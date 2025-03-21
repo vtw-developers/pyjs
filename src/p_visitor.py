@@ -18,9 +18,6 @@ class AbstractNode(ABC):
   '''
   This is the base class for node classes.
   All node classes should inherit from this class.
-
-  INV1 self.parent is not None
-  INV2 self.is_root_node() and self.parent == self
   '''
   def __init__(self, node_type: str) -> None:
     self.node_type = node_type
@@ -40,7 +37,6 @@ class AbstractNode(ABC):
     self.parent = parent
 
   def get_parent(self) -> AbstractNode:
-    assert self.parent is not None, 'class invariant is broken'
     return self.parent
 
   def get_root_node(self) -> AbstractNode:
@@ -49,7 +45,7 @@ class AbstractNode(ABC):
     According to class invariant INV2, root_node's parent is itself.
     '''
     cursor = self
-    while cursor != cursor.parent:
+    while cursor.parent is not None:
       cursor = cursor.parent
     return cursor
 
@@ -389,7 +385,6 @@ class Tree:
     root_node_type, children = ast[0], ast[1:]
     RootNodeCls = NODE_TYPES_CLASSES[root_node_type]
     root_node = RootNodeCls(root_node_type)
-    root_node.set_parent(root_node)
     for child in children:
       _rec_construct_at(root_node, child)
     tree = Tree(root_node)
@@ -458,7 +453,6 @@ class Tree:
 
     RootNodeCls = NODE_TYPES_CLASSES[ts_root_node.type]
     root_node = RootNodeCls(ts_root_node.type)
-    root_node.set_parent(root_node)
 
     for child in ts_root_node.children:
       _rec_construct_at(root_node, child)
