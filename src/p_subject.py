@@ -14,7 +14,7 @@ class PirelSubject:
 
   translation_rules_main_code - translation rules that were learned
   by PiREL from translating `src_program` to the target language.
-  We want to validate these rules.
+  We want to validate and apply these rules.
 
   translation_rules_test_code - translation rules that are
   hand-written by DuoGlot authors to translate the test code.
@@ -104,6 +104,9 @@ class PirelSubject:
       'tar_lang': self.tar_lang,
     }
     return json.dumps(attrs)
+
+  def __repr__(self) -> str:
+    return f'PirelSubject({self.name})'
 
   def _load_tr_test_code(self, benchmark_name: str) -> Optional[str]:
     '''Load translation rules for the test code'''
