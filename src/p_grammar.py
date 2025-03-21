@@ -4,6 +4,7 @@ import copy
 import json
 import random
 import string
+from collections import deque
 from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
@@ -376,6 +377,15 @@ class TreeSitterGrammar():
     else:
       ast.append(simplest_ast)
     return ast
+
+  def get_symbols_under(self, rule_name: str) -> Set[str]:
+    '''
+    Return all symbols under `rule_name`.
+    '''
+    if self.is_external(rule_name):
+      return set()
+    all_symbols = self.rules[rule_name].get_all_symbols()
+    return set(map(lambda r: r.name, all_symbols))
 
 
 class Rule():
@@ -2454,13 +2464,41 @@ def _rank_node_types(node_types: List[str], grammar: TreeSitterGrammar) -> List[
     # return size of the shortest path
     return len(paths[0])
 
+  def __get_min_distance_optimized(from_node: str, to_node: str) -> Union[int, float]:
+    '''
+    Author: Jinwoo Choi
+    '''
+    nonlocal grammar
+    queue = deque([(from_node, 0)])
+    visited = set()
+
+    while queue:
+      cur_node, dist = queue.popleft()
+
+      if cur_node == to_node:
+        return dist
+
+      if cur_node in visited:
+        continue
+
+      visited.add(cur_node)
+
+      if not grammar.is_hidden(cur_node):
+        dist += 1
+
+      children = grammar.get_symbols_under(cur_node)
+      for child in children:
+        queue.append((child, dist))
+    else:
+      return float('inf')
+
   assert len(node_types) == len(set(node_types)), '`node_types` list contains duplicates (should not happen)'
 
   reachable_nodes = list(PY_GEN.keys())  # NOTE a bit hacky
   min_dists : List[Tuple[Tuple[str, str], int|float]] = []
   for node_type in node_types:
     for reachable_node in reachable_nodes:
-      min_dist = __get_min_distance(node_type, reachable_node)
+      min_dist = __get_min_distance_optimized(node_type, reachable_node)
       min_dists.append(((node_type, reachable_node), min_dist))
   min_dists.sort(key=lambda min_dist: min_dist[1])
   ranked = [min_dist[0][0] for min_dist in min_dists]
