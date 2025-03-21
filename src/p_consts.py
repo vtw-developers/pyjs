@@ -16,6 +16,7 @@ BENCHMARKS_DIR = ROOT_DIR / 'benchmarks'
 TRANSLATION_RULES_DIR = ROOT_DIR / 'translation-rules'
 TREE_SITTER_GRAMMARS_DIR = ROOT_DIR / 'tree-sitter-util'
 BUILD_DIR = ROOT_DIR / 'build'
+TMP_DIR = ROOT_DIR / 'tmp'
 
 PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 DUOGLOT_LOGS_DIR = LOGS_DIR / 'duoglot'
