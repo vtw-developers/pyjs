@@ -1,503 +1,17 @@
 from __future__ import annotations
 
+import tree_sitter
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
+import p_consts
 import p_utils
 
 
 class Visitor(ABC):
-  '''
-  This is the Visitor interface for ASTs generated from parsing Python code.
-  Should add an abstract method for each node type.
-
-  NOTE
-  This class changes only if the Tree-Sitter node types change for Python.
-  '''
-
   @abstractmethod
-  def visit_terminal_node(self, node: TerminalNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__collection_elements_node(self, node: _CollectionElementsNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__compound_statement_node(self, node: _CompoundStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__comprehension_clauses_node(self, node: _ComprehensionClausesNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__expression_within_for_in_clause_node(self, node: _ExpressionWithinForInClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__expressions_node(self, node: _ExpressionsNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__import_list_node(self, node: _ImportListNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__left_hand_side_node(self, node: _LeftHandSideNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__parameters_node(self, node: _ParametersNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__patterns_node(self, node: _PatternsNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__right_hand_side_node(self, node: _RightHandSideNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__simple_statement_node(self, node: _SimpleStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__simple_statements_node(self, node: _SimpleStatementsNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__statement_node(self, node: _StatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit__suite_node(self, node: _SuiteNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_aliased_import_node(self, node: AliasedImportNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_argument_list_node(self, node: ArgumentListNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_assert_statement_node(self, node: AssertStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_assignment_node(self, node: AssignmentNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_attribute_node(self, node: AttributeNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_augmented_assignment_node(self, node: AugmentedAssignmentNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_await_node(self, node: AwaitNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_binary_operator_node(self, node: BinaryOperatorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_block_node(self, node: BlockNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_boolean_operator_node(self, node: BooleanOperatorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_break_statement_node(self, node: BreakStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_call_node(self, node: CallNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_chevron_node(self, node: ChevronNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_class_definition_node(self, node: ClassDefinitionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_comment_node(self, node: CommentNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_comparison_operator_node(self, node: ComparisonOperatorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_concatenated_string_node(self, node: ConcatenatedStringNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_conditional_expression_node(self, node: ConditionalExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_continue_statement_node(self, node: ContinueStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_decorated_definition_node(self, node: DecoratedDefinitionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_decorator_node(self, node: DecoratorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_default_parameter_node(self, node: DefaultParameterNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_delete_statement_node(self, node: DeleteStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_dictionary_node(self, node: DictionaryNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_dictionary_comprehension_node(self, node: DictionaryComprehensionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_dictionary_splat_node(self, node: DictionarySplatNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_dictionary_splat_pattern_node(self, node: DictionarySplatPatternNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_dotted_name_node(self, node: DottedNameNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_elif_clause_node(self, node: ElifClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_ellipsis_node(self, node: EllipsisNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_else_clause_node(self, node: ElseClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_escape_interpolation_node(self, node: EscapeInterpolationNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_escape_sequence_node(self, node: EscapeSequenceNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_except_clause_node(self, node: ExceptClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_exec_statement_node(self, node: ExecStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_expression_node(self, node: ExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_expression_list_node(self, node: ExpressionListNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_expression_statement_node(self, node: ExpressionStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_false_node(self, node: FalseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_finally_clause_node(self, node: FinallyClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_float_node(self, node: FloatNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_for_in_clause_node(self, node: ForInClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_for_statement_node(self, node: ForStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_format_expression_node(self, node: FormatExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_format_specifier_node(self, node: FormatSpecifierNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_function_definition_node(self, node: FunctionDefinitionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_future_import_statement_node(self, node: FutureImportStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_generator_expression_node(self, node: GeneratorExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_global_statement_node(self, node: GlobalStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_identifier_node(self, node: IdentifierNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_if_clause_node(self, node: IfClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_if_statement_node(self, node: IfStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_import_from_statement_node(self, node: ImportFromStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_import_prefix_node(self, node: ImportPrefixNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_import_statement_node(self, node: ImportStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_integer_node(self, node: IntegerNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_interpolation_node(self, node: InterpolationNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_keyword_argument_node(self, node: KeywordArgumentNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_keyword_identifier_node(self, node: KeywordIdentifierNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_lambda_node(self, node: LambdaNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_lambda_parameters_node(self, node: LambdaParametersNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_lambda_within_for_in_clause_node(self, node: LambdaWithinForInClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_list_node(self, node: ListNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_list_comprehension_node(self, node: ListComprehensionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_list_pattern_node(self, node: ListPatternNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_list_splat_node(self, node: ListSplatNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_list_splat_pattern_node(self, node: ListSplatPatternNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_module_node(self, node: ModuleNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_named_expression_node(self, node: NamedExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_none_node(self, node: NoneNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_nonlocal_statement_node(self, node: NonlocalStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_not_escape_sequence_node(self, node: NotEscapeSequenceNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_not_operator_node(self, node: NotOperatorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_pair_node(self, node: PairNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_parameter_node(self, node: ParameterNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_parameters_node(self, node: ParametersNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_parenthesized_expression_node(self, node: ParenthesizedExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_parenthesized_list_splat_node(self, node: ParenthesizedListSplatNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_pass_statement_node(self, node: PassStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_pattern_node(self, node: PatternNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_pattern_list_node(self, node: PatternListNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_primary_expression_node(self, node: PrimaryExpressionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_print_statement_node(self, node: PrintStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_raise_statement_node(self, node: RaiseStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_relative_import_node(self, node: RelativeImportNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_return_statement_node(self, node: ReturnStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_set_node(self, node: SetNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_set_comprehension_node(self, node: SetComprehensionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_slice_node(self, node: SliceNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_string_node(self, node: StringNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_subscript_node(self, node: SubscriptNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_true_node(self, node: TrueNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_try_statement_node(self, node: TryStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_tuple_node(self, node: TupleNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_tuple_pattern_node(self, node: TuplePatternNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_type_node(self, node: TypeNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_type_conversion_node(self, node: TypeConversionNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_typed_default_parameter_node(self, node: TypedDefaultParameterNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_typed_parameter_node(self, node: TypedParameterNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_unary_operator_node(self, node: UnaryOperatorNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_while_statement_node(self, node: WhileStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_wildcard_import_node(self, node: WildcardImportNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_with_clause_node(self, node: WithClauseNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_with_item_node(self, node: WithItemNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_with_statement_node(self, node: WithStatementNode) -> None:
-    raise NotImplementedError
-
-  @abstractmethod
-  def visit_yield_node(self, node: YieldNode) -> None:
-    raise NotImplementedError
+  def visit(self, node: AbstractNode) -> Any:
+    pass
 
 
 class AbstractNode(ABC):
@@ -589,496 +103,132 @@ class AbstractNode(ABC):
     except IndexError:
       return None
 
-  @abstractmethod
   def accept(self, visitor: Visitor) -> None:
-    pass
+    return visitor.visit(self)
 
 class TerminalNode(AbstractNode):
   def __repr__(self) -> str:
-    return f'"{self.node_type}"'
-
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_terminal_node(self)
-
-class _CollectionElementsNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__collection_elements_node(self)
-
-class _CompoundStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__compound_statement_node(self)
-
-class _ComprehensionClausesNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__comprehension_clauses_node(self)
-
-class _ExpressionWithinForInClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__expression_within_for_in_clause_node(self)
-
-class _ExpressionsNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__expressions_node(self)
-
-class _ImportListNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__import_list_node(self)
-
-class _LeftHandSideNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__left_hand_side_node(self)
-
-class _ParametersNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__parameters_node(self)
-
-class _PatternsNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__patterns_node(self)
-
-class _RightHandSideNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__right_hand_side_node(self)
-
-class _SimpleStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__simple_statement_node(self)
-
-class _SimpleStatementsNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__simple_statements_node(self)
-
-class _StatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__statement_node(self)
-
-class _SuiteNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit__suite_node(self)
-
-class AliasedImportNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_aliased_import_node(self)
-
-class ArgumentListNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_argument_list_node(self)
-
-class AssertStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_assert_statement_node(self)
-
-class AssignmentNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_assignment_node(self)
-
-class AttributeNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_attribute_node(self)
-
-class AugmentedAssignmentNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_augmented_assignment_node(self)
-
-class AwaitNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_await_node(self)
-
-class BinaryOperatorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_binary_operator_node(self)
-
-class BlockNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_block_node(self)
-
-class BooleanOperatorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_boolean_operator_node(self)
-
-class BreakStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_break_statement_node(self)
-
-class CallNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_call_node(self)
-
-class ChevronNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_chevron_node(self)
-
-class ClassDefinitionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_class_definition_node(self)
-
-class CommentNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_comment_node(self)
-
-class ComparisonOperatorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_comparison_operator_node(self)
-
-class ConcatenatedStringNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_concatenated_string_node(self)
-
-class ConditionalExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_conditional_expression_node(self)
-
-class ContinueStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_continue_statement_node(self)
-
-class DecoratedDefinitionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_decorated_definition_node(self)
-
-class DecoratorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_decorator_node(self)
-
-class DefaultParameterNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_default_parameter_node(self)
-
-class DeleteStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_delete_statement_node(self)
-
-class DictionaryNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_dictionary_node(self)
-
-class DictionaryComprehensionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_dictionary_comprehension_node(self)
-
-class DictionarySplatNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_dictionary_splat_node(self)
-
-class DictionarySplatPatternNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_dictionary_splat_pattern_node(self)
-
-class DottedNameNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_dotted_name_node(self)
-
-class ElifClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_elif_clause_node(self)
-
-class EllipsisNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_ellipsis_node(self)
-
-class ElseClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_else_clause_node(self)
-
-class EscapeInterpolationNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_escape_interpolation_node(self)
-
-class EscapeSequenceNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_escape_sequence_node(self)
-
-class ExceptClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_except_clause_node(self)
-
-class ExecStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_exec_statement_node(self)
-
-class ExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_expression_node(self)
-
-class ExpressionListNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_expression_list_node(self)
-
-class ExpressionStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_expression_statement_node(self)
-
-class FalseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_false_node(self)
-
-class FinallyClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_finally_clause_node(self)
-
-class FloatNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_float_node(self)
-
-class ForInClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_for_in_clause_node(self)
-
-class ForStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_for_statement_node(self)
-
-class FormatExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_format_expression_node(self)
-
-class FormatSpecifierNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_format_specifier_node(self)
-
-class FunctionDefinitionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_function_definition_node(self)
-
-class FutureImportStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_future_import_statement_node(self)
-
-class GeneratorExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_generator_expression_node(self)
-
-class GlobalStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_global_statement_node(self)
-
-class IdentifierNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_identifier_node(self)
-
-class IfClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_if_clause_node(self)
-
-class IfStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_if_statement_node(self)
-
-class ImportFromStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_import_from_statement_node(self)
-
-class ImportPrefixNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_import_prefix_node(self)
-
-class ImportStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_import_statement_node(self)
-
-class IntegerNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_integer_node(self)
-
-class InterpolationNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_interpolation_node(self)
-
-class KeywordArgumentNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_keyword_argument_node(self)
-
-class KeywordIdentifierNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_keyword_identifier_node(self)
-
-class LambdaNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_lambda_node(self)
-
-class LambdaParametersNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_lambda_parameters_node(self)
-
-class LambdaWithinForInClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_lambda_within_for_in_clause_node(self)
-
-class ListNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_list_node(self)
-
-class ListComprehensionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_list_comprehension_node(self)
-
-class ListPatternNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_list_pattern_node(self)
-
-class ListSplatNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_list_splat_node(self)
-
-class ListSplatPatternNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_list_splat_pattern_node(self)
-
-class ModuleNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_module_node(self)
-
-class NamedExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_named_expression_node(self)
-
-class NoneNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_none_node(self)
-
-class NonlocalStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_nonlocal_statement_node(self)
-
-class NotEscapeSequenceNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_not_escape_sequence_node(self)
-
-class NotOperatorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_not_operator_node(self)
-
-class PairNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_pair_node(self)
-
-class ParameterNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_parameter_node(self)
-
-class ParametersNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_parameters_node(self)
-
-class ParenthesizedExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_parenthesized_expression_node(self)
-
-class ParenthesizedListSplatNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_parenthesized_list_splat_node(self)
-
-class PassStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_pass_statement_node(self)
-
-class PatternNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_pattern_node(self)
-
-class PatternListNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_pattern_list_node(self)
-
-class PrimaryExpressionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_primary_expression_node(self)
-
-class PrintStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_print_statement_node(self)
-
-class RaiseStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_raise_statement_node(self)
-
-class RelativeImportNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_relative_import_node(self)
-
-class ReturnStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_return_statement_node(self)
-
-class SetNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_set_node(self)
-
-class SetComprehensionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_set_comprehension_node(self)
-
-class SliceNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_slice_node(self)
-
-class StringNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_string_node(self)
-
-class SubscriptNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_subscript_node(self)
-
-class TrueNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_true_node(self)
-
-class TryStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_try_statement_node(self)
-
-class TupleNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_tuple_node(self)
-
-class TuplePatternNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_tuple_pattern_node(self)
-
-class TypeNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_type_node(self)
-
-class TypeConversionNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_type_conversion_node(self)
-
-class TypedDefaultParameterNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_typed_default_parameter_node(self)
-
-class TypedParameterNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_typed_parameter_node(self)
-
-class UnaryOperatorNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_unary_operator_node(self)
-
-class WhileStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_while_statement_node(self)
-
-class WildcardImportNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_wildcard_import_node(self)
-
-class WithClauseNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_with_clause_node(self)
-
-class WithItemNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_with_item_node(self)
-
-class WithStatementNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_with_statement_node(self)
-
-class YieldNode(AbstractNode):
-  def accept(self, visitor: Visitor) -> None:
-    return visitor.visit_yield_node(self)
+    return f'Terminal({repr(self.node_type)})'
+class _CollectionElementsNode(AbstractNode): pass
+class _CompoundStatementNode(AbstractNode): pass
+class _ComprehensionClausesNode(AbstractNode): pass
+class _ExpressionWithinForInClauseNode(AbstractNode): pass
+class _ExpressionsNode(AbstractNode): pass
+class _ImportListNode(AbstractNode): pass
+class _LeftHandSideNode(AbstractNode): pass
+class _ParametersNode(AbstractNode): pass
+class _PatternsNode(AbstractNode): pass
+class _RightHandSideNode(AbstractNode): pass
+class _SimpleStatementNode(AbstractNode): pass
+class _SimpleStatementsNode(AbstractNode): pass
+class _StatementNode(AbstractNode): pass
+class _SuiteNode(AbstractNode): pass
+class AliasedImportNode(AbstractNode): pass
+class ArgumentListNode(AbstractNode): pass
+class AssertStatementNode(AbstractNode): pass
+class AssignmentNode(AbstractNode): pass
+class AttributeNode(AbstractNode): pass
+class AugmentedAssignmentNode(AbstractNode): pass
+class AwaitNode(AbstractNode): pass
+class BinaryOperatorNode(AbstractNode): pass
+class BlockNode(AbstractNode): pass
+class BooleanOperatorNode(AbstractNode): pass
+class BreakStatementNode(AbstractNode): pass
+class CallNode(AbstractNode): pass
+class ChevronNode(AbstractNode): pass
+class ClassDefinitionNode(AbstractNode): pass
+class CommentNode(AbstractNode): pass
+class ComparisonOperatorNode(AbstractNode): pass
+class ConcatenatedStringNode(AbstractNode): pass
+class ConditionalExpressionNode(AbstractNode): pass
+class ContinueStatementNode(AbstractNode): pass
+class DecoratedDefinitionNode(AbstractNode): pass
+class DecoratorNode(AbstractNode): pass
+class DefaultParameterNode(AbstractNode): pass
+class DeleteStatementNode(AbstractNode): pass
+class DictionaryNode(AbstractNode): pass
+class DictionaryComprehensionNode(AbstractNode): pass
+class DictionarySplatNode(AbstractNode): pass
+class DictionarySplatPatternNode(AbstractNode): pass
+class DottedNameNode(AbstractNode): pass
+class ElifClauseNode(AbstractNode): pass
+class EllipsisNode(AbstractNode): pass
+class ElseClauseNode(AbstractNode): pass
+class EscapeInterpolationNode(AbstractNode): pass
+class EscapeSequenceNode(AbstractNode): pass
+class ExceptClauseNode(AbstractNode): pass
+class ExecStatementNode(AbstractNode): pass
+class ExpressionNode(AbstractNode): pass
+class ExpressionListNode(AbstractNode): pass
+class ExpressionStatementNode(AbstractNode): pass
+class FalseNode(AbstractNode): pass
+class FinallyClauseNode(AbstractNode): pass
+class FloatNode(AbstractNode): pass
+class ForInClauseNode(AbstractNode): pass
+class ForStatementNode(AbstractNode): pass
+class FormatExpressionNode(AbstractNode): pass
+class FormatSpecifierNode(AbstractNode): pass
+class FunctionDefinitionNode(AbstractNode): pass
+class FutureImportStatementNode(AbstractNode): pass
+class GeneratorExpressionNode(AbstractNode): pass
+class GlobalStatementNode(AbstractNode): pass
+class IdentifierNode(AbstractNode): pass
+class IfClauseNode(AbstractNode): pass
+class IfStatementNode(AbstractNode): pass
+class ImportFromStatementNode(AbstractNode): pass
+class ImportPrefixNode(AbstractNode): pass
+class ImportStatementNode(AbstractNode): pass
+class IntegerNode(AbstractNode): pass
+class InterpolationNode(AbstractNode): pass
+class KeywordArgumentNode(AbstractNode): pass
+class KeywordIdentifierNode(AbstractNode): pass
+class LambdaNode(AbstractNode): pass
+class LambdaParametersNode(AbstractNode): pass
+class LambdaWithinForInClauseNode(AbstractNode): pass
+class ListNode(AbstractNode): pass
+class ListComprehensionNode(AbstractNode): pass
+class ListPatternNode(AbstractNode): pass
+class ListSplatNode(AbstractNode): pass
+class ListSplatPatternNode(AbstractNode): pass
+class ModuleNode(AbstractNode): pass
+class NamedExpressionNode(AbstractNode): pass
+class NoneNode(AbstractNode): pass
+class NonlocalStatementNode(AbstractNode): pass
+class NotEscapeSequenceNode(AbstractNode): pass
+class NotOperatorNode(AbstractNode): pass
+class PairNode(AbstractNode): pass
+class ParameterNode(AbstractNode): pass
+class ParametersNode(AbstractNode): pass
+class ParenthesizedExpressionNode(AbstractNode): pass
+class ParenthesizedListSplatNode(AbstractNode): pass
+class PassStatementNode(AbstractNode): pass
+class PatternNode(AbstractNode): pass
+class PatternListNode(AbstractNode): pass
+class PrimaryExpressionNode(AbstractNode): pass
+class PrintStatementNode(AbstractNode): pass
+class RaiseStatementNode(AbstractNode): pass
+class RelativeImportNode(AbstractNode): pass
+class ReturnStatementNode(AbstractNode): pass
+class SetNode(AbstractNode): pass
+class SetComprehensionNode(AbstractNode): pass
+class SliceNode(AbstractNode): pass
+class StringNode(AbstractNode): pass
+class SubscriptNode(AbstractNode): pass
+class TrueNode(AbstractNode): pass
+class TryStatementNode(AbstractNode): pass
+class TupleNode(AbstractNode): pass
+class TuplePatternNode(AbstractNode): pass
+class TypeNode(AbstractNode): pass
+class TypeConversionNode(AbstractNode): pass
+class TypedDefaultParameterNode(AbstractNode): pass
+class TypedParameterNode(AbstractNode): pass
+class UnaryOperatorNode(AbstractNode): pass
+class WhileStatementNode(AbstractNode): pass
+class WildcardImportNode(AbstractNode): pass
+class WithClauseNode(AbstractNode): pass
+class WithItemNode(AbstractNode): pass
+class WithStatementNode(AbstractNode): pass
+class YieldNode(AbstractNode): pass
 
 
 NODE_TYPES_CLASSES: Dict[str, AbstractNode] = {
@@ -1245,6 +395,77 @@ class Tree:
     tree = Tree(root_node)
     return tree
 
+  @classmethod
+  def from_ts_tree(cls, ts_tree: tree_sitter.Tree) -> Tree:
+    '''
+    Construct a Tree from a parsed tree-sitter tree
+    NOTE we can also use `text` attribute of `ts_tree`
+    '''
+
+    def _create_string_node(ts_node: tree_sitter.Node) -> StringNode:
+      '''Special treatment for `string` nodes in tree-sitter trees'''
+      node = StringNode('string')
+      string_content_node = TerminalNode(ts_node.text.decode('utf-8'))
+      node.add_child(string_content_node)
+      string_content_node.set_parent(node)
+      return node
+
+    def _rec_construct_at(parent_node: AbstractNode, ts_node: tree_sitter.Node) -> None:
+      '''Recursively construct the tree from a tree-sitter node'''
+
+      # base case: leaf node
+      # might be a terminal node, literal node
+      if len(ts_node.children) == 0:
+        text : str = ts_node.text.decode('utf-8')
+        type : str = ts_node.type
+
+        # terminal node
+        if type == text:
+          terminal_node = TerminalNode(ts_node.text.decode('utf-8'))
+          parent_node.add_child(terminal_node)
+          terminal_node.set_parent(parent_node)
+          return
+
+        # literal node
+        NodeCls = NODE_TYPES_CLASSES[ts_node.type]
+        literal_node = NodeCls(ts_node.type)
+        parent_node.add_child(literal_node)
+        literal_node.set_parent(parent_node)
+
+        terminal_node = TerminalNode(ts_node.text.decode('utf-8'))
+        literal_node.add_child(terminal_node)
+        terminal_node.set_parent(literal_node)
+        return
+
+      # base case: string node
+      if ts_node.type == 'string':
+        terminal_node = _create_string_node(ts_node)
+        parent_node.add_child(terminal_node)
+        terminal_node.set_parent(parent_node)
+        return
+
+      # general case: non-terminal node
+      NodeCls = NODE_TYPES_CLASSES[ts_node.type]
+      terminal_node = NodeCls(ts_node.type)
+      parent_node.add_child(terminal_node)
+      terminal_node.set_parent(parent_node)
+
+      for child in ts_node.children:
+        _rec_construct_at(terminal_node, child)
+
+    ts_root_node = ts_tree.root_node
+    assert not ts_root_node.has_error, 'tree-sitter tree has error'
+
+    RootNodeCls = NODE_TYPES_CLASSES[ts_root_node.type]
+    root_node = RootNodeCls(ts_root_node.type)
+    root_node.set_parent(root_node)
+
+    for child in ts_root_node.children:
+      _rec_construct_at(root_node, child)
+
+    tree = Tree(root_node)
+    return tree
+
 
 class PrettyPrinter(Visitor):
   def __init__(self) -> None:
@@ -1252,388 +473,58 @@ class PrettyPrinter(Visitor):
     self.indentation_level : int = 0
     self.indentation_size : int = 2
 
+  def visit(self, node: AbstractNode) -> str:
+    method_name = 'visit_' + node.__class__.__name__
+    visit_method = getattr(self, method_name, self.default_visit)
+    return visit_method(node)
+
   def indent(self, text: str) -> str:
     self.indentation_level += 1
     code = p_utils.indent(text, self.indentation_level * self.indentation_size)
     self.indentation_level -= 1
     return code
 
-  def default_visit(self, node: AbstractNode, delimeter: str = ' ') -> str:
+  def default_visit(self, node: AbstractNode, delimiter: str = ' ') -> str:
     code = ''
     for child in node.children:
       child_code = child.accept(self)
-      code += (child_code + delimeter)
+      code += (child_code + delimiter)
     return code.strip()
 
-  def visit_terminal_node(self, node: TerminalNode) -> str:
+  def visit_TerminalNode(self, node: TerminalNode) -> str:
     return node.node_type
 
-  def visit__collection_elements_node(self, node: _CollectionElementsNode) -> str:
-    return self.default_visit(node)
-
-  def visit__compound_statement_node(self, node: _CompoundStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit__comprehension_clauses_node(self, node: _ComprehensionClausesNode) -> str:
-    return self.default_visit(node)
-
-  def visit__expression_within_for_in_clause_node(self, node: _ExpressionWithinForInClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit__expressions_node(self, node: _ExpressionsNode) -> str:
-    return self.default_visit(node)
-
-  def visit__import_list_node(self, node: _ImportListNode) -> str:
-    return self.default_visit(node)
-
-  def visit__left_hand_side_node(self, node: _LeftHandSideNode) -> str:
-    return self.default_visit(node)
-
-  def visit__parameters_node(self, node: _ParametersNode) -> str:
-    return self.default_visit(node)
-
-  def visit__patterns_node(self, node: _PatternsNode) -> str:
-    return self.default_visit(node)
-
-  def visit__right_hand_side_node(self, node: _RightHandSideNode) -> str:
-    return self.default_visit(node)
-
-  def visit__simple_statement_node(self, node: _SimpleStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit__simple_statements_node(self, node: _SimpleStatementsNode) -> str:
-    return self.default_visit(node)
-
-  def visit__statement_node(self, node: _StatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit__suite_node(self, node: _SuiteNode) -> str:
-    code = self.default_visit(node, delimeter='\n')
+  def visit__SuiteNode(self, node: _SuiteNode) -> str:
+    code = self.default_visit(node, delimiter='\n')
     code = self.indent(code)
     return '\n' + code
 
-  def visit_aliased_import_node(self, node: AliasedImportNode) -> str:
-    return self.default_visit(node)
 
-  def visit_argument_list_node(self, node: ArgumentListNode) -> str:
-    return self.default_visit(node)
+# TEST HARNESSES
+def _test_pretty_printer():
+  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
+  src_lang = 'py'
 
-  def visit_assert_statement_node(self, node: AssertStatementNode) -> str:
-    return self.default_visit(node)
+  parser = p_consts.PARSER_DICT[src_lang]
+  ts_tree = parser.parse(bytes(snippet, 'utf8'))
+  tree = Tree.from_ts_tree(ts_tree)
 
-  def visit_assignment_node(self, node: AssignmentNode) -> str:
-    return self.default_visit(node)
+  pp = PrettyPrinter()
+  code = pp.visit(tree.root_node)
+  print(code)
 
-  def visit_attribute_node(self, node: AttributeNode) -> str:
-    return self.default_visit(node)
 
-  def visit_augmented_assignment_node(self, node: AugmentedAssignmentNode) -> str:
-    return self.default_visit(node)
+def _test_tree_from_ts_tree():
+  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
+  src_lang = 'py'
 
-  def visit_await_node(self, node: AwaitNode) -> str:
-    return self.default_visit(node)
-
-  def visit_binary_operator_node(self, node: BinaryOperatorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_block_node(self, node: BlockNode) -> str:
-    return self.default_visit(node)
-
-  def visit_boolean_operator_node(self, node: BooleanOperatorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_break_statement_node(self, node: BreakStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_call_node(self, node: CallNode) -> str:
-    return self.default_visit(node)
-
-  def visit_chevron_node(self, node: ChevronNode) -> str:
-    return self.default_visit(node)
-
-  def visit_class_definition_node(self, node: ClassDefinitionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_comment_node(self, node: CommentNode) -> str:
-    return self.default_visit(node)
-
-  def visit_comparison_operator_node(self, node: ComparisonOperatorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_concatenated_string_node(self, node: ConcatenatedStringNode) -> str:
-    return self.default_visit(node)
-
-  def visit_conditional_expression_node(self, node: ConditionalExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_continue_statement_node(self, node: ContinueStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_decorated_definition_node(self, node: DecoratedDefinitionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_decorator_node(self, node: DecoratorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_default_parameter_node(self, node: DefaultParameterNode) -> str:
-    return self.default_visit(node)
-
-  def visit_delete_statement_node(self, node: DeleteStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_dictionary_node(self, node: DictionaryNode) -> str:
-    return self.default_visit(node)
-
-  def visit_dictionary_comprehension_node(self, node: DictionaryComprehensionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_dictionary_splat_node(self, node: DictionarySplatNode) -> str:
-    return self.default_visit(node)
-
-  def visit_dictionary_splat_pattern_node(self, node: DictionarySplatPatternNode) -> str:
-    return self.default_visit(node)
-
-  def visit_dotted_name_node(self, node: DottedNameNode) -> str:
-    return self.default_visit(node)
-
-  def visit_elif_clause_node(self, node: ElifClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_ellipsis_node(self, node: EllipsisNode) -> str:
-    return self.default_visit(node)
-
-  def visit_else_clause_node(self, node: ElseClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_escape_interpolation_node(self, node: EscapeInterpolationNode) -> str:
-    return self.default_visit(node)
-
-  def visit_escape_sequence_node(self, node: EscapeSequenceNode) -> str:
-    return self.default_visit(node)
-
-  def visit_except_clause_node(self, node: ExceptClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_exec_statement_node(self, node: ExecStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_expression_node(self, node: ExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_expression_list_node(self, node: ExpressionListNode) -> str:
-    return self.default_visit(node)
-
-  def visit_expression_statement_node(self, node: ExpressionStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_false_node(self, node: FalseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_finally_clause_node(self, node: FinallyClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_float_node(self, node: FloatNode) -> str:
-    return self.default_visit(node)
-
-  def visit_for_in_clause_node(self, node: ForInClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_for_statement_node(self, node: ForStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_format_expression_node(self, node: FormatExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_format_specifier_node(self, node: FormatSpecifierNode) -> str:
-    return self.default_visit(node)
-
-  def visit_function_definition_node(self, node: FunctionDefinitionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_future_import_statement_node(self, node: FutureImportStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_generator_expression_node(self, node: GeneratorExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_global_statement_node(self, node: GlobalStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_identifier_node(self, node: IdentifierNode) -> str:
-    return self.default_visit(node)
-
-  def visit_if_clause_node(self, node: IfClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_if_statement_node(self, node: IfStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_import_from_statement_node(self, node: ImportFromStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_import_prefix_node(self, node: ImportPrefixNode) -> str:
-    return self.default_visit(node)
-
-  def visit_import_statement_node(self, node: ImportStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_integer_node(self, node: IntegerNode) -> str:
-    return self.default_visit(node)
-
-  def visit_interpolation_node(self, node: InterpolationNode) -> str:
-    return self.default_visit(node)
-
-  def visit_keyword_argument_node(self, node: KeywordArgumentNode) -> str:
-    return self.default_visit(node)
-
-  def visit_keyword_identifier_node(self, node: KeywordIdentifierNode) -> str:
-    return self.default_visit(node)
-
-  def visit_lambda_node(self, node: LambdaNode) -> str:
-    return self.default_visit(node)
-
-  def visit_lambda_parameters_node(self, node: LambdaParametersNode) -> str:
-    return self.default_visit(node)
-
-  def visit_lambda_within_for_in_clause_node(self, node: LambdaWithinForInClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_list_node(self, node: ListNode) -> str:
-    return self.default_visit(node)
-
-  def visit_list_comprehension_node(self, node: ListComprehensionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_list_pattern_node(self, node: ListPatternNode) -> str:
-    return self.default_visit(node)
-
-  def visit_list_splat_node(self, node: ListSplatNode) -> str:
-    return self.default_visit(node)
-
-  def visit_list_splat_pattern_node(self, node: ListSplatPatternNode) -> str:
-    return self.default_visit(node)
-
-  def visit_module_node(self, node: ModuleNode) -> str:
-    return self.default_visit(node, delimeter='\n')
-
-  def visit_named_expression_node(self, node: NamedExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_none_node(self, node: NoneNode) -> str:
-    return self.default_visit(node)
-
-  def visit_nonlocal_statement_node(self, node: NonlocalStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_not_escape_sequence_node(self, node: NotEscapeSequenceNode) -> str:
-    return self.default_visit(node)
-
-  def visit_not_operator_node(self, node: NotOperatorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_pair_node(self, node: PairNode) -> str:
-    return self.default_visit(node)
-
-  def visit_parameter_node(self, node: ParameterNode) -> str:
-    return self.default_visit(node)
-
-  def visit_parameters_node(self, node: ParametersNode) -> str:
-    return self.default_visit(node)
-
-  def visit_parenthesized_expression_node(self, node: ParenthesizedExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_parenthesized_list_splat_node(self, node: ParenthesizedListSplatNode) -> str:
-    return self.default_visit(node)
-
-  def visit_pass_statement_node(self, node: PassStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_pattern_node(self, node: PatternNode) -> str:
-    return self.default_visit(node)
-
-  def visit_pattern_list_node(self, node: PatternListNode) -> str:
-    return self.default_visit(node)
-
-  def visit_primary_expression_node(self, node: PrimaryExpressionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_print_statement_node(self, node: PrintStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_raise_statement_node(self, node: RaiseStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_relative_import_node(self, node: RelativeImportNode) -> str:
-    return self.default_visit(node)
-
-  def visit_return_statement_node(self, node: ReturnStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_set_node(self, node: SetNode) -> str:
-    return self.default_visit(node)
-
-  def visit_set_comprehension_node(self, node: SetComprehensionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_slice_node(self, node: SliceNode) -> str:
-    return self.default_visit(node)
-
-  def visit_string_node(self, node: StringNode) -> str:
-    return self.default_visit(node)
-
-  def visit_subscript_node(self, node: SubscriptNode) -> str:
-    return self.default_visit(node)
-
-  def visit_true_node(self, node: TrueNode) -> str:
-    return self.default_visit(node)
-
-  def visit_try_statement_node(self, node: TryStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_tuple_node(self, node: TupleNode) -> str:
-    return self.default_visit(node)
-
-  def visit_tuple_pattern_node(self, node: TuplePatternNode) -> str:
-    return self.default_visit(node)
-
-  def visit_type_node(self, node: TypeNode) -> str:
-    return self.default_visit(node)
-
-  def visit_type_conversion_node(self, node: TypeConversionNode) -> str:
-    return self.default_visit(node)
-
-  def visit_typed_default_parameter_node(self, node: TypedDefaultParameterNode) -> str:
-    return self.default_visit(node)
-
-  def visit_typed_parameter_node(self, node: TypedParameterNode) -> str:
-    return self.default_visit(node)
-
-  def visit_unary_operator_node(self, node: UnaryOperatorNode) -> str:
-    return self.default_visit(node)
-
-  def visit_while_statement_node(self, node: WhileStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_wildcard_import_node(self, node: WildcardImportNode) -> str:
-    return self.default_visit(node)
-
-  def visit_with_clause_node(self, node: WithClauseNode) -> str:
-    return self.default_visit(node)
-
-  def visit_with_item_node(self, node: WithItemNode) -> str:
-    return self.default_visit(node)
-
-  def visit_with_statement_node(self, node: WithStatementNode) -> str:
-    return self.default_visit(node)
-
-  def visit_yield_node(self, node: YieldNode) -> str:
-    return self.default_visit(node)
+  # logic
+  parser = p_consts.PARSER_DICT[src_lang]
+  ts_tree = parser.parse(bytes(snippet, 'utf8'))
+  tree = Tree.from_ts_tree(ts_tree)
+  print()
 
 
 if __name__ == '__main__':
-  ast = p_utils.read_json('temporary_gen_ast.json')
-  tree = Tree.from_gen_ast(ast)
-  pp = PrettyPrinter()
-  code = tree.root_node.accept(pp)
-  print(code)
+  _test_pretty_printer()
+  # _test_tree_from_ts_tree()
