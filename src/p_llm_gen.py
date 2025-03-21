@@ -53,7 +53,7 @@ logger = p_utils.setup_logger(__name__)
 class TemplateSimplificationRetryLimitError(RuntimeError): pass
 class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
-class CannotGetTranslationPairsFromTspError(RuntimeError): pass
+class NoTransPairsFromTSPError(RuntimeError): pass
 class LLMResponseFormatError(RuntimeError): pass
 
 
@@ -748,10 +748,8 @@ def simplify_template(template_dict: dict) -> dict:
 
 def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[str, str], template_dict: dict) -> List[Tuple[dict, dict]]:
   '''
-  RETURN all possible translation pairs obtained from a given `tsp`.
-
-  NOTE raised errors propagate to the caller
-  NOTE might return empty list
+  RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
+  NOTE raised errors propagate to the caller.
   '''
   logger.info(f'~~~ Starting API call to p_llm_gen.get_translation_pairs_from_tsp')
   logger.debug(f'Attempting to translate SP1 and SP2 to generate a translation pair:\n{json.dumps(tsp, indent=2)}')
@@ -778,7 +776,7 @@ def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[s
     sp1_tp1_cands = trans_sp1.run()
   except SP1TranslationRetryLimitError as err:
     logger.warning(f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}')
-    raise CannotGetTranslationPairsFromTspError from err
+    raise NoTransPairsFromTSPError from err
 
   logger.debug(f'Generated {len(sp1_tp1_cands)} candidate translations for SP1:\n{json.dumps(sp1_tp1_cands, indent=2)}')
 
@@ -813,7 +811,7 @@ def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[s
   if len(all_translation_pairs) == 0:
     msg = f'BAD: Could not generate any translation pairs from a program pair:\n{json.dumps(sp1_tp1_cands, indent=2)}'
     logger.warning(msg)
-    raise CannotGetTranslationPairsFromTspError(msg)
+    raise NoTransPairsFromTSPError(msg)
 
   return all_translation_pairs
 
