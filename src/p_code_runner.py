@@ -346,7 +346,7 @@ def run_src_program_with_mylog(src_program_instr: str, src_lang: str) -> Tuple[l
   # check the cache first
   global _last_run_cached
   if _last_run_cached is not None and _last_run_cached[0] == src_program_instr and _last_run_cached[1] == src_lang:
-    logger.debug('Using cached result')
+    logger.debug('run_src_program_with_mylog: using cached result')
     return _last_run_cached[2], _last_run_cached[3]
 
   assert src_lang in MYLOG_IMPL, f'mylog for {src_lang} is not implemented.'
