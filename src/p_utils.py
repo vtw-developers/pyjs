@@ -162,6 +162,17 @@ def llog_text(fname: str, contents: str) -> None:
   write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, contents, include_timestamp=False)
 
 
+# Helper functions to read/write to TMP_DIR
+def read_tmp_json(fname: str) -> Any:
+  return read_json(p_consts.TMP_DIR / fname)
+
+def read_tmp_text(fname: str) -> Any:
+  return read_text(p_consts.TMP_DIR / fname)
+
+def write_tmp_json(fname: str, obj: Any) -> None:
+  write_json(p_consts.TMP_DIR / fname, obj)
+
+
 # Parsing and AST related
 def does_have_parse_error(content: str, lang: str):
   '''
@@ -319,3 +330,9 @@ def footer(subject_name: str) -> str:
   log file
   '''
   return '\n' * 10 + f'<END>{subject_name}</END>' + '\n' * 10
+
+def to_int(val: Union[str, int]) -> int:
+  assert isinstance(val, (str, int)), f'Expected str or int, got {type(val)}'
+  if isinstance(val, int):
+    return val
+  return int(val)
