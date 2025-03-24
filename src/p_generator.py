@@ -7,7 +7,7 @@ import p_consts
 import p_data_structures as pds
 import p_grammar
 import p_utils
-import p_visitor
+import p_visitor_py
 
 
 logger = p_utils.setup_logger(__name__)
@@ -481,9 +481,9 @@ def _deprecated_generate_tsps_with_generator_OLD(template_dict: dict) -> List[Tu
         return '{' + f'foo: {p_consts.GENERIC_SECRET_FN_INVOCATION}' + '}'
 
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor.Tree.from_gen_ast(ast)
+    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
     # TODO fix type annotations for `accept` below as `code` is suggested to be `None`
-    code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+    code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
     return code
 
   def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
@@ -726,8 +726,8 @@ def _deprecated_generate_tsp_overfitted(template_dict: dict) -> Tuple[str, str]:
     '''
     node_type = node.get_ts_node_type()
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor.Tree.from_gen_ast(ast)
-    code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
+    code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
     return code
 
   def _generate_fuzzed_code_for_literal_nodes(
@@ -1096,8 +1096,8 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
         return spec_treatment_map[node_type]
 
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor.Tree.from_gen_ast(ast)
-    code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
+    code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
     return code
 
   def _gen_code_pair_for_node_with_check(
