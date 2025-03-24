@@ -13,7 +13,7 @@ import p_data_structures
 import p_grammar
 import p_subject
 import p_utils
-import p_visitor
+import p_visitor_py
 
 
 logger = p_utils.setup_logger(__name__)
@@ -1562,8 +1562,8 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
   def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor.Tree.from_gen_ast(ast)
-    code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
+    code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
     return code
 
   def _get_num_nt_nodes(code: str, lang: str) -> int:
@@ -3284,8 +3284,8 @@ def simplify_program_context_usage() -> None:
     '''
     def __gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar):
       ast = grammar.generate_simplest_ast(node_type)
-      ast_tree = p_visitor.Tree.from_gen_ast(ast)
-      code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+      ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
+      code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
       return code
 
     def __process_parent_nodes(
