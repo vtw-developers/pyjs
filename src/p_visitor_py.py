@@ -639,6 +639,13 @@ class ParametrizableVariablesCollector(Visitor):
   def get_parametrizable_identifiers(self) -> List[str]:
     return self.parametrizable_identifiers
 
+  def is_identifier_built_in_module(self, node: IdentifierNode) -> bool:
+    # not a built-in module if appears as an argument
+    # L0167: `i, j = 1, len(numbers)` (numbers is a built-in module)
+    if self.ctx and self.ctx[-1] == 'call.arguments':
+      return False
+    return node.val() in p_consts.PY_BUILT_IN_MODULES
+
   # VISIT METHODS
   def default_visit(self, node: AbstractNode) -> None:
     for child in node.children:
@@ -674,8 +681,7 @@ class ParametrizableVariablesCollector(Visitor):
     if node.val() in p_consts.PY_BUILT_IN_FUNCTIONS:
       self.add_initialized_identifier(node)
       return
-    # fixes L0065: `Ans = re.match(NumberRE, s)`
-    if node.val() in p_consts.PY_BUILT_IN_MODULES:
+    if self.is_identifier_built_in_module(node):
       self.add_initialized_identifier(node)
       return
 
@@ -715,7 +721,9 @@ class ParametrizableVariablesCollector(Visitor):
     We consider both `a` and `b` as parametrizable variables.
     '''
     if isinstance(node.function, IdentifierNode):
+      self.ctx.append('call.arguments')
       self.visit(node.arguments)
+      self.ctx.pop()
     elif isinstance(node.function, AttributeNode):
       self.visit(node.function)
       self.visit(node.arguments)
