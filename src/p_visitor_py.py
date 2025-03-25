@@ -815,9 +815,11 @@ class ParametrizableVariablesCollector(Visitor):
     '''
     Treat as an inner function.
     '''
-    self.ctx.append('lambda.parameters')
-    self.visit(node.parameters)
-    self.ctx.pop()
+    # lambda parameters are optional per grammar
+    if node.parameters is not None:
+      self.ctx.append('lambda.parameters')
+      self.visit(node.parameters)
+      self.ctx.pop()
 
     self.ctx.append('lambda.body')
     self.visit(node.body)
