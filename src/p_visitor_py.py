@@ -766,6 +766,24 @@ class ParametrizableVariablesCollector(Visitor):
     self.visit(node.body)
     self.ctx.pop()
 
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    '''
+    We want to visit the `function_definition` nodes last,
+    since they might use variables out of their scope.
+    '''
+    # we will modify this list, that's why we need a slice
+    children = node.get_nt_children()[:]
+
+    # Separate function_definition nodes from other nodes
+    function_definitions = [child for child in children if isinstance(child, FunctionDefinitionNode)]
+    other_nodes = [child for child in children if not isinstance(child, FunctionDefinitionNode)]
+
+    # Concatenate other nodes with function_definition nodes at the end
+    children = other_nodes + function_definitions
+
+    for child in children:
+      self.visit(child)
+
   def visit_SubscriptNode(self, node: SubscriptNode) -> None:
     self.ctx.append('subscript.subscript')
     self.visit(node.subscript)
