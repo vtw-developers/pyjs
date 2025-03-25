@@ -219,6 +219,8 @@ class GlobalStatementNode(AbstractNode): pass
 class IdentifierNode(AbstractNode):
   def __init__(self, node_type: str):
     super().__init__(node_type)
+  def __repr__(self) -> str:
+    return f'ID({self.val()})'
   def val(self) -> str:
     assert len(self.children) == 1, 'sanity check'
     assert isinstance(self.children[0], TerminalNode), 'sanity check'
