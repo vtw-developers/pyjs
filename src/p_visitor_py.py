@@ -856,16 +856,20 @@ class ParametrizableVariablesCollector(Visitor):
     '''
     We want to visit the `function_definition` nodes last,
     since they might use variables out of their scope.
+
+    `decorated_definition` are function definitions with a decorator.
     '''
     # we will modify this list, that's why we need a slice
     children = node.get_nt_children()[:]
 
     # Separate function_definition nodes from other nodes
-    function_definitions = [child for child in children if isinstance(child, FunctionDefinitionNode)]
-    other_nodes = [child for child in children if not isinstance(child, FunctionDefinitionNode)]
+    fn_dfns = [ch for ch in children
+               if isinstance(ch, (FunctionDefinitionNode, DecoratedDefinitionNode))]
+    other_nodes = [ch for ch in children
+                   if not isinstance(ch, (FunctionDefinitionNode, DecoratedDefinitionNode))]
 
     # Concatenate other nodes with function_definition nodes at the end
-    children = other_nodes + function_definitions
+    children = other_nodes + fn_dfns
 
     for child in children:
       self.visit(child)
