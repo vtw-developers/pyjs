@@ -254,7 +254,11 @@ class ListPatternNode(AbstractNode): pass
 class ListSplatNode(AbstractNode): pass
 class ListSplatPatternNode(AbstractNode): pass
 class ModuleNode(AbstractNode): pass
-class NamedExpressionNode(AbstractNode): pass
+class NamedExpressionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.name : AbstractNode = None
+    self.value : AbstractNode = None
 class NoneNode(AbstractNode): pass
 class NonlocalStatementNode(AbstractNode): pass
 class NotEscapeSequenceNode(AbstractNode): pass
@@ -490,6 +494,7 @@ class Tree:
       'lambda',
       'list_comprehension',
       'keyword_argument',
+      'named_expression',
       'set_comprehension',
       'subscript',
       'typed_parameter',
@@ -698,6 +703,10 @@ class ParametrizableVariablesCollector(Visitor):
     # check if the identifier is a variable that is being assigned a value
     # i.e. it appears on the left-hand side of an assignment
     if self.ctx and self.ctx[-1] == 'assignment.left':
+      self.add_initialized_identifier(node)
+      return
+    # similar to assignment
+    if self.ctx and self.ctx[-1] == 'named_expression.name':
       self.add_initialized_identifier(node)
       return
     # `for a in nums: pass` - `a` is initialized
@@ -929,6 +938,16 @@ class ParametrizableVariablesCollector(Visitor):
 
     for child in children:
       self.visit(child)
+
+  def visit_NamedExpressionNode(self, node: NamedExpressionNode) -> None:
+    '''Similar to `AssignmentNode`'''
+    self.ctx.append('named_expression.value')
+    self.visit(node.value)
+    self.ctx.pop()
+
+    self.ctx.append('named_expression.name')
+    self.visit(node.name)
+    self.ctx.pop()
 
   def visit_SetComprehensionNode(self, node: SetComprehensionNode) -> None:
     '''
