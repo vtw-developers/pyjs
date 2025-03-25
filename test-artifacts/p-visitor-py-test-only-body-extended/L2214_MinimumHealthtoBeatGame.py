@@ -1,0 +1,1 @@
+return sum(damage) - min(max(damage), armor) + 1

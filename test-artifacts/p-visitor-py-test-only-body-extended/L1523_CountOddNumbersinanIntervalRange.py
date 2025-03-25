@@ -1,0 +1,1 @@
+return (high + 1 >> 1) - (low >> 1)

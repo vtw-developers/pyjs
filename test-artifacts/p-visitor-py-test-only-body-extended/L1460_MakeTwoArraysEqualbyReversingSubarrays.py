@@ -1,0 +1,1 @@
+return sorted(target) == sorted(arr)

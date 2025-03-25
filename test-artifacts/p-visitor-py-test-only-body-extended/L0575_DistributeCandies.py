@@ -1,0 +1,1 @@
+return min(len(candyType) >> 1, len(set(candyType)))
