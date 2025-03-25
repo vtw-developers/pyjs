@@ -271,7 +271,10 @@ class RaiseStatementNode(AbstractNode): pass
 class RelativeImportNode(AbstractNode): pass
 class ReturnStatementNode(AbstractNode): pass
 class SetNode(AbstractNode): pass
-class SetComprehensionNode(AbstractNode): pass
+class SetComprehensionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.body : AbstractNode = None
 class SliceNode(AbstractNode): pass
 class StringNode(AbstractNode): pass
 class SubscriptNode(AbstractNode):
@@ -485,6 +488,7 @@ class Tree:
       'lambda',
       'list_comprehension',
       'keyword_argument',
+      'set_comprehension',
       'subscript',
       'typed_parameter',
     ]
@@ -915,6 +919,26 @@ class ParametrizableVariablesCollector(Visitor):
 
     for child in children:
       self.visit(child)
+
+  def visit_SetComprehensionNode(self, node: SetComprehensionNode) -> None:
+    '''
+    Treat identical to ListComprehensionNode
+    '''
+    # we will modify this list, that's why we need a slice
+    clauses = node.get_nt_children()[:]
+    # keep only the clauses in the parsed order
+    clauses.remove(node.body)
+
+    # clauses are visited in sequence
+    for clause in clauses:
+      self.ctx.append('set_comprehension.clause')
+      self.visit(clause)
+      self.ctx.pop()
+
+    # body is visited last
+    self.ctx.append('set_comprehension.body')
+    self.visit(node.body)
+    self.ctx.pop()
 
   def visit_SubscriptNode(self, node: SubscriptNode) -> None:
     self.ctx.append('subscript.subscript')
