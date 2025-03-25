@@ -722,6 +722,9 @@ class ParametrizableVariablesCollector(Visitor):
     else:
       raise ValueError('unknown function type')
 
+  def visit_DecoratorNode(self, node: DecoratorNode) -> None:
+    '''Do not visit anything'''
+
   def visit_ForInClauseNode(self, node: ForInClauseNode) -> None:
     self.ctx.append('for_in_clause.right')
     self.visit(node.right)
