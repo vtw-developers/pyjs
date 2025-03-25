@@ -2615,7 +2615,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L1001(self):
     tree = self.load_tree_from('L1001')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['n', 'lamps', 'queries'])
+    # removed `n` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['lamps', 'queries'])
 
   def test_L1002(self):
     tree = self.load_tree_from('L1002')
@@ -3308,7 +3310,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L1376(self):
     tree = self.load_tree_from('L1376')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['n', 'headID', 'manager', 'informTime'])
+    # removed `n` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['headID', 'manager', 'informTime'])
 
   def test_L1377(self):
     tree = self.load_tree_from('L1377')
@@ -3323,7 +3327,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L1383(self):
     tree = self.load_tree_from('L1383')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['n', 'speed', 'efficiency', 'k'])
+    # removed `n` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['speed', 'efficiency', 'k'])
 
   def test_L1385(self):
     tree = self.load_tree_from('L1385')
@@ -3478,7 +3484,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L1462(self):
     tree = self.load_tree_from('L1462')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['numCourses', 'prerequisites', 'queries'])
+    # removed `numCourses` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['prerequisites', 'queries'])
 
   def test_L1463(self):
     tree = self.load_tree_from('L1463')
@@ -4270,7 +4278,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L1923(self):
     tree = self.load_tree_from('L1923')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['n', 'paths'])
+    # removed `n` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['paths'])
 
   def test_L1925(self):
     tree = self.load_tree_from('L1925')
@@ -4983,7 +4993,9 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
   def test_L2201(self):
     tree = self.load_tree_from('L2201')
     self.param_collector.visit(tree.root_node)
-    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['n', 'artifacts', 'dig'])
+    # removed `n` from the list of parametrizable identifiers
+    # it is not used in the original function `f_gold`
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['artifacts', 'dig'])
 
   def test_L2202(self):
     tree = self.load_tree_from('L2202')
