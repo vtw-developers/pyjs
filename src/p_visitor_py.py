@@ -208,7 +208,10 @@ class FunctionDefinitionNode(AbstractNode):
     self.return_type : AbstractNode = None
     self.body : AbstractNode = None
 class FutureImportStatementNode(AbstractNode): pass
-class GeneratorExpressionNode(AbstractNode): pass
+class GeneratorExpressionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.body : AbstractNode = None
 class GlobalStatementNode(AbstractNode): pass
 class IdentifierNode(AbstractNode):
   def __init__(self, node_type: str):
@@ -466,6 +469,7 @@ class Tree:
       'for_in_clause',
       'for_statement',
       'function_definition',
+      'generator_expression',
       'list_comprehension',
       'subscript',
       'typed_parameter',
@@ -749,6 +753,26 @@ class ParametrizableVariablesCollector(Visitor):
     self.ctx.pop()
 
     self.ctx.append('function_definition.body')
+    self.visit(node.body)
+    self.ctx.pop()
+
+  def visit_GeneratorExpressionNode(self, node: GeneratorExpressionNode) -> None:
+    '''
+    Treat identical to ListComprehensionNode
+    '''
+    # we will modify this list, that's why we need a slice
+    clauses = node.get_nt_children()[:]
+    # keep only the clauses in the parsed order
+    clauses.remove(node.body)
+
+    # clauses are visited in sequence
+    for clause in clauses:
+      self.ctx.append('generator_expression.clause')
+      self.visit(clause)
+      self.ctx.pop()
+
+    # body is visited last
+    self.ctx.append('generator_expression.body')
     self.visit(node.body)
     self.ctx.pop()
 
