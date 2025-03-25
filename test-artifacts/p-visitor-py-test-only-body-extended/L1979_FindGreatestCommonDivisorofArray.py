@@ -1,0 +1,1 @@
+return gcd(max(nums), min(nums))

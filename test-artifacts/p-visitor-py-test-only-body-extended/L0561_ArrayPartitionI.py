@@ -1,0 +1,1 @@
+return sum(sorted(nums)[::2])

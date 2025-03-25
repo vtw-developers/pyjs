@@ -1,0 +1,9 @@
+if num == 0:
+    return '0'
+chars = '0123456789abcdef'
+s = []
+for i in range(7, -1, -1):
+    x = num >> 4 * i & 15
+    if s or x != 0:
+        s.append(chars[x])
+return ''.join(s)

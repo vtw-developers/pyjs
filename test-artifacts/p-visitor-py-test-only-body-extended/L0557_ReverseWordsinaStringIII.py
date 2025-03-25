@@ -1,0 +1,1 @@
+return ' '.join([t[::-1] for t in s.split(' ')])

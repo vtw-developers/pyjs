@@ -1,0 +1,1 @@
+return sum((w.startswith(pref) for w in words))

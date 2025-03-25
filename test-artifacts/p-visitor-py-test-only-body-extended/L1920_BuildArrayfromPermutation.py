@@ -1,0 +1,1 @@
+return [nums[num] for num in nums]

@@ -1,0 +1,1 @@
+return max((sum(account) for account in accounts))

@@ -1,0 +1,1 @@
+return sum((word == s[:len(word)] for word in words))
