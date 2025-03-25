@@ -227,9 +227,17 @@ class ImportPrefixNode(AbstractNode): pass
 class ImportStatementNode(AbstractNode): pass
 class IntegerNode(AbstractNode): pass
 class InterpolationNode(AbstractNode): pass
-class KeywordArgumentNode(AbstractNode): pass
+class KeywordArgumentNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.name : AbstractNode = None
+    self.value : AbstractNode = None
 class KeywordIdentifierNode(AbstractNode): pass
-class LambdaNode(AbstractNode): pass
+class LambdaNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.parameters : AbstractNode = None
+    self.body : AbstractNode = None
 class LambdaParametersNode(AbstractNode): pass
 class LambdaWithinForInClauseNode(AbstractNode): pass
 class ListNode(AbstractNode): pass
@@ -470,7 +478,9 @@ class Tree:
       'for_statement',
       'function_definition',
       'generator_expression',
+      'lambda',
       'list_comprehension',
+      'keyword_argument',
       'subscript',
       'typed_parameter',
     ]
@@ -677,6 +687,10 @@ class ParametrizableVariablesCollector(Visitor):
     if self.ctx and self.ctx[-1] == 'function_definition.parameters':
       self.add_initialized_identifier(node)
       return
+    # lambda fn is similar to inner fn, and all of its parameters are initialized
+    if self.ctx and self.ctx[-1] == 'lambda.parameters':
+      self.add_initialized_identifier(node)
+      return
     # fixes L0049: `chars = defaultdict(list)`
     if node.val() in p_consts.PY_BUILT_IN_FUNCTIONS:
       self.add_initialized_identifier(node)
@@ -792,6 +806,22 @@ class ParametrizableVariablesCollector(Visitor):
 
   def visit_ImportStatementNode(self, node: ImportStatementNode) -> None:
     '''Do not visit anything'''
+
+  def visit_KeywordArgumentNode(self, node: KeywordArgumentNode) -> None:
+    '''Do not visit `name`'''
+    self.visit(node.value)
+
+  def visit_LambdaNode(self, node: LambdaNode) -> None:
+    '''
+    Treat as an inner function.
+    '''
+    self.ctx.append('lambda.parameters')
+    self.visit(node.parameters)
+    self.ctx.pop()
+
+    self.ctx.append('lambda.body')
+    self.visit(node.body)
+    self.ctx.pop()
 
   def visit_ListComprehensionNode(self, node: ListComprehensionNode) -> None:
     '''
