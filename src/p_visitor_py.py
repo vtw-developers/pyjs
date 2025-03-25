@@ -671,6 +671,9 @@ class ParametrizableVariablesCollector(Visitor):
     # L0167: `i, j = 1, len(numbers)` (numbers is a built-in module)
     if self.ctx and self.ctx[-1] == 'call.arguments':
       return False
+    # L0681: `s = {c for c in time if c != ':'}` (time is a built-in module)
+    if self.ctx and self.ctx[-1] == 'for_in_clause.right':
+      return False
     return node.val() in p_consts.PY_BUILT_IN_MODULES
 
   # VISIT METHODS
