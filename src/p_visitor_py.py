@@ -169,7 +169,10 @@ class DecoratorNode(AbstractNode): pass
 class DefaultParameterNode(AbstractNode): pass
 class DeleteStatementNode(AbstractNode): pass
 class DictionaryNode(AbstractNode): pass
-class DictionaryComprehensionNode(AbstractNode): pass
+class DictionaryComprehensionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.body : AbstractNode = None
 class DictionarySplatNode(AbstractNode): pass
 class DictionarySplatPatternNode(AbstractNode): pass
 class DottedNameNode(AbstractNode): pass
@@ -474,6 +477,7 @@ class Tree:
       'attribute',
       'assignment',
       'call',
+      'dictionary_comprehension',
       'for_in_clause',
       'for_statement',
       'function_definition',
@@ -764,6 +768,26 @@ class ParametrizableVariablesCollector(Visitor):
 
   def visit_DecoratorNode(self, node: DecoratorNode) -> None:
     '''Do not visit anything'''
+
+  def visit_DictionaryComprehensionNode(self, node: DictionaryComprehensionNode) -> None:
+    '''
+    Treat identical to ListComprehensionNode
+    '''
+    # we will modify this list, that's why we need a slice
+    clauses = node.get_nt_children()[:]
+    # keep only the clauses in the parsed order
+    clauses.remove(node.body)
+
+    # clauses are visited in sequence
+    for clause in clauses:
+      self.ctx.append('dictionary_comprehension.clause')
+      self.visit(clause)
+      self.ctx.pop()
+
+    # body is visited last
+    self.ctx.append('dictionary_comprehension.body')
+    self.visit(node.body)
+    self.ctx.pop()
 
   def visit_ForInClauseNode(self, node: ForInClauseNode) -> None:
     self.ctx.append('for_in_clause.right')
