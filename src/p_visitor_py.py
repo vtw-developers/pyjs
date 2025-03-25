@@ -666,6 +666,9 @@ class ParametrizableVariablesCollector(Visitor):
     # L0126: how about `prev = defaultdict(set)`
     if self.ctx and self.ctx[-1] == 'call.arguments':
       return False
+    # L0749: idx = boundaries.index(max(boundaries, key=len))
+    if self.ctx and self.ctx[-1] == 'keyword_argument.value':
+      return True
     return node.val() in p_consts.PY_BUILT_IN_FUNCTIONS
 
   def is_identifier_built_in_module(self, node: IdentifierNode) -> bool:
@@ -860,7 +863,9 @@ class ParametrizableVariablesCollector(Visitor):
 
   def visit_KeywordArgumentNode(self, node: KeywordArgumentNode) -> None:
     '''Do not visit `name`'''
+    self.ctx.append('keyword_argument.value')
     self.visit(node.value)
+    self.ctx.pop()
 
   def visit_LambdaNode(self, node: LambdaNode) -> None:
     '''
