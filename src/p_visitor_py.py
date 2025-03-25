@@ -186,7 +186,11 @@ class ExpressionStatementNode(AbstractNode): pass
 class FalseNode(AbstractNode): pass
 class FinallyClauseNode(AbstractNode): pass
 class FloatNode(AbstractNode): pass
-class ForInClauseNode(AbstractNode): pass
+class ForInClauseNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.left : AbstractNode = None
+    self.right : AbstractNode = None
 class ForStatementNode(AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
@@ -226,7 +230,10 @@ class LambdaNode(AbstractNode): pass
 class LambdaParametersNode(AbstractNode): pass
 class LambdaWithinForInClauseNode(AbstractNode): pass
 class ListNode(AbstractNode): pass
-class ListComprehensionNode(AbstractNode): pass
+class ListComprehensionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.body : AbstractNode = None
 class ListPatternNode(AbstractNode): pass
 class ListSplatNode(AbstractNode): pass
 class ListSplatPatternNode(AbstractNode): pass
@@ -265,7 +272,10 @@ class TuplePatternNode(AbstractNode): pass
 class TypeNode(AbstractNode): pass
 class TypeConversionNode(AbstractNode): pass
 class TypedDefaultParameterNode(AbstractNode): pass
-class TypedParameterNode(AbstractNode): pass
+class TypedParameterNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.type : AbstractNode = None
 class UnaryOperatorNode(AbstractNode): pass
 class WhileStatementNode(AbstractNode): pass
 class WildcardImportNode(AbstractNode): pass
@@ -453,9 +463,12 @@ class Tree:
       'attribute',
       'assignment',
       'call',
+      'for_in_clause',
       'for_statement',
       'function_definition',
+      'list_comprehension',
       'subscript',
+      'typed_parameter',
     ]
 
     def _create_StringNode(ts_node: tree_sitter.Node) -> StringNode:
@@ -587,6 +600,11 @@ class PrettyPrinter(Visitor):
 
 
 class ParametrizableVariablesCollector(Visitor):
+  '''
+  Assume that the generated snippet will be a body of a function definition.
+  This visitor collects all identifiers that are parametrizable for that function.
+  '''
+
   def __init__(self) -> None:
     super().__init__()
 
@@ -636,7 +654,16 @@ class ParametrizableVariablesCollector(Visitor):
     if self.ctx and self.ctx[-1] == 'assignment.left':
       self.add_initialized_identifier(node)
       return
+    # `for a in nums: pass` - `a` is initialized
     if self.ctx and self.ctx[-1] == 'for_statement.left':
+      self.add_initialized_identifier(node)
+      return
+    # `[None for a in nums]` - `a` is initialized
+    if self.ctx and self.ctx[-1] == 'for_in_clause.left':
+      self.add_initialized_identifier(node)
+      return
+    # this in an inner function, and all of its parameters are initialized
+    if self.ctx and self.ctx[-1] == 'function_definition.parameters':
       self.add_initialized_identifier(node)
       return
 
@@ -672,6 +699,15 @@ class ParametrizableVariablesCollector(Visitor):
     self.visit(node.arguments)
     self.ctx.pop()
 
+  def visit_ForInClauseNode(self, node: ForInClauseNode) -> None:
+    self.ctx.append('for_in_clause.right')
+    self.visit(node.right)
+    self.ctx.pop()
+
+    self.ctx.append('for_in_clause.left')
+    self.visit(node.left)
+    self.ctx.pop()
+
   def visit_ForStatementNode(self, node: ForStatementNode) -> None:
     self.ctx.append('for_statement.left')
     self.visit(node.left)
@@ -687,14 +723,48 @@ class ParametrizableVariablesCollector(Visitor):
 
   def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
     '''
-    Visit only the body of a function definition.
+    Inner functions may use parametrized variables as in L0022.
     '''
+    self.ctx.append('function_definition.parameters')
+    self.visit(node.parameters)
+    self.ctx.pop()
+
     self.ctx.append('function_definition.body')
     self.visit(node.body)
     self.ctx.pop()
 
   def visit_ImportFromStatementNode(self, node: ImportFromStatementNode) -> None:
     '''Do not visit anything'''
+
+  def visit_ImportStatementNode(self, node: ImportStatementNode) -> None:
+    '''Do not visit anything'''
+
+  def visit_ListComprehensionNode(self, node: ListComprehensionNode) -> None:
+    '''
+    This is very tricky. The following implementation is based on intuition
+    and some hand testing. It might not be correct. Refer to
+    https://docs.python.org/3/reference/expressions.html#displays-for-lists-sets-and-dictionaries
+    for more details on how list comprehensions are executed.
+
+    One thing for sure is that the body is executed last.
+    Remaining `if` and `for` clauses are executed in "some" order.
+    Currently, we are visiting the clauses in the order they appear in the code.
+    '''
+    # we will modify this list, that's why we need a slice
+    clauses = node.get_nt_children()[:]
+    # keep only the clauses in the parsed order
+    clauses.remove(node.body)
+
+    # clauses are visited in sequence
+    for clause in clauses:
+      self.ctx.append('list_comprehension.clause')
+      self.visit(clause)
+      self.ctx.pop()
+
+    # body is visited last
+    self.ctx.append('list_comprehension.body')
+    self.visit(node.body)
+    self.ctx.pop()
 
   def visit_SubscriptNode(self, node: SubscriptNode) -> None:
     self.ctx.append('subscript.subscript')
@@ -704,6 +774,13 @@ class ParametrizableVariablesCollector(Visitor):
     self.ctx.append('subscript.value')
     self.visit(node.value)
     self.ctx.pop()
+
+  def visit_TypedParameterNode(self, node: TypedParameterNode) -> None:
+    '''
+    Do not visit the field `type`.
+    Visit just the identifier, which is the first child according to grammar.
+    '''
+    self.visit(node.children[0])
 
 
 # TEST HARNESSES
@@ -732,7 +809,7 @@ def _test_tree_from_ts_tree():
 
 
 def _test_parametrizable_variables_collector():
-  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
+  snippet = p_utils.read_tmp_text('test_params.py')
   src_lang = 'py'
 
   parser = p_consts.PARSER_DICT[src_lang]
