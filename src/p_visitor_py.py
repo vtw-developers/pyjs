@@ -725,6 +725,11 @@ class ParametrizableVariablesCollector(Visitor):
     if self.ctx and self.ctx[-1] == 'lambda.parameters':
       self.add_initialized_identifier(node)
       return
+    # whatever is inside `defaultdict` is initialized
+    # L1722: `mp = defaultdict(Counter)`
+    if self.ctx and self.ctx[-1] == 'defaultdict.arguments':
+      self.add_initialized_identifier(node)
+      return
     # fixes L0049: `chars = defaultdict(list)`
     if self.is_identifier_built_in_function(node):
       self.add_initialized_identifier(node)
