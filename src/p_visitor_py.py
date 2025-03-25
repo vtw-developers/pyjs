@@ -666,6 +666,10 @@ class ParametrizableVariablesCollector(Visitor):
     if self.ctx and self.ctx[-1] == 'function_definition.parameters':
       self.add_initialized_identifier(node)
       return
+    # fixes L0049: `chars = defaultdict(list)`
+    if node.val() in p_consts.PY_BUILT_IN_FUNCTIONS:
+      self.add_initialized_identifier(node)
+      return
 
     # an identifier is parametrizable
     # 1. seeing it for the first time
