@@ -687,10 +687,6 @@ class ParametrizableVariablesCollector(Visitor):
     return node.val() in p_consts.PY_BUILT_IN_MODULES
 
   # VISIT METHODS
-  def default_visit(self, node: AbstractNode) -> None:
-    for child in node.children:
-      self.visit(child)
-
   def visit_IdentifierNode(self, node: IdentifierNode) -> None:
     # if we already have seen this identifier, skip
     # because we already have decided what to do with this identifier
