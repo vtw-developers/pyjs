@@ -649,6 +649,15 @@ class ParametrizableVariablesCollector(Visitor):
   def get_parametrizable_identifiers(self) -> List[str]:
     return self.parametrizable_identifiers
 
+  def is_identifier_built_in_function(self, node: IdentifierNode) -> bool:
+    # not a built-in function if appears as an argument
+    # L0388: `i, n = (0, len(input))` (input is a built-in function)
+    # L0049: how about `chars = defaultdict(list)`
+    # L0126: how about `prev = defaultdict(set)`
+    if self.ctx and self.ctx[-1] == 'call.arguments':
+      return False
+    return node.val() in p_consts.PY_BUILT_IN_FUNCTIONS
+
   def is_identifier_built_in_module(self, node: IdentifierNode) -> bool:
     # not a built-in module if appears as an argument
     # L0167: `i, j = 1, len(numbers)` (numbers is a built-in module)
@@ -692,7 +701,7 @@ class ParametrizableVariablesCollector(Visitor):
       self.add_initialized_identifier(node)
       return
     # fixes L0049: `chars = defaultdict(list)`
-    if node.val() in p_consts.PY_BUILT_IN_FUNCTIONS:
+    if self.is_identifier_built_in_function(node):
       self.add_initialized_identifier(node)
       return
     if self.is_identifier_built_in_module(node):
@@ -735,9 +744,18 @@ class ParametrizableVariablesCollector(Visitor):
     We consider both `a` and `b` as parametrizable variables.
     '''
     if isinstance(node.function, IdentifierNode):
-      self.ctx.append('call.arguments')
-      self.visit(node.arguments)
-      self.ctx.pop()
+      if node.function.val() == 'defaultdict':
+        self.ctx.append('defaultdict.arguments')
+        self.visit(node.arguments)
+        self.ctx.pop()
+      elif node.function.val() == 'map':
+        self.ctx.append('map.arguments')
+        self.visit(node.arguments)
+        self.ctx.pop()
+      else:
+        self.ctx.append('call.arguments')
+        self.visit(node.arguments)
+        self.ctx.pop()
     elif isinstance(node.function, AttributeNode):
       self.visit(node.function)
       self.visit(node.arguments)
