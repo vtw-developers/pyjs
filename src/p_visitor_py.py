@@ -670,6 +670,10 @@ class ParametrizableVariablesCollector(Visitor):
     if node.val() in p_consts.PY_BUILT_IN_FUNCTIONS:
       self.add_initialized_identifier(node)
       return
+    # fixes L0065: `Ans = re.match(NumberRE, s)`
+    if node.val() in p_consts.PY_BUILT_IN_MODULES:
+      self.add_initialized_identifier(node)
+      return
 
     # an identifier is parametrizable
     # 1. seeing it for the first time
@@ -696,12 +700,23 @@ class ParametrizableVariablesCollector(Visitor):
 
   def visit_CallNode(self, node: CallNode) -> None:
     '''
-    Do not visit `node.function`:
-    1. it is a function name
+    Both of these examples are CallNode's:
+    1. max(a,b)
+    2. a.max(b)
+
+    In (1), we assume `max` is defined in the global scope.
+    That's why we care about the parameters of `max` only.
+
+    In (2), we assume `max` is defined in the object `a`.
+    We consider both `a` and `b` as parametrizable variables.
     '''
-    self.ctx.append('call.arguments')
-    self.visit(node.arguments)
-    self.ctx.pop()
+    if isinstance(node.function, IdentifierNode):
+      self.visit(node.arguments)
+    elif isinstance(node.function, AttributeNode):
+      self.visit(node.function)
+      self.visit(node.arguments)
+    else:
+      raise ValueError('unknown function type')
 
   def visit_ForInClauseNode(self, node: ForInClauseNode) -> None:
     self.ctx.append('for_in_clause.right')
