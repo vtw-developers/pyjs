@@ -482,7 +482,7 @@ class Tree:
     # special treatment for some nodes
     # these nodes have fields that we want to access as attributes
     # check `_create_special_node` for more details.
-    _SPECIAL_NODES_WITH_FIELDS = [
+    _NODES_WITH_FIELDS = [
       'attribute',
       'assignment',
       'call',
@@ -519,29 +519,33 @@ class Tree:
       Their fields must be registered as attributes in their respective
       classes (see `AssignmentNode` for example). This special treatment
       allows us to access fields of these classes as attributes.
-      Check `_SPECIAL_NODES_WITH_FIELDS` for the list of special nodes.
+      Check `_NODES_WITH_FIELDS` for the list of special nodes.
+
+      NOTE TODO in `if_statement`, there are multiple nodes under a single
+      field `alternative`. Current implementation does not support it, as it
+      will save the last node under `alternative` as an attribute.
       '''
       # instantiate a special node
       ntype = ts_node.type
       NodeCls = NODE_TYPES_CLASSES[ntype]
-      special_node = NodeCls(ntype)
+      node_wfield = NodeCls(ntype)
 
       # field names of the special node
-      field_names = [ts_node.field_name_for_child(i) for i in range(len(ts_node.children))]
-      field_names = [fn for fn in field_names if fn is not None]
+      ts_field_names = [ts_node.field_name_for_child(i) for i in range(len(ts_node.children))]
+      ts_field_names = [fn for fn in ts_field_names if fn is not None]
 
       # add children to the special node
       for idx, ts_child in enumerate(ts_node.children):
         child_node = _rec_build_tree(ts_child)
-        special_node.add_child(child_node)
-        child_node.set_parent(special_node)
+        node_wfield.add_child(child_node)
+        child_node.set_parent(node_wfield)
 
         # set attributes of the special node
         ts_child_field_name = ts_node.field_name_for_child(idx)
-        if ts_child_field_name in field_names:
-          setattr(special_node, ts_child_field_name, child_node)
+        if ts_child_field_name in ts_field_names:
+          setattr(node_wfield, ts_child_field_name, child_node)
 
-      return special_node
+      return node_wfield
 
     def _rec_build_tree(ts_node: tree_sitter.Node) -> AbstractNode:
       '''Construct a tree from a tree-sitter node recursively'''
@@ -570,7 +574,7 @@ class Tree:
 
       # special case: nodes with fields
       # NOTE might as well do this for all nodes
-      if ts_node.type in _SPECIAL_NODES_WITH_FIELDS:
+      if ts_node.type in _NODES_WITH_FIELDS:
         spec_node = _create_node_with_field(ts_node)
         return spec_node
 
