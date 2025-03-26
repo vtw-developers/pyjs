@@ -8,7 +8,7 @@ import p_visitor_py
 
 class TestParametrizableVariablesCollector(unittest.TestCase):
   def setUp(self):
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-py-test-only-body-extended'
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'TestParametrizableVariablesCollector'
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
     self.param_collector = p_visitor_py.ParametrizableVariablesCollector()
