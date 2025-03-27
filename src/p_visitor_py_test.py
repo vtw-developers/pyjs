@@ -1,5 +1,5 @@
 import unittest
-from pathlib import Path
+from typing import Tuple
 
 import p_consts
 import p_utils
@@ -5386,6 +5386,5364 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
     tree = self.load_tree_from('L2323')
     self.param_collector.visit(tree.root_node)
     self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['jobs', 'workers'])
+
+
+class TestPrettyPrinter(unittest.TestCase):
+  def setUp(self):
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'TestPrettyPrinter'
+    self.src_lang = 'py'
+    self.parser = p_consts.PARSER_DICT[self.src_lang]
+    self.pp = p_visitor_py.PrettyPrinter(indent_with='    ')
+    self.maxDiff = None
+
+  def load_test_subject(self, subject_name: str) -> Tuple[str, p_visitor_py.Tree]:
+    for fpath in self.snippets_dir.iterdir():
+      if fpath.name.startswith(subject_name):
+        snippet_text = p_utils.read_text(fpath).strip()
+        ts_tree = self.parser.parse(bytes(snippet_text, 'utf8'))
+        tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+        return snippet_text, tree
+    raise FileNotFoundError(f"No file starting with '{subject_name}' found in {self.snippets_dir}")
+
+  def test_L0001(self):
+    gold_code, tree = self.load_test_subject('L0001')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0003(self):
+    gold_code, tree = self.load_test_subject('L0003')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0004(self):
+    gold_code, tree = self.load_test_subject('L0004')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0005(self):
+    gold_code, tree = self.load_test_subject('L0005')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0006(self):
+    gold_code, tree = self.load_test_subject('L0006')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0007(self):
+    gold_code, tree = self.load_test_subject('L0007')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0008(self):
+    gold_code, tree = self.load_test_subject('L0008')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0009(self):
+    gold_code, tree = self.load_test_subject('L0009')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L00010(self):
+    gold_code, tree = self.load_test_subject('L0010')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L00011(self):
+    gold_code, tree = self.load_test_subject('L0011')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0012(self):
+    gold_code, tree = self.load_test_subject('L0012')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0013(self):
+    gold_code, tree = self.load_test_subject('L0013')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0014(self):
+    gold_code, tree = self.load_test_subject('L0014')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0015(self):
+    gold_code, tree = self.load_test_subject('L0015')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0016(self):
+    gold_code, tree = self.load_test_subject('L0016')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0017(self):
+    gold_code, tree = self.load_test_subject('L0017')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0018(self):
+    gold_code, tree = self.load_test_subject('L0018')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0020(self):
+    gold_code, tree = self.load_test_subject('L0020')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0022(self):
+    gold_code, tree = self.load_test_subject('L0022')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0026(self):
+    gold_code, tree = self.load_test_subject('L0026')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0027(self):
+    gold_code, tree = self.load_test_subject('L0027')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0028(self):
+    gold_code, tree = self.load_test_subject('L0028')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0029(self):
+    gold_code, tree = self.load_test_subject('L0029')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0030(self):
+    gold_code, tree = self.load_test_subject('L0030')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0032(self):
+    gold_code, tree = self.load_test_subject('L0032')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0033(self):
+    gold_code, tree = self.load_test_subject('L0033')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0035(self):
+    gold_code, tree = self.load_test_subject('L0035')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0036(self):
+    gold_code, tree = self.load_test_subject('L0036')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0038(self):
+    gold_code, tree = self.load_test_subject('L0038')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0039(self):
+    gold_code, tree = self.load_test_subject('L0039')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0040(self):
+    gold_code, tree = self.load_test_subject('L0040')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0041(self):
+    gold_code, tree = self.load_test_subject('L0041')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0042(self):
+    gold_code, tree = self.load_test_subject('L0042')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0043(self):
+    gold_code, tree = self.load_test_subject('L0043')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0045(self):
+    gold_code, tree = self.load_test_subject('L0045')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0046(self):
+    gold_code, tree = self.load_test_subject('L0046')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0047(self):
+    gold_code, tree = self.load_test_subject('L0047')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0048(self):
+    gold_code, tree = self.load_test_subject('L0048')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0049(self):
+    gold_code, tree = self.load_test_subject('L0049')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0050(self):
+    gold_code, tree = self.load_test_subject('L0050')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0051(self):
+    gold_code, tree = self.load_test_subject('L0051')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0053(self):
+    gold_code, tree = self.load_test_subject('L0053')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0054(self):
+    gold_code, tree = self.load_test_subject('L0054')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0055(self):
+    gold_code, tree = self.load_test_subject('L0055')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0056(self):
+    gold_code, tree = self.load_test_subject('L0056')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0057(self):
+    gold_code, tree = self.load_test_subject('L0057')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0058(self):
+    gold_code, tree = self.load_test_subject('L0058')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0059(self):
+    gold_code, tree = self.load_test_subject('L0059')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0062(self):
+    gold_code, tree = self.load_test_subject('L0062')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0063(self):
+    gold_code, tree = self.load_test_subject('L0063')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0064(self):
+    gold_code, tree = self.load_test_subject('L0064')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0065(self):
+    gold_code, tree = self.load_test_subject('L0065')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0066(self):
+    gold_code, tree = self.load_test_subject('L0066')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0067(self):
+    gold_code, tree = self.load_test_subject('L0067')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0068(self):
+    gold_code, tree = self.load_test_subject('L0068')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0069(self):
+    gold_code, tree = self.load_test_subject('L0069')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0070(self):
+    gold_code, tree = self.load_test_subject('L0070')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0071(self):
+    gold_code, tree = self.load_test_subject('L0071')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0072(self):
+    gold_code, tree = self.load_test_subject('L0072')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0073(self):
+    gold_code, tree = self.load_test_subject('L0073')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0074(self):
+    gold_code, tree = self.load_test_subject('L0074')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0075(self):
+    gold_code, tree = self.load_test_subject('L0075')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0076(self):
+    gold_code, tree = self.load_test_subject('L0076')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0077(self):
+    gold_code, tree = self.load_test_subject('L0077')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0078(self):
+    gold_code, tree = self.load_test_subject('L0078')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0079(self):
+    gold_code, tree = self.load_test_subject('L0079')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0080(self):
+    gold_code, tree = self.load_test_subject('L0080')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0081(self):
+    gold_code, tree = self.load_test_subject('L0081')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0084(self):
+    gold_code, tree = self.load_test_subject('L0084')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0087(self):
+    gold_code, tree = self.load_test_subject('L0087')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0088(self):
+    gold_code, tree = self.load_test_subject('L0088')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0089(self):
+    gold_code, tree = self.load_test_subject('L0089')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0090(self):
+    gold_code, tree = self.load_test_subject('L0090')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0091(self):
+    gold_code, tree = self.load_test_subject('L0091')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0093(self):
+    gold_code, tree = self.load_test_subject('L0093')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0096(self):
+    gold_code, tree = self.load_test_subject('L0096')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0097(self):
+    gold_code, tree = self.load_test_subject('L0097')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0118(self):
+    gold_code, tree = self.load_test_subject('L0118')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0119(self):
+    gold_code, tree = self.load_test_subject('L0119')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0120(self):
+    gold_code, tree = self.load_test_subject('L0120')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0121(self):
+    gold_code, tree = self.load_test_subject('L0121')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0122(self):
+    gold_code, tree = self.load_test_subject('L0122')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0123(self):
+    gold_code, tree = self.load_test_subject('L0123')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0126(self):
+    gold_code, tree = self.load_test_subject('L0126')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0127(self):
+    gold_code, tree = self.load_test_subject('L0127')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0128(self):
+    gold_code, tree = self.load_test_subject('L0128')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0130(self):
+    gold_code, tree = self.load_test_subject('L0130')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0131(self):
+    gold_code, tree = self.load_test_subject('L0131')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0132(self):
+    gold_code, tree = self.load_test_subject('L0132')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0136(self):
+    gold_code, tree = self.load_test_subject('L0136')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0137(self):
+    gold_code, tree = self.load_test_subject('L0137')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0139(self):
+    gold_code, tree = self.load_test_subject('L0139')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0149(self):
+    gold_code, tree = self.load_test_subject('L0149')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0150(self):
+    gold_code, tree = self.load_test_subject('L0150')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0151(self):
+    gold_code, tree = self.load_test_subject('L0151')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0152(self):
+    gold_code, tree = self.load_test_subject('L0152')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0153(self):
+    gold_code, tree = self.load_test_subject('L0153')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0154(self):
+    gold_code, tree = self.load_test_subject('L0154')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0159(self):
+    gold_code, tree = self.load_test_subject('L0159')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0162(self):
+    gold_code, tree = self.load_test_subject('L0162')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0165(self):
+    gold_code, tree = self.load_test_subject('L0165')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0166(self):
+    gold_code, tree = self.load_test_subject('L0166')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0167(self):
+    gold_code, tree = self.load_test_subject('L0167')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0168(self):
+    gold_code, tree = self.load_test_subject('L0168')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0169(self):
+    gold_code, tree = self.load_test_subject('L0169')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0171(self):
+    gold_code, tree = self.load_test_subject('L0171')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0172(self):
+    gold_code, tree = self.load_test_subject('L0172')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0179(self):
+    gold_code, tree = self.load_test_subject('L0179')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0186(self):
+    gold_code, tree = self.load_test_subject('L0186')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0187(self):
+    gold_code, tree = self.load_test_subject('L0187')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0188(self):
+    gold_code, tree = self.load_test_subject('L0188')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0189(self):
+    gold_code, tree = self.load_test_subject('L0189')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0198(self):
+    gold_code, tree = self.load_test_subject('L0198')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0200(self):
+    gold_code, tree = self.load_test_subject('L0200')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0201(self):
+    gold_code, tree = self.load_test_subject('L0201')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0202(self):
+    gold_code, tree = self.load_test_subject('L0202')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0204(self):
+    gold_code, tree = self.load_test_subject('L0204')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0205(self):
+    gold_code, tree = self.load_test_subject('L0205')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0207(self):
+    gold_code, tree = self.load_test_subject('L0207')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0210(self):
+    gold_code, tree = self.load_test_subject('L0210')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0212(self):
+    gold_code, tree = self.load_test_subject('L0212')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0213(self):
+    gold_code, tree = self.load_test_subject('L0213')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0214(self):
+    gold_code, tree = self.load_test_subject('L0214')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0215(self):
+    gold_code, tree = self.load_test_subject('L0215')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0216(self):
+    gold_code, tree = self.load_test_subject('L0216')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0217(self):
+    gold_code, tree = self.load_test_subject('L0217')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0219(self):
+    gold_code, tree = self.load_test_subject('L0219')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0221(self):
+    gold_code, tree = self.load_test_subject('L0221')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0223(self):
+    gold_code, tree = self.load_test_subject('L0223')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0227(self):
+    gold_code, tree = self.load_test_subject('L0227')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0228(self):
+    gold_code, tree = self.load_test_subject('L0228')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0229(self):
+    gold_code, tree = self.load_test_subject('L0229')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0231(self):
+    gold_code, tree = self.load_test_subject('L0231')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0233(self):
+    gold_code, tree = self.load_test_subject('L0233')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0238(self):
+    gold_code, tree = self.load_test_subject('L0238')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0239(self):
+    gold_code, tree = self.load_test_subject('L0239')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0240(self):
+    gold_code, tree = self.load_test_subject('L0240')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0241(self):
+    gold_code, tree = self.load_test_subject('L0241')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0242(self):
+    gold_code, tree = self.load_test_subject('L0242')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0243(self):
+    gold_code, tree = self.load_test_subject('L0243')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0245(self):
+    gold_code, tree = self.load_test_subject('L0245')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0246(self):
+    gold_code, tree = self.load_test_subject('L0246')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0247(self):
+    gold_code, tree = self.load_test_subject('L0247')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0249(self):
+    gold_code, tree = self.load_test_subject('L0249')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0252(self):
+    gold_code, tree = self.load_test_subject('L0252')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0253(self):
+    gold_code, tree = self.load_test_subject('L0253')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0255(self):
+    gold_code, tree = self.load_test_subject('L0255')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0256(self):
+    gold_code, tree = self.load_test_subject('L0256')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0258(self):
+    gold_code, tree = self.load_test_subject('L0258')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0259(self):
+    gold_code, tree = self.load_test_subject('L0259')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0260(self):
+    gold_code, tree = self.load_test_subject('L0260')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0261(self):
+    gold_code, tree = self.load_test_subject('L0261')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0263(self):
+    gold_code, tree = self.load_test_subject('L0263')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0264(self):
+    gold_code, tree = self.load_test_subject('L0264')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0266(self):
+    gold_code, tree = self.load_test_subject('L0266')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0268(self):
+    gold_code, tree = self.load_test_subject('L0268')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0269(self):
+    gold_code, tree = self.load_test_subject('L0269')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0273(self):
+    gold_code, tree = self.load_test_subject('L0273')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0274(self):
+    gold_code, tree = self.load_test_subject('L0274')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0275(self):
+    gold_code, tree = self.load_test_subject('L0275')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0279(self):
+    gold_code, tree = self.load_test_subject('L0279')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0280(self):
+    gold_code, tree = self.load_test_subject('L0280')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0282(self):
+    gold_code, tree = self.load_test_subject('L0282')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0283(self):
+    gold_code, tree = self.load_test_subject('L0283')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0286(self):
+    gold_code, tree = self.load_test_subject('L0286')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0287(self):
+    gold_code, tree = self.load_test_subject('L0287')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0289(self):
+    gold_code, tree = self.load_test_subject('L0289')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0290(self):
+    gold_code, tree = self.load_test_subject('L0290')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0291(self):
+    gold_code, tree = self.load_test_subject('L0291')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0292(self):
+    gold_code, tree = self.load_test_subject('L0292')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0293(self):
+    gold_code, tree = self.load_test_subject('L0293')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0299(self):
+    gold_code, tree = self.load_test_subject('L0299')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0301(self):
+    gold_code, tree = self.load_test_subject('L0301')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0302(self):
+    gold_code, tree = self.load_test_subject('L0302')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0305(self):
+    gold_code, tree = self.load_test_subject('L0305')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0306(self):
+    gold_code, tree = self.load_test_subject('L0306')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0309(self):
+    gold_code, tree = self.load_test_subject('L0309')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0310(self):
+    gold_code, tree = self.load_test_subject('L0310')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0311(self):
+    gold_code, tree = self.load_test_subject('L0311')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0312(self):
+    gold_code, tree = self.load_test_subject('L0312')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0317(self):
+    gold_code, tree = self.load_test_subject('L0317')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0318(self):
+    gold_code, tree = self.load_test_subject('L0318')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0320(self):
+    gold_code, tree = self.load_test_subject('L0320')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0322(self):
+    gold_code, tree = self.load_test_subject('L0322')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0323(self):
+    gold_code, tree = self.load_test_subject('L0323')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0324(self):
+    gold_code, tree = self.load_test_subject('L0324')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0325(self):
+    gold_code, tree = self.load_test_subject('L0325')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0329(self):
+    gold_code, tree = self.load_test_subject('L0329')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0334(self):
+    gold_code, tree = self.load_test_subject('L0334')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0335(self):
+    gold_code, tree = self.load_test_subject('L0335')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0338(self):
+    gold_code, tree = self.load_test_subject('L0338')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0342(self):
+    gold_code, tree = self.load_test_subject('L0342')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0343(self):
+    gold_code, tree = self.load_test_subject('L0343')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0344(self):
+    gold_code, tree = self.load_test_subject('L0344')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0345(self):
+    gold_code, tree = self.load_test_subject('L0345')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0347(self):
+    gold_code, tree = self.load_test_subject('L0347')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0349(self):
+    gold_code, tree = self.load_test_subject('L0349')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0350(self):
+    gold_code, tree = self.load_test_subject('L0350')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0356(self):
+    gold_code, tree = self.load_test_subject('L0356')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0357(self):
+    gold_code, tree = self.load_test_subject('L0357')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0360(self):
+    gold_code, tree = self.load_test_subject('L0360')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0361(self):
+    gold_code, tree = self.load_test_subject('L0361')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0365(self):
+    gold_code, tree = self.load_test_subject('L0365')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0367(self):
+    gold_code, tree = self.load_test_subject('L0367')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0368(self):
+    gold_code, tree = self.load_test_subject('L0368')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0370(self):
+    gold_code, tree = self.load_test_subject('L0370')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0371(self):
+    gold_code, tree = self.load_test_subject('L0371')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0372(self):
+    gold_code, tree = self.load_test_subject('L0372')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0373(self):
+    gold_code, tree = self.load_test_subject('L0373')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0375(self):
+    gold_code, tree = self.load_test_subject('L0375')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0376(self):
+    gold_code, tree = self.load_test_subject('L0376')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0377(self):
+    gold_code, tree = self.load_test_subject('L0377')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0378(self):
+    gold_code, tree = self.load_test_subject('L0378')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0383(self):
+    gold_code, tree = self.load_test_subject('L0383')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0386(self):
+    gold_code, tree = self.load_test_subject('L0386')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0387(self):
+    gold_code, tree = self.load_test_subject('L0387')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0388(self):
+    gold_code, tree = self.load_test_subject('L0388')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0389(self):
+    gold_code, tree = self.load_test_subject('L0389')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0390(self):
+    gold_code, tree = self.load_test_subject('L0390')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0391(self):
+    gold_code, tree = self.load_test_subject('L0391')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0392(self):
+    gold_code, tree = self.load_test_subject('L0392')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0393(self):
+    gold_code, tree = self.load_test_subject('L0393')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0394(self):
+    gold_code, tree = self.load_test_subject('L0394')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0395(self):
+    gold_code, tree = self.load_test_subject('L0395')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0396(self):
+    gold_code, tree = self.load_test_subject('L0396')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0397(self):
+    gold_code, tree = self.load_test_subject('L0397')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0399(self):
+    gold_code, tree = self.load_test_subject('L0399')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0400(self):
+    gold_code, tree = self.load_test_subject('L0400')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0401(self):
+    gold_code, tree = self.load_test_subject('L0401')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0403(self):
+    gold_code, tree = self.load_test_subject('L0403')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0405(self):
+    gold_code, tree = self.load_test_subject('L0405')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0406(self):
+    gold_code, tree = self.load_test_subject('L0406')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0407(self):
+    gold_code, tree = self.load_test_subject('L0407')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0409(self):
+    gold_code, tree = self.load_test_subject('L0409')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0410(self):
+    gold_code, tree = self.load_test_subject('L0410')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0412(self):
+    gold_code, tree = self.load_test_subject('L0412')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0413(self):
+    gold_code, tree = self.load_test_subject('L0413')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0414(self):
+    gold_code, tree = self.load_test_subject('L0414')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0415(self):
+    gold_code, tree = self.load_test_subject('L0415')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0416(self):
+    gold_code, tree = self.load_test_subject('L0416')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0417(self):
+    gold_code, tree = self.load_test_subject('L0417')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0419(self):
+    gold_code, tree = self.load_test_subject('L0419')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0420(self):
+    gold_code, tree = self.load_test_subject('L0420')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0421(self):
+    gold_code, tree = self.load_test_subject('L0421')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0423(self):
+    gold_code, tree = self.load_test_subject('L0423')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0424(self):
+    gold_code, tree = self.load_test_subject('L0424')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0433(self):
+    gold_code, tree = self.load_test_subject('L0433')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0434(self):
+    gold_code, tree = self.load_test_subject('L0434')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0435(self):
+    gold_code, tree = self.load_test_subject('L0435')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0438(self):
+    gold_code, tree = self.load_test_subject('L0438')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0440(self):
+    gold_code, tree = self.load_test_subject('L0440')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0441(self):
+    gold_code, tree = self.load_test_subject('L0441')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0442(self):
+    gold_code, tree = self.load_test_subject('L0442')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0443(self):
+    gold_code, tree = self.load_test_subject('L0443')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0444(self):
+    gold_code, tree = self.load_test_subject('L0444')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0447(self):
+    gold_code, tree = self.load_test_subject('L0447')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0448(self):
+    gold_code, tree = self.load_test_subject('L0448')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0451(self):
+    gold_code, tree = self.load_test_subject('L0451')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0453(self):
+    gold_code, tree = self.load_test_subject('L0453')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0454(self):
+    gold_code, tree = self.load_test_subject('L0454')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0456(self):
+    gold_code, tree = self.load_test_subject('L0456')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0457(self):
+    gold_code, tree = self.load_test_subject('L0457')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0458(self):
+    gold_code, tree = self.load_test_subject('L0458')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0461(self):
+    gold_code, tree = self.load_test_subject('L0461')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0462(self):
+    gold_code, tree = self.load_test_subject('L0462')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0463(self):
+    gold_code, tree = self.load_test_subject('L0463')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0464(self):
+    gold_code, tree = self.load_test_subject('L0464')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0467(self):
+    gold_code, tree = self.load_test_subject('L0467')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0473(self):
+    gold_code, tree = self.load_test_subject('L0473')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0474(self):
+    gold_code, tree = self.load_test_subject('L0474')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0475(self):
+    gold_code, tree = self.load_test_subject('L0475')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0477(self):
+    gold_code, tree = self.load_test_subject('L0477')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0479(self):
+    gold_code, tree = self.load_test_subject('L0479')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0482(self):
+    gold_code, tree = self.load_test_subject('L0482')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0485(self):
+    gold_code, tree = self.load_test_subject('L0485')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0487(self):
+    gold_code, tree = self.load_test_subject('L0487')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0488(self):
+    gold_code, tree = self.load_test_subject('L0488')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0490(self):
+    gold_code, tree = self.load_test_subject('L0490')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0491(self):
+    gold_code, tree = self.load_test_subject('L0491')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0492(self):
+    gold_code, tree = self.load_test_subject('L0492')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0494(self):
+    gold_code, tree = self.load_test_subject('L0494')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0495(self):
+    gold_code, tree = self.load_test_subject('L0495')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0496(self):
+    gold_code, tree = self.load_test_subject('L0496')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0498(self):
+    gold_code, tree = self.load_test_subject('L0498')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0499(self):
+    gold_code, tree = self.load_test_subject('L0499')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0500(self):
+    gold_code, tree = self.load_test_subject('L0500')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0503(self):
+    gold_code, tree = self.load_test_subject('L0503')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0504(self):
+    gold_code, tree = self.load_test_subject('L0504')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0505(self):
+    gold_code, tree = self.load_test_subject('L0505')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0506(self):
+    gold_code, tree = self.load_test_subject('L0506')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0507(self):
+    gold_code, tree = self.load_test_subject('L0507')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0509(self):
+    gold_code, tree = self.load_test_subject('L0509')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0516(self):
+    gold_code, tree = self.load_test_subject('L0516')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0518(self):
+    gold_code, tree = self.load_test_subject('L0518')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0520(self):
+    gold_code, tree = self.load_test_subject('L0520')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0521(self):
+    gold_code, tree = self.load_test_subject('L0521')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0522(self):
+    gold_code, tree = self.load_test_subject('L0522')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0523(self):
+    gold_code, tree = self.load_test_subject('L0523')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0524(self):
+    gold_code, tree = self.load_test_subject('L0524')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0525(self):
+    gold_code, tree = self.load_test_subject('L0525')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0526(self):
+    gold_code, tree = self.load_test_subject('L0526')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0531(self):
+    gold_code, tree = self.load_test_subject('L0531')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0532(self):
+    gold_code, tree = self.load_test_subject('L0532')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0533(self):
+    gold_code, tree = self.load_test_subject('L0533')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0537(self):
+    gold_code, tree = self.load_test_subject('L0537')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0539(self):
+    gold_code, tree = self.load_test_subject('L0539')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0540(self):
+    gold_code, tree = self.load_test_subject('L0540')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0541(self):
+    gold_code, tree = self.load_test_subject('L0541')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0542(self):
+    gold_code, tree = self.load_test_subject('L0542')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0544(self):
+    gold_code, tree = self.load_test_subject('L0544')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0547(self):
+    gold_code, tree = self.load_test_subject('L0547')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0548(self):
+    gold_code, tree = self.load_test_subject('L0548')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0551(self):
+    gold_code, tree = self.load_test_subject('L0551')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0552(self):
+    gold_code, tree = self.load_test_subject('L0552')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0553(self):
+    gold_code, tree = self.load_test_subject('L0553')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0554(self):
+    gold_code, tree = self.load_test_subject('L0554')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0557(self):
+    gold_code, tree = self.load_test_subject('L0557')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0560(self):
+    gold_code, tree = self.load_test_subject('L0560')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0561(self):
+    gold_code, tree = self.load_test_subject('L0561')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0564(self):
+    gold_code, tree = self.load_test_subject('L0564')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0565(self):
+    gold_code, tree = self.load_test_subject('L0565')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0566(self):
+    gold_code, tree = self.load_test_subject('L0566')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0567(self):
+    gold_code, tree = self.load_test_subject('L0567')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0575(self):
+    gold_code, tree = self.load_test_subject('L0575')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0581(self):
+    gold_code, tree = self.load_test_subject('L0581')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0582(self):
+    gold_code, tree = self.load_test_subject('L0582')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0583(self):
+    gold_code, tree = self.load_test_subject('L0583')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0587(self):
+    gold_code, tree = self.load_test_subject('L0587')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0591(self):
+    gold_code, tree = self.load_test_subject('L0591')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0594(self):
+    gold_code, tree = self.load_test_subject('L0594')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0598(self):
+    gold_code, tree = self.load_test_subject('L0598')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0599(self):
+    gold_code, tree = self.load_test_subject('L0599')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0605(self):
+    gold_code, tree = self.load_test_subject('L0605')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0609(self):
+    gold_code, tree = self.load_test_subject('L0609')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0628(self):
+    gold_code, tree = self.load_test_subject('L0628')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0629(self):
+    gold_code, tree = self.load_test_subject('L0629')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0630(self):
+    gold_code, tree = self.load_test_subject('L0630')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0633(self):
+    gold_code, tree = self.load_test_subject('L0633')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0638(self):
+    gold_code, tree = self.load_test_subject('L0638')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0639(self):
+    gold_code, tree = self.load_test_subject('L0639')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0643(self):
+    gold_code, tree = self.load_test_subject('L0643')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0645(self):
+    gold_code, tree = self.load_test_subject('L0645')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0646(self):
+    gold_code, tree = self.load_test_subject('L0646')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0647(self):
+    gold_code, tree = self.load_test_subject('L0647')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0657(self):
+    gold_code, tree = self.load_test_subject('L0657')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0658(self):
+    gold_code, tree = self.load_test_subject('L0658')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0661(self):
+    gold_code, tree = self.load_test_subject('L0661')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0665(self):
+    gold_code, tree = self.load_test_subject('L0665')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0666(self):
+    gold_code, tree = self.load_test_subject('L0666')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0668(self):
+    gold_code, tree = self.load_test_subject('L0668')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0670(self):
+    gold_code, tree = self.load_test_subject('L0670')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0673(self):
+    gold_code, tree = self.load_test_subject('L0673')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0674(self):
+    gold_code, tree = self.load_test_subject('L0674')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0675(self):
+    gold_code, tree = self.load_test_subject('L0675')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0678(self):
+    gold_code, tree = self.load_test_subject('L0678')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0680(self):
+    gold_code, tree = self.load_test_subject('L0680')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0681(self):
+    gold_code, tree = self.load_test_subject('L0681')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0682(self):
+    gold_code, tree = self.load_test_subject('L0682')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0684(self):
+    gold_code, tree = self.load_test_subject('L0684')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0686(self):
+    gold_code, tree = self.load_test_subject('L0686')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0688(self):
+    gold_code, tree = self.load_test_subject('L0688')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0689(self):
+    gold_code, tree = self.load_test_subject('L0689')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0691(self):
+    gold_code, tree = self.load_test_subject('L0691')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0692(self):
+    gold_code, tree = self.load_test_subject('L0692')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0693(self):
+    gold_code, tree = self.load_test_subject('L0693')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0694(self):
+    gold_code, tree = self.load_test_subject('L0694')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0695(self):
+    gold_code, tree = self.load_test_subject('L0695')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0696(self):
+    gold_code, tree = self.load_test_subject('L0696')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0697(self):
+    gold_code, tree = self.load_test_subject('L0697')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0698(self):
+    gold_code, tree = self.load_test_subject('L0698')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0704(self):
+    gold_code, tree = self.load_test_subject('L0704')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0709(self):
+    gold_code, tree = self.load_test_subject('L0709')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0711(self):
+    gold_code, tree = self.load_test_subject('L0711')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0712(self):
+    gold_code, tree = self.load_test_subject('L0712')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0713(self):
+    gold_code, tree = self.load_test_subject('L0713')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0714(self):
+    gold_code, tree = self.load_test_subject('L0714')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0717(self):
+    gold_code, tree = self.load_test_subject('L0717')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0718(self):
+    gold_code, tree = self.load_test_subject('L0718')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0720(self):
+    gold_code, tree = self.load_test_subject('L0720')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0721(self):
+    gold_code, tree = self.load_test_subject('L0721')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0723(self):
+    gold_code, tree = self.load_test_subject('L0723')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0724(self):
+    gold_code, tree = self.load_test_subject('L0724')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0728(self):
+    gold_code, tree = self.load_test_subject('L0728')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0730(self):
+    gold_code, tree = self.load_test_subject('L0730')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0733(self):
+    gold_code, tree = self.load_test_subject('L0733')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0734(self):
+    gold_code, tree = self.load_test_subject('L0734')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0735(self):
+    gold_code, tree = self.load_test_subject('L0735')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0737(self):
+    gold_code, tree = self.load_test_subject('L0737')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0739(self):
+    gold_code, tree = self.load_test_subject('L0739')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0740(self):
+    gold_code, tree = self.load_test_subject('L0740')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0741(self):
+    gold_code, tree = self.load_test_subject('L0741')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0743(self):
+    gold_code, tree = self.load_test_subject('L0743')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0744(self):
+    gold_code, tree = self.load_test_subject('L0744')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0746(self):
+    gold_code, tree = self.load_test_subject('L0746')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0747(self):
+    gold_code, tree = self.load_test_subject('L0747')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0748(self):
+    gold_code, tree = self.load_test_subject('L0748')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0749(self):
+    gold_code, tree = self.load_test_subject('L0749')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0752(self):
+    gold_code, tree = self.load_test_subject('L0752')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0760(self):
+    gold_code, tree = self.load_test_subject('L0760')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0763(self):
+    gold_code, tree = self.load_test_subject('L0763')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0765(self):
+    gold_code, tree = self.load_test_subject('L0765')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0766(self):
+    gold_code, tree = self.load_test_subject('L0766')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0767(self):
+    gold_code, tree = self.load_test_subject('L0767')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0768(self):
+    gold_code, tree = self.load_test_subject('L0768')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0769(self):
+    gold_code, tree = self.load_test_subject('L0769')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0771(self):
+    gold_code, tree = self.load_test_subject('L0771')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0773(self):
+    gold_code, tree = self.load_test_subject('L0773')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0778(self):
+    gold_code, tree = self.load_test_subject('L0778')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0779(self):
+    gold_code, tree = self.load_test_subject('L0779')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0780(self):
+    gold_code, tree = self.load_test_subject('L0780')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0781(self):
+    gold_code, tree = self.load_test_subject('L0781')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0784(self):
+    gold_code, tree = self.load_test_subject('L0784')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0785(self):
+    gold_code, tree = self.load_test_subject('L0785')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0786(self):
+    gold_code, tree = self.load_test_subject('L0786')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0787(self):
+    gold_code, tree = self.load_test_subject('L0787')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0789(self):
+    gold_code, tree = self.load_test_subject('L0789')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0792(self):
+    gold_code, tree = self.load_test_subject('L0792')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0794(self):
+    gold_code, tree = self.load_test_subject('L0794')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0796(self):
+    gold_code, tree = self.load_test_subject('L0796')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0797(self):
+    gold_code, tree = self.load_test_subject('L0797')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0798(self):
+    gold_code, tree = self.load_test_subject('L0798')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0800(self):
+    gold_code, tree = self.load_test_subject('L0800')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0802(self):
+    gold_code, tree = self.load_test_subject('L0802')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0803(self):
+    gold_code, tree = self.load_test_subject('L0803')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0804(self):
+    gold_code, tree = self.load_test_subject('L0804')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0806(self):
+    gold_code, tree = self.load_test_subject('L0806')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0807(self):
+    gold_code, tree = self.load_test_subject('L0807')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0811(self):
+    gold_code, tree = self.load_test_subject('L0811')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0812(self):
+    gold_code, tree = self.load_test_subject('L0812')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0816(self):
+    gold_code, tree = self.load_test_subject('L0816')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0819(self):
+    gold_code, tree = self.load_test_subject('L0819')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0821(self):
+    gold_code, tree = self.load_test_subject('L0821')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0822(self):
+    gold_code, tree = self.load_test_subject('L0822')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0824(self):
+    gold_code, tree = self.load_test_subject('L0824')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0825(self):
+    gold_code, tree = self.load_test_subject('L0825')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0826(self):
+    gold_code, tree = self.load_test_subject('L0826')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0827(self):
+    gold_code, tree = self.load_test_subject('L0827')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0829(self):
+    gold_code, tree = self.load_test_subject('L0829')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0832(self):
+    gold_code, tree = self.load_test_subject('L0832')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0838(self):
+    gold_code, tree = self.load_test_subject('L0838')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0839(self):
+    gold_code, tree = self.load_test_subject('L0839')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0841(self):
+    gold_code, tree = self.load_test_subject('L0841')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0844(self):
+    gold_code, tree = self.load_test_subject('L0844')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0845(self):
+    gold_code, tree = self.load_test_subject('L0845')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0847(self):
+    gold_code, tree = self.load_test_subject('L0847')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0848(self):
+    gold_code, tree = self.load_test_subject('L0848')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0851(self):
+    gold_code, tree = self.load_test_subject('L0851')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0852(self):
+    gold_code, tree = self.load_test_subject('L0852')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0853(self):
+    gold_code, tree = self.load_test_subject('L0853')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0854(self):
+    gold_code, tree = self.load_test_subject('L0854')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0859(self):
+    gold_code, tree = self.load_test_subject('L0859')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0860(self):
+    gold_code, tree = self.load_test_subject('L0860')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0861(self):
+    gold_code, tree = self.load_test_subject('L0861')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0862(self):
+    gold_code, tree = self.load_test_subject('L0862')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0864(self):
+    gold_code, tree = self.load_test_subject('L0864')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0867(self):
+    gold_code, tree = self.load_test_subject('L0867')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0868(self):
+    gold_code, tree = self.load_test_subject('L0868')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0869(self):
+    gold_code, tree = self.load_test_subject('L0869')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0873(self):
+    gold_code, tree = self.load_test_subject('L0873')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0875(self):
+    gold_code, tree = self.load_test_subject('L0875')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0881(self):
+    gold_code, tree = self.load_test_subject('L0881')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0883(self):
+    gold_code, tree = self.load_test_subject('L0883')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0884(self):
+    gold_code, tree = self.load_test_subject('L0884')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0885(self):
+    gold_code, tree = self.load_test_subject('L0885')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0886(self):
+    gold_code, tree = self.load_test_subject('L0886')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0887(self):
+    gold_code, tree = self.load_test_subject('L0887')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0888(self):
+    gold_code, tree = self.load_test_subject('L0888')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0890(self):
+    gold_code, tree = self.load_test_subject('L0890')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0893(self):
+    gold_code, tree = self.load_test_subject('L0893')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0896(self):
+    gold_code, tree = self.load_test_subject('L0896')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0898(self):
+    gold_code, tree = self.load_test_subject('L0898')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0904(self):
+    gold_code, tree = self.load_test_subject('L0904')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0905(self):
+    gold_code, tree = self.load_test_subject('L0905')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0907(self):
+    gold_code, tree = self.load_test_subject('L0907')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0908(self):
+    gold_code, tree = self.load_test_subject('L0908')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0909(self):
+    gold_code, tree = self.load_test_subject('L0909')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0912(self):
+    gold_code, tree = self.load_test_subject('L0912')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0914(self):
+    gold_code, tree = self.load_test_subject('L0914')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0915(self):
+    gold_code, tree = self.load_test_subject('L0915')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0917(self):
+    gold_code, tree = self.load_test_subject('L0917')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0918(self):
+    gold_code, tree = self.load_test_subject('L0918')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0921(self):
+    gold_code, tree = self.load_test_subject('L0921')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0922(self):
+    gold_code, tree = self.load_test_subject('L0922')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0924(self):
+    gold_code, tree = self.load_test_subject('L0924')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0925(self):
+    gold_code, tree = self.load_test_subject('L0925')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0926(self):
+    gold_code, tree = self.load_test_subject('L0926')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0927(self):
+    gold_code, tree = self.load_test_subject('L0927')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0928(self):
+    gold_code, tree = self.load_test_subject('L0928')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0929(self):
+    gold_code, tree = self.load_test_subject('L0929')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0930(self):
+    gold_code, tree = self.load_test_subject('L0930')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0931(self):
+    gold_code, tree = self.load_test_subject('L0931')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0932(self):
+    gold_code, tree = self.load_test_subject('L0932')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0934(self):
+    gold_code, tree = self.load_test_subject('L0934')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0935(self):
+    gold_code, tree = self.load_test_subject('L0935')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0937(self):
+    gold_code, tree = self.load_test_subject('L0937')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0941(self):
+    gold_code, tree = self.load_test_subject('L0941')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0942(self):
+    gold_code, tree = self.load_test_subject('L0942')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0944(self):
+    gold_code, tree = self.load_test_subject('L0944')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0946(self):
+    gold_code, tree = self.load_test_subject('L0946')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0947(self):
+    gold_code, tree = self.load_test_subject('L0947')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0953(self):
+    gold_code, tree = self.load_test_subject('L0953')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0954(self):
+    gold_code, tree = self.load_test_subject('L0954')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0959(self):
+    gold_code, tree = self.load_test_subject('L0959')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0960(self):
+    gold_code, tree = self.load_test_subject('L0960')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0961(self):
+    gold_code, tree = self.load_test_subject('L0961')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0962(self):
+    gold_code, tree = self.load_test_subject('L0962')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0967(self):
+    gold_code, tree = self.load_test_subject('L0967')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0969(self):
+    gold_code, tree = self.load_test_subject('L0969')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0970(self):
+    gold_code, tree = self.load_test_subject('L0970')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0974(self):
+    gold_code, tree = self.load_test_subject('L0974')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0977(self):
+    gold_code, tree = self.load_test_subject('L0977')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0985(self):
+    gold_code, tree = self.load_test_subject('L0985')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0986(self):
+    '''
+    exclude this test case due to a bug in tree-sitter
+    the current version of tree-sitter we are using
+    cannot parse the program correctly (has ERROR)
+    '''
+    # gold_code, tree = self.load_test_subject('L0986')
+    # pp_code = self.pp.visit(tree.root_node).strip()
+    # self.assertEqual(pp_code, gold_code)
+
+  def test_L0989(self):
+    gold_code, tree = self.load_test_subject('L0989')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0990(self):
+    gold_code, tree = self.load_test_subject('L0990')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0994(self):
+    gold_code, tree = self.load_test_subject('L0994')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0997(self):
+    gold_code, tree = self.load_test_subject('L0997')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L0999(self):
+    gold_code, tree = self.load_test_subject('L0999')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1001(self):
+    gold_code, tree = self.load_test_subject('L1001')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1002(self):
+    gold_code, tree = self.load_test_subject('L1002')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1004(self):
+    gold_code, tree = self.load_test_subject('L1004')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1005(self):
+    gold_code, tree = self.load_test_subject('L1005')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1006(self):
+    gold_code, tree = self.load_test_subject('L1006')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1007(self):
+    gold_code, tree = self.load_test_subject('L1007')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1009(self):
+    gold_code, tree = self.load_test_subject('L1009')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1011(self):
+    gold_code, tree = self.load_test_subject('L1011')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1014(self):
+    gold_code, tree = self.load_test_subject('L1014')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1016(self):
+    gold_code, tree = self.load_test_subject('L1016')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1020(self):
+    gold_code, tree = self.load_test_subject('L1020')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1021(self):
+    gold_code, tree = self.load_test_subject('L1021')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1027(self):
+    gold_code, tree = self.load_test_subject('L1027')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1029(self):
+    gold_code, tree = self.load_test_subject('L1029')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1030(self):
+    gold_code, tree = self.load_test_subject('L1030')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1031(self):
+    gold_code, tree = self.load_test_subject('L1031')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1034(self):
+    gold_code, tree = self.load_test_subject('L1034')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1035(self):
+    gold_code, tree = self.load_test_subject('L1035')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1037(self):
+    gold_code, tree = self.load_test_subject('L1037')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1041(self):
+    gold_code, tree = self.load_test_subject('L1041')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1042(self):
+    gold_code, tree = self.load_test_subject('L1042')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1044(self):
+    gold_code, tree = self.load_test_subject('L1044')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1046(self):
+    gold_code, tree = self.load_test_subject('L1046')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1047(self):
+    gold_code, tree = self.load_test_subject('L1047')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1048(self):
+    gold_code, tree = self.load_test_subject('L1048')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1049(self):
+    gold_code, tree = self.load_test_subject('L1049')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1051(self):
+    gold_code, tree = self.load_test_subject('L1051')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1052(self):
+    gold_code, tree = self.load_test_subject('L1052')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1061(self):
+    gold_code, tree = self.load_test_subject('L1061')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1064(self):
+    gold_code, tree = self.load_test_subject('L1064')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1072(self):
+    gold_code, tree = self.load_test_subject('L1072')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1078(self):
+    gold_code, tree = self.load_test_subject('L1078')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1079(self):
+    gold_code, tree = self.load_test_subject('L1079')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1085(self):
+    gold_code, tree = self.load_test_subject('L1085')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1087(self):
+    gold_code, tree = self.load_test_subject('L1087')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1089(self):
+    gold_code, tree = self.load_test_subject('L1089')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1090(self):
+    gold_code, tree = self.load_test_subject('L1090')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1091(self):
+    gold_code, tree = self.load_test_subject('L1091')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1094(self):
+    gold_code, tree = self.load_test_subject('L1094')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1099(self):
+    gold_code, tree = self.load_test_subject('L1099')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1100(self):
+    gold_code, tree = self.load_test_subject('L1100')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1101(self):
+    gold_code, tree = self.load_test_subject('L1101')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1102(self):
+    gold_code, tree = self.load_test_subject('L1102')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1103(self):
+    gold_code, tree = self.load_test_subject('L1103')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1105(self):
+    gold_code, tree = self.load_test_subject('L1105')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1108(self):
+    gold_code, tree = self.load_test_subject('L1108')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1109(self):
+    gold_code, tree = self.load_test_subject('L1109')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1118(self):
+    gold_code, tree = self.load_test_subject('L1118')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1119(self):
+    gold_code, tree = self.load_test_subject('L1119')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1122(self):
+    gold_code, tree = self.load_test_subject('L1122')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1124(self):
+    gold_code, tree = self.load_test_subject('L1124')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1128(self):
+    gold_code, tree = self.load_test_subject('L1128')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1129(self):
+    gold_code, tree = self.load_test_subject('L1129')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1133(self):
+    gold_code, tree = self.load_test_subject('L1133')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1134(self):
+    gold_code, tree = self.load_test_subject('L1134')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1135(self):
+    gold_code, tree = self.load_test_subject('L1135')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1137(self):
+    gold_code, tree = self.load_test_subject('L1137')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1143(self):
+    gold_code, tree = self.load_test_subject('L1143')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1154(self):
+    gold_code, tree = self.load_test_subject('L1154')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1160(self):
+    gold_code, tree = self.load_test_subject('L1160')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1162(self):
+    gold_code, tree = self.load_test_subject('L1162')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1165(self):
+    gold_code, tree = self.load_test_subject('L1165')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1167(self):
+    gold_code, tree = self.load_test_subject('L1167')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1168(self):
+    gold_code, tree = self.load_test_subject('L1168')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1175(self):
+    gold_code, tree = self.load_test_subject('L1175')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1180(self):
+    gold_code, tree = self.load_test_subject('L1180')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1181(self):
+    gold_code, tree = self.load_test_subject('L1181')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1182(self):
+    gold_code, tree = self.load_test_subject('L1182')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1185(self):
+    gold_code, tree = self.load_test_subject('L1185')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1189(self):
+    gold_code, tree = self.load_test_subject('L1189')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1190(self):
+    gold_code, tree = self.load_test_subject('L1190')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1197(self):
+    gold_code, tree = self.load_test_subject('L1197')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1198(self):
+    gold_code, tree = self.load_test_subject('L1198')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1202(self):
+    gold_code, tree = self.load_test_subject('L1202')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1207(self):
+    gold_code, tree = self.load_test_subject('L1207')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1208(self):
+    gold_code, tree = self.load_test_subject('L1208')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1210(self):
+    gold_code, tree = self.load_test_subject('L1210')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1213(self):
+    gold_code, tree = self.load_test_subject('L1213')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1217(self):
+    gold_code, tree = self.load_test_subject('L1217')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1218(self):
+    gold_code, tree = self.load_test_subject('L1218')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1219(self):
+    gold_code, tree = self.load_test_subject('L1219')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1220(self):
+    gold_code, tree = self.load_test_subject('L1220')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1221(self):
+    gold_code, tree = self.load_test_subject('L1221')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1222(self):
+    gold_code, tree = self.load_test_subject('L1222')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1228(self):
+    gold_code, tree = self.load_test_subject('L1228')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1230(self):
+    gold_code, tree = self.load_test_subject('L1230')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1234(self):
+    gold_code, tree = self.load_test_subject('L1234')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1239(self):
+    gold_code, tree = self.load_test_subject('L1239')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1243(self):
+    gold_code, tree = self.load_test_subject('L1243')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1245(self):
+    gold_code, tree = self.load_test_subject('L1245')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1252(self):
+    gold_code, tree = self.load_test_subject('L1252')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1254(self):
+    gold_code, tree = self.load_test_subject('L1254')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1257(self):
+    gold_code, tree = self.load_test_subject('L1257')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1258(self):
+    gold_code, tree = self.load_test_subject('L1258')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1260(self):
+    gold_code, tree = self.load_test_subject('L1260')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1266(self):
+    gold_code, tree = self.load_test_subject('L1266')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1267(self):
+    gold_code, tree = self.load_test_subject('L1267')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1273(self):
+    gold_code, tree = self.load_test_subject('L1273')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1275(self):
+    gold_code, tree = self.load_test_subject('L1275')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1277(self):
+    gold_code, tree = self.load_test_subject('L1277')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1281(self):
+    gold_code, tree = self.load_test_subject('L1281')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1282(self):
+    gold_code, tree = self.load_test_subject('L1282')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1283(self):
+    gold_code, tree = self.load_test_subject('L1283')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1284(self):
+    gold_code, tree = self.load_test_subject('L1284')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1287(self):
+    gold_code, tree = self.load_test_subject('L1287')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1288(self):
+    gold_code, tree = self.load_test_subject('L1288')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1292(self):
+    gold_code, tree = self.load_test_subject('L1292')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1293(self):
+    gold_code, tree = self.load_test_subject('L1293')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1295(self):
+    gold_code, tree = self.load_test_subject('L1295')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1298(self):
+    gold_code, tree = self.load_test_subject('L1298')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1299(self):
+    gold_code, tree = self.load_test_subject('L1299')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1304(self):
+    gold_code, tree = self.load_test_subject('L1304')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1306(self):
+    gold_code, tree = self.load_test_subject('L1306')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1309(self):
+    gold_code, tree = self.load_test_subject('L1309')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1310(self):
+    gold_code, tree = self.load_test_subject('L1310')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1311(self):
+    gold_code, tree = self.load_test_subject('L1311')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1313(self):
+    gold_code, tree = self.load_test_subject('L1313')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1314(self):
+    gold_code, tree = self.load_test_subject('L1314')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1316(self):
+    gold_code, tree = self.load_test_subject('L1316')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1318(self):
+    gold_code, tree = self.load_test_subject('L1318')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1319(self):
+    gold_code, tree = self.load_test_subject('L1319')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1323(self):
+    gold_code, tree = self.load_test_subject('L1323')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1324(self):
+    gold_code, tree = self.load_test_subject('L1324')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1329(self):
+    gold_code, tree = self.load_test_subject('L1329')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1332(self):
+    gold_code, tree = self.load_test_subject('L1332')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1338(self):
+    gold_code, tree = self.load_test_subject('L1338')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1342(self):
+    gold_code, tree = self.load_test_subject('L1342')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1345(self):
+    gold_code, tree = self.load_test_subject('L1345')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1346(self):
+    gold_code, tree = self.load_test_subject('L1346')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1347(self):
+    gold_code, tree = self.load_test_subject('L1347')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1351(self):
+    gold_code, tree = self.load_test_subject('L1351')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1361(self):
+    gold_code, tree = self.load_test_subject('L1361')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1365(self):
+    gold_code, tree = self.load_test_subject('L1365')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1366(self):
+    gold_code, tree = self.load_test_subject('L1366')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1368(self):
+    gold_code, tree = self.load_test_subject('L1368')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1370(self):
+    gold_code, tree = self.load_test_subject('L1370')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1371(self):
+    gold_code, tree = self.load_test_subject('L1371')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1374(self):
+    gold_code, tree = self.load_test_subject('L1374')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1376(self):
+    gold_code, tree = self.load_test_subject('L1376')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1377(self):
+    gold_code, tree = self.load_test_subject('L1377')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1380(self):
+    gold_code, tree = self.load_test_subject('L1380')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1383(self):
+    gold_code, tree = self.load_test_subject('L1383')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1385(self):
+    gold_code, tree = self.load_test_subject('L1385')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1386(self):
+    gold_code, tree = self.load_test_subject('L1386')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1389(self):
+    gold_code, tree = self.load_test_subject('L1389')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1391(self):
+    gold_code, tree = self.load_test_subject('L1391')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1392(self):
+    gold_code, tree = self.load_test_subject('L1392')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1394(self):
+    gold_code, tree = self.load_test_subject('L1394')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1395(self):
+    gold_code, tree = self.load_test_subject('L1395')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1400(self):
+    gold_code, tree = self.load_test_subject('L1400')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1404(self):
+    gold_code, tree = self.load_test_subject('L1404')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1405(self):
+    gold_code, tree = self.load_test_subject('L1405')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1409(self):
+    gold_code, tree = self.load_test_subject('L1409')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1413(self):
+    gold_code, tree = self.load_test_subject('L1413')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1414(self):
+    gold_code, tree = self.load_test_subject('L1414')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1418(self):
+    gold_code, tree = self.load_test_subject('L1418')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1419(self):
+    gold_code, tree = self.load_test_subject('L1419')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1423(self):
+    gold_code, tree = self.load_test_subject('L1423')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1425(self):
+    gold_code, tree = self.load_test_subject('L1425')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1426(self):
+    gold_code, tree = self.load_test_subject('L1426')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1431(self):
+    gold_code, tree = self.load_test_subject('L1431')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1434(self):
+    gold_code, tree = self.load_test_subject('L1434')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1436(self):
+    gold_code, tree = self.load_test_subject('L1436')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1441(self):
+    gold_code, tree = self.load_test_subject('L1441')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1442(self):
+    gold_code, tree = self.load_test_subject('L1442')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1443(self):
+    gold_code, tree = self.load_test_subject('L1443')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1446(self):
+    gold_code, tree = self.load_test_subject('L1446')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1447(self):
+    gold_code, tree = self.load_test_subject('L1447')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1450(self):
+    gold_code, tree = self.load_test_subject('L1450')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1455(self):
+    gold_code, tree = self.load_test_subject('L1455')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1460(self):
+    gold_code, tree = self.load_test_subject('L1460')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1461(self):
+    gold_code, tree = self.load_test_subject('L1461')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1462(self):
+    gold_code, tree = self.load_test_subject('L1462')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1463(self):
+    gold_code, tree = self.load_test_subject('L1463')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1464(self):
+    gold_code, tree = self.load_test_subject('L1464')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1466(self):
+    gold_code, tree = self.load_test_subject('L1466')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1470(self):
+    gold_code, tree = self.load_test_subject('L1470')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1471(self):
+    gold_code, tree = self.load_test_subject('L1471')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1475(self):
+    gold_code, tree = self.load_test_subject('L1475')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1480(self):
+    gold_code, tree = self.load_test_subject('L1480')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1481(self):
+    gold_code, tree = self.load_test_subject('L1481')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1482(self):
+    gold_code, tree = self.load_test_subject('L1482')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1486(self):
+    gold_code, tree = self.load_test_subject('L1486')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1496(self):
+    gold_code, tree = self.load_test_subject('L1496')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1497(self):
+    gold_code, tree = self.load_test_subject('L1497')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1499(self):
+    gold_code, tree = self.load_test_subject('L1499')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1502(self):
+    gold_code, tree = self.load_test_subject('L1502')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1503(self):
+    gold_code, tree = self.load_test_subject('L1503')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1507(self):
+    gold_code, tree = self.load_test_subject('L1507')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1508(self):
+    gold_code, tree = self.load_test_subject('L1508')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1512(self):
+    gold_code, tree = self.load_test_subject('L1512')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1514(self):
+    gold_code, tree = self.load_test_subject('L1514')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1518(self):
+    gold_code, tree = self.load_test_subject('L1518')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1523(self):
+    gold_code, tree = self.load_test_subject('L1523')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1524(self):
+    gold_code, tree = self.load_test_subject('L1524')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1528(self):
+    gold_code, tree = self.load_test_subject('L1528')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1534(self):
+    gold_code, tree = self.load_test_subject('L1534')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1539(self):
+    gold_code, tree = self.load_test_subject('L1539')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1546(self):
+    gold_code, tree = self.load_test_subject('L1546')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1551(self):
+    gold_code, tree = self.load_test_subject('L1551')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1552(self):
+    gold_code, tree = self.load_test_subject('L1552')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1554(self):
+    gold_code, tree = self.load_test_subject('L1554')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1557(self):
+    gold_code, tree = self.load_test_subject('L1557')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1559(self):
+    gold_code, tree = self.load_test_subject('L1559')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1561(self):
+    gold_code, tree = self.load_test_subject('L1561')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1567(self):
+    gold_code, tree = self.load_test_subject('L1567')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1572(self):
+    gold_code, tree = self.load_test_subject('L1572')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1576(self):
+    gold_code, tree = self.load_test_subject('L1576')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1584(self):
+    gold_code, tree = self.load_test_subject('L1584')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1588(self):
+    gold_code, tree = self.load_test_subject('L1588')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1589(self):
+    gold_code, tree = self.load_test_subject('L1589')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1605(self):
+    gold_code, tree = self.load_test_subject('L1605')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1614(self):
+    gold_code, tree = self.load_test_subject('L1614')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1619(self):
+    gold_code, tree = self.load_test_subject('L1619')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1625(self):
+    gold_code, tree = self.load_test_subject('L1625')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1626(self):
+    gold_code, tree = self.load_test_subject('L1626')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1629(self):
+    gold_code, tree = self.load_test_subject('L1629')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1630(self):
+    gold_code, tree = self.load_test_subject('L1630')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1631(self):
+    gold_code, tree = self.load_test_subject('L1631')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1636(self):
+    gold_code, tree = self.load_test_subject('L1636')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1640(self):
+    gold_code, tree = self.load_test_subject('L1640')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1641(self):
+    gold_code, tree = self.load_test_subject('L1641')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1646(self):
+    gold_code, tree = self.load_test_subject('L1646')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1647(self):
+    gold_code, tree = self.load_test_subject('L1647')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1652(self):
+    gold_code, tree = self.load_test_subject('L1652')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1654(self):
+    gold_code, tree = self.load_test_subject('L1654')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1658(self):
+    gold_code, tree = self.load_test_subject('L1658')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1662(self):
+    gold_code, tree = self.load_test_subject('L1662')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1672(self):
+    gold_code, tree = self.load_test_subject('L1672')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1678(self):
+    gold_code, tree = self.load_test_subject('L1678')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1679(self):
+    gold_code, tree = self.load_test_subject('L1679')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1684(self):
+    gold_code, tree = self.load_test_subject('L1684')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1685(self):
+    gold_code, tree = self.load_test_subject('L1685')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1688(self):
+    gold_code, tree = self.load_test_subject('L1688')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1689(self):
+    gold_code, tree = self.load_test_subject('L1689')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1691(self):
+    gold_code, tree = self.load_test_subject('L1691')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1697(self):
+    gold_code, tree = self.load_test_subject('L1697')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1700(self):
+    gold_code, tree = self.load_test_subject('L1700')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1701(self):
+    gold_code, tree = self.load_test_subject('L1701')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1704(self):
+    gold_code, tree = self.load_test_subject('L1704')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1705(self):
+    gold_code, tree = self.load_test_subject('L1705')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1706(self):
+    gold_code, tree = self.load_test_subject('L1706')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1711(self):
+    gold_code, tree = self.load_test_subject('L1711')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1712(self):
+    gold_code, tree = self.load_test_subject('L1712')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1716(self):
+    gold_code, tree = self.load_test_subject('L1716')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1717(self):
+    gold_code, tree = self.load_test_subject('L1717')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1718(self):
+    gold_code, tree = self.load_test_subject('L1718')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1719(self):
+    gold_code, tree = self.load_test_subject('L1719')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1720(self):
+    gold_code, tree = self.load_test_subject('L1720')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1722(self):
+    gold_code, tree = self.load_test_subject('L1722')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1723(self):
+    gold_code, tree = self.load_test_subject('L1723')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1725(self):
+    gold_code, tree = self.load_test_subject('L1725')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1730(self):
+    gold_code, tree = self.load_test_subject('L1730')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1732(self):
+    gold_code, tree = self.load_test_subject('L1732')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1734(self):
+    gold_code, tree = self.load_test_subject('L1734')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1736(self):
+    gold_code, tree = self.load_test_subject('L1736')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1742(self):
+    gold_code, tree = self.load_test_subject('L1742')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1743(self):
+    gold_code, tree = self.load_test_subject('L1743')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1748(self):
+    gold_code, tree = self.load_test_subject('L1748')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1758(self):
+    gold_code, tree = self.load_test_subject('L1758')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1760(self):
+    gold_code, tree = self.load_test_subject('L1760')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1763(self):
+    gold_code, tree = self.load_test_subject('L1763')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1765(self):
+    gold_code, tree = self.load_test_subject('L1765')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1768(self):
+    gold_code, tree = self.load_test_subject('L1768')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1769(self):
+    gold_code, tree = self.load_test_subject('L1769')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1772(self):
+    gold_code, tree = self.load_test_subject('L1772')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1773(self):
+    gold_code, tree = self.load_test_subject('L1773')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1775(self):
+    gold_code, tree = self.load_test_subject('L1775')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1781(self):
+    gold_code, tree = self.load_test_subject('L1781')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1790(self):
+    gold_code, tree = self.load_test_subject('L1790')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1791(self):
+    gold_code, tree = self.load_test_subject('L1791')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1796(self):
+    gold_code, tree = self.load_test_subject('L1796')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1798(self):
+    gold_code, tree = self.load_test_subject('L1798')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1800(self):
+    gold_code, tree = self.load_test_subject('L1800')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1805(self):
+    gold_code, tree = self.load_test_subject('L1805')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1807(self):
+    gold_code, tree = self.load_test_subject('L1807')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1812(self):
+    gold_code, tree = self.load_test_subject('L1812')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1813(self):
+    gold_code, tree = self.load_test_subject('L1813')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1816(self):
+    gold_code, tree = self.load_test_subject('L1816')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1817(self):
+    gold_code, tree = self.load_test_subject('L1817')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1822(self):
+    gold_code, tree = self.load_test_subject('L1822')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1823(self):
+    gold_code, tree = self.load_test_subject('L1823')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1826(self):
+    gold_code, tree = self.load_test_subject('L1826')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1827(self):
+    gold_code, tree = self.load_test_subject('L1827')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1828(self):
+    gold_code, tree = self.load_test_subject('L1828')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1829(self):
+    gold_code, tree = self.load_test_subject('L1829')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1832(self):
+    gold_code, tree = self.load_test_subject('L1832')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1833(self):
+    gold_code, tree = self.load_test_subject('L1833')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1837(self):
+    gold_code, tree = self.load_test_subject('L1837')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1838(self):
+    gold_code, tree = self.load_test_subject('L1838')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1844(self):
+    gold_code, tree = self.load_test_subject('L1844')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1848(self):
+    gold_code, tree = self.load_test_subject('L1848')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1854(self):
+    gold_code, tree = self.load_test_subject('L1854')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1855(self):
+    gold_code, tree = self.load_test_subject('L1855')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1856(self):
+    gold_code, tree = self.load_test_subject('L1856')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1859(self):
+    gold_code, tree = self.load_test_subject('L1859')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1860(self):
+    gold_code, tree = self.load_test_subject('L1860')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1861(self):
+    gold_code, tree = self.load_test_subject('L1861')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1864(self):
+    gold_code, tree = self.load_test_subject('L1864')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1869(self):
+    gold_code, tree = self.load_test_subject('L1869')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1870(self):
+    gold_code, tree = self.load_test_subject('L1870')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1871(self):
+    gold_code, tree = self.load_test_subject('L1871')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1872(self):
+    gold_code, tree = self.load_test_subject('L1872')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1874(self):
+    gold_code, tree = self.load_test_subject('L1874')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1876(self):
+    gold_code, tree = self.load_test_subject('L1876')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1877(self):
+    gold_code, tree = self.load_test_subject('L1877')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1880(self):
+    gold_code, tree = self.load_test_subject('L1880')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1881(self):
+    gold_code, tree = self.load_test_subject('L1881')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1882(self):
+    gold_code, tree = self.load_test_subject('L1882')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1883(self):
+    gold_code, tree = self.load_test_subject('L1883')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1886(self):
+    gold_code, tree = self.load_test_subject('L1886')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1887(self):
+    gold_code, tree = self.load_test_subject('L1887')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1888(self):
+    gold_code, tree = self.load_test_subject('L1888')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1891(self):
+    gold_code, tree = self.load_test_subject('L1891')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1893(self):
+    gold_code, tree = self.load_test_subject('L1893')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1895(self):
+    gold_code, tree = self.load_test_subject('L1895')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1897(self):
+    gold_code, tree = self.load_test_subject('L1897')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1898(self):
+    gold_code, tree = self.load_test_subject('L1898')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1899(self):
+    gold_code, tree = self.load_test_subject('L1899')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1903(self):
+    gold_code, tree = self.load_test_subject('L1903')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1904(self):
+    gold_code, tree = self.load_test_subject('L1904')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1905(self):
+    gold_code, tree = self.load_test_subject('L1905')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1906(self):
+    gold_code, tree = self.load_test_subject('L1906')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1909(self):
+    gold_code, tree = self.load_test_subject('L1909')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1913(self):
+    gold_code, tree = self.load_test_subject('L1913')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1914(self):
+    gold_code, tree = self.load_test_subject('L1914')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1915(self):
+    gold_code, tree = self.load_test_subject('L1915')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1920(self):
+    gold_code, tree = self.load_test_subject('L1920')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1921(self):
+    gold_code, tree = self.load_test_subject('L1921')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1922(self):
+    gold_code, tree = self.load_test_subject('L1922')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1923(self):
+    gold_code, tree = self.load_test_subject('L1923')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1925(self):
+    gold_code, tree = self.load_test_subject('L1925')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1926(self):
+    gold_code, tree = self.load_test_subject('L1926')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1929(self):
+    gold_code, tree = self.load_test_subject('L1929')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1930(self):
+    gold_code, tree = self.load_test_subject('L1930')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1935(self):
+    gold_code, tree = self.load_test_subject('L1935')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1936(self):
+    gold_code, tree = self.load_test_subject('L1936')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1941(self):
+    gold_code, tree = self.load_test_subject('L1941')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1942(self):
+    gold_code, tree = self.load_test_subject('L1942')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1943(self):
+    gold_code, tree = self.load_test_subject('L1943')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1944(self):
+    gold_code, tree = self.load_test_subject('L1944')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1945(self):
+    gold_code, tree = self.load_test_subject('L1945')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1946(self):
+    gold_code, tree = self.load_test_subject('L1946')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1952(self):
+    gold_code, tree = self.load_test_subject('L1952')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1953(self):
+    gold_code, tree = self.load_test_subject('L1953')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1957(self):
+    gold_code, tree = self.load_test_subject('L1957')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1958(self):
+    gold_code, tree = self.load_test_subject('L1958')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1959(self):
+    gold_code, tree = self.load_test_subject('L1959')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1961(self):
+    gold_code, tree = self.load_test_subject('L1961')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1962(self):
+    gold_code, tree = self.load_test_subject('L1962')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1963(self):
+    gold_code, tree = self.load_test_subject('L1963')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1967(self):
+    gold_code, tree = self.load_test_subject('L1967')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1968(self):
+    gold_code, tree = self.load_test_subject('L1968')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1970(self):
+    gold_code, tree = self.load_test_subject('L1970')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1971(self):
+    gold_code, tree = self.load_test_subject('L1971')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1974(self):
+    gold_code, tree = self.load_test_subject('L1974')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1976(self):
+    gold_code, tree = self.load_test_subject('L1976')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1979(self):
+    gold_code, tree = self.load_test_subject('L1979')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1980(self):
+    gold_code, tree = self.load_test_subject('L1980')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1984(self):
+    gold_code, tree = self.load_test_subject('L1984')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1991(self):
+    gold_code, tree = self.load_test_subject('L1991')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1992(self):
+    gold_code, tree = self.load_test_subject('L1992')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1994(self):
+    gold_code, tree = self.load_test_subject('L1994')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1995(self):
+    gold_code, tree = self.load_test_subject('L1995')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1996(self):
+    gold_code, tree = self.load_test_subject('L1996')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L1998(self):
+    gold_code, tree = self.load_test_subject('L1998')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2000(self):
+    gold_code, tree = self.load_test_subject('L2000')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2006(self):
+    gold_code, tree = self.load_test_subject('L2006')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2007(self):
+    gold_code, tree = self.load_test_subject('L2007')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2011(self):
+    gold_code, tree = self.load_test_subject('L2011')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2012(self):
+    gold_code, tree = self.load_test_subject('L2012')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2016(self):
+    gold_code, tree = self.load_test_subject('L2016')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2017(self):
+    gold_code, tree = self.load_test_subject('L2017')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2021(self):
+    gold_code, tree = self.load_test_subject('L2021')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2022(self):
+    gold_code, tree = self.load_test_subject('L2022')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2023(self):
+    gold_code, tree = self.load_test_subject('L2023')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2024(self):
+    gold_code, tree = self.load_test_subject('L2024')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2028(self):
+    gold_code, tree = self.load_test_subject('L2028')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2029(self):
+    gold_code, tree = self.load_test_subject('L2029')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2032(self):
+    gold_code, tree = self.load_test_subject('L2032')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2033(self):
+    gold_code, tree = self.load_test_subject('L2033')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2035(self):
+    gold_code, tree = self.load_test_subject('L2035')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2037(self):
+    gold_code, tree = self.load_test_subject('L2037')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2038(self):
+    gold_code, tree = self.load_test_subject('L2038')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2039(self):
+    gold_code, tree = self.load_test_subject('L2039')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2042(self):
+    gold_code, tree = self.load_test_subject('L2042')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2044(self):
+    gold_code, tree = self.load_test_subject('L2044')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2045(self):
+    gold_code, tree = self.load_test_subject('L2045')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2047(self):
+    gold_code, tree = self.load_test_subject('L2047')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2048(self):
+    gold_code, tree = self.load_test_subject('L2048')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2049(self):
+    gold_code, tree = self.load_test_subject('L2049')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2052(self):
+    gold_code, tree = self.load_test_subject('L2052')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2053(self):
+    gold_code, tree = self.load_test_subject('L2053')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2055(self):
+    gold_code, tree = self.load_test_subject('L2055')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2057(self):
+    gold_code, tree = self.load_test_subject('L2057')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2059(self):
+    gold_code, tree = self.load_test_subject('L2059')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2063(self):
+    gold_code, tree = self.load_test_subject('L2063')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2064(self):
+    gold_code, tree = self.load_test_subject('L2064')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2067(self):
+    gold_code, tree = self.load_test_subject('L2067')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2068(self):
+    gold_code, tree = self.load_test_subject('L2068')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2073(self):
+    gold_code, tree = self.load_test_subject('L2073')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2075(self):
+    gold_code, tree = self.load_test_subject('L2075')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2076(self):
+    gold_code, tree = self.load_test_subject('L2076')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2078(self):
+    gold_code, tree = self.load_test_subject('L2078')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2079(self):
+    gold_code, tree = self.load_test_subject('L2079')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2083(self):
+    gold_code, tree = self.load_test_subject('L2083')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2085(self):
+    gold_code, tree = self.load_test_subject('L2085')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2089(self):
+    gold_code, tree = self.load_test_subject('L2089')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2090(self):
+    gold_code, tree = self.load_test_subject('L2090')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2091(self):
+    gold_code, tree = self.load_test_subject('L2091')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2092(self):
+    gold_code, tree = self.load_test_subject('L2092')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2094(self):
+    gold_code, tree = self.load_test_subject('L2094')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2099(self):
+    gold_code, tree = self.load_test_subject('L2099')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2100(self):
+    gold_code, tree = self.load_test_subject('L2100')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2101(self):
+    gold_code, tree = self.load_test_subject('L2101')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2103(self):
+    gold_code, tree = self.load_test_subject('L2103')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2104(self):
+    gold_code, tree = self.load_test_subject('L2104')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2105(self):
+    gold_code, tree = self.load_test_subject('L2105')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2106(self):
+    gold_code, tree = self.load_test_subject('L2106')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2108(self):
+    gold_code, tree = self.load_test_subject('L2108')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2109(self):
+    gold_code, tree = self.load_test_subject('L2109')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2110(self):
+    gold_code, tree = self.load_test_subject('L2110')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2114(self):
+    gold_code, tree = self.load_test_subject('L2114')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2119(self):
+    gold_code, tree = self.load_test_subject('L2119')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2120(self):
+    gold_code, tree = self.load_test_subject('L2120')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2121(self):
+    gold_code, tree = self.load_test_subject('L2121')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2122(self):
+    gold_code, tree = self.load_test_subject('L2122')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2125(self):
+    gold_code, tree = self.load_test_subject('L2125')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2132(self):
+    gold_code, tree = self.load_test_subject('L2132')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2133(self):
+    gold_code, tree = self.load_test_subject('L2133')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2134(self):
+    gold_code, tree = self.load_test_subject('L2134')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2135(self):
+    gold_code, tree = self.load_test_subject('L2135')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2136(self):
+    gold_code, tree = self.load_test_subject('L2136')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2138(self):
+    gold_code, tree = self.load_test_subject('L2138')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2139(self):
+    gold_code, tree = self.load_test_subject('L2139')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2140(self):
+    gold_code, tree = self.load_test_subject('L2140')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2144(self):
+    gold_code, tree = self.load_test_subject('L2144')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2145(self):
+    gold_code, tree = self.load_test_subject('L2145')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2146(self):
+    gold_code, tree = self.load_test_subject('L2146')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2148(self):
+    gold_code, tree = self.load_test_subject('L2148')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2149(self):
+    gold_code, tree = self.load_test_subject('L2149')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2150(self):
+    gold_code, tree = self.load_test_subject('L2150')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2151(self):
+    gold_code, tree = self.load_test_subject('L2151')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2154(self):
+    gold_code, tree = self.load_test_subject('L2154')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2155(self):
+    gold_code, tree = self.load_test_subject('L2155')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2157(self):
+    gold_code, tree = self.load_test_subject('L2157')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2160(self):
+    gold_code, tree = self.load_test_subject('L2160')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2161(self):
+    gold_code, tree = self.load_test_subject('L2161')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2162(self):
+    gold_code, tree = self.load_test_subject('L2162')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2164(self):
+    gold_code, tree = self.load_test_subject('L2164')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2165(self):
+    gold_code, tree = self.load_test_subject('L2165')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2167(self):
+    gold_code, tree = self.load_test_subject('L2167')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2168(self):
+    gold_code, tree = self.load_test_subject('L2168')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2169(self):
+    gold_code, tree = self.load_test_subject('L2169')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2170(self):
+    gold_code, tree = self.load_test_subject('L2170')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2171(self):
+    gold_code, tree = self.load_test_subject('L2171')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2174(self):
+    gold_code, tree = self.load_test_subject('L2174')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2176(self):
+    gold_code, tree = self.load_test_subject('L2176')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2177(self):
+    gold_code, tree = self.load_test_subject('L2177')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2178(self):
+    gold_code, tree = self.load_test_subject('L2178')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2180(self):
+    gold_code, tree = self.load_test_subject('L2180')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2182(self):
+    gold_code, tree = self.load_test_subject('L2182')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2185(self):
+    gold_code, tree = self.load_test_subject('L2185')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2186(self):
+    gold_code, tree = self.load_test_subject('L2186')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2190(self):
+    gold_code, tree = self.load_test_subject('L2190')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2191(self):
+    gold_code, tree = self.load_test_subject('L2191')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2192(self):
+    gold_code, tree = self.load_test_subject('L2192')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2193(self):
+    gold_code, tree = self.load_test_subject('L2193')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2194(self):
+    gold_code, tree = self.load_test_subject('L2194')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2198(self):
+    gold_code, tree = self.load_test_subject('L2198')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2200(self):
+    gold_code, tree = self.load_test_subject('L2200')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2201(self):
+    gold_code, tree = self.load_test_subject('L2201')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2202(self):
+    gold_code, tree = self.load_test_subject('L2202')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2203(self):
+    gold_code, tree = self.load_test_subject('L2203')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2206(self):
+    gold_code, tree = self.load_test_subject('L2206')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2207(self):
+    gold_code, tree = self.load_test_subject('L2207')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2208(self):
+    gold_code, tree = self.load_test_subject('L2208')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2210(self):
+    gold_code, tree = self.load_test_subject('L2210')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2211(self):
+    gold_code, tree = self.load_test_subject('L2211')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2212(self):
+    gold_code, tree = self.load_test_subject('L2212')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2214(self):
+    gold_code, tree = self.load_test_subject('L2214')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2215(self):
+    gold_code, tree = self.load_test_subject('L2215')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2216(self):
+    gold_code, tree = self.load_test_subject('L2216')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2217(self):
+    gold_code, tree = self.load_test_subject('L2217')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2218(self):
+    gold_code, tree = self.load_test_subject('L2218')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2219(self):
+    gold_code, tree = self.load_test_subject('L2219')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2220(self):
+    gold_code, tree = self.load_test_subject('L2220')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2221(self):
+    gold_code, tree = self.load_test_subject('L2221')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2224(self):
+    gold_code, tree = self.load_test_subject('L2224')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2225(self):
+    gold_code, tree = self.load_test_subject('L2225')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2226(self):
+    gold_code, tree = self.load_test_subject('L2226')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2229(self):
+    gold_code, tree = self.load_test_subject('L2229')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2235(self):
+    gold_code, tree = self.load_test_subject('L2235')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2237(self):
+    gold_code, tree = self.load_test_subject('L2237')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2239(self):
+    gold_code, tree = self.load_test_subject('L2239')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2240(self):
+    gold_code, tree = self.load_test_subject('L2240')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2243(self):
+    gold_code, tree = self.load_test_subject('L2243')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2244(self):
+    gold_code, tree = self.load_test_subject('L2244')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2248(self):
+    gold_code, tree = self.load_test_subject('L2248')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2249(self):
+    gold_code, tree = self.load_test_subject('L2249')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2255(self):
+    gold_code, tree = self.load_test_subject('L2255')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2256(self):
+    gold_code, tree = self.load_test_subject('L2256')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2257(self):
+    gold_code, tree = self.load_test_subject('L2257')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2258(self):
+    gold_code, tree = self.load_test_subject('L2258')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2259(self):
+    gold_code, tree = self.load_test_subject('L2259')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2260(self):
+    gold_code, tree = self.load_test_subject('L2260')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2261(self):
+    gold_code, tree = self.load_test_subject('L2261')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2262(self):
+    gold_code, tree = self.load_test_subject('L2262')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2264(self):
+    gold_code, tree = self.load_test_subject('L2264')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2267(self):
+    gold_code, tree = self.load_test_subject('L2267')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2268(self):
+    gold_code, tree = self.load_test_subject('L2268')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2269(self):
+    gold_code, tree = self.load_test_subject('L2269')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2270(self):
+    gold_code, tree = self.load_test_subject('L2270')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2273(self):
+    gold_code, tree = self.load_test_subject('L2273')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2274(self):
+    gold_code, tree = self.load_test_subject('L2274')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2275(self):
+    gold_code, tree = self.load_test_subject('L2275')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2278(self):
+    gold_code, tree = self.load_test_subject('L2278')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2279(self):
+    gold_code, tree = self.load_test_subject('L2279')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2281(self):
+    gold_code, tree = self.load_test_subject('L2281')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2283(self):
+    gold_code, tree = self.load_test_subject('L2283')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2284(self):
+    gold_code, tree = self.load_test_subject('L2284')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2285(self):
+    gold_code, tree = self.load_test_subject('L2285')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2287(self):
+    gold_code, tree = self.load_test_subject('L2287')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2288(self):
+    gold_code, tree = self.load_test_subject('L2288')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2289(self):
+    gold_code, tree = self.load_test_subject('L2289')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2290(self):
+    gold_code, tree = self.load_test_subject('L2290')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2291(self):
+    gold_code, tree = self.load_test_subject('L2291')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2293(self):
+    gold_code, tree = self.load_test_subject('L2293')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2295(self):
+    gold_code, tree = self.load_test_subject('L2295')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2299(self):
+    gold_code, tree = self.load_test_subject('L2299')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2301(self):
+    gold_code, tree = self.load_test_subject('L2301')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2302(self):
+    gold_code, tree = self.load_test_subject('L2302')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2303(self):
+    gold_code, tree = self.load_test_subject('L2303')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2304(self):
+    gold_code, tree = self.load_test_subject('L2304')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2305(self):
+    gold_code, tree = self.load_test_subject('L2305')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2306(self):
+    gold_code, tree = self.load_test_subject('L2306')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2309(self):
+    gold_code, tree = self.load_test_subject('L2309')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2310(self):
+    gold_code, tree = self.load_test_subject('L2310')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2311(self):
+    gold_code, tree = self.load_test_subject('L2311')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2312(self):
+    gold_code, tree = self.load_test_subject('L2312')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2315(self):
+    gold_code, tree = self.load_test_subject('L2315')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2316(self):
+    gold_code, tree = self.load_test_subject('L2316')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2317(self):
+    gold_code, tree = self.load_test_subject('L2317')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2318(self):
+    gold_code, tree = self.load_test_subject('L2318')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2319(self):
+    gold_code, tree = self.load_test_subject('L2319')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2320(self):
+    gold_code, tree = self.load_test_subject('L2320')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2321(self):
+    gold_code, tree = self.load_test_subject('L2321')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2322(self):
+    gold_code, tree = self.load_test_subject('L2322')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
+
+  def test_L2323(self):
+    gold_code, tree = self.load_test_subject('L2323')
+    pp_code = self.pp.visit(tree.root_node).strip()
+    self.assertEqual(pp_code, gold_code)
 
 
 if __name__ == '__main__':
