@@ -68,7 +68,7 @@ logger = setup_logger(__name__)
 # TEXT
 def indent(text: str, num_spaces=2) -> str:
   spaces = ' ' * num_spaces
-  return '\n'.join([spaces + line for line in text.splitlines()])
+  return '\n'.join([spaces + line if line.strip() else line for line in text.splitlines()])
 
 
 # SEQUENCES
