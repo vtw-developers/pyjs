@@ -8,4 +8,4 @@ def f_gold(arr: List[int], k: int, x: int) -> List[int]:
             right = mid
         else:
             left = mid + 1
-    return arr[left : left + k]
+    return arr[left:left + k]

@@ -3,8 +3,7 @@ import math
 from math import inf
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, headID: int, manager: List[int], informTime: List[int]
-) -> int:
+def f_gold(n: int, headID: int, manager: List[int], informTime: List[int]) -> int:
     def dfs(i):
         ans = 0
         for j in g[i]:

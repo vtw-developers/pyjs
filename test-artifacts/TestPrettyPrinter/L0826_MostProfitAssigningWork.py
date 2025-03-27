@@ -1,7 +1,6 @@
 ### maxProfitAssignment 
 from typing import *
-def f_gold(difficulty: List[int], profit: List[int], worker: List[int]
-) -> int:
+def f_gold(difficulty: List[int], profit: List[int], worker: List[int]) -> int:
     n = len(difficulty)
     job = [(difficulty[i], profit[i]) for i in range(n)]
     job.sort(key=lambda x: x[0])

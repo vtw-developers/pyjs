@@ -1,8 +1,7 @@
 ### gridIllumination 
 from collections import Counter
 from typing import *
-def f_gold(n: int, lamps: List[List[int]], queries: List[List[int]]
-) -> List[int]:
+def f_gold(n: int, lamps: List[List[int]], queries: List[List[int]]) -> List[int]:
     points = set()
     rcnt, ccnt, dgcnt, udgcnt = Counter(), Counter(), Counter(), Counter()
     for r, c in lamps:
@@ -17,17 +16,7 @@ def f_gold(n: int, lamps: List[List[int]], queries: List[List[int]]
         r, c = q
         if rcnt[r] or ccnt[c] or dgcnt[r - c] or udgcnt[r + c]:
             ans[i] = 1
-            for a, b in [
-                (0, 1),
-                (1, 0),
-                (0, -1),
-                (-1, 0),
-                (0, 0),
-                (1, 1),
-                (-1, 1),
-                (1, -1),
-                (-1, -1),
-            ]:
+            for a, b in [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]:
                 x, y = r + a, c + b
                 if (x, y) in points:
                     points.remove((x, y))

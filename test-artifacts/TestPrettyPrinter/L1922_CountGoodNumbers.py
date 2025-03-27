@@ -1,7 +1,7 @@
 ### countGoodNumbers 
 from typing import *
 def f_gold(n: int) -> int:
-    mod = 10**9 + 7
+    mod = 10 ** 9 + 7
     def myPow(x, n):
         res = 1
         while n:

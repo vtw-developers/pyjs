@@ -2,8 +2,7 @@
 from collections import deque
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, meetings: List[List[int]], firstPerson: int
-) -> List[int]:
+def f_gold(n: int, meetings: List[List[int]], firstPerson: int) -> List[int]:
     vis = [False] * n
     vis[0] = vis[firstPerson] = True
     meetings.sort(key=lambda x: x[2])
@@ -14,7 +13,7 @@ def f_gold(n: int, meetings: List[List[int]], firstPerson: int
             j += 1
         s = set()
         g = defaultdict(list)
-        for x, y, _ in meetings[i : j + 1]:
+        for x, y, _ in meetings[i:j + 1]:
             g[x].append(y)
             g[y].append(x)
             s.update([x, y])

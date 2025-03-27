@@ -4,8 +4,7 @@ from math import inf
 from collections import deque
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, edges: List[List[int]], time: int, change: int
-) -> int:
+def f_gold(n: int, edges: List[List[int]], time: int, change: int) -> int:
     g = defaultdict(set)
     for u, v in edges:
         g[u].add(v)

@@ -7,7 +7,7 @@ def f_gold(pattern: str, s: str) -> bool:
         if i == m or j == n or n - j < m - i:
             return False
         for k in range(j, n):
-            t = s[j : k + 1]
+            t = s[j:k + 1]
             if d.get(pattern[i]) == t:
                 if dfs(i + 1, k + 1):
                     return True

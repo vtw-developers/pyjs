@@ -1,5 +1,6 @@
 ### hasValidPath 
-def cache(f): return f
+def cache(f):
+    return f
 from typing import *
 def f_gold(grid: List[List[str]]) -> bool:
     @cache

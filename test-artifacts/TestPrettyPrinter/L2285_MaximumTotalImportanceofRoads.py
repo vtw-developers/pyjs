@@ -6,4 +6,4 @@ def f_gold(n: int, roads: List[List[int]]) -> int:
         deg[a] += 1
         deg[b] += 1
     deg.sort()
-    return sum(i * v for i, v in enumerate(deg, 1))
+    return sum((i * v for i, v in enumerate(deg, 1)))

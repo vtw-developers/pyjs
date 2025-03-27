@@ -4,7 +4,7 @@ from typing import *
 def f_gold(nums: List[int]) -> int:
     def check(a, b, c):
         s = a + b + c
-        return sum(s % x == 0 for x in [a, b, c]) == 1
+        return sum((s % x == 0 for x in [a, b, c])) == 1
     counter = Counter(nums)
     ans = 0
     for a, cnt1 in counter.items():

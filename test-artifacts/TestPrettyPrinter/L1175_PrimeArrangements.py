@@ -14,4 +14,4 @@ def f_gold(n: int) -> int:
         return cnt
     cnt = count(n)
     ans = factorial(cnt) * factorial(n - cnt)
-    return ans % (10**9 + 7)
+    return ans % (10 ** 9 + 7)

@@ -19,7 +19,7 @@ def f_gold(nums: List[int]) -> int:
             if stk:
                 right[i] = stk[-1]
             stk.append(i)
-        return sum((i - left[i]) * (right[i] - i) * v for i, v in enumerate(nums))
+        return sum(((i - left[i]) * (right[i] - i) * v for i, v in enumerate(nums)))
     mx = f(nums)
     mi = f([-v for v in nums])
     return mx + mi

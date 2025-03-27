@@ -14,4 +14,4 @@ def f_gold(s: str) -> str:
     cnt[7] = counter['s'] - cnt[6]
     cnt[1] = counter['o'] - cnt[0] - cnt[2] - cnt[4]
     cnt[9] = counter['i'] - cnt[5] - cnt[6] - cnt[8]
-    return ''.join(cnt[i] * str(i) for i in range(10))
+    return ''.join((cnt[i] * str(i) for i in range(10)))

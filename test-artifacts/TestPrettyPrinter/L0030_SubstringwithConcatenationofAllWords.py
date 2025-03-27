@@ -11,7 +11,7 @@ def f_gold(s: str, words: List[str]) -> List[int]:
         l = r = i
         t = 0
         while r + sublen <= n:
-            w = s[r : r + sublen]
+            w = s[r:r + sublen]
             r += sublen
             if w not in cnt:
                 l = r
@@ -21,7 +21,7 @@ def f_gold(s: str, words: List[str]) -> List[int]:
             cnt1[w] += 1
             t += 1
             while cnt1[w] > cnt[w]:
-                remove = s[l : l + sublen]
+                remove = s[l:l + sublen]
                 l += sublen
                 cnt1[remove] -= 1
                 t -= 1

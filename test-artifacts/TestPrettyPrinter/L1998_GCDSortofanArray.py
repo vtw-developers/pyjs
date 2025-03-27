@@ -4,7 +4,7 @@ from math import gcd
 from collections import defaultdict
 from typing import *
 def f_gold(nums: List[int]) -> bool:
-    n = 10**5 + 10
+    n = 10 ** 5 + 10
     p = list(range(n))
     f = defaultdict(list)
     mx = max(nums)

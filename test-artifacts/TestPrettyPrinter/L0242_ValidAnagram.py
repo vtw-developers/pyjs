@@ -7,4 +7,4 @@ def f_gold(s: str, t: str) -> bool:
     for i in range(len(s)):
         chars[ord(s[i]) - ord('a')] += 1
         chars[ord(t[i]) - ord('a')] -= 1
-    return all(c == 0 for c in chars)
+    return all((c == 0 for c in chars))

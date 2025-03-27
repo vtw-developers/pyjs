@@ -1,5 +1,6 @@
 ### sellingWood 
-def cache(f): return f
+def cache(f):
+    return f
 from collections import defaultdict
 from typing import *
 def f_gold(m: int, n: int, prices: List[List[int]]) -> int:

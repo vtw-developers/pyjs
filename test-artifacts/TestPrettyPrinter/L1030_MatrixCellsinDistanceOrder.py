@@ -1,8 +1,7 @@
 ### allCellsDistOrder 
 from collections import deque
 from typing import *
-def f_gold(rows: int, cols: int, rCenter: int, cCenter: int
-) -> List[List[int]]:
+def f_gold(rows: int, cols: int, rCenter: int, cCenter: int) -> List[List[int]]:
     q = deque([(rCenter, cCenter)])
     vis = [[False] * cols for _ in range(rows)]
     vis[rCenter][cCenter] = True

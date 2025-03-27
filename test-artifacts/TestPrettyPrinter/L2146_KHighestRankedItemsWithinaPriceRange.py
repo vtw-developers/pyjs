@@ -1,8 +1,7 @@
 ### highestRankedKItems 
 from collections import deque
 from typing import *
-def f_gold(grid: List[List[int]], pricing: List[int], start: List[int], k: int
-) -> List[List[int]]:
+def f_gold(grid: List[List[int]], pricing: List[int], start: List[int], k: int) -> List[List[int]]:
     m, n = len(grid), len(grid[0])
     row, col, low, high = start + pricing
     items = []

@@ -3,7 +3,6 @@ from collections import defaultdict
 from collections import Counter
 from typing import *
 def f_gold(s: str) -> int:
-    # count the occurence of each char
     count_chars = Counter(s)
     required = len(s) // 4
     # hold the number of excessive occurences
@@ -20,7 +19,6 @@ def f_gold(s: str) -> int:
     # Second, move the first_cursor so that it still satisfy the requirement
     first_cursor, second_cursor = 0, 0
     while second_cursor < len(s):
-        # Move second_cursor
         if more_chars[s[second_cursor]] > 0:
             need_replace -= 1
         more_chars[s[second_cursor]] -= 1

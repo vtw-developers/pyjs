@@ -1,7 +1,6 @@
 ### sortTransformedArray 
 from typing import *
-def f_gold(nums: List[int], a: int, b: int, c: int
-) -> List[int]:
+def f_gold(nums: List[int], a: int, b: int, c: int) -> List[int]:
     def f(x):
         return a * x * x + b * x + c
     n = len(nums)

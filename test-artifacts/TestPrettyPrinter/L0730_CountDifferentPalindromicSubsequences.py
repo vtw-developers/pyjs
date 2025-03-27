@@ -1,7 +1,7 @@
 ### countPalindromicSubsequences 
 from typing import *
 def f_gold(s: str) -> int:
-    mod = 10**9 + 7
+    mod = 10 ** 9 + 7
     n = len(s)
     dp = [[[0] * 4 for _ in range(n)] for _ in range(n)]
     for i, c in enumerate(s):

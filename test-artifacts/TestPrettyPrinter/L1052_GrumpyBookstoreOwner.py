@@ -1,8 +1,7 @@
 ### maxSatisfied 
 from typing import *
-def f_gold(customers: List[int], grumpy: List[int], minutes: int
-) -> int:
-    s = sum(a * b for a, b in zip(customers, grumpy))
+def f_gold(customers: List[int], grumpy: List[int], minutes: int) -> int:
+    s = sum((a * b for a, b in zip(customers, grumpy)))
     cs = sum(customers)
     t = ans = 0
     for i, (a, b) in enumerate(zip(customers, grumpy), 1):

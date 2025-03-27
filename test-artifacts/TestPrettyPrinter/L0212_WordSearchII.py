@@ -4,7 +4,7 @@ from typing import *
 def f_gold(board: List[List[str]], words: List[str]) -> List[str]:
     def check(word):
         cnt = Counter(word)
-        return all(counter[c] >= i for c, i in cnt.items())
+        return all((counter[c] >= i for c, i in cnt.items()))
     def dfs(i, j, l, word):
         if l == len(word):
             return True
@@ -28,5 +28,5 @@ def f_gold(board: List[List[str]], words: List[str]) -> List[str]:
         return False
     m, n = len(board), len(board[0])
     words = set(words)
-    counter = Counter(c for b in board for c in b)
+    counter = Counter((c for b in board for c in b))
     return [word for word in words if find(word)]

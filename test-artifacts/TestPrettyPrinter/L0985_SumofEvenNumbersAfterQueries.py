@@ -1,9 +1,8 @@
 ### sumEvenAfterQueries 
 from typing import *
-def f_gold(nums: List[int], queries: List[List[int]]
-) -> List[int]:
+def f_gold(nums: List[int], queries: List[List[int]]) -> List[int]:
     ans = []
-    s = sum(num for num in nums if num % 2 == 0)
+    s = sum((num for num in nums if num % 2 == 0))
     for v, i in queries:
         old = nums[i]
         nums[i] += v

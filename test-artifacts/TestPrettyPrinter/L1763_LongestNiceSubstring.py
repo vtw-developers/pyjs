@@ -11,5 +11,5 @@ def f_gold(s: str) -> str:
             else:
                 upper |= 1 << (ord(s[j]) - ord('A'))
             if lower == upper and j - i + 1 > len(ans):
-                ans = s[i : j + 1]
+                ans = s[i:j + 1]
     return ans

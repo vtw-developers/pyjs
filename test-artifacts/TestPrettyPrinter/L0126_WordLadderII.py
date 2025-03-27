@@ -2,8 +2,7 @@
 from collections import deque
 from collections import defaultdict
 from typing import *
-def f_gold(beginWord: str, endWord: str, wordList: List[str]
-) -> List[List[str]]:
+def f_gold(beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
     def dfs(path, cur):
         if cur == beginWord:
             ans.append(path[::-1])

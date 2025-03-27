@@ -1,9 +1,8 @@
 ### shoppingOffers 
 from typing import *
-def f_gold(price: List[int], special: List[List[int]], needs: List[int]
-) -> int:
+def f_gold(price: List[int], special: List[List[int]], needs: List[int]) -> int:
     def total(price, needs):
-        return sum(price[i] * needs[i] for i in range(len(needs)))
+        return sum((price[i] * needs[i] for i in range(len(needs))))
     ans = total(price, needs)
     t = []
     for offer in special:

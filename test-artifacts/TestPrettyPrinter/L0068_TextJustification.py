@@ -24,7 +24,6 @@ def f_gold(words: List[str], maxWidth: int) -> List[str]:
             t.append(words[i])
             i += 1
         if i == n or len(t) == 1:
-            # this is the last line or only one word in a line
             left = ' '.join(t)
             right = ' ' * (maxWidth - len(left))
             ans.append(left + right)

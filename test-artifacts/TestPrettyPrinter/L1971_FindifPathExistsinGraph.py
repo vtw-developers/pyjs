@@ -1,7 +1,6 @@
 ### validPath 
 from typing import *
-def f_gold(n: int, edges: List[List[int]], source: int, destination: int
-) -> bool:
+def f_gold(n: int, edges: List[List[int]], source: int, destination: int) -> bool:
     def find(x):
         if p[x] != x:
             p[x] = find(p[x])

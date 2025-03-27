@@ -6,6 +6,6 @@ def f_gold(words: List[str], chars: str) -> int:
     ans = 0
     for word in words:
         cnt = Counter(word)
-        if all([counter[c] >= v for c, v in cnt.items()]):
+        if all(([counter[c] >= v for c, v in cnt.items()])):
             ans += len(word)
     return ans

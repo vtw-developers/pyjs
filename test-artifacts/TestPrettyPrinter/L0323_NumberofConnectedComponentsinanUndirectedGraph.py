@@ -8,4 +8,4 @@ def f_gold(n: int, edges: List[List[int]]) -> int:
     p = list(range(n))
     for a, b in edges:
         p[find(a)] = find(b)
-    return sum(i == find(i) for i in range(n))
+    return sum((i == find(i) for i in range(n)))

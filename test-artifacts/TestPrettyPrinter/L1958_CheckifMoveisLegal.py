@@ -1,7 +1,6 @@
 ### checkMove 
 from typing import *
-def f_gold(board: List[List[str]], rMove: int, cMove: int, color: str
-) -> bool:
+def f_gold(board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
     dirs = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
     n = 8
     for a, b in dirs:

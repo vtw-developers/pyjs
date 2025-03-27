@@ -1,7 +1,6 @@
 ### colorBorder 
 from typing import *
-def f_gold(grid: List[List[int]], row: int, col: int, color: int
-) -> List[List[int]]:
+def f_gold(grid: List[List[int]], row: int, col: int, color: int) -> List[List[int]]:
     m, n = len(grid), len(grid[0])
     vis = [[False] * n for _ in range(m)]
     def dfs(i, j, color):

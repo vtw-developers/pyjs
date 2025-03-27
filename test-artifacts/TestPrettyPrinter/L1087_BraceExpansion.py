@@ -7,7 +7,7 @@ def f_gold(s: str) -> List[str]:
         if s[0] == '{':
             j = s.find('}')
             items.append(s[1:j].split(','))
-            convert(s[j + 1 :])
+            convert(s[j + 1:])
         else:
             j = s.find('{')
             if j != -1:

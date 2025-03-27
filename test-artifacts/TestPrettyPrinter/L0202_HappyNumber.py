@@ -5,7 +5,7 @@ def f_gold(n: int) -> bool:
         s = 0
         while n > 0:
             n, digit = divmod(n, 10)
-            s += digit**2
+            s += digit ** 2
         return s
     visited = set()
     while n != 1 and n not in visited:

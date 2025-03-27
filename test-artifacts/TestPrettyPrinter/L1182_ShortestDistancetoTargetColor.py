@@ -1,8 +1,7 @@
 ### shortestDistanceColor 
 from collections import defaultdict
 from typing import *
-def f_gold(colors: List[int], queries: List[List[int]]
-) -> List[int]:
+def f_gold(colors: List[int], queries: List[List[int]]) -> List[int]:
     color_indexes = defaultdict(list)
     for i, c in enumerate(colors):
         color_indexes[c].append(i)

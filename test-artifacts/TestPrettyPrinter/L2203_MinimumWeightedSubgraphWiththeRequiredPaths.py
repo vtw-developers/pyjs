@@ -4,8 +4,7 @@ from math import inf
 from heapq import heapify, heappush, heappop
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, edges: List[List[int]], src1: int, src2: int, dest: int
-) -> int:
+def f_gold(n: int, edges: List[List[int]], src1: int, src2: int, dest: int) -> int:
     def dijkstra(g, u):
         dist = [inf] * n
         dist[u] = 0
@@ -27,5 +26,5 @@ def f_gold(n: int, edges: List[List[int]], src1: int, src2: int, dest: int
     d1 = dijkstra(g, src1)
     d2 = dijkstra(g, src2)
     d3 = dijkstra(rg, dest)
-    ans = min(sum(v) for v in zip(d1, d2, d3))
+    ans = min(sum(((v) for v in zip(d1, d2, d3))))
     return -1 if ans >= inf else ans

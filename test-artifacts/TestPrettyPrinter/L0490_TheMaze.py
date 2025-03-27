@@ -1,8 +1,7 @@
 ### hasPath 
 from collections import deque
 from typing import *
-def f_gold(maze: List[List[int]], start: List[int], destination: List[int]
-) -> bool:
+def f_gold(maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
     m, n = len(maze), len(maze[0])
     q = deque([start])
     rs, cs = start

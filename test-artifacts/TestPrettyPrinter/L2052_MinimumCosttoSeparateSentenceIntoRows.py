@@ -1,5 +1,6 @@
 ### minimumCost 
-def cache(f): return f
+def cache(f):
+    return f
 from itertools import accumulate
 import math
 from math import inf

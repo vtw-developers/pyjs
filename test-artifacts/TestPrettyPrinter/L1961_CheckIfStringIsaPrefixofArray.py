@@ -5,5 +5,5 @@ def f_gold(s: str, words: List[str]) -> bool:
     for i, w in enumerate(words):
         t += len(w)
         if len(s) == t:
-            return ''.join(words[: i + 1]) == s
+            return ''.join(words[:i + 1]) == s
     return False

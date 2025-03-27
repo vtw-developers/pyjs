@@ -24,6 +24,6 @@ def f_gold(time: str) -> str:
     ans = None
     dfs('')
     if ans is None:
-        mi = min(int(c) for c in s)
+        mi = min((int(c) for c in s))
         ans = f'{mi}{mi}:{mi}{mi}'
     return ans

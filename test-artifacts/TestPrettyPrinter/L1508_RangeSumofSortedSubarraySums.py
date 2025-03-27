@@ -8,5 +8,5 @@ def f_gold(nums: List[int], n: int, left: int, right: int) -> int:
             s += nums[j]
             arr.append(s)
     arr.sort()
-    MOD = 10**9 + 7
-    return sum(arr[left - 1 : right]) % MOD
+    MOD = 10 ** 9 + 7
+    return sum(arr[left - 1:right]) % MOD

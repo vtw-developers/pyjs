@@ -7,5 +7,5 @@ def f_gold(s: str) -> List[str]:
     res = []
     for i in range(n - 1):
         if s[i] == '+' and s[i + 1] == '+':
-            res.append(s[:i] + "--" + s[i + 2 :])
+            res.append(s[:i] + "--" + s[i + 2:])
     return res

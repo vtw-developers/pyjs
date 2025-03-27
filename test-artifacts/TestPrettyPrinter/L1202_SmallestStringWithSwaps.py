@@ -14,4 +14,4 @@ def f_gold(s: str, pairs: List[List[int]]) -> str:
     mp = defaultdict(list)
     for i, c in enumerate(s):
         heappush(mp[find(i)], c)
-    return ''.join(heappop(mp[find(i)]) for i in range(n))
+    return ''.join((heappop(mp[find(i)]) for i in range(n)))

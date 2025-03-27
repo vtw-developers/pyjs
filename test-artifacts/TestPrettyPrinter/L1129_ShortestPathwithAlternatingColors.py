@@ -2,8 +2,7 @@
 from collections import deque
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, redEdges: List[List[int]], blueEdges: List[List[int]]
-) -> List[int]:
+def f_gold(n: int, redEdges: List[List[int]], blueEdges: List[List[int]]) -> List[int]:
     red = defaultdict(list)
     blue = defaultdict(list)
     for i, j in redEdges:

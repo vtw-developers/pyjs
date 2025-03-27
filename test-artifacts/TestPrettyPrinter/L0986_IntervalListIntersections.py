@@ -1,7 +1,6 @@
 ### intervalIntersection 
 from typing import *
-def f_gold(firstList: List[List[int]], secondList: List[List[int]]
-) -> List[List[int]]:
+def f_gold(firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
     i = j = 0
     ans = []
     while i < len(firstList) and j < len(secondList):

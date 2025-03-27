@@ -1,7 +1,6 @@
 ### friendRequests 
 from typing import *
-def f_gold(n: int, restrictions: List[List[int]], requests: List[List[int]]
-) -> List[bool]:
+def f_gold(n: int, restrictions: List[List[int]], requests: List[List[int]]) -> List[bool]:
     p = list(range(n))
     def find(x):
         if p[x] != x:
@@ -15,9 +14,7 @@ def f_gold(n: int, restrictions: List[List[int]], requests: List[List[int]]
         else:
             valid = True
             for x, y in restrictions:
-                if (find(u) == find(x) and find(v) == find(y)) or (
-                    find(u) == find(y) and find(v) == find(x)
-                ):
+                if (find(u) == find(x) and find(v) == find(y)) or (find(u) == find(y) and find(v) == find(x)):
                     valid = False
                     break
             ans.append(valid)

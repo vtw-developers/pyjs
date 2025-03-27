@@ -7,4 +7,4 @@ def f_gold(m: int, n: int, indices: List[List[int]]) -> int:
             g[i][c] += 1
         for j in range(n):
             g[r][j] += 1
-    return sum(g[i][j] % 2 for i in range(m) for j in range(n))
+    return sum((g[i][j] % 2 for i in range(m) for j in range(n)))

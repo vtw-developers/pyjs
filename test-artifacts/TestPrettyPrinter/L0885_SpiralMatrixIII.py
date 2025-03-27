@@ -1,7 +1,6 @@
 ### spiralMatrixIII 
 from typing import *
-def f_gold(rows: int, cols: int, rStart: int, cStart: int
-) -> List[List[int]]:
+def f_gold(rows: int, cols: int, rStart: int, cStart: int) -> List[List[int]]:
     ans = [[rStart, cStart]]
     if rows * cols == 1:
         return ans

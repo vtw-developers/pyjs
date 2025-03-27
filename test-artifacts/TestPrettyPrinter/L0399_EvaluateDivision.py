@@ -1,8 +1,7 @@
 ### calcEquation 
 from collections import defaultdict
 from typing import *
-def f_gold(equations: List[List[str]], values: List[float], queries: List[List[str]]
-) -> List[float]:
+def f_gold(equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
     def find(x):
         if p[x] != x:
             origin = p[x]
@@ -20,7 +19,4 @@ def f_gold(equations: List[List[str]], values: List[float], queries: List[List[s
             continue
         p[pa] = pb
         w[pa] = w[b] * v / w[a]
-    return [
-        -1 if c not in p or d not in p or find(c) != find(d) else w[c] / w[d]
-        for c, d in queries
-    ]
+    return [-1 if c not in p or d not in p or find(c) != find(d) else w[c] / w[d] for c, d in queries]

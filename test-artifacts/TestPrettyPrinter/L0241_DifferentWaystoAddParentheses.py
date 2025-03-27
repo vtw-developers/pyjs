@@ -1,5 +1,6 @@
 ### diffWaysToCompute 
-def cache(f): return f
+def cache(f):
+    return f
 from typing import *
 def f_gold(expression: str) -> List[int]:
     @cache

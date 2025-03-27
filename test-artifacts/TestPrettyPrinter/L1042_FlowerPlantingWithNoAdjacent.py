@@ -9,7 +9,7 @@ def f_gold(n: int, paths: List[List[int]]) -> List[int]:
         g[y].append(x)
     ans = [0] * n
     for u in range(n):
-        colors = set(ans[v] for v in g[u])
+        colors = set((ans[v] for v in g[u]))
         for c in range(1, 5):
             if c not in colors:
                 ans[u] = c

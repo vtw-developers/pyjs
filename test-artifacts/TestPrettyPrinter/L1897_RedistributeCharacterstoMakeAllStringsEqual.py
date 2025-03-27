@@ -7,4 +7,4 @@ def f_gold(words: List[str]) -> bool:
         for c in word:
             counter[c] += 1
     n = len(words)
-    return all(count % n == 0 for count in counter.values())
+    return all((count % n == 0 for count in counter.values()))
