@@ -1,5 +1,6 @@
 ### longestIncreasingPath 
-def cache(f): return f
+def cache(f):
+    return f
 from typing import *
 def f_gold(matrix: List[List[int]]) -> int:
     @cache
@@ -11,4 +12,4 @@ def f_gold(matrix: List[List[int]]) -> int:
                 ans = max(ans, dfs(x, y) + 1)
         return ans
     m, n = len(matrix), len(matrix[0])
-    return max(dfs(i, j) for i in range(m) for j in range(n))
+    return max((dfs(i, j) for i in range(m) for j in range(n)))

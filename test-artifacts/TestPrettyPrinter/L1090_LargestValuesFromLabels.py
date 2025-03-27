@@ -1,8 +1,7 @@
 ### largestValsFromLabels 
 from collections import Counter
 from typing import *
-def f_gold(values: List[int], labels: List[int], numWanted: int, useLimit: int
-) -> int:
+def f_gold(values: List[int], labels: List[int], numWanted: int, useLimit: int) -> int:
     arr = list(zip(values, labels))
     arr.sort(reverse=True)
     cnt = Counter()

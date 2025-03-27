@@ -8,4 +8,4 @@ def f_gold(s: str) -> int:
         pre[i + 1] = pre[i] if c == '0' else min(pre[i] + 2, i + 1)
     for i in range(n - 1, -1, -1):
         suf[i] = suf[i + 1] if s[i] == '0' else min(suf[i + 1] + 2, n - i)
-    return min(a + b for a, b in zip(pre[1:], suf[1:]))
+    return min((a + b for a, b in zip(pre[1:], suf[1:])))

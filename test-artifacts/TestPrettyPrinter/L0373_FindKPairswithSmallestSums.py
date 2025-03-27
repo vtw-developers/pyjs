@@ -1,8 +1,7 @@
 ### kSmallestPairs 
 from heapq import heapify, heappush, heappop
 from typing import *
-def f_gold(nums1: List[int], nums2: List[int], k: int
-) -> List[List[int]]:
+def f_gold(nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
     q = [[u + nums2[0], i, 0] for i, u in enumerate(nums1[:k])]
     heapify(q)
     ans = []

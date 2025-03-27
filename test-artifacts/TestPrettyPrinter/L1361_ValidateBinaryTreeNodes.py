@@ -1,7 +1,6 @@
 ### validateBinaryTreeNodes 
 from typing import *
-def f_gold(n: int, leftChild: List[int], rightChild: List[int]
-) -> bool:
+def f_gold(n: int, leftChild: List[int], rightChild: List[int]) -> bool:
     p = list(range(n))
     vis = [False] * n
     def find(x):

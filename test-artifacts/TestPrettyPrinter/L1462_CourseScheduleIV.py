@@ -1,9 +1,9 @@
 ### checkIfPrerequisite 
-def cache(f): return f
+def cache(f):
+    return f
 from collections import defaultdict
 from typing import *
-def f_gold(numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]
-) -> List[bool]:
+def f_gold(numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:
     @cache
     def dfs(a, b):
         if b in g[a] or a == b:

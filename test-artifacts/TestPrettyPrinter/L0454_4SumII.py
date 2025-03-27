@@ -1,8 +1,7 @@
 ### fourSumCount 
 from collections import Counter
 from typing import *
-def f_gold(nums1: List[int], nums2: List[int], nums3: List[int], nums4: List[int]
-) -> int:
+def f_gold(nums1: List[int], nums2: List[int], nums3: List[int], nums4: List[int]) -> int:
     counter = Counter()
     for a in nums1:
         for b in nums2:

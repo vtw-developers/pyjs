@@ -1,7 +1,6 @@
 ### countPoints 
 from typing import *
-def f_gold(points: List[List[int]], queries: List[List[int]]
-) -> List[int]:
+def f_gold(points: List[List[int]], queries: List[List[int]]) -> List[int]:
     ans = []
     for x0, y0, r in queries:
         count = 0

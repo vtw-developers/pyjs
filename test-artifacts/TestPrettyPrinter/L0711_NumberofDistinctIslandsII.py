@@ -25,7 +25,7 @@ def f_gold(grid: List[List[int]]) -> int:
                 e[i][0] -= e[0][0]
                 e[i][1] -= e[0][1]
         shapes.sort()
-        return tuple(tuple(e) for e in shapes[0])
+        return tuple((tuple(e) for e in shapes[0]))
     m, n = len(grid), len(grid[0])
     s = set()
     for i in range(m):

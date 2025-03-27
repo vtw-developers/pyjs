@@ -8,7 +8,7 @@ def f_gold(n: int) -> bool:
             n //= 10
         return counter
     i, s = 1, convert(n)
-    while i <= 10**9:
+    while i <= 10 ** 9:
         if convert(i) == s:
             return True
         i <<= 1

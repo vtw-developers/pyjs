@@ -2,7 +2,7 @@
 from typing import *
 def f_gold(s: str) -> List[str]:
     words = s.split()
-    m, n = len(words), max(len(word) for word in words)
+    m, n = len(words), max((len(word) for word in words))
     ans = []
     for j in range(n):
         t = []

@@ -10,4 +10,4 @@ def f_gold(statements: List[List[int]]) -> int:
                         return 0
                 cnt += 1
         return cnt
-    return max(check(mask) for mask in range(1, 1 << len(statements)))
+    return max((check(mask) for mask in range(1, 1 << len(statements))))

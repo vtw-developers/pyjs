@@ -18,7 +18,7 @@ def f_gold(s: str, t: str) -> str:
         while cnt == n:
             if j - i + 1 < mi:
                 mi = j - i + 1
-                ans = s[i : j + 1]
+                ans = s[i:j + 1]
             c = s[i]
             if need[c] >= window[c]:
                 cnt -= 1

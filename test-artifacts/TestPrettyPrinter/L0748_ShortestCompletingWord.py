@@ -11,7 +11,7 @@ def f_gold(licensePlate: str, words: List[str]) -> str:
             if counter1[i] > counter2[i]:
                 return False
         return True
-    counter = count(c.lower() for c in licensePlate if c.isalpha())
+    counter = count((c.lower() for c in licensePlate if c.isalpha()))
     ans, n = None, 16
     for word in words:
         if n <= len(word):

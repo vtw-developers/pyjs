@@ -20,9 +20,7 @@ def f_gold(forest: List[List[int]]) -> int:
                         heappush(q, (dist[c * n + d] + f(c, d, x, y), c, d))
         return -1
     m, n = len(forest), len(forest[0])
-    trees = [
-        (forest[i][j], i, j) for i in range(m) for j in range(n) if forest[i][j] > 1
-    ]
+    trees = [(forest[i][j], i, j) for i in range(m) for j in range(n) if forest[i][j] > 1]
     trees.sort()
     i = j = 0
     ans = 0

@@ -16,4 +16,4 @@ def f_gold(n: int) -> int:
         t[8] = f[1] + f[3]
         t[9] = f[2] + f[4]
         f = t
-    return sum(t) % (10**9 + 7)
+    return sum(t) % (10 ** 9 + 7)

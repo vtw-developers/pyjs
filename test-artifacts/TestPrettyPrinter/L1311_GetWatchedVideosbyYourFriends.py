@@ -2,11 +2,7 @@
 from collections import deque
 from collections import Counter
 from typing import *
-def f_gold(watchedVideos: List[List[str]],
-    friends: List[List[int]],
-    id: int,
-    level: int,
-) -> List[str]:
+def f_gold(watchedVideos: List[List[str]], friends: List[List[int]], id: int, level: int) -> List[str]:
     n = len(friends)
     vis = [False] * n
     q = deque([id])

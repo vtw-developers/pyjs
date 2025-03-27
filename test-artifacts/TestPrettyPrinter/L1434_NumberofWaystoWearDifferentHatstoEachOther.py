@@ -7,7 +7,7 @@ def f_gold(hats: List[List[int]]) -> int:
         for v in h:
             d[v].append(i)
     n = len(hats)
-    mx = max(max(h) for h in hats)
+    mx = max(max((h for h in hats)))
     dp = [[0] * (1 << n) for _ in range(mx + 1)]
     dp[0][0] = 1
     mod = int(1e9) + 7

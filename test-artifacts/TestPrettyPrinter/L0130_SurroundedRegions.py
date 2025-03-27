@@ -13,9 +13,7 @@ def f_gold(board: List[List[str]]) -> None:
     m, n = len(board), len(board[0])
     for i in range(m):
         for j in range(n):
-            if board[i][j] == 'O' and (
-                i == 0 or i == m - 1 or j == 0 or j == n - 1
-            ):
+            if board[i][j] == 'O' and (i == 0 or i == m - 1 or j == 0 or j == n - 1):
                 dfs(i, j)
     for i in range(m):
         for j in range(n):

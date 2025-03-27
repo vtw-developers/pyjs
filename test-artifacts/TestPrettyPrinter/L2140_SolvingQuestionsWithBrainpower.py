@@ -1,5 +1,6 @@
 ### mostPoints 
-def cache(f): return f
+def cache(f):
+    return f
 from typing import *
 def f_gold(questions: List[List[int]]) -> int:
     @cache

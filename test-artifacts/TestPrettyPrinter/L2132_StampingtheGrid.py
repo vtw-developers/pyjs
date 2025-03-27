@@ -1,7 +1,6 @@
 ### possibleToStamp 
 from typing import *
-def f_gold(grid: List[List[int]], stampHeight: int, stampWidth: int
-) -> bool:
+def f_gold(grid: List[List[int]], stampHeight: int, stampWidth: int) -> bool:
     m, n = len(grid), len(grid[0])
     s = [[0] * (n + 1) for _ in range(m + 1)]
     for i, row in enumerate(grid):

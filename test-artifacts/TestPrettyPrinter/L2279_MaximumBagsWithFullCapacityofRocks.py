@@ -1,7 +1,6 @@
 ### maximumBags 
 from typing import *
-def f_gold(capacity: List[int], rocks: List[int], additionalRocks: int
-) -> int:
+def f_gold(capacity: List[int], rocks: List[int], additionalRocks: int) -> int:
     d = [a - b for a, b in zip(capacity, rocks)]
     d.sort()
     ans = 0

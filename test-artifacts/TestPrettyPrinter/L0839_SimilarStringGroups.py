@@ -9,6 +9,6 @@ def f_gold(strs: List[str]) -> int:
     p = list(range(n))
     for i in range(n):
         for j in range(i + 1, n):
-            if sum(strs[i][k] != strs[j][k] for k in range(l)) <= 2:
+            if sum((strs[i][k] != strs[j][k] for k in range(l))) <= 2:
                 p[find(i)] = find(j)
-    return sum(i == find(i) for i in range(n))
+    return sum((i == find(i) for i in range(n)))

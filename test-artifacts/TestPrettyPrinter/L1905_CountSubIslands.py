@@ -10,4 +10,4 @@ def f_gold(grid1: List[List[int]], grid2: List[List[int]]) -> int:
                 ans = False
         return ans
     m, n = len(grid1), len(grid1[0])
-    return sum(grid2[i][j] == 1 and dfs(i, j) for i in range(m) for j in range(n))
+    return sum((grid2[i][j] == 1 and dfs(i, j) for i in range(m) for j in range(n)))

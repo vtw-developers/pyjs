@@ -2,12 +2,7 @@
 from heapq import heapify, heappush, heappop
 from collections import defaultdict
 from typing import *
-def f_gold(n: int,
-    edges: List[List[int]],
-    succProb: List[float],
-    start: int,
-    end: int,
-) -> float:
+def f_gold(n: int, edges: List[List[int]], succProb: List[float], start: int, end: int) -> float:
     g = defaultdict(list)
     for (a, b), s in zip(edges, succProb):
         g[a].append((b, s))

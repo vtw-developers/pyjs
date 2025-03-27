@@ -2,7 +2,7 @@
 from typing import *
 def f_gold(s: str) -> str:
     base = 131
-    mod = 10**9 + 7
+    mod = 10 ** 9 + 7
     n = len(s)
     prefix = suffix = 0
     mul = 1

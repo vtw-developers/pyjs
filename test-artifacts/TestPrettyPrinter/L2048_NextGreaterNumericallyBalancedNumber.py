@@ -9,7 +9,7 @@ def f_gold(n: int) -> int:
             if counter[int(c)] != int(c):
                 return False
         return True
-    for i in range(n + 1, 10**7):
+    for i in range(n + 1, 10 ** 7):
         if check(i):
             return i
     return -1

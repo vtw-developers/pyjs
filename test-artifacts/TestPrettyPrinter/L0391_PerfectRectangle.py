@@ -16,13 +16,7 @@ def f_gold(rectangles: List[List[int]]) -> bool:
         cnt[(r[0], r[3])] += 1
         cnt[(r[2], r[3])] += 1
         cnt[(r[2], r[1])] += 1
-    if (
-        area != (maxX - minX) * (maxY - minY)
-        or cnt[(minX, minY)] != 1
-        or cnt[(minX, maxY)] != 1
-        or cnt[(maxX, maxY)] != 1
-        or cnt[(maxX, minY)] != 1
-    ):
+    if (area != (maxX - minX) * (maxY - minY) or cnt[(minX, minY)] != 1 or cnt[(minX, maxY)] != 1 or cnt[(maxX, maxY)] != 1 or cnt[(maxX, minY)] != 1):
         return False
     del cnt[(minX, minY)], cnt[(minX, maxY)], cnt[(maxX, maxY)], cnt[(maxX, minY)]
-    return all(c == 2 or c == 4 for c in cnt.values())
+    return all((c == 2 or c == 4 for c in cnt.values()))

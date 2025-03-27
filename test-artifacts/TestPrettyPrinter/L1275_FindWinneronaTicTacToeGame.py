@@ -11,11 +11,6 @@ def f_gold(moves: List[List[int]]) -> str:
             counter[6] += 1
         if row + col == 2:
             counter[7] += 1
-        if (
-            counter[row] == 3
-            or counter[col + 3] == 3
-            or counter[6] == 3
-            or counter[7] == 3
-        ):
+        if (counter[row] == 3 or counter[col + 3] == 3 or counter[6] == 3 or counter[7] == 3):
             return "A" if (i % 2) == 0 else "B"
     return "Draw" if n == 9 else "Pending"

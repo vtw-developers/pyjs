@@ -1,7 +1,6 @@
 ### arraysIntersection 
 from typing import *
-def f_gold(arr1: List[int], arr2: List[int], arr3: List[int]
-) -> List[int]:
+def f_gold(arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
     def find(arr, val):
         left, right = 0, len(arr) - 1
         while left < right:

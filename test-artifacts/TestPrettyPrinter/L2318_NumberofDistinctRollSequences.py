@@ -5,7 +5,7 @@ from typing import *
 def f_gold(n: int) -> int:
     if n == 1:
         return 6
-    mod = 10**9 + 7
+    mod = 10 ** 9 + 7
     dp = [[[0] * 6 for _ in range(6)] for _ in range(n + 1)]
     for i in range(6):
         for j in range(6):

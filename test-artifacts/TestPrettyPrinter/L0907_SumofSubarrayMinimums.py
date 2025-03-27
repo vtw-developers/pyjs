@@ -19,4 +19,4 @@ def f_gold(arr: List[int]) -> int:
             right[i] = stk[-1]
         stk.append(i)
     mod = int(1e9) + 7
-    return sum((i - left[i]) * (right[i] - i) * v for i, v in enumerate(arr)) % mod
+    return sum(((i - left[i]) * (right[i] - i) * v for i, v in enumerate(arr))) % mod

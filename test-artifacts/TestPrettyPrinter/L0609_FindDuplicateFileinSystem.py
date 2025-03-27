@@ -7,7 +7,7 @@ def f_gold(paths: List[str]) -> List[List[str]]:
         a = path.split(" ")
         for i in range(1, len(a)):
             j = a[i].find("(")
-            content = a[i][j + 1 : -1]
+            content = a[i][j + 1:-1]
             name = a[0] + "/" + a[i][:j]
             m[content].append(name)
     ans = []

@@ -11,6 +11,6 @@ def f_gold(digits: List[int]) -> List[int]:
             t.append(k % 10)
             k //= 10
         cnt = Counter(t)
-        if all([counter[i] >= cnt[i] for i in range(10)]):
+        if all(([counter[i] >= cnt[i] for i in range(10)])):
             ans.append(i)
     return ans

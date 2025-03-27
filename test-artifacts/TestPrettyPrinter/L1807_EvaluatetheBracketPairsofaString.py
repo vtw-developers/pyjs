@@ -11,7 +11,7 @@ def f_gold(s: str, knowledge: List[List[str]]) -> str:
     while i < n:
         if s[i] == '(':
             right_bracket_pos = find_right_bracket(s, i + 1, n)
-            key = s[i + 1 : right_bracket_pos]
+            key = s[i + 1:right_bracket_pos]
             res.append(knowledge_dict.get(key, '?'))
             i = right_bracket_pos + 1
         else:

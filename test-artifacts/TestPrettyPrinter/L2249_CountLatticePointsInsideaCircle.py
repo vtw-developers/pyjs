@@ -2,8 +2,8 @@
 from typing import *
 def f_gold(circles: List[List[int]]) -> int:
     ans = 0
-    imx = max(x + r for x, _, r in circles)
-    jmx = max(y + r for _, y, r in circles)
+    imx = max((x + r for x, _, r in circles))
+    jmx = max((y + r for _, y, r in circles))
     for i in range(imx + 1):
         for j in range(jmx + 1):
             for x, y, r in circles:

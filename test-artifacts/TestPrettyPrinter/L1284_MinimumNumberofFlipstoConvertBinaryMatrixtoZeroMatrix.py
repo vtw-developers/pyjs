@@ -3,7 +3,7 @@ from collections import deque
 from typing import *
 def f_gold(mat: List[List[int]]) -> int:
     m, n = len(mat), len(mat[0])
-    state = sum(1 << (i * n + j) for i in range(m) for j in range(n) if mat[i][j])
+    state = sum((1 << (i * n + j) for i in range(m) for j in range(n) if mat[i][j]))
     q = deque([state])
     vis = {state}
     ans = 0

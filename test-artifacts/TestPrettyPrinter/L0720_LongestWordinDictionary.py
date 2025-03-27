@@ -5,7 +5,7 @@ def f_gold(words: List[str]) -> str:
     s = set(words)
     for w in s:
         n = len(w)
-        if all(w[:i] in s for i in range(1, n)):
+        if all((w[:i] in s for i in range(1, n))):
             if cnt < n:
                 cnt, ans = n, w
             elif cnt == n and w < ans:

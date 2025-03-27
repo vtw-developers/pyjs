@@ -2,8 +2,7 @@
 from collections import defaultdict
 from collections import Counter
 from typing import *
-def f_gold(source: List[int], target: List[int], allowedSwaps: List[List[int]]
-) -> int:
+def f_gold(source: List[int], target: List[int], allowedSwaps: List[List[int]]) -> int:
     n = len(source)
     p = list(range(n))
     def find(x):

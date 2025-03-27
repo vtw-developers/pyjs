@@ -21,5 +21,5 @@ def f_gold(nums: List[int]) -> int:
             right[i] = stk[-1]
         stk.append(i)
     s = [0] + list(accumulate(nums))
-    ans = max(v * (s[right[i]] - s[left[i] + 1]) for i, v in enumerate(nums))
+    ans = max((v * (s[right[i]] - s[left[i] + 1]) for i, v in enumerate(nums)))
     return ans % mod

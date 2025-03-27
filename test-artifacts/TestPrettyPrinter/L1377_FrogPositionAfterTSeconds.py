@@ -2,8 +2,7 @@
 from collections import deque
 from collections import defaultdict
 from typing import *
-def f_gold(n: int, edges: List[List[int]], t: int, target: int
-) -> float:
+def f_gold(n: int, edges: List[List[int]], t: int, target: int) -> float:
     g = defaultdict(list)
     for u, v in edges:
         g[u].append(v)

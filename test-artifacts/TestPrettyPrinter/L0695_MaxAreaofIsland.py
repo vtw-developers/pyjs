@@ -10,7 +10,4 @@ def f_gold(grid: List[List[int]]) -> int:
                 ans += dfs(x, y)
         return ans
     m, n = len(grid), len(grid[0])
-    return max(
-        [dfs(i, j) for i in range(m) for j in range(n) if grid[i][j] == 1],
-        default=0,
-    )
+    return max([dfs(i, j) for i in range(m) for j in range(n) if grid[i][j] == 1], default=0)

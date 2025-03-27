@@ -4,7 +4,7 @@ from math import inf
 from typing import *
 def f_gold(n: int, roads: List[List[int]]) -> int:
     INF = float('inf')
-    MOD = 10**9 + 7
+    MOD = 10 ** 9 + 7
     g = [[INF] * n for _ in range(n)]
     for u, v, t in roads:
         g[u][v] = t

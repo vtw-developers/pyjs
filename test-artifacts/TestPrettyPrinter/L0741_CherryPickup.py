@@ -10,12 +10,7 @@ def f_gold(grid: List[List[int]]) -> int:
         for i1 in range(n):
             for i2 in range(n):
                 j1, j2 = k - i1, k - i2
-                if (
-                    not 0 <= j1 < n
-                    or not 0 <= j2 < n
-                    or grid[i1][j1] == -1
-                    or grid[i2][j2] == -1
-                ):
+                if (not 0 <= j1 < n or not 0 <= j2 < n or grid[i1][j1] == -1 or grid[i2][j2] == -1):
                     continue
                 t = grid[i1][j1]
                 if i1 != i2:
@@ -23,7 +18,5 @@ def f_gold(grid: List[List[int]]) -> int:
                 for x1 in range(i1 - 1, i1 + 1):
                     for x2 in range(i2 - 1, i2 + 1):
                         if x1 >= 0 and x2 >= 0:
-                            dp[k][i1][i2] = max(
-                                dp[k][i1][i2], dp[k - 1][x1][x2] + t
-                            )
+                            dp[k][i1][i2] = max(dp[k][i1][i2], dp[k - 1][x1][x2] + t)
     return max(0, dp[-1][-1][-1])

@@ -1,7 +1,7 @@
 ### largestPalindrome 
 from typing import *
 def f_gold(n: int) -> int:
-    mx = 10**n - 1
+    mx = 10 ** n - 1
     for a in range(mx, mx // 10, -1):
         b = x = a
         while b:

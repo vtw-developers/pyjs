@@ -1,7 +1,6 @@
 ### insert 
 from typing import *
-def f_gold(intervals: List[List[int]], newInterval: List[int]
-) -> List[List[int]]:
+def f_gold(intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
     def merge(intervals):
         intervals.sort()
         ans = []

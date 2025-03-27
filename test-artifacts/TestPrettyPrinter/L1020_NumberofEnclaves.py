@@ -12,4 +12,4 @@ def f_gold(grid: List[List[int]]) -> int:
         for j in range(n):
             if grid[i][j] == 1 and (i == 0 or i == m - 1 or j == 0 or j == n - 1):
                 dfs(i, j)
-    return sum(grid[i][j] for i in range(m) for j in range(n))
+    return sum((grid[i][j] for i in range(m) for j in range(n)))

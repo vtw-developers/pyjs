@@ -12,4 +12,4 @@ def f_gold(s: str) -> str:
                 dp[i][j] = dp[i + 1][j - 1] and s[i] == s[j]
             if dp[i][j] and mx < j - i + 1:
                 start, mx = i, j - i + 1
-    return s[start : start + mx]
+    return s[start:start + mx]

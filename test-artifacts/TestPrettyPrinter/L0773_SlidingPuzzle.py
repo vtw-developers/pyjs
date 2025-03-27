@@ -12,7 +12,7 @@ def f_gold(board: List[List[int]]) -> int:
             start += str(board[i][j])
     def check(seq):
         n = len(seq)
-        cnt = sum(seq[i] > seq[j] for i in range(n) for j in range(i, n))
+        cnt = sum((seq[i] > seq[j] for i in range(n) for j in range(i, n)))
         return cnt % 2 == 0
     def f(s):
         ans = 0

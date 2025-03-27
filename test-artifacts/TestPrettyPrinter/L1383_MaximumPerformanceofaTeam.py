@@ -1,8 +1,7 @@
 ### maxPerformance 
 from heapq import heapify, heappush, heappop
 from typing import *
-def f_gold(n: int, speed: List[int], efficiency: List[int], k: int
-) -> int:
+def f_gold(n: int, speed: List[int], efficiency: List[int], k: int) -> int:
     team = [(s, e) for s, e in zip(speed, efficiency)]
     team.sort(key=lambda x: -x[1])
     q = []

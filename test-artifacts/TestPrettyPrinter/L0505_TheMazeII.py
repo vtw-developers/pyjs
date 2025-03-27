@@ -3,8 +3,7 @@ import math
 from math import inf
 from collections import deque
 from typing import *
-def f_gold(maze: List[List[int]], start: List[int], destination: List[int]
-) -> int:
+def f_gold(maze: List[List[int]], start: List[int], destination: List[int]) -> int:
     m, n = len(maze), len(maze[0])
     rs, cs = start
     rd, cd = destination

@@ -4,7 +4,7 @@ def f_gold(s: str) -> str:
     def check(l):
         vis = set()
         for i in range(n - l + 1):
-            t = s[i : i + l]
+            t = s[i:i + l]
             if t in vis:
                 return t
             vis.add(t)

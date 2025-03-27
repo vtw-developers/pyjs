@@ -3,7 +3,7 @@ from typing import *
 def f_gold(nums: List[int]) -> int:
     def f_goldRange(nums, l, r):
         a, b = 0, nums[l]
-        for num in nums[l + 1 : r + 1]:
+        for num in nums[l + 1:r + 1]:
             a, b = b, max(num + a, b)
         return b
     n = len(nums)

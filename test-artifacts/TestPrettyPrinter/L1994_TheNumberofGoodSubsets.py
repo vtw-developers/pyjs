@@ -3,7 +3,7 @@ from collections import Counter
 from typing import *
 def f_gold(nums: List[int]) -> int:
     counter = Counter(nums)
-    mod = 10**9 + 7
+    mod = 10 ** 9 + 7
     prime = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
     n = len(prime)
     dp = [0] * (1 << n)

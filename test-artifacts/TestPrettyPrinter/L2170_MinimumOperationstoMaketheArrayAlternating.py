@@ -10,4 +10,4 @@ def f_gold(nums: List[int]) -> int:
             return [c[0], (0, 0)]
         return c
     n = len(nums)
-    return min(n - (n1 + n2) for a, n1 in get(0) for b, n2 in get(1) if a != b)
+    return min((n - (n1 + n2) for a, n1 in get(0) for b, n2 in get(1) if a != b))
