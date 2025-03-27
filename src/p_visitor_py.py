@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import tree_sitter
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import final, Any, Dict, List, Union
 
 import p_consts
@@ -115,6 +115,12 @@ class AbstractNode(ABC):
     except IndexError:
       return None
 
+  def is_terminal(self) -> bool:
+    return isinstance(self, TerminalNode)
+
+  def is_nonterminal(self) -> bool:
+    return not self.is_terminal()
+
 class TerminalNode(AbstractNode):
   def __repr__(self) -> str:
     return f'Terminal({repr(self.node_type)})'
@@ -146,11 +152,26 @@ class AttributeNode(AbstractNode):
     super().__init__(node_type)
     self.object : AbstractNode = None
     self.attribute : AbstractNode = None
-class AugmentedAssignmentNode(AbstractNode): pass
+class AugmentedAssignmentNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.left : AbstractNode = None
+    self.operator : AbstractNode = None
+    self.right : AbstractNode = None
 class AwaitNode(AbstractNode): pass
-class BinaryOperatorNode(AbstractNode): pass
+class BinaryOperatorNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.left : AbstractNode = None
+    self.operator : AbstractNode = None
+    self.right : AbstractNode = None
 class BlockNode(AbstractNode): pass
-class BooleanOperatorNode(AbstractNode): pass
+class BooleanOperatorNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.left : AbstractNode = None
+    self.operator : AbstractNode = None
+    self.right : AbstractNode = None
 class BreakStatementNode(AbstractNode): pass
 class CallNode(AbstractNode):
   def __init__(self, node_type):
@@ -164,7 +185,10 @@ class ComparisonOperatorNode(AbstractNode): pass
 class ConcatenatedStringNode(AbstractNode): pass
 class ConditionalExpressionNode(AbstractNode): pass
 class ContinueStatementNode(AbstractNode): pass
-class DecoratedDefinitionNode(AbstractNode): pass
+class DecoratedDefinitionNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.definition : AbstractNode = None
 class DecoratorNode(AbstractNode): pass
 class DefaultParameterNode(AbstractNode): pass
 class DeleteStatementNode(AbstractNode): pass
@@ -176,9 +200,16 @@ class DictionaryComprehensionNode(AbstractNode):
 class DictionarySplatNode(AbstractNode): pass
 class DictionarySplatPatternNode(AbstractNode): pass
 class DottedNameNode(AbstractNode): pass
-class ElifClauseNode(AbstractNode): pass
+class ElifClauseNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.condition : AbstractNode = None
+    self.consequence : AbstractNode = None
 class EllipsisNode(AbstractNode): pass
-class ElseClauseNode(AbstractNode): pass
+class ElseClauseNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.body : AbstractNode = None
 class EscapeInterpolationNode(AbstractNode): pass
 class EscapeSequenceNode(AbstractNode): pass
 class ExceptClauseNode(AbstractNode): pass
@@ -188,7 +219,11 @@ class ExpressionListNode(AbstractNode): pass
 class ExpressionStatementNode(AbstractNode): pass
 class FalseNode(AbstractNode): pass
 class FinallyClauseNode(AbstractNode): pass
-class FloatNode(AbstractNode): pass
+class FloatNode(AbstractNode):
+  def val(self) -> str:
+    assert len(self.children) == 1, 'sanity check'
+    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    return self.children[0].node_type
 class ForInClauseNode(AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
@@ -226,11 +261,28 @@ class IdentifierNode(AbstractNode):
     assert isinstance(self.children[0], TerminalNode), 'sanity check'
     return self.children[0].node_type
 class IfClauseNode(AbstractNode): pass
-class IfStatementNode(AbstractNode): pass
-class ImportFromStatementNode(AbstractNode): pass
+class IfStatementNode(AbstractNode):
+  '''
+  In tree-sitter AST, multiple nodes may appear under a single field `alternative`.
+  Since a single attribute holds a single node,
+  we use `alternatives` attribute to hold all nodes under `alternative`.
+  '''
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.condition : AbstractNode = None
+    self.consequence : AbstractNode = None
+    self.alternatives : List[AbstractNode] = []
+class ImportFromStatementNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.module_name : AbstractNode = None
 class ImportPrefixNode(AbstractNode): pass
 class ImportStatementNode(AbstractNode): pass
-class IntegerNode(AbstractNode): pass
+class IntegerNode(AbstractNode):
+  def val(self) -> str:
+    assert len(self.children) == 1, 'sanity check'
+    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    return self.children[0].node_type
 class InterpolationNode(AbstractNode): pass
 class KeywordArgumentNode(AbstractNode):
   def __init__(self, node_type):
@@ -262,8 +314,15 @@ class NamedExpressionNode(AbstractNode):
 class NoneNode(AbstractNode): pass
 class NonlocalStatementNode(AbstractNode): pass
 class NotEscapeSequenceNode(AbstractNode): pass
-class NotOperatorNode(AbstractNode): pass
-class PairNode(AbstractNode): pass
+class NotOperatorNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.argument : AbstractNode = None
+class PairNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.key : AbstractNode = None
+    self.value : AbstractNode = None
 class ParameterNode(AbstractNode): pass
 class ParametersNode(AbstractNode): pass
 class ParenthesizedExpressionNode(AbstractNode): pass
@@ -282,7 +341,12 @@ class SetComprehensionNode(AbstractNode):
     super().__init__(node_type)
     self.body : AbstractNode = None
 class SliceNode(AbstractNode): pass
-class StringNode(AbstractNode): pass
+class StringNode(AbstractNode):
+  '''NOTE may not support all types of quoted strings'''
+  def val(self) -> str:
+    assert len(self.children) == 1, 'sanity check'
+    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    return self.children[0].node_type
 class SubscriptNode(AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
@@ -299,8 +363,17 @@ class TypedParameterNode(AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
     self.type : AbstractNode = None
-class UnaryOperatorNode(AbstractNode): pass
-class WhileStatementNode(AbstractNode): pass
+class UnaryOperatorNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.operator : AbstractNode = None
+    self.argument : AbstractNode = None
+class WhileStatementNode(AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.condition : AbstractNode = None
+    self.body : AbstractNode = None
+    self.alternative : AbstractNode = None
 class WildcardImportNode(AbstractNode): pass
 class WithClauseNode(AbstractNode): pass
 class WithItemNode(AbstractNode): pass
@@ -485,19 +558,29 @@ class Tree:
     _NODES_WITH_FIELDS = [
       'attribute',
       'assignment',
+      'augmented_assignment',
+      'binary_operator',
+      'boolean_operator',
       'call',
+      'decorated_definition',
       'dictionary_comprehension',
+      'elif_clause',
+      'else_clause',
       'for_in_clause',
-      'for_statement',
       'function_definition',
       'generator_expression',
+      'import_from_statement',
       'lambda',
       'list_comprehension',
       'keyword_argument',
       'named_expression',
+      'not_operator',
+      'pair',
       'set_comprehension',
       'subscript',
       'typed_parameter',
+      'unary_operator',
+      'while_statement',
     ]
 
     def _create_StringNode(ts_node: tree_sitter.Node) -> StringNode:
@@ -512,6 +595,76 @@ class Tree:
       string_content_node.set_parent(node)
       return node
 
+    def _create_IfStatementNode(ts_node: tree_sitter.Node) -> IfStatementNode:
+      '''
+      This is a workaround for a bug in the current tree-sitter version.
+      The bug: `else_clause` is parsed as a `consequence` field,
+      but should be parsed as `alternative` field according to grammar.
+      '''
+      if_statement_node = IfStatementNode('if_statement')
+
+      # according to grammar, first four children are:
+      # 'if', 'condition', ':', 'consequence'
+      # and all four must be present
+      assert len(ts_node.children) >= 4, 'per grammar: if_statement must have at least 4 children'
+      for idx, ts_child in enumerate(ts_node.children[:4]):
+        child_node = _rec_build_tree(ts_child)
+        if idx == 1:
+          if_statement_node.condition = child_node
+        elif idx == 3:
+          if_statement_node.consequence = child_node
+        if_statement_node.add_child(child_node)
+        child_node.set_parent(if_statement_node)
+
+      # remaining nodes are `alternative` fields
+      # NOTE alternative fields are added to `alternatives` attribute
+      for ts_child in ts_node.children[4:]:
+        child_node = _rec_build_tree(ts_child)
+        if_statement_node.add_child(child_node)
+        child_node.set_parent(if_statement_node)
+        if_statement_node.alternatives.append(child_node)
+
+      return if_statement_node
+
+    def _create_ForStatementNode(ts_node: tree_sitter.Node) -> ForStatementNode:
+      '''
+      This is a workaround for a bug in the current tree-sitter version.
+      The bug:  `for_statement`s `else_clause` is parsed as
+      `body` field. It should be parsed as `alternative`
+      according to the grammar.
+
+      TODO async is not supported
+      '''
+      assert ts_node.children[0].type != 'async', 'async is not supported'
+      assert ts_node.children[0].type == 'for', 'sanity check'
+
+      for_statement_node = ForStatementNode('for_statement')
+
+      # according to grammar, first six children are:
+      # 'for', 'left', 'in', 'right', ':', 'body'
+      for idx, ts_child in enumerate(ts_node.children[:6]):
+        child_node = _rec_build_tree(ts_child)
+        if idx == 1:
+          for_statement_node.left = child_node
+        elif idx == 3:
+          for_statement_node.right = child_node
+        elif idx == 5:
+          for_statement_node.body = child_node
+        for_statement_node.add_child(child_node)
+        child_node.set_parent(for_statement_node)
+
+      # no else_clause
+      if len(ts_node.children) == 6:
+        return for_statement_node
+
+      # else_clause is present
+      # NOTE else_clause is added to `alternative` attribute
+      else_clause_node = _rec_build_tree(ts_node.children[6])
+      for_statement_node.add_child(else_clause_node)
+      else_clause_node.set_parent(for_statement_node)
+      for_statement_node.alternative = else_clause_node
+      return for_statement_node
+
     def _create_node_with_field(ts_node: tree_sitter.Node) -> AbstractNode:
       '''
       Special treatment for some nodes in tree-sitter trees.
@@ -524,6 +677,8 @@ class Tree:
       NOTE TODO in `if_statement`, there are multiple nodes under a single
       field `alternative`. Current implementation does not support it, as it
       will save the last node under `alternative` as an attribute.
+      The same issue is true for `comparison_operator`
+      and its `operators` field.
       '''
       # instantiate a special node
       ntype = ts_node.type
@@ -572,6 +727,16 @@ class Tree:
         string_node = _create_StringNode(ts_node)
         return string_node
 
+      # special case: if_statement node
+      if ts_node.type == 'if_statement':
+        if_statement_node = _create_IfStatementNode(ts_node)
+        return if_statement_node
+
+      # special case: for_statement node
+      if ts_node.type == 'for_statement':
+        for_statement_node = _create_ForStatementNode(ts_node)
+        return for_statement_node
+
       # special case: nodes with fields
       # NOTE might as well do this for all nodes
       if ts_node.type in _NODES_WITH_FIELDS:
@@ -605,31 +770,483 @@ class Tree:
 
 
 class PrettyPrinter(Visitor):
-  def __init__(self) -> None:
+  def __init__(self, indent_with: str = '  ') -> None:
     super().__init__()
-    self.indentation_level : int = 0
-    self.indentation_size : int = 2
+    # e.g. two spaces
+    self.indent_with = indent_with
 
-  def indent(self, text: str) -> str:
-    self.indentation_level += 1
-    code = p_utils.indent(text, self.indentation_level * self.indentation_size)
-    self.indentation_level -= 1
-    return code
+    # current indentation level
+    self.level = 0
 
-  def default_visit(self, node: AbstractNode, delimiter: str = ' ') -> str:
-    code = ''
-    for child in node.children:
-      child_code = self.visit(child)
-      code += (child_code + delimiter)
-    return code.strip()
+    # accumulate lines of generated code
+    self.lines : List[str] = []
+
+  def indent(self) -> str:
+    '''Return the current indentation string'''
+    return self.indent_with * self.level
+
+  def write_line(self, line: str) -> None:
+    '''Write a line of code to the output'''
+    self.lines.append(self.indent() + line)
+
+  # VISIT METHODS
+  def default_visit(self, node: AbstractNode) -> None:
+    print('\n'.join(self.lines))
+    raise NotImplementedError(f'visit_{node.__class__.__name__} not implemented')
+
+  def visit_ArgumentListNode(self, node: ArgumentListNode) -> str:
+    arguments = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return arguments
+
+  def visit_AssignmentNode(self, node: AssignmentNode) -> str:
+    left = self.visit(node.left)
+    right = self.visit(node.right)
+    return f'{left} = {right}'
+
+  def visit_AttributeNode(self, node: AttributeNode) -> str:
+    object_ = self.visit(node.object)
+    attribute = self.visit(node.attribute)
+    return f'{object_}.{attribute}'
+
+  def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> str:
+    left = self.visit(node.left)
+    operator = self.visit(node.operator)
+    right = self.visit(node.right)
+    return f'{left} {operator} {right}'
+
+  def visit_BinaryOperatorNode(self, node: BinaryOperatorNode) -> str:
+    left = self.visit(node.left)
+    operator = self.visit(node.operator)
+    right = self.visit(node.right)
+    return f'{left} {operator} {right}'
+
+  def visit_BlockNode(self, node: BlockNode) -> None:
+    for stmt in node.children:
+      self.visit(stmt)
+
+  def visit_BooleanOperatorNode(self, node: BooleanOperatorNode) -> str:
+    left = self.visit(node.left)
+    operator = self.visit(node.operator)
+    right = self.visit(node.right)
+    return f'{left} {operator} {right}'
+
+  def visit_BreakStatementNode(self, node: BreakStatementNode) -> None:
+    self.write_line('break')
+
+  def visit_CallNode(self, node: CallNode) -> str:
+    function = self.visit(node.function)
+    arguments = self.visit(node.arguments)
+    return f'{function}({arguments})'
+
+  def visit_CommentNode(self, node: CommentNode) -> None:
+    self.write_line(f'{node.children[0].node_type}')
+
+  def visit_ComparisonOperatorNode(self, node: ComparisonOperatorNode) -> str:
+    '''
+    NOTE `comparison_operator` uses a field `operators`.
+    There might be multiple comparison operators in a single node.
+    In this implementation, we are not using this field.
+    '''
+    left_node = node.children[0]
+    assert left_node.is_nonterminal(), 'left node is expected to be non-terminal'
+    left = self.visit(left_node)
+
+    # NOTE operator may span two terminal nodes as in `not in` and `is not`
+    rem_ch_queue = node.children[1:]
+    while len(rem_ch_queue) > 0:
+      operator, right = '', ''
+
+      # at least one operator token is always present
+      op_node_first = rem_ch_queue.pop(0)
+      assert op_node_first.is_terminal(), 'operator node is expected to be terminal'
+      operator = self.visit(op_node_first)
+
+      # second operator token is not always present
+      op_node_second = rem_ch_queue.pop(0)
+      if op_node_second.is_terminal():
+        assert (op_node_first.node_type, op_node_second.node_type) in [('not', 'in'), ('is', 'not')], \
+          'operator is expected to be `not in` or `is not`'
+        operator += f' {self.visit(op_node_second)}'
+        right_node = rem_ch_queue.pop(0)
+      else:
+        right_node = op_node_second
+
+      assert right_node.is_nonterminal(), 'right node is expected to be non-terminal'
+
+      right = self.visit(right_node)
+
+      # append to the right
+      left = f'{left} {operator} {right}'
+
+    return left
+
+  def visit_ConditionalExpressionNode(self, node: ConditionalExpressionNode) -> str:
+    assert len(node.get_children()) == 5, 'per grammar: sanity check'
+    assert len(node.get_nt_children()) == 3, 'per grammar: sanity check'
+    consequence = self.visit(node.get_nt_children()[0])
+    condition = self.visit(node.get_nt_children()[1])
+    alternative = self.visit(node.get_nt_children()[2])
+    return f'{consequence} if {condition} else {alternative}'
+
+  def visit_ContinueStatementNode(self, node: ContinueStatementNode) -> None:
+    self.write_line('continue')
+
+  def visit_DecoratedDefinitionNode(self, node: DecoratedDefinitionNode) -> None:
+    '''
+    According to grammar, `definition` is the last child.
+    '''
+    assert all(child.is_nonterminal() for child in node.children), 'all children must be non-terminal'
+    assert node.definition is node.children[-1], 'per grammar: definition is the last child'
+    for dec_node in node.children[:-1]:
+      decorator = self.visit(dec_node)
+      self.write_line(decorator)
+    self.visit(node.definition)
+
+  def visit_DecoratorNode(self, node: DecoratorNode) -> str:
+    return f'@{self.visit(node.children[1])}'
+
+  def visit_DeleteStatementNode(self, node: DeleteStatementNode) -> None:
+    targets = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    self.write_line(f'del {targets}')
+
+  def visit_DictionaryComprehensionNode(self, node: DictionaryComprehensionNode) -> str:
+    '''
+    Similar to `list_comprehension`
+    '''
+    nt_children = node.get_nt_children()
+    assert len(nt_children) >= 2, 'per grammar: there must be at least two non-terminal children'
+    body = self.visit(node.body)
+    assert nt_children[0] is node.body, 'per grammar: first non-terminal child is the body'
+    clauses = ' '.join([self.visit(child) for child in nt_children[1:]])
+    return f'{{{body} {clauses}}}'
+
+  def visit_DictionaryNode(self, node: DictionaryNode) -> str:
+    pairs = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'{{{pairs}}}'
+
+  def visit_DottedNameNode(self, node: DottedNameNode) -> str:
+    return '.'.join([self.visit(child) for child in node.children])
+
+  def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
+    assert len(node.get_nt_children()) == 2, 'per grammar: there must be exactly two non-terminal children'
+    cond = self.visit(node.condition)
+    self.write_line(f'elif {cond}:')
+    self.level += 1
+    self.visit(node.consequence)
+    self.level -= 1
+
+  def visit_ElseClauseNode(self, node: ElseClauseNode) -> None:
+    assert len(node.get_nt_children()) == 1, 'per grammar: there must be exactly one non-terminal child'
+    self.write_line('else:')
+    self.level += 1
+    self.visit(node.body)
+    self.level -= 1
+
+  def visit_ExpressionListNode(self, node: ExpressionListNode) -> str:
+    expressions = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return expressions
+
+  def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
+    assert len(node.children) == 1, 'sanity check'
+    code = self.visit(node.children[0])
+    self.write_line(code)
+
+  def visit_FalseNode(self, node: FalseNode) -> str:
+    return 'False'
+
+  def visit_FloatNode(self, node: FloatNode) -> str:
+    return node.val()
+
+  def visit_ForInClauseNode(self, node: ForInClauseNode) -> str:
+    '''
+    TODO async is not supported
+    '''
+    left = self.visit(node.left)
+    right = self.visit(node.right)
+    return f'for {left} in {right}'
+
+  def visit_ForStatementNode(self, node: ForStatementNode) -> None:
+    '''
+    TODO async is not supported
+    TODO alternative is not supported
+    '''
+    left = self.visit(node.left)
+    right = self.visit(node.right)
+    self.write_line(f'for {left} in {right}:')
+    self.level += 1
+    self.visit(node.body)
+    self.level -= 1
+    if node.alternative:
+      self.visit(node.alternative)
+
+  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
+    '''
+    TODO `async` is not supported
+    '''
+    name = self.visit(node.name)
+    params = self.visit(node.parameters)
+    # return type annotation is optional
+    if node.return_type:
+      return_type = self.visit(node.return_type)
+      self.write_line(f'def {name}{params} -> {return_type}:')
+    else:
+      self.write_line(f'def {name}{params}:')
+    self.level += 1
+    self.visit(node.body)
+    self.level -= 1
+
+  def visit_GeneratorExpressionNode(self, node: GeneratorExpressionNode) -> str:
+    nt_children = node.get_nt_children()
+    assert len(nt_children) >= 2, 'per grammar: there must be at least two non-terminal children'
+    body = self.visit(node.body)
+    assert nt_children[0] is node.body, 'per grammar: first non-terminal child is the body'
+    clauses = ' '.join([self.visit(child) for child in nt_children[1:]])
+    return f'({body} {clauses})'
+
+  def visit_IdentifierNode(self, node: IdentifierNode) -> str:
+    return node.val()
+
+  def visit_IfClauseNode(self, node: IfClauseNode) -> str:
+    cond = self.visit(node.children[1])
+    return f'if {cond}'
+
+  def visit_IfStatementNode(self, node: IfStatementNode) -> None:
+    '''
+    Access `alternative` fields by child index.
+    Better way to do this is to use field names as attributes (really?)
+    '''
+    cond = self.visit(node.condition)
+    self.write_line(f'if {cond}:')
+    self.level += 1
+    self.visit(node.consequence)
+    self.level -= 1
+
+    # alternatives are the third and later children
+    if len(node.get_nt_children()) <= 2:
+      return
+    for alt in node.get_nt_children()[2:]:
+      self.visit(alt)
+
+  def visit_ImportFromStatementNode(self, node: ImportFromStatementNode) -> None:
+    module_name = self.visit(node.module_name)
+    imports : str = ', '.join([self.visit(child) for child in node.get_nt_children()[1:]])
+    code = f'from {module_name} import {imports}'
+    self.write_line(code)
+
+  def visit_ImportStatementNode(self, node: ImportStatementNode) -> None:
+    nt_children = node.get_nt_children()
+    assert len(nt_children) == 1, 'per grammar: there must be exactly one non-terminal child'
+    import_list : str = self.visit(nt_children[0])
+    self.write_line(f'import {import_list}')
+
+  def visit_IntegerNode(self, node: IntegerNode) -> str:
+    return node.val()
+
+  def visit_KeywordArgumentNode(self, node: KeywordArgumentNode) -> str:
+    name = self.visit(node.name)
+    value = self.visit(node.value)
+    return f'{name}={value}'
+
+  def visit_LambdaNode(self, node: LambdaNode) -> str:
+    '''
+    lambda parameters are optional according to grammar
+    '''
+    if node.parameters is None:
+      params = ''
+    else:
+      params = f' {self.visit(node.parameters)}'
+    body = self.visit(node.body)
+    return f'lambda{params}: {body}'
+
+  def visit_LambdaParametersNode(self, node: LambdaParametersNode) -> str:
+    params = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'{params}'
+
+  def visit_ListComprehensionNode(self, node: ListComprehensionNode) -> str:
+    '''
+    According to grammar, first and last children are brackets.
+    First non-terminal child is the body of the list comprehension.
+    Remaining non-terminal children are comprehension clauses.
+    '''
+    nt_children = node.get_nt_children()
+    assert len(nt_children) >= 2, 'per grammar: there must be at least two non-terminal children'
+    body = self.visit(node.body)
+    assert nt_children[0] is node.body, 'per grammar: first non-terminal child is the body'
+    clauses = ' '.join([self.visit(child) for child in nt_children[1:]])
+    return f'[{body} {clauses}]'
+
+  def visit_ListNode(self, node: ListNode) -> str:
+    elements = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'[{elements}]'
+
+  def visit_ListSplatNode(self, node: ListSplatNode) -> str:
+    return f'*{self.visit(node.children[1])}'
+
+  def visit_ModuleNode(self, node: ModuleNode) -> str:
+    for stmt in node.children:
+      self.visit(stmt)
+    return '\n'.join(self.lines)
+
+  def visit_NamedExpressionNode(self, node: NamedExpressionNode) -> str:
+    name = self.visit(node.name)
+    value = self.visit(node.value)
+    return f'{name} := {value}'
+
+  def visit_NoneNode(self, node: NoneNode) -> str:
+    return 'None'
+
+  def visit_NonlocalStatementNode(self, node: NonlocalStatementNode) -> None:
+    names = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    self.write_line(f'nonlocal {names}')
+
+  def visit_NotOperatorNode(self, node: NotOperatorNode) -> str:
+    argument = self.visit(node.argument)
+    return f'not {argument}'
+
+  def visit_PairNode(self, node: PairNode) -> str:
+    key = self.visit(node.key)
+    value = self.visit(node.value)
+    return f'{key}: {value}'
+
+  def visit_ParametersNode(self, node: ParametersNode) -> str:
+    params = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'({params})'
+
+  def visit_ParenthesizedExpressionNode(self, node: ParenthesizedExpressionNode) -> str:
+    assert len(node.children) == 3, 'per grammar: parenthesized expression has 3 children'
+    assert node.children[1].is_nonterminal(), 'per grammar: second child is non-terminal'
+    return f'({self.visit(node.children[1])})'
+
+  def visit_PassStatementNode(self, node: PassStatementNode) -> None:
+    self.write_line('pass')
+
+  def visit_PatternListNode(self, node: PatternListNode) -> str:
+    pattern_list = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'{pattern_list}'
+
+  def visit_ReturnStatementNode(self, node: ReturnStatementNode) -> None:
+    if len(node.get_nt_children()) == 0:
+      self.write_line('return')
+      return
+    assert len(node.get_nt_children()) == 1, 'there must be exactly one return value node'
+    return_value = self.visit(node.get_nt_children()[0])
+    self.write_line(f'return {return_value}')
+
+  def visit_SetComprehensionNode(self, node: SetComprehensionNode) -> str:
+    '''
+    Similar to `list_comprehension` and `dictionary_comprehension`
+    '''
+    nt_children = node.get_nt_children()
+    assert len(nt_children) >= 2, 'per grammar: there must be at least two non-terminal children'
+    body = self.visit(node.body)
+    assert nt_children[0] is node.body, 'per grammar: first non-terminal child is the body'
+    clauses = ' '.join([self.visit(child) for child in nt_children[1:]])
+    return f'{{{body} {clauses}}}'
+
+  def visit_SetNode(self, node: SetNode) -> str:
+    elements = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'{{{elements}}}'
+
+  def visit_SliceNode(self, node: SliceNode) -> str:
+    '''
+    Very tricky one :)
+    Need to use `:` as anchors.
+    '''
+    # first colon is always present
+    first_colon_idx = -1
+    for idx, child in enumerate(node.children):
+      if child.node_type == ':':
+        first_colon_idx = idx
+        break
+    assert first_colon_idx in [0, 1], 'sanity check: first colon is always present'
+
+    # second colon is optional
+    second_colon_idx = -1
+    for idx, child in enumerate(node.children[first_colon_idx + 1:], start=first_colon_idx + 1):
+      if child.node_type == ':':
+        second_colon_idx = idx
+        break
+
+    # all three are optional
+    start, stop, step = '', '', ''
+
+    # start optional is present
+    if first_colon_idx == 1:
+      assert node.children[0].is_nonterminal(), 'sanity check: start is non-terminal'
+      start = self.visit(node.children[0])
+
+    # second colon is missing
+    if second_colon_idx == -1:
+      # stop optional is present
+      if len(node.children) == first_colon_idx + 2:
+        assert node.children[first_colon_idx + 1].is_nonterminal(), 'sanity check: stop is non-terminal'
+        stop = self.visit(node.children[first_colon_idx + 1])
+      return f'{start}:{stop}'
+
+    # second colon is present
+    assert second_colon_idx > first_colon_idx, 'sanity check: second colon is after the first colon'
+
+    # stop optional is present
+    if second_colon_idx == first_colon_idx + 2:
+      assert node.children[first_colon_idx + 1].is_nonterminal(), 'sanity check: stop is non-terminal'
+      stop = self.visit(node.children[first_colon_idx + 1])
+
+    # step optional is present
+    if len(node.children) == second_colon_idx + 2:
+      assert node.children[second_colon_idx + 1].is_nonterminal(), 'sanity check: step is non-terminal'
+      step = self.visit(node.children[second_colon_idx + 1])
+
+    return f'{start}:{stop}:{step}'
+
+  def visit_StringNode(self, node: StringNode) -> str:
+    return node.val()
+
+  def visit_SubscriptNode(self, node: SubscriptNode) -> str:
+    value = self.visit(node.value)
+    subscript = self.visit(node.subscript)
+    return f'{value}[{subscript}]'
 
   def visit_TerminalNode(self, node: TerminalNode) -> str:
     return node.node_type
 
-  def visit__SuiteNode(self, node: _SuiteNode) -> str:
-    code = self.default_visit(node, delimiter='\n')
-    code = self.indent(code)
-    return '\n' + code
+  def visit_TrueNode(self, node: TrueNode) -> str:
+    return 'True'
+
+  def visit_TupleNode(self, node: TupleNode) -> str:
+    # tuple with one element
+    if len(node.get_nt_children()) == 1:
+      return f'({self.visit(node.get_nt_children()[0])},)'
+    elements = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'({elements})'
+
+  def visit_TuplePatternNode(self, node: TuplePatternNode) -> str:
+    patterns = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    return f'({patterns})'
+
+  def visit_TypeNode(self, node: TypeNode) -> str:
+    return self.visit(node.children[0])
+
+  def visit_TypedParameterNode(self, node: TypedParameterNode) -> str:
+    type_ = self.visit(node.type)
+    name = self.visit(node.children[0])
+    return f'{name}: {type_}'
+
+  def visit_UnaryOperatorNode(self, node: UnaryOperatorNode) -> str:
+    operator = self.visit(node.operator)
+    operand = self.visit(node.argument)
+    return f'{operator}{operand}'
+
+  def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
+    cond = self.visit(node.condition)
+    self.write_line(f'while {cond}:')
+    self.level += 1
+    self.visit(node.body)
+    self.level -= 1
+    if node.alternative:
+      self.visit(node.alternative)
+
+  def visit_WildcardImportNode(self, node: WildcardImportNode) -> str:
+    return '*'
 
 
 class ParametrizableVariablesCollector(Visitor):
@@ -993,7 +1610,7 @@ class ParametrizableVariablesCollector(Visitor):
 
 # TEST HARNESSES
 def _test_pretty_printer():
-  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
+  snippet = p_utils.read_tmp_text('test_pp.py')
   src_lang = 'py'
 
   parser = p_consts.PARSER_DICT[src_lang]
@@ -1003,17 +1620,6 @@ def _test_pretty_printer():
   pp = PrettyPrinter()
   code = pp.visit(tree.root_node)
   print(code)
-
-
-def _test_tree_from_ts_tree():
-  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
-  src_lang = 'py'
-
-  # logic
-  parser = p_consts.PARSER_DICT[src_lang]
-  ts_tree = parser.parse(bytes(snippet, 'utf8'))
-  tree = Tree.from_ts_tree(ts_tree)
-  print()
 
 
 def _test_parametrizable_variables_collector():
