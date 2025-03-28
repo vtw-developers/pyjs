@@ -1,267 +1,167 @@
+'''
+This module provides classes for working with Python ASTs.
+
+Classes:
+  - *Node: classes that represent nodes in a Python AST
+  - Tree: represents a Python AST
+  - PrettyPrinter: a visitor class that prints a Python AST in a readable format
+  - ParametrizableVariablesCollector: a visitor class that collects parametrizable variables in a Python AST
+  - PrintStatementInserter: a visitor class that inserts print statements in a Python AST
+
+Constants:
+  - NODE_TYPES_CLASSES: dictionary that maps node types to their respective classes
+  - NODES_WITH_FIELDS: list of node types that have fields
+'''
+
+
 from __future__ import annotations
 
 import tree_sitter
-from abc import ABC
-from typing import final, Any, Dict, List, Union
+from typing import Dict, List, Union
 
 import p_consts
 import p_utils
+import p_visitor as pvis
 
 
-class Visitor(ABC):
-  @final
-  def visit(self, node: AbstractNode) -> Any:
-    '''
-    This is a dispatcher method that either calls `self.visit_<NodeClass>()`
-    if it exists. Otherwise, falls back to `self.default_visit()`.
-    <NodeClass> is a CamelCase class name for parameter `node`.
-    NOTE this method is intended to be final, i.e. not be overridden.
-    '''
-    method_name = 'visit_' + node.__class__.__name__
-    visit_method = getattr(self, method_name, self.default_visit)
-    return visit_method(node)
-
-  def default_visit(self, node: AbstractNode) -> None:
-    '''
-    Default visit method for all nodes.
-    NOTE can be overridden in subclasses.
-    '''
-    for child in node.children:
-      self.visit(child)
-
-
-class AbstractNode(ABC):
-  '''
-  This is the base class for node classes.
-  All node classes should inherit from this class.
-  '''
-  def __init__(self, node_type: str) -> None:
-    self.node_type = node_type
-    self.children: List[AbstractNode] = []
-    self.parent = None
-
-  def __repr__(self) -> str:
-    return self.node_type
-
-  def add_child(self, child: AbstractNode):
-    self.children.append(child)
-
-  def get_children(self) -> List[AbstractNode]:
-    return self.children
-
-  def set_parent(self, parent: AbstractNode) -> None:
-    self.parent = parent
-
-  def get_parent(self) -> AbstractNode:
-    return self.parent
-
-  def get_root_node(self) -> AbstractNode:
-    '''
-    Return root_node of the tree that `self` belongs to
-    According to class invariant INV2, root_node's parent is itself.
-    '''
-    cursor = self
-    while cursor.parent is not None:
-      cursor = cursor.parent
-    return cursor
-
-  def get_path_to_self(self) -> List[int]:
-    '''
-    return path to `self` from the `root_node` of tree that `self` belongs to
-    '''
-    root_node = self.get_root_node()
-    return root_node.get_path_to_child(self)
-
-  def get_nt_children(self) -> List[AbstractNode]:
-    '''
-    Return a list of non-terminal children of `self`.
-    '''
-    return list(filter(lambda node: not isinstance(node, TerminalNode), self.children))
-
-  def is_ancestor_or_itself(self, other_node: AbstractNode) -> bool:
-    def _recurse(descendant: AbstractNode, other_node: AbstractNode) -> bool:
-      if id(descendant) == id(other_node):
-        return True
-      for child_node in descendant.get_children():
-        child_res = _recurse(child_node, other_node)
-        if child_res:
-          return True
-      return False
-    return _recurse(self, other_node)
-
-  def get_path_to_child(self, child_node: AbstractNode) -> List[int]:
-    '''return path to a node under self as a list of int indices'''
-    assert self.is_ancestor_or_itself(child_node)
-    def _rec_pre_order(path: List[int], node: AbstractNode) -> Union[None, List[int]]:
-      nonlocal child_node
-      if node == child_node:
-        return path
-      for i, nd in enumerate(node.get_children()):
-        child_result = _rec_pre_order(path + [i], nd)
-        if child_result is not None:
-          return child_result
-      return None
-    path = _rec_pre_order([], self)
-    assert path is not None, 'should not happen'
-    return path
-
-  def get_child_by_path(self, rel_path: List[int]) -> Union[AbstractNode, None]:
-    '''return a child node by a relative path from self, None if not found'''
-    try:
-      child_node = self
-      for child_idx in rel_path:
-        child_node = child_node.get_children()[child_idx]
-      return child_node
-    except IndexError:
-      return None
-
-  def is_terminal(self) -> bool:
-    return isinstance(self, TerminalNode)
-
-  def is_nonterminal(self) -> bool:
-    return not self.is_terminal()
-
-class TerminalNode(AbstractNode):
-  def __repr__(self) -> str:
-    return f'Terminal({repr(self.node_type)})'
-class _CollectionElementsNode(AbstractNode): pass
-class _CompoundStatementNode(AbstractNode): pass
-class _ComprehensionClausesNode(AbstractNode): pass
-class _ExpressionWithinForInClauseNode(AbstractNode): pass
-class _ExpressionsNode(AbstractNode): pass
-class _ImportListNode(AbstractNode): pass
-class _LeftHandSideNode(AbstractNode): pass
-class _ParametersNode(AbstractNode): pass
-class _PatternsNode(AbstractNode): pass
-class _RightHandSideNode(AbstractNode): pass
-class _SimpleStatementNode(AbstractNode): pass
-class _SimpleStatementsNode(AbstractNode): pass
-class _StatementNode(AbstractNode): pass
-class _SuiteNode(AbstractNode): pass
-class AliasedImportNode(AbstractNode): pass
-class ArgumentListNode(AbstractNode): pass
-class AssertStatementNode(AbstractNode): pass
-class AssignmentNode(AbstractNode):
+class _CollectionElementsNode(pvis.AbstractNode): pass
+class _CompoundStatementNode(pvis.AbstractNode): pass
+class _ComprehensionClausesNode(pvis.AbstractNode): pass
+class _ExpressionWithinForInClauseNode(pvis.AbstractNode): pass
+class _ExpressionsNode(pvis.AbstractNode): pass
+class _ImportListNode(pvis.AbstractNode): pass
+class _LeftHandSideNode(pvis.AbstractNode): pass
+class _ParametersNode(pvis.AbstractNode): pass
+class _PatternsNode(pvis.AbstractNode): pass
+class _RightHandSideNode(pvis.AbstractNode): pass
+class _SimpleStatementNode(pvis.AbstractNode): pass
+class _SimpleStatementsNode(pvis.AbstractNode): pass
+class _StatementNode(pvis.AbstractNode): pass
+class _SuiteNode(pvis.AbstractNode): pass
+class AliasedImportNode(pvis.AbstractNode): pass
+class ArgumentListNode(pvis.AbstractNode): pass
+class AssertStatementNode(pvis.AbstractNode): pass
+class AssignmentNode(pvis.AbstractNode):
   def __init__(self, node_type: str):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.type : AbstractNode = None
-    self.right : AbstractNode = None
-class AttributeNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.type : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+class AttributeNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.object : AbstractNode = None
-    self.attribute : AbstractNode = None
-class AugmentedAssignmentNode(AbstractNode):
+    self.object : pvis.AbstractNode = None
+    self.attribute : pvis.AbstractNode = None
+class AugmentedAssignmentNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.operator : AbstractNode = None
-    self.right : AbstractNode = None
-class AwaitNode(AbstractNode): pass
-class BinaryOperatorNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.operator : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+class AwaitNode(pvis.AbstractNode): pass
+class BinaryOperatorNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.operator : AbstractNode = None
-    self.right : AbstractNode = None
-class BlockNode(AbstractNode): pass
-class BooleanOperatorNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.operator : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+class BlockNode(pvis.AbstractNode): pass
+class BooleanOperatorNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.operator : AbstractNode = None
-    self.right : AbstractNode = None
-class BreakStatementNode(AbstractNode): pass
-class CallNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.operator : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+class BreakStatementNode(pvis.AbstractNode): pass
+class CallNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.function : AbstractNode = None
-    self.arguments : AbstractNode = None
-class ChevronNode(AbstractNode): pass
-class ClassDefinitionNode(AbstractNode): pass
-class CommentNode(AbstractNode): pass
-class ComparisonOperatorNode(AbstractNode): pass
-class ConcatenatedStringNode(AbstractNode): pass
-class ConditionalExpressionNode(AbstractNode): pass
-class ContinueStatementNode(AbstractNode): pass
-class DecoratedDefinitionNode(AbstractNode):
+    self.function : pvis.AbstractNode = None
+    self.arguments : pvis.AbstractNode = None
+class ChevronNode(pvis.AbstractNode): pass
+class ClassDefinitionNode(pvis.AbstractNode): pass
+class CommentNode(pvis.AbstractNode): pass
+class ComparisonOperatorNode(pvis.AbstractNode): pass
+class ConcatenatedStringNode(pvis.AbstractNode): pass
+class ConditionalExpressionNode(pvis.AbstractNode): pass
+class ContinueStatementNode(pvis.AbstractNode): pass
+class DecoratedDefinitionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.definition : AbstractNode = None
-class DecoratorNode(AbstractNode): pass
-class DefaultParameterNode(AbstractNode): pass
-class DeleteStatementNode(AbstractNode): pass
-class DictionaryNode(AbstractNode): pass
-class DictionaryComprehensionNode(AbstractNode):
+    self.definition : pvis.AbstractNode = None
+class DecoratorNode(pvis.AbstractNode): pass
+class DefaultParameterNode(pvis.AbstractNode): pass
+class DeleteStatementNode(pvis.AbstractNode): pass
+class DictionaryNode(pvis.AbstractNode): pass
+class DictionaryComprehensionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.body : AbstractNode = None
-class DictionarySplatNode(AbstractNode): pass
-class DictionarySplatPatternNode(AbstractNode): pass
-class DottedNameNode(AbstractNode): pass
-class ElifClauseNode(AbstractNode):
+    self.body : pvis.AbstractNode = None
+class DictionarySplatNode(pvis.AbstractNode): pass
+class DictionarySplatPatternNode(pvis.AbstractNode): pass
+class DottedNameNode(pvis.AbstractNode): pass
+class ElifClauseNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.condition : AbstractNode = None
-    self.consequence : AbstractNode = None
-class EllipsisNode(AbstractNode): pass
-class ElseClauseNode(AbstractNode):
+    self.condition : pvis.AbstractNode = None
+    self.consequence : pvis.AbstractNode = None
+class EllipsisNode(pvis.AbstractNode): pass
+class ElseClauseNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.body : AbstractNode = None
-class EscapeInterpolationNode(AbstractNode): pass
-class EscapeSequenceNode(AbstractNode): pass
-class ExceptClauseNode(AbstractNode): pass
-class ExecStatementNode(AbstractNode): pass
-class ExpressionNode(AbstractNode): pass
-class ExpressionListNode(AbstractNode): pass
-class ExpressionStatementNode(AbstractNode): pass
-class FalseNode(AbstractNode): pass
-class FinallyClauseNode(AbstractNode): pass
-class FloatNode(AbstractNode):
+    self.body : pvis.AbstractNode = None
+class EscapeInterpolationNode(pvis.AbstractNode): pass
+class EscapeSequenceNode(pvis.AbstractNode): pass
+class ExceptClauseNode(pvis.AbstractNode): pass
+class ExecStatementNode(pvis.AbstractNode): pass
+class ExpressionNode(pvis.AbstractNode): pass
+class ExpressionListNode(pvis.AbstractNode): pass
+class ExpressionStatementNode(pvis.AbstractNode): pass
+class FalseNode(pvis.AbstractNode): pass
+class FinallyClauseNode(pvis.AbstractNode): pass
+class FloatNode(pvis.AbstractNode):
   def val(self) -> str:
     assert len(self.children) == 1, 'sanity check'
-    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
-class ForInClauseNode(AbstractNode):
+class ForInClauseNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.right : AbstractNode = None
-class ForStatementNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+class ForStatementNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.left : AbstractNode = None
-    self.right : AbstractNode = None
-    self.body : AbstractNode = None
-    self.alternative : AbstractNode = None
-class FormatExpressionNode(AbstractNode): pass
-class FormatSpecifierNode(AbstractNode): pass
-class FunctionDefinitionNode(AbstractNode):
+    self.left : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
+    self.alternative : pvis.AbstractNode = None
+class FormatExpressionNode(pvis.AbstractNode): pass
+class FormatSpecifierNode(pvis.AbstractNode): pass
+class FunctionDefinitionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.name : AbstractNode = None
-    self.parameters : AbstractNode = None
-    self.return_type : AbstractNode = None
-    self.body : AbstractNode = None
-class FutureImportStatementNode(AbstractNode): pass
-class GeneratorExpressionNode(AbstractNode):
+    self.name : pvis.AbstractNode = None
+    self.parameters : pvis.AbstractNode = None
+    self.return_type : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
+class FutureImportStatementNode(pvis.AbstractNode): pass
+class GeneratorExpressionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.body : AbstractNode = None
-class GlobalStatementNode(AbstractNode): pass
-class IdentifierNode(AbstractNode):
+    self.body : pvis.AbstractNode = None
+class GlobalStatementNode(pvis.AbstractNode): pass
+class IdentifierNode(pvis.AbstractNode):
   def __init__(self, node_type: str):
     super().__init__(node_type)
   def __repr__(self) -> str:
     return f'ID({self.val()})'
   def val(self) -> str:
     assert len(self.children) == 1, 'sanity check'
-    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
-class IfClauseNode(AbstractNode): pass
-class IfStatementNode(AbstractNode):
+class IfClauseNode(pvis.AbstractNode): pass
+class IfStatementNode(pvis.AbstractNode):
   '''
   In tree-sitter AST, multiple nodes may appear under a single field `alternative`.
   Since a single attribute holds a single node,
@@ -269,120 +169,120 @@ class IfStatementNode(AbstractNode):
   '''
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.condition : AbstractNode = None
-    self.consequence : AbstractNode = None
-    self.alternatives : List[AbstractNode] = []
-class ImportFromStatementNode(AbstractNode):
+    self.condition : pvis.AbstractNode = None
+    self.consequence : pvis.AbstractNode = None
+    self.alternatives : List[pvis.AbstractNode] = []
+class ImportFromStatementNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.module_name : AbstractNode = None
-class ImportPrefixNode(AbstractNode): pass
-class ImportStatementNode(AbstractNode): pass
-class IntegerNode(AbstractNode):
+    self.module_name : pvis.AbstractNode = None
+class ImportPrefixNode(pvis.AbstractNode): pass
+class ImportStatementNode(pvis.AbstractNode): pass
+class IntegerNode(pvis.AbstractNode):
   def val(self) -> str:
     assert len(self.children) == 1, 'sanity check'
-    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
-class InterpolationNode(AbstractNode): pass
-class KeywordArgumentNode(AbstractNode):
+class InterpolationNode(pvis.AbstractNode): pass
+class KeywordArgumentNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.name : AbstractNode = None
-    self.value : AbstractNode = None
-class KeywordIdentifierNode(AbstractNode): pass
-class LambdaNode(AbstractNode):
+    self.name : pvis.AbstractNode = None
+    self.value : pvis.AbstractNode = None
+class KeywordIdentifierNode(pvis.AbstractNode): pass
+class LambdaNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.parameters : AbstractNode = None
-    self.body : AbstractNode = None
-class LambdaParametersNode(AbstractNode): pass
-class LambdaWithinForInClauseNode(AbstractNode): pass
-class ListNode(AbstractNode): pass
-class ListComprehensionNode(AbstractNode):
+    self.parameters : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
+class LambdaParametersNode(pvis.AbstractNode): pass
+class LambdaWithinForInClauseNode(pvis.AbstractNode): pass
+class ListNode(pvis.AbstractNode): pass
+class ListComprehensionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.body : AbstractNode = None
-class ListPatternNode(AbstractNode): pass
-class ListSplatNode(AbstractNode): pass
-class ListSplatPatternNode(AbstractNode): pass
-class ModuleNode(AbstractNode): pass
-class NamedExpressionNode(AbstractNode):
+    self.body : pvis.AbstractNode = None
+class ListPatternNode(pvis.AbstractNode): pass
+class ListSplatNode(pvis.AbstractNode): pass
+class ListSplatPatternNode(pvis.AbstractNode): pass
+class ModuleNode(pvis.AbstractNode): pass
+class NamedExpressionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.name : AbstractNode = None
-    self.value : AbstractNode = None
-class NoneNode(AbstractNode): pass
-class NonlocalStatementNode(AbstractNode): pass
-class NotEscapeSequenceNode(AbstractNode): pass
-class NotOperatorNode(AbstractNode):
+    self.name : pvis.AbstractNode = None
+    self.value : pvis.AbstractNode = None
+class NoneNode(pvis.AbstractNode): pass
+class NonlocalStatementNode(pvis.AbstractNode): pass
+class NotEscapeSequenceNode(pvis.AbstractNode): pass
+class NotOperatorNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.argument : AbstractNode = None
-class PairNode(AbstractNode):
+    self.argument : pvis.AbstractNode = None
+class PairNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.key : AbstractNode = None
-    self.value : AbstractNode = None
-class ParameterNode(AbstractNode): pass
-class ParametersNode(AbstractNode): pass
-class ParenthesizedExpressionNode(AbstractNode): pass
-class ParenthesizedListSplatNode(AbstractNode): pass
-class PassStatementNode(AbstractNode): pass
-class PatternNode(AbstractNode): pass
-class PatternListNode(AbstractNode): pass
-class PrimaryExpressionNode(AbstractNode): pass
-class PrintStatementNode(AbstractNode): pass
-class RaiseStatementNode(AbstractNode): pass
-class RelativeImportNode(AbstractNode): pass
-class ReturnStatementNode(AbstractNode): pass
-class SetNode(AbstractNode): pass
-class SetComprehensionNode(AbstractNode):
+    self.key : pvis.AbstractNode = None
+    self.value : pvis.AbstractNode = None
+class ParameterNode(pvis.AbstractNode): pass
+class ParametersNode(pvis.AbstractNode): pass
+class ParenthesizedExpressionNode(pvis.AbstractNode): pass
+class ParenthesizedListSplatNode(pvis.AbstractNode): pass
+class PassStatementNode(pvis.AbstractNode): pass
+class PatternNode(pvis.AbstractNode): pass
+class PatternListNode(pvis.AbstractNode): pass
+class PrimaryExpressionNode(pvis.AbstractNode): pass
+class PrintStatementNode(pvis.AbstractNode): pass
+class RaiseStatementNode(pvis.AbstractNode): pass
+class RelativeImportNode(pvis.AbstractNode): pass
+class ReturnStatementNode(pvis.AbstractNode): pass
+class SetNode(pvis.AbstractNode): pass
+class SetComprehensionNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.body : AbstractNode = None
-class SliceNode(AbstractNode): pass
-class StringNode(AbstractNode):
+    self.body : pvis.AbstractNode = None
+class SliceNode(pvis.AbstractNode): pass
+class StringNode(pvis.AbstractNode):
   '''NOTE may not support all types of quoted strings'''
   def val(self) -> str:
     assert len(self.children) == 1, 'sanity check'
-    assert isinstance(self.children[0], TerminalNode), 'sanity check'
+    assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
-class SubscriptNode(AbstractNode):
+class SubscriptNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.value : AbstractNode = None
-    self.subscript : AbstractNode = None
-class TrueNode(AbstractNode): pass
-class TryStatementNode(AbstractNode): pass
-class TupleNode(AbstractNode): pass
-class TuplePatternNode(AbstractNode): pass
-class TypeNode(AbstractNode): pass
-class TypeConversionNode(AbstractNode): pass
-class TypedDefaultParameterNode(AbstractNode): pass
-class TypedParameterNode(AbstractNode):
+    self.value : pvis.AbstractNode = None
+    self.subscript : pvis.AbstractNode = None
+class TrueNode(pvis.AbstractNode): pass
+class TryStatementNode(pvis.AbstractNode): pass
+class TupleNode(pvis.AbstractNode): pass
+class TuplePatternNode(pvis.AbstractNode): pass
+class TypeNode(pvis.AbstractNode): pass
+class TypeConversionNode(pvis.AbstractNode): pass
+class TypedDefaultParameterNode(pvis.AbstractNode): pass
+class TypedParameterNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.type : AbstractNode = None
-class UnaryOperatorNode(AbstractNode):
+    self.type : pvis.AbstractNode = None
+class UnaryOperatorNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.operator : AbstractNode = None
-    self.argument : AbstractNode = None
-class WhileStatementNode(AbstractNode):
+    self.operator : pvis.AbstractNode = None
+    self.argument : pvis.AbstractNode = None
+class WhileStatementNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
-    self.condition : AbstractNode = None
-    self.body : AbstractNode = None
-    self.alternative : AbstractNode = None
-class WildcardImportNode(AbstractNode): pass
-class WithClauseNode(AbstractNode): pass
-class WithItemNode(AbstractNode): pass
-class WithStatementNode(AbstractNode): pass
-class YieldNode(AbstractNode): pass
+    self.condition : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
+    self.alternative : pvis.AbstractNode = None
+class WildcardImportNode(pvis.AbstractNode): pass
+class WithClauseNode(pvis.AbstractNode): pass
+class WithItemNode(pvis.AbstractNode): pass
+class WithStatementNode(pvis.AbstractNode): pass
+class YieldNode(pvis.AbstractNode): pass
 
 
-NODE_TYPES_CLASSES: Dict[str, AbstractNode] = {
-  'terminal': TerminalNode,
+NODE_TYPES_CLASSES: Dict[str, pvis.AbstractNode] = {
+  'terminal': pvis.TerminalNode,
   '_collection_elements': _CollectionElementsNode,
   '_compound_statement': _CompoundStatementNode,
   '_comprehension_clauses': _ComprehensionClausesNode,
@@ -505,14 +405,42 @@ NODE_TYPES_CLASSES: Dict[str, AbstractNode] = {
   'yield': YieldNode,
 }
 
+NODES_WITH_FIELDS = [
+  'attribute',
+  'assignment',
+  'augmented_assignment',
+  'binary_operator',
+  'boolean_operator',
+  'call',
+  'decorated_definition',
+  'dictionary_comprehension',
+  'elif_clause',
+  'else_clause',
+  'for_in_clause',
+  'function_definition',
+  'generator_expression',
+  'import_from_statement',
+  'lambda',
+  'list_comprehension',
+  'keyword_argument',
+  'named_expression',
+  'not_operator',
+  'pair',
+  'set_comprehension',
+  'subscript',
+  'typed_parameter',
+  'unary_operator',
+  'while_statement',
+]
+
 
 class Tree:
   '''
-  Class that represents an AST that was generated by p_grammar.TreeSitterGrammar.generate_simplest_ast.
-  This class is compatible with `Visitor` classes.
+  Class that represents a Python AST.
+  This class is compatible with `pvis.Visitor` classes.
   '''
-  def __init__(self, root_node: AbstractNode) -> None:
-    self.root_node: AbstractNode = root_node
+  def __init__(self, root_node: pvis.AbstractNode) -> None:
+    self.root_node: pvis.AbstractNode = root_node
 
   def __repr__(self) -> str:
     return f'Tree({self.root_node.node_type})'
@@ -522,10 +450,10 @@ class Tree:
     '''
     Construct a Tree from a structure generated by p_grammar.TreeSitterGrammar.generate_simplest_ast
     '''
-    def _rec_construct_at(parent_node: AbstractNode, node: Union[list, str]) -> None:
+    def _rec_construct_at(parent_node: pvis.AbstractNode, node: Union[list, str]) -> None:
       # base case: `node` is terminal
       if isinstance(node, str):
-        new_node = TerminalNode(node)
+        new_node = pvis.TerminalNode(node)
         parent_node.add_child(new_node)
         new_node.set_parent(parent_node)
         return
@@ -550,38 +478,12 @@ class Tree:
     '''
     Construct a Tree from a parsed tree-sitter tree
     NOTE we can also use `text` attribute of `ts_tree`
-    '''
 
-    # special treatment for some nodes
-    # these nodes have fields that we want to access as attributes
-    # check `_create_special_node` for more details.
-    _NODES_WITH_FIELDS = [
-      'attribute',
-      'assignment',
-      'augmented_assignment',
-      'binary_operator',
-      'boolean_operator',
-      'call',
-      'decorated_definition',
-      'dictionary_comprehension',
-      'elif_clause',
-      'else_clause',
-      'for_in_clause',
-      'function_definition',
-      'generator_expression',
-      'import_from_statement',
-      'lambda',
-      'list_comprehension',
-      'keyword_argument',
-      'named_expression',
-      'not_operator',
-      'pair',
-      'set_comprehension',
-      'subscript',
-      'typed_parameter',
-      'unary_operator',
-      'while_statement',
-    ]
+    PARAM nodes_with_fields: list of node types that have fields.
+    Special treatment for some nodes.
+    These nodes have fields that we want to access as attributes.
+    Check `_create_node_with_field` for more details.
+    '''
 
     def _create_StringNode(ts_node: tree_sitter.Node) -> StringNode:
       '''
@@ -590,7 +492,7 @@ class Tree:
       in tree-sitter trees, `string` nodes are not literal nodes.
       '''
       node = StringNode('string')
-      string_content_node = TerminalNode(ts_node.text.decode('utf-8'))
+      string_content_node = pvis.TerminalNode(ts_node.text.decode('utf-8'))
       node.add_child(string_content_node)
       string_content_node.set_parent(node)
       return node
@@ -665,14 +567,14 @@ class Tree:
       for_statement_node.alternative = else_clause_node
       return for_statement_node
 
-    def _create_node_with_field(ts_node: tree_sitter.Node) -> AbstractNode:
+    def _create_node_with_field(ts_node: tree_sitter.Node) -> pvis.AbstractNode:
       '''
       Special treatment for some nodes in tree-sitter trees.
       What is special about these nodes? They have fields.
       Their fields must be registered as attributes in their respective
       classes (see `AssignmentNode` for example). This special treatment
       allows us to access fields of these classes as attributes.
-      Check `_NODES_WITH_FIELDS` for the list of special nodes.
+      Check `NODES_WITH_FIELDS` for the list of special nodes.
 
       NOTE TODO in `if_statement`, there are multiple nodes under a single
       field `alternative`. Current implementation does not support it, as it
@@ -689,7 +591,8 @@ class Tree:
       ts_field_names = [ts_node.field_name_for_child(i) for i in range(len(ts_node.children))]
       ts_field_names = [fn for fn in ts_field_names if fn is not None]
 
-      # add children to the special node
+      # add children to the node with field
+      # register nodes as attributes using `setattr`
       for idx, ts_child in enumerate(ts_node.children):
         child_node = _rec_build_tree(ts_child)
         node_wfield.add_child(child_node)
@@ -702,7 +605,7 @@ class Tree:
 
       return node_wfield
 
-    def _rec_build_tree(ts_node: tree_sitter.Node) -> AbstractNode:
+    def _rec_build_tree(ts_node: tree_sitter.Node) -> pvis.AbstractNode:
       '''Construct a tree from a tree-sitter node recursively'''
       # base case: leaf node
       # might be a terminal node, literal node
@@ -712,12 +615,12 @@ class Tree:
 
         # terminal node
         if type_ == text:
-          return TerminalNode(text)
+          return pvis.TerminalNode(text)
 
         # literal node
         NodeCls = NODE_TYPES_CLASSES[type_]
         literal_node = NodeCls(type_)
-        tnode = TerminalNode(text)
+        tnode = pvis.TerminalNode(text)
         literal_node.add_child(tnode)
         tnode.set_parent(literal_node)
         return literal_node
@@ -739,7 +642,7 @@ class Tree:
 
       # special case: nodes with fields
       # NOTE might as well do this for all nodes
-      if ts_node.type in _NODES_WITH_FIELDS:
+      if ts_node.type in NODES_WITH_FIELDS:
         spec_node = _create_node_with_field(ts_node)
         return spec_node
 
@@ -769,7 +672,7 @@ class Tree:
     return tree
 
 
-class PrettyPrinter(Visitor):
+class PrettyPrinter(pvis.Visitor):
   def __init__(self, indent_with: str = '  ') -> None:
     super().__init__()
     # e.g. two spaces
@@ -790,7 +693,7 @@ class PrettyPrinter(Visitor):
     self.lines.append(self.indent() + line)
 
   # VISIT METHODS
-  def default_visit(self, node: AbstractNode) -> None:
+  def default_visit(self, node: pvis.AbstractNode) -> None:
     print('\n'.join(self.lines))
     raise NotImplementedError(f'visit_{node.__class__.__name__} not implemented')
 
@@ -1206,7 +1109,7 @@ class PrettyPrinter(Visitor):
     subscript = self.visit(node.subscript)
     return f'{value}[{subscript}]'
 
-  def visit_TerminalNode(self, node: TerminalNode) -> str:
+  def visit_TerminalNode(self, node: pvis.TerminalNode) -> str:
     return node.node_type
 
   def visit_TrueNode(self, node: TrueNode) -> str:
@@ -1249,7 +1152,7 @@ class PrettyPrinter(Visitor):
     return '*'
 
 
-class ParametrizableVariablesCollector(Visitor):
+class ParametrizableVariablesCollector(pvis.Visitor):
   '''
   Assume that the generated snippet will be a body of a function definition.
   This visitor collects all identifiers that are parametrizable for that function.
