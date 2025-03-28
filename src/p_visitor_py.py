@@ -581,6 +581,11 @@ class Tree:
       will save the last node under `alternative` as an attribute.
       The same issue is true for `comparison_operator`
       and its `operators` field.
+
+      NOTE TODO in order to fix the issue above, we can use the method
+      `children_by_field_name`, `child_by_field_name` to set multiple
+      nodes under the same field name into a single attribute
+      that is a list.
       '''
       # instantiate a special node
       ntype = ts_node.type
