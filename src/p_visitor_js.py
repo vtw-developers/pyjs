@@ -118,7 +118,11 @@ class JsxSelfClosingElementNode(pvis.AbstractNode): pass
 class JsxTextNode(pvis.AbstractNode): pass
 class LabeledStatementNode(pvis.AbstractNode): pass
 class LexicalDeclarationNode(pvis.AbstractNode): pass
-class MemberExpressionNode(pvis.AbstractNode): pass
+class MemberExpressionNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.object : pvis.AbstractNode = None
+    self.property : pvis.AbstractNode = None
 class MetaPropertyNode(pvis.AbstractNode): pass
 class MethodDefinitionNode(pvis.AbstractNode): pass
 class NamedImportsNode(pvis.AbstractNode): pass
@@ -137,7 +141,11 @@ class PatternNode(pvis.AbstractNode): pass
 class PrimaryExpressionNode(pvis.AbstractNode): pass
 class PrivatePropertyIdentifierNode(pvis.AbstractNode): pass
 class ProgramNode(pvis.AbstractNode): pass
-class RegexNode(pvis.AbstractNode): pass
+class RegexNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.pattern : pvis.AbstractNode = None
+    self.flags : pvis.AbstractNode = None
 class RegexFlagsNode(pvis.AbstractNode): pass
 class RegexPatternNode(pvis.AbstractNode): pass
 class RestPatternNode(pvis.AbstractNode): pass
@@ -147,7 +155,11 @@ class SpreadElementNode(pvis.AbstractNode): pass
 class StatementNode(pvis.AbstractNode): pass
 class StatementBlockNode(pvis.AbstractNode): pass
 class StringNode(pvis.AbstractNode): pass
-class SubscriptExpressionNode(pvis.AbstractNode): pass
+class SubscriptExpressionNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.object : pvis.AbstractNode = None
+    self.index : pvis.AbstractNode = None
 class SuperNode(pvis.AbstractNode): pass
 class SwitchBodyNode(pvis.AbstractNode): pass
 class SwitchCaseNode(pvis.AbstractNode): pass
@@ -174,6 +186,9 @@ class VariableDeclaratorNode(pvis.AbstractNode):
 class WhileStatementNode(pvis.AbstractNode): pass
 class WithStatementNode(pvis.AbstractNode): pass
 class YieldExpressionNode(pvis.AbstractNode): pass
+
+# CLASSES FOR EXTERNAL NODES
+class TemplateCharsNode(pvis.AbstractNode): pass
 
 
 NODE_TYPES_CLASSES: Dict[str, pvis.AbstractNode] = {
@@ -314,10 +329,20 @@ NODE_TYPES_CLASSES: Dict[str, pvis.AbstractNode] = {
 
   # aliases
   'property_identifier': IdentifierNode,
+  'shorthand_property_identifier': IdentifierNode,
+  'shorthand_property_identifier_pattern': IdentifierNode,
+  'statement_identifier': IdentifierNode,
+  'string_fragment': UnescapedDoubleStringFragmentNode,
+
+  # externals
+  'template_chars': TemplateCharsNode,
 }
 
 NODES_WITH_FIELDS = [
   'function',
+  'member_expression',
+  'regex',
+  'subscript_expression',
   'variable_declarator',
 ]
 
@@ -435,23 +460,113 @@ class Tree:
 
 
 class PrettyPrinter(pvis.Visitor):
-  def __init__(self):
-    super().__init__()
-    self.delimiter = ' '
+  # VISITOR METHODS
+  def default_visit(self, node: pvis.AbstractNode, delimiter: str = ' ') -> str:
+    code = ''
+    for child in node.children:
+      child_code = self.visit(child)
+      code += child_code + delimiter
+    return code.strip()
+
+  def visit_ArgumentsNode(self, node: ArgumentsNode) -> str:
+    assert node.children[0].is_terminal() and node.children[0].node_type == '(', 'sanity check: ( is terminal node'
+    assert node.children[-1].is_terminal() and node.children[-1].node_type == ')', 'sanity check: ) is terminal node'
+    arg_nodes = [ch for ch in node.children[1:-1] if ch.is_nonterminal() or ch.node_type in ['null', 'true', 'false']]
+    args = ', '.join([self.visit(child) for child in arg_nodes])
+    return f'({args})'
+
+  def visit_CallExpressionNode(self, node: CallExpressionNode) -> str:
+    return self.default_visit(node, delimiter='')
+
+  def visit_MemberExpressionNode(self, node: MemberExpressionNode) -> str:
+    obj = self.visit(node.object)
+    assert node.children[1].is_terminal(), 'sanity check: property is terminal node'
+    assert node.children[1].node_type in ['.', '?.'], 'sanity check: property is . or ?.'
+    chaining_op = self.visit(node.children[1])
+    prop = self.visit(node.property)
+    return f'{obj}{chaining_op}{prop}'
+
+  def visit_ProgramNode(self, node: ProgramNode) -> str:
+    entire_code = self.default_visit(node, delimiter='\n')
+    # delegate (almost) all pretty printing to jsbeautifier
+    return jsbeautifier.beautify(entire_code)
+
+  def visit_RegexNode(self, node: RegexNode) -> str:
+    '''
+    regex: $ => seq(
+      '/',
+      field('pattern', $.regex_pattern),
+      token.immediate('/'),
+      optional(field('flags', $.regex_flags))
+    ),
+    '''
+    pattern = self.visit(node.pattern)
+    flags = '' if node.flags is None else self.visit(node.flags)
+    return f'/{pattern}/{flags}'
+
+  def visit_StringNode(self, node: StringNode) -> str:
+    return self.default_visit(node, delimiter='')
+
+  def visit_SubscriptExpressionNode(self, node: SubscriptExpressionNode) -> str:
+    '''
+    NOTE As far as I remember, this whole implementation is written
+    because the jsbeautifier library could not handle subscript expressions properly.
+
+    subscript_expression: $ => prec.right('member', seq(
+      field('object', choice($.expression, $.primary_expression)),
+      optional('?.'),
+      '[', field('index', $._expressions), ']'
+    )),
+    '''
+    child_cursor = node.children[0]
+
+    assert node.object == child_cursor, 'sanity check: object is the first child'
+    obj = self.visit(node.object)
+
+    child_cursor = child_cursor.next_sibling()
+    chaining_op = ''
+    if child_cursor.is_terminal() and child_cursor.node_type == '?.':
+      chaining_op = self.visit(child_cursor)
+      child_cursor = child_cursor.next_sibling()
+
+    assert child_cursor.is_terminal() and child_cursor.node_type == '[', 'sanity check: [ is terminal node'
+
+    child_cursor = child_cursor.next_sibling()
+    index = self.visit(child_cursor)
+
+    child_cursor = child_cursor.next_sibling()
+    assert child_cursor.is_terminal() and child_cursor.node_type == ']', 'sanity check: ] is terminal node'
+    return f'{obj}{chaining_op}[{index}]'
+
+  def visit_TemplateCharsNode(self, node: TemplateCharsNode) -> str:
+    assert len(node.children) == 1, 'sanity check: only one child'
+    assert isinstance(node.children[0], pvis.TerminalNode), 'sanity check: child is terminal node'
+    return node.children[0].node_type
+
+  def visit_TemplateStringNode(self, node: TemplateStringNode) -> str:
+    return self.default_visit(node, delimiter='')
+
+  def visit_TemplateSubstitutionNode(self, node: TemplateSubstitutionNode) -> str:
+    return self.default_visit(node, delimiter='')
 
   def visit_TerminalNode(self, node: pvis.TerminalNode) -> str:
     return node.node_type
 
-  def visit_ProgramNode(self, node: ProgramNode) -> str:
-    entire_code = self.default_visit(node)
-    return jsbeautifier.beautify(entire_code)
+  def visit_UnaryExpressionNode(self, node: UnaryExpressionNode) -> str:
+    '''
+    unary_expression: $ => prec.left('unary_void', seq(
+      field('operator', choice('!', '~', '-', '+', 'typeof', 'void', 'delete')),
+      field('argument', $.expression)
+    )),
+    '''
+    # the following unary operators should be separated by a space
+    if node.children[0].is_terminal() and node.children[0].node_type in ['delete', 'void', 'typeof']:
+      return self.default_visit(node, delimiter=' ')
+    return self.default_visit(node, delimiter='')
 
-  def default_visit(self, node: pvis.AbstractNode) -> str:
-    code = ''
-    for child in node.children:
-      child_code = self.visit(child)
-      code += child_code + self.delimiter
-    return code.strip()
+  def visit_UnescapedDoubleStringFragmentNode(self, node: UnescapedDoubleStringFragmentNode) -> str:
+    assert node.children[0].is_terminal(), 'sanity check: child is terminal node'
+    return node.children[0].node_type
 
 
 # TEST HARNESSES

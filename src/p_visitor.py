@@ -61,6 +61,18 @@ class AbstractNode(ABC):
   def get_parent(self) -> AbstractNode:
     return self.parent
 
+  def next_sibling(self) -> Union[AbstractNode, None]:
+    '''
+    Return the next sibling of `self` if it exists, otherwise None.
+    '''
+    if self.parent is None:
+      return None
+    siblings = self.parent.get_children()
+    idx = siblings.index(self)
+    if idx + 1 < len(siblings):
+      return siblings[idx + 1]
+    return None
+
   def get_root_node(self) -> AbstractNode:
     '''
     Return root_node of the tree that `self` belongs to
