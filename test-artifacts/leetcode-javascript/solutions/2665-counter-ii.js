@@ -11,16 +11,15 @@
  * - decrement() reduces the current value by 1 and then returns it.
  * - reset() sets the current value to init and then returns it.
  */
-
 /**
  * @param {integer} init
  * @return { increment: Function, decrement: Function, reset: Function }
  */
 var createCounter = function(init) {
-  let current = init;
-  return {
-    increment: () => ++current,
-    decrement: () => --current,
-    reset: () => current = init,
-  };
+    let current = init;
+    return {
+        increment: () => ++current,
+        decrement: () => --current,
+        reset: () => current = init,
+    };
 };

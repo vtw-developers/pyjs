@@ -10,7 +10,6 @@
  * not have a left child, then the sum of the left subtree node values is
  * treated as 0. The rule is similar if the node does not have a right child.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,15 +23,17 @@
  * @return {number}
  */
 var findTilt = function(root) {
-  const result = { val: 0 };
-  dfs(root, result);
-  return result.val;
+    const result = {
+        val: 0
+    };
+    dfs(root, result);
+    return result.val;
 };
 
 function dfs(root, tilt) {
-  if (!root) return 0;
-  const left = dfs(root.left, tilt);
-  const right = dfs(root.right, tilt);
-  tilt.val += Math.abs(left - right);
-  return root.val + left + right;
+    if (!root) return 0;
+    const left = dfs(root.left, tilt);
+    const right = dfs(root.right, tilt);
+    tilt.val += Math.abs(left - right);
+    return root.val + left + right;
 }

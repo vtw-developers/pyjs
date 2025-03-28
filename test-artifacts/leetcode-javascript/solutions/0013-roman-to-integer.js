@@ -31,18 +31,22 @@
  *
  * Given a roman numeral, convert it to an integer.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var romanToInt = function(s) {
-  const map = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
-
-  return s.split('').reduce((result, v, i) => {
-    result += map[v] >= map[s[i + 1]] || s.length === i + 1
-      ? map[v]
-      : -1 * map[v];
-    return result;
-  }, 0);
+    const map = {
+        M: 1000,
+        D: 500,
+        C: 100,
+        L: 50,
+        X: 10,
+        V: 5,
+        I: 1
+    };
+    return s.split('').reduce((result, v, i) => {
+        result += map[v] >= map[s[i + 1]] || s.length === i + 1 ? map[v] : -1 * map[v];
+        return result;
+    }, 0);
 };

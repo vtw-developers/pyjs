@@ -16,20 +16,17 @@
  * It is guaranteed that every call to ping uses a strictly larger value of t than
  * the previous call.
  */
-
-
 var RecentCounter = function() {
-  this.queue = [];
+    this.queue = [];
 };
-
 /**
  * @param {number} t
  * @return {number}
  */
 RecentCounter.prototype.ping = function(t) {
-  this.queue.push(t);
-  while (this.queue[0] < t - 3000) {
-    this.queue.shift();
-  }
-  return this.queue.length;
+    this.queue.push(t);
+    while (this.queue[0] < t - 3000) {
+        this.queue.shift();
+    }
+    return this.queue.length;
 };

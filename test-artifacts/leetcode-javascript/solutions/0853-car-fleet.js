@@ -20,7 +20,6 @@
  *
  * Return the number of car fleets that will arrive at the destination.
  */
-
 /**
  * @param {number} target
  * @param {number[]} position
@@ -28,20 +27,18 @@
  * @return {number}
  */
 var carFleet = function(target, position, speed) {
-  const cars = position.map((pos, i) => ({
-    position: pos,
-    timeToTarget: (target - pos) / speed[i]
-  }));
-  cars.sort((a, b) => b.position - a.position);
-
-  let slowestTime = 0;
-  let result = 0;
-  for (const car of cars) {
-    if (car.timeToTarget > slowestTime) {
-      result++;
-      slowestTime = car.timeToTarget;
+    const cars = position.map((pos, i) => ({
+        position: pos,
+        timeToTarget: (target - pos) / speed[i]
+    }));
+    cars.sort((a, b) => b.position - a.position);
+    let slowestTime = 0;
+    let result = 0;
+    for (const car of cars) {
+        if (car.timeToTarget > slowestTime) {
+            result++;
+            slowestTime = car.timeToTarget;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

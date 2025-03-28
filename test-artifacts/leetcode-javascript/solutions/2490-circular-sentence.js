@@ -19,14 +19,12 @@
  *
  * Given a string sentence, return true if it is circular. Otherwise, return false.
  */
-
 /**
  * @param {string} sentence
  * @return {boolean}
  */
 var isCircularSentence = function(sentence) {
-  const match = sentence.match(/^\w$|^(\w).*\1$/) !== null;
-  const count = sentence.match(/(\w)(?=\s\1)/g)?.length || 0;
-
-  return match && count === sentence.split(/\s/).length - 1;
+    const match = sentence.match(/^\w$|^(\w).*\1$/) !== null;
+    const count = sentence.match(/(\w)(?=\s\1)/g)?.length || 0;
+    return match && count === sentence.split(/\s/).length - 1;
 };

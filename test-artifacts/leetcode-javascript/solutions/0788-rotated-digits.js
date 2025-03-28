@@ -15,36 +15,30 @@
  *
  * Given an integer n, return the number of good integers in the range [1, n].
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var rotatedDigits = function(n) {
-  let result = 0;
-
-  for (let i = 1; i <= n; i++) {
-    if (verify(i)) {
-      result++;
+    let result = 0;
+    for (let i = 1; i <= n; i++) {
+        if (verify(i)) {
+            result++;
+        }
     }
-  }
-
-  return result;
-
-  function verify(num) {
-    const digits = num.toString().split('');
-    let result = false;
-
-    for (const digit of digits) {
-      if (digit === '3' || digit === '4' || digit === '7') {
-        return false;
-      }
-
-      if (digit === '2' || digit === '5' || digit === '6' || digit === '9') {
-        result = true;
-      }
-    }
-
     return result;
-  }
+
+    function verify(num) {
+        const digits = num.toString().split('');
+        let result = false;
+        for (const digit of digits) {
+            if (digit === '3' || digit === '4' || digit === '7') {
+                return false;
+            }
+            if (digit === '2' || digit === '5' || digit === '6' || digit === '9') {
+                result = true;
+            }
+        }
+        return result;
+    }
 };

@@ -12,12 +12,11 @@
  *
  * A prefix of a string s is any leading contiguous substring of s.
  */
-
 /**
  * @param {string} sentence
  * @param {string} searchWord
  * @return {number}
  */
 var isPrefixOfWord = function(sentence, searchWord) {
-  return sentence.split(/\s+/).findIndex(s => s.startsWith(searchWord)) + 1 || -1;
+    return sentence.split(/\s+/).findIndex(s => s.startsWith(searchWord)) + 1 || -1;
 };

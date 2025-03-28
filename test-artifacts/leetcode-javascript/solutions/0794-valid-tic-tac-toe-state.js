@@ -19,40 +19,31 @@
  * - The game also ends if all squares are non-empty.
  * - No more moves can be played if the game is over.
  */
-
 /**
  * @param {string[]} board
  * @return {boolean}
  */
 var validTicTacToe = function(board) {
-  let xCount = 0;
-  let oCount = 0;
-
-  for (const row of board) {
-    for (const cell of row) {
-      if (cell === 'X') xCount++;
-      if (cell === 'O') oCount++;
+    let xCount = 0;
+    let oCount = 0;
+    for (const row of board) {
+        for (const cell of row) {
+            if (cell === 'X') xCount++;
+            if (cell === 'O') oCount++;
+        }
     }
-  }
-
-  if (xCount !== oCount && xCount !== oCount + 1) return false;
-
-  const hasWon = player => {
-    for (let i = 0; i < 3; i++) {
-      if (board[i] === player.repeat(3)) return true;
-      if (board[0][i] === player && board[1][i] === player && board[2][i] === player) return true;
-    }
-
-    return (board[0][0] === player && board[1][1] === player && board[2][2] === player)
-      || (board[0][2] === player && board[1][1] === player && board[2][0] === player);
-  };
-
-  const xWin = hasWon('X');
-  const oWin = hasWon('O');
-
-  if (xWin && xCount !== oCount + 1) return false;
-  if (oWin && xCount !== oCount) return false;
-  if (xWin && oWin) return false;
-
-  return true;
+    if (xCount !== oCount && xCount !== oCount + 1) return false;
+    const hasWon = player => {
+        for (let i = 0; i < 3; i++) {
+            if (board[i] === player.repeat(3)) return true;
+            if (board[0][i] === player && board[1][i] === player && board[2][i] === player) return true;
+        }
+        return (board[0][0] === player && board[1][1] === player && board[2][2] === player) || (board[0][2] === player && board[1][1] === player && board[2][0] === player);
+    };
+    const xWin = hasWon('X');
+    const oWin = hasWon('O');
+    if (xWin && xCount !== oCount + 1) return false;
+    if (oWin && xCount !== oCount) return false;
+    if (xWin && oWin) return false;
+    return true;
 };

@@ -12,17 +12,16 @@
  * function rand10() will be called while testing. Note that this is not an argument passed to
  * rand10().
  */
-
 /**
  * The rand7() API is already defined for you.
  * var rand7 = function() {}
  * @return {number} a random integer in the range 1 to 7
  */
 var rand10 = function() {
-  while (true) {
-    const n = (rand7() - 1) * 7 + rand7();
-    if (n <= 40) {
-      return (n % 10) + 1;
+    while (true) {
+        const n = (rand7() - 1) * 7 + rand7();
+        if (n <= 40) {
+            return (n % 10) + 1;
+        }
     }
-  }
 };

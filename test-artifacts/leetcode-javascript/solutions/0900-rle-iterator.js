@@ -16,39 +16,33 @@
  * - int next(int n) Exhausts the next n elements and returns the last element exhausted in this
  *   way. If there is no element left to exhaust, return -1 instead.
  */
-
 /**
  * @param {number[]} encoding
  */
 var RLEIterator = function(encoding) {
-  this.pairs = [];
-  this.index = 0;
-  this.count = 0;
-
-  for (let i = 0; i < encoding.length; i += 2) {
-    if (encoding[i] > 0) {
-      this.pairs.push([encoding[i], encoding[i + 1]]);
+    this.pairs = [];
+    this.index = 0;
+    this.count = 0;
+    for (let i = 0; i < encoding.length; i += 2) {
+        if (encoding[i] > 0) {
+            this.pairs.push([encoding[i], encoding[i + 1]]);
+        }
     }
-  }
 };
-
 /**
  * @param {number} n
  * @return {number}
  */
 RLEIterator.prototype.next = function(n) {
-  while (n > 0 && this.index < this.pairs.length) {
-    const available = this.pairs[this.index][0] - this.count;
-
-    if (n <= available) {
-      this.count += n;
-      return this.pairs[this.index][1];
+    while (n > 0 && this.index < this.pairs.length) {
+        const available = this.pairs[this.index][0] - this.count;
+        if (n <= available) {
+            this.count += n;
+            return this.pairs[this.index][1];
+        }
+        n -= available;
+        this.count = 0;
+        this.index++;
     }
-
-    n -= available;
-    this.count = 0;
-    this.index++;
-  }
-
-  return -1;
+    return -1;
 };

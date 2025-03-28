@@ -5,7 +5,6 @@
  *
  * Given the root of a binary tree, return the preorder traversal of its nodes' values.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -19,7 +18,5 @@
  * @return {number[]}
  */
 var preorderTraversal = function(root) {
-  return root
-    ? [root.val, ...preorderTraversal(root.left), ...preorderTraversal(root.right)]
-    : [];
+    return root ? [root.val, ...preorderTraversal(root.left), ...preorderTraversal(root.right)] : [];
 };

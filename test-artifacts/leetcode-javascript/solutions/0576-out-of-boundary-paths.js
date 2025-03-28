@@ -12,7 +12,6 @@
  * paths to move the ball out of the grid boundary. Since the answer can be very large,
  * return it modulo 109 + 7.
  */
-
 /**
  * @param {number} m
  * @param {number} n
@@ -22,23 +21,26 @@
  * @return {number}
  */
 var findPaths = function(m, n, maxMove, startRow, startColumn) {
-  const MOD = 1e9 + 7;
-  const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-  const dp = new Array(maxMove + 1).fill().map(() => {
-    return new Array(m).fill().map(() => new Array(n).fill(-1));
-  });
+    const MOD = 1e9 + 7;
+    const directions = [
+        [0, 1],
+        [0, -1],
+        [1, 0],
+        [-1, 0]
+    ];
+    const dp = new Array(maxMove + 1).fill().map(() => {
+        return new Array(m).fill().map(() => new Array(n).fill(-1));
+    });
+    return solve(maxMove, startRow, startColumn);
 
-  return solve(maxMove, startRow, startColumn);
-
-  function solve(moves, row, col) {
-    if (row < 0 || row >= m || col < 0 || col >= n) return 1;
-    if (moves === 0) return 0;
-    if (dp[moves][row][col] !== -1) return dp[moves][row][col];
-
-    let paths = 0;
-    for (const [dr, dc] of directions) {
-      paths = (paths + solve(moves - 1, row + dr, col + dc)) % MOD;
+    function solve(moves, row, col) {
+        if (row < 0 || row >= m || col < 0 || col >= n) return 1;
+        if (moves === 0) return 0;
+        if (dp[moves][row][col] !== -1) return dp[moves][row][col];
+        let paths = 0;
+        for (const [dr, dc] of directions) {
+            paths = (paths + solve(moves - 1, row + dr, col + dc)) % MOD;
+        }
+        return dp[moves][row][col] = paths;
     }
-    return dp[moves][row][col] = paths;
-  }
 };

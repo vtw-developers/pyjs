@@ -15,29 +15,26 @@
  * bad. Implement a function to find the first bad version. You should minimize the
  * number of calls to the API.
  */
-
 /**
  * @param {function} isBadVersion()
  * @return {function}
  */
 var solution = function(isBadVersion) {
-  /**
-   * @param {integer} n Total versions
-   * @return {integer} The first bad version
-   */
-  return n => {
-    let left = 1;
-    let right = n;
-
-    while (left <= right) {
-      const pivot = Math.floor((right + left) / 2);
-      if (isBadVersion(pivot)) {
-        right = pivot - 1;
-      } else {
-        left = pivot + 1;
-      }
-    }
-
-    return left;
-  };
+    /**
+     * @param {integer} n Total versions
+     * @return {integer} The first bad version
+     */
+    return n => {
+        let left = 1;
+        let right = n;
+        while (left <= right) {
+            const pivot = Math.floor((right + left) / 2);
+            if (isBadVersion(pivot)) {
+                right = pivot - 1;
+            } else {
+                left = pivot + 1;
+            }
+        }
+        return left;
+    };
 };

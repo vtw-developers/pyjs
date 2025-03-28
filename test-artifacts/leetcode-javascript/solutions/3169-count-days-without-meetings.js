@@ -12,28 +12,23 @@
  *
  * Note: The meetings may overlap.
  */
-
 /**
  * @param {number} days
  * @param {number[][]} meetings
  * @return {number}
  */
 var countDays = function(days, meetings) {
-  meetings.sort((a, b) => a[0] - b[0]);
-
-  let result = 0;
-  let currentEnd = 0;
-
-  for (const [start, end] of meetings) {
-    if (start > currentEnd + 1) {
-      result += start - currentEnd - 1;
+    meetings.sort((a, b) => a[0] - b[0]);
+    let result = 0;
+    let currentEnd = 0;
+    for (const [start, end] of meetings) {
+        if (start > currentEnd + 1) {
+            result += start - currentEnd - 1;
+        }
+        currentEnd = Math.max(currentEnd, end);
     }
-    currentEnd = Math.max(currentEnd, end);
-  }
-
-  if (currentEnd < days) {
-    result += days - currentEnd;
-  }
-
-  return result;
+    if (currentEnd < days) {
+        result += days - currentEnd;
+    }
+    return result;
 };

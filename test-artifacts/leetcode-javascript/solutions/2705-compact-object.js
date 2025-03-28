@@ -12,21 +12,19 @@
  *
  * You may assume the obj is the output of JSON.parse. In other words, it is valid JSON.
  */
-
 /**
  * @param {Object|Array} obj
  * @return {Object|Array}
  */
 var compactObject = function(obj) {
-  if (obj === null) return null;
-  if (Array.isArray(obj)) return obj.filter(Boolean).map(compactObject);
-  if (typeof obj !== 'object') return obj;
-
-  return Object.keys(obj).reduce((result, key) => {
-    const value = compactObject(obj[key]);
-    if (value) {
-      result[key] = value;
-    }
-    return result;
-  }, {});
+    if (obj === null) return null;
+    if (Array.isArray(obj)) return obj.filter(Boolean).map(compactObject);
+    if (typeof obj !== 'object') return obj;
+    return Object.keys(obj).reduce((result, key) => {
+        const value = compactObject(obj[key]);
+        if (value) {
+            result[key] = value;
+        }
+        return result;
+    }, {});
 };

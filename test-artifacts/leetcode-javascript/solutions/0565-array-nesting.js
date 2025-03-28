@@ -12,23 +12,22 @@
  * A[A[A[i]]]… By that analogy, we stop adding right before a duplicate
  * element occurs in S.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var arrayNesting = function(nums) {
-  const history = new Set();
-  let max = 0;
-  for (let i = 0; i < nums.length; i++) {
-    let count = 0;
-    let j = i;
-    while (!history.has(nums[j])) {
-      j = nums[j];
-      history.add(j);
-      count++;
+    const history = new Set();
+    let max = 0;
+    for (let i = 0; i < nums.length; i++) {
+        let count = 0;
+        let j = i;
+        while (!history.has(nums[j])) {
+            j = nums[j];
+            history.add(j);
+            count++;
+        }
+        max = Math.max(max, count);
     }
-    max = Math.max(max, count);
-  }
-  return max;
+    return max;
 };

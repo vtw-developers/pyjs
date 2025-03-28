@@ -11,23 +11,19 @@
  * Note: An array A rotated by x positions results in an array B of the same length such
  * that A[i] == B[(i+x) % A.length], where % is the modulo operation.
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
  */
 var check = function(nums) {
-  let count = 0;
-
-  for (let i = 0; i < nums.length - 1; i++) {
-    if (nums[i] > nums[i + 1]) {
-      count++;
+    let count = 0;
+    for (let i = 0; i < nums.length - 1; i++) {
+        if (nums[i] > nums[i + 1]) {
+            count++;
+        }
     }
-  }
-
-  if (nums[nums.length - 1] > nums[0]) {
-    count++;
-  }
-
-  return count < 2 ? true : false;
+    if (nums[nums.length - 1] > nums[0]) {
+        count++;
+    }
+    return count < 2 ? true : false;
 };

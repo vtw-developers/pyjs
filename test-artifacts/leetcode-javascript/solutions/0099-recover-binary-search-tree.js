@@ -7,7 +7,6 @@
  * of exactly two nodes of the tree were swapped by mistake. Recover the
  * tree without changing its structure.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -21,23 +20,22 @@
  * @return {void} Do not return anything, modify root in-place instead.
  */
 var recoverTree = function(root) {
-  let [previous, small, large] = [null, null, null];
+    let [previous, small, large] = [null, null, null];
+    dfs(root);
+    [large.val, small.val] = [small.val, large.val];
 
-  dfs(root);
-  [large.val, small.val] = [small.val, large.val];
-
-  function dfs(root) {
-    if (!root) return;
-    dfs(root.left);
-    if (previous != null && previous.val > root.val) {
-      small = root;
-      if (!large) {
-        large = previous;
-      } else {
-        return false;
-      }
+    function dfs(root) {
+        if (!root) return;
+        dfs(root.left);
+        if (previous != null && previous.val > root.val) {
+            small = root;
+            if (!large) {
+                large = previous;
+            } else {
+                return false;
+            }
+        }
+        previous = root;
+        dfs(root.right);
     }
-    previous = root;
-    dfs(root.right);
-  }
 };

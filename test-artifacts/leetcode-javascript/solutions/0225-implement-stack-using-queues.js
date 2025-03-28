@@ -14,41 +14,34 @@
  * - int top() Returns the element on the top of the stack.
  * - boolean empty() Returns true if the stack is empty, false otherwise.
  */
-
-
 var MyStack = function() {
-  this.data = [];
+    this.data = [];
 };
-
 /**
  * @param {number} x
  * @return {void}
  */
 MyStack.prototype.push = function(x) {
-  this.data.push(x);
+    this.data.push(x);
 };
-
 /**
  * @return {number}
  */
 MyStack.prototype.pop = function() {
-  return this.data.pop();
+    return this.data.pop();
 };
-
 /**
  * @return {number}
  */
 MyStack.prototype.top = function() {
-  return this.data[this.data.length - 1];
+    return this.data[this.data.length - 1];
 };
-
 /**
  * @return {boolean}
  */
 MyStack.prototype.empty = function() {
-  return !this.data.length;
+    return !this.data.length;
 };
-
 /**
  * Your MyStack object will be instantiated and called as such:
  * var obj = new MyStack()

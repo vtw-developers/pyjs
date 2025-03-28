@@ -13,24 +13,20 @@
  * Return an array containing all the safe nodes of the graph. The answer should be sorted
  * in ascending order.
  */
-
 /**
  * @param {number[][]} graph
  * @return {number[]}
  */
 var eventualSafeNodes = function(graph) {
-  const nodes = graph.map(() => []);
-  const totals = graph.map(n => n.length);
-  const queue = totals.map((v, i) => v ? -1 : i).filter(v => v >= 0);
-  const result = [];
-
-  graph.forEach((n, i) => n.forEach(v => nodes[v].push(i)));
-
-  while (queue.length) {
-    const node = queue.shift();
-    result.push(node);
-    nodes[node].forEach(v => !--totals[v] && queue.push(v));
-  }
-
-  return result.sort((a, b) => a - b);
+    const nodes = graph.map(() => []);
+    const totals = graph.map(n => n.length);
+    const queue = totals.map((v, i) => v ? -1 : i).filter(v => v >= 0);
+    const result = [];
+    graph.forEach((n, i) => n.forEach(v => nodes[v].push(i)));
+    while (queue.length) {
+        const node = queue.shift();
+        result.push(node);
+        nodes[node].forEach(v => !--totals[v] && queue.push(v));
+    }
+    return result.sort((a, b) => a - b);
 };

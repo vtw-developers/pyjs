@@ -11,7 +11,6 @@
  * affect the one-to-one mapping relationship between the string
  * and the original binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val) {
@@ -24,18 +23,16 @@
  * @return {string}
  */
 var tree2str = function(t) {
-  return !t ? '' : `${t.val}(${tree2str(t.left)})(${tree2str(t.right)})`.replace(/(\(\)){2}|\(\)(?=$|\))/g, '');
+    return !t ? '' : `${t.val}(${tree2str(t.left)})(${tree2str(t.right)})`.replace(/(\(\)){2}|\(\)(?=$|\))/g, '');
 };
-
-
 // alternative, longer but faster version:
 /**
  * @param {TreeNode} t
  * @return {string}
  */
 var tree2str = function(t) {
-  let str = t ? `${t.val}` : '';
-  if (t && t.right) str += `(${tree2str(t.left)})(${tree2str(t.right)})`;
-  else if (t && t.left) str += `(${tree2str(t.left)})`;
-  return str;
+    let str = t ? `${t.val}` : '';
+    if (t && t.right) str += `(${tree2str(t.left)})(${tree2str(t.right)})`;
+    else if (t && t.left) str += `(${tree2str(t.left)})`;
+    return str;
 };

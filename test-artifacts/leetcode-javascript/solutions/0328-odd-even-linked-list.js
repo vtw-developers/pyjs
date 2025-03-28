@@ -13,7 +13,6 @@
  *
  * You must solve the problem in O(1) extra space complexity and O(n) time complexity.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -26,18 +25,15 @@
  * @return {ListNode}
  */
 var oddEvenList = function(head) {
-  if (!head) return head;
-
-  const even = head.next;
-  let odd = head;
-
-  while (odd.next && odd.next.next) {
-    const pointer = odd.next;
-    odd.next = odd.next.next;
-    odd = odd.next;
-    pointer.next = odd.next;
-  }
-
-  odd.next = even;
-  return head;
+    if (!head) return head;
+    const even = head.next;
+    let odd = head;
+    while (odd.next && odd.next.next) {
+        const pointer = odd.next;
+        odd.next = odd.next.next;
+        odd = odd.next;
+        pointer.next = odd.next;
+    }
+    odd.next = even;
+    return head;
 };

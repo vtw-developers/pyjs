@@ -8,17 +8,14 @@
  *
  * You must not use any built-in exponent function or operator.
  */
-
 /**
  * @param {number} x
  * @return {number}
  */
 var mySqrt = function(x) {
-  let result = 1;
-
-  while (result * result <= x) {
-    result++;
-  }
-
-  return result - 1;
+    let result = 1;
+    while (result * result <= x) {
+        result++;
+    }
+    return result - 1;
 };

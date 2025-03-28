@@ -8,12 +8,11 @@
  *
  * In one move, you can increment n - 1 elements of the array by 1.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var minMoves = function(nums) {
-  const min = Math.min(...nums);
-  return nums.reduce((sum, num) => sum + num - min, 0);
+    const min = Math.min(...nums);
+    return nums.reduce((sum, num) => sum + num - min, 0);
 };

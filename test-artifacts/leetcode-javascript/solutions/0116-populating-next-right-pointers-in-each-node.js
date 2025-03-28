@@ -11,7 +11,6 @@
  *
  * Initially, all next pointers are set to NULL.
  */
-
 /**
  * // Definition for a Node.
  * function Node(val, left, right, next) {
@@ -21,30 +20,27 @@
  *    this.next = next === undefined ? null : next;
  * };
  */
-
 /**
  * @param {Node} root
  * @return {Node}
  */
 var connect = function(root) {
-  const order = [];
-  traverse(order, root);
-  for (let level of order) {
-    for (let i = 0; i < level.length - 1; i++) {
-      level[i].next = level[i + 1];
+    const order = [];
+    traverse(order, root);
+    for (let level of order) {
+        for (let i = 0; i < level.length - 1; i++) {
+            level[i].next = level[i + 1];
+        }
     }
-  }
-  return root;
+    return root;
 };
 
 function traverse(order, node, level = 0) {
-  if (!node) {
-    return [];
-  }
-
-  order[level] = order[level] || [];
-  order[level].push(node);
-
-  traverse(order, node.left, level + 1);
-  traverse(order, node.right, level + 1);
+    if (!node) {
+        return [];
+    }
+    order[level] = order[level] || [];
+    order[level].push(node);
+    traverse(order, node.left, level + 1);
+    traverse(order, node.right, level + 1);
 }

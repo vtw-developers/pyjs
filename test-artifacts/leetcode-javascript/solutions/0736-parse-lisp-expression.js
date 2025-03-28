@@ -31,45 +31,41 @@
  *   It is guaranteed that every expression is legal. Please see the examples for more details
  *   on the scope.
  */
-
 /**
  * @param {string} expression
  * @return {number}
  */
 var evaluate = function(expression) {
-  return parse(expression, new Map());
+    return parse(expression, new Map());
 
-  function parse(exp, scope) {
-    if (!isNaN(exp)) return parseInt(exp);
-    if (!exp.startsWith('(')) return scope.get(exp) || 0;
-
-    const tokens = tokenize(exp.slice(1, -1));
-    if (tokens[0] === 'add') return parse(tokens[1], scope) + parse(tokens[2], scope);
-    if (tokens[0] === 'mult') return parse(tokens[1], scope) * parse(tokens[2], scope);
-
-    const newScope = new Map(scope);
-    for (let i = 1; i < tokens.length - 1; i += 2) {
-      newScope.set(tokens[i], parse(tokens[i + 1], newScope));
+    function parse(exp, scope) {
+        if (!isNaN(exp)) return parseInt(exp);
+        if (!exp.startsWith('(')) return scope.get(exp) || 0;
+        const tokens = tokenize(exp.slice(1, -1));
+        if (tokens[0] === 'add') return parse(tokens[1], scope) + parse(tokens[2], scope);
+        if (tokens[0] === 'mult') return parse(tokens[1], scope) * parse(tokens[2], scope);
+        const newScope = new Map(scope);
+        for (let i = 1; i < tokens.length - 1; i += 2) {
+            newScope.set(tokens[i], parse(tokens[i + 1], newScope));
+        }
+        return parse(tokens[tokens.length - 1], newScope);
     }
-    return parse(tokens[tokens.length - 1], newScope);
-  }
 
-  function tokenize(exp) {
-    const result = [];
-    let current = '';
-    let depth = 0;
-
-    for (const char of exp) {
-      if (char === ' ' && depth === 0) {
+    function tokenize(exp) {
+        const result = [];
+        let current = '';
+        let depth = 0;
+        for (const char of exp) {
+            if (char === ' ' && depth === 0) {
+                result.push(current);
+                current = '';
+            } else {
+                current += char;
+                if (char === '(') depth++;
+                if (char === ')') depth--;
+            }
+        }
         result.push(current);
-        current = '';
-      } else {
-        current += char;
-        if (char === '(') depth++;
-        if (char === ')') depth--;
-      }
+        return result;
     }
-    result.push(current);
-    return result;
-  }
 };

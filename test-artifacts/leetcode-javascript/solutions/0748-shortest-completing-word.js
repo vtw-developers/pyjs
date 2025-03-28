@@ -16,24 +16,21 @@
  * Return the shortest completing word in words. It is guaranteed an answer exists. If there
  * are multiple shortest completing words, return the first one that occurs in words.
  */
-
 /**
  * @param {string} licensePlate
  * @param {string[]} words
  * @return {string}
  */
 var shortestCompletingWord = function(licensePlate, words) {
-  const license = licensePlate.toLowerCase().replace(/[\d\s]+/g, '');
-  const sortedWords = [...words].sort((a, b) => a.length - b.length);
-
-  for (const word of sortedWords) {
-    let updatedLicense = license;
-
-    for (let i = 0; i < word.length; i++) {
-      updatedLicense = updatedLicense.replace(word[i], '');
-      if (!updatedLicense) {
-        return word;
-      }
+    const license = licensePlate.toLowerCase().replace(/[\d\s]+/g, '');
+    const sortedWords = [...words].sort((a, b) => a.length - b.length);
+    for (const word of sortedWords) {
+        let updatedLicense = license;
+        for (let i = 0; i < word.length; i++) {
+            updatedLicense = updatedLicense.replace(word[i], '');
+            if (!updatedLicense) {
+                return word;
+            }
+        }
     }
-  }
 };

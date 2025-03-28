@@ -14,26 +14,23 @@
  * - int sum(string prefix) Returns the sum of all the pairs' value whose key starts
  *   with the prefix.
  */
-
 var MapSum = function() {
-  this.map = new Map();
+    this.map = new Map();
 };
-
 /**
  * @param {string} key
  * @param {number} val
  * @return {void}
  */
 MapSum.prototype.insert = function(key, val) {
-  this.map.set(key, val);
+    this.map.set(key, val);
 };
-
 /**
  * @param {string} prefix
  * @return {number}
  */
 MapSum.prototype.sum = function(prefix) {
-  return [...this.map.entries()].reduce((total, [key, val]) => {
-    return key.startsWith(prefix) ? total + val : total;
-  }, 0);
+    return [...this.map.entries()].reduce((total, [key, val]) => {
+        return key.startsWith(prefix) ? total + val : total;
+    }, 0);
 };

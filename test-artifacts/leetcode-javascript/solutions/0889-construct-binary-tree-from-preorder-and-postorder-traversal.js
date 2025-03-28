@@ -9,7 +9,6 @@
  *
  * If there exist multiple answers, you can return any of them.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,20 +23,11 @@
  * @return {TreeNode}
  */
 var constructFromPrePost = function(preorder, postorder) {
-  if (!preorder.length) return null;
-
-  const root = new TreeNode(preorder[0]);
-  if (preorder.length === 1) return root;
-
-  const leftSize = postorder.indexOf(preorder[1]) + 1;
-  root.left = constructFromPrePost(
-    preorder.slice(1, leftSize + 1),
-    postorder.slice(0, leftSize)
-  );
-  root.right = constructFromPrePost(
-    preorder.slice(leftSize + 1),
-    postorder.slice(leftSize, -1)
-  );
-
-  return root;
+    if (!preorder.length) return null;
+    const root = new TreeNode(preorder[0]);
+    if (preorder.length === 1) return root;
+    const leftSize = postorder.indexOf(preorder[1]) + 1;
+    root.left = constructFromPrePost(preorder.slice(1, leftSize + 1), postorder.slice(0, leftSize));
+    root.right = constructFromPrePost(preorder.slice(leftSize + 1), postorder.slice(leftSize, -1));
+    return root;
 };

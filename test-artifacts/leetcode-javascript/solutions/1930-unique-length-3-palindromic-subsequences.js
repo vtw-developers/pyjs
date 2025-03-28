@@ -17,22 +17,19 @@
  *
  * For example, "ace" is a subsequence of "abcde".
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var countPalindromicSubsequence = function(s) {
-  let result = 0;
-
-  for (let i = 0; i < 26; ++i) {
-    const char = String.fromCharCode(i + 97);
-    const left = s.indexOf(char);
-    const right = s.lastIndexOf(char);
-    if (left !== -1 && right !== -1 && left < right) {
-      result += new Set(s.substring(left + 1, right)).size;
+    let result = 0;
+    for (let i = 0; i < 26; ++i) {
+        const char = String.fromCharCode(i + 97);
+        const left = s.indexOf(char);
+        const right = s.lastIndexOf(char);
+        if (left !== -1 && right !== -1 && left < right) {
+            result += new Set(s.substring(left + 1, right)).size;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

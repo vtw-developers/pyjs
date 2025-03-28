@@ -13,22 +13,19 @@
  *
  * Return the lexicographically smallest possible string num that meets the conditions.
  */
-
 /**
  * @param {string} pattern
  * @return {string}
  */
 var smallestNumber = function(pattern) {
-  let result = '';
-
-  for (let i = 0, stack = []; i <= pattern.length; i++) {
-    stack.push(i + 1);
-    if (i === pattern.length || pattern[i] === 'I') {
-      while (stack.length > 0) {
-        result += stack.pop();
-      }
+    let result = '';
+    for (let i = 0, stack = []; i <= pattern.length; i++) {
+        stack.push(i + 1);
+        if (i === pattern.length || pattern[i] === 'I') {
+            while (stack.length > 0) {
+                result += stack.pop();
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 };

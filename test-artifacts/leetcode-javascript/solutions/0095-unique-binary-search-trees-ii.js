@@ -7,7 +7,6 @@
  * trees), which has exactly n nodes of unique values from 1 to n. Return the
  * answer in any order.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -21,17 +20,20 @@
  * @return {TreeNode[]}
  */
 var generateTrees = function(n) {
-  return backtrack(n);
+    return backtrack(n);
 };
 
 function backtrack(n, j = 1, k = n, result = []) {
-  for (let index = j; index <= k; index++) {
-    for (const left of backtrack(n, j, index - 1)) {
-      for (const right of backtrack(n, index + 1, k)) {
-        result.push({ val: index, left, right });
-      }
+    for (let index = j; index <= k; index++) {
+        for (const left of backtrack(n, j, index - 1)) {
+            for (const right of backtrack(n, index + 1, k)) {
+                result.push({
+                    val: index,
+                    left,
+                    right
+                });
+            }
+        }
     }
-  }
-
-  return n ? result.length ? result : [null] : [];
+    return n ? result.length ? result : [null] : [];
 }

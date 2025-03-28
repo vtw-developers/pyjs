@@ -25,7 +25,6 @@
  *
  * Your code will only be given the head of the original linked list.
  */
-
 /**
  * // Definition for a Node.
  * function Node(val, next, random) {
@@ -34,28 +33,24 @@
  *    this.random = random;
  * };
  */
-
 /**
  * @param {Node} head
  * @return {Node}
  */
 var copyRandomList = function(head) {
-  const map = new Map();
+    const map = new Map();
 
-  function copy(reference) {
-    if (reference === null) return null;
-    const instance = map.get(reference);
-    if (instance) {
-      return instance;
+    function copy(reference) {
+        if (reference === null) return null;
+        const instance = map.get(reference);
+        if (instance) {
+            return instance;
+        }
+        const node = new Node(reference.val);
+        map.set(reference, node);
+        node.next = copy(reference.next);
+        node.random = copy(reference.random);
+        return node;
     }
-
-    const node = new Node(reference.val);
-    map.set(reference, node);
-    node.next = copy(reference.next);
-    node.random = copy(reference.random);
-
-    return node;
-  }
-
-  return copy(head);
+    return copy(head);
 };

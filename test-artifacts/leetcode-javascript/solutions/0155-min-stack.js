@@ -14,37 +14,34 @@
  *
  * You must implement a solution with O(1) time complexity for each function.
  */
-
-
 var MinStack = function() {
-  this.stack = [];
+    this.stack = [];
 };
-
 /**
  * @param {number} val
  * @return {void}
  */
 MinStack.prototype.push = function(val) {
-  this.stack.push({ val, min: this.stack.length ? Math.min(val, this.getMin()) : val });
+    this.stack.push({
+        val,
+        min: this.stack.length ? Math.min(val, this.getMin()) : val
+    });
 };
-
 /**
  * @return {void}
  */
 MinStack.prototype.pop = function() {
-  this.stack.pop();
+    this.stack.pop();
 };
-
 /**
  * @return {number}
  */
 MinStack.prototype.top = function() {
-  return this.stack[this.stack.length - 1].val;
+    return this.stack[this.stack.length - 1].val;
 };
-
 /**
  * @return {number}
  */
 MinStack.prototype.getMin = function() {
-  return this.stack.length ? this.stack[this.stack.length - 1].min : 0;
+    return this.stack.length ? this.stack[this.stack.length - 1].min : 0;
 };

@@ -17,23 +17,21 @@
  *
  * Return true if such cuts can be made; otherwise, return false.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} rectangles
  * @return {boolean}
  */
 var checkValidCuts = function(n, rectangles) {
-  return canPartition(rectangles.map(r => [r[0], r[2]]))
-    || canPartition(rectangles.map(r => [r[1], r[3]]));
+    return canPartition(rectangles.map(r => [r[0], r[2]])) || canPartition(rectangles.map(r => [r[1], r[3]]));
 };
 
 function canPartition(intervals, cuts = 0) {
-  intervals.sort(([start1, end1], [start2, end2]) => start1 - start2 || end2 - end1);
-  let maxReach = intervals[0][1];
-  for (let i = 1; i < intervals.length; i++) {
-    if (intervals[i][0] >= maxReach && ++cuts === 2) return true;
-    maxReach = Math.max(intervals[i][1], maxReach);
-  }
-  return false;
+    intervals.sort(([start1, end1], [start2, end2]) => start1 - start2 || end2 - end1);
+    let maxReach = intervals[0][1];
+    for (let i = 1; i < intervals.length; i++) {
+        if (intervals[i][0] >= maxReach && ++cuts === 2) return true;
+        maxReach = Math.max(intervals[i][1], maxReach);
+    }
+    return false;
 }

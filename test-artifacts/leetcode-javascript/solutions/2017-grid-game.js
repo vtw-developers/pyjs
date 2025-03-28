@@ -18,21 +18,18 @@
  * contrast, the second robot wants to maximize the number of points it collects. If both
  * robots play optimally, return the number of points collected by the second robot.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var gridGame = function(grid) {
-  let result = Infinity;
-  let sum1 = grid[0].reduce((a, b) => a + b, 0);
-  let sum2 = 0;
-
-  for (let i = 0; i < grid[0].length; i++) {
-    sum1 -= grid[0][i];
-    result = Math.min(result, Math.max(sum1, sum2));
-    sum2 += grid[1][i];
-  }
-
-  return result;
+    let result = Infinity;
+    let sum1 = grid[0].reduce((a, b) => a + b, 0);
+    let sum2 = 0;
+    for (let i = 0; i < grid[0].length; i++) {
+        sum1 -= grid[0][i];
+        result = Math.min(result, Math.max(sum1, sum2));
+        sum2 += grid[1][i];
+    }
+    return result;
 };

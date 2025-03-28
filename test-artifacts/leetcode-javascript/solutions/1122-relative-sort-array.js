@@ -10,13 +10,12 @@
  * are the same as in arr2. Elements that do not appear in arr2 should be
  * placed at the end of arr1 in ascending order.
  */
-
 /**
  * @param {number[]} arr1
  * @param {number[]} arr2
  * @return {number[]}
  */
 var relativeSortArray = function(arr1, arr2) {
-  const map = new Map(arr2.map((v, i) => [v, i]));
-  return arr1.sort((a, b) => (map.get(a) ?? arr2.length + a) - (map.get(b) ?? arr2.length + b));
+    const map = new Map(arr2.map((v, i) => [v, i]));
+    return arr1.sort((a, b) => (map.get(a) ?? arr2.length + a) - (map.get(b) ?? arr2.length + b));
 };

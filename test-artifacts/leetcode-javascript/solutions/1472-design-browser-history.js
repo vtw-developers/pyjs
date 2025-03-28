@@ -20,40 +20,36 @@
  *   only forward x steps in the history and steps > x, you will forward only
  *   x steps. Return the current url after forwarding in history at most steps.
  */
-
 /**
  * @param {string} homepage
  */
 var BrowserHistory = function(homepage) {
-  this.history = [];
-  this.cursor = -1;
-  this.visit(homepage);
+    this.history = [];
+    this.cursor = -1;
+    this.visit(homepage);
 };
-
 /**
  * @param {string} url
  * @return {void}
  */
 BrowserHistory.prototype.visit = function(url) {
-  this.history.splice(this.cursor + 1, this.history.length);
-  this.history.push(url);
-  this.cursor++;
+    this.history.splice(this.cursor + 1, this.history.length);
+    this.history.push(url);
+    this.cursor++;
 };
-
 /**
  * @param {number} steps
  * @return {string}
  */
 BrowserHistory.prototype.back = function(steps) {
-  this.cursor = Math.max(0, this.cursor - steps);
-  return this.history[this.cursor];
+    this.cursor = Math.max(0, this.cursor - steps);
+    return this.history[this.cursor];
 };
-
 /**
  * @param {number} steps
  * @return {string}
  */
 BrowserHistory.prototype.forward = function(steps) {
-  this.cursor = Math.min(this.cursor + steps, this.history.length - 1);
-  return this.history[this.cursor];
+    this.cursor = Math.min(this.cursor + steps, this.history.length - 1);
+    return this.history[this.cursor];
 };

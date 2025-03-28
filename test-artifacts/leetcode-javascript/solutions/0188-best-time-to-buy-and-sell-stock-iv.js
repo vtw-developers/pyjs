@@ -12,31 +12,27 @@
  * Note: You may not engage in multiple transactions simultaneously (i.e., you must sell
  * the stock before you buy again).
  */
-
 /**
  * @param {number} k
  * @param {number[]} prices
  * @return {number}
  */
 var maxProfit = function(k, prices) {
-  if (prices.length < 2 || k === 0) return 0;
-
-  if (k >= prices.length / 2) {
-    let profit = 0;
-    for (let i = 1; i < prices.length; i++) {
-      profit += prices[i] > prices[i - 1] ? (prices[i] - prices[i - 1]) : 0;
+    if (prices.length < 2 || k === 0) return 0;
+    if (k >= prices.length / 2) {
+        let profit = 0;
+        for (let i = 1; i < prices.length; i++) {
+            profit += prices[i] > prices[i - 1] ? (prices[i] - prices[i - 1]) : 0;
+        }
+        return profit;
     }
-    return profit;
-  }
-
-  const buy = new Array(k + 1).fill(-Infinity);
-  const sell = new Array(k + 1).fill(0);
-  for (let i = 0; i < prices.length; i++) {
-    for (let j = k; j >= 1; j--) {
-      sell[j] = Math.max(sell[j], buy[j] + prices[i]);
-      buy[j] = Math.max(buy[j], sell[j - 1] - prices[i]);
+    const buy = new Array(k + 1).fill(-Infinity);
+    const sell = new Array(k + 1).fill(0);
+    for (let i = 0; i < prices.length; i++) {
+        for (let j = k; j >= 1; j--) {
+            sell[j] = Math.max(sell[j], buy[j] + prices[i]);
+            buy[j] = Math.max(buy[j], sell[j - 1] - prices[i]);
+        }
     }
-  }
-
-  return sell[k];
+    return sell[k];
 };

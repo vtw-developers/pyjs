@@ -14,26 +14,23 @@
  * more than one solution, return any of them. It can be shown that an answer is always possible
  * with the given constraints.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var modifyString = function(s) {
-  const substitute = takenCharacteres => {
-    for (let charCode = 97; ; charCode++) {
-      const attempt = String.fromCharCode(charCode);
-
-      if (!takenCharacteres.includes(attempt)) {
-        return attempt;
-      }
+    const substitute = takenCharacteres => {
+        for (let charCode = 97;; charCode++) {
+            const attempt = String.fromCharCode(charCode);
+            if (!takenCharacteres.includes(attempt)) {
+                return attempt;
+            }
+        }
+    };
+    const result = [...s];
+    for (let index = 0; index < s.length; index++) {
+        const takenCharacteres = [result[index - 1], result[index + 1]];
+        result[index] = s[index] === '?' ? substitute(takenCharacteres) : s[index];
     }
-  };
-
-  const result = [...s];
-  for (let index = 0; index < s.length; index++) {
-    const takenCharacteres = [result[index - 1], result[index + 1]];
-    result[index] = s[index] === '?' ? substitute(takenCharacteres) : s[index];
-  }
-  return result.join('');
+    return result.join('');
 };

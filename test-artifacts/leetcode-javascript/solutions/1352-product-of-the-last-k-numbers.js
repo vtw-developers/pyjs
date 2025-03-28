@@ -14,23 +14,20 @@
  * - The test cases are generated so that, at any time, the product of any contiguous sequence
  *   of numbers will fit into a single 32-bit integer without overflowing.
  */
-
 var ProductOfNumbers = function() {
-  this.nums = [];
+    this.nums = [];
 };
-
 /**
  * @param {number} num
  * @return {void}
  */
 ProductOfNumbers.prototype.add = function(num) {
-  this.nums.push(num);
+    this.nums.push(num);
 };
-
 /**
  * @param {number} k
  * @return {number}
  */
 ProductOfNumbers.prototype.getProduct = function(k) {
-  return this.nums.slice(-k).reduce((product, n) => product * n, 1);
+    return this.nums.slice(-k).reduce((product, n) => product * n, 1);
 };

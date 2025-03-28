@@ -16,15 +16,14 @@
  * Return an array [L, W] where L and W are the length and width of the web
  * page you designed in sequence.
  */
-
 /**
  * @param {number} area
  * @return {number[]}
  */
 var constructRectangle = function(area) {
-  let width = Math.floor(Math.sqrt(area));
-  while (area % width) {
-    width--;
-  }
-  return [area / width, width];
+    let width = Math.floor(Math.sqrt(area));
+    while (area % width) {
+        width--;
+    }
+    return [area / width, width];
 };

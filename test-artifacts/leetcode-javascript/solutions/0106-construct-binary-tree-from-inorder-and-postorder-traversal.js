@@ -7,7 +7,6 @@
  * binary tree and postorder is the postorder traversal of the same tree, construct and return
  * the binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,14 +21,12 @@
  * @return {TreeNode}
  */
 var buildTree = function(inorder, postorder) {
-  if (inorder.length === 0) return null;
-
-  const root = postorder[postorder.length - 1];
-  const index = inorder.indexOf(root);
-
-  return {
-    val: root,
-    left: buildTree(inorder.slice(0, index), postorder.slice(0, index)),
-    right: buildTree(inorder.slice(index + 1), postorder.slice(index, -1))
-  };
+    if (inorder.length === 0) return null;
+    const root = postorder[postorder.length - 1];
+    const index = inorder.indexOf(root);
+    return {
+        val: root,
+        left: buildTree(inorder.slice(0, index), postorder.slice(0, index)),
+        right: buildTree(inorder.slice(index + 1), postorder.slice(index, -1))
+    };
 };

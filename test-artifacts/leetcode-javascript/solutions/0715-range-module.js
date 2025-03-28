@@ -18,62 +18,58 @@
  * - void removeRange(int left, int right) Stops tracking every real number currently being tracked
  *   in the half-open interval [left, right).
  */
-
 var RangeModule = function() {
-  this.ranges = [];
+    this.ranges = [];
 };
-
 /**
  * @param {number} left
  * @param {number} right
  * @return {void}
  */
 RangeModule.prototype.addRange = function(left, right) {
-  const intervals = [];
-  let placed = false;
-  for (const [start, end] of this.ranges) {
-    if (start > right && !placed) {
-      intervals.push([left, right]);
-      placed = true;
+    const intervals = [];
+    let placed = false;
+    for (const [start, end] of this.ranges) {
+        if (start > right && !placed) {
+            intervals.push([left, right]);
+            placed = true;
+        }
+        if (end < left || start > right) {
+            intervals.push([start, end]);
+        } else {
+            left = Math.min(left, start);
+            right = Math.max(right, end);
+        }
     }
-    if (end < left || start > right) {
-      intervals.push([start, end]);
-    } else {
-      left = Math.min(left, start);
-      right = Math.max(right, end);
-    }
-  }
-  if (!placed) intervals.push([left, right]);
-  this.ranges = intervals;
+    if (!placed) intervals.push([left, right]);
+    this.ranges = intervals;
 };
-
 /**
  * @param {number} left
  * @param {number} right
  * @return {boolean}
  */
 RangeModule.prototype.queryRange = function(left, right) {
-  for (const [start, end] of this.ranges) {
-    if (start <= left && end >= right) return true;
-    if (start > left) break;
-  }
-  return false;
+    for (const [start, end] of this.ranges) {
+        if (start <= left && end >= right) return true;
+        if (start > left) break;
+    }
+    return false;
 };
-
 /**
  * @param {number} left
  * @param {number} right
  * @return {void}
  */
 RangeModule.prototype.removeRange = function(left, right) {
-  const intervals = [];
-  for (const [start, end] of this.ranges) {
-    if (end <= left || start >= right) {
-      intervals.push([start, end]);
-    } else {
-      if (start < left) intervals.push([start, left]);
-      if (end > right) intervals.push([right, end]);
+    const intervals = [];
+    for (const [start, end] of this.ranges) {
+        if (end <= left || start >= right) {
+            intervals.push([start, end]);
+        } else {
+            if (start < left) intervals.push([start, left]);
+            if (end > right) intervals.push([right, end]);
+        }
     }
-  }
-  this.ranges = intervals;
+    this.ranges = intervals;
 };

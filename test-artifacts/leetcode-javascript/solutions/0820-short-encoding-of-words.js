@@ -13,26 +13,22 @@
  * Given an array of words, return the length of the shortest reference string s possible
  * of any valid encoding of words.
  */
-
 /**
  * @param {string[]} words
  * @return {number}
  */
 var minimumLengthEncoding = function(words) {
-  const uniqueWords = [...new Set(words)];
-  const wordSet = new Set(uniqueWords);
-
-  for (const word of uniqueWords) {
-    for (let i = 1; i < word.length; i++) {
-      const suffix = word.slice(i);
-      wordSet.delete(suffix);
+    const uniqueWords = [...new Set(words)];
+    const wordSet = new Set(uniqueWords);
+    for (const word of uniqueWords) {
+        for (let i = 1; i < word.length; i++) {
+            const suffix = word.slice(i);
+            wordSet.delete(suffix);
+        }
     }
-  }
-
-  let result = 0;
-  for (const word of wordSet) {
-    result += word.length + 1;
-  }
-
-  return result;
+    let result = 0;
+    for (const word of wordSet) {
+        result += word.length + 1;
+    }
+    return result;
 };

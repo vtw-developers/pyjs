@@ -11,31 +11,31 @@
  *
  * Return the maximum area of an island in grid. If there is no island, return 0.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var maxAreaOfIsland = function(grid) {
-  const cache = new Set();
-  let max = 0;
-
-  for (let i = 0; i < grid.length; i++) {
-    for (let j = 0; j < grid[0].length; j++) {
-      max = Math.max(max, traverse(grid, cache, i, j));
+    const cache = new Set();
+    let max = 0;
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            max = Math.max(max, traverse(grid, cache, i, j));
+        }
     }
-  }
-
-  return max;
+    return max;
 };
 
 function traverse(grid, cache, x, y) {
-  let count = 0;
-  if (grid[x] && grid[x][y] === 1 && !cache.has(`${x},${y}`)) {
-    cache.add(`${x},${y}`);
-    count += [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]
-      .map(([x, y]) => traverse(grid, cache, x, y))
-      .reduce((sum, count) => sum + count, 0) + 1;
-  }
-  return count;
+    let count = 0;
+    if (grid[x] && grid[x][y] === 1 && !cache.has(`${x},${y}`)) {
+        cache.add(`${x},${y}`);
+        count += [
+            [x - 1, y],
+            [x + 1, y],
+            [x, y - 1],
+            [x, y + 1]
+        ].map(([x, y]) => traverse(grid, cache, x, y)).reduce((sum, count) => sum + count, 0) + 1;
+    }
+    return count;
 }

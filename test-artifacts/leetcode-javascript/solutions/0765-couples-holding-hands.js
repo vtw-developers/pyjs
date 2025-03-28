@@ -12,35 +12,30 @@
  * Return the minimum number of swaps so that every couple is sitting side by side. A swap
  * consists of choosing any two people, then they stand up and switch seats.
  */
-
 /**
  * @param {number[]} row
  * @return {number}
  */
 function minSwapsCouples(row) {
-  const n = row.length / 2;
-  const partner = new Array(2 * n);
-  const position = new Array(2 * n);
-
-  for (let i = 0; i < 2 * n; i++) {
-    partner[i] = i % 2 === 0 ? i + 1 : i - 1;
-    position[row[i]] = i;
-  }
-
-  let swaps = 0;
-  for (let i = 0; i < 2 * n; i += 2) {
-    const current = row[i];
-    const expected = partner[current];
-    const nextPerson = row[i + 1];
-
-    if (nextPerson !== expected) {
-      row[i + 1] = expected;
-      row[position[expected]] = nextPerson;
-      position[nextPerson] = position[expected];
-      position[expected] = i + 1;
-      swaps++;
+    const n = row.length / 2;
+    const partner = new Array(2 * n);
+    const position = new Array(2 * n);
+    for (let i = 0; i < 2 * n; i++) {
+        partner[i] = i % 2 === 0 ? i + 1 : i - 1;
+        position[row[i]] = i;
     }
-  }
-
-  return swaps;
+    let swaps = 0;
+    for (let i = 0; i < 2 * n; i += 2) {
+        const current = row[i];
+        const expected = partner[current];
+        const nextPerson = row[i + 1];
+        if (nextPerson !== expected) {
+            row[i + 1] = expected;
+            row[position[expected]] = nextPerson;
+            position[nextPerson] = position[expected];
+            position[expected] = i + 1;
+            swaps++;
+        }
+    }
+    return swaps;
 }

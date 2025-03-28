@@ -19,33 +19,29 @@
  *
  * Return the total number of friend requests made.
  */
-
 /**
  * @param {number[]} ages
  * @return {number}
  */
 var numFriendRequests = function(ages) {
-  const ageCount = new Array(121).fill(0);
-
-  for (const age of ages) {
-    ageCount[age]++;
-  }
-
-  let result = 0;
-  for (let ageX = 1; ageX <= 120; ageX++) {
-    if (ageCount[ageX] === 0) continue;
-    for (let ageY = 1; ageY <= 120; ageY++) {
-      if (ageCount[ageY] === 0) continue;
-      if (ageY <= 0.5 * ageX + 7) continue;
-      if (ageY > ageX) continue;
-      if (ageY > 100 && ageX < 100) continue;
-      if (ageX === ageY) {
-        result += ageCount[ageX] * (ageCount[ageY] - 1);
-      } else {
-        result += ageCount[ageX] * ageCount[ageY];
-      }
+    const ageCount = new Array(121).fill(0);
+    for (const age of ages) {
+        ageCount[age]++;
     }
-  }
-
-  return result;
+    let result = 0;
+    for (let ageX = 1; ageX <= 120; ageX++) {
+        if (ageCount[ageX] === 0) continue;
+        for (let ageY = 1; ageY <= 120; ageY++) {
+            if (ageCount[ageY] === 0) continue;
+            if (ageY <= 0.5 * ageX + 7) continue;
+            if (ageY > ageX) continue;
+            if (ageY > 100 && ageX < 100) continue;
+            if (ageX === ageY) {
+                result += ageCount[ageX] * (ageCount[ageY] - 1);
+            } else {
+                result += ageCount[ageX] * ageCount[ageY];
+            }
+        }
+    }
+    return result;
 };

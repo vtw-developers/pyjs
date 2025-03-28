@@ -13,16 +13,19 @@
  * only if there are two 4-directionally adjacent cells on the board such that exactly
  * one of the tilings has both squares occupied by a tile.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var numTilings = function(n) {
-  const MOD_VALUE = Math.pow(10, 9) + 7;
-  const dp = { 1: 1, 2: 2, 3: 5 };
-  for (let i = 4; i <= n; i++) {
-    dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD_VALUE;
-  }
-  return dp[n];
+    const MOD_VALUE = Math.pow(10, 9) + 7;
+    const dp = {
+        1: 1,
+        2: 2,
+        3: 5
+    };
+    for (let i = 4; i <= n; i++) {
+        dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD_VALUE;
+    }
+    return dp[n];
 };

@@ -10,7 +10,6 @@
  *
  * Return the maximum sum.
  */
-
 /**
  * @param {number[][]} grid
  * @param {number[]} limits
@@ -18,9 +17,9 @@
  * @return {number}
  */
 var maxSum = function(grid, limits, k) {
-  const result = [];
-  grid.forEach((row, i) => {
-    result.push(...row.slice().sort((a, b) => b - a).slice(0, limits[i]));
-  });
-  return result.sort((a, b) => b - a).slice(0, k).reduce((sum, num) => sum + num, 0);
+    const result = [];
+    grid.forEach((row, i) => {
+        result.push(...row.slice().sort((a, b) => b - a).slice(0, limits[i]));
+    });
+    return result.sort((a, b) => b - a).slice(0, k).reduce((sum, num) => sum + num, 0);
 };

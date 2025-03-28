@@ -14,24 +14,21 @@
  *
  * Note that subarrays of length 1 are always considered nice.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var longestNiceSubarray = function(nums) {
-  let result = 1;
-  let left = 0;
-  let usedBits = 0;
-
-  for (let right = 0; right < nums.length; right++) {
-    while ((usedBits & nums[right]) !== 0) {
-      usedBits ^= nums[left];
-      left++;
+    let result = 1;
+    let left = 0;
+    let usedBits = 0;
+    for (let right = 0; right < nums.length; right++) {
+        while ((usedBits & nums[right]) !== 0) {
+            usedBits ^= nums[left];
+            left++;
+        }
+        usedBits |= nums[right];
+        result = Math.max(result, right - left + 1);
     }
-    usedBits |= nums[right];
-    result = Math.max(result, right - left + 1);
-  }
-
-  return result;
+    return result;
 };

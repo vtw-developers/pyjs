@@ -19,13 +19,12 @@
  *
  * Given a string sentence, return the number of valid words in sentence.
  */
-
 /**
  * @param {string} sentence
  * @return {number}
  */
 var countValidWords = function(sentence) {
-  return sentence.trim().split(/\s+/).reduce((total, str) => {
-    return total + (/^(?:([a-z]+\-?[a-z]+)|([a-z+]))?[!.,]?$/.test(str) ? 1 : 0);
-  }, 0);
+    return sentence.trim().split(/\s+/).reduce((total, str) => {
+        return total + (/^(?:([a-z]+\-?[a-z]+)|([a-z+]))?[!.,]?$/.test(str) ? 1 : 0);
+    }, 0);
 };

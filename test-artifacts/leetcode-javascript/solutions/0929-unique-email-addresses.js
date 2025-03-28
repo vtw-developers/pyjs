@@ -23,11 +23,10 @@
  * Given a list of emails, we send one email to each address in the list.
  * How many different addresses actually receive mails?
  */
-
 /**
  * @param {string[]} emails
  * @return {number}
  */
 var numUniqueEmails = function(emails) {
-  return new Set(emails.map(e => e.replace(/\.(?=[\w\.+]+@)|\+[\w.+]+(?=@)/g, ''))).size;
+    return new Set(emails.map(e => e.replace(/\.(?=[\w\.+]+@)|\+[\w.+]+(?=@)/g, ''))).size;
 };

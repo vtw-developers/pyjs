@@ -10,13 +10,12 @@
  *
  * Given an integer array nums, return true if the given array is monotonic, or false otherwise.
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
  */
 var isMonotonic = function(nums) {
-  const isIncreasing = nums.every((num, i) => i === 0 || num >= nums[i - 1]);
-  const isDecreasing = nums.every((num, i) => i === 0 || num <= nums[i - 1]);
-  return isIncreasing || isDecreasing;
+    const isIncreasing = nums.every((num, i) => i === 0 || num >= nums[i - 1]);
+    const isDecreasing = nums.every((num, i) => i === 0 || num <= nums[i - 1]);
+    return isIncreasing || isDecreasing;
 };

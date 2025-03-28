@@ -11,36 +11,33 @@
  *
  * Given an integer k, return the kth letter (1-indexed) in the decoded string.
  */
-
 /**
  * @param {string} s
  * @param {number} k
  * @return {string}
  */
 var decodeAtIndex = function(s, k) {
-  let tapeLength = 0;
-  let i = 0;
-
-  while (tapeLength < k) {
-    if (isLetter(s[i])) {
-      tapeLength++;
-    } else {
-      tapeLength *= parseInt(s[i]);
+    let tapeLength = 0;
+    let i = 0;
+    while (tapeLength < k) {
+        if (isLetter(s[i])) {
+            tapeLength++;
+        } else {
+            tapeLength *= parseInt(s[i]);
+        }
+        i++;
     }
-    i++;
-  }
-
-  while (i--) {
-    if (isLetter(s[i])) {
-      if (tapeLength === k) return s[i];
-      tapeLength--;
-    } else {
-      tapeLength = Math.floor(tapeLength / parseInt(s[i]));
-      k = k % tapeLength || tapeLength;
+    while (i--) {
+        if (isLetter(s[i])) {
+            if (tapeLength === k) return s[i];
+            tapeLength--;
+        } else {
+            tapeLength = Math.floor(tapeLength / parseInt(s[i]));
+            k = k % tapeLength || tapeLength;
+        }
     }
-  }
 };
 
 function isLetter(char) {
-  return /[a-z]/.test(char);
+    return /[a-z]/.test(char);
 }

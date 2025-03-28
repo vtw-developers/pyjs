@@ -12,18 +12,15 @@
  * Return the maximum profit you can achieve from this transaction. If you
  * cannot achieve any profit, return 0.
  */
-
 /**
  * @param {number[]} prices
  * @return {number}
  */
 var maxProfit = function(prices) {
-  let max = 0;
-
-  for (let i = 0, min = prices[0]; i < prices.length; i++) {
-    min = Math.min(min, prices[i]);
-    max = Math.max(max, prices[i] - min);
-  }
-
-  return max;
+    let max = 0;
+    for (let i = 0, min = prices[0]; i < prices.length; i++) {
+        min = Math.min(min, prices[i]);
+        max = Math.max(max, prices[i] - min);
+    }
+    return max;
 };

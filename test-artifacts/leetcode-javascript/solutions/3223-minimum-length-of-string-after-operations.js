@@ -14,16 +14,13 @@
  *
  * Return the minimum length of the final string s that you can achieve.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var minimumLength = function(s) {
-  if (s.length < 3) return s.length;
-
-  const map = new Map();
-  s.split('').forEach(c => map.set(c, (map.get(c) ?? 0) + 1));
-
-  return [...map.values()].reduce((count, n) => count + (n % 2 ? n % 2 : 2), 0);
+    if (s.length < 3) return s.length;
+    const map = new Map();
+    s.split('').forEach(c => map.set(c, (map.get(c) ?? 0) + 1));
+    return [...map.values()].reduce((count, n) => count + (n % 2 ? n % 2 : 2), 0);
 };

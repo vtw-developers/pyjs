@@ -10,7 +10,6 @@
  * - The right subtree of a node contains only nodes with keys greater than the node's key.
  * - Both the left and right subtrees must also be binary search trees.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,17 +23,15 @@
  * @return {boolean}
  */
 var isValidBST = function(root) {
-  return traverse(root, null, null);
+    return traverse(root, null, null);
 };
 
 function traverse(root, min, max) {
-  if (!root) {
-    return true;
-  }
-
-  if ((min !== null && root.val <= min) || (max !== null && root.val >= max)) {
-    return false;
-  }
-
-  return traverse(root.left, min, root.val) && traverse(root.right, root.val, max);
+    if (!root) {
+        return true;
+    }
+    if ((min !== null && root.val <= min) || (max !== null && root.val >= max)) {
+        return false;
+    }
+    return traverse(root.left, min, root.val) && traverse(root.right, root.val, max);
 }

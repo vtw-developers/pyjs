@@ -9,11 +9,10 @@
  * You are given an integer array gain of length n where gain[i] is the net gain in altitude
  * between points i and i + 1 for all (0 <= i < n). Return the highest altitude of a point.
  */
-
 /**
  * @param {number[]} gain
  * @return {number}
  */
 var largestAltitude = function(gain) {
-  return Math.max(...gain.reduce((all, n, i) => all.push(all[i] - n * -1) && all, [0]));
+    return Math.max(...gain.reduce((all, n, i) => all.push(all[i] - n * -1) && all, [0]));
 };

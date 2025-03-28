@@ -9,12 +9,11 @@
  *
  * A prefix of a string s is any leading contiguous substring of s.
  */
-
 /**
  * @param {string[]} words
  * @param {string} pref
  * @return {number}
  */
 var prefixCount = function(words, pref) {
-  return words.filter(word => word.startsWith(pref)).length;
+    return words.filter(word => word.startsWith(pref)).length;
 };

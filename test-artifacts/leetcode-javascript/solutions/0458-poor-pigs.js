@@ -21,7 +21,6 @@
  * Given buckets, minutesToDie, and minutesToTest, return the minimum number of pigs needed to
  * figure out which bucket is poisonous within the allotted time.
  */
-
 /**
  * @param {number} buckets
  * @param {number} minutesToDie
@@ -29,12 +28,10 @@
  * @return {number}
  */
 var poorPigs = function(buckets, minutesToDie, minutesToTest) {
-  const max = Math.floor(minutesToTest / minutesToDie) + 1;
-  let result = 0;
-
-  while (Math.pow(max, result) < buckets) {
-    result++;
-  }
-
-  return result;
+    const max = Math.floor(minutesToTest / minutesToDie) + 1;
+    let result = 0;
+    while (Math.pow(max, result) < buckets) {
+        result++;
+    }
+    return result;
 };

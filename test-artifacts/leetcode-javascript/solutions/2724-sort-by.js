@@ -10,12 +10,11 @@
  *
  * You may assume that fn will never duplicate numbers for a given array.
  */
-
 /**
  * @param {Array} arr
  * @param {Function} fn
  * @return {Array}
  */
 var sortBy = function(arr, fn) {
-  return arr.sort((a, b) => fn(a) - fn(b));
+    return arr.sort((a, b) => fn(a) - fn(b));
 };

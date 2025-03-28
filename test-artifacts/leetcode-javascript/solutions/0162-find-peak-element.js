@@ -13,22 +13,19 @@
  *
  * You must write an algorithm that runs in O(log n) time.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var findPeakElement = function(nums) {
-  let left = 0;
-
-  for (let right = nums.length - 1, middle = 0; left < right;) {
-    middle = Math.floor((right + left) / 2);
-    if (nums[middle] > nums[middle + 1]) {
-      right = middle;
-    } else {
-      left = middle + 1;
+    let left = 0;
+    for (let right = nums.length - 1, middle = 0; left < right;) {
+        middle = Math.floor((right + left) / 2);
+        if (nums[middle] > nums[middle + 1]) {
+            right = middle;
+        } else {
+            left = middle + 1;
+        }
     }
-  }
-
-  return left;
+    return left;
 };

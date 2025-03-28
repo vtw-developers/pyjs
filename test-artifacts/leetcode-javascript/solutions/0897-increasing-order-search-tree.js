@@ -7,7 +7,6 @@
  * node in the tree is now the root of the tree, and every node has no left child and only one
  * right child.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -21,18 +20,16 @@
  * @return {TreeNode}
  */
 var increasingBST = function(root) {
-  const result = new TreeNode(0);
-  let current = result;
+    const result = new TreeNode(0);
+    let current = result;
+    inorderTraversal(root);
+    return result.right;
 
-  inorderTraversal(root);
-  return result.right;
-
-  function inorderTraversal(node) {
-    if (!node) return;
-
-    inorderTraversal(node.left);
-    current.right = new TreeNode(node.val);
-    current = current.right;
-    inorderTraversal(node.right);
-  }
+    function inorderTraversal(node) {
+        if (!node) return;
+        inorderTraversal(node.left);
+        current.right = new TreeNode(node.val);
+        current = current.right;
+        inorderTraversal(node.right);
+    }
 };

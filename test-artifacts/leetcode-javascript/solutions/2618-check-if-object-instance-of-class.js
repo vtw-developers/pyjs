@@ -10,15 +10,14 @@
  * There are no constraints on the data types that can be passed to the function. For example,
  * the value or the class could be undefined.
  */
-
 /**
  * @param {*} obj
  * @param {*} classFunction
  * @return {boolean}
  */
 var checkIfInstanceOf = function(obj, classFunction) {
-  if (obj === null || obj === undefined || typeof classFunction !== 'function') {
-    return false;
-  }
-  return Object(obj) instanceof classFunction;
+    if (obj === null || obj === undefined || typeof classFunction !== 'function') {
+        return false;
+    }
+    return Object(obj) instanceof classFunction;
 };

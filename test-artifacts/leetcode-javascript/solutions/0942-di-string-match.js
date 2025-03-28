@@ -11,26 +11,23 @@
  * Given a string s, reconstruct the permutation perm and return it. If there are multiple valid
  * permutations perm, return any of them.
  */
-
 /**
  * @param {string} s
  * @return {number[]}
  */
 var diStringMatch = function(s) {
-  const result = [];
-  let low = 0;
-  let high = s.length;
-
-  for (const char of s) {
-    if (char === 'I') {
-      result.push(low);
-      low++;
-    } else {
-      result.push(high);
-      high--;
+    const result = [];
+    let low = 0;
+    let high = s.length;
+    for (const char of s) {
+        if (char === 'I') {
+            result.push(low);
+            low++;
+        } else {
+            result.push(high);
+            high--;
+        }
     }
-  }
-
-  result.push(low);
-  return result;
+    result.push(low);
+    return result;
 };

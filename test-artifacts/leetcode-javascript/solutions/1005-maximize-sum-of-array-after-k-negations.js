@@ -11,17 +11,16 @@
  *
  * Return the largest possible sum of the array after modifying it in this way.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var largestSumAfterKNegations = function(nums, k) {
-  while (k) {
-    const i = nums.indexOf(Math.min(...nums));
-    nums[i] *= -1;
-    k--;
-  }
-  return nums.reduce((sum, n) => sum + n, 0);
+    while (k) {
+        const i = nums.indexOf(Math.min(...nums));
+        nums[i] *= -1;
+        k--;
+    }
+    return nums.reduce((sum, n) => sum + n, 0);
 };

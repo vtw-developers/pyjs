@@ -9,12 +9,11 @@
  *
  * Given a string s, return true if it is a palindrome, or false otherwise.
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var isPalindrome = function(s) {
-  const string = s.replace(/[^A-Z\d]+/ig, '').toLowerCase();
-  return string.split('').reverse().join('') === string;
+    const string = s.replace(/[^A-Z\d]+/ig, '').toLowerCase();
+    return string.split('').reverse().join('') === string;
 };

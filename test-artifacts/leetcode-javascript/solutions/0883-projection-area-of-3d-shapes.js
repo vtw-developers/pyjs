@@ -15,29 +15,24 @@
  *
  * Return the total area of all three projections.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var projectionArea = function(grid) {
-  let topView = 0;
-  let frontView = 0;
-  let sideView = 0;
-
-  for (let i = 0; i < grid.length; i++) {
-    let maxRow = 0;
-    let maxCol = 0;
-
-    for (let j = 0; j < grid.length; j++) {
-      if (grid[i][j] > 0) topView++;
-      maxRow = Math.max(maxRow, grid[i][j]);
-      maxCol = Math.max(maxCol, grid[j][i]);
+    let topView = 0;
+    let frontView = 0;
+    let sideView = 0;
+    for (let i = 0; i < grid.length; i++) {
+        let maxRow = 0;
+        let maxCol = 0;
+        for (let j = 0; j < grid.length; j++) {
+            if (grid[i][j] > 0) topView++;
+            maxRow = Math.max(maxRow, grid[i][j]);
+            maxCol = Math.max(maxCol, grid[j][i]);
+        }
+        frontView += maxRow;
+        sideView += maxCol;
     }
-
-    frontView += maxRow;
-    sideView += maxCol;
-  }
-
-  return topView + frontView + sideView;
+    return topView + frontView + sideView;
 };

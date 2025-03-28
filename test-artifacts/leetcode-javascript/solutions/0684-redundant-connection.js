@@ -14,33 +14,30 @@
  * Return an edge that can be removed so that the resulting graph is a tree of n nodes.
  * If there are multiple answers, return the answer that occurs last in the input.
  */
-
 /**
  * @param {number[][]} edges
  * @return {number[]}
  */
 var findRedundantConnection = function(edges) {
-  const adjacency = new Map();
+    const adjacency = new Map();
 
-  function traverse(node, target, prev) {
-    if (node === target) {
-      return true;
+    function traverse(node, target, prev) {
+        if (node === target) {
+            return true;
+        }
+        for (const nextNode of adjacency.get(node)) {
+            if (nextNode !== prev && traverse(nextNode, target, node)) {
+                return true;
+            }
+        }
+        return false;
     }
-    for (const nextNode of adjacency.get(node)) {
-      if (nextNode !== prev && traverse(nextNode, target, node)) {
-        return true;
-      }
+    for (const edge of edges) {
+        const [a, b] = edge;
+        adjacency.set(a, !adjacency.has(a) ? [b] : [...adjacency.get(a), b]);
+        adjacency.set(b, !adjacency.has(b) ? [a] : [...adjacency.get(b), a]);
+        if (traverse(b, a, a)) {
+            return [a, b];
+        }
     }
-    return false;
-  }
-
-  for (const edge of edges) {
-    const [a, b] = edge;
-    adjacency.set(a, !adjacency.has(a) ? [b] : [...adjacency.get(a), b]);
-    adjacency.set(b, !adjacency.has(b) ? [a] : [...adjacency.get(b), a]);
-
-    if (traverse(b, a, a)) {
-      return [a, b];
-    }
-  }
 };

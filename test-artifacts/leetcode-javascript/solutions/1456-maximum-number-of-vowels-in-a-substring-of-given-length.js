@@ -9,25 +9,22 @@
  *
  * Vowel letters in English are (a, e, i, o, u).
  */
-
 /**
  * @param {string} s
  * @param {number} k
  * @return {number}
  */
 var maxVowels = function(s, k) {
-  const vowels = 'aeiou';
-  let result = 0;
-
-  for (let i = 0, count = 0; i < s.length; i++) {
-    if (vowels.includes(s[i])) {
-      count++;
+    const vowels = 'aeiou';
+    let result = 0;
+    for (let i = 0, count = 0; i < s.length; i++) {
+        if (vowels.includes(s[i])) {
+            count++;
+        }
+        if (i >= k && vowels.includes(s[i - k])) {
+            count--;
+        }
+        result = Math.max(result, count);
     }
-    if (i >= k && vowels.includes(s[i - k])) {
-      count--;
-    }
-    result = Math.max(result, count);
-  }
-
-  return result;
+    return result;
 };

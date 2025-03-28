@@ -11,30 +11,28 @@
  *
  * Return the maximum number of courses that you can take.
  */
-
 /**
  * @param {number[][]} courses
  * @return {number}
  */
 var scheduleCourse = function(courses) {
-  courses.sort((a, b) => a[1] - b[1]);
-
-  const maxHeap = new PriorityQueue({ compare: (a, b) => b - a });
-  let value = 0;
-
-  for (const [duration, lastDay] of courses) {
-    if (value + duration <= lastDay) {
-      value += duration;
-      maxHeap.enqueue(duration);
-    } else {
-      if (maxHeap.front() > duration) {
-        var prev = maxHeap.dequeue();
-        value -= prev;
-        value += duration;
-        maxHeap.enqueue(duration);
-      }
+    courses.sort((a, b) => a[1] - b[1]);
+    const maxHeap = new PriorityQueue({
+        compare: (a, b) => b - a
+    });
+    let value = 0;
+    for (const [duration, lastDay] of courses) {
+        if (value + duration <= lastDay) {
+            value += duration;
+            maxHeap.enqueue(duration);
+        } else {
+            if (maxHeap.front() > duration) {
+                var prev = maxHeap.dequeue();
+                value -= prev;
+                value += duration;
+                maxHeap.enqueue(duration);
+            }
+        }
     }
-  }
-
-  return maxHeap.size();
+    return maxHeap.size();
 };

@@ -7,22 +7,19 @@
  * (exclusive) such that the denominator is less-than-or-equal-to n. The
  * fractions can be in any order.
  */
-
 /**
  * @param {number} n
  * @return {string[]}
  */
 var simplifiedFractions = function(n) {
-  const gcd = (a, b) => !b ? a : gcd(b, a % b);
-  const result = [];
-
-  for (let i = 2; i <= n; i++) {
-    for (let j = 1; j < i; j++) {
-      if (gcd(i, j) === 1) {
-        result.push(`${j}/${i}`);
-      }
+    const gcd = (a, b) => !b ? a : gcd(b, a % b);
+    const result = [];
+    for (let i = 2; i <= n; i++) {
+        for (let j = 1; j < i; j++) {
+            if (gcd(i, j) === 1) {
+                result.push(`${j}/${i}`);
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 };

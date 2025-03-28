@@ -14,7 +14,6 @@
  *
  * Return an array of the k parts.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -28,29 +27,25 @@
  * @return {ListNode[]}
  */
 var splitListToParts = function(head, k) {
-  let count = 0;
-  let current = head;
-
-  while (current) {
-    count++;
-    current = current.next;
-  }
-
-  const base = Math.floor(count / k);
-  const extra = count % k;
-  const result = new Array(k).fill(null);
-
-  current = head;
-  for (let i = 0; i < k && current; i++) {
-    result[i] = current;
-    const partSize = base + (i < extra ? 1 : 0);
-    for (let j = 1; j < partSize; j++) {
-      current = current.next;
+    let count = 0;
+    let current = head;
+    while (current) {
+        count++;
+        current = current.next;
     }
-    const next = current.next;
-    current.next = null;
-    current = next;
-  }
-
-  return result;
+    const base = Math.floor(count / k);
+    const extra = count % k;
+    const result = new Array(k).fill(null);
+    current = head;
+    for (let i = 0; i < k && current; i++) {
+        result[i] = current;
+        const partSize = base + (i < extra ? 1 : 0);
+        for (let j = 1; j < partSize; j++) {
+            current = current.next;
+        }
+        const next = current.next;
+        current.next = null;
+        current = next;
+    }
+    return result;
 };

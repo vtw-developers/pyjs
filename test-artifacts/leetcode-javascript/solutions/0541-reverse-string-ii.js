@@ -9,16 +9,15 @@
  * but greater than or equal to k characters, then reverse the first k
  * characters and left the other as original.
  */
-
 /**
  * @param {string} s
  * @param {number} k
  * @return {string}
  */
 var reverseStr = function(s, k) {
-  const split = s.split('');
-  for (let i = 0; i < s.length; i += 2 * k) {
-    split.splice(i, 0, ...split.splice(i, k).reverse());
-  }
-  return split.join('');
+    const split = s.split('');
+    for (let i = 0; i < s.length; i += 2 * k) {
+        split.splice(i, 0, ...split.splice(i, k).reverse());
+    }
+    return split.join('');
 };

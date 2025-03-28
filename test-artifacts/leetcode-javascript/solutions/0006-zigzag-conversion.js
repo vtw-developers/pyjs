@@ -13,18 +13,15 @@
  *
  * And then read line by line: `"PAHNAPLSIIGYIR"`
  */
-
 /**
  * @param {string} s
  * @param {number} numRows
  * @return {string}
  */
 var convert = function(s, numRows) {
-  const order = [...new Array(numRows).keys()];
-  order.push(...order.slice(1, -1).reverse());
-
-  const rows = new Array(numRows).fill('');
-  [...s].forEach((c, i) => (rows[order[i % order.length]] += c));
-
-  return rows.join('');
+    const order = [...new Array(numRows).keys()];
+    order.push(...order.slice(1, -1).reverse());
+    const rows = new Array(numRows).fill('');
+    [...s].forEach((c, i) => (rows[order[i % order.length]] += c));
+    return rows.join('');
 };

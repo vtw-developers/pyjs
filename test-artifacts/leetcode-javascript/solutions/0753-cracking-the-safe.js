@@ -19,36 +19,35 @@
  *
  * Return any string of minimum length that will unlock the safe at some point of entering it.
  */
-
 /**
  * @param {number} n
  * @param {number} k
  * @return {string}
  */
 var crackSafe = function(n, k) {
-  if (n === 1) return Array.from({ length: k }, (_, i) => i).join('');
-  const seen = new Set();
-  const targetSize = k ** n;
-  let sequence = '0'.repeat(n);
+    if (n === 1) return Array.from({
+        length: k
+    }, (_, i) => i).join('');
+    const seen = new Set();
+    const targetSize = k ** n;
+    let sequence = '0'.repeat(n);
+    seen.add(sequence);
+    build(sequence);
+    return sequence;
 
-  seen.add(sequence);
-  build(sequence);
-  return sequence;
-
-  function build(curr) {
-    if (seen.size === targetSize) return true;
-
-    const prefix = curr.slice(-n + 1);
-    for (let digit = 0; digit < k; digit++) {
-      const next = prefix + digit;
-      if (!seen.has(next)) {
-        seen.add(next);
-        sequence += digit;
-        if (build(sequence)) return true;
-        sequence = sequence.slice(0, -1);
-        seen.delete(next);
-      }
+    function build(curr) {
+        if (seen.size === targetSize) return true;
+        const prefix = curr.slice(-n + 1);
+        for (let digit = 0; digit < k; digit++) {
+            const next = prefix + digit;
+            if (!seen.has(next)) {
+                seen.add(next);
+                sequence += digit;
+                if (build(sequence)) return true;
+                sequence = sequence.slice(0, -1);
+                seen.delete(next);
+            }
+        }
+        return false;
     }
-    return false;
-  }
 };

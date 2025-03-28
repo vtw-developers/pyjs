@@ -16,34 +16,30 @@
  * Note: Each language may have a different implementation of the constructor and Iterator, but
  * they all support the int next() and boolean hasNext() functions.
  */
-
 /**
  * @param {Iterator} iterator
  */
 var PeekingIterator = function(iterator) {
-  this.iterator = iterator;
-  this.peekValue = iterator.next();
+    this.iterator = iterator;
+    this.peekValue = iterator.next();
 };
-
 /**
  * @return {number}
  */
 PeekingIterator.prototype.peek = function() {
-  return this.peekValue;
+    return this.peekValue;
 };
-
 /**
  * @return {number}
  */
 PeekingIterator.prototype.next = function() {
-  const next = this.peekValue;
-  this.peekValue = this.iterator.next();
-  return next;
+    const next = this.peekValue;
+    this.peekValue = this.iterator.next();
+    return next;
 };
-
 /**
  * @return {boolean}
  */
 PeekingIterator.prototype.hasNext = function() {
-  return this.peekValue > 0;
+    return this.peekValue > 0;
 };

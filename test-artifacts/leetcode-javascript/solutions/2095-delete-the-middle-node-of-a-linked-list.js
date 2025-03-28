@@ -11,7 +11,6 @@
  *
  * For n = 1, 2, 3, 4, and 5, the middle nodes are 0, 1, 1, 2, and 2, respectively.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -24,19 +23,15 @@
  * @return {ListNode}
  */
 var deleteMiddle = function(head) {
-  let slow = new ListNode(0, head);
-  let fast = head;
-
-  if (!head.next) {
-    return null;
-  }
-
-  while (fast && fast.next) {
-    slow = slow.next;
-    fast = fast.next.next;
-  }
-
-  slow.next = slow.next.next;
-
-  return head;
+    let slow = new ListNode(0, head);
+    let fast = head;
+    if (!head.next) {
+        return null;
+    }
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    slow.next = slow.next.next;
+    return head;
 };

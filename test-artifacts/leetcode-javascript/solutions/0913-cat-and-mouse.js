@@ -27,88 +27,73 @@
  * - 2 if the cat wins the game, or
  * - 0 if the game is a draw.
  */
-
 /**
  * @param {number[][]} graph
  * @return {number}
  */
 var catMouseGame = function(graph) {
-  const MOUSE_TURN = 0;
-  const CAT_TURN = 1;
-  const MOUSE_WIN = 1;
-  const CAT_WIN = 2;
-  const n = graph.length;
-
-  const color = new Array(n).fill().map(() => {
-    return new Array(n).fill().map(() => new Array(2).fill(0));
-  });
-
-  const degree = new Array(n).fill().map(() => {
-    return new Array(n).fill().map(() => new Array(2).fill(0));
-  });
-
-  const queue = [];
-
-  for (let i = 0; i < n; i++) {
-    for (let turn = 0; turn < 2; turn++) {
-      color[0][i][turn] = MOUSE_WIN;
-      queue.push([0, i, turn, MOUSE_WIN]);
-
-      if (i > 0) {
-        color[i][i][turn] = CAT_WIN;
-        queue.push([i, i, turn, CAT_WIN]);
-      }
-    }
-  }
-
-  for (let m = 0; m < n; m++) {
-    for (let c = 0; c < n; c++) {
-      degree[m][c][MOUSE_TURN] = graph[m].length;
-      degree[m][c][CAT_TURN] = graph[c].length;
-
-      for (let x = 0; x < graph[c].length; x++) {
-        if (graph[c][x] === 0) {
-          degree[m][c][CAT_TURN]--;
-          break;
+    const MOUSE_TURN = 0;
+    const CAT_TURN = 1;
+    const MOUSE_WIN = 1;
+    const CAT_WIN = 2;
+    const n = graph.length;
+    const color = new Array(n).fill().map(() => {
+        return new Array(n).fill().map(() => new Array(2).fill(0));
+    });
+    const degree = new Array(n).fill().map(() => {
+        return new Array(n).fill().map(() => new Array(2).fill(0));
+    });
+    const queue = [];
+    for (let i = 0; i < n; i++) {
+        for (let turn = 0; turn < 2; turn++) {
+            color[0][i][turn] = MOUSE_WIN;
+            queue.push([0, i, turn, MOUSE_WIN]);
+            if (i > 0) {
+                color[i][i][turn] = CAT_WIN;
+                queue.push([i, i, turn, CAT_WIN]);
+            }
         }
-      }
     }
-  }
-
-  while (queue.length > 0) {
-    const [mouse, cat, turn, result] = queue.shift();
-
-    const prevTurn = 1 - turn;
-    const prevPositions = [];
-
-    if (prevTurn === MOUSE_TURN) {
-      for (const prevMouse of graph[mouse]) {
-        prevPositions.push([prevMouse, cat]);
-      }
-    } else {
-      for (const prevCat of graph[cat]) {
-        if (prevCat !== 0) {
-          prevPositions.push([mouse, prevCat]);
+    for (let m = 0; m < n; m++) {
+        for (let c = 0; c < n; c++) {
+            degree[m][c][MOUSE_TURN] = graph[m].length;
+            degree[m][c][CAT_TURN] = graph[c].length;
+            for (let x = 0; x < graph[c].length; x++) {
+                if (graph[c][x] === 0) {
+                    degree[m][c][CAT_TURN]--;
+                    break;
+                }
+            }
         }
-      }
     }
-
-    for (const [prevMouse, prevCat] of prevPositions) {
-      if (color[prevMouse][prevCat][prevTurn] !== 0) continue;
-
-      if ((prevTurn === MOUSE_TURN && result === MOUSE_WIN)
-          || (prevTurn === CAT_TURN && result === CAT_WIN)) {
-        color[prevMouse][prevCat][prevTurn] = result;
-        queue.push([prevMouse, prevCat, prevTurn, result]);
-      } else {
-        degree[prevMouse][prevCat][prevTurn]--;
-        if (degree[prevMouse][prevCat][prevTurn] === 0) {
-          color[prevMouse][prevCat][prevTurn] = result;
-          queue.push([prevMouse, prevCat, prevTurn, result]);
+    while (queue.length > 0) {
+        const [mouse, cat, turn, result] = queue.shift();
+        const prevTurn = 1 - turn;
+        const prevPositions = [];
+        if (prevTurn === MOUSE_TURN) {
+            for (const prevMouse of graph[mouse]) {
+                prevPositions.push([prevMouse, cat]);
+            }
+        } else {
+            for (const prevCat of graph[cat]) {
+                if (prevCat !== 0) {
+                    prevPositions.push([mouse, prevCat]);
+                }
+            }
         }
-      }
+        for (const [prevMouse, prevCat] of prevPositions) {
+            if (color[prevMouse][prevCat][prevTurn] !== 0) continue;
+            if ((prevTurn === MOUSE_TURN && result === MOUSE_WIN) || (prevTurn === CAT_TURN && result === CAT_WIN)) {
+                color[prevMouse][prevCat][prevTurn] = result;
+                queue.push([prevMouse, prevCat, prevTurn, result]);
+            } else {
+                degree[prevMouse][prevCat][prevTurn]--;
+                if (degree[prevMouse][prevCat][prevTurn] === 0) {
+                    color[prevMouse][prevCat][prevTurn] = result;
+                    queue.push([prevMouse, prevCat, prevTurn, result]);
+                }
+            }
+        }
     }
-  }
-
-  return color[1][2][MOUSE_TURN];
+    return color[1][2][MOUSE_TURN];
 };

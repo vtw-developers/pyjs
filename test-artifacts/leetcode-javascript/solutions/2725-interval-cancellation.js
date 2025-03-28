@@ -12,7 +12,6 @@
  * The function fn should be called with args immediately and then called again every t
  * milliseconds until cancelFn is called at cancelTimeMs ms.
  */
-
 /**
  * @param {Function} fn
  * @param {Array} args
@@ -20,7 +19,7 @@
  * @return {Function}
  */
 var cancellable = function(fn, args, t) {
-  fn(...args);
-  const timer = setInterval(() => fn(...args), t);
-  return () => clearInterval(timer);
+    fn(...args);
+    const timer = setInterval(() => fn(...args), t);
+    return () => clearInterval(timer);
 };

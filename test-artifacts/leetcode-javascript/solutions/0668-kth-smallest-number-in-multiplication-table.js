@@ -9,7 +9,6 @@
  * Given three integers m, n, and k, return the kth smallest element in the m x n multiplication
  * table.
  */
-
 /**
  * @param {number} m
  * @param {number} n
@@ -17,25 +16,23 @@
  * @return {number}
  */
 var findKthNumber = function(m, n, k) {
-  let low = 1;
-  let high = m * n;
-
-  while (low < high) {
-    const middle = Math.floor((low + high) / 2);
-    if (helper(middle) < k) {
-      low = middle + 1;
-    } else {
-      high = middle;
+    let low = 1;
+    let high = m * n;
+    while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+        if (helper(middle) < k) {
+            low = middle + 1;
+        } else {
+            high = middle;
+        }
     }
-  }
+    return low;
 
-  return low;
-
-  function helper(x) {
-    let count = 0;
-    for (let i = 1; i <= m; i++) {
-      count += Math.min(Math.floor(x / i), n);
+    function helper(x) {
+        let count = 0;
+        for (let i = 1; i <= m; i++) {
+            count += Math.min(Math.floor(x / i), n);
+        }
+        return count;
     }
-    return count;
-  }
 };

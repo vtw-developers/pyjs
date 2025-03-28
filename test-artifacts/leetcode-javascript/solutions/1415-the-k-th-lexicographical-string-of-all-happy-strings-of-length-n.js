@@ -16,29 +16,27 @@
  * Return the kth string of this list or return an empty string if there are less than k happy
  * strings of length n.
  */
-
 /**
  * @param {number} n
  * @param {number} k
  * @return {string}
  */
 var getHappyString = function(n, k) {
-  return backtrack('') || '';
+    return backtrack('') || '';
 
-  function backtrack(str) {
-    if (str.length === n) {
-      return --k ? false : str;
+    function backtrack(str) {
+        if (str.length === n) {
+            return --k ? false : str;
+        }
+        for (const character of 'abc') {
+            if (character === str[str.length - 1]) {
+                continue;
+            }
+            const value = backtrack(str + character);
+            if (value) {
+                return value;
+            }
+        }
+        return false;
     }
-    for (const character of 'abc') {
-      if (character === str[str.length - 1]) {
-        continue;
-      }
-      const value = backtrack(str + character);
-      if (value) {
-        return value;
-      }
-    }
-
-    return false;
-  }
 };

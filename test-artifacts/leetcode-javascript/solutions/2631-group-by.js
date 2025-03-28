@@ -16,20 +16,18 @@
  *
  * Please solve it without lodash's _.groupBy function.
  */
-
 /**
  * @param {Function} fn
  * @return {Object}
  */
 Array.prototype.groupBy = function(fn) {
-  return this.reduce((grouped, item) => {
-    const key = fn(item);
-    grouped[key] = grouped[key] || [];
-    grouped[key].push(item);
-    return grouped;
-  }, {});
+    return this.reduce((grouped, item) => {
+        const key = fn(item);
+        grouped[key] = grouped[key] || [];
+        grouped[key].push(item);
+        return grouped;
+    }, {});
 };
-
 /**
  * [1,2,3].groupBy(String) // {"1":[1],"2":[2],"3":[3]}
  */

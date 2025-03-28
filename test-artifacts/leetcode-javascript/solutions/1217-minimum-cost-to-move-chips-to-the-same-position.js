@@ -12,12 +12,11 @@
  *
  * Return the minimum cost needed to move all the chips to the same position.
  */
-
 /**
  * @param {number[]} position
  * @return {number}
  */
 var minCostToMoveChips = function(position) {
-  const count = position.reduce((result, n) => n % 2 ? ++result : result, 0);
-  return count >= position.length / 2 ? position.length - count : count;
+    const count = position.reduce((result, n) => n % 2 ? ++result : result, 0);
+    return count >= position.length / 2 ? position.length - count : count;
 };

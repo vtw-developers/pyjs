@@ -9,28 +9,24 @@
  *
  * Given the array answers, return the minimum number of rabbits that could be in the forest.
  */
-
 /**
  * @param {number[]} answers
  * @return {number}
  */
 var numRabbits = function(answers) {
-  const colorGroups = {};
-  let totalRabbits = 0;
-
-  for (const answer of answers) {
-    if (answer === 0) {
-      totalRabbits++;
-      continue;
+    const colorGroups = {};
+    let totalRabbits = 0;
+    for (const answer of answers) {
+        if (answer === 0) {
+            totalRabbits++;
+            continue;
+        }
+        if (!colorGroups[answer] || colorGroups[answer] === 0) {
+            totalRabbits += answer + 1;
+            colorGroups[answer] = answer;
+        } else {
+            colorGroups[answer]--;
+        }
     }
-
-    if (!colorGroups[answer] || colorGroups[answer] === 0) {
-      totalRabbits += answer + 1;
-      colorGroups[answer] = answer;
-    } else {
-      colorGroups[answer]--;
-    }
-  }
-
-  return totalRabbits;
+    return totalRabbits;
 };

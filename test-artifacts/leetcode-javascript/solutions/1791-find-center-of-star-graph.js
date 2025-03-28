@@ -10,19 +10,18 @@
  * You are given a 2D integer array edges where each edges[i] = [ui, vi] indicates that there is an
  * edge between the nodes ui and vi. Return the center of the given star graph.
  */
-
 /**
  * @param {number[][]} edges
  * @return {number}
  */
 var findCenter = function(edges) {
-  const set = new Set();
-  for (const edge of edges) {
-    for (const node of edge) {
-      if (set.has(node)) {
-        return node;
-      }
-      set.add(node);
+    const set = new Set();
+    for (const edge of edges) {
+        for (const node of edge) {
+            if (set.has(node)) {
+                return node;
+            }
+            set.add(node);
+        }
     }
-  }
 };

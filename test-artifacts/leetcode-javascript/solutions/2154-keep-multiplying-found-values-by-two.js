@@ -12,14 +12,11 @@
  * Repeat this process with the new number as long as you keep finding the number.
  * Return the final value of original.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} original
  * @return {number}
  */
 var findFinalValue = function(nums, original) {
-  return nums
-    .sort((a, b) => a - b)
-    .reduce((result, n) => result *= n === result ? 2 : 1, original);
+    return nums.sort((a, b) => a - b).reduce((result, n) => result *= n === result ? 2 : 1, original);
 };

@@ -18,7 +18,6 @@
  * four cups of champagne are poured, the third row has the middle glass half full, and the two
  * outside glasses are a quarter full, as pictured below.
  */
-
 /**
  * @param {number} poured
  * @param {number} queryRow
@@ -26,19 +25,16 @@
  * @return {number}
  */
 var champagneTower = function(poured, queryRow, queryGlass) {
-  const tower = new Array(101).fill().map(() => new Array(101).fill(0));
-  tower[0][0] = poured;
-
-  for (let row = 0; row <= queryRow; row++) {
-    for (let glass = 0; glass <= row; glass++) {
-      const excess = (tower[row][glass] - 1) / 2;
-
-      if (excess > 0) {
-        tower[row + 1][glass] += excess;
-        tower[row + 1][glass + 1] += excess;
-      }
+    const tower = new Array(101).fill().map(() => new Array(101).fill(0));
+    tower[0][0] = poured;
+    for (let row = 0; row <= queryRow; row++) {
+        for (let glass = 0; glass <= row; glass++) {
+            const excess = (tower[row][glass] - 1) / 2;
+            if (excess > 0) {
+                tower[row + 1][glass] += excess;
+                tower[row + 1][glass + 1] += excess;
+            }
+        }
     }
-  }
-
-  return Math.min(1, tower[queryRow][queryGlass]);
+    return Math.min(1, tower[queryRow][queryGlass]);
 };

@@ -20,22 +20,21 @@
  *
  * Please solve it without using the built-in Promise.all function.
  */
-
 /**
  * @param {Array<Function>} functions
  * @return {Promise<any>}
  */
 var promiseAll = function(functions) {
-  return new Promise((resolve, reject) => {
-    const promises = new Array(functions.length);
-    let count = 0;
-    functions.forEach((fn, i) => {
-      fn().then(result => {
-        promises[i] = result;
-        if (++count === promises.length) {
-          resolve(promises);
-        }
-      }).catch(reject);
+    return new Promise((resolve, reject) => {
+        const promises = new Array(functions.length);
+        let count = 0;
+        functions.forEach((fn, i) => {
+            fn().then(result => {
+                promises[i] = result;
+                if (++count === promises.length) {
+                    resolve(promises);
+                }
+            }).catch(reject);
+        });
     });
-  });
 };

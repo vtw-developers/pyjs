@@ -13,13 +13,12 @@
  *
  * It's guaranteed that a unique mapping will always exist.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var freqAlphabets = function(s) {
-  return s.replace(/\d{2}#|\d/g, match => {
-    return String.fromCharCode('a'.charCodeAt() + parseInt(match, 10) - 1);
-  });
+    return s.replace(/\d{2}#|\d/g, match => {
+        return String.fromCharCode('a'.charCodeAt() + parseInt(match, 10) - 1);
+    });
 };

@@ -13,17 +13,16 @@
  *
  * Return true if n is a happy number, and false if not.
  */
-
 /**
  * @param {number} n
  * @return {boolean}
  */
 var isHappy = function(n) {
-  while (n !== 1) {
-    n = [...String(n)].reduce((sum, digit) => sum + digit ** 2, 0);
-    if (n === 4) {
-      return false;
+    while (n !== 1) {
+        n = [...String(n)].reduce((sum, digit) => sum + digit ** 2, 0);
+        if (n === 4) {
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 };

@@ -10,17 +10,16 @@
  * maximum value of h such that the given researcher has published at least h papers
  * that have each been cited at least h times.
  */
-
 /**
  * @param {number[]} citations
  * @return {number}
  */
 var hIndex = function(citations) {
-  citations.sort((a, b) => a - b);
-  for (let i = 0; i < citations.length; i++) {
-    if (citations[i] >= citations.length - i) {
-      return citations.length - i;
+    citations.sort((a, b) => a - b);
+    for (let i = 0; i < citations.length; i++) {
+        if (citations[i] >= citations.length - i) {
+            return citations.length - i;
+        }
     }
-  }
-  return 0;
+    return 0;
 };

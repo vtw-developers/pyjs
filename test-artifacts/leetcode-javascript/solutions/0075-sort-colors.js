@@ -12,17 +12,16 @@
  *
  * You must solve this problem without using the library's sort function.
  */
-
 /**
  * @param {number[]} nums
  * @return {void} Do not return anything, modify nums in-place instead.
  */
 var sortColors = function(nums) {
-  const count = nums.reduce((a, n) => ++a[n] && a, [0, 0, 0]);
-  for (let i = 0, j = 0; i < count.length; i++) {
-    for (let k = 0; k < count[i]; k++) {
-      nums[j++] = i;
+    const count = nums.reduce((a, n) => ++a[n] && a, [0, 0, 0]);
+    for (let i = 0, j = 0; i < count.length; i++) {
+        for (let k = 0; k < count[i]; k++) {
+            nums[j++] = i;
+        }
     }
-  }
-  return nums;
+    return nums;
 };

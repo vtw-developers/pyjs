@@ -15,50 +15,45 @@
  * Return the minimum possible non-negative value of k, such that after processing the first
  * k queries in sequence, nums becomes a Zero Array. If no such k exists, return -1.
  */
-
 /**
  * @param {number[]} nums
  * @param {number[][]} queries
  * @return {number}
  */
 var minZeroArray = function(nums, queries) {
-  const diff = new Array(nums.length + 1).fill(0);
-  const total = nums.reduce((sum, num) => sum + num, 0);
-  let left = 0;
-  let right = queries.length - 1;
-  let result = -1;
-
-  if (total === 0) {
-    return 0;
-  }
-
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    if (canZeroOut(mid)) {
-      result = mid + 1;
-      right = mid - 1;
-    } else {
-      left = mid + 1;
+    const diff = new Array(nums.length + 1).fill(0);
+    const total = nums.reduce((sum, num) => sum + num, 0);
+    let left = 0;
+    let right = queries.length - 1;
+    let result = -1;
+    if (total === 0) {
+        return 0;
     }
-  }
-
-  return result;
-
-  function canZeroOut(k) {
-    const tempDiff = new Array(nums.length + 1).fill(0);
-    for (let i = 0; i <= k; i++) {
-      const [left, right, val] = queries[i];
-      tempDiff[left] += val;
-      if (right + 1 < nums.length) tempDiff[right + 1] -= val;
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (canZeroOut(mid)) {
+            result = mid + 1;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
     }
+    return result;
 
-    let current = 0;
-    let reduction = 0;
-    for (let i = 0; i < nums.length; i++) {
-      current = Math.max(0, current + tempDiff[i]);
-      reduction += Math.min(nums[i], current);
-      if (reduction >= total) return true;
+    function canZeroOut(k) {
+        const tempDiff = new Array(nums.length + 1).fill(0);
+        for (let i = 0; i <= k; i++) {
+            const [left, right, val] = queries[i];
+            tempDiff[left] += val;
+            if (right + 1 < nums.length) tempDiff[right + 1] -= val;
+        }
+        let current = 0;
+        let reduction = 0;
+        for (let i = 0; i < nums.length; i++) {
+            current = Math.max(0, current + tempDiff[i]);
+            reduction += Math.min(nums[i], current);
+            if (reduction >= total) return true;
+        }
+        return reduction >= total;
     }
-    return reduction >= total;
-  }
 };

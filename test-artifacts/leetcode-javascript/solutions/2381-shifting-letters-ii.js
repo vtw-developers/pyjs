@@ -14,25 +14,24 @@
  *
  * Return the final string after all such shifts to s are applied.
  */
-
 /**
  * @param {string} s
  * @param {number[][]} shifts
  * @return {string}
  */
 var shiftingLetters = function(s, shifts) {
-  const compare = new Array(s.length).fill(0);
-  for (const [start, end, direction] of shifts) {
-    compare[start] += direction === 1 ? 1 : -1;
-    if (end + 1 < s.length) {
-      compare[end + 1] += direction === 1 ? -1 : 1;
+    const compare = new Array(s.length).fill(0);
+    for (const [start, end, direction] of shifts) {
+        compare[start] += direction === 1 ? 1 : -1;
+        if (end + 1 < s.length) {
+            compare[end + 1] += direction === 1 ? -1 : 1;
+        }
     }
-  }
-  let result = '';
-  for (let i = 0, count = 0; i < s.length; i++) {
-    count = (count + compare[i]) % 26;
-    count = count < 0 ? count + 26 : count;
-    result += String.fromCharCode((s.charCodeAt(i) - 97 + count) % 26 + 97);
-  }
-  return result;
+    let result = '';
+    for (let i = 0, count = 0; i < s.length; i++) {
+        count = (count + compare[i]) % 26;
+        count = count < 0 ? count + 26 : count;
+        result += String.fromCharCode((s.charCodeAt(i) - 97 + count) % 26 + 97);
+    }
+    return result;
 };

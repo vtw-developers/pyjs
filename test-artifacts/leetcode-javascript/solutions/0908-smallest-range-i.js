@@ -14,12 +14,11 @@
  * Return the minimum score of nums after applying the mentioned operation at most once for each
  * index in it.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var smallestRangeI = function(nums, k) {
-  return Math.max(Math.max(...nums) - Math.min(...nums) - 2 * k, 0);
+    return Math.max(Math.max(...nums) - Math.min(...nums) - 2 * k, 0);
 };

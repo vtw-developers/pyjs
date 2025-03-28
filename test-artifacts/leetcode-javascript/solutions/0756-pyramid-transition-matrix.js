@@ -23,31 +23,27 @@
  * Given bottom and allowed, return true if you can build the pyramid all the way to the top such
  * that every triangular pattern in the pyramid is in allowed, or false otherwise.
  */
-
 /**
  * @param {string} bottom
  * @param {string[]} allowed
  * @return {boolean}
  */
 var pyramidTransition = function(bottom, allowed) {
-  const transitions = new Map();
-  for (const [left, right, top] of allowed) {
-    const key = left + right;
-    transitions.set(key, (transitions.get(key) || '') + top);
-  }
-
-  function canBuild(row, nextRow = '') {
-    if (row.length === 1) return true;
-    if (nextRow.length === row.length - 1) return canBuild(nextRow);
-
-    const pair = row.slice(nextRow.length, nextRow.length + 2);
-    const options = transitions.get(pair) || '';
-
-    for (const top of options) {
-      if (canBuild(row, nextRow + top)) return true;
+    const transitions = new Map();
+    for (const [left, right, top] of allowed) {
+        const key = left + right;
+        transitions.set(key, (transitions.get(key) || '') + top);
     }
-    return false;
-  }
 
-  return canBuild(bottom);
+    function canBuild(row, nextRow = '') {
+        if (row.length === 1) return true;
+        if (nextRow.length === row.length - 1) return canBuild(nextRow);
+        const pair = row.slice(nextRow.length, nextRow.length + 2);
+        const options = transitions.get(pair) || '';
+        for (const top of options) {
+            if (canBuild(row, nextRow + top)) return true;
+        }
+        return false;
+    }
+    return canBuild(bottom);
 };

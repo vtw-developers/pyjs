@@ -18,41 +18,35 @@
  *
  * Return true if and only if it is bipartite.
  */
-
 /**
  * @param {number[][]} graph
  * @return {boolean}
  */
 var isBipartite = function(graph) {
-  const n = graph.length;
-  const colors = new Array(n).fill(-1);
-
-  for (let i = 0; i < n; i++) {
-    if (colors[i] === -1 && !colorGraph(i, 0, graph, colors)) {
-      return false;
+    const n = graph.length;
+    const colors = new Array(n).fill(-1);
+    for (let i = 0; i < n; i++) {
+        if (colors[i] === -1 && !colorGraph(i, 0, graph, colors)) {
+            return false;
+        }
     }
-  }
-
-  return true;
+    return true;
 };
 
 function colorGraph(start, color, graph, colors) {
-  const queue = [start];
-  colors[start] = color;
-
-  while (queue.length > 0) {
-    const node = queue.shift();
-    const nextColor = 1 - colors[node];
-
-    for (const neighbor of graph[node]) {
-      if (colors[neighbor] === -1) {
-        colors[neighbor] = nextColor;
-        queue.push(neighbor);
-      } else if (colors[neighbor] !== nextColor) {
-        return false;
-      }
+    const queue = [start];
+    colors[start] = color;
+    while (queue.length > 0) {
+        const node = queue.shift();
+        const nextColor = 1 - colors[node];
+        for (const neighbor of graph[node]) {
+            if (colors[neighbor] === -1) {
+                colors[neighbor] = nextColor;
+                queue.push(neighbor);
+            } else if (colors[neighbor] !== nextColor) {
+                return false;
+            }
+        }
     }
-  }
-
-  return true;
+    return true;
 }

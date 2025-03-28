@@ -7,11 +7,10 @@
  *
  * Note that n! = n * (n - 1) * (n - 2) * ... * 3 * 2 * 1.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var trailingZeroes = function(n) {
-  return n < 5 ? 0 : Math.floor(n / 5) + trailingZeroes(n / 5);
+    return n < 5 ? 0 : Math.floor(n / 5) + trailingZeroes(n / 5);
 };

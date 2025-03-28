@@ -11,17 +11,14 @@
  * Return the final string after all such duplicate removals have been made. It can be
  * proven that the answer is unique.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var removeDuplicates = function(s) {
-  const stack = [];
-
-  for (const char of s) {
-    stack[stack.length - 1] === char ? stack.pop() : stack.push(char);
-  }
-
-  return stack.join('');
+    const stack = [];
+    for (const char of s) {
+        stack[stack.length - 1] === char ? stack.pop() : stack.push(char);
+    }
+    return stack.join('');
 };

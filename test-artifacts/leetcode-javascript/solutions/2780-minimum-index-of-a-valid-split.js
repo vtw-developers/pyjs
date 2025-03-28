@@ -18,35 +18,29 @@
  *
  * Return the minimum index of a valid split. If no valid split exists, return -1.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var minimumIndex = function(nums) {
-  const map = new Map();
-
-  for (const num of nums) {
-    map.set(num, (map.get(num) || 0) + 1);
-  }
-
-  let dominantElement;
-  for (const [num, count] of map) {
-    if (count * 2 > nums.length) {
-      dominantElement = num;
-      break;
+    const map = new Map();
+    for (const num of nums) {
+        map.set(num, (map.get(num) || 0) + 1);
     }
-  }
-
-  let leftCount = 0;
-  for (let i = 0; i < nums.length - 1; i++) {
-    leftCount += nums[i] === dominantElement ? 1 : 0;
-    const rightCount = map.get(dominantElement) - leftCount;
-
-    if (leftCount * 2 > i + 1 && rightCount * 2 > nums.length - i - 1) {
-      return i;
+    let dominantElement;
+    for (const [num, count] of map) {
+        if (count * 2 > nums.length) {
+            dominantElement = num;
+            break;
+        }
     }
-  }
-
-  return -1;
+    let leftCount = 0;
+    for (let i = 0; i < nums.length - 1; i++) {
+        leftCount += nums[i] === dominantElement ? 1 : 0;
+        const rightCount = map.get(dominantElement) - leftCount;
+        if (leftCount * 2 > i + 1 && rightCount * 2 > nums.length - i - 1) {
+            return i;
+        }
+    }
+    return -1;
 };

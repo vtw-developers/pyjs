@@ -7,11 +7,10 @@
  *
  * A segment is defined to be a contiguous sequence of non-space characters.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var countSegments = function(s) {
-  return s.split(/\s+/).filter(s => s).length;
+    return s.split(/\s+/).filter(s => s).length;
 };

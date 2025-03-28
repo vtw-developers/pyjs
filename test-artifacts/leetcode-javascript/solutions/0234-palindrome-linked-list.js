@@ -5,7 +5,6 @@
  *
  * Given the `head` of a singly linked list, return `true` if it is a palindrome.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -18,13 +17,12 @@
  * @return {boolean}
  */
 var isPalindrome = function(head) {
-  let a = '', b = '';
-
-  while (head) {
-    a = a + head.val;
-    b = head.val + b;
-    head = head.next;
-  }
-
-  return a === b;
+    let a = '',
+        b = '';
+    while (head) {
+        a = a + head.val;
+        b = head.val + b;
+        head = head.next;
+    }
+    return a === b;
 };

@@ -17,30 +17,27 @@
  * Note that since colors represents a circle, the first and the last tiles are considered
  * to be next to each other.
  */
-
 /**
  * @param {number[]} colors
  * @param {number} k
  * @return {number}
  */
 var numberOfAlternatingGroups = function(colors, k) {
-  const extended = colors.concat(colors.slice(0, k - 1));
-  let result = 0;
-  let invalid = 0;
-
-  for (let i = 1; i < k; i++) {
-    if (extended[i] === extended[i - 1]) {
-      invalid++;
+    const extended = colors.concat(colors.slice(0, k - 1));
+    let result = 0;
+    let invalid = 0;
+    for (let i = 1; i < k; i++) {
+        if (extended[i] === extended[i - 1]) {
+            invalid++;
+        }
     }
-  }
-  if (invalid === 0) {
-    result++;
-  }
-  for (let i = 1; i < colors.length; i++) {
-    if (extended[i] === extended[i - 1]) invalid--;
-    if (extended[i + k - 1] === extended[i + k - 2]) invalid++;
-    if (invalid === 0) result++;
-  }
-
-  return result;
+    if (invalid === 0) {
+        result++;
+    }
+    for (let i = 1; i < colors.length; i++) {
+        if (extended[i] === extended[i - 1]) invalid--;
+        if (extended[i + k - 1] === extended[i + k - 2]) invalid++;
+        if (invalid === 0) result++;
+    }
+    return result;
 };

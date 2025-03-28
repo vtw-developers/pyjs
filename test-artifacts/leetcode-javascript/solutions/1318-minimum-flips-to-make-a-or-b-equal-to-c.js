@@ -10,7 +10,6 @@
  * Flip operation consists of change any single bit 1 to 0
  * or change the bit 0 to 1 in their binary representation.
  */
-
 /**
  * @param {number} a
  * @param {number} b
@@ -18,14 +17,12 @@
  * @return {number}
  */
 var minFlips = function(a, b, c, flips = 0) {
-  [a, b, c] = [a, b, c].map(x => x.toString(2).padStart(32, 0));
-
-  for (let i = 0; i < c.length; i++) {
-    if ((+a[i] | +b[i]) !== +c[i]) {
-      if (((+a[i] ^ 1) | +b[i]) === +c[i] || (+a[i] | (+b[i] ^ 1)) === +c[i]) flips++;
-      else if (((+a[i] ^ 1) | (+b[i] ^ 1)) === +c[i]) flips += 2;
+    [a, b, c] = [a, b, c].map(x => x.toString(2).padStart(32, 0));
+    for (let i = 0; i < c.length; i++) {
+        if ((+a[i] | +b[i]) !== +c[i]) {
+            if (((+a[i] ^ 1) | +b[i]) === +c[i] || (+a[i] | (+b[i] ^ 1)) === +c[i]) flips++;
+            else if (((+a[i] ^ 1) | (+b[i] ^ 1)) === +c[i]) flips += 2;
+        }
     }
-  }
-
-  return flips;
+    return flips;
 };

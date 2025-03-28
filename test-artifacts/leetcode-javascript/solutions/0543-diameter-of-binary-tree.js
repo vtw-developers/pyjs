@@ -10,7 +10,6 @@
  *
  * The length of a path between two nodes is represented by the number of edges between them.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,15 +23,15 @@
  * @return {number}
  */
 var diameterOfBinaryTree = function(root) {
-  let result = 0;
-  maxDepth(root);
-  return result;
+    let result = 0;
+    maxDepth(root);
+    return result;
 
-  function maxDepth(node) {
-    if (!node) return 0;
-    const left = maxDepth(node.left);
-    const right = maxDepth(node.right);
-    result = Math.max(result, left + right);
-    return Math.max(left, right) + 1;
-  }
+    function maxDepth(node) {
+        if (!node) return 0;
+        const left = maxDepth(node.left);
+        const right = maxDepth(node.right);
+        result = Math.max(result, left + right);
+        return Math.max(left, right) + 1;
+    }
 };

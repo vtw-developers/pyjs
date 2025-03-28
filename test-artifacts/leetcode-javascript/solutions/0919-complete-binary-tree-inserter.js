@@ -16,7 +16,6 @@
  *   the tree remains complete, and returns the value of the parent of the inserted TreeNode.
  * - TreeNode get_root() Returns the root node of the tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -29,38 +28,35 @@
  * @param {TreeNode} root
  */
 var CBTInserter = function(root) {
-  this.root = root;
-  this.deque = [];
-
-  const queue = [root];
-  while (queue.length) {
-    const node = queue.shift();
-    if (!node.left || !node.right) this.deque.push(node);
-    if (node.left) queue.push(node.left);
-    if (node.right) queue.push(node.right);
-  }
+    this.root = root;
+    this.deque = [];
+    const queue = [root];
+    while (queue.length) {
+        const node = queue.shift();
+        if (!node.left || !node.right) this.deque.push(node);
+        if (node.left) queue.push(node.left);
+        if (node.right) queue.push(node.right);
+    }
 };
-
 /**
  * @param {number} val
  * @return {number}
  */
 CBTInserter.prototype.insert = function(val) {
-  const node = new TreeNode(val);
-  const parent = this.deque[0];
-  if (!parent.left) {
-    parent.left = node;
-  } else {
-    parent.right = node;
-    this.deque.shift();
-  }
-  this.deque.push(node);
-  return parent.val;
+    const node = new TreeNode(val);
+    const parent = this.deque[0];
+    if (!parent.left) {
+        parent.left = node;
+    } else {
+        parent.right = node;
+        this.deque.shift();
+    }
+    this.deque.push(node);
+    return parent.val;
 };
-
 /**
  * @return {TreeNode}
  */
 CBTInserter.prototype.get_root = function() {
-  return this.root;
+    return this.root;
 };

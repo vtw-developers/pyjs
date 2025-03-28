@@ -11,26 +11,19 @@
  * A subsequence is an array that can be derived from another array by deleting some or
  * no elements without changing the order of the remaining elements.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number[]}
  */
 var maxSubsequence = function(nums, k) {
-  const map = new Map();
-  nums.slice()
-      .sort((a, b) => a - b)
-      .slice(-k)
-      .forEach(n => map.set(n, (map.get(n) || 0) + 1));
-
-  return nums.filter(n => {
-    const isInSubsequence = map.get(n);
-
-    if (isInSubsequence) {
-      map.set(n, map.get(n) - 1);
-    }
-
-    return isInSubsequence;
-  });
+    const map = new Map();
+    nums.slice().sort((a, b) => a - b).slice(-k).forEach(n => map.set(n, (map.get(n) || 0) + 1));
+    return nums.filter(n => {
+        const isInSubsequence = map.get(n);
+        if (isInSubsequence) {
+            map.set(n, map.get(n) - 1);
+        }
+        return isInSubsequence;
+    });
 };

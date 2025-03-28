@@ -8,19 +8,16 @@
  *
  * Return the total number of bad pairs in nums.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var countBadPairs = function(nums) {
-  const map = new Map();
-  let result = nums.length * (nums.length - 1) / 2;
-
-  nums.forEach((n, i) => {
-    result -= map.get(n - i) ?? 0;
-    map.set(n - i, (map.get(n - i) ?? 0) + 1);
-  });
-
-  return result;
+    const map = new Map();
+    let result = nums.length * (nums.length - 1) / 2;
+    nums.forEach((n, i) => {
+        result -= map.get(n - i) ?? 0;
+        map.set(n - i, (map.get(n - i) ?? 0) + 1);
+    });
+    return result;
 };

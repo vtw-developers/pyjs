@@ -13,22 +13,18 @@
  * The tests are generated such that there is exactly one solution. You may not use the same
  * element twice.
  */
-
 /**
  * @param {number[]} numbers
  * @param {number} target
  * @return {number[]}
  */
 var twoSum = function(numbers, target) {
-  const map = new Map();
-
-  for (let i = 0; i < numbers.length; i++) {
-    const diff = target - numbers[i];
-
-    if (map.has(diff)) {
-      return [map.get(diff) + 1, i + 1];
+    const map = new Map();
+    for (let i = 0; i < numbers.length; i++) {
+        const diff = target - numbers[i];
+        if (map.has(diff)) {
+            return [map.get(diff) + 1, i + 1];
+        }
+        map.set(numbers[i], i);
     }
-
-    map.set(numbers[i], i);
-  }
 };

@@ -19,29 +19,33 @@
  *
  * As the answer may be very large, return the answer modulo 109 + 7.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var knightDialer = function(n) {
-  const MOD = 1e9 + 7;
-  const moves = [
-    [4, 6], [6, 8], [7, 9], [4, 8],
-    [0, 3, 9], [], [0, 1, 7], [2, 6],
-    [1, 3], [2, 4]
-  ];
-  let prevCounts = new Array(10).fill(1);
-
-  for (let jump = 1; jump < n; jump++) {
-    const currCounts = new Array(10).fill(0);
-    for (let digit = 0; digit < 10; digit++) {
-      for (const nextDigit of moves[digit]) {
-        currCounts[nextDigit] = (currCounts[nextDigit] + prevCounts[digit]) % MOD;
-      }
+    const MOD = 1e9 + 7;
+    const moves = [
+        [4, 6],
+        [6, 8],
+        [7, 9],
+        [4, 8],
+        [0, 3, 9],
+        [],
+        [0, 1, 7],
+        [2, 6],
+        [1, 3],
+        [2, 4]
+    ];
+    let prevCounts = new Array(10).fill(1);
+    for (let jump = 1; jump < n; jump++) {
+        const currCounts = new Array(10).fill(0);
+        for (let digit = 0; digit < 10; digit++) {
+            for (const nextDigit of moves[digit]) {
+                currCounts[nextDigit] = (currCounts[nextDigit] + prevCounts[digit]) % MOD;
+            }
+        }
+        prevCounts = currCounts;
     }
-    prevCounts = currCounts;
-  }
-
-  return prevCounts.reduce((sum, count) => (sum + count) % MOD, 0);
+    return prevCounts.reduce((sum, count) => (sum + count) % MOD, 0);
 };

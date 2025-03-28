@@ -22,7 +22,6 @@
  *
  * Return the total cost to hire exactly k workers.
  */
-
 /**
  * @param {number[]} costs
  * @param {number} k
@@ -30,33 +29,31 @@
  * @return {number}
  */
 var totalCost = function(costs, k, candidates) {
-  const queue = new PriorityQueue({ compare: (a, b) => {
-    return a[0] === b[0] ? a[1] - b[1] : a[0] - b[0];
-  }});
-
-  costs.forEach((cost, index) => {
-    if (index < candidates || index >= costs.length - candidates) {
-      queue.enqueue([cost, index]);
+    const queue = new PriorityQueue({
+        compare: (a, b) => {
+            return a[0] === b[0] ? a[1] - b[1] : a[0] - b[0];
+        }
+    });
+    costs.forEach((cost, index) => {
+        if (index < candidates || index >= costs.length - candidates) {
+            queue.enqueue([cost, index]);
+        }
+    });
+    let result = 0;
+    for (let i = 0, count = candidates, diff = costs.length - candidates - 1; i < k; i++) {
+        const worker = queue.dequeue();
+        result += worker[0];
+        if (count <= diff) {
+            let status = null;
+            if (worker[1] < count) {
+                status = [costs[count], count];
+                count++;
+            } else {
+                status = [costs[diff], diff];
+                diff--;
+            }
+            queue.enqueue(status);
+        }
     }
-  });
-
-  let result = 0;
-  for (let i = 0, count = candidates, diff = costs.length - candidates - 1; i < k; i++) {
-    const worker = queue.dequeue();
-    result += worker[0];
-
-    if (count <= diff) {
-      let status = null;
-      if (worker[1] < count) {
-        status = [costs[count], count];
-        count++;
-      } else {
-        status = [costs[diff], diff];
-        diff--;
-      }
-      queue.enqueue(status);
-    }
-  }
-
-  return result;
+    return result;
 };

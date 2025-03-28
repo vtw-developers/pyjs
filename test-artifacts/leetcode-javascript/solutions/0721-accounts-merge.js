@@ -16,34 +16,29 @@
  * each account is the name, and the rest of the elements are emails in sorted order. The accounts
  * themselves can be returned in any order.
  */
-
 /**
  * @param {string[][]} accounts
  * @return {string[][]}
  */
 var accountsMerge = function(accounts) {
-  const parent = new Map();
-  const names = new Map();
-  const groups = new Map();
-
-  const find = node => {
-    if (!parent.has(node)) parent.set(node, node);
-    return parent.get(node) === node ? node : parent.set(node, find(parent.get(node))).get(node);
-  };
-
-  for (const [name, ...emails] of accounts) {
-    for (const email of emails) {
-      names.set(email, name);
-      find(email);
-      parent.set(find(email), find(emails[0]));
+    const parent = new Map();
+    const names = new Map();
+    const groups = new Map();
+    const find = node => {
+        if (!parent.has(node)) parent.set(node, node);
+        return parent.get(node) === node ? node : parent.set(node, find(parent.get(node))).get(node);
+    };
+    for (const [name, ...emails] of accounts) {
+        for (const email of emails) {
+            names.set(email, name);
+            find(email);
+            parent.set(find(email), find(emails[0]));
+        }
     }
-  }
-
-  for (const email of parent.keys()) {
-    const root = find(email);
-    if (!groups.has(root)) groups.set(root, new Set());
-    groups.get(root).add(email);
-  }
-
-  return Array.from(groups, ([root, emails]) => [names.get(root), ...[...emails].sort()]);
+    for (const email of parent.keys()) {
+        const root = find(email);
+        if (!groups.has(root)) groups.set(root, new Set());
+        groups.get(root).add(email);
+    }
+    return Array.from(groups, ([root, emails]) => [names.get(root), ...[...emails].sort()]);
 };

@@ -10,7 +10,6 @@
  * - |a - x| < |b - x|, or
  * - |a - x| == |b - x| and a < b
  */
-
 /**
  * @param {number[]} arr
  * @param {number} k
@@ -18,20 +17,17 @@
  * @return {number[]}
  */
 var findClosestElements = function(arr, k, x) {
-  let left = 0;
-  let right = arr.length - k;
-
-  while (left < right) {
-    const middle = Math.floor((left + right) / 2);
-    const x1 = arr[middle];
-    const x2 = arr[middle + k];
-
-    if (x - x1 > x2 - x) {
-      left = middle + 1;
-    } else {
-      right = middle;
+    let left = 0;
+    let right = arr.length - k;
+    while (left < right) {
+        const middle = Math.floor((left + right) / 2);
+        const x1 = arr[middle];
+        const x2 = arr[middle + k];
+        if (x - x1 > x2 - x) {
+            left = middle + 1;
+        } else {
+            right = middle;
+        }
     }
-  }
-
-  return arr.slice(left, left + k);
+    return arr.slice(left, left + k);
 };

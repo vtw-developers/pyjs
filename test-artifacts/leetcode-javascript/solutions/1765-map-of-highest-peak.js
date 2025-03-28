@@ -20,25 +20,24 @@
  * Return an integer matrix height of size m x n where height[i][j] is cell (i, j)'s height.
  * If there are multiple solutions, return any of them.
  */
-
 /**
  * @param {number[][]} isWater
  * @return {number[][]}
  */
 var highestPeak = function(isWater) {
-  const map = isWater.map(row => row.map(() => 0));
-  const values = isWater.map((row, i) => {
-    return row.map((value, j) => value ? [i, j] : 0);
-  }).flat().filter(Boolean);
-
-  for (let value = 0; values.length > value;) {
-    const [i, j] = values[value++];
-    const level = map[i][j] + 1;
-    [[1, 0], [-1, 0], [0, -1], [0, 1]]
-      .map(direction => [i + direction[0], j + direction[1]])
-      .filter(([x, y]) => 0 === isWater[x]?.[y] && !map[x][y])
-      .forEach(([x, y]) => (map[x][y] = level, values.push([x, y])));
-  }
-
-  return map;
+    const map = isWater.map(row => row.map(() => 0));
+    const values = isWater.map((row, i) => {
+        return row.map((value, j) => value ? [i, j] : 0);
+    }).flat().filter(Boolean);
+    for (let value = 0; values.length > value;) {
+        const [i, j] = values[value++];
+        const level = map[i][j] + 1;
+        [
+            [1, 0],
+            [-1, 0],
+            [0, -1],
+            [0, 1]
+        ].map(direction => [i + direction[0], j + direction[1]]).filter(([x, y]) => 0 === isWater[x]?.[y] && !map[x][y]).forEach(([x, y]) => (map[x][y] = level, values.push([x, y])));
+    }
+    return map;
 };

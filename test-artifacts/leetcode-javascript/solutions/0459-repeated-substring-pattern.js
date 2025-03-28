@@ -8,11 +8,10 @@
  * together. You may assume the given string consists of lowercase
  * English letters only and its length will not exceed 10000.
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var repeatedSubstringPattern = function(s) {
-  return (s + s).slice(1, s.length * 2 - 1).indexOf(s) !== -1;
+    return (s + s).slice(1, s.length * 2 - 1).indexOf(s) !== -1;
 };

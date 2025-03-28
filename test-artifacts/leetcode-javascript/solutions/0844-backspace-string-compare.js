@@ -8,23 +8,22 @@
  *
  * Note that after backspacing an empty text, the text will continue empty.
  */
-
 /**
  * @param {string} s
  * @param {string} t
  * @return {boolean}
  */
 var backspaceCompare = function(s, t) {
-  return handleBackspaces(s) === handleBackspaces(t);
+    return handleBackspaces(s) === handleBackspaces(t);
 };
 
 function handleBackspaces(input) {
-  return input.split('').reduce((result, char) => {
-    if (char === '#') {
-      result.pop();
-    } else {
-      result.push(char);
-    }
-    return result;
-  }, []).join('');
+    return input.split('').reduce((result, char) => {
+        if (char === '#') {
+            result.pop();
+        } else {
+            result.push(char);
+        }
+        return result;
+    }, []).join('');
 }

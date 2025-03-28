@@ -26,37 +26,33 @@
  *   exist in the Skiplist, do nothing and return false. If there exist multiple num values,
  *   removing any one of them is fine.
  */
-
 var Skiplist = function() {
-  this.values = {};
+    this.values = {};
 };
-
 /**
  * @param {number} target
  * @return {boolean}
  */
 Skiplist.prototype.search = function(target) {
-  return target in this.values;
+    return target in this.values;
 };
-
 /**
  * @param {number} num
  * @return {void}
  */
 Skiplist.prototype.add = function(num) {
-  this.values[num] = (this.values[num] ?? 0) + 1;
+    this.values[num] = (this.values[num] ?? 0) + 1;
 };
-
 /**
  * @param {number} num
  * @return {boolean}
  */
 Skiplist.prototype.erase = function(num) {
-  if (!(num in this.values)) {
-    return false;
-  }
-  if (!--this.values[num]) {
-    delete this.values[num];
-  }
-  return true;
+    if (!(num in this.values)) {
+        return false;
+    }
+    if (!--this.values[num]) {
+        delete this.values[num];
+    }
+    return true;
 };

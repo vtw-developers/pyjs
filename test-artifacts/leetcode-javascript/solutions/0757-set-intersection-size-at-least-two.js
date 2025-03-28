@@ -14,32 +14,28 @@
  *
  * Return the minimum possible size of a containing set.
  */
-
 /**
  * @param {number[][]} intervals
  * @return {number}
  */
 var intersectionSizeTwo = function(intervals) {
-  intervals.sort((a, b) => a[1] - b[1] || b[0] - a[0]);
-  let size = 0;
-  let smallest = -1;
-  let secondSmallest = -1;
-
-  for (const [start, end] of intervals) {
-    const hasTwo = start <= smallest;
-    const hasOne = start <= secondSmallest;
-
-    if (hasTwo) continue;
-    if (hasOne) {
-      smallest = secondSmallest;
-      secondSmallest = end;
-      size++;
-    } else {
-      smallest = end - 1;
-      secondSmallest = end;
-      size += 2;
+    intervals.sort((a, b) => a[1] - b[1] || b[0] - a[0]);
+    let size = 0;
+    let smallest = -1;
+    let secondSmallest = -1;
+    for (const [start, end] of intervals) {
+        const hasTwo = start <= smallest;
+        const hasOne = start <= secondSmallest;
+        if (hasTwo) continue;
+        if (hasOne) {
+            smallest = secondSmallest;
+            secondSmallest = end;
+            size++;
+        } else {
+            smallest = end - 1;
+            secondSmallest = end;
+            size += 2;
+        }
     }
-  }
-
-  return size;
+    return size;
 };

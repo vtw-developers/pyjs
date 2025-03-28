@@ -9,12 +9,11 @@
  * Return the smallest character in letters that is lexicographically greater than target.
  * If such a character does not exist, return the first character in letters.
  */
-
 /**
  * @param {character[]} letters
  * @param {character} target
  * @return {character}
  */
 var nextGreatestLetter = function(letters, target) {
-  return letters.find(l => l > target) || letters[0];
+    return letters.find(l => l > target) || letters[0];
 };

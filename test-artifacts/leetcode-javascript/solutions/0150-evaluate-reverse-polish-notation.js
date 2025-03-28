@@ -16,28 +16,25 @@
  * - The input represents a valid arithmetic expression in a reverse polish notation.
  * - The answer and all the intermediate calculations can be represented in a 32-bit integer.
  */
-
 /**
  * @param {string[]} tokens
  * @return {number}
  */
 var evalRPN = function(tokens) {
-  const stack = [];
-  const operators = {
-    '+': (a, b) => a + b,
-    '-': (a, b) => a - b,
-    '*': (a, b) => a * b,
-    '/': (a, b) => a / b >= 0 ? Math.floor(a / b) : Math.ceil(a / b),
-  };
-
-  tokens.forEach(token => {
-    if (operators[token]) {
-      const item = stack.pop();
-      stack.push(operators[token](stack.pop(), item));
-    } else {
-      stack.push(Number(token));
-    }
-  });
-
-  return stack.pop();
+    const stack = [];
+    const operators = {
+        '+': (a, b) => a + b,
+        '-': (a, b) => a - b,
+        '*': (a, b) => a * b,
+        '/': (a, b) => a / b >= 0 ? Math.floor(a / b) : Math.ceil(a / b),
+    };
+    tokens.forEach(token => {
+        if (operators[token]) {
+            const item = stack.pop();
+            stack.push(operators[token](stack.pop(), item));
+        } else {
+            stack.push(Number(token));
+        }
+    });
+    return stack.pop();
 };

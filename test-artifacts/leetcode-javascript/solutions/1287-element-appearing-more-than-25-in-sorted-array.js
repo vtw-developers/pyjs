@@ -8,18 +8,16 @@
  *
  * Return that integer.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var findSpecialInteger = function(arr) {
-  const limit = arr.length * 0.25;
-  const offset = limit % 1 === 0 ? limit : Math.ceil(limit) - 1;
-
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === arr[i + offset]) {
-      return arr[i];
+    const limit = arr.length * 0.25;
+    const offset = limit % 1 === 0 ? limit : Math.ceil(limit) - 1;
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === arr[i + offset]) {
+            return arr[i];
+        }
     }
-  }
 };

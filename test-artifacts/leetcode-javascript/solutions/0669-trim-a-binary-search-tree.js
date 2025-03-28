@@ -11,7 +11,6 @@
  * Return the root of the trimmed binary search tree. Note that the root may change depending on
  * the given bounds.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -27,12 +26,10 @@
  * @return {TreeNode}
  */
 var trimBST = function(root, low, high) {
-  if (!root) return null;
-
-  if (root.val < low) return trimBST(root.right, low, high);
-  if (root.val > high) return trimBST(root.left, low, high);
-  root.left = trimBST(root.left, low, high);
-  root.right = trimBST(root.right, low, high);
-
-  return root;
+    if (!root) return null;
+    if (root.val < low) return trimBST(root.right, low, high);
+    if (root.val > high) return trimBST(root.left, low, high);
+    root.left = trimBST(root.left, low, high);
+    root.right = trimBST(root.right, low, high);
+    return root;
 };

@@ -12,12 +12,11 @@
  * Note that the absolute difference between two integers x and y is defined
  * as |x - y|.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var differenceOfSum = function(nums) {
-  const sum = input => input.reduce((sum, n) => sum + +n, 0);
-  return Math.abs(sum(nums) - sum(nums.join('').split('')));
+    const sum = input => input.reduce((sum, n) => sum + +n, 0);
+    return Math.abs(sum(nums) - sum(nums.join('').split('')));
 };

@@ -13,7 +13,6 @@
  *
  * Given the head of a linked list with even length, return the maximum twin sum of the linked list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -26,16 +25,14 @@
  * @return {number}
  */
 var pairSum = function(head) {
-  const stack = [];
-  while (head) {
-    stack.push(head.val);
-    head = head.next;
-  }
-
-  let max = 0;
-  for (let i = 0; i < stack.length; i++) {
-    max = Math.max(max, stack[i] + stack[stack.length - 1 - i]);
-  }
-
-  return max;
+    const stack = [];
+    while (head) {
+        stack.push(head.val);
+        head = head.next;
+    }
+    let max = 0;
+    for (let i = 0; i < stack.length; i++) {
+        max = Math.max(max, stack[i] + stack[stack.length - 1 - i]);
+    }
+    return max;
 };

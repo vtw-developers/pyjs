@@ -9,7 +9,6 @@
  *
  * Two trees are duplicate if they have the same structure with the same node values.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -23,20 +22,18 @@
  * @return {TreeNode[]}
  */
 var findDuplicateSubtrees = function(root) {
-  const map = new Map();
-  const result = [];
+    const map = new Map();
+    const result = [];
+    serialize(root);
+    return result;
 
-  serialize(root);
-
-  return result;
-
-  function serialize(node) {
-    if (!node) return '#';
-    const key = `${node.val},${serialize(node.left)},${serialize(node.right)}`;
-    map.set(key, (map.get(key) || 0) + 1);
-    if (map.get(key) === 2) {
-      result.push(node);
+    function serialize(node) {
+        if (!node) return '#';
+        const key = `${node.val},${serialize(node.left)},${serialize(node.right)}`;
+        map.set(key, (map.get(key) || 0) + 1);
+        if (map.get(key) === 2) {
+            result.push(node);
+        }
+        return key;
     }
-    return key;
-  }
 };

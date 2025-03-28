@@ -12,17 +12,16 @@
  *
  * Note that the vowel letters are 'a', 'e', 'i', 'o', and 'u'.
  */
-
 /**
  * @param {string[]} words
  * @param {number[][]} queries
  * @return {number[]}
  */
 var vowelStrings = function(words, queries) {
-  const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
-  const prefix = [0];
-  for (let i = 0; i < words.length; i++) {
-    prefix[i + 1] = prefix[i] + (vowels.has(words[i][0]) && vowels.has(words[i].at(-1)));
-  }
-  return queries.map(([l, r]) => prefix[r + 1] - prefix[l]);
+    const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+    const prefix = [0];
+    for (let i = 0; i < words.length; i++) {
+        prefix[i + 1] = prefix[i] + (vowels.has(words[i][0]) && vowels.has(words[i].at(-1)));
+    }
+    return queries.map(([l, r]) => prefix[r + 1] - prefix[l]);
 };

@@ -11,24 +11,21 @@
  * next element from position (row, col) will be (row + 1, col - 1), (row + 1, col),
  * or (row + 1, col + 1).
  */
-
 /**
  * @param {number[][]} matrix
  * @return {number}
  */
 var minFallingPathSum = function(matrix) {
-  let previousRow = [...matrix[0]];
-
-  for (let row = 1; row < matrix.length; row++) {
-    const currentRow = new Array(matrix.length);
-    for (let col = 0; col < matrix.length; col++) {
-      const leftDiagonal = col > 0 ? previousRow[col - 1] : Infinity;
-      const directlyAbove = previousRow[col];
-      const rightDiagonal = col < matrix.length - 1 ? previousRow[col + 1] : Infinity;
-      currentRow[col] = matrix[row][col] + Math.min(leftDiagonal, directlyAbove, rightDiagonal);
+    let previousRow = [...matrix[0]];
+    for (let row = 1; row < matrix.length; row++) {
+        const currentRow = new Array(matrix.length);
+        for (let col = 0; col < matrix.length; col++) {
+            const leftDiagonal = col > 0 ? previousRow[col - 1] : Infinity;
+            const directlyAbove = previousRow[col];
+            const rightDiagonal = col < matrix.length - 1 ? previousRow[col + 1] : Infinity;
+            currentRow[col] = matrix[row][col] + Math.min(leftDiagonal, directlyAbove, rightDiagonal);
+        }
+        previousRow = currentRow;
     }
-    previousRow = currentRow;
-  }
-
-  return Math.min(...previousRow);
+    return Math.min(...previousRow);
 };

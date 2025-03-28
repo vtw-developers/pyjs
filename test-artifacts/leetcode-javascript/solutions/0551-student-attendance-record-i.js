@@ -16,11 +16,10 @@
  *
  * Return true if the student is eligible for an attendance award, or false otherwise.
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var checkRecord = function(s) {
-  return !s.includes('LLL') && (s.indexOf('A') === s.lastIndexOf('A'));
+    return !s.includes('LLL') && (s.indexOf('A') === s.lastIndexOf('A'));
 };

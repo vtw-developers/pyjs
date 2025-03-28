@@ -8,11 +8,10 @@
  *
  * Return any array that satisfies this condition.
  */
-
 /**
  * @param {number[]} nums
  * @return {number[]}
  */
 var sortArrayByParity = function(nums) {
-  return nums.sort((a, b) => a % 2 === 0 ? -1 : 1);
+    return nums.sort((a, b) => a % 2 === 0 ? -1 : 1);
 };

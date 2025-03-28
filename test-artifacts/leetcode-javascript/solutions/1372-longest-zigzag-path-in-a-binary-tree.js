@@ -17,7 +17,6 @@
  *
  * Return the longest ZigZag path contained in that tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -31,17 +30,15 @@
  * @return {number}
  */
 var longestZigZag = function(root) {
-  let result = 0;
+    let result = 0;
+    dfs(root, true, 0);
+    dfs(root, false, 0);
+    return result;
 
-  dfs(root, true, 0);
-  dfs(root, false, 0);
-
-  return result;
-
-  function dfs(node, isLeft, total) {
-    if (!node) return;
-    result = Math.max(result, total);
-    dfs(node.left, true, isLeft ? 1 : total + 1);
-    dfs(node.right, false, isLeft ? total + 1 : 1);
-  }
+    function dfs(node, isLeft, total) {
+        if (!node) return;
+        result = Math.max(result, total);
+        dfs(node.left, true, isLeft ? 1 : total + 1);
+        dfs(node.right, false, isLeft ? total + 1 : 1);
+    }
 };

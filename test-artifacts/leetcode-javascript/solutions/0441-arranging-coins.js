@@ -8,15 +8,14 @@
  *
  * Given the integer n, return the number of complete rows of the staircase you will build.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var arrangeCoins = function(n) {
-  let count = 0;
-  for (; count <= n; count++) {
-    n -= count;
-  }
-  return count - 1;
+    let count = 0;
+    for (; count <= n; count++) {
+        n -= count;
+    }
+    return count - 1;
 };

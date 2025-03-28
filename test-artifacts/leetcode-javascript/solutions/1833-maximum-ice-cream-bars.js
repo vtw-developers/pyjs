@@ -14,20 +14,19 @@
  *
  * Return the maximum number of ice cream bars the boy can buy with coins.
  */
-
 /**
  * @param {number[]} costs
  * @param {number} coins
  * @return {number}
  */
 var maxIceCream = function(costs, coins) {
-  let count = 0;
-  costs.sort((a, b) => a - b);
-  for (let i = 0; i < costs.length; i++) {
-    if (costs[i] <= coins) {
-      count++;
-      coins -= costs[i];
+    let count = 0;
+    costs.sort((a, b) => a - b);
+    for (let i = 0; i < costs.length; i++) {
+        if (costs[i] <= coins) {
+            count++;
+            coins -= costs[i];
+        }
     }
-  }
-  return count;
+    return count;
 };

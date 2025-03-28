@@ -9,15 +9,14 @@
  *
  * Return the shuffled string.
  */
-
 /**
  * @param {string} s
  * @param {number[]} indices
  * @return {string}
  */
 var restoreString = function(s, indices) {
-  return indices.reduce((result, index, offset) => {
-    result[index] = s[offset];
-    return result;
-  }, new Array(indices.length)).join('');
+    return indices.reduce((result, index, offset) => {
+        result[index] = s[offset];
+        return result;
+    }, new Array(indices.length)).join('');
 };

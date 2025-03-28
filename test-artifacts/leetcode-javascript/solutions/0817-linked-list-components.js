@@ -9,7 +9,6 @@
  * Return the number of connected components in nums where two values are connected if they appear
  * consecutively in the linked list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -23,22 +22,20 @@
  * @return {number}
  */
 var numComponents = function(head, nums) {
-  const numSet = new Set(nums);
-  let componentCount = 0;
-  let inComponent = false;
-
-  let current = head;
-  while (current) {
-    if (numSet.has(current.val)) {
-      if (!inComponent) {
-        componentCount++;
-        inComponent = true;
-      }
-    } else {
-      inComponent = false;
+    const numSet = new Set(nums);
+    let componentCount = 0;
+    let inComponent = false;
+    let current = head;
+    while (current) {
+        if (numSet.has(current.val)) {
+            if (!inComponent) {
+                componentCount++;
+                inComponent = true;
+            }
+        } else {
+            inComponent = false;
+        }
+        current = current.next;
     }
-    current = current.next;
-  }
-
-  return componentCount;
+    return componentCount;
 };

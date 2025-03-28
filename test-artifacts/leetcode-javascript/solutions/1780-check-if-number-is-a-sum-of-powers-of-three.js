@@ -8,17 +8,16 @@
  *
  * An integer y is a power of three if there exists an integer x such that y == 3x.
  */
-
 /**
  * @param {number} n
  * @return {boolean}
  */
 var checkPowersOfThree = function(n) {
-  while (n) {
-    if (n % 3 === 2) {
-      return 0;
+    while (n) {
+        if (n % 3 === 2) {
+            return 0;
+        }
+        n = n / 3 >> 0;
     }
-    n = n / 3 >> 0;
-  }
-  return 1;
+    return 1;
 };

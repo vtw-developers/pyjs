@@ -14,7 +14,6 @@
  *
  * It is guaranteed that the answer will in the range of a 32-bit signed integer.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -28,25 +27,21 @@
  * @return {number}
  */
 var widthOfBinaryTree = function(root) {
-  const queue = [[root, 0n]];
-  let result = 0n;
-
-  while (queue.length) {
-    const total = queue.length;
-    const levelStart = queue[0][1];
-    let levelEnd;
-
-    for (let i = 0; i < total; i++) {
-      const [node, index] = queue.shift();
-      levelEnd = index;
-      if (node.left) queue.push([node.left, index * 2n]);
-      if (node.right) queue.push([node.right, index * 2n + 1n]);
+    const queue = [
+        [root, 0n]
+    ];
+    let result = 0n;
+    while (queue.length) {
+        const total = queue.length;
+        const levelStart = queue[0][1];
+        let levelEnd;
+        for (let i = 0; i < total; i++) {
+            const [node, index] = queue.shift();
+            levelEnd = index;
+            if (node.left) queue.push([node.left, index * 2n]);
+            if (node.right) queue.push([node.right, index * 2n + 1n]);
+        }
+        result = result > (levelEnd - levelStart + 1n) ? result : (levelEnd - levelStart + 1n);
     }
-
-    result = result > (levelEnd - levelStart + 1n)
-      ? result
-      : (levelEnd - levelStart + 1n);
-  }
-
-  return Number(result);
+    return Number(result);
 };

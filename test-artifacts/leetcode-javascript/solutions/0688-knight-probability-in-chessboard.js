@@ -17,7 +17,6 @@
  *
  * Return the probability that the knight remains on the board after it has stopped moving.
  */
-
 /**
  * @param {number} n
  * @param {number} k
@@ -26,24 +25,29 @@
  * @return {number}
  */
 var knightProbability = function(n, k, row, column) {
-  const moves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
-  const dp = new Map();
+    const moves = [
+        [-2, -1],
+        [-2, 1],
+        [-1, -2],
+        [-1, 2],
+        [1, -2],
+        [1, 2],
+        [2, -1],
+        [2, 1]
+    ];
+    const dp = new Map();
+    return calc(k, row, column);
 
-  return calc(k, row, column);
-
-  function calc(movesLeft, r, c) {
-    if (r < 0 || r >= n || c < 0 || c >= n) return 0;
-    if (movesLeft === 0) return 1;
-
-    const key = `${movesLeft},${r},${c}`;
-    if (dp.has(key)) return dp.get(key);
-
-    let prob = 0;
-    for (const [dr, dc] of moves) {
-      prob += calc(movesLeft - 1, r + dr, c + dc) / 8;
+    function calc(movesLeft, r, c) {
+        if (r < 0 || r >= n || c < 0 || c >= n) return 0;
+        if (movesLeft === 0) return 1;
+        const key = `${movesLeft},${r},${c}`;
+        if (dp.has(key)) return dp.get(key);
+        let prob = 0;
+        for (const [dr, dc] of moves) {
+            prob += calc(movesLeft - 1, r + dr, c + dc) / 8;
+        }
+        dp.set(key, prob);
+        return prob;
     }
-
-    dp.set(key, prob);
-    return prob;
-  }
 };

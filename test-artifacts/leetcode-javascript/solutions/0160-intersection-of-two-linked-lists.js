@@ -9,7 +9,6 @@
  *
  * For example, the following two linked lists begin to intersect at node c1:
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val) {
@@ -17,24 +16,20 @@
  *     this.next = null;
  * }
  */
-
 /**
  * @param {ListNode} headA
  * @param {ListNode} headB
  * @return {ListNode}
  */
 var getIntersectionNode = function(headA, headB) {
-  if (!headA || !headB) {
-    return null;
-  }
-
-  let a = headA;
-  let b = headB;
-
-  while (a !== b) {
-    a = a === null ? headB : a.next;
-    b = b === null ? headA : b.next;
-  }
-
-  return a;
+    if (!headA || !headB) {
+        return null;
+    }
+    let a = headA;
+    let b = headB;
+    while (a !== b) {
+        a = a === null ? headB : a.next;
+        b = b === null ? headA : b.next;
+    }
+    return a;
 };

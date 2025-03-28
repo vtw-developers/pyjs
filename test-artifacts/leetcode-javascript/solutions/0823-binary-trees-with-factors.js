@@ -11,34 +11,30 @@
  * Return the number of binary trees we can make. The answer may be too large so return the answer
  * modulo 109 + 7.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var numFactoredBinaryTrees = function(arr) {
-  const MOD = 1e9 + 7;
-  const dp = {};
-  const numMap = new Map();
-
-  arr.sort((a, b) => a - b);
-  for (let i = 0; i < arr.length; i++) {
-    numMap.set(arr[i], i);
-  }
-
-  let result = 0;
-  for (let i = 0; i < arr.length; i++) {
-    dp[arr[i]] = 1;
-    for (let j = 0; j < i; j++) {
-      if (arr[i] % arr[j] === 0) {
-        const complement = arr[i] / arr[j];
-        if (numMap.has(complement)) {
-          dp[arr[i]] = (dp[arr[i]] + dp[arr[j]] * dp[complement]) % MOD;
-        }
-      }
+    const MOD = 1e9 + 7;
+    const dp = {};
+    const numMap = new Map();
+    arr.sort((a, b) => a - b);
+    for (let i = 0; i < arr.length; i++) {
+        numMap.set(arr[i], i);
     }
-    result = (result + dp[arr[i]]) % MOD;
-  }
-
-  return result;
+    let result = 0;
+    for (let i = 0; i < arr.length; i++) {
+        dp[arr[i]] = 1;
+        for (let j = 0; j < i; j++) {
+            if (arr[i] % arr[j] === 0) {
+                const complement = arr[i] / arr[j];
+                if (numMap.has(complement)) {
+                    dp[arr[i]] = (dp[arr[i]] + dp[arr[j]] * dp[complement]) % MOD;
+                }
+            }
+        }
+        result = (result + dp[arr[i]]) % MOD;
+    }
+    return result;
 };

@@ -19,21 +19,20 @@
  *
  * Return the array answer as described above.
  */
-
 /**
  * @param {number[][]} logs
  * @param {number} k
  * @return {number[]}
  */
 var findingUsersActiveMinutes = function(logs, k) {
-  const map = new Map();
-  logs.forEach(([id, time]) => {
-    map.set(id, map.get(id) || new Set());
-    map.get(id).add(time);
-  });
-
-  const result = new Array(k).fill(0);
-  [...map.values()].forEach(({ size }) => result[size - 1]++);
-
-  return result;
+    const map = new Map();
+    logs.forEach(([id, time]) => {
+        map.set(id, map.get(id) || new Set());
+        map.get(id).add(time);
+    });
+    const result = new Array(k).fill(0);
+    [...map.values()].forEach(({
+        size
+    }) => result[size - 1]++);
+    return result;
 };

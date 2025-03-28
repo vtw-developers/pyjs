@@ -13,25 +13,21 @@
  *
  * The number of set bits of an integer is the number of 1's in its binary representation.
  */
-
 /**
  * @param {number} num1
  * @param {number} num2
  * @return {number}
  */
 var minimizeXor = function(num1, num2) {
-  let count1 = num1.toString(2).split('1').length - 1;
-  const count2 = num2.toString(2).split('1').length - 1;
-
-  while (count1 > count2) {
-    num1 &= (num1 - 1);
-    count1--;
-  }
-
-  while (count1 < count2) {
-    num1 |= (num1 + 1);
-    count1++;
-  }
-
-  return num1;
+    let count1 = num1.toString(2).split('1').length - 1;
+    const count2 = num2.toString(2).split('1').length - 1;
+    while (count1 > count2) {
+        num1 &= (num1 - 1);
+        count1--;
+    }
+    while (count1 < count2) {
+        num1 |= (num1 + 1);
+        count1++;
+    }
+    return num1;
 };

@@ -10,13 +10,12 @@
  * - Otherwise, change the first letter to uppercase and the remaining letters to lowercase.
  * Return the capitalized title.
  */
-
 /**
  * @param {string} title
  * @return {string}
  */
 var capitalizeTitle = function(title) {
-  return title.split(/\s+/).map(word => {
-    return word.toLowerCase().replace(/^\w/, l => word.length > 2 ? l.toUpperCase() : l);
-  }).join(' ');
+    return title.split(/\s+/).map(word => {
+        return word.toLowerCase().replace(/^\w/, l => word.length > 2 ? l.toUpperCase() : l);
+    }).join(' ');
 };

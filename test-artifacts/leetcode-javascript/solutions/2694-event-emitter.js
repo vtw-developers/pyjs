@@ -22,45 +22,39 @@
  *   to the given event, return an empty array. Otherwise, return an array of the results of all
  *   callback calls in the order they were subscribed.
  */
-
 class EventEmitter {
-  constructor() {
-    this.events = new Map();
-  }
-
-  /**
-   * @param {string} eventName
-   * @param {Function} callback
-   * @return {Object}
-   */
-  subscribe(eventName, callback) {
-    if (!this.events.has(eventName)) {
-      this.events.set(eventName, []);
+    constructor() {
+        this.events = new Map();
     }
-
-    const listeners = this.events.get(eventName);
-    listeners.push(callback);
-
-    return {
-      unsubscribe: () => {
-        const index = listeners.indexOf(callback);
-        if (index !== -1) {
-          listeners.splice(index, 1);
+    /**
+     * @param {string} eventName
+     * @param {Function} callback
+     * @return {Object}
+     */
+    subscribe(eventName, callback) {
+        if (!this.events.has(eventName)) {
+            this.events.set(eventName, []);
         }
-      }
-    };
-  }
-
-  /**
-   * @param {string} eventName
-   * @param {Array} args
-   * @return {Array}
-   */
-  emit(eventName, args = []) {
-    if (!this.events.has(eventName)) {
-      return [];
+        const listeners = this.events.get(eventName);
+        listeners.push(callback);
+        return {
+            unsubscribe: () => {
+                const index = listeners.indexOf(callback);
+                if (index !== -1) {
+                    listeners.splice(index, 1);
+                }
+            }
+        };
     }
-
-    return this.events.get(eventName).map(listener => listener(...args));
-  }
+    /**
+     * @param {string} eventName
+     * @param {Array} args
+     * @return {Array}
+     */
+    emit(eventName, args = []) {
+        if (!this.events.has(eventName)) {
+            return [];
+        }
+        return this.events.get(eventName).map(listener => listener(...args));
+    }
 }

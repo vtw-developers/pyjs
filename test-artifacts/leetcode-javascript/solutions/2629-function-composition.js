@@ -13,11 +13,10 @@
  * You may assume each function in the array accepts one integer as input and returns one integer
  * as output.
  */
-
 /**
  * @param {Function[]} functions
  * @return {Function}
  */
 var compose = function(functions) {
-  return x => functions.reduceRight((result, fn) => fn(result), x);
+    return x => functions.reduceRight((result, fn) => fn(result), x);
 };

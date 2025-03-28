@@ -10,12 +10,11 @@
  *
  * You must find a solution with a memory complexity better than O(n2).
  */
-
 /**
  * @param {number[][]} matrix
  * @param {number} k
  * @return {number}
  */
 var kthSmallest = function(matrix, k) {
-  return matrix.flat().sort((a, b) => a - b)[k - 1];
+    return matrix.flat().sort((a, b) => a - b)[k - 1];
 };

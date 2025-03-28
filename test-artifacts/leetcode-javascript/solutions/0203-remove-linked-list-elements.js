@@ -7,7 +7,6 @@
  * nodes of the linked list that has Node.val == val, and return the
  * new head.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -21,7 +20,7 @@
  * @return {ListNode}
  */
 var removeElements = function(head, val) {
-  if (!head) return null;
-  head.next = removeElements(head.next, val);
-  return head.val === val ? head.next : head;
+    if (!head) return null;
+    head.next = removeElements(head.next, val);
+    return head.val === val ? head.next : head;
 };

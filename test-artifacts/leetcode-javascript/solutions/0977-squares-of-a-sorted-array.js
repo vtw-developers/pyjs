@@ -7,11 +7,10 @@
  * return an array of the squares of each number,
  * also in sorted non-decreasing order.
  */
-
 /**
  * @param {number[]} A
  * @return {number[]}
  */
 var sortedSquares = function(A) {
-  return A.map(n => Math.pow(n, 2)).sort((a, b) => a - b);
+    return A.map(n => Math.pow(n, 2)).sort((a, b) => a - b);
 };

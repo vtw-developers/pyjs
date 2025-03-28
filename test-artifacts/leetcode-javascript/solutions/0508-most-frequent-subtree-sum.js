@@ -9,7 +9,6 @@
  * The subtree sum of a node is defined as the sum of all the node values formed by the subtree
  * rooted at that node (including the node itself).
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -23,29 +22,25 @@
  * @return {number[]}
  */
 var findFrequentTreeSum = function(root) {
-  if (!root) return [];
-
-  const map = new Map();
-  let result = [];
-  let max = 0;
-
-  traverse(root);
-
-  for (const [sum, freq] of map) {
-    if (freq > max) {
-      max = freq;
-      result = [sum];
-    } else if (freq === max) {
-      result.push(sum);
+    if (!root) return [];
+    const map = new Map();
+    let result = [];
+    let max = 0;
+    traverse(root);
+    for (const [sum, freq] of map) {
+        if (freq > max) {
+            max = freq;
+            result = [sum];
+        } else if (freq === max) {
+            result.push(sum);
+        }
     }
-  }
+    return result;
 
-  return result;
-
-  function traverse(node) {
-    if (!node) return 0;
-    const sum = node.val + traverse(node.left) + traverse(node.right);
-    map.set(sum, (map.get(sum) || 0) + 1);
-    return sum;
-  }
+    function traverse(node) {
+        if (!node) return 0;
+        const sum = node.val + traverse(node.left) + traverse(node.right);
+        map.set(sum, (map.get(sum) || 0) + 1);
+        return sum;
+    }
 };

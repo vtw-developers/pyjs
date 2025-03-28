@@ -14,37 +14,34 @@
  * Return the minimum number of times you need to do this in order to make all the computers
  * connected. If it is not possible, return -1.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} connections
  * @return {number}
  */
 var makeConnected = function(n, connections) {
-  const parent = Array(n).fill(-1);
-  let isNotConnected = n - 1;
-  let count = 0;
+    const parent = Array(n).fill(-1);
+    let isNotConnected = n - 1;
+    let count = 0;
+    connections.forEach(([node, connection]) => {
+        if (search(node) !== search(connection)) {
+            const p1 = search(node);
+            const p2 = search(connection);
+            if (p1 !== p2) {
+                parent[p2] = p1;
+            }
+            isNotConnected--;
+        } else {
+            count++;
+        }
+    });
+    return isNotConnected <= count ? isNotConnected : -1;
 
-  connections.forEach(([node, connection]) => {
-    if (search(node) !== search(connection)) {
-      const p1 = search(node);
-      const p2 = search(connection);
-      if (p1 !== p2) {
-        parent[p2] = p1;
-      }
-      isNotConnected--;
-    } else {
-      count++;
+    function search(node) {
+        if (parent[node] === -1) {
+            return node;
+        }
+        parent[node] = search(parent[node]);
+        return parent[node];
     }
-  });
-
-  return isNotConnected <= count ? isNotConnected : -1;
-
-  function search(node) {
-    if (parent[node] === -1) {
-      return node;
-    }
-    parent[node] = search(parent[node]);
-    return parent[node];
-  }
 };

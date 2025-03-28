@@ -10,13 +10,12 @@
  *
  * Return the bitwise XOR of all integers in nums3.
  */
-
 /**
  * @param {number[]} nums1
  * @param {number[]} nums2
  * @return {number}
  */
 var xorAllNums = function(nums1, nums2) {
-  const xor = (a, b) => a.length % 2 ? b.reduce((x, y) => x ^ y): 0;
-  return xor(nums1, nums2) ^ xor(nums2, nums1);
+    const xor = (a, b) => a.length % 2 ? b.reduce((x, y) => x ^ y) : 0;
+    return xor(nums1, nums2) ^ xor(nums2, nums1);
 };

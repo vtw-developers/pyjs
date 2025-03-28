@@ -11,25 +11,23 @@
  * - int pick(int target) Picks a random index i from nums where nums[i] == target. If there
  *   are multiple valid i's, then each index should have an equal probability of returning.
  */
-
 /**
  * @param {number[]} nums
  */
 var Solution = function(nums) {
-  this.map = new Map();
-  for (let i = 0; i < nums.length; i++) {
-    if (!this.map.has(nums[i])) {
-      this.map.set(nums[i], []);
+    this.map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        if (!this.map.has(nums[i])) {
+            this.map.set(nums[i], []);
+        }
+        this.map.get(nums[i]).push(i);
     }
-    this.map.get(nums[i]).push(i);
-  }
 };
-
 /**
  * @param {number} target
  * @return {number}
  */
 Solution.prototype.pick = function(target) {
-  const result = this.map.get(target);
-  return result[Math.floor(Math.random() * result.length)];
+    const result = this.map.get(target);
+    return result[Math.floor(Math.random() * result.length)];
 };

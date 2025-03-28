@@ -13,26 +13,22 @@
  * no elements without changing the order of the remaining elements. For example,
  * [3,6,2,7] is a subsequence of the array [0,3,1,6,2,2,7].
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var sumSubseqWidths = function(nums) {
-  const MOD = 1e9 + 7;
-  const n = nums.length;
-  const powers = [1];
-
-  nums.sort((a, b) => a - b);
-  for (let i = 1; i < n; i++) {
-    powers[i] = (powers[i - 1] * 2) % MOD;
-  }
-
-  let result = 0;
-  for (let i = 0; i < n; i++) {
-    const contribution = (nums[i] * (powers[i] - powers[n - 1 - i] + MOD)) % MOD;
-    result = (result + contribution) % MOD;
-  }
-
-  return result;
+    const MOD = 1e9 + 7;
+    const n = nums.length;
+    const powers = [1];
+    nums.sort((a, b) => a - b);
+    for (let i = 1; i < n; i++) {
+        powers[i] = (powers[i - 1] * 2) % MOD;
+    }
+    let result = 0;
+    for (let i = 0; i < n; i++) {
+        const contribution = (nums[i] * (powers[i] - powers[n - 1 - i] + MOD)) % MOD;
+        result = (result + contribution) % MOD;
+    }
+    return result;
 };

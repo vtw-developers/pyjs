@@ -23,41 +23,37 @@
  *
  * Return a string representing the final state.
  */
-
 /**
  * @param {string} dominoes
  * @return {string}
  */
 var pushDominoes = function(dominoes) {
-  const forces = new Array(dominoes.length).fill(0);
-
-  let force = 0;
-  for (let i = 0; i < dominoes.length; i++) {
-    if (dominoes[i] === 'R') {
-      force = dominoes.length;
-    } else if (dominoes[i] === 'L') {
-      force = 0;
-    } else {
-      force = Math.max(force - 1, 0);
+    const forces = new Array(dominoes.length).fill(0);
+    let force = 0;
+    for (let i = 0; i < dominoes.length; i++) {
+        if (dominoes[i] === 'R') {
+            force = dominoes.length;
+        } else if (dominoes[i] === 'L') {
+            force = 0;
+        } else {
+            force = Math.max(force - 1, 0);
+        }
+        forces[i] += force;
     }
-    forces[i] += force;
-  }
-
-  force = 0;
-  for (let i = dominoes.length - 1; i >= 0; i--) {
-    if (dominoes[i] === 'L') {
-      force = dominoes.length;
-    } else if (dominoes[i] === 'R') {
-      force = 0;
-    } else {
-      force = Math.max(force - 1, 0);
+    force = 0;
+    for (let i = dominoes.length - 1; i >= 0; i--) {
+        if (dominoes[i] === 'L') {
+            force = dominoes.length;
+        } else if (dominoes[i] === 'R') {
+            force = 0;
+        } else {
+            force = Math.max(force - 1, 0);
+        }
+        forces[i] -= force;
     }
-    forces[i] -= force;
-  }
-
-  return forces.map(f => {
-    if (f > 0) return 'R';
-    if (f < 0) return 'L';
-    return '.';
-  }).join('');
+    return forces.map(f => {
+        if (f > 0) return 'R';
+        if (f < 0) return 'L';
+        return '.';
+    }).join('');
 };

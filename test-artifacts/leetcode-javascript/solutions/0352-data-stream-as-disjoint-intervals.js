@@ -12,35 +12,30 @@
  * - int[][] getIntervals() Returns a summary of the integers in the stream currently as
  *   a list of disjoint intervals [starti, endi]. The answer should be sorted by starti.
  */
-
 var SummaryRanges = function() {
-  this.list = [];
+    this.list = [];
 };
-
 /**
  * @param {number} value
  * @return {void}
  */
 SummaryRanges.prototype.addNum = function(value) {
-  this.list[value] = true;
+    this.list[value] = true;
 };
-
 /**
  * @return {number[][]}
  */
 SummaryRanges.prototype.getIntervals = function() {
-  const result = [];
-
-  for (let i = 0; i < this.list.length; i++) {
-    if (this.list[i]) {
-      let j = i;
-      while (this.list[j]) {
-        j++;
-      }
-      result.push([i, j - 1]);
-      i = j;
+    const result = [];
+    for (let i = 0; i < this.list.length; i++) {
+        if (this.list[i]) {
+            let j = i;
+            while (this.list[j]) {
+                j++;
+            }
+            result.push([i, j - 1]);
+            i = j;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

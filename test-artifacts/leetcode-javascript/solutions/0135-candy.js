@@ -13,25 +13,21 @@
  * Return the minimum number of candies you need to have to distribute the candies to
  * the children.
  */
-
 /**
  * @param {number[]} ratings
  * @return {number}
  */
 var candy = function(ratings) {
-  const data = new Array(ratings.length).fill(1);
-
-  for (let i = 1; i < ratings.length; i++) {
-    if (ratings[i - 1] < ratings[i]) {
-      data[i] = data[i - 1] + 1;
+    const data = new Array(ratings.length).fill(1);
+    for (let i = 1; i < ratings.length; i++) {
+        if (ratings[i - 1] < ratings[i]) {
+            data[i] = data[i - 1] + 1;
+        }
     }
-  }
-
-  for (let i = ratings.length - 1; i > 0; i--) {
-    if (ratings[i - 1] > ratings[i]) {
-      data[i - 1] = data[i - 1] > data[i] + 1 ? data[i - 1] : data[i] + 1;
+    for (let i = ratings.length - 1; i > 0; i--) {
+        if (ratings[i - 1] > ratings[i]) {
+            data[i - 1] = data[i - 1] > data[i] + 1 ? data[i - 1] : data[i] + 1;
+        }
     }
-  }
-
-  return data.reduce((sum, n) => sum + n, 0);
+    return data.reduce((sum, n) => sum + n, 0);
 };

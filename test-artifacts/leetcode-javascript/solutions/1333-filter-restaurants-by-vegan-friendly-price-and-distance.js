@@ -15,7 +15,6 @@
  * For restaurants with the same rating, order them by id from highest to lowest. For simplicity
  * veganFriendlyi and veganFriendly take value 1 when it is true, and 0 when it is false.
  */
-
 /**
  * @param {number[][]} restaurants
  * @param {number} veganFriendly
@@ -24,7 +23,5 @@
  * @return {number[]}
  */
 var filterRestaurants = function(restaurants, veganFriendly, maxPrice, maxDistance) {
-  return restaurants.filter(([,, v, p, d]) => v >= veganFriendly && p <= maxPrice && d <= maxDistance)
-    .sort((a, b) => a[1] === b[1] ? b[0] - a[0] : b[1] - a[1])
-    .map(r => r[0]);
+    return restaurants.filter(([, , v, p, d]) => v >= veganFriendly && p <= maxPrice && d <= maxDistance).sort((a, b) => a[1] === b[1] ? b[0] - a[0] : b[1] - a[1]).map(r => r[0]);
 };

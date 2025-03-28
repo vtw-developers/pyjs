@@ -26,7 +26,6 @@
  *
  * A substring is a contiguous sequence of characters in a string.
  */
-
 /**
  * @param {string} s
  * @param {number[]} indices
@@ -35,24 +34,28 @@
  * @return {string}
  */
 var findReplaceString = function(s, indices, sources, targets) {
-  const replacements = [];
-
-  for (let i = 0; i < indices.length; i++) {
-    const index = indices[i];
-    const source = sources[i];
-    const target = targets[i];
-
-    if (s.substring(index, index + source.length) === source) {
-      replacements.push({ index, source, target });
+    const replacements = [];
+    for (let i = 0; i < indices.length; i++) {
+        const index = indices[i];
+        const source = sources[i];
+        const target = targets[i];
+        if (s.substring(index, index + source.length) === source) {
+            replacements.push({
+                index,
+                source,
+                target
+            });
+        }
     }
-  }
-
-  replacements.sort((a, b) => b.index - a.index);
-
-  let result = s;
-  for (const { index, source, target } of replacements) {
-    result = result.substring(0, index) + target + result.substring(index + source.length);
-  }
-
-  return result;
+    replacements.sort((a, b) => b.index - a.index);
+    let result = s;
+    for (const {
+            index,
+            source,
+            target
+        }
+        of replacements) {
+        result = result.substring(0, index) + target + result.substring(index + source.length);
+    }
+    return result;
 };

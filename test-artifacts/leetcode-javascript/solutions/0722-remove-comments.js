@@ -16,11 +16,10 @@
  * Finally, implicit newline characters can be deleted by block comments.
  * After removing the comments from the source code, return the source code in the same format.
  */
-
 /**
  * @param {string[]} source
  * @return {string[]}
  */
 var removeComments = function(source) {
-  return source.join('\n').replace(/\/\*.*?\*\/|\/\/[^\n]+/gs, '').split(/\n/).filter(Boolean);
+    return source.join('\n').replace(/\/\*.*?\*\/|\/\/[^\n]+/gs, '').split(/\n/).filter(Boolean);
 };

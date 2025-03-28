@@ -10,7 +10,6 @@
  *
  * Return true if there exists a pattern of length m that is repeated k or more times, otherwise return false.
  */
-
 /**
  * @param {number[]} arr
  * @param {number} m
@@ -18,11 +17,11 @@
  * @return {boolean}
  */
 var containsPattern = function(arr, m, k) {
-  for (let i = 0; i < arr.length - m + 1; i++) {
-    const pattern = new Array(k).fill(arr.slice(i, i + m).join()).join();
-    if (arr.join().includes(pattern)) {
-      return true;
+    for (let i = 0; i < arr.length - m + 1; i++) {
+        const pattern = new Array(k).fill(arr.slice(i, i + m).join()).join();
+        if (arr.join().includes(pattern)) {
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 };

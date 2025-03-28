@@ -10,11 +10,10 @@
  * between two 1's is the absolute difference between their bit positions. For example, the two
  * 1's in "1001" have a distance of 3.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var binaryGap = function(n) {
-  return Math.max(0, ...n.toString(2).split('1').slice(1, -1).map(s => s.length + 1));
+    return Math.max(0, ...n.toString(2).split('1').slice(1, -1).map(s => s.length + 1));
 };

@@ -14,7 +14,6 @@
  * Return an array of coordinates representing the positions of the grid in the order you visited
  * them.
  */
-
 /**
  * @param {number} rows
  * @param {number} cols
@@ -23,30 +22,32 @@
  * @return {number[][]}
  */
 var spiralMatrixIII = function(rows, cols, rStart, cStart) {
-  const result = [];
-  const total = rows * cols;
-  let row = rStart;
-  let col = cStart;
-  let step = 1;
-  let direction = 0;
-  const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-
-  result.push([row, col]);
-
-  while (result.length < total) {
-    for (let i = 0; i < 2; i++) {
-      const [dr, dc] = directions[direction];
-      for (let j = 0; j < step; j++) {
-        row += dr;
-        col += dc;
-        if (row >= 0 && row < rows && col >= 0 && col < cols) {
-          result.push([row, col]);
+    const result = [];
+    const total = rows * cols;
+    let row = rStart;
+    let col = cStart;
+    let step = 1;
+    let direction = 0;
+    const directions = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0]
+    ];
+    result.push([row, col]);
+    while (result.length < total) {
+        for (let i = 0; i < 2; i++) {
+            const [dr, dc] = directions[direction];
+            for (let j = 0; j < step; j++) {
+                row += dr;
+                col += dc;
+                if (row >= 0 && row < rows && col >= 0 && col < cols) {
+                    result.push([row, col]);
+                }
+            }
+            direction = (direction + 1) % 4;
         }
-      }
-      direction = (direction + 1) % 4;
+        step++;
     }
-    step++;
-  }
-
-  return result;
+    return result;
 };

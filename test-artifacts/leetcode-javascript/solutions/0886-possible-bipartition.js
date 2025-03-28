@@ -10,33 +10,31 @@
  * the person labeled ai does not like the person labeled bi, return true if it is possible
  * to split everyone into two groups in this way.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} dislikes
  * @return {boolean}
  */
 var possibleBipartition = function(n, dislikes) {
-  const graph = Array.from({ length: n + 1 }, () => []);
-  dislikes.forEach(([a, b]) => {
-    graph[a].push(b);
-    graph[b].push(a);
-  });
+    const graph = Array.from({
+        length: n + 1
+    }, () => []);
+    dislikes.forEach(([a, b]) => {
+        graph[a].push(b);
+        graph[b].push(a);
+    });
+    const colors = new Array(n + 1).fill(0);
 
-  const colors = new Array(n + 1).fill(0);
-
-  function colorGraph(person, color) {
-    colors[person] = color;
-    for (const neighbor of graph[person]) {
-      if (colors[neighbor] === color) return false;
-      if (colors[neighbor] === 0 && !colorGraph(neighbor, -color)) return false;
+    function colorGraph(person, color) {
+        colors[person] = color;
+        for (const neighbor of graph[person]) {
+            if (colors[neighbor] === color) return false;
+            if (colors[neighbor] === 0 && !colorGraph(neighbor, -color)) return false;
+        }
+        return true;
+    }
+    for (let person = 1; person <= n; person++) {
+        if (colors[person] === 0 && !colorGraph(person, 1)) return false;
     }
     return true;
-  }
-
-  for (let person = 1; person <= n; person++) {
-    if (colors[person] === 0 && !colorGraph(person, 1)) return false;
-  }
-
-  return true;
 };

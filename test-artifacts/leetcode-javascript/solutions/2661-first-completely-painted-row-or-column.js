@@ -12,27 +12,24 @@
  * Return the smallest index i at which either a row or a column will be completely painted
  * in mat.
  */
-
 /**
  * @param {number[]} arr
  * @param {number[][]} mat
  * @return {number}
  */
 var firstCompleteIndex = function(arr, mat) {
-  const rows = new Array(mat.length).fill(0);
-  const columns = new Array(mat[0].length).fill(0);
-  const map = new Map();
-
-  for (let i = 0; i < mat.length; i++) {
-    for (let j = 0; j < mat[i].length; j++) {
-      map.set(mat[i][j], [i, j]);
+    const rows = new Array(mat.length).fill(0);
+    const columns = new Array(mat[0].length).fill(0);
+    const map = new Map();
+    for (let i = 0; i < mat.length; i++) {
+        for (let j = 0; j < mat[i].length; j++) {
+            map.set(mat[i][j], [i, j]);
+        }
     }
-  }
-
-  for (let i = 0; i < arr.length; i++) {
-    const [rowIndex, columnIndex] = map.get(arr[i]);
-    if (++rows[rowIndex] === mat[0].length || ++columns[columnIndex] === mat.length) {
-      return i;
+    for (let i = 0; i < arr.length; i++) {
+        const [rowIndex, columnIndex] = map.get(arr[i]);
+        if (++rows[rowIndex] === mat[0].length || ++columns[columnIndex] === mat.length) {
+            return i;
+        }
     }
-  }
 };

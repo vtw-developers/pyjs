@@ -11,7 +11,6 @@
  * - Pour water from one jug into another until the receiving jug is full, or the
  *   transferring jug is empty.
  */
-
 /**
  * @param {number} x
  * @param {number} y
@@ -19,13 +18,13 @@
  * @return {boolean}
  */
 var canMeasureWater = function(x, y, target) {
-  if (target > x + y) return false;
-  if (target === 0) return true;
-  if (x === 0) return target === y;
-  if (y === 0) return target === x;
-  return target % gcd(x, y) === 0;
+    if (target > x + y) return false;
+    if (target === 0) return true;
+    if (x === 0) return target === y;
+    if (y === 0) return target === x;
+    return target % gcd(x, y) === 0;
 
-  function gcd(a, b) {
-    return b === 0 ? a : gcd(b, a % b);
-  }
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
 };

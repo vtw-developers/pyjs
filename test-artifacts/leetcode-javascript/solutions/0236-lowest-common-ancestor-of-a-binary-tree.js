@@ -9,7 +9,6 @@
  * between two nodes p and q as the lowest node in T that has both p and q as descendants
  * (where we allow a node to be a descendant of itself).”
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val) {
@@ -24,7 +23,7 @@
  * @return {TreeNode}
  */
 var lowestCommonAncestor = function(root, p, q) {
-  if (!root || root === p || root === q) return root;
-  const [l, r] = [lowestCommonAncestor(root.left, p, q), lowestCommonAncestor(root.right, p, q)];
-  return l && r ? root : l ?? r;
+    if (!root || root === p || root === q) return root;
+    const [l, r] = [lowestCommonAncestor(root.left, p, q), lowestCommonAncestor(root.right, p, q)];
+    return l && r ? root : l ?? r;
 };

@@ -10,23 +10,20 @@
  *
  * Return the list answer. If there multiple valid answers, return any of them.
  */
-
 /**
  * @param {number} n
  * @param {number} k
  * @return {number[]}
  */
 var constructArray = function(n, k) {
-  const result = [];
-
-  for (let i = 0, left = 1, right = n; i < n; i++) {
-    if (k > 1) {
-      result.push(k % 2 === 0 ? right-- : left++);
-      k--;
-    } else {
-      result.push(left++);
+    const result = [];
+    for (let i = 0, left = 1, right = n; i < n; i++) {
+        if (k > 1) {
+            result.push(k % 2 === 0 ? right-- : left++);
+            k--;
+        } else {
+            result.push(left++);
+        }
     }
-  }
-
-  return result;
+    return result;
 };

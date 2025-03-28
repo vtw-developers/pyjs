@@ -9,16 +9,15 @@
  *
  * Given strings sequence and word, return the maximum k-repeating value of word in sequence.
  */
-
 /**
  * @param {string} sequence
  * @param {string} word
  * @return {number}
  */
 var maxRepeating = function(sequence, word) {
-  let count = Math.floor(sequence.length / word.length) + 1;
-  while (--count) {
-    if (sequence.includes(word.repeat(count))) return count;
-  }
-  return count;
+    let count = Math.floor(sequence.length / word.length) + 1;
+    while (--count) {
+        if (sequence.includes(word.repeat(count))) return count;
+    }
+    return count;
 };

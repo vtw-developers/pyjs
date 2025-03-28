@@ -13,7 +13,6 @@
  * You may not alter the values in the list's nodes, only nodes themselves may
  * be changed.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -27,23 +26,21 @@
  * @return {ListNode}
  */
 var reverseKGroup = function(head, k) {
-  const result = new ListNode(null, head);
-  const stack = [];
-  let tail = result;
-
-  while (head) {
-    for (let i = 0; i < k && head; i++) {
-      stack.push(head);
-      head = head.next;
+    const result = new ListNode(null, head);
+    const stack = [];
+    let tail = result;
+    while (head) {
+        for (let i = 0; i < k && head; i++) {
+            stack.push(head);
+            head = head.next;
+        }
+        if (stack.length === k) {
+            while (stack.length) {
+                tail.next = stack.pop();
+                tail = tail.next;
+            }
+            tail.next = head;
+        }
     }
-    if (stack.length === k) {
-      while (stack.length) {
-        tail.next = stack.pop();
-        tail = tail.next;
-      }
-      tail.next = head;
-    }
-  }
-
-  return result.next;
+    return result.next;
 };

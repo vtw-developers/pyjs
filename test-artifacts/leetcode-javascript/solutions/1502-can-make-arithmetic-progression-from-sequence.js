@@ -9,19 +9,16 @@
  * Given an array of numbers arr, return true if the array can be rearranged to
  * form an arithmetic progression. Otherwise, return false.
  */
-
 /**
  * @param {number[]} arr
  * @return {boolean}
  */
 var canMakeArithmeticProgression = function(arr) {
-  arr.sort((a, b) => a - b);
-
-  for (let i = 2, diff = arr[1] - arr[0]; i < arr.length; i++) {
-    if (arr[i] - arr[i - 1] !== diff) {
-      return false;
+    arr.sort((a, b) => a - b);
+    for (let i = 2, diff = arr[1] - arr[0]; i < arr.length; i++) {
+        if (arr[i] - arr[i - 1] !== diff) {
+            return false;
+        }
     }
-  }
-
-  return true;
+    return true;
 };

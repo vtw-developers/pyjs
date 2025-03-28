@@ -11,13 +11,10 @@
  * queue should be formatted as an array queue, where queue[j] = [hj, kj] is the attributes of
  * the jth person in the queue (queue[0] is the person at the front of the queue).
  */
-
 /**
  * @param {number[][]} people
  * @return {number[][]}
  */
 var reconstructQueue = function(people) {
-  return people
-    .sort(([h1, k1], [h2, k2]) => h2 - h1 || k1 - k2)
-    .reduce((queue, person) => queue.splice(person[1], 0, person) && queue, []);
+    return people.sort(([h1, k1], [h2, k2]) => h2 - h1 || k1 - k2).reduce((queue, person) => queue.splice(person[1], 0, person) && queue, []);
 };

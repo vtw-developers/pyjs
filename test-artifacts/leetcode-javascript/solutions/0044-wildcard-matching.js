@@ -11,40 +11,36 @@
  *
  * The matching should cover the entire input string (not partial).
  */
-
 /**
  * @param {string} s
  * @param {string} p
  * @return {boolean}
  */
 var isMatch = function(s, p) {
-  let i = 0;
-  let j = 0;
-  let start = -1;
-  let offset = -1;
-
-  while (i < s.length) {
-    if (j < p.length && s[i] === p[j] || p[j] === '?') {
-      i++;
-      j++;
-    } else if (j < p.length && p[j] === '*') {
-      start = j;
-      offset = i;
-      j++;
-    } else if (start === -1) {
-      return false;
-    } else {
-      j = start + 1;
-      i = offset + 1;
-      offset = i;
+    let i = 0;
+    let j = 0;
+    let start = -1;
+    let offset = -1;
+    while (i < s.length) {
+        if (j < p.length && s[i] === p[j] || p[j] === '?') {
+            i++;
+            j++;
+        } else if (j < p.length && p[j] === '*') {
+            start = j;
+            offset = i;
+            j++;
+        } else if (start === -1) {
+            return false;
+        } else {
+            j = start + 1;
+            i = offset + 1;
+            offset = i;
+        }
     }
-  }
-
-  for (let index = j; index < p.length; index++) {
-    if (p[index] !== '*') {
-      return false;
+    for (let index = j; index < p.length; index++) {
+        if (p[index] !== '*') {
+            return false;
+        }
     }
-  }
-
-  return true;
+    return true;
 };

@@ -16,22 +16,20 @@
  *
  * The testcases are generated so that the answer will be less than or equal to 2 * 109.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var uniquePathsWithObstacles = function(grid) {
-  const cache = new Array(grid.length).fill(0).map(v => new Array(grid[0].length).fill(0));
+    const cache = new Array(grid.length).fill(0).map(v => new Array(grid[0].length).fill(0));
 
-  function traverse(x, y) {
-    if (grid[x] === undefined || grid[x][y] === undefined || grid[x][y] === 1) return 0;
-    if (x === grid.length - 1 && y === grid[0].length - 1) return 1;
-    if (!cache[x][y]) {
-      cache[x][y] = traverse(x + 1, y) + traverse(x, y + 1);
+    function traverse(x, y) {
+        if (grid[x] === undefined || grid[x][y] === undefined || grid[x][y] === 1) return 0;
+        if (x === grid.length - 1 && y === grid[0].length - 1) return 1;
+        if (!cache[x][y]) {
+            cache[x][y] = traverse(x + 1, y) + traverse(x, y + 1);
+        }
+        return cache[x][y];
     }
-    return cache[x][y];
-  }
-
-  return traverse(0, 0);
+    return traverse(0, 0);
 };

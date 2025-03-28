@@ -15,23 +15,20 @@
  * belongs to more than one subarray. A subarray is a contiguous sequence of elements within
  * an array.
  */
-
 /**
  * @param {number[][]} groups
  * @param {number[]} nums
  * @return {boolean}
  */
 var canChoose = function(groups, nums) {
-  const rows = groups.map(row => ',' + row.join(',') + ',');
-  const joined = `,${nums.join(',')},`;
-
-  for (let i = 0, offset = 0; i < rows.length; i++) {
-    offset = joined.indexOf(rows[i], offset);
-    if (offset === -1) {
-      return false;
+    const rows = groups.map(row => ',' + row.join(',') + ',');
+    const joined = `,${nums.join(',')},`;
+    for (let i = 0, offset = 0; i < rows.length; i++) {
+        offset = joined.indexOf(rows[i], offset);
+        if (offset === -1) {
+            return false;
+        }
+        offset += rows[i].length - 1;
     }
-    offset += rows[i].length - 1;
-  }
-
-  return true;
+    return true;
 };

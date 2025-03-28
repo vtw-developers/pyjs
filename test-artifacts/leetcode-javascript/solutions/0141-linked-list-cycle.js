@@ -12,7 +12,6 @@
  *
  * Return true if there is a cycle in the linked list. Otherwise, return false.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val) {
@@ -20,19 +19,17 @@
  *     this.next = null;
  * }
  */
-
 /**
  * @param {ListNode} head
  * @return {boolean}
  */
 var hasCycle = function(head) {
-  while (head) {
-    if (head.visited) {
-      return true;
+    while (head) {
+        if (head.visited) {
+            return true;
+        }
+        head.visited = 1;
+        head = head.next;
     }
-    head.visited = 1;
-    head = head.next;
-  }
-
-  return false;
+    return false;
 };

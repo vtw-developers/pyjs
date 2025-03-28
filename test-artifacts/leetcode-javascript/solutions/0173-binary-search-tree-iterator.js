@@ -18,7 +18,6 @@
  * You may assume that next() calls will always be valid. That is, there will be at least a
  * next number in the in-order traversal when next() is called.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -31,28 +30,25 @@
  * @param {TreeNode} root
  */
 var BSTIterator = function(root) {
-  this.stack = [];
-  this.root = root;
+    this.stack = [];
+    this.root = root;
 };
-
 /**
  * @return {number}
  */
 BSTIterator.prototype.next = function() {
-  while (this.root) {
-    this.stack.push(this.root);
-    this.root = this.root.left;
-  }
-  this.root = this.stack.pop();
-
-  const result = this.root.val;
-  this.root = this.root.right;
-  return result;
+    while (this.root) {
+        this.stack.push(this.root);
+        this.root = this.root.left;
+    }
+    this.root = this.stack.pop();
+    const result = this.root.val;
+    this.root = this.root.right;
+    return result;
 };
-
 /**
  * @return {boolean}
  */
 BSTIterator.prototype.hasNext = function() {
-  return this.root || this.stack.length;
+    return this.root || this.stack.length;
 };

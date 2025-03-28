@@ -8,14 +8,12 @@
  *
  * Check if these points make a straight line in the XY plane.
  */
-
 /**
  * @param {number[][]} coordinates
  * @return {boolean}
  */
 var checkStraightLine = function(coords) {
-  const m = (coords[0][1] - coords[1][1]) / (coords[0][0] - coords[1][0]);
-  const b = coords[0][1] - m * coords[0][0];
-
-  return coords.every(coord => coord[1] === m * coord[0] + b);
+    const m = (coords[0][1] - coords[1][1]) / (coords[0][0] - coords[1][0]);
+    const b = coords[0][1] - m * coords[0][0];
+    return coords.every(coord => coord[1] === m * coord[0] + b);
 };

@@ -10,24 +10,20 @@
  *
  * Your task is to solve it in O(log(n)) time complexity.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var peakIndexInMountainArray = function(arr) {
-  let left = 0;
-  let right = arr.length - 1;
-
-  while (left < right) {
-    const middle = Math.floor((left + right) / 2);
-
-    if (arr[middle] > arr[middle + 1]) {
-      right = middle;
-    } else {
-      left = middle + 1;
+    let left = 0;
+    let right = arr.length - 1;
+    while (left < right) {
+        const middle = Math.floor((left + right) / 2);
+        if (arr[middle] > arr[middle + 1]) {
+            right = middle;
+        } else {
+            left = middle + 1;
+        }
     }
-  }
-
-  return left;
+    return left;
 };

@@ -5,7 +5,6 @@
  *
  * Given the head of a linked list, rotate the list to the right by k places.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -19,19 +18,19 @@
  * @return {ListNode}
  */
 var rotateRight = function(head, k) {
-  if (!head || !head.next || !k) return head;
-  let tailCopy = head;
-  let tail = head;
-  let count = 1;
-  while (tail.next) {
-    tail = tail.next;
-    count++;
-  }
-  tail.next = head;
-  for (let i = 1; i < count - k % count; i++) {
-    tailCopy = tailCopy.next;
-  }
-  const result = tailCopy.next;
-  tailCopy.next = null;
-  return result;
+    if (!head || !head.next || !k) return head;
+    let tailCopy = head;
+    let tail = head;
+    let count = 1;
+    while (tail.next) {
+        tail = tail.next;
+        count++;
+    }
+    tail.next = head;
+    for (let i = 1; i < count - k % count; i++) {
+        tailCopy = tailCopy.next;
+    }
+    const result = tailCopy.next;
+    tailCopy.next = null;
+    return result;
 };

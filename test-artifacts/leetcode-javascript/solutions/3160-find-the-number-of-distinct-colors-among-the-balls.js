@@ -15,26 +15,23 @@
  *
  * Note that when answering a query, lack of a color will not be considered as a color.
  */
-
 /**
  * @param {number} limit
  * @param {number[][]} queries
  * @return {number[]}
  */
 var queryResults = function(limit, queries) {
-  const result = [];
-
-  for (let i = 0, colors = new Map(), counts = new Map(); i < queries.length; i++) {
-    const [index, color] = queries[i];
-    if (colors.has(index)) {
-      const prev = colors.get(index);
-      counts.set(prev, counts.get(prev) - 1);
-      if (!counts.get(prev)) counts.delete(prev);
+    const result = [];
+    for (let i = 0, colors = new Map(), counts = new Map(); i < queries.length; i++) {
+        const [index, color] = queries[i];
+        if (colors.has(index)) {
+            const prev = colors.get(index);
+            counts.set(prev, counts.get(prev) - 1);
+            if (!counts.get(prev)) counts.delete(prev);
+        }
+        colors.set(index, color);
+        counts.set(color, (counts.get(color) ?? 0) + 1);
+        result.push(counts.size);
     }
-    colors.set(index, color);
-    counts.set(color, (counts.get(color) ?? 0) + 1);
-    result.push(counts.size);
-  }
-
-  return result;
+    return result;
 };

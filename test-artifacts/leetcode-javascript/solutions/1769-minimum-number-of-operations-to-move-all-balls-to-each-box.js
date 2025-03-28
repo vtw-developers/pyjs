@@ -15,23 +15,20 @@
  *
  * Each answer[i] is calculated considering the initial state of the boxes.
  */
-
 /**
  * @param {string} boxes
  * @return {number[]}
  */
 var minOperations = function(boxes) {
-  const result = new Array(boxes.length).fill(0);
-
-  for (let i = 0; i < boxes.length; i++) {
-    let total = 0;
-    for (let j = 0; j < boxes.length; j++) {
-      if (boxes[j] === '1') {
-        total += Math.abs(j - i);
-      }
+    const result = new Array(boxes.length).fill(0);
+    for (let i = 0; i < boxes.length; i++) {
+        let total = 0;
+        for (let j = 0; j < boxes.length; j++) {
+            if (boxes[j] === '1') {
+                total += Math.abs(j - i);
+            }
+        }
+        result[i] = total;
     }
-    result[i] = total;
-  }
-
-  return result;
+    return result;
 };

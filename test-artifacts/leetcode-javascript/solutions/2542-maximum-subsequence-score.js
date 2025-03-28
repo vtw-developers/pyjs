@@ -17,7 +17,6 @@
  * A subsequence of indices of an array is a set that can be derived from the set {0, 1, ..., n-1}
  * by deleting some or no elements.
  */
-
 /**
  * @param {number[]} nums1
  * @param {number[]} nums2
@@ -25,20 +24,17 @@
  * @return {number}
  */
 var maxScore = function(nums1, nums2, k) {
-  const zipped = nums1.map((num1, i) => [num1, nums2[i]]).sort((a, b) => b[1] - a[1]);
-  const heap = new MinPriorityQueue();
-  let result = 0;
-  let sum = 0;
-
-  for (const [num, min] of zipped) {
-    heap.enqueue(num);
-    sum += num;
-
-    if (heap.size() == k) {
-      result = Math.max(result, sum * min);
-      sum -= heap.dequeue().element;
+    const zipped = nums1.map((num1, i) => [num1, nums2[i]]).sort((a, b) => b[1] - a[1]);
+    const heap = new MinPriorityQueue();
+    let result = 0;
+    let sum = 0;
+    for (const [num, min] of zipped) {
+        heap.enqueue(num);
+        sum += num;
+        if (heap.size() == k) {
+            result = Math.max(result, sum * min);
+            sum -= heap.dequeue().element;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

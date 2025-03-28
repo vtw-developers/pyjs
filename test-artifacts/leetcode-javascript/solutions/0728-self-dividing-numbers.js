@@ -12,13 +12,13 @@
  * Given two integers left and right, return a list of all the self-dividing numbers
  * in the range [left, right] (both inclusive).
  */
-
 /**
  * @param {number} left
  * @param {number} right
  * @return {number[]}
  */
 var selfDividingNumbers = function(left, right) {
-  return Array.from({ length: right - left + 1 }, (_, i) => left + i)
-    .filter(n => String(n).split('').every(d => d !== '0' && n % d === 0));
+    return Array.from({
+        length: right - left + 1
+    }, (_, i) => left + i).filter(n => String(n).split('').every(d => d !== '0' && n % d === 0));
 };

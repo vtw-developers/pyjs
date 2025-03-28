@@ -13,7 +13,6 @@
  * The subtree of a node is a tree consisting of that node, plus the set of all descendants of
  * that node.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -27,18 +26,25 @@
  * @return {TreeNode}
  */
 var subtreeWithAllDeepest = function(root) {
-  return findDepthAndNode(root).node;
+    return findDepthAndNode(root).node;
 
-  function findDepthAndNode(node) {
-    if (!node) return { depth: 0, node: null };
-
-    const left = findDepthAndNode(node.left);
-    const right = findDepthAndNode(node.right);
-
-    if (left.depth === right.depth) {
-      return { depth: left.depth + 1, node: node };
+    function findDepthAndNode(node) {
+        if (!node) return {
+            depth: 0,
+            node: null
+        };
+        const left = findDepthAndNode(node.left);
+        const right = findDepthAndNode(node.right);
+        if (left.depth === right.depth) {
+            return {
+                depth: left.depth + 1,
+                node: node
+            };
+        }
+        const deeper = left.depth > right.depth ? left : right;
+        return {
+            depth: deeper.depth + 1,
+            node: deeper.node
+        };
     }
-    const deeper = left.depth > right.depth ? left : right;
-    return { depth: deeper.depth + 1, node: deeper.node };
-  }
 };

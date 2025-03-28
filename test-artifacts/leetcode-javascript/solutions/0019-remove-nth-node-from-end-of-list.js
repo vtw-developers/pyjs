@@ -6,7 +6,6 @@
  * Given the head of a linked list, remove the nth node from the end of the list
  * and return its head.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -20,21 +19,17 @@
  * @return {ListNode}
  */
 var removeNthFromEnd = function(head, n) {
-  const result = new ListNode();
-  let slow = result;
-  let fast = result;
-  slow.next = head;
-
-  for (let i = 0; i <= n; i++) {
-    fast = fast.next;
-  }
-
-  while (fast) {
-    fast = fast.next;
-    slow = slow.next;
-  }
-
-  slow.next = slow.next.next;
-
-  return result.next;
+    const result = new ListNode();
+    let slow = result;
+    let fast = result;
+    slow.next = head;
+    for (let i = 0; i <= n; i++) {
+        fast = fast.next;
+    }
+    while (fast) {
+        fast = fast.next;
+        slow = slow.next;
+    }
+    slow.next = slow.next.next;
+    return result.next;
 };

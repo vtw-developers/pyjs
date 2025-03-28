@@ -8,21 +8,20 @@
  *
  * A subarray is a contiguous non-empty sequence of elements within an array.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var subarraySum = function(nums, k) {
-  const map = new Map([[0, 1]]);
-  let result = 0;
-
-  for (let i = 0, count = 0; i < nums.length; i++) {
-    count += nums[i];
-    result += map.get(count - k) ?? 0;
-    map.set(count, (map.get(count) ?? 0) + 1);
-  }
-
-  return result;
+    const map = new Map([
+        [0, 1]
+    ]);
+    let result = 0;
+    for (let i = 0, count = 0; i < nums.length; i++) {
+        count += nums[i];
+        result += map.get(count - k) ?? 0;
+        map.set(count, (map.get(count) ?? 0) + 1);
+    }
+    return result;
 };

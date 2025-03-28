@@ -15,7 +15,6 @@
  * If the reshape operation with given parameters is possible and legal, output
  * the new reshaped matrix; Otherwise, output the original matrix.
  */
-
 /**
  * @param {number[][]} mat
  * @param {number} r
@@ -23,16 +22,13 @@
  * @return {number[][]}
  */
 var matrixReshape = function(mat, r, c) {
-  const flat = mat.flat();
-  const result = [];
-
-  if (flat.length !== r * c) {
-    return mat;
-  }
-
-  while (flat.length) {
-    result.push(flat.splice(0, c));
-  }
-
-  return result;
+    const flat = mat.flat();
+    const result = [];
+    if (flat.length !== r * c) {
+        return mat;
+    }
+    while (flat.length) {
+        result.push(flat.splice(0, c));
+    }
+    return result;
 };

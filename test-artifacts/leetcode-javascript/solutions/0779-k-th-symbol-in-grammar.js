@@ -11,21 +11,18 @@
  *
  * Given two integer n and k, return the kth (1-indexed) symbol in the nth row of a table of n rows.
  */
-
 /**
  * @param {number} n
  * @param {number} k
  * @return {number}
  */
 var kthGrammar = function(n, k) {
-  if (n === 1) return 0;
-
-  const length = 1 << (n - 1);
-  const mid = length / 2;
-
-  if (k <= mid) {
-    return kthGrammar(n - 1, k);
-  } else {
-    return 1 - kthGrammar(n - 1, k - mid);
-  }
+    if (n === 1) return 0;
+    const length = 1 << (n - 1);
+    const mid = length / 2;
+    if (k <= mid) {
+        return kthGrammar(n - 1, k);
+    } else {
+        return 1 - kthGrammar(n - 1, k - mid);
+    }
 };

@@ -11,11 +11,10 @@
  *
  * Below is a pictorial representation of the state of the grid after minutes 1, 2, and 3.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var coloredCells = function(n) {
-  return 1 + 2 * n * (n - 1);
+    return 1 + 2 * n * (n - 1);
 };

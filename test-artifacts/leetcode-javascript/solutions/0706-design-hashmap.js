@@ -13,42 +13,38 @@
  * - void remove(key) removes the key and its corresponding value if the map
  *   contains the mapping for the key.
  */
-
-
 var MyHashMap = function() {
-  this._keys = [];
-  this._values = [];
+    this._keys = [];
+    this._values = [];
 };
-
 /**
  * @param {number} key
  * @param {number} value
  * @return {void}
  */
 MyHashMap.prototype.put = function(key, value) {
-  if (this._keys[key] === undefined) {
-    this._values.push(value);
-    this._keys[key] = this._values.length - 1;
-  } else {
-    this._values[this._keys[key]] = value;
-  }
+    if (this._keys[key] === undefined) {
+        this._values.push(value);
+        this._keys[key] = this._values.length - 1;
+    } else {
+        this._values[this._keys[key]] = value;
+    }
 };
-
 /**
  * @param {number} key
  * @return {number}
  */
 MyHashMap.prototype.get = function(key) {
-  const offset = this._keys[key];
-  return offset === undefined ? -1 : this._values[offset];
+    const offset = this._keys[key];
+    return offset === undefined ? -1 : this._values[offset];
 }
 /**
  * @param {number} key
  * @return {void}
  */
 MyHashMap.prototype.remove = function(key) {
-  if (this._keys[key] !== undefined) {
-    this._values[this._keys[key]] = undefined;
-    this._keys[key] = undefined;
-  }
+    if (this._keys[key] !== undefined) {
+        this._values[this._keys[key]] = undefined;
+        this._keys[key] = undefined;
+    }
 };

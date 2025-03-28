@@ -12,31 +12,27 @@
  * - void remove(key) Removes the value key in the HashSet. If key
  *   does not exist in the HashSet, do nothing.
  */
-
 var MyHashSet = function() {
-  this._keys = [];
+    this._keys = [];
 };
-
 /**
  * @param {number} key
  * @return {void}
  */
 MyHashSet.prototype.add = function(key) {
-  this._keys[key] = 1;
+    this._keys[key] = 1;
 };
-
 /**
  * @param {number} key
  * @return {void}
  */
 MyHashSet.prototype.remove = function(key) {
-  this._keys[key] = undefined;
+    this._keys[key] = undefined;
 };
-
 /**
  * @param {number} key
  * @return {boolean}
  */
 MyHashSet.prototype.contains = function(key) {
-  return this._keys[key] !== undefined;
+    return this._keys[key] !== undefined;
 };

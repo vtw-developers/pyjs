@@ -17,32 +17,26 @@
  * - int add(int val) Adds a new test score val to the stream and returns the element representing
  *   the kth largest element in the pool of test scores so far.
  */
-
 /**
  * @param {number} k
  * @param {number[]} nums
  */
 var KthLargest = function(k, nums) {
-  this.main = new MinPriorityQueue();
-  this.k = k;
-
-  nums.forEach(n => this.main.enqueue(n));
-
-  while (this.main.size() > k) {
-    this.main.dequeue().element;
-  }
+    this.main = new MinPriorityQueue();
+    this.k = k;
+    nums.forEach(n => this.main.enqueue(n));
+    while (this.main.size() > k) {
+        this.main.dequeue().element;
+    }
 };
-
 /**
  * @param {number} val
  * @return {number}
  */
 KthLargest.prototype.add = function(val) {
-  this.main.enqueue(val);
-
-  if (this.main.size() > this.k) {
-    this.main.dequeue().element;
-  }
-
-  return this.main.front().element;
+    this.main.enqueue(val);
+    if (this.main.size() > this.k) {
+        this.main.dequeue().element;
+    }
+    return this.main.front().element;
 };

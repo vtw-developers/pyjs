@@ -16,23 +16,16 @@
  * Dishes can be prepared in any order and the chef can discard some
  * dishes to get this maximum value.
  */
-
 /**
  * @param {number[]} satisfaction
  * @return {number}
  */
 var maxSatisfaction = function(satisfaction) {
-  let max = 0;
-
-  satisfaction.sort((a, b) => a - b);
-
-  while (satisfaction.length) {
-    max = Math.max(
-      max,
-      satisfaction.reduce((total, n, i) => total + n * (i + 1), 0)
-    );
-    satisfaction.shift();
-  }
-
-  return max;
+    let max = 0;
+    satisfaction.sort((a, b) => a - b);
+    while (satisfaction.length) {
+        max = Math.max(max, satisfaction.reduce((total, n, i) => total + n * (i + 1), 0));
+        satisfaction.shift();
+    }
+    return max;
 };

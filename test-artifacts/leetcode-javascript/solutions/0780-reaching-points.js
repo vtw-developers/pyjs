@@ -8,7 +8,6 @@
  *
  * The allowed operation on some point (x, y) is to convert it to either (x, x + y) or (x + y, y).
  */
-
 /**
  * @param {number} sx
  * @param {number} sy
@@ -17,25 +16,21 @@
  * @return {boolean}
  */
 var reachingPoints = function(sx, sy, tx, ty) {
-  while (tx >= sx && ty >= sy) {
-    if (tx === sx && ty === sy) {
-      return true;
-    }
-
-    if (tx > ty) {
-      // If we can directly reach sx by making proper subtractions
-      if (ty === sy) {
-        return (tx - sx) % ty === 0;
-      }
-      tx %= ty;
-    } else {
-      // If we can directly reach sy by making proper subtractions
-      if (tx === sx) {
-        return (ty - sy) % tx === 0;
-      }
-      ty %= tx;
-    }
-  }
-
-  return false;
+    while (tx >= sx && ty >= sy) {
+        if (tx === sx && ty === sy) {
+            return true;
+        };
+        if (tx > ty) {
+            if (ty === sy) {
+                return (tx - sx) % ty === 0;
+            }
+            tx %= ty;
+        } else {
+            if (tx === sx) {
+                return (ty - sy) % tx === 0;
+            }
+            ty %= tx;
+        };
+    };
+    return false;
 };

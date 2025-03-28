@@ -12,13 +12,10 @@
  * Given an array of strings operations containing a list of operations, return the
  * final value of X after performing all the operations.
  */
-
 /**
  * @param {string[]} operations
  * @return {number}
  */
 var finalValueAfterOperations = function(operations) {
-  return operations
-    .map(n => n.includes('++') ? 1 : -1)
-    .reduce((sum, n) => sum + n, 0);
+    return operations.map(n => n.includes('++') ? 1 : -1).reduce((sum, n) => sum + n, 0);
 };

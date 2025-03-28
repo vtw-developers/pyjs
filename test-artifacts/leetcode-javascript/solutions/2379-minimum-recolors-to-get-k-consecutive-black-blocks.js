@@ -14,26 +14,21 @@
  * Return the minimum number of operations needed such that there is at least one occurrence
  * of k consecutive black blocks.
  */
-
 /**
  * @param {string} blocks
  * @param {number} k
  * @return {number}
  */
 var minimumRecolors = function(blocks, k) {
-  let count = 0;
-
-  for (let i = 0; i < k; i++) {
-    if (blocks[i] === 'W') count++;
-  }
-
-  let result = count;
-
-  for (let i = k; i < blocks.length; i++) {
-    if (blocks[i] === 'W') count++;
-    if (blocks[i - k] === 'W') count--;
-    result = Math.min(result, count);
-  }
-
-  return result;
+    let count = 0;
+    for (let i = 0; i < k; i++) {
+        if (blocks[i] === 'W') count++;
+    }
+    let result = count;
+    for (let i = k; i < blocks.length; i++) {
+        if (blocks[i] === 'W') count++;
+        if (blocks[i - k] === 'W') count--;
+        result = Math.min(result, count);
+    }
+    return result;
 };

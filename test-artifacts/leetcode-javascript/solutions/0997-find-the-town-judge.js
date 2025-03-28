@@ -17,20 +17,17 @@
  * Return the label of the town judge if the town judge exists and can be identified, or return
  * -1 otherwise.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} trust
  * @return {number}
  */
 var findJudge = function(n, trust) {
-  if (!trust.length) {
-    return n === 1 ? n : -1;
-  }
-
-  const map = new Map();
-  trust.forEach(([_, value]) => map.set(value, (map.get(value) || 0 ) + 1));
-
-  const [judge, count] = [...map].sort(([,a], [,b]) => b - a)[0];
-  return count === n - 1  && !trust.find(([key]) => key === judge) ? judge : -1;
+    if (!trust.length) {
+        return n === 1 ? n : -1;
+    }
+    const map = new Map();
+    trust.forEach(([_, value]) => map.set(value, (map.get(value) || 0) + 1));
+    const [judge, count] = [...map].sort(([, a], [, b]) => b - a)[0];
+    return count === n - 1 && !trust.find(([key]) => key === judge) ? judge : -1;
 };

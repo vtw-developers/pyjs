@@ -15,19 +15,18 @@
  * - The input will be generated such that the operation is always possible.
  * - It can be shown that the resulting string will always be unique.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var removeStars = function(s) {
-  const result = [];
-  for (let i = 0; i < s.length; i++) {
-    if (s[i] !== '*') {
-      result.push(s[i]);
-    } else {
-      result.pop();
+    const result = [];
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] !== '*') {
+            result.push(s[i]);
+        } else {
+            result.pop();
+        }
     }
-  }
-  return result.join('');
+    return result.join('');
 };

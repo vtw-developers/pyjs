@@ -19,64 +19,55 @@
  *   calendar successfully without causing a double booking. Otherwise, return false and do
  *   not add the event to the calendar.
  */
-
 class MyCalendar {
-  constructor() {
-    this.events = [];
-  }
-
-  /**
-   * @param {number} startTime
-   * @param {number} endTime
-   * @returns {boolean}
-   */
-  book(startTime, endTime) {
-    const event = [startTime, endTime];
-    const index = this.findInsertIndex(startTime);
-
-    if (this.overlapsPrevious(index - 1, startTime) || this.overlapsNext(index, endTime)) {
-      return false;
+    constructor() {
+        this.events = [];
     }
-
-    this.events.splice(index, 0, event);
-    return true;
-  }
-
-  /**
-   * @param {number} startTime
-   * @returns {number}
-   */
-  findInsertIndex(startTime) {
-    let left = 0;
-    let right = this.events.length;
-
-    while (left < right) {
-      const mid = Math.floor((left + right) / 2);
-      if (this.events[mid][0] > startTime) {
-        right = mid;
-      } else {
-        left = mid + 1;
-      }
+    /**
+     * @param {number} startTime
+     * @param {number} endTime
+     * @returns {boolean}
+     */
+    book(startTime, endTime) {
+        const event = [startTime, endTime];
+        const index = this.findInsertIndex(startTime);
+        if (this.overlapsPrevious(index - 1, startTime) || this.overlapsNext(index, endTime)) {
+            return false;
+        }
+        this.events.splice(index, 0, event);
+        return true;
     }
-
-    return left;
-  }
-
-  /**
-   * @param {number} prevIndex
-   * @param {number} startTime
-   * @returns {boolean}
-   */
-  overlapsPrevious(prevIndex, startTime) {
-    return prevIndex >= 0 && this.events[prevIndex][1] > startTime;
-  }
-
-  /**
-   * @param {number} nextIndex
-   * @param {number} endTime
-   * @returns {boolean}
-   */
-  overlapsNext(nextIndex, endTime) {
-    return nextIndex < this.events.length && this.events[nextIndex][0] < endTime;
-  }
+    /**
+     * @param {number} startTime
+     * @returns {number}
+     */
+    findInsertIndex(startTime) {
+        let left = 0;
+        let right = this.events.length;
+        while (left < right) {
+            const mid = Math.floor((left + right) / 2);
+            if (this.events[mid][0] > startTime) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+    /**
+     * @param {number} prevIndex
+     * @param {number} startTime
+     * @returns {boolean}
+     */
+    overlapsPrevious(prevIndex, startTime) {
+        return prevIndex >= 0 && this.events[prevIndex][1] > startTime;
+    }
+    /**
+     * @param {number} nextIndex
+     * @param {number} endTime
+     * @returns {boolean}
+     */
+    overlapsNext(nextIndex, endTime) {
+        return nextIndex < this.events.length && this.events[nextIndex][0] < endTime;
+    }
 }

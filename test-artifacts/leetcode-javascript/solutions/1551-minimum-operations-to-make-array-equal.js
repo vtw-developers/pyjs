@@ -14,11 +14,10 @@
  * Given an integer n, the length of the array, return the minimum number of operations
  * needed to make all the elements of arr equal.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var minOperations = function(n) {
-  return n * n / 4;
+    return n * n / 4;
 };

@@ -20,32 +20,27 @@
  * Return an integer array ans where ans[i] represents the height described above after
  * dropping the ith square.
  */
-
 /**
  * @param {number[][]} positions
  * @return {number[]}
  */
 var fallingSquares = function(positions) {
-  const map = new Map();
-  const result = [];
-  let max = 0;
-
-  for (const [left, side] of positions) {
-    const right = left + side;
-    let height = 0;
-
-    for (const [start, [i, n]] of map) {
-      const end = start + i;
-      if (right > start && left < end) {
-        height = Math.max(height, n);
-      }
+    const map = new Map();
+    const result = [];
+    let max = 0;
+    for (const [left, side] of positions) {
+        const right = left + side;
+        let height = 0;
+        for (const [start, [i, n]] of map) {
+            const end = start + i;
+            if (right > start && left < end) {
+                height = Math.max(height, n);
+            }
+        }
+        height += side;
+        map.set(left, [side, height]);
+        max = Math.max(max, height);
+        result.push(max);
     }
-
-    height += side;
-    map.set(left, [side, height]);
-    max = Math.max(max, height);
-    result.push(max);
-  }
-
-  return result;
+    return result;
 };

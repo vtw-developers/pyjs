@@ -11,19 +11,14 @@
  * - Each unique word in s maps to exactly one letter in pattern.
  * - No two letters map to the same word, and no two words map to the same letter.
  */
-
 /**
  * @param {string} pattern
  * @param {string} s
  * @return {boolean}
  */
 var wordPattern = function(pattern, s) {
-  const words = s.split(' ');
-  if (pattern.length !== words.length) return false;
-  const map = new Map();
-  return pattern.split('').every((char, i) =>
-    map.has(char)
-      ? map.get(char) === words[i]
-      : !([...map.values()].includes(words[i])) && map.set(char, words[i])
-  );
+    const words = s.split(' ');
+    if (pattern.length !== words.length) return false;
+    const map = new Map();
+    return pattern.split('').every((char, i) => map.has(char) ? map.get(char) === words[i] : !([...map.values()].includes(words[i])) && map.set(char, words[i]));
 };

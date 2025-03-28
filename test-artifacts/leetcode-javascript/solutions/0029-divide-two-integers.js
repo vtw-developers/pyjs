@@ -16,31 +16,28 @@
  * greater than 231 - 1, then return 231 - 1, and if the quotient is strictly less than -231,
  * then return -231.
  */
-
 /**
  * @param {number} dividend
  * @param {number} divisor
  * @return {number}
  */
 var divide = function(dividend, divisor) {
-  if (divisor === -1 && dividend === Math.pow(-2, 31)) {
-    return Math.pow(2, 31) - 1;
-  }
-  const isNegative = dividend > 0 ^ divisor > 0;
-  let result = 0;
-
-  dividend = Math.abs(dividend);
-  subtract(Math.abs(divisor), 1);
-
-  function subtract(n, quotient) {
-    if (dividend > n) {
-      subtract(n * 2, quotient * 2);
+    if (divisor === -1 && dividend === Math.pow(-2, 31)) {
+        return Math.pow(2, 31) - 1;
     }
-    if (dividend >= n) {
-      dividend -= n;
-      result += quotient;
-    }
-  }
+    const isNegative = dividend > 0 ^ divisor > 0;
+    let result = 0;
+    dividend = Math.abs(dividend);
+    subtract(Math.abs(divisor), 1);
 
-  return isNegative ? -result : result;
+    function subtract(n, quotient) {
+        if (dividend > n) {
+            subtract(n * 2, quotient * 2);
+        }
+        if (dividend >= n) {
+            dividend -= n;
+            result += quotient;
+        }
+    }
+    return isNegative ? -result : result;
 };

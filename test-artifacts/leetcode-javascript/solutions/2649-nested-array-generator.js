@@ -12,14 +12,13 @@
  * inorder traversal iterates over each array from left to right, yielding any integers
  * it encounters or applying inorder traversal to any arrays it encounters.
  */
-
 /**
  * @param {Array} input
  * @return {Generator}
  */
-var inorderTraversal = function* (input) {
-  for (const item of input) {
-    if (!Array.isArray(item)) yield item;
-    else yield* inorderTraversal(item);
-  }
+var inorderTraversal = function*(input) {
+    for (const item of input) {
+        if (!Array.isArray(item)) yield item;
+        else yield* inorderTraversal(item);
+    }
 };

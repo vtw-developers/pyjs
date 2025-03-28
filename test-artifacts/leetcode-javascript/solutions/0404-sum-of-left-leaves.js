@@ -7,7 +7,6 @@
  *
  * A leaf is a node with no children. A left leaf is a leaf that is the left child of another node.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,7 +21,7 @@
  * @return {number}
  */
 var sumOfLeftLeaves = function(root, include) {
-  if (!root) return 0;
-  if (!root.left && !root.right && include) return root.val;
-  return sumOfLeftLeaves(root.left, true) + sumOfLeftLeaves(root.right);
+    if (!root) return 0;
+    if (!root.left && !root.right && include) return root.val;
+    return sumOfLeftLeaves(root.left, true) + sumOfLeftLeaves(root.right);
 };

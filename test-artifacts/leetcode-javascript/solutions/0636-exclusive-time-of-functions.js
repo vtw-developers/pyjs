@@ -25,32 +25,28 @@
  * Return the exclusive time of each function in an array, where the value at the ith index
  * represents the exclusive time for the function with ID i.
  */
-
 /**
  * @param {number} n
  * @param {string[]} logs
  * @return {number[]}
  */
 var exclusiveTime = function(n, logs) {
-  const stack = [];
-  const result = new Array(n).fill(0);
-  let previousTime = 0;
-
-  for (const log of logs) {
-    const [id, action, time] = log.split(':');
-    const currentTime = +time;
-
-    if (action === 'start') {
-      if (stack.length) {
-        result[stack[stack.length - 1]] += currentTime - previousTime;
-      }
-      stack.push(+id);
-      previousTime = currentTime;
-    } else {
-      result[stack.pop()] += currentTime - previousTime + 1;
-      previousTime = currentTime + 1;
+    const stack = [];
+    const result = new Array(n).fill(0);
+    let previousTime = 0;
+    for (const log of logs) {
+        const [id, action, time] = log.split(':');
+        const currentTime = +time;
+        if (action === 'start') {
+            if (stack.length) {
+                result[stack[stack.length - 1]] += currentTime - previousTime;
+            }
+            stack.push(+id);
+            previousTime = currentTime;
+        } else {
+            result[stack.pop()] += currentTime - previousTime + 1;
+            previousTime = currentTime + 1;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

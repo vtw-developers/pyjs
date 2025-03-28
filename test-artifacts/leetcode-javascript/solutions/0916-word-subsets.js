@@ -13,19 +13,18 @@
  *
  * Return an array of all the universal strings in words1. You may return the answer in any order.
  */
-
 /**
  * @param {string[]} words1
  * @param {string[]} words2
  * @return {string[]}
  */
 var wordSubsets = function(words1, words2) {
-  const count = (string, char) => string.split(char).length - 1;
-  const subset = Array.from(words2.reduce((map, b) => {
-    b.split('').forEach(char => {
-      map.set(char, (map.get(char) || 0) > count(b, char) ? map.get(char) : count(b, char));
-    });
-    return map;
-  }, new Map()));
-  return words1.filter(a => subset.every(match => count(a, match[0]) >= match[1]));
+    const count = (string, char) => string.split(char).length - 1;
+    const subset = Array.from(words2.reduce((map, b) => {
+        b.split('').forEach(char => {
+            map.set(char, (map.get(char) || 0) > count(b, char) ? map.get(char) : count(b, char));
+        });
+        return map;
+    }, new Map()));
+    return words1.filter(a => subset.every(match => count(a, match[0]) >= match[1]));
 };

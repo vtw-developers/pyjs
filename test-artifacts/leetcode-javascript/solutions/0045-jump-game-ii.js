@@ -15,23 +15,20 @@
  * Return the minimum number of jumps to reach nums[n - 1].
  * The test cases are generated such that you can reach nums[n - 1].
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var jump = function(nums) {
-  let result = 0;
-  let max = 0;
-  let previous = 0;
-
-  for (let index = 0; index < nums.length - 1; index++) {
-    max = Math.max(max, index + nums[index]);
-    if (index === previous) {
-      result++;
-      previous = max;
+    let result = 0;
+    let max = 0;
+    let previous = 0;
+    for (let index = 0; index < nums.length - 1; index++) {
+        max = Math.max(max, index + nums[index]);
+        if (index === previous) {
+            result++;
+            previous = max;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

@@ -8,7 +8,6 @@
  *   to the next node in the list and the left child pointer is always null.
  * - The "linked list" should be in the same order as a pre-order traversal of the binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,18 +21,16 @@
  * @return {void} Do not return anything, modify root in-place instead.
  */
 var flatten = function(root) {
-  if (root === null) return;
-
-  if (root.left) {
-    let previous = root.left;
-    while (previous.right) {
-      previous = previous.right;
+    if (root === null) return;
+    if (root.left) {
+        let previous = root.left;
+        while (previous.right) {
+            previous = previous.right;
+        }
+        const rightNode = root.right;
+        root.right = root.left;
+        previous.right = rightNode;
+        root.left = null;
     }
-    const rightNode = root.right;
-    root.right = root.left;
-    previous.right = rightNode;
-    root.left = null;
-  }
-
-  flatten(root.right);
+    flatten(root.right);
 };

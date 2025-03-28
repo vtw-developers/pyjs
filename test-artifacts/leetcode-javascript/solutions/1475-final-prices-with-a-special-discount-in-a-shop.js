@@ -12,11 +12,10 @@
  * Return an array where the ith element is the final price you will pay for the ith
  * item of the shop considering the special discount.
  */
-
 /**
  * @param {number[]} prices
  * @return {number[]}
  */
 var finalPrices = function(prices) {
-  return prices.map((n, i) => n - (prices.slice(i + 1).find(v => v <= n) || 0));
+    return prices.map((n, i) => n - (prices.slice(i + 1).find(v => v <= n) || 0));
 };

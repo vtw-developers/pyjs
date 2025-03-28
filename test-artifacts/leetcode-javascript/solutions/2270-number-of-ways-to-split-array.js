@@ -12,21 +12,18 @@
  *
  * Return the number of valid splits in nums.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var waysToSplitArray = function(nums) {
-  const total = nums.reduce((a, b) => a + b);
-  let result = 0;
-
-  for (let i = 0, sum = 0; i < nums.length - 1; i++) {
-    sum += nums[i];
-    if (sum >= total - sum) {
-      result++;
+    const total = nums.reduce((a, b) => a + b);
+    let result = 0;
+    for (let i = 0, sum = 0; i < nums.length - 1; i++) {
+        sum += nums[i];
+        if (sum >= total - sum) {
+            result++;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

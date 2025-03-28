@@ -9,12 +9,11 @@
  * as every other number in the array. If it is, return the index of the largest
  * element, or return -1 otherwise.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var dominantIndex = function(nums) {
-  const max = Math.max(...nums);
-  return nums.find(n => n !== max && n > max / 2) ? -1 : nums.indexOf(max);
+    const max = Math.max(...nums);
+    return nums.find(n => n !== max && n > max / 2) ? -1 : nums.indexOf(max);
 };

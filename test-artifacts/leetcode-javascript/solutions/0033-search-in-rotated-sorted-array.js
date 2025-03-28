@@ -15,30 +15,24 @@
  *
  * You must write an algorithm with O(log n) runtime complexity.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} target
  * @return {number}
  */
 var search = function(nums, target) {
-  let start = 0;
-  let end = nums.length;
-
-  while (start < end) {
-    const i = Math.floor((start + end) / 2);
-    const middle = nums[i] < nums[0] === target < nums[0]
-      ? nums[i]
-      : target < nums[0] ? -Infinity : Infinity;
-
-    if (middle < target) {
-      start = i + 1;
-    } else if (middle > target) {
-      end = i;
-    } else {
-      return i;
+    let start = 0;
+    let end = nums.length;
+    while (start < end) {
+        const i = Math.floor((start + end) / 2);
+        const middle = nums[i] < nums[0] === target < nums[0] ? nums[i] : target < nums[0] ? -Infinity : Infinity;
+        if (middle < target) {
+            start = i + 1;
+        } else if (middle > target) {
+            end = i;
+        } else {
+            return i;
+        }
     }
-  }
-
-  return -1;
+    return -1;
 };

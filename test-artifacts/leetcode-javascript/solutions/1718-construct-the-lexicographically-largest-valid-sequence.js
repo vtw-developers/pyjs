@@ -20,45 +20,42 @@
  * b. For example, [0,1,9,0] is lexicographically larger than [0,1,5,6] because the first position
  * they differ is at the third number, and 9 is greater than 5.
  */
-
 /**
  * @param {number} n
  * @return {number[]}
  */
 var constructDistancedSequence = function(n) {
-  const result = new Array(2 * n - 1).fill(0);
-  const group = new Array(n + 1).fill(false);
+    const result = new Array(2 * n - 1).fill(0);
+    const group = new Array(n + 1).fill(false);
+    backtrack(0);
 
-  backtrack(0);
-
-  function backtrack(index) {
-    if (index === 2 * n - 1) {
-      return true;
-    } else if (result[index] !== 0) {
-      return backtrack(index + 1);
+    function backtrack(index) {
+        if (index === 2 * n - 1) {
+            return true;
+        } else if (result[index] !== 0) {
+            return backtrack(index + 1);
+        }
+        for (let num = n; num >= 1; num--) {
+            if (group[num]) {
+                continue;
+            }
+            group[num] = true;
+            result[index] = num;
+            if (num === 1 || (index + num < 2 * n - 1 && result[index + num] === 0)) {
+                if (num > 1) {
+                    result[index + num] = num;
+                }
+                if (backtrack(index + 1)) {
+                    return true;
+                }
+                if (num > 1) {
+                    result[index + num] = 0;
+                }
+            }
+            result[index] = 0;
+            group[num] = false;
+        }
+        return false;
     }
-    for (let num = n; num >= 1; num--) {
-      if (group[num]) {
-        continue;
-      }
-      group[num] = true;
-      result[index] = num;
-      if (num === 1 || (index + num < 2 * n - 1 && result[index + num] === 0)) {
-        if (num > 1) {
-          result[index + num] = num;
-        }
-        if (backtrack(index + 1)) {
-          return true;
-        }
-        if (num > 1) {
-          result[index + num] = 0;
-        }
-      }
-      result[index] = 0;
-      group[num] = false;
-    }
-    return false;
-  }
-
-  return result;
+    return result;
 };

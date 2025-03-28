@@ -16,7 +16,6 @@
  * Given the integer k, return the least amount of money needed to form a paid group satisfying
  * the above conditions. Answers within 10-5 of the actual answer will be accepted.
  */
-
 /**
  * @param {number[]} quality
  * @param {number[]} wage
@@ -24,25 +23,22 @@
  * @return {number}
  */
 var mincostToHireWorkers = function(quality, wage, k) {
-  const workers = quality.map((q, i) => ({ ratio: wage[i] / q, quality: q }))
-    .sort((a, b) => a.ratio - b.ratio);
-
-  let result = Infinity;
-  let qualitySum = 0;
-  const maxHeap = new MaxPriorityQueue();
-
-  for (const worker of workers) {
-    maxHeap.enqueue(worker.quality);
-    qualitySum += worker.quality;
-
-    if (maxHeap.size() > k) {
-      qualitySum -= maxHeap.dequeue();
+    const workers = quality.map((q, i) => ({
+        ratio: wage[i] / q,
+        quality: q
+    })).sort((a, b) => a.ratio - b.ratio);
+    let result = Infinity;
+    let qualitySum = 0;
+    const maxHeap = new MaxPriorityQueue();
+    for (const worker of workers) {
+        maxHeap.enqueue(worker.quality);
+        qualitySum += worker.quality;
+        if (maxHeap.size() > k) {
+            qualitySum -= maxHeap.dequeue();
+        }
+        if (maxHeap.size() === k) {
+            result = Math.min(result, qualitySum * worker.ratio);
+        }
     }
-
-    if (maxHeap.size() === k) {
-      result = Math.min(result, qualitySum * worker.ratio);
-    }
-  }
-
-  return result;
+    return result;
 };

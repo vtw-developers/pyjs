@@ -18,7 +18,6 @@
  * element (red) is removed from the input data and inserted in-place into the sorted
  * list with each iteration.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -31,21 +30,18 @@
  * @return {ListNode}
  */
 var insertionSortList = function(head) {
-  const result = new ListNode(0);
-
-  while (head) {
-    const tail = head;
-    let current = result;
-    head = head.next;
-
-    while (current) {
-      if (!current.next || tail.val <= current.next.val) {
-        [current.next, tail.next] = [tail, current.next];
-        break;
-      }
-      current = current.next;
+    const result = new ListNode(0);
+    while (head) {
+        const tail = head;
+        let current = result;
+        head = head.next;
+        while (current) {
+            if (!current.next || tail.val <= current.next.val) {
+                [current.next, tail.next] = [tail, current.next];
+                break;
+            }
+            current = current.next;
+        }
     }
-  }
-
-  return result.next;
+    return result.next;
 };

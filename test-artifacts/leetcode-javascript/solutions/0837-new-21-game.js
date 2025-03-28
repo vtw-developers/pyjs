@@ -15,7 +15,6 @@
  *
  * Answers within 10-5 of the actual answer are considered accepted.
  */
-
 /**
  * @param {number} n
  * @param {number} k
@@ -23,26 +22,22 @@
  * @return {number}
  */
 var new21Game = function(n, k, maxPts) {
-  if (k === 0 || n >= k + maxPts - 1) return 1.0;
-
-  const dp = new Array(n + 1).fill(0);
-  dp[0] = 1.0;
-
-  let sum = 1.0;
-  for (let i = 1; i <= n; i++) {
-    dp[i] = sum / maxPts;
-    if (i < k) {
-      sum += dp[i];
+    if (k === 0 || n >= k + maxPts - 1) return 1.0;
+    const dp = new Array(n + 1).fill(0);
+    dp[0] = 1.0;
+    let sum = 1.0;
+    for (let i = 1; i <= n; i++) {
+        dp[i] = sum / maxPts;
+        if (i < k) {
+            sum += dp[i];
+        }
+        if (i >= maxPts) {
+            sum -= dp[i - maxPts];
+        }
     }
-    if (i >= maxPts) {
-      sum -= dp[i - maxPts];
+    let result = 0;
+    for (let i = k; i <= n; i++) {
+        result += dp[i];
     }
-  }
-
-  let result = 0;
-  for (let i = k; i <= n; i++) {
-    result += dp[i];
-  }
-
-  return result;
+    return result;
 };

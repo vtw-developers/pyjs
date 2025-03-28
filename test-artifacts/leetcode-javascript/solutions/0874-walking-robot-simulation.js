@@ -26,38 +26,39 @@
  * - South means -Y direction.
  * - West means -X direction.
  */
-
 /**
  * @param {number[]} commands
  * @param {number[][]} obstacles
  * @return {number}
  */
 var robotSim = function(commands, obstacles) {
-  const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-  const obstacleSet = new Set(obstacles.map(([x, y]) => `${x},${y}`));
-
-  let x = 0;
-  let y = 0;
-  let directionIndex = 0;
-  let result = 0;
-
-  for (const command of commands) {
-    if (command === -1) {
-      directionIndex = (directionIndex + 1) % 4;
-    } else if (command === -2) {
-      directionIndex = (directionIndex + 3) % 4;
-    } else {
-      const [dx, dy] = directions[directionIndex];
-      for (let step = 0; step < command; step++) {
-        const nextX = x + dx;
-        const nextY = y + dy;
-        if (obstacleSet.has(`${nextX},${nextY}`)) break;
-        x = nextX;
-        y = nextY;
-        result = Math.max(result, x * x + y * y);
-      }
+    const directions = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0]
+    ];
+    const obstacleSet = new Set(obstacles.map(([x, y]) => `${x},${y}`));
+    let x = 0;
+    let y = 0;
+    let directionIndex = 0;
+    let result = 0;
+    for (const command of commands) {
+        if (command === -1) {
+            directionIndex = (directionIndex + 1) % 4;
+        } else if (command === -2) {
+            directionIndex = (directionIndex + 3) % 4;
+        } else {
+            const [dx, dy] = directions[directionIndex];
+            for (let step = 0; step < command; step++) {
+                const nextX = x + dx;
+                const nextY = y + dy;
+                if (obstacleSet.has(`${nextX},${nextY}`)) break;
+                x = nextX;
+                y = nextY;
+                result = Math.max(result, x * x + y * y);
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 };

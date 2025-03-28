@@ -16,30 +16,25 @@
  * For example, the array [2,10,3] is lexicographically smaller than the array [10,2,3]
  * because they differ at index 0 and 2 < 10.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} limit
  * @return {number[]}
  */
 var lexicographicallySmallestArray = function(nums, limit) {
-  const keys = new Array(nums.length).fill(0).map((_, i) => i);
-  keys.sort((i, j) => nums[i] - nums[j]);
-
-  const result = new Array(nums.length).fill(0);
-  for (let i = 0; i < nums.length;) {
-    let j = i + 1;
-
-    while (j < nums.length && nums[keys[j]] - nums[keys[j - 1]] <= limit) {
-      j++;
+    const keys = new Array(nums.length).fill(0).map((_, i) => i);
+    keys.sort((i, j) => nums[i] - nums[j]);
+    const result = new Array(nums.length).fill(0);
+    for (let i = 0; i < nums.length;) {
+        let j = i + 1;
+        while (j < nums.length && nums[keys[j]] - nums[keys[j - 1]] <= limit) {
+            j++;
+        }
+        const keyRange = keys.slice(i, j).sort((a, b) => a - b);
+        for (let k = 0; k < keyRange.length; k++) {
+            result[keyRange[k]] = nums[keys[i + k]];
+        }
+        i = j;
     }
-
-    const keyRange = keys.slice(i, j).sort((a, b) => a - b);
-    for (let k = 0; k < keyRange.length; k++) {
-      result[keyRange[k]] = nums[keys[i + k]];
-    }
-    i = j;
-  }
-
-  return result;
+    return result;
 };

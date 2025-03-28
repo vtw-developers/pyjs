@@ -23,49 +23,39 @@
  *
  * Return the number of query strings that are stretchy.
  */
-
 /**
  * @param {string} s
  * @param {string[]} words
  * @return {number}
  */
 var expressiveWords = function(s, words) {
-  let result = 0;
-
-  for (const word of words) {
-    if (verify(s, word)) {
-      result++;
+    let result = 0;
+    for (const word of words) {
+        if (verify(s, word)) {
+            result++;
+        }
     }
-  }
-
-  return result;
+    return result;
 };
 
 function verify(s, word) {
-  let i = 0;
-  let j = 0;
-
-  while (i < s.length && j < word.length) {
-    if (s[i] !== word[j]) return false;
-
-    const char = s[i];
-    let sCount = 0;
-
-    while (i < s.length && s[i] === char) {
-      sCount++;
-      i++;
+    let i = 0;
+    let j = 0;
+    while (i < s.length && j < word.length) {
+        if (s[i] !== word[j]) return false;
+        const char = s[i];
+        let sCount = 0;
+        while (i < s.length && s[i] === char) {
+            sCount++;
+            i++;
+        }
+        let wordCount = 0;
+        while (j < word.length && word[j] === char) {
+            wordCount++;
+            j++;
+        }
+        if (wordCount > sCount) return false;
+        if (sCount > wordCount && sCount < 3) return false;
     }
-
-    let wordCount = 0;
-
-    while (j < word.length && word[j] === char) {
-      wordCount++;
-      j++;
-    }
-
-    if (wordCount > sCount) return false;
-    if (sCount > wordCount && sCount < 3) return false;
-  }
-
-  return i === s.length && j === word.length;
+    return i === s.length && j === word.length;
 }

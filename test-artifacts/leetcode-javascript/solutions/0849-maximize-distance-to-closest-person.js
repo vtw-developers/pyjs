@@ -13,29 +13,25 @@
  *
  * Return that maximum distance to the closest person.
  */
-
 /**
  * @param {number[]} seats
  * @return {number}
  */
 var maxDistToClosest = function(seats) {
-  let lastOccupied = -1;
-  let result = 0;
-
-  for (let i = 0; i < seats.length; i++) {
-    if (seats[i] === 1) {
-      if (lastOccupied === -1) {
-        result = i;
-      } else {
-        result = Math.max(result, Math.floor((i - lastOccupied) / 2));
-      }
-      lastOccupied = i;
+    let lastOccupied = -1;
+    let result = 0;
+    for (let i = 0; i < seats.length; i++) {
+        if (seats[i] === 1) {
+            if (lastOccupied === -1) {
+                result = i;
+            } else {
+                result = Math.max(result, Math.floor((i - lastOccupied) / 2));
+            }
+            lastOccupied = i;
+        }
     }
-  }
-
-  if (lastOccupied !== seats.length - 1) {
-    result = Math.max(result, seats.length - 1 - lastOccupied);
-  }
-
-  return result;
+    if (lastOccupied !== seats.length - 1) {
+        result = Math.max(result, seats.length - 1 - lastOccupied);
+    }
+    return result;
 };

@@ -8,7 +8,6 @@
  *
  * Initially, all next pointers are set to NULL.
  */
-
 /**
  * // Definition for a _Node.
  * function _Node(val, left, right, next) {
@@ -18,32 +17,30 @@
  *    this.next = next === undefined ? null : next;
  * };
  */
-
 /**
  * @param {_Node} root
  * @return {_Node}
  */
 var connect = function(root) {
-  if (root === null) return root;
-
-  const depth = 0;
-  const stack = [[root, depth]];
-
-  while (stack.length) {
-    const [node, depth] = stack.shift();
-    if (stack.length) {
-      const [nextNode, nextDepth] = stack[0];
-      if (depth === nextDepth) {
-        node.next = nextNode;
-      }
+    if (root === null) return root;
+    const depth = 0;
+    const stack = [
+        [root, depth]
+    ];
+    while (stack.length) {
+        const [node, depth] = stack.shift();
+        if (stack.length) {
+            const [nextNode, nextDepth] = stack[0];
+            if (depth === nextDepth) {
+                node.next = nextNode;
+            }
+        }
+        if (node.left) {
+            stack.push([node.left, depth + 1]);
+        }
+        if (node.right) {
+            stack.push([node.right, depth + 1]);
+        }
     }
-    if (node.left) {
-      stack.push([node.left, depth + 1]);
-    }
-    if (node.right) {
-      stack.push([node.right, depth + 1]);
-    }
-  }
-
-  return root;
+    return root;
 };

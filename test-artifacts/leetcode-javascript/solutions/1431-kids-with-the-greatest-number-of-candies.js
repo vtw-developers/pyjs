@@ -13,13 +13,12 @@
  *
  * Note that multiple kids can have the greatest number of candies.
  */
-
 /**
  * @param {number[]} candies
  * @param {number} extraCandies
  * @return {boolean[]}
  */
 var kidsWithCandies = function(candies, extraCandies) {
-  const max = Math.max(...candies);
-  return candies.map(count => count + extraCandies >= max);
+    const max = Math.max(...candies);
+    return candies.map(count => count + extraCandies >= max);
 };

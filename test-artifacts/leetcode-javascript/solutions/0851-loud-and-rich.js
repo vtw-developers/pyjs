@@ -15,39 +15,32 @@
  * the person y with the smallest value of quiet[y]) among all people who definitely have equal
  * to or more money than the person x.
  */
-
 /**
  * @param {number[][]} richer
  * @param {number[]} quiet
  * @return {number[]}
  */
 var loudAndRich = function(richer, quiet) {
-  const graph = new Array(quiet.length).fill().map(() => []);
-  const result = new Array(quiet.length).fill(-1);
-
-  for (const [a, b] of richer) {
-    graph[b].push(a);
-  }
-
-  function dfs(person) {
-    if (result[person] !== -1) return result[person];
-
-    let quietestPerson = person;
-
-    for (const richerPerson of graph[person]) {
-      const candidate = dfs(richerPerson);
-      if (quiet[candidate] < quiet[quietestPerson]) {
-        quietestPerson = candidate;
-      }
+    const graph = new Array(quiet.length).fill().map(() => []);
+    const result = new Array(quiet.length).fill(-1);
+    for (const [a, b] of richer) {
+        graph[b].push(a);
     }
 
-    result[person] = quietestPerson;
-    return quietestPerson;
-  }
-
-  for (let i = 0; i < quiet.length; i++) {
-    dfs(i);
-  }
-
-  return result;
+    function dfs(person) {
+        if (result[person] !== -1) return result[person];
+        let quietestPerson = person;
+        for (const richerPerson of graph[person]) {
+            const candidate = dfs(richerPerson);
+            if (quiet[candidate] < quiet[quietestPerson]) {
+                quietestPerson = candidate;
+            }
+        }
+        result[person] = quietestPerson;
+        return quietestPerson;
+    }
+    for (let i = 0; i < quiet.length; i++) {
+        dfs(i);
+    }
+    return result;
 };

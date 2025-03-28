@@ -9,11 +9,10 @@
  *
  * Return the maximum number of words that appear in a single sentence.
  */
-
 /**
  * @param {string[]} sentences
  * @return {number}
  */
 var mostWordsFound = function(sentences) {
-  return sentences.reduce((max, str) => Math.max(max, str.split(/\s+/).length), 0);
+    return sentences.reduce((max, str) => Math.max(max, str.split(/\s+/).length), 0);
 };

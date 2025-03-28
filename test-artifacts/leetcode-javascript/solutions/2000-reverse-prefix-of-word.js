@@ -10,13 +10,12 @@
  * For example, if word = "abcdefd" and ch = "d", then you should reverse the segment
  * that starts at 0 and ends at 3 (inclusive). The resulting string will be "dcbaefd".
  */
-
 /**
  * @param {string} word
  * @param {character} ch
  * @return {string}
  */
 var reversePrefix = function(word, ch) {
-  const index = word.indexOf(ch) + 1;
-  return word.slice(0, index).split('').reverse().join('') + word.slice(index);
+    const index = word.indexOf(ch) + 1;
+    return word.slice(0, index).split('').reverse().join('') + word.slice(index);
 };

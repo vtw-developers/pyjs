@@ -13,19 +13,16 @@
  *
  * Please solve it without using lodash's _.chunk function.
  */
-
 /**
  * @param {Array} arr
  * @param {number} size
  * @return {Array}
  */
 var chunk = function(arr, size) {
-  var result = [];
-
-  for (let index = 0; index < arr.length;) {
-    result.push(arr.slice(index, index + size));
-    index += size;
-  }
-
-  return result;
+    var result = [];
+    for (let index = 0; index < arr.length;) {
+        result.push(arr.slice(index, index + size));
+        index += size;
+    }
+    return result;
 };

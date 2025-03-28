@@ -18,17 +18,16 @@
  * Do not allocate extra space for another array. You must do this by modifying
  * the input array in-place with O(1) extra memory.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var removeDuplicates = function(nums) {
-  let i = 0;
-  for (let j = 0; j < nums.length; j++) {
-    if (nums[i] !== nums[j]) {
-      nums[++i] = nums[j];
+    let i = 0;
+    for (let j = 0; j < nums.length; j++) {
+        if (nums[i] !== nums[j]) {
+            nums[++i] = nums[j];
+        }
     }
-  }
-  return ++i;
+    return ++i;
 };

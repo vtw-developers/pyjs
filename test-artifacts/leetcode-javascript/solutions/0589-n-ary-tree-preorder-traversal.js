@@ -8,7 +8,6 @@
  * Nary-Tree input serialization is represented in their level order traversal. Each group
  * of children is separated by the null value (See examples)
  */
-
 /**
  * // Definition for a _Node.
  * function _Node(val, children) {
@@ -16,11 +15,10 @@
  *    this.children = children;
  * };
  */
-
 /**
  * @param {_Node|null} root
  * @return {number[]}
  */
 var preorder = function(root) {
-  return !root ? [] : [root.val, ...root.children.flatMap(n => preorder(n))];
+    return !root ? [] : [root.val, ...root.children.flatMap(n => preorder(n))];
 };

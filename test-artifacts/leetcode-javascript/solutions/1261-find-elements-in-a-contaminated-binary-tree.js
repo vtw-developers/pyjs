@@ -20,7 +20,6 @@
  * - bool find(int target) Returns true if the target value exists in the recovered
  *   binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -33,25 +32,22 @@
  * @param {TreeNode} root
  */
 var FindElements = function(root) {
-  this.values = new Set();
-  root.val = 0;
-
-  const traverse = node => {
-    if (!node) return;
-    this.values.add(node.val);
-    if (node.left) node.left.val = 2 * node.val + 1;
-    if (node.right) node.right.val = 2 * node.val + 2;
-    traverse(node.left);
-    traverse(node.right);
-  };
-
-  traverse(root);
+    this.values = new Set();
+    root.val = 0;
+    const traverse = node => {
+        if (!node) return;
+        this.values.add(node.val);
+        if (node.left) node.left.val = 2 * node.val + 1;
+        if (node.right) node.right.val = 2 * node.val + 2;
+        traverse(node.left);
+        traverse(node.right);
+    };
+    traverse(root);
 };
-
 /**
  * @param {number} target
  * @return {boolean}
  */
 FindElements.prototype.find = function(target) {
-  return this.values.has(target);
+    return this.values.has(target);
 };

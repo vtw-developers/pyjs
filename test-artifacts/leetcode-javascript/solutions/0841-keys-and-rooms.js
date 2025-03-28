@@ -14,15 +14,14 @@
  * Given an array rooms where rooms[i] is the set of keys that you can obtain if you visited
  * room i, return true if you can visit all the rooms, or false otherwise.
  */
-
 /**
  * @param {number[][]} rooms
  * @return {boolean}
  */
 var canVisitAllRooms = function(rooms) {
-  const set = new Set([0]);
-  for (const key of set) {
-    rooms[key].forEach(value => set.add(value));
-  }
-  return set.size === rooms.length;
+    const set = new Set([0]);
+    for (const key of set) {
+        rooms[key].forEach(value => set.add(value));
+    }
+    return set.size === rooms.length;
 };

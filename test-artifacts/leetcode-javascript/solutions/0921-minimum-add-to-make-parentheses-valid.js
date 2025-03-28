@@ -15,24 +15,21 @@
  *
  * Return the minimum number of moves required to make s valid.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var minAddToMakeValid = function(s) {
-  let openCount = 0;
-  let unmatchedClose = 0;
-
-  for (const character of s) {
-    if (character === '(') {
-      openCount++;
-    } else if (openCount > 0) {
-      openCount--;
-    } else {
-      unmatchedClose++;
+    let openCount = 0;
+    let unmatchedClose = 0;
+    for (const character of s) {
+        if (character === '(') {
+            openCount++;
+        } else if (openCount > 0) {
+            openCount--;
+        } else {
+            unmatchedClose++;
+        }
     }
-  }
-
-  return openCount + unmatchedClose;
+    return openCount + unmatchedClose;
 };

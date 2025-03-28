@@ -14,32 +14,29 @@
  * - bool search(String searchWord) Returns true if you can change exactly one character in
  *   searchWord to match any string in the data structure, otherwise returns false.
  */
-
 var MagicDictionary = function() {
-  this.words = new Set();
+    this.words = new Set();
 };
-
 /**
  * @param {string[]} dictionary
  * @return {void}
  */
 MagicDictionary.prototype.buildDict = function(dictionary) {
-  this.words = new Set(dictionary);
+    this.words = new Set(dictionary);
 };
-
 /**
  * @param {string} searchWord
  * @return {boolean}
  */
 MagicDictionary.prototype.search = function(searchWord) {
-  const words = searchWord.split('');
-  return Array.from(this.words).some(word => {
-    if (word.length !== searchWord.length) return false;
-    let diff = 0;
-    for (let i = 0; i < word.length; i++) {
-      if (word[i] !== words[i]) diff++;
-      if (diff > 1) return false;
-    }
-    return diff === 1;
-  });
+    const words = searchWord.split('');
+    return Array.from(this.words).some(word => {
+        if (word.length !== searchWord.length) return false;
+        let diff = 0;
+        for (let i = 0; i < word.length; i++) {
+            if (word[i] !== words[i]) diff++;
+            if (diff > 1) return false;
+        }
+        return diff === 1;
+    });
 };

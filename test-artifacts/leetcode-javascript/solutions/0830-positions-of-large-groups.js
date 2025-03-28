@@ -14,23 +14,20 @@
  *
  * Return the intervals of every large group sorted in increasing order by start index.
  */
-
 /**
  * @param {string} s
  * @return {number[][]}
  */
 var largeGroupPositions = function(s) {
-  const result = [];
-  let start = 0;
-
-  for (let i = 1; i <= s.length; i++) {
-    if (s.length === i || s[i] !== s[start]) {
-      if (i - start >= 3) {
-        result.push([start, i - 1]);
-      }
-      start = i;
+    const result = [];
+    let start = 0;
+    for (let i = 1; i <= s.length; i++) {
+        if (s.length === i || s[i] !== s[start]) {
+            if (i - start >= 3) {
+                result.push([start, i - 1]);
+            }
+            start = i;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

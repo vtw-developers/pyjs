@@ -24,17 +24,16 @@
  *
  * Return the simplified canonical path.
  */
-
 /**
  * @param {string} path
  * @return {string}
  */
 var simplifyPath = function(path) {
-  const stack = [];
-  for (const segment of path.split('/')) {
-    if (segment === '.' || segment === '') continue;
-    if (segment === '..') stack.pop();
-    else stack.push(segment);
-  }
-  return `/${stack.join('/')}`;
+    const stack = [];
+    for (const segment of path.split('/')) {
+        if (segment === '.' || segment === '') continue;
+        if (segment === '..') stack.pop();
+        else stack.push(segment);
+    }
+    return `/${stack.join('/')}`;
 };

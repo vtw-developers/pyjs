@@ -23,11 +23,10 @@
  *
  * The digits are defined as one or more digits.
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var isNumber = function(s) {
-  return s.trim().length && !isNaN(s.trim()) && !s.includes('Infinity');
+    return s.trim().length && !isNaN(s.trim()) && !s.includes('Infinity');
 };

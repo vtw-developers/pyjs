@@ -13,15 +13,14 @@
  *   exactly one bit.
  * Given an integer n, return any valid n-bit gray code sequence.
  */
-
 /**
  * @param {number} n
  * @return {number[]}
  */
 var grayCode = function(n) {
-  const result = [0];
-  for (let i = 0; i < n; i++) {
-    result.push(...result.map((v) => v | 1 << i).reverse());
-  }
-  return result;
+    const result = [0];
+    for (let i = 0; i < n; i++) {
+        result.push(...result.map((v) => v | 1 << i).reverse());
+    }
+    return result;
 };

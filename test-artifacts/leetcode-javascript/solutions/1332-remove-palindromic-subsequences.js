@@ -13,11 +13,10 @@
  * A string is called palindrome if is one that reads the same backward
  * as well as forward.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var removePalindromeSub = function(s) {
-  return s.length === 0 ? 0 : (s.split('').reverse().join('') === s ? 1 : 2);
+    return s.length === 0 ? 0 : (s.split('').reverse().join('') === s ? 1 : 2);
 };

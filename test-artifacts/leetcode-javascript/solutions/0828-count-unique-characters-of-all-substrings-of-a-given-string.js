@@ -13,29 +13,24 @@
  * Notice that some substrings can be repeated so in this case you have to count the repeated
  * ones too.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var uniqueLetterString = function(s) {
-  const n = s.length;
-  const lastPositions = {};
-  let result = 0;
-
-  for (let i = 0; i < n; i++) {
-    const char = s[i];
-    if (!lastPositions[char]) lastPositions[char] = [-1, -1];
-
-    const [prevPrev, prev] = lastPositions[char];
-    result += (i - prev) * (prev - prevPrev);
-    lastPositions[char] = [prev, i];
-  }
-
-  for (const char of Object.keys(lastPositions)) {
-    const [prev, pos] = lastPositions[char];
-    if (pos >= 0) result += (n - pos) * (pos - prev);
-  }
-
-  return result;
+    const n = s.length;
+    const lastPositions = {};
+    let result = 0;
+    for (let i = 0; i < n; i++) {
+        const char = s[i];
+        if (!lastPositions[char]) lastPositions[char] = [-1, -1];
+        const [prevPrev, prev] = lastPositions[char];
+        result += (i - prev) * (prev - prevPrev);
+        lastPositions[char] = [prev, i];
+    }
+    for (const char of Object.keys(lastPositions)) {
+        const [prev, pos] = lastPositions[char];
+        if (pos >= 0) result += (n - pos) * (pos - prev);
+    }
+    return result;
 };

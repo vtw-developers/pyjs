@@ -11,25 +11,21 @@
  * Return the maximum number of points you can earn by applying the above operation some number
  * of times.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var deleteAndEarn = function(nums) {
-  const points = new Array(10001).fill(0);
-  let previous = 0;
-  let result = 0;
-
-  for (const num of nums) {
-    points[num] += num;
-  }
-
-  for (const value of points) {
-    const temp = result;
-    result = Math.max(result, previous + value);
-    previous = temp;
-  }
-
-  return result;
+    const points = new Array(10001).fill(0);
+    let previous = 0;
+    let result = 0;
+    for (const num of nums) {
+        points[num] += num;
+    }
+    for (const value of points) {
+        const temp = result;
+        result = Math.max(result, previous + value);
+        previous = temp;
+    }
+    return result;
 };

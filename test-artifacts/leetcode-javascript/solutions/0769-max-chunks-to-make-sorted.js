@@ -11,20 +11,17 @@
  *
  * Return the largest number of chunks we can make to sort the array.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var maxChunksToSorted = function(arr) {
-  let result = 0;
-
-  for (let i = 0, max = 0; i < arr.length; i++) {
-    max = Math.max(max, arr[i]);
-    if (max === i) {
-      result++;
+    let result = 0;
+    for (let i = 0, max = 0; i < arr.length; i++) {
+        max = Math.max(max, arr[i]);
+        if (max === i) {
+            result++;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

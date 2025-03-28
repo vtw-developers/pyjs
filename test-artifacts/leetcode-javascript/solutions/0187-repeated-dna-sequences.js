@@ -11,23 +11,20 @@
  * Given a string s that represents a DNA sequence, return all the 10-letter-long sequences
  * (substrings) that occur more than once in a DNA molecule. You may return the answer in any order.
  */
-
 /**
  * @param {string} s
  * @return {string[]}
  */
 var findRepeatedDnaSequences = function(s) {
-  let substring = s.slice(0, 10);
-  const set = new Set([substring]);
-  const result = new Set();
-
-  for (let i = 10; i < s.length; i++) {
-    substring = substring.slice(1) + s[i];
-    if (set.has(substring)) {
-      result.add(substring);
+    let substring = s.slice(0, 10);
+    const set = new Set([substring]);
+    const result = new Set();
+    for (let i = 10; i < s.length; i++) {
+        substring = substring.slice(1) + s[i];
+        if (set.has(substring)) {
+            result.add(substring);
+        }
+        set.add(substring);
     }
-    set.add(substring);
-  }
-
-  return [...result];
+    return [...result];
 };

@@ -8,7 +8,6 @@
  * Find the node in the BST that the node's value equals val and return the
  * subtree rooted with that node. If such a node does not exist, return null.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -23,12 +22,11 @@
  * @return {TreeNode}
  */
 var searchBST = function(root, val) {
-  while (root) {
-    if (root.val === val) {
-      return root;
+    while (root) {
+        if (root.val === val) {
+            return root;
+        }
+        root = root.val > val ? root.left : root.right;
     }
-    root = root.val > val ? root.left : root.right;
-  }
-
-  return null;
+    return null;
 };

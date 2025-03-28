@@ -16,7 +16,6 @@
  * to the right once, 'L' will always make it move left, etc. Also, assume that the magnitude
  * of the robot's movement is the same for each move.
  */
-
 /**
  * @param {string} moves
  * @return {boolean}
@@ -26,13 +25,11 @@
  * @return {boolean}
  */
 var judgeCircle = function(moves) {
-  let x = 0;
-  let y = 0;
-
-  for (const move of moves) {
-    x += move === 'R' ? 1 : move === 'L' ? -1 : 0;
-    y += move === 'U' ? 1 : move === 'D' ? -1 : 0;
-  }
-
-  return x === 0 && y === 0;
+    let x = 0;
+    let y = 0;
+    for (const move of moves) {
+        x += move === 'R' ? 1 : move === 'L' ? -1 : 0;
+        y += move === 'U' ? 1 : move === 'D' ? -1 : 0;
+    }
+    return x === 0 && y === 0;
 };

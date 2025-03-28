@@ -9,7 +9,6 @@
  * Two binary trees are considered the same if they are structurally identical, and
  * the nodes have the same value.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,7 +23,7 @@
  * @return {boolean}
  */
 var isSameTree = function(p, q) {
-  const hasSameValue = p !== null && q !== null && p.val === q.val;
-  const hasSameTree = hasSameValue && isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
-  return (p === null && q === null) || hasSameTree;
+    const hasSameValue = p !== null && q !== null && p.val === q.val;
+    const hasSameTree = hasSameValue && isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    return (p === null && q === null) || hasSameTree;
 };

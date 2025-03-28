@@ -14,7 +14,6 @@
  *
  * Note: a + b is the concatenation of strings a and b.
  */
-
 /**
  * @param {string} s1
  * @param {string} s2
@@ -22,18 +21,14 @@
  * @return {boolean}
  */
 var isInterleave = function(s1, s2, s3) {
-  const values = new Array(s1.length + 1).fill().map(() => []);
-
-  if (s1.length + s2.length !== s3.length) {
-    return false;
-  }
-
-  for (let i = 0; i <= s1.length; i++) {
-    for (let j = 0; j <= s2.length; j++) {
-      values[i][j] = i && values[i - 1][j] && s3[i + j - 1] === s1[i - 1]
-        || j && values[i][j - 1] && s3[i + j - 1] === s2[j - 1] || !i && !j;
+    const values = new Array(s1.length + 1).fill().map(() => []);
+    if (s1.length + s2.length !== s3.length) {
+        return false;
     }
-  }
-
-  return Boolean(values.pop().pop());
+    for (let i = 0; i <= s1.length; i++) {
+        for (let j = 0; j <= s2.length; j++) {
+            values[i][j] = i && values[i - 1][j] && s3[i + j - 1] === s1[i - 1] || j && values[i][j - 1] && s3[i + j - 1] === s2[j - 1] || !i && !j;
+        }
+    }
+    return Boolean(values.pop().pop());
 };

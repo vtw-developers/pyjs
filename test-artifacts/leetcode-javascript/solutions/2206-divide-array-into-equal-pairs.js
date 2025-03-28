@@ -11,7 +11,6 @@
  *
  * Return true if nums can be divided into n pairs, otherwise return false.
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
@@ -21,16 +20,14 @@
  * @return {boolean}
  */
 var divideArray = function(nums) {
-  const map = new Map();
-
-  for (const num of nums) {
-    map.set(num, (map.get(num) || 0) + 1);
-  }
-  for (const count of map.values()) {
-    if (count % 2 !== 0) {
-      return false;
+    const map = new Map();
+    for (const num of nums) {
+        map.set(num, (map.get(num) || 0) + 1);
     }
-  }
-
-  return true;
+    for (const count of map.values()) {
+        if (count % 2 !== 0) {
+            return false;
+        }
+    }
+    return true;
 };

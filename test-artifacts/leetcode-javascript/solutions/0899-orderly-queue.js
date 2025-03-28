@@ -9,20 +9,19 @@
  * Return the lexicographically smallest string you could have after applying the mentioned
  * step any number of moves.
  */
-
 /**
  * @param {string} s
  * @param {number} k
  * @return {string}
  */
 var orderlyQueue = function(s, k) {
-  if (k === 1) {
-    let smallest = s;
-    for (let i = 0; i < s.length; i++) {
-      const rotated = s.slice(i) + s.slice(0, i);
-      if (rotated < smallest) smallest = rotated;
+    if (k === 1) {
+        let smallest = s;
+        for (let i = 0; i < s.length; i++) {
+            const rotated = s.slice(i) + s.slice(0, i);
+            if (rotated < smallest) smallest = rotated;
+        }
+        return smallest;
     }
-    return smallest;
-  }
-  return [...s].sort().join('');
+    return [...s].sort().join('');
 };
