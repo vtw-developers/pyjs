@@ -9,14 +9,13 @@
  *
  * Return a 0-indexed integer array ans of size 2 where ans[0] equals to a and ans[1] equals to b.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number[]}
  */
 var findMissingAndRepeatedValues = function(grid) {
-  const sum = grid.flat().reduce((a, b) => a + b, 0);
-  const expectedSum = (grid.length * grid.length * (grid.length * grid.length + 1)) / 2;
-  const repeated = sum - [...new Set(grid.flat())].reduce((a, b) => a + b, 0);
-  return [repeated, expectedSum - sum + repeated];
+    const sum = grid.flat().reduce((a, b) => a + b, 0);
+    const expectedSum = (grid.length * grid.length * (grid.length * grid.length + 1)) / 2;
+    const repeated = sum - [...new Set(grid.flat())].reduce((a, b) => a + b, 0);
+    return [repeated, expectedSum - sum + repeated];
 };

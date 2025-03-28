@@ -8,23 +8,20 @@
  *
  * Note that the same word in the dictionary may be reused multiple times in the segmentation.
  */
-
 /**
  * @param {string} s
  * @param {string[]} wordDict
  * @return {boolean}
  */
 var wordBreak = function(s, wordDict) {
-  const result = [1, ...new Array(s.length + 1).fill(0)];
-
-  for (let i = 1; i <= s.length; i++) {
-    for (let j = 0; j < i; j++) {
-      if (result[j] && wordDict.includes(s.slice(j, i))) {
-        result[i] = 1;
-        break;
-      }
+    const result = [1, ...new Array(s.length + 1).fill(0)];
+    for (let i = 1; i <= s.length; i++) {
+        for (let j = 0; j < i; j++) {
+            if (result[j] && wordDict.includes(s.slice(j, i))) {
+                result[i] = 1;
+                break;
+            }
+        }
     }
-  }
-
-  return result[s.length];
+    return result[s.length];
 };

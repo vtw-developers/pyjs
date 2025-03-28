@@ -17,35 +17,30 @@
  * (can be none) of the elements without disturbing the relative positions of the remaining
  * elements. (i.e., [1,3,5] is a subsequence of [1,2,3,4,5] while [1,3,2] is not).
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
  */
 var isPossible = function(nums) {
-  const map = new Map();
-  const map2 = new Map();
-
-  for (const n of nums) {
-    map.set(n, (map.get(n) || 0) + 1);
-  }
-
-  for (const n of nums) {
-    if (map.get(n) === 0) continue;
-
-    if ((map2.get(n) || 0) > 0) {
-      map2.set(n, map2.get(n) - 1);
-      map.set(n, map.get(n) - 1);
-      map2.set(n + 1, (map2.get(n + 1) || 0) + 1);
-    } else if ((map.get(n) || 0) > 0 && (map.get(n + 1) || 0) > 0 && (map.get(n + 2) || 0) > 0) {
-      map.set(n, map.get(n) - 1);
-      map.set(n + 1, map.get(n + 1) - 1);
-      map.set(n + 2, map.get(n + 2) - 1);
-      map2.set(n + 3, (map2.get(n + 3) || 0) + 1);
-    } else {
-      return false;
+    const map = new Map();
+    const map2 = new Map();
+    for (const n of nums) {
+        map.set(n, (map.get(n) || 0) + 1);
     }
-  }
-
-  return true;
+    for (const n of nums) {
+        if (map.get(n) === 0) continue;
+        if ((map2.get(n) || 0) > 0) {
+            map2.set(n, map2.get(n) - 1);
+            map.set(n, map.get(n) - 1);
+            map2.set(n + 1, (map2.get(n + 1) || 0) + 1);
+        } else if ((map.get(n) || 0) > 0 && (map.get(n + 1) || 0) > 0 && (map.get(n + 2) || 0) > 0) {
+            map.set(n, map.get(n) - 1);
+            map.set(n + 1, map.get(n + 1) - 1);
+            map.set(n + 2, map.get(n + 2) - 1);
+            map2.set(n + 3, (map2.get(n + 3) || 0) + 1);
+        } else {
+            return false;
+        }
+    }
+    return true;
 };

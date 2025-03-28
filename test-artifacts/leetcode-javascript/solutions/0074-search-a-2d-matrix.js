@@ -9,14 +9,11 @@
  * Integers in each row are sorted from left to right.
  * The first integer of each row is greater than the last integer of the previous row.
  */
-
 /**
  * @param {number[][]} matrix
  * @param {number} target
  * @return {boolean}
  */
 var searchMatrix = function(matrix, target) {
-  return matrix
-    .filter(row => row[0] <= target && row[row.length - 1] >= target)
-    .find(row => row.includes(target)) !== undefined;
+    return matrix.filter(row => row[0] <= target && row[row.length - 1] >= target).find(row => row.includes(target)) !== undefined;
 };

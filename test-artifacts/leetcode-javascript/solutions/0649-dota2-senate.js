@@ -25,29 +25,25 @@
  * Suppose every senator is smart enough and will play the best strategy for his own
  * party. Predict which party will finally announce the victory and change the Dota2
  * game. The output should be "Radiant" or "Dire".
-*/
-
+ */
 /**
  * @param {string} senate
  * @return {string}
  */
 var predictPartyVictory = function(senate) {
-  const rQueue = [];
-  const dQueue = [];
-
-  for (let i = 0; i < senate.length; i++) {
-    if (senate[i] === 'R') rQueue.push(i);
-    else dQueue.push(i);
-  }
-
-  while (rQueue.length && dQueue.length) {
-    const [rIndex, dIndex] = [rQueue.shift(), dQueue.shift()];
-    if (rIndex < dIndex) {
-      rQueue.push(rIndex + senate.length);
-    } else {
-      dQueue.push(dIndex + senate.length);
+    const rQueue = [];
+    const dQueue = [];
+    for (let i = 0; i < senate.length; i++) {
+        if (senate[i] === 'R') rQueue.push(i);
+        else dQueue.push(i);
     }
-  }
-
-  return rQueue.length > 0 ? 'Radiant' : 'Dire';
+    while (rQueue.length && dQueue.length) {
+        const [rIndex, dIndex] = [rQueue.shift(), dQueue.shift()];
+        if (rIndex < dIndex) {
+            rQueue.push(rIndex + senate.length);
+        } else {
+            dQueue.push(dIndex + senate.length);
+        }
+    }
+    return rQueue.length > 0 ? 'Radiant' : 'Dire';
 };

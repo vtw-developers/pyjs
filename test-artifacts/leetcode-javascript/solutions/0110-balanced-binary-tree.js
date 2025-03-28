@@ -5,7 +5,6 @@
  *
  * Given a binary tree, determine if it is height-balanced.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -19,12 +18,11 @@
  * @return {boolean}
  */
 var isBalanced = function(root) {
-  if (!root) return true;
-  return isBalanced(root.right) && isBalanced(root.left)
-    && Math.abs(traverse(root.right) - traverse(root.left)) < 2;
+    if (!root) return true;
+    return isBalanced(root.right) && isBalanced(root.left) && Math.abs(traverse(root.right) - traverse(root.left)) < 2;
 };
 
 function traverse(node, depth = 0) {
-  if (!node) return depth;
-  return Math.max(traverse(node.right, depth + 1), traverse(node.left, depth + 1));
+    if (!node) return depth;
+    return Math.max(traverse(node.right, depth + 1), traverse(node.left, depth + 1));
 }

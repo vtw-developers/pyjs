@@ -14,13 +14,15 @@
  * Return any permutation of T (as a string) that satisfies
  * this property.
  */
-
 /**
  * @param {string} S
  * @param {string} T
  * @return {string}
  */
 var customSortString = function(S, T) {
-  const order = S.split('').reduce((o, k, i) => ({...o, [k]: i}), {});
-  return T.split('').sort((a, b) => (order[a] || 0) - (order[b] || 0)).join('');
+    const order = S.split('').reduce((o, k, i) => ({
+        ...o,
+        [k]: i
+    }), {});
+    return T.split('').sort((a, b) => (order[a] || 0) - (order[b] || 0)).join('');
 };

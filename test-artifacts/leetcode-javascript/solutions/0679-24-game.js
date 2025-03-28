@@ -18,31 +18,28 @@
  *
  * Return true if you can get such expression that evaluates to 24, and false otherwise.
  */
-
 /**
  * @param {number[]} cards
  * @return {boolean}
  */
 const judgePoint24 = function(cards) {
-  if (cards.length === 1) return Math.abs(cards[0] - 24) < 0.1;
-
-  for (let i = 0; i < cards.length; i++) {
-    for (let j = i + 1; j < cards.length; j++) {
-      const remaining = new Array(cards.length - 1);
-      for (let index = 0, current = 0; current < cards.length; current++) {
-        if (i === current || j === current) continue;
-        remaining[index++] = cards[current];
-      }
-      const a = cards[i];
-      const b = cards[j];
-      const operations = [a + b, a - b, b - a, a * b, a / b, b / a];
-      for (const result of operations) {
-        if (result === 0) continue;
-        remaining[cards.length - 2] = result;
-        if (judgePoint24(remaining)) return true;
-      }
+    if (cards.length === 1) return Math.abs(cards[0] - 24) < 0.1;
+    for (let i = 0; i < cards.length; i++) {
+        for (let j = i + 1; j < cards.length; j++) {
+            const remaining = new Array(cards.length - 1);
+            for (let index = 0, current = 0; current < cards.length; current++) {
+                if (i === current || j === current) continue;
+                remaining[index++] = cards[current];
+            }
+            const a = cards[i];
+            const b = cards[j];
+            const operations = [a + b, a - b, b - a, a * b, a / b, b / a];
+            for (const result of operations) {
+                if (result === 0) continue;
+                remaining[cards.length - 2] = result;
+                if (judgePoint24(remaining)) return true;
+            }
+        }
     }
-  }
-
-  return false;
+    return false;
 };

@@ -14,38 +14,31 @@
  * Return the rotation index k that corresponds to the highest score we can achieve if we rotated
  * nums by it. If there are multiple answers, return the smallest such index k.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var bestRotation = function(nums) {
-  const n = nums.length;
-  const changes = new Array(n).fill(0);
-
-  for (let i = 0; i < n; i++) {
-    const lowIndex = (i + 1) % n;
-    const highIndex = (i - nums[i] + 1 + n) % n;
-
-    changes[lowIndex]++;
-    changes[highIndex]--;
-
-    if (lowIndex > highIndex) {
-      changes[0]++;
+    const n = nums.length;
+    const changes = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) {
+        const lowIndex = (i + 1) % n;
+        const highIndex = (i - nums[i] + 1 + n) % n;
+        changes[lowIndex]++;
+        changes[highIndex]--;
+        if (lowIndex > highIndex) {
+            changes[0]++;
+        }
     }
-  }
-
-  let maxScore = 0;
-  let maxIndex = 0;
-  let currentScore = 0;
-
-  for (let i = 0; i < n; i++) {
-    currentScore += changes[i];
-    if (currentScore > maxScore) {
-      maxScore = currentScore;
-      maxIndex = i;
+    let maxScore = 0;
+    let maxIndex = 0;
+    let currentScore = 0;
+    for (let i = 0; i < n; i++) {
+        currentScore += changes[i];
+        if (currentScore > maxScore) {
+            maxScore = currentScore;
+            maxIndex = i;
+        }
     }
-  }
-
-  return maxIndex;
+    return maxIndex;
 };

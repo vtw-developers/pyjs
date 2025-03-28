@@ -9,18 +9,15 @@
  * An Anagram is a word or phrase formed by rearranging the letters of a different
  * word or phrase, typically using all the original letters exactly once.
  */
-
 /**
  * @param {string[]} strs
  * @return {string[][]}
  */
 var groupAnagrams = function(strs) {
-  const map = {};
-
-  strs.forEach(str => {
-    const key = [...str].sort();
-    map[key] = map[key] ? [...map[key], str] : [str];
-  });
-
-  return Object.values(map);
+    const map = {};
+    strs.forEach(str => {
+        const key = [...str].sort();
+        map[key] = map[key] ? [...map[key], str] : [str];
+    });
+    return Object.values(map);
 };

@@ -24,16 +24,13 @@
  * Return the number of different transformations
  * among all words we have.
  */
-
 /**
  * @param {string[]} words
  * @return {number}
  */
 var uniqueMorseRepresentations = function(words) {
-  const codes = [".-","-...","-.-.","-..",".","..-.","--.","....","..",".---",
-                 "-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-",
-                 "..-","...-",".--","-..-","-.--","--.."];
-  const map = new Map(codes.map((v, i) => [String.fromCharCode(97 + i), v]));
-  const transformed = words.map(word => word.split('').map(c => map.get(c)).join(''));
-  return new Set(transformed).size;
+    const codes = [".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."];
+    const map = new Map(codes.map((v, i) => [String.fromCharCode(97 + i), v]));
+    const transformed = words.map(word => word.split('').map(c => map.get(c)).join(''));
+    return new Set(transformed).size;
 };

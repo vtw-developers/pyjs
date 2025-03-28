@@ -14,7 +14,6 @@
  *
  * Return the maximum profit we can achieve after assigning the workers to the jobs.
  */
-
 /**
  * @param {number[]} difficulty
  * @param {number[]} profit
@@ -22,27 +21,22 @@
  * @return {number}
  */
 var maxProfitAssignment = function(difficulty, profit, worker) {
-  const jobs = difficulty.map((d, i) => [d, profit[i]]);
-  jobs.sort((a, b) => a[0] - b[0]);
-
-  const n = jobs.length;
-  const bestProfit = new Array(n);
-  let maxProfit = 0;
-
-  for (let i = 0; i < n; i++) {
-    maxProfit = Math.max(maxProfit, jobs[i][1]);
-    bestProfit[i] = [jobs[i][0], maxProfit];
-  }
-
-  return worker.reduce((total, ability) => {
-    let left = 0;
-    let right = n - 1;
-
-    while (left <= right) {
-      const mid = (left + right) >> 1;
-      bestProfit[mid][0] <= ability ? left = mid + 1 : right = mid - 1;
+    const jobs = difficulty.map((d, i) => [d, profit[i]]);
+    jobs.sort((a, b) => a[0] - b[0]);
+    const n = jobs.length;
+    const bestProfit = new Array(n);
+    let maxProfit = 0;
+    for (let i = 0; i < n; i++) {
+        maxProfit = Math.max(maxProfit, jobs[i][1]);
+        bestProfit[i] = [jobs[i][0], maxProfit];
     }
-
-    return total + (right >= 0 ? bestProfit[right][1] : 0);
-  }, 0);
+    return worker.reduce((total, ability) => {
+        let left = 0;
+        let right = n - 1;
+        while (left <= right) {
+            const mid = (left + right) >> 1;
+            bestProfit[mid][0] <= ability ? left = mid + 1 : right = mid - 1;
+        }
+        return total + (right >= 0 ? bestProfit[right][1] : 0);
+    }, 0);
 };

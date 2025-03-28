@@ -15,13 +15,12 @@
  *
  * You may return the answer in any order.
  */
-
 /**
  * @param {string[]} words
  * @param {string} pattern
  * @return {string[]}
  */
 var findAndReplacePattern = function(words, pattern) {
-  const map = (p, o = {}, count = 0) => p.split('').map(c => o[c] = o[c] || String(count++)).join('');
-  return words.filter(word => map(word) === map(pattern));
+    const map = (p, o = {}, count = 0) => p.split('').map(c => o[c] = o[c] || String(count++)).join('');
+    return words.filter(word => map(word) === map(pattern));
 };

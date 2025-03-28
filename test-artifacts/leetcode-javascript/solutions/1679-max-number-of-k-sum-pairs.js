@@ -10,26 +10,22 @@
  *
  * Return the maximum number of operations you can perform on the array.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var maxOperations = function(nums, k) {
-  const map = new Map();
-  let result = 0;
-
-  nums.forEach(n => {
-    const diff = k - n;
-
-    if (map.get(diff)) {
-      result++;
-      map.set(diff, map.get(diff) - 1);
-    } else {
-      map.set(n, (map.get(n) ?? 0) + 1);
-    }
-  });
-
-  return result;
+    const map = new Map();
+    let result = 0;
+    nums.forEach(n => {
+        const diff = k - n;
+        if (map.get(diff)) {
+            result++;
+            map.set(diff, map.get(diff) - 1);
+        } else {
+            map.set(n, (map.get(n) ?? 0) + 1);
+        }
+    });
+    return result;
 };

@@ -20,7 +20,6 @@
  * Note that if the car reaches a gas station with 0 fuel left, the car can still refuel there.
  * If the car reaches the destination with 0 fuel left, it is still considered to have arrived.
  */
-
 /**
  * @param {number} target
  * @param {number} startFuel
@@ -28,21 +27,18 @@
  * @return {number}
  */
 var minRefuelStops = function(target, startFuel, stations) {
-  const dp = [startFuel];
-  const stationCount = stations.length;
-
-  for (let i = 0; i < stationCount; i++) {
-    dp.push(0);
-    for (let stops = i; stops >= 0; stops--) {
-      if (dp[stops] >= stations[i][0]) {
-        dp[stops + 1] = Math.max(dp[stops + 1], dp[stops] + stations[i][1]);
-      }
+    const dp = [startFuel];
+    const stationCount = stations.length;
+    for (let i = 0; i < stationCount; i++) {
+        dp.push(0);
+        for (let stops = i; stops >= 0; stops--) {
+            if (dp[stops] >= stations[i][0]) {
+                dp[stops + 1] = Math.max(dp[stops + 1], dp[stops] + stations[i][1]);
+            }
+        }
     }
-  }
-
-  for (let stops = 0; stops <= stationCount; stops++) {
-    if (dp[stops] >= target) return stops;
-  }
-
-  return -1;
+    for (let stops = 0; stops <= stationCount; stops++) {
+        if (dp[stops] >= target) return stops;
+    }
+    return -1;
 };

@@ -7,15 +7,13 @@
  *
  * Return the average salary of employees excluding the minimum and maximum salary.
  */
-
 /**
  * @param {number[]} salary
  * @return {number}
  */
 var average = function(salary) {
-  salary.sort((a, b) => a - b);
-  salary.shift();
-  salary.pop();
-
-  return salary.reduce((total, n) => total + n, 0) / salary.length;
+    salary.sort((a, b) => a - b);
+    salary.shift();
+    salary.pop();
+    return salary.reduce((total, n) => total + n, 0) / salary.length;
 };

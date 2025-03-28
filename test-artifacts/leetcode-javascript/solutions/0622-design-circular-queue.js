@@ -27,72 +27,65 @@
  * You must solve the problem without using the built-in queue data structure in your programming
  * language.
  */
-
 /**
  * @param {number} k
  */
 var MyCircularQueue = function(k) {
-  this.queue = new Array(k);
-  this.size = k;
-  this.front = -1;
-  this.rear = -1;
+    this.queue = new Array(k);
+    this.size = k;
+    this.front = -1;
+    this.rear = -1;
 };
-
 /**
  * @param {number} value
  * @return {boolean}
  */
 MyCircularQueue.prototype.enQueue = function(value) {
-  if (this.isFull()) {
-    return false;
-  }
-  if (this.isEmpty()) {
-    this.front = 0;
-  }
-  this.rear = (this.rear + 1) % this.size;
-  this.queue[this.rear] = value;
-  return true;
+    if (this.isFull()) {
+        return false;
+    }
+    if (this.isEmpty()) {
+        this.front = 0;
+    }
+    this.rear = (this.rear + 1) % this.size;
+    this.queue[this.rear] = value;
+    return true;
 };
-
 /**
  * @return {boolean}
  */
 MyCircularQueue.prototype.deQueue = function() {
-  if (this.isEmpty()) {
-    return false;
-  } else if (this.front === this.rear) {
-    this.front = -1;
-    this.rear = -1;
-  } else {
-    this.front = (this.front + 1) % this.size;
-  }
-  return true;
+    if (this.isEmpty()) {
+        return false;
+    } else if (this.front === this.rear) {
+        this.front = -1;
+        this.rear = -1;
+    } else {
+        this.front = (this.front + 1) % this.size;
+    }
+    return true;
 };
-
 /**
  * @return {number}
  */
 MyCircularQueue.prototype.Front = function() {
-  return this.isEmpty() ? -1 : this.queue[this.front];
+    return this.isEmpty() ? -1 : this.queue[this.front];
 };
-
 /**
  * @return {number}
  */
 MyCircularQueue.prototype.Rear = function() {
-  return this.isEmpty() ? -1 : this.queue[this.rear];
+    return this.isEmpty() ? -1 : this.queue[this.rear];
 };
-
 /**
  * @return {boolean}
  */
 MyCircularQueue.prototype.isEmpty = function() {
-  return this.front === -1;
+    return this.front === -1;
 };
-
 /**
  * @return {boolean}
  */
 MyCircularQueue.prototype.isFull = function() {
-  return (this.rear + 1) % this.size === this.front;
+    return (this.rear + 1) % this.size === this.front;
 };

@@ -13,21 +13,19 @@
  *
  * The test cases are guaranteed so that the ray will meet a receptor eventually.
  */
-
 /**
  * @param {number} p
  * @param {number} q
  * @return {number}
  */
 var mirrorReflection = function(p, q) {
-  const gcd = findGCD(p, q);
-  const m = q / gcd;
-  const n = p / gcd;
-
-  if (m % 2 === 0) return 0;
-  return n % 2 === 1 ? 1 : 2;
+    const gcd = findGCD(p, q);
+    const m = q / gcd;
+    const n = p / gcd;
+    if (m % 2 === 0) return 0;
+    return n % 2 === 1 ? 1 : 2;
 };
 
 function findGCD(a, b) {
-  return b === 0 ? a : findGCD(b, a % b);
+    return b === 0 ? a : findGCD(b, a % b);
 }

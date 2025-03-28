@@ -7,11 +7,10 @@
  * return a binary string of length n that does not appear in nums. If there are multiple
  * answers, you may return any of them.
  */
-
 /**
  * @param {string[]} nums
  * @return {string}
  */
 var findDifferentBinaryString = function(nums) {
-  return nums.map((n, i) => n[i] === '0' ? '1' : '0').join('');
+    return nums.map((n, i) => n[i] === '0' ? '1' : '0').join('');
 };

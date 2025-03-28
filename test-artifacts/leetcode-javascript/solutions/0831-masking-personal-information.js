@@ -25,33 +25,23 @@
  *
  * Return the correct "mask" of the information provided.
  */
-
 // The one-line solution:
 /**
  * @param {string} S
  * @return {string}
  */
 var maskPII = function(S) {
-  return S.toLowerCase()
-    .replace(/^([a-z])[a-z]*([a-z])/, '$1*****$2')
-    .replace(/[)(\-\s+]+/g, '')
-    .replace(/^(\d*)(\d{3})(\d{3})(\d{4})$/, '+$1-$2-$3-$4')
-    .replace(/\d(?!\d{0,3}$)/g, '*')
-    .replace(/^\+\-/, '');
+    return S.toLowerCase().replace(/^([a-z])[a-z]*([a-z])/, '$1*****$2').replace(/[)(\-\s+]+/g, '').replace(/^(\d*)(\d{3})(\d{3})(\d{4})$/, '+$1-$2-$3-$4').replace(/\d(?!\d{0,3}$)/g, '*').replace(/^\+\-/, '');
 };
-
 // More readable alternative:
 /**
  * @param {string} S
  * @return {string}
  */
 var maskPII = function(S) {
-  if (S.includes('@')) {
-    return S.toLowerCase().replace(/^(\w)\w*(\w)/, '$1*****$2');
-  } else {
-    return S.replace(/\D+/g, '')
-      .replace(/^(\d*)(\d{3})(\d{3})(\d{4})$/, '+$1-$2-$3-$4')
-      .replace(/\d(?!\d{0,3}$)/g, '*')
-      .replace(/^\+\-/, '');
-  }
+    if (S.includes('@')) {
+        return S.toLowerCase().replace(/^(\w)\w*(\w)/, '$1*****$2');
+    } else {
+        return S.replace(/\D+/g, '').replace(/^(\d*)(\d{3})(\d{3})(\d{4})$/, '+$1-$2-$3-$4').replace(/\d(?!\d{0,3}$)/g, '*').replace(/^\+\-/, '');
+    }
 };

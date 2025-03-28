@@ -9,18 +9,15 @@
  *
  * Return the maximum difference. If no such i and j exists, return -1.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var maximumDifference = function(nums) {
-  let max = 0;
-
-  for (let i = 0, min = nums[0]; i < nums.length; i++) {
-    min = Math.min(min, nums[i]);
-    max = Math.max(max, nums[i] - min);
-  }
-
-  return max === 0 ? -1 : max;
+    let max = 0;
+    for (let i = 0, min = nums[0]; i < nums.length; i++) {
+        min = Math.min(min, nums[i]);
+        max = Math.max(max, nums[i] - min);
+    }
+    return max === 0 ? -1 : max;
 };

@@ -23,56 +23,50 @@
  * Return an array of the index of the left-most letter being stamped at each turn. If we
  * cannot obtain target from s within 10 * target.length turns, return an empty array.
  */
-
 /**
  * @param {string} stamp
  * @param {string} target
  * @return {number[]}
  */
 var movesToStamp = function(stamp, target) {
-  const stampLength = stamp.length;
-  const targetLength = target.length;
-  const moves = [];
-  const targetArray = target.split('');
-  let totalReplaced = 0;
+    const stampLength = stamp.length;
+    const targetLength = target.length;
+    const moves = [];
+    const targetArray = target.split('');
+    let totalReplaced = 0;
 
-  function tryStampAt(position) {
-    let canStamp = false;
-    let hasUnstamped = false;
-
-    for (let i = 0; i < stampLength; i++) {
-      const currentChar = targetArray[position + i];
-      if (currentChar === '?') continue;
-      if (currentChar !== stamp[i]) return false;
-      hasUnstamped = true;
-    }
-
-    if (hasUnstamped) {
-      for (let i = 0; i < stampLength; i++) {
-        if (targetArray[position + i] !== '?') {
-          targetArray[position + i] = '?';
-          totalReplaced++;
+    function tryStampAt(position) {
+        let canStamp = false;
+        let hasUnstamped = false;
+        for (let i = 0; i < stampLength; i++) {
+            const currentChar = targetArray[position + i];
+            if (currentChar === '?') continue;
+            if (currentChar !== stamp[i]) return false;
+            hasUnstamped = true;
         }
-      }
-      canStamp = true;
+        if (hasUnstamped) {
+            for (let i = 0; i < stampLength; i++) {
+                if (targetArray[position + i] !== '?') {
+                    targetArray[position + i] = '?';
+                    totalReplaced++;
+                }
+            }
+            canStamp = true;
+        }
+        return canStamp;
     }
-
-    return canStamp;
-  }
-
-  const maxMoves = 10 * targetLength;
-  while (moves.length <= maxMoves) {
-    let madeChange = false;
-    for (let i = 0; i <= targetLength - stampLength; i++) {
-      if (tryStampAt(i)) {
-        moves.push(i);
-        madeChange = true;
-        break;
-      }
+    const maxMoves = 10 * targetLength;
+    while (moves.length <= maxMoves) {
+        let madeChange = false;
+        for (let i = 0; i <= targetLength - stampLength; i++) {
+            if (tryStampAt(i)) {
+                moves.push(i);
+                madeChange = true;
+                break;
+            }
+        }
+        if (!madeChange) break;
+        if (totalReplaced === targetLength) return moves.reverse();
     }
-    if (!madeChange) break;
-    if (totalReplaced === targetLength) return moves.reverse();
-  }
-
-  return [];
+    return [];
 };

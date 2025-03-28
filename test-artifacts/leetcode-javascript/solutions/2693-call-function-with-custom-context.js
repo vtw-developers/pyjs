@@ -24,12 +24,11 @@
  *
  * Please solve this without using the built-in Function.call method.
  */
-
 /**
  * @param {Object} context
  * @param {Array} args
  * @return {null|boolean|number|string|Array|Object}
  */
 Function.prototype.callPolyfill = function(context, ...args) {
-  return this.bind(context)(...args);
+    return this.bind(context)(...args);
 }

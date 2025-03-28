@@ -15,34 +15,29 @@
  * You may assume all tickets form at least one valid itinerary. You must use all the tickets once
  * and only once.
  */
-
 /**
  * @param {string[][]} tickets
  * @return {string[]}
  */
 var findItinerary = function(tickets) {
-  const graph = new Map();
-  const itinerary = [];
-
-  for (const [from, to] of tickets) {
-    if (!graph.has(from)) {
-      graph.set(from, []);
+    const graph = new Map();
+    const itinerary = [];
+    for (const [from, to] of tickets) {
+        if (!graph.has(from)) {
+            graph.set(from, []);
+        }
+        graph.get(from).push(to);
     }
-    graph.get(from).push(to);
-  }
-
-  for (const [_, destinations] of graph) {
-    destinations.sort().reverse();
-  }
-
-  dfs('JFK');
-
-  return itinerary.reverse();
-
-  function dfs(airport) {
-    while (graph.has(airport) && graph.get(airport).length) {
-      dfs(graph.get(airport).pop());
+    for (const [_, destinations] of graph) {
+        destinations.sort().reverse();
     }
-    itinerary.push(airport);
-  }
+    dfs('JFK');
+    return itinerary.reverse();
+
+    function dfs(airport) {
+        while (graph.has(airport) && graph.get(airport).length) {
+            dfs(graph.get(airport).pop());
+        }
+        itinerary.push(airport);
+    }
 };

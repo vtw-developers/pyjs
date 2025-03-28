@@ -34,7 +34,6 @@
  * Note: You may assume that the given expression is always valid. All intermediate results will be
  * in the range of [-231, 231 - 1].
  */
-
 /**
  * @param {string} expression
  * @param {string[]} evalvars
@@ -42,189 +41,153 @@
  * @return {string[]}
  */
 var basicCalculatorIV = function(expression, evalvars, evalints) {
-  const map = new Map();
-  for (let i = 0; i < evalvars.length; i++) {
-    map.set(evalvars[i], evalints[i]);
-  }
+    const map = new Map();
+    for (let i = 0; i < evalvars.length; i++) {
+        map.set(evalvars[i], evalints[i]);
+    }
+    const result = parse(expression, map);
+    return result.toStringArray();
 
-  const result = parse(expression, map);
-  return result.toStringArray();
+    function parse(expr, map) {
+        const tokens = tokenize(expr);
+        return parseExpr(tokens, 0, map)[0];
+    }
 
-  function parse(expr, map) {
-    const tokens = tokenize(expr);
-    return parseExpr(tokens, 0, map)[0];
-  }
-
-  function tokenize(expr) {
-    const tokens = [];
-    let i = 0;
-
-    while (i < expr.length) {
-      if (expr[i] === ' ') {
-        i++; continue;
-      }
-
-      if ('+-*()'.includes(expr[i])) {
-        tokens.push(expr[i++]);
-        continue;
-      }
-
-      if (/[a-z]/.test(expr[i])) {
-        let variable = '';
-        while (i < expr.length && /[a-z]/.test(expr[i])) {
-          variable += expr[i++];
+    function tokenize(expr) {
+        const tokens = [];
+        let i = 0;
+        while (i < expr.length) {
+            if (expr[i] === ' ') {
+                i++;
+                continue;
+            }
+            if ('+-*()'.includes(expr[i])) {
+                tokens.push(expr[i++]);
+                continue;
+            }
+            if (/[a-z]/.test(expr[i])) {
+                let variable = '';
+                while (i < expr.length && /[a-z]/.test(expr[i])) {
+                    variable += expr[i++];
+                }
+                tokens.push(variable);
+                continue;
+            }
+            if (/\d/.test(expr[i])) {
+                let num = '';
+                while (i < expr.length && /\d/.test(expr[i])) {
+                    num += expr[i++];
+                }
+                tokens.push(parseInt(num));
+                continue;
+            }
+            i++;
         }
-        tokens.push(variable);
-        continue;
-      }
+        return tokens;
+    }
 
-      if (/\d/.test(expr[i])) {
-        let num = '';
-        while (i < expr.length && /\d/.test(expr[i])) {
-          num += expr[i++];
+    function parseExpr(tokens, start, map) {
+        let [left, pos] = parseTerm(tokens, start, map);
+        while (pos < tokens.length && (tokens[pos] === '+' || tokens[pos] === '-')) {
+            const op = tokens[pos];
+            const [right, nextPos] = parseTerm(tokens, pos + 1, map);
+            left = op === '+' ? left.add(right) : left.subtract(right);
+            pos = nextPos;
         }
-        tokens.push(parseInt(num));
-        continue;
-      }
-
-      i++;
+        return [left, pos];
     }
 
-    return tokens;
-  }
-
-  function parseExpr(tokens, start, map) {
-    let [left, pos] = parseTerm(tokens, start, map);
-
-    while (pos < tokens.length && (tokens[pos] === '+' || tokens[pos] === '-')) {
-      const op = tokens[pos];
-      const [right, nextPos] = parseTerm(tokens, pos + 1, map);
-
-      left = op === '+' ? left.add(right) : left.subtract(right);
-      pos = nextPos;
+    function parseTerm(tokens, start, map) {
+        let [left, pos] = parseFactor(tokens, start, map);
+        while (pos < tokens.length && tokens[pos] === '*') {
+            const [right, nextPos] = parseFactor(tokens, pos + 1, map);
+            left = left.multiply(right);
+            pos = nextPos;
+        }
+        return [left, pos];
     }
 
-    return [left, pos];
-  }
-
-  function parseTerm(tokens, start, map) {
-    let [left, pos] = parseFactor(tokens, start, map);
-
-    while (pos < tokens.length && tokens[pos] === '*') {
-      const [right, nextPos] = parseFactor(tokens, pos + 1, map);
-      left = left.multiply(right);
-      pos = nextPos;
+    function parseFactor(tokens, start, map) {
+        const token = tokens[start];
+        if (token === '(') {
+            const [expr, pos] = parseExpr(tokens, start + 1, map);
+            return [expr, pos + 1];
+        }
+        if (typeof token === 'string' && /[a-z]/.test(token)) {
+            return map.has(token) ? [new Expression([new Term(map.get(token))]), start + 1] : [new Expression([new Term(1, [token])]), start + 1];
+        }
+        if (typeof token === 'number') {
+            return [new Expression([new Term(token)]), start + 1];
+        }
+        throw new Error(`Unexpected token: ${token}`);
     }
-
-    return [left, pos];
-  }
-
-  function parseFactor(tokens, start, map) {
-    const token = tokens[start];
-
-    if (token === '(') {
-      const [expr, pos] = parseExpr(tokens, start + 1, map);
-      return [expr, pos + 1];
-    }
-
-    if (typeof token === 'string' && /[a-z]/.test(token)) {
-      return map.has(token)
-        ? [new Expression([new Term(map.get(token))]), start + 1]
-        : [new Expression([new Term(1, [token])]), start + 1];
-    }
-
-    if (typeof token === 'number') {
-      return [new Expression([new Term(token)]), start + 1];
-    }
-
-    throw new Error(`Unexpected token: ${token}`);
-  }
 };
-
 class Term {
-  constructor(coefficient = 0, variables = []) {
-    this.coefficient = coefficient;
-    this.variables = [...variables].sort();
-  }
-
-  multiply(other) {
-    return new Term(
-      this.coefficient * other.coefficient,
-      [...this.variables, ...other.variables].sort()
-    );
-  }
-
-  toString() {
-    if (this.coefficient === 0) return '';
-    if (this.variables.length === 0) return `${this.coefficient}`;
-    return `${this.coefficient}*${this.variables.join('*')}`;
-  }
-
-  get degree() {
-    return this.variables.length;
-  }
-
-  compare(other) {
-    if (this.degree !== other.degree) return other.degree - this.degree;
-
-    for (let i = 0; i < this.degree; i++) {
-      if (this.variables[i] !== other.variables[i]) {
-        return this.variables[i].localeCompare(other.variables[i]);
-      }
+    constructor(coefficient = 0, variables = []) {
+        this.coefficient = coefficient;
+        this.variables = [...variables].sort();
     }
-    return 0;
-  }
-}
-
-class Expression {
-  constructor(terms = []) {
-    this.terms = terms;
-  }
-
-  add(other, multiplier = 1) {
-    const termMap = new Map();
-
-    for (const term of this.terms) {
-      const key = term.variables.join('*');
-      termMap.set(key, term);
+    multiply(other) {
+        return new Term(this.coefficient * other.coefficient, [...this.variables, ...other.variables].sort());
     }
-
-    for (const term of other.terms) {
-      const key = term.variables.join('*');
-      if (termMap.has(key)) {
-        termMap.get(key).coefficient += term.coefficient * multiplier;
-      } else {
-        const newTerm = new Term(term.coefficient * multiplier, term.variables);
-        this.terms.push(newTerm);
-        termMap.set(key, newTerm);
-      }
+    toString() {
+        if (this.coefficient === 0) return '';
+        if (this.variables.length === 0) return `${this.coefficient}`;
+        return `${this.coefficient}*${this.variables.join('*')}`;
     }
-
-    this.terms = this.terms.filter(term => term.coefficient !== 0);
-    return this;
-  }
-
-  subtract(other) {
-    return this.add(other, -1);
-  }
-
-  multiply(other) {
-    const result = new Expression();
-
-    for (const term1 of this.terms) {
-      for (const term2 of other.terms) {
-        const product = term1.multiply(term2);
-        if (product.coefficient !== 0) {
-          result.add(new Expression([product]));
+    get degree() {
+        return this.variables.length;
+    }
+    compare(other) {
+        if (this.degree !== other.degree) return other.degree - this.degree;
+        for (let i = 0; i < this.degree; i++) {
+            if (this.variables[i] !== other.variables[i]) {
+                return this.variables[i].localeCompare(other.variables[i]);
+            }
         }
-      }
+        return 0;
     }
-
-    return result;
-  }
-
-  toStringArray() {
-    this.terms.sort((a, b) => a.compare(b));
-    return this.terms.map(term => term.toString()).filter(Boolean);
-  }
+}
+class Expression {
+    constructor(terms = []) {
+        this.terms = terms;
+    }
+    add(other, multiplier = 1) {
+        const termMap = new Map();
+        for (const term of this.terms) {
+            const key = term.variables.join('*');
+            termMap.set(key, term);
+        }
+        for (const term of other.terms) {
+            const key = term.variables.join('*');
+            if (termMap.has(key)) {
+                termMap.get(key).coefficient += term.coefficient * multiplier;
+            } else {
+                const newTerm = new Term(term.coefficient * multiplier, term.variables);
+                this.terms.push(newTerm);
+                termMap.set(key, newTerm);
+            }
+        }
+        this.terms = this.terms.filter(term => term.coefficient !== 0);
+        return this;
+    }
+    subtract(other) {
+        return this.add(other, -1);
+    }
+    multiply(other) {
+        const result = new Expression();
+        for (const term1 of this.terms) {
+            for (const term2 of other.terms) {
+                const product = term1.multiply(term2);
+                if (product.coefficient !== 0) {
+                    result.add(new Expression([product]));
+                }
+            }
+        }
+        return result;
+    }
+    toStringArray() {
+        this.terms.sort((a, b) => a.compare(b));
+        return this.terms.map(term => term.toString()).filter(Boolean);
+    }
 }

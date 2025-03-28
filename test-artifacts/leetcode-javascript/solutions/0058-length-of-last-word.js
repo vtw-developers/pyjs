@@ -13,11 +13,10 @@
  * Note: A word is defined as a maximal substring consisting
  * of non-space characters only.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var lengthOfLastWord = function(s) {
-  return s.trim().split(/\s+/).pop().length;
+    return s.trim().split(/\s+/).pop().length;
 };

@@ -7,25 +7,22 @@
  * (i, j, k) such that i < j < k and nums[i] < nums[j] < nums[k]. If no such
  * indices exists, return false.
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
  */
 var increasingTriplet = function(nums) {
-  let first = Infinity;
-  let second = Infinity;
-
-  for (const current of nums) {
-    if (current > second && current > first) {
-      return true;
+    let first = Infinity;
+    let second = Infinity;
+    for (const current of nums) {
+        if (current > second && current > first) {
+            return true;
+        }
+        if (current > first) {
+            second = current;
+        } else {
+            first = current;
+        }
     }
-    if (current > first) {
-      second = current;
-    } else {
-      first = current;
-    }
-  }
-
-  return false;
+    return false;
 };

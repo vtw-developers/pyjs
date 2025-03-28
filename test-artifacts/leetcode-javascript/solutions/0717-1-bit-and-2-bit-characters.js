@@ -10,11 +10,10 @@
  * Given a binary array bits that ends with 0, return true if the last character
  * must be a one-bit character.
  */
-
 /**
  * @param {number[]} bits
  * @return {boolean}
  */
 var isOneBitCharacter = function(bits) {
-  return bits.slice(0, bits.length - 1).join('').replace(/11|10|0/g, '') !== '1';
+    return bits.slice(0, bits.length - 1).join('').replace(/11|10|0/g, '') !== '1';
 };

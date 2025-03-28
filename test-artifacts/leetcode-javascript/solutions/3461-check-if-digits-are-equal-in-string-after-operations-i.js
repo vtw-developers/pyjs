@@ -12,18 +12,17 @@
  *
  * Return true if the final two digits in s are the same; otherwise, return false.
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var hasSameDigits = function(s) {
-  while (s.length > 2) {
-    let next = '';
-    for (let i = 0; i < s.length - 1; i++) {
-      next += (parseInt(s[i]) + parseInt(s[i + 1])) % 10;
+    while (s.length > 2) {
+        let next = '';
+        for (let i = 0; i < s.length - 1; i++) {
+            next += (parseInt(s[i]) + parseInt(s[i + 1])) % 10;
+        }
+        s = next;
     }
-    s = next;
-  }
-  return s[0] === s[1];
+    return s[0] === s[1];
 };

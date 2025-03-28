@@ -34,7 +34,6 @@
  *    divide the current grid into four sub-grids as shown in the photo.
  * 3. Recurse for each of the children with the proper sub-grid.
  */
-
 /**
  * // Definition for a QuadTree node.
  * function _Node(val,isLeaf,topLeft,topRight,bottomLeft,bottomRight) {
@@ -46,26 +45,20 @@
  *    this.bottomRight = bottomRight;
  * };
  */
-
 /**
  * @param {_Node} quadTree1
  * @param {_Node} quadTree2
  * @return {_Node}
  */
 var intersect = function(quadTree1, quadTree2) {
-  if (quadTree1.isLeaf) return quadTree1.val ? quadTree1 : quadTree2;
-  if (quadTree2.isLeaf) return quadTree2.val ? quadTree2 : quadTree1;
-
-  const topLeft = intersect(quadTree1.topLeft, quadTree2.topLeft);
-  const topRight = intersect(quadTree1.topRight, quadTree2.topRight);
-  const bottomLeft = intersect(quadTree1.bottomLeft, quadTree2.bottomLeft);
-  const bottomRight = intersect(quadTree1.bottomRight, quadTree2.bottomRight);
-
-  if (topLeft.isLeaf && topRight.isLeaf && bottomLeft.isLeaf && bottomRight.isLeaf
-      && topLeft.val === topRight.val && topRight.val === bottomLeft.val
-      && bottomLeft.val === bottomRight.val) {
-    return new _Node(topLeft.val, true, null, null, null, null);
-  }
-
-  return new _Node(false, false, topLeft, topRight, bottomLeft, bottomRight);
+    if (quadTree1.isLeaf) return quadTree1.val ? quadTree1 : quadTree2;
+    if (quadTree2.isLeaf) return quadTree2.val ? quadTree2 : quadTree1;
+    const topLeft = intersect(quadTree1.topLeft, quadTree2.topLeft);
+    const topRight = intersect(quadTree1.topRight, quadTree2.topRight);
+    const bottomLeft = intersect(quadTree1.bottomLeft, quadTree2.bottomLeft);
+    const bottomRight = intersect(quadTree1.bottomRight, quadTree2.bottomRight);
+    if (topLeft.isLeaf && topRight.isLeaf && bottomLeft.isLeaf && bottomRight.isLeaf && topLeft.val === topRight.val && topRight.val === bottomLeft.val && bottomLeft.val === bottomRight.val) {
+        return new _Node(topLeft.val, true, null, null, null, null);
+    }
+    return new _Node(false, false, topLeft, topRight, bottomLeft, bottomRight);
 };

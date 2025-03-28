@@ -13,28 +13,24 @@
  * Find the number that occurs twice and the number that is missing and return them in
  * the form of an array.
  */
-
 /**
  * @param {number[]} nums
  * @return {number[]}
  */
 var findErrorNums = function(nums) {
-  const set = new Set();
-  const result = [];
-
-  for (const n of nums) {
-    if (set.has(n)) {
-      result.push(n);
+    const set = new Set();
+    const result = [];
+    for (const n of nums) {
+        if (set.has(n)) {
+            result.push(n);
+        }
+        set.add(n);
     }
-    set.add(n);
-  }
-
-  for (let i = nums.length; i > 0; i--) {
-    if (!set.has(i)) {
-      result.push(i);
-      break;
+    for (let i = nums.length; i > 0; i--) {
+        if (!set.has(i)) {
+            result.push(i);
+            break;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

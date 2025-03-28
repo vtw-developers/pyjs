@@ -15,21 +15,18 @@
  * Return the minimum number of operations needed so that all elements of the array are greater
  * than or equal to k.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var minOperations = function(nums, k) {
-  const queue = new MinPriorityQueue();
-  let operations = 0;
-
-  nums.forEach(n => queue.enqueue(n));
-  while (queue.size() >= 2 && queue.front().element < k) {
-    queue.enqueue(queue.dequeue().element * 2 + queue.dequeue().element);
-    operations++;
-  }
-
-  return operations;
+    const queue = new MinPriorityQueue();
+    let operations = 0;
+    nums.forEach(n => queue.enqueue(n));
+    while (queue.size() >= 2 && queue.front().element < k) {
+        queue.enqueue(queue.dequeue().element * 2 + queue.dequeue().element);
+        operations++;
+    }
+    return operations;
 };

@@ -10,16 +10,15 @@
  * Each word would be put on only one column and that in one
  * column there will be only one word.
  */
-
 /**
  * @param {string} s
  * @return {string[]}
  */
 var printVertically = function(s) {
-  const result = [];
-  s.split(/\s+/).forEach((word, i) => word.split('').forEach((letter, j) => {
-    result[j] = result[j] || '';
-    result[j] += letter.padStart(i - result[j].length + 1, ' ');
-  }));
-  return result;
+    const result = [];
+    s.split(/\s+/).forEach((word, i) => word.split('').forEach((letter, j) => {
+        result[j] = result[j] || '';
+        result[j] += letter.padStart(i - result[j].length + 1, ' ');
+    }));
+    return result;
 };

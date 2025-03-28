@@ -9,15 +9,11 @@
  *
  * Return the bitwise XOR of all elements of nums.
  */
-
 /**
  * @param {number} n
  * @param {number} start
  * @return {number}
  */
 var xorOperation = function(n, start) {
-  return new Array(n)
-    .fill(0)
-    .map((_, i) => start + 2 * i)
-    .reduce((result, n) => result ^ n, 0);
+    return new Array(n).fill(0).map((_, i) => start + 2 * i).reduce((result, n) => result ^ n, 0);
 };

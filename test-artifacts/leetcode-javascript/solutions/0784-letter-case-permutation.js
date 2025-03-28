@@ -8,28 +8,27 @@
  *
  * Return a list of all possible strings we could create. Return the output in any order.
  */
-
 /**
  * @param {string} str
  * @return {string[]}
  */
 var letterCasePermutation = function(str) {
-  const result = [];
-  backtrack(result, str);
-  return result;
+    const result = [];
+    backtrack(result, str);
+    return result;
 };
 
 function backtrack(result, input, permutation = '', offset = 0) {
-  if (input.length === permutation.length) {
-    result.push(permutation);
-  } else {
-    const target = input[offset];
-    if (isNaN(target)) {
-      [target.toLowerCase(), target.toUpperCase()].forEach(s => {
-        backtrack(result, input, permutation + s, offset + 1);
-      });
+    if (input.length === permutation.length) {
+        result.push(permutation);
     } else {
-      backtrack(result, input, permutation + target, offset + 1);
+        const target = input[offset];
+        if (isNaN(target)) {
+            [target.toLowerCase(), target.toUpperCase()].forEach(s => {
+                backtrack(result, input, permutation + s, offset + 1);
+            });
+        } else {
+            backtrack(result, input, permutation + target, offset + 1);
+        }
     }
-  }
 }

@@ -10,13 +10,11 @@
  *
  * Return the sorted array.
  */
-
 /**
  * @param {number[]} arr
  * @return {number[]}
  */
 var sortByBits = function(arr) {
-  const getCount = n => n.toString(2).replace(/0/g, '').length;
-
-  return arr.sort((a, b) => getCount(a) - getCount(b) || a - b);
+    const getCount = n => n.toString(2).replace(/0/g, '').length;
+    return arr.sort((a, b) => getCount(a) - getCount(b) || a - b);
 };

@@ -26,29 +26,28 @@
  * For instance, [...,[2 3],[4 5],[7 5],[11 5],[12 7],...] is not acceptable; the three lines
  * of height 5 should be merged into one in the final output as such: [...,[2 3],[4 5],[12 7],...]
  */
-
 /**
  * @param {number[][]} buildings
  * @return {number[][]}
  */
 var getSkyline = function(buildings) {
-  const result = [];
-  const events = buildings.flatMap(([l, r, h]) => [[l, -h], [r, h]]);
-
-  events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-
-  for (let i = 0, previous = 0, heights = [0]; i < events.length; i++) {
-    const [x, h] = events[i];
-    if (h < 0) {
-      heights.push(-h);
-    } else {
-      heights.splice(heights.indexOf(h), 1);
+    const result = [];
+    const events = buildings.flatMap(([l, r, h]) => [
+        [l, -h],
+        [r, h]
+    ]);
+    events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    for (let i = 0, previous = 0, heights = [0]; i < events.length; i++) {
+        const [x, h] = events[i];
+        if (h < 0) {
+            heights.push(-h);
+        } else {
+            heights.splice(heights.indexOf(h), 1);
+        }
+        const value = Math.max(...heights);
+        if (value !== previous) {
+            result.push([x, previous = value]);
+        }
     }
-    const value = Math.max(...heights);
-    if (value !== previous) {
-      result.push([x, previous = value]);
-    }
-  }
-
-  return result;
+    return result;
 };

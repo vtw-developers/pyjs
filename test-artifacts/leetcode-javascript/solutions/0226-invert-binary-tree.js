@@ -5,7 +5,6 @@
  *
  * Invert a binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val) {
@@ -18,6 +17,6 @@
  * @return {TreeNode}
  */
 var invertTree = function(node) {
-  if (node) [node.left, node.right] = [invertTree(node.right), invertTree(node.left)];
-  return node;
+    if (node)[node.left, node.right] = [invertTree(node.right), invertTree(node.left)];
+    return node;
 };

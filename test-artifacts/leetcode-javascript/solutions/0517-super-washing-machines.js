@@ -13,20 +13,18 @@
  * from left to right on the line, return the minimum number of moves to make all the washing
  * machines have the same number of dresses. If it is not possible to do it, return -1.
  */
-
 /**
  * @param {number[]} machines
  * @return {number}
  */
 var findMinMoves = function(machines) {
-  const total = machines.reduce((sum, num) => sum + num, 0);
-  const target = total / machines.length;
-  if (total % machines.length !== 0) return -1;
-
-  let result = 0;
-  for (let i = 0, balance = 0; i < machines.length; i++) {
-    balance += machines[i] - target;
-    result = Math.max(result, Math.abs(balance), machines[i] - target);
-  }
-  return result;
+    const total = machines.reduce((sum, num) => sum + num, 0);
+    const target = total / machines.length;
+    if (total % machines.length !== 0) return -1;
+    let result = 0;
+    for (let i = 0, balance = 0; i < machines.length; i++) {
+        balance += machines[i] - target;
+        result = Math.max(result, Math.abs(balance), machines[i] - target);
+    }
+    return result;
 };

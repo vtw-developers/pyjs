@@ -8,7 +8,6 @@
  *
  * The length of the path between two nodes is represented by the number of edges between them.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,19 +21,17 @@
  * @return {number}
  */
 var longestUnivaluePath = function(root) {
-  let max = 0;
-  dfs(root);
-  return max;
+    let max = 0;
+    dfs(root);
+    return max;
 
-  function dfs(node) {
-    if (!node) return 0;
-
-    const left = dfs(node.left);
-    const right = dfs(node.right);
-    const leftPath = node.left?.val === node.val ? left + 1 : 0;
-    const rightPath = node.right?.val === node.val ? right + 1 : 0;
-
-    max = Math.max(max, leftPath + rightPath);
-    return Math.max(leftPath, rightPath);
-  }
+    function dfs(node) {
+        if (!node) return 0;
+        const left = dfs(node.left);
+        const right = dfs(node.right);
+        const leftPath = node.left?.val === node.val ? left + 1 : 0;
+        const rightPath = node.right?.val === node.val ? right + 1 : 0;
+        max = Math.max(max, leftPath + rightPath);
+        return Math.max(leftPath, rightPath);
+    }
 };

@@ -12,11 +12,10 @@
  * Given n, the number of stones in the heap, return true if you can win the game assuming
  * both you and your friend play optimally, otherwise return false.
  */
-
 /**
  * @param {number} n
  * @return {boolean}
  */
 var canWinNim = function(n) {
-  return n % 4 !== 0;
+    return n % 4 !== 0;
 };

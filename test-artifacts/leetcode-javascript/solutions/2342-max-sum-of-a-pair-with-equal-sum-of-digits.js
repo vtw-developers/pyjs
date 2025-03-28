@@ -10,19 +10,16 @@
  * Return the maximum value of nums[i] + nums[j] that you can obtain over all possible indices
  * i and j that satisfy the conditions.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var maximumSum = function(nums) {
-  const map = new Map();
-
-  return nums.reduce((result, n) => {
-    const key = n.toString().split('').reduce((sum, n) => +n + sum, 0);
-    result = !map.has(key) ? result : Math.max(result, n + map.get(key));
-    map.set(key, Math.max(map.get(key) ?? 0, n));
-
-    return result;
-  }, -1);
+    const map = new Map();
+    return nums.reduce((result, n) => {
+        const key = n.toString().split('').reduce((sum, n) => +n + sum, 0);
+        result = !map.has(key) ? result : Math.max(result, n + map.get(key));
+        map.set(key, Math.max(map.get(key) ?? 0, n));
+        return result;
+    }, -1);
 };

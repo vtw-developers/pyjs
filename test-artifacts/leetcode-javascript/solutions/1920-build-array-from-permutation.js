@@ -9,11 +9,10 @@
  * A zero-based permutation nums is an array of distinct integers from 0 to nums.length - 1
  * (inclusive).
  */
-
 /**
  * @param {number[]} nums
  * @return {number[]}
  */
 var buildArray = function(nums) {
-  return nums.map(n => nums[n]);
+    return nums.map(n => nums[n]);
 };

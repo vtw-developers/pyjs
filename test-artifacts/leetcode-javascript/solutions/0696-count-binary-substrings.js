@@ -9,25 +9,22 @@
  *
  * Substrings that occur multiple times are counted the number of times they occur.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var countBinarySubstrings = function(s) {
-  let result = 0;
-
-  for (let i = 0, group = [], count = 1, prevCount = 0; i < s.length; i++) {
-    if (s[i] === s[i + 1]) {
-      count++;
-    } else {
-      if (prevCount) {
-        result += prevCount <= count ? prevCount : count;
-      }
-      prevCount = count;
-      count = 1;
+    let result = 0;
+    for (let i = 0, group = [], count = 1, prevCount = 0; i < s.length; i++) {
+        if (s[i] === s[i + 1]) {
+            count++;
+        } else {
+            if (prevCount) {
+                result += prevCount <= count ? prevCount : count;
+            }
+            prevCount = count;
+            count = 1;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

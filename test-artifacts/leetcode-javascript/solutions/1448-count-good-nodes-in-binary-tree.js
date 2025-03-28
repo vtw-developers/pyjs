@@ -8,7 +8,6 @@
  *
  * Return the number of good nodes in the binary tree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,7 +21,7 @@
  * @return {number}
  */
 var goodNodes = function(root, max = -Infinity) {
-  if (!root) return 0;
-  const n = root.val >= max ? 1 : 0;
-  return n + goodNodes(root.left, n ? root.val : max) + goodNodes(root.right, n ? root.val : max);
+    if (!root) return 0;
+    const n = root.val >= max ? 1 : 0;
+    return n + goodNodes(root.left, n ? root.val : max) + goodNodes(root.right, n ? root.val : max);
 };

@@ -21,32 +21,23 @@
  * Given a target position target, return the length of the shortest sequence of instructions
  * to get there.
  */
-
 /**
  * @param {number} target
  * @return {number}
  */
 var racecar = function(target) {
-  const dp = new Array(target + 1).fill(Infinity);
-  dp[0] = 0;
-
-  for (let i = 1; i <= target; i++) {
-    const k = Math.ceil(Math.log2(i + 1));
-
-    if ((1 << k) - 1 === i) {
-      dp[i] = k;
-      continue;
+    const dp = new Array(target + 1).fill(Infinity);
+    dp[0] = 0;
+    for (let i = 1; i <= target; i++) {
+        const k = Math.ceil(Math.log2(i + 1));
+        if ((1 << k) - 1 === i) {
+            dp[i] = k;
+            continue;
+        }
+        dp[i] = k + 1 + dp[(1 << k) - 1 - i];
+        for (let j = 0; j < k - 1; j++) {
+            dp[i] = Math.min(dp[i], (k - 1) + 1 + j + 1 + dp[i - ((1 << (k - 1)) - 1) + (1 << j) - 1]);
+        }
     }
-
-    dp[i] = k + 1 + dp[(1 << k) - 1 - i];
-
-    for (let j = 0; j < k - 1; j++) {
-      dp[i] = Math.min(
-        dp[i],
-        (k - 1) + 1 + j + 1 + dp[i - ((1 << (k - 1)) - 1) + (1 << j) - 1]
-      );
-    }
-  }
-
-  return dp[target];
+    return dp[target];
 };

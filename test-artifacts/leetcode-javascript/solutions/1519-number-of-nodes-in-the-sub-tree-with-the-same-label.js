@@ -18,7 +18,6 @@
  * A subtree of a tree T is the tree consisting of a node in T and all of its
  * descendant nodes.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} edges
@@ -26,27 +25,24 @@
  * @return {number[]}
  */
 var countSubTrees = function(n, edges, labels) {
-  const lookup = Array.from(Array(n), () => []);
-  const result = new Array(n).fill(0);
-
-  edges.forEach(([x, y]) => {
-    lookup[x].push(y);
-    lookup[y].push(x);
-  });
-
-  function bfs(index, previous, chars = new Array(26).fill(0)) {
-    const key = labels.charCodeAt(index) - 97;
-    const count = chars[key];
-    chars[key]++;
-    lookup[index].forEach(i => {
-      if (i !== previous) {
-        bfs(i, index, chars);
-      }
+    const lookup = Array.from(Array(n), () => []);
+    const result = new Array(n).fill(0);
+    edges.forEach(([x, y]) => {
+        lookup[x].push(y);
+        lookup[y].push(x);
     });
-    result[index] = chars[key] - count;
-  }
 
-  bfs(0, -1);
-
-  return result;
+    function bfs(index, previous, chars = new Array(26).fill(0)) {
+        const key = labels.charCodeAt(index) - 97;
+        const count = chars[key];
+        chars[key]++;
+        lookup[index].forEach(i => {
+            if (i !== previous) {
+                bfs(i, index, chars);
+            }
+        });
+        result[index] = chars[key] - count;
+    }
+    bfs(0, -1);
+    return result;
 };

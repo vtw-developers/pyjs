@@ -15,22 +15,19 @@
  * Note: The length of temperatures will be in the range [1, 30000].
  * Each temperature will be an integer in the range [30, 100].
  */
-
 /**
  * @param {number[]} T
  * @return {number[]}
  */
 var dailyTemperatures = function(T) {
-  const result = new Array(T.length).fill(0);
-  const stack = [];
-
-  for (let i = 0; i < T.length; i++) {
-    while (stack.length && T[stack[stack.length - 1]] < T[i]) {
-      const topIndex = stack.pop();
-      result[topIndex] = i - topIndex;
+    const result = new Array(T.length).fill(0);
+    const stack = [];
+    for (let i = 0; i < T.length; i++) {
+        while (stack.length && T[stack[stack.length - 1]] < T[i]) {
+            const topIndex = stack.pop();
+            result[topIndex] = i - topIndex;
+        }
+        stack.push(i);
     }
-    stack.push(i);
-  }
-
-  return result;
+    return result;
 };

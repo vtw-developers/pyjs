@@ -19,41 +19,35 @@
  * Return the minimum capability of the robber out of all the possible ways to steal at least
  * k houses.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var minCapability = function(nums, k) {
-  let left = Math.min(...nums);
-  let right = Math.max(...nums);
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-
-    if (canRob(nums, mid, k)) {
-      right = mid;
-    } else {
-      left = mid + 1;
+    let left = Math.min(...nums);
+    let right = Math.max(...nums);
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (canRob(nums, mid, k)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
     }
-  }
-
-  return left;
+    return left;
 };
 
 function canRob(nums, capability, k) {
-  let count = 0;
-  let i = 0;
-
-  while (i < nums.length) {
-    if (nums[i] <= capability) {
-      count++;
-      i += 2;
-    } else {
-      i++;
+    let count = 0;
+    let i = 0;
+    while (i < nums.length) {
+        if (nums[i] <= capability) {
+            count++;
+            i += 2;
+        } else {
+            i++;
+        }
     }
-  }
-
-  return count >= k;
+    return count >= k;
 }

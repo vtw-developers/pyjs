@@ -9,7 +9,6 @@
  *
  * The blue edges and nodes in the following figure indicate the result:
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -25,20 +24,18 @@
  * @return {ListNode}
  */
 var mergeInBetween = function(list1, a, b, list2) {
-  const result = new ListNode(0, list1);
-
-  for (let i = 1; i < a; i++) {
-    list1 = list1.next;
-  }
-  let tail = list1.next;
-  list1.next = list2;
-  for (let i = a; i < b; i++) {
-    tail = tail.next;
-  }
-  while (list1 && list1.next) {
-    list1 = list1.next;
-  }
-  list1.next = tail.next;
-
-  return result.next;
+    const result = new ListNode(0, list1);
+    for (let i = 1; i < a; i++) {
+        list1 = list1.next;
+    }
+    let tail = list1.next;
+    list1.next = list2;
+    for (let i = a; i < b; i++) {
+        tail = tail.next;
+    }
+    while (list1 && list1.next) {
+        list1 = list1.next;
+    }
+    list1.next = tail.next;
+    return result.next;
 };

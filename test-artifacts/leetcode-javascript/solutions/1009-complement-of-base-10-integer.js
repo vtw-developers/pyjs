@@ -15,11 +15,10 @@
  * For a given number N in base-10, return the complement of it's
  * binary representation as a base-10 integer.
  */
-
 /**
  * @param {number} N
  * @return {number}
  */
 var bitwiseComplement = function(N) {
-  return parseInt(N.toString(2).split('').map(n => n ^ 1).join(''), 2);
+    return parseInt(N.toString(2).split('').map(n => n ^ 1).join(''), 2);
 };

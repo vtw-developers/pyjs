@@ -13,22 +13,19 @@
  * A sequence of n integers is called a permutation if it contains all integers from 1 to
  * n exactly once.
  */
-
 /**
  * @param {number[]} A
  * @param {number[]} B
  * @return {number[]}
  */
 var findThePrefixCommonArray = function(A, B) {
-  const result = [];
-
-  for (let i = 0, count = 0, set = new Set(); i < A.length; i++) {
-    if (set.has(A[i])) count++;
-    if (set.has(B[i])) count++;
-    if (A[i] === B[i]) count++;
-    [A[i], B[i]].forEach(n => set.add(n));
-    result.push(count);
-  }
-
-  return result;
+    const result = [];
+    for (let i = 0, count = 0, set = new Set(); i < A.length; i++) {
+        if (set.has(A[i])) count++;
+        if (set.has(B[i])) count++;
+        if (A[i] === B[i]) count++;
+        [A[i], B[i]].forEach(n => set.add(n));
+        result.push(count);
+    }
+    return result;
 };

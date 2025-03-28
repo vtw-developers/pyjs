@@ -10,21 +10,18 @@
  *
  * Return the resulting string after removing all digits.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var clearDigits = function(s) {
-  const stack = [];
-
-  for (const character of s) {
-    if (!isNaN(character) && stack.length) {
-      stack.pop();
-    } else {
-      stack.push(character);
+    const stack = [];
+    for (const character of s) {
+        if (!isNaN(character) && stack.length) {
+            stack.pop();
+        } else {
+            stack.push(character);
+        }
     }
-  }
-
-  return stack.join('');
+    return stack.join('');
 };

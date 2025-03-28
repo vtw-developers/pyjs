@@ -8,7 +8,6 @@
  * The linked list holds the binary representation of a number.
  * Return the decimal value of the number in the linked list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val) {
@@ -21,12 +20,10 @@
  * @return {number}
  */
 var getDecimalValue = function(head) {
-  let binary = String(head.val);
-
-  while (head.next !== null) {
-    head = head.next;
-    binary += head.val;
-  }
-
-  return parseInt(binary, 2);
+    let binary = String(head.val);
+    while (head.next !== null) {
+        head = head.next;
+        binary += head.val;
+    }
+    return parseInt(binary, 2);
 };

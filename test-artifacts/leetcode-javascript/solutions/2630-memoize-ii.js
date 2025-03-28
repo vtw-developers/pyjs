@@ -12,19 +12,19 @@
  * of values it accepts. Inputs are considered identical if they
  * are === to each other.
  */
-
 /**
  * @param {Function} fn
  * @return {Function}
  */
 function memoize(fn) {
-  const cache = {};
-  const idLookup = new Map();
-  function generateId(item) {
-    return idLookup.get(item) ?? idLookup.set(item, idLookup.size + 1).get(item);
-  }
-  return (...args) => {
-    const key = args.map(generateId).join('-');
-    return !cache.hasOwnProperty(key) ? (cache[key] = fn(...args)) : cache[key];
-  };
+    const cache = {};
+    const idLookup = new Map();
+
+    function generateId(item) {
+        return idLookup.get(item) ?? idLookup.set(item, idLookup.size + 1).get(item);
+    }
+    return (...args) => {
+        const key = args.map(generateId).join('-');
+        return !cache.hasOwnProperty(key) ? (cache[key] = fn(...args)) : cache[key];
+    };
 }

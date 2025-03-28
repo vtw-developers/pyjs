@@ -9,28 +9,24 @@
  * The graph is given as follows: graph[i] is a list of all nodes you can visit from node i (i.e.,
  * there is a directed edge from node i to node graph[i][j]).
  */
-
 /**
  * @param {number[][]} graph
  * @return {number[][]}
  */
 var allPathsSourceTarget = function(graph) {
-  const target = graph.length - 1;
-  const paths = [];
-
-  const dfs = (node, path) => {
-    if (node === target) {
-      paths.push([...path]);
-      return;
-    }
-
-    for (const neighbor of graph[node]) {
-      path.push(neighbor);
-      dfs(neighbor, path);
-      path.pop();
-    }
-  };
-
-  dfs(0, [0]);
-  return paths;
+    const target = graph.length - 1;
+    const paths = [];
+    const dfs = (node, path) => {
+        if (node === target) {
+            paths.push([...path]);
+            return;
+        }
+        for (const neighbor of graph[node]) {
+            path.push(neighbor);
+            dfs(neighbor, path);
+            path.pop();
+        }
+    };
+    dfs(0, [0]);
+    return paths;
 };

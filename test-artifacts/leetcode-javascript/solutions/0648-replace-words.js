@@ -13,18 +13,17 @@
  *
  * You need to output the sentence after the replacement.
  */
-
 /**
  * @param {string[]} dict
  * @param {string} sentence
  * @return {string}
  */
 var replaceWords = function(dict, sentence) {
-  const set = new Set(dict);
-  return sentence.split(/\s+/).map(word => {
-    for (let i = 1; i <= word.length; i++) {
-      if (set.has(word.slice(0, i))) return word.slice(0, i);
-    }
-    return word;
-  }).join(' ');
+    const set = new Set(dict);
+    return sentence.split(/\s+/).map(word => {
+        for (let i = 1; i <= word.length; i++) {
+            if (set.has(word.slice(0, i))) return word.slice(0, i);
+        }
+        return word;
+    }).join(' ');
 };

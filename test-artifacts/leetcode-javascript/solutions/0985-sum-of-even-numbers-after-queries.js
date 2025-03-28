@@ -15,19 +15,17 @@
  * Return the answer to all queries. Your answer array should
  * have answer[i] as the answer to the i-th query.
  */
-
 /**
  * @param {number[]} A
  * @param {number[][]} queries
  * @return {number[]}
  */
 var sumEvenAfterQueries = function(A, queries) {
-  return queries.reduce((sums, query) => {
-    A[query[1]] += query[0];
-    return [...sums, A.reduce((sum, n) => sum + (n % 2 === 0 ? n : 0), 0)];
-  }, []);
+    return queries.reduce((sums, query) => {
+        A[query[1]] += query[0];
+        return [...sums, A.reduce((sum, n) => sum + (n % 2 === 0 ? n : 0), 0)];
+    }, []);
 };
-
 // Significantly faster, less elegant approach:
 /**
  * @param {number[]} A
@@ -35,12 +33,12 @@ var sumEvenAfterQueries = function(A, queries) {
  * @return {number[]}
  */
 var sumEvenAfterQueries = function(A, queries) {
-  return queries.reduce((sums, query) => {
-    const [v, i] = query;
-    const prev = A[i];
-    const lastSum = sums.length ? sums[sums.length - 1] : A.reduce((sum, n) => sum + (n % 2 === 0 ? n : 0), 0);
-    A[i] += v;
-    sums.push(lastSum - (prev % 2 === 0 ? prev : 0) + (A[i] % 2 === 0 ? A[i] : 0));
-    return sums;
-  }, []);
+    return queries.reduce((sums, query) => {
+        const [v, i] = query;
+        const prev = A[i];
+        const lastSum = sums.length ? sums[sums.length - 1] : A.reduce((sum, n) => sum + (n % 2 === 0 ? n : 0), 0);
+        A[i] += v;
+        sums.push(lastSum - (prev % 2 === 0 ? prev : 0) + (A[i] % 2 === 0 ? A[i] : 0));
+        return sums;
+    }, []);
 };

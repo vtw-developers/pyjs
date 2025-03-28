@@ -22,7 +22,6 @@
  * Given the original graph and maxMoves, return the number of nodes that are reachable from node
  * 0 in the new graph.
  */
-
 /**
  * @param {number[][]} edges
  * @param {number} maxMoves
@@ -30,57 +29,50 @@
  * @return {number}
  */
 var reachableNodes = function(edges, maxMoves, n) {
-  const graph = {};
-  for (let i = 0; i < n; i++) {
-    graph[i] = [];
-  }
-
-  for (const [u, v, w] of edges) {
-    graph[u].push([v, w]);
-    graph[v].push([u, w]);
-  }
-
-  const dist = {};
-  for (let i = 0; i < n; i++) {
-    dist[i] = Infinity;
-  }
-  dist[0] = 0;
-
-  const used = {};
-  const pq = [[0, 0]];
-  while (pq.length) {
-    pq.sort((a, b) => a[0] - b[0]);
-    const [d, node] = pq.shift();
-
-    if (d > dist[node]) continue;
-
-    for (const [nei, weight] of graph[node]) {
-      const edgeId = `${Math.min(node, nei)}-${Math.max(node, nei)}`;
-      const dirId = node < nei ? 0 : 1;
-
-      if (!used[edgeId]) {
-        used[edgeId] = [0, 0];
-      }
-      used[edgeId][dirId] = Math.min(maxMoves - d, weight);
-      if (d + weight + 1 <= maxMoves && d + weight + 1 < dist[nei]) {
-        dist[nei] = d + weight + 1;
-        pq.push([dist[nei], nei]);
-      }
+    const graph = {};
+    for (let i = 0; i < n; i++) {
+        graph[i] = [];
     }
-  }
-
-  let result = 0;
-  for (let i = 0; i < n; i++) {
-    if (dist[i] <= maxMoves) result++;
-  }
-
-  for (const [u, v, cnt] of edges) {
-    const edgeId = `${Math.min(u, v)}-${Math.max(u, v)}`;
-    if (used[edgeId]) {
-      const totalUsed = used[edgeId][0] + used[edgeId][1];
-      result += Math.min(cnt, totalUsed);
+    for (const [u, v, w] of edges) {
+        graph[u].push([v, w]);
+        graph[v].push([u, w]);
     }
-  }
-
-  return result;
+    const dist = {};
+    for (let i = 0; i < n; i++) {
+        dist[i] = Infinity;
+    }
+    dist[0] = 0;
+    const used = {};
+    const pq = [
+        [0, 0]
+    ];
+    while (pq.length) {
+        pq.sort((a, b) => a[0] - b[0]);
+        const [d, node] = pq.shift();
+        if (d > dist[node]) continue;
+        for (const [nei, weight] of graph[node]) {
+            const edgeId = `${Math.min(node, nei)}-${Math.max(node, nei)}`;
+            const dirId = node < nei ? 0 : 1;
+            if (!used[edgeId]) {
+                used[edgeId] = [0, 0];
+            }
+            used[edgeId][dirId] = Math.min(maxMoves - d, weight);
+            if (d + weight + 1 <= maxMoves && d + weight + 1 < dist[nei]) {
+                dist[nei] = d + weight + 1;
+                pq.push([dist[nei], nei]);
+            }
+        }
+    }
+    let result = 0;
+    for (let i = 0; i < n; i++) {
+        if (dist[i] <= maxMoves) result++;
+    }
+    for (const [u, v, cnt] of edges) {
+        const edgeId = `${Math.min(u, v)}-${Math.max(u, v)}`;
+        if (used[edgeId]) {
+            const totalUsed = used[edgeId][0] + used[edgeId][1];
+            result += Math.min(cnt, totalUsed);
+        }
+    }
+    return result;
 };

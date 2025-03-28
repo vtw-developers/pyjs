@@ -13,28 +13,25 @@
  *
  * Return the maximum number of candies each child can get.
  */
-
 /**
  * @param {number[]} candies
  * @param {number} k
  * @return {number}
  */
 var maximumCandies = function(candies, k) {
-  let left = 0;
-  let right = 1e7 + 1;
-
-  while (left + 1 !== right) {
-    const middle = Math.floor((left + right) / 2);
-    let piles = 0;
-    for (const candy of candies) {
-      piles += Math.floor(candy / middle);
+    let left = 0;
+    let right = 1e7 + 1;
+    while (left + 1 !== right) {
+        const middle = Math.floor((left + right) / 2);
+        let piles = 0;
+        for (const candy of candies) {
+            piles += Math.floor(candy / middle);
+        }
+        if (piles >= k) {
+            left = middle;
+        } else {
+            right = middle;
+        }
     }
-    if (piles >= k) {
-      left = middle;
-    } else {
-      right = middle;
-    }
-  }
-
-  return left;
+    return left;
 };

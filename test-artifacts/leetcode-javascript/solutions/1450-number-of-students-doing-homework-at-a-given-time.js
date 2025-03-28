@@ -12,7 +12,6 @@
  * return the number of students where queryTime lays in the interval [startTime[i],
  * endTime[i]] inclusive.
  */
-
 /**
  * @param {number[]} startTime
  * @param {number[]} endTime
@@ -20,5 +19,5 @@
  * @return {number}
  */
 var busyStudent = function(startTime, endTime, queryTime) {
-  return startTime.filter((s, i) => queryTime >= s && queryTime <= endTime[i]).length;
+    return startTime.filter((s, i) => queryTime >= s && queryTime <= endTime[i]).length;
 };

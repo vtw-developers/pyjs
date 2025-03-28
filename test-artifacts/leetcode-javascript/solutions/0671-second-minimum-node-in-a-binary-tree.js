@@ -13,7 +13,6 @@
  *
  * If no such second minimum value exists, output -1 instead.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -27,10 +26,11 @@
  * @return {number}
  */
 var findSecondMinimumValue = function(root) {
-  return root ? (n => n === Infinity ? -1 : n)(traverse(root, root.val)) : -1;
-  function traverse(node, min) {
-    if (!node) return Infinity;
-    if (node.val > min) return node.val;
-    return Math.min(traverse(node.left, min), traverse(node.right, min));
-  }
+    return root ? (n => n === Infinity ? -1 : n)(traverse(root, root.val)) : -1;
+
+    function traverse(node, min) {
+        if (!node) return Infinity;
+        if (node.val > min) return node.val;
+        return Math.min(traverse(node.left, min), traverse(node.right, min));
+    }
 };

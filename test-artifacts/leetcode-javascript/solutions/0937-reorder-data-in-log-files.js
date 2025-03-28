@@ -19,22 +19,15 @@
  *
  * Return the final order of the logs.
  */
-
 /**
  * @param {string[]} logs
  * @return {string[]}
  */
 var reorderLogFiles = function(logs) {
-  const split = logs.map(l => l.split(' '));
-  const sortedA = split.filter(l => isNaN(parseInt(l[1], 10))).sort((a, b) => {
-    return a[1] !== b[1]
-      ? a[1].localeCompare(b[1]) : a[2] !== b[2]
-        ? a[2].localeCompare(b[2]) : a.length === b.length
-          ? a[0].localeCompare(b[0]) : a.length - b.length;
-  }).map(l => l.join(' '));
-  const sortedB = split.filter(l => !isNaN(parseInt(l[1], 10)))
-    .sort((a, b) => b - a)
-    .map(l => l.join(' '));
-
-  return [...sortedA, ...sortedB];
+    const split = logs.map(l => l.split(' '));
+    const sortedA = split.filter(l => isNaN(parseInt(l[1], 10))).sort((a, b) => {
+        return a[1] !== b[1] ? a[1].localeCompare(b[1]) : a[2] !== b[2] ? a[2].localeCompare(b[2]) : a.length === b.length ? a[0].localeCompare(b[0]) : a.length - b.length;
+    }).map(l => l.join(' '));
+    const sortedB = split.filter(l => !isNaN(parseInt(l[1], 10))).sort((a, b) => b - a).map(l => l.join(' '));
+    return [...sortedA, ...sortedB];
 };

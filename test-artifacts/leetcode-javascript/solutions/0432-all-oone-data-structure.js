@@ -20,80 +20,89 @@
  *
  * Note that each function must run in O(1) average time complexity.
  */
-
 var AllOne = function() {
-  this.map = new Map();
-  this.head = { count: 0, keys: new Set(), prev: null, next: null };
-  this.tail = { count: Infinity, keys: new Set(), prev: this.head, next: null };
-  this.head.next = this.tail;
+    this.map = new Map();
+    this.head = {
+        count: 0,
+        keys: new Set(),
+        prev: null,
+        next: null
+    };
+    this.tail = {
+        count: Infinity,
+        keys: new Set(),
+        prev: this.head,
+        next: null
+    };
+    this.head.next = this.tail;
 };
-
 /**
  * @param {string} key
  * @return {void}
  */
 AllOne.prototype.inc = function(key) {
-  const node = this.map.get(key) || this.head;
-  const count = node.count + 1;
-  let next = node.next;
-
-  if (next.count !== count) {
-    next = { count, keys: new Set(), prev: node, next: node.next };
-    node.next.prev = next;
-    node.next = next;
-  }
-
-  next.keys.add(key);
-  node.keys.delete(key);
-  this.map.set(key, next);
-
-  if (node !== this.head && node.keys.size === 0) {
-    node.prev.next = node.next;
-    node.next.prev = node.prev;
-  }
+    const node = this.map.get(key) || this.head;
+    const count = node.count + 1;
+    let next = node.next;
+    if (next.count !== count) {
+        next = {
+            count,
+            keys: new Set(),
+            prev: node,
+            next: node.next
+        };
+        node.next.prev = next;
+        node.next = next;
+    }
+    next.keys.add(key);
+    node.keys.delete(key);
+    this.map.set(key, next);
+    if (node !== this.head && node.keys.size === 0) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
 };
-
 /**
  * @param {string} key
  * @return {void}
  */
 AllOne.prototype.dec = function(key) {
-  const node = this.map.get(key);
-  const count = node.count - 1;
-
-  node.keys.delete(key);
-
-  if (count === 0) {
-    this.map.delete(key);
-  } else {
-    let prev = node.prev;
-    if (prev.count !== count) {
-      prev = { count, keys: new Set(), prev: node.prev, next: node };
-      node.prev.next = prev;
-      node.prev = prev;
+    const node = this.map.get(key);
+    const count = node.count - 1;
+    node.keys.delete(key);
+    if (count === 0) {
+        this.map.delete(key);
+    } else {
+        let prev = node.prev;
+        if (prev.count !== count) {
+            prev = {
+                count,
+                keys: new Set(),
+                prev: node.prev,
+                next: node
+            };
+            node.prev.next = prev;
+            node.prev = prev;
+        }
+        prev.keys.add(key);
+        this.map.set(key, prev);
     }
-    prev.keys.add(key);
-    this.map.set(key, prev);
-  }
-
-  if (node.keys.size === 0) {
-    node.prev.next = node.next;
-    node.next.prev = node.prev;
-  }
+    if (node.keys.size === 0) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
 };
-
 /**
  * @return {string}
  */
 AllOne.prototype.getMaxKey = function() {
-  const node = this.tail.prev;
-  return node === this.head ? '' : node.keys.values().next().value;
+    const node = this.tail.prev;
+    return node === this.head ? '' : node.keys.values().next().value;
 };
-
 /**
  * @return {string}
  */
 AllOne.prototype.getMinKey = function() {
-  const node = this.head.next;
-  return node === this.tail ? '' : node.keys.values().next().value;
+    const node = this.head.next;
+    return node === this.tail ? '' : node.keys.values().next().value;
 };

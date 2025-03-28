@@ -8,27 +8,24 @@
  *
  * Return true if and only if we can do this so that the resulting number is a power of two.
  */
-
 /**
  * @param {number} n
  * @return {boolean}
  */
 var reorderedPowerOf2 = function(n) {
-  const numSignature = getDigitCount(n);
-  const maxPower = Math.floor(Math.log2(10 ** 9));
-
-  for (let i = 0; i <= maxPower; i++) {
-    if (getDigitCount(1 << i) === numSignature) return true;
-  }
-
-  return false;
-
-  function getDigitCount(num) {
-    const count = Array(10).fill(0);
-    while (num > 0) {
-      count[num % 10]++;
-      num = Math.floor(num / 10);
+    const numSignature = getDigitCount(n);
+    const maxPower = Math.floor(Math.log2(10 ** 9));
+    for (let i = 0; i <= maxPower; i++) {
+        if (getDigitCount(1 << i) === numSignature) return true;
     }
-    return count.join('');
-  }
+    return false;
+
+    function getDigitCount(num) {
+        const count = Array(10).fill(0);
+        while (num > 0) {
+            count[num % 10]++;
+            num = Math.floor(num / 10);
+        }
+        return count.join('');
+    }
 };

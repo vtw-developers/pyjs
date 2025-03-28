@@ -28,30 +28,25 @@
  *
  * The test cases are generated so that the answer fits in a 32-bit integer.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var numDecodings = function(s) {
-  if (s == null || s.length === 0) return 0;
-  if (s[0] === '0') return 0;
-
-  const group = new Array(s.length + 1).fill(0);
-  group[0] = 1;
-  group[1] = 1;
-
-  for (let i = 2; i <= s.length; i++) {
-    const a = Number(s.slice(i - 1, i));
-    if (a >= 1 && a <= 9) {
-      group[i] += group[i - 1];
+    if (s == null || s.length === 0) return 0;
+    if (s[0] === '0') return 0;
+    const group = new Array(s.length + 1).fill(0);
+    group[0] = 1;
+    group[1] = 1;
+    for (let i = 2; i <= s.length; i++) {
+        const a = Number(s.slice(i - 1, i));
+        if (a >= 1 && a <= 9) {
+            group[i] += group[i - 1];
+        }
+        const b = Number(s.slice(i - 2, i));
+        if (b >= 10 && b <= 26) {
+            group[i] += group[i - 2];
+        }
     }
-
-    const b = Number(s.slice(i - 2, i));
-    if (b >= 10 && b <= 26) {
-      group[i] += group[i - 2];
-    }
-  }
-
-  return group[s.length];
+    return group[s.length];
 };

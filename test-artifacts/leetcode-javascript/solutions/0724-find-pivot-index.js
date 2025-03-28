@@ -13,22 +13,19 @@
  *
  * Return the leftmost pivot index. If no such index exists, return -1.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var pivotIndex = function(nums) {
-  let left = 0;
-  let right = nums.reduce((sum, n) => sum + n, 0);
-
-  for (let i = 0; i < nums.length; i++) {
-    left += nums[i];
-    right -= nums[i];
-    if (left - nums[i] === right) {
-      return i;
+    let left = 0;
+    let right = nums.reduce((sum, n) => sum + n, 0);
+    for (let i = 0; i < nums.length; i++) {
+        left += nums[i];
+        right -= nums[i];
+        if (left - nums[i] === right) {
+            return i;
+        }
     }
-  }
-
-  return -1;
+    return -1;
 };

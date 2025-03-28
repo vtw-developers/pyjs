@@ -8,18 +8,17 @@
  * - Integers in each row are sorted in ascending from left to right.
  * - Integers in each column are sorted in ascending from top to bottom.
  */
-
 /**
  * @param {number[][]} matrix
  * @param {number} target
  * @return {boolean}
  */
 var searchMatrix = function(matrix, target) {
-  for (let i = 0, j = matrix[0].length - 1; i < matrix.length && j >= 0;) {
-    if (matrix[i][j] === target) {
-      return true;
+    for (let i = 0, j = matrix[0].length - 1; i < matrix.length && j >= 0;) {
+        if (matrix[i][j] === target) {
+            return true;
+        }
+        matrix[i][j] > target ? j-- : i++;
     }
-    matrix[i][j] > target ? j-- : i++;
-  }
-  return false;
+    return false;
 };

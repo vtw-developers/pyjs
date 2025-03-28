@@ -22,53 +22,52 @@
  * Note: The input is generated such that no two trees have the same height, and there is at least
  * one tree needs to be cut off.
  */
-
 /**
  * @param {number[][]} forest
  * @return {number}
  */
 const cutOffTree = (forest) => {
-  const treeHeights = forest.flat().filter((height) => height > 1).sort((a, b) => a - b);
-  let currentPosition = [0, 0];
-  let totalDistance = 0;
-
-  while (treeHeights.length) {
-    const gridCopy = forest.map((row) => [...row]);
-    const result = findDistance(currentPosition, treeHeights.shift(), gridCopy);
-    if (result === null) return -1;
-    const [nextPosition, distance] = result;
-    currentPosition = nextPosition;
-    totalDistance += distance;
-  }
-  return totalDistance;
-
-  function findDistance(startPosition, targetHeight, grid) {
-    const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    let queue = [startPosition];
-    let distance = 0;
-
-    while (queue.length) {
-      const nextLevel = [];
-
-      for (const [row, col] of queue) {
-        if (grid[row][col] === targetHeight) return [[row, col], distance];
-        if (!grid[row][col]) continue;
-
-        for (const [deltaRow, deltaCol] of directions) {
-          const newRow = row + deltaRow;
-          const newCol = col + deltaCol;
-          if (
-            newRow >= 0 && newRow < grid.length && newCol >= 0
-            && newCol < grid[0].length && grid[newRow][newCol]
-          ) {
-            nextLevel.push([newRow, newCol]);
-          }
-        }
-        grid[row][col] = 0;
-      }
-      distance += 1;
-      queue = nextLevel;
+    const treeHeights = forest.flat().filter((height) => height > 1).sort((a, b) => a - b);
+    let currentPosition = [0, 0];
+    let totalDistance = 0;
+    while (treeHeights.length) {
+        const gridCopy = forest.map((row) => [...row]);
+        const result = findDistance(currentPosition, treeHeights.shift(), gridCopy);
+        if (result === null) return -1;
+        const [nextPosition, distance] = result;
+        currentPosition = nextPosition;
+        totalDistance += distance;
     }
-    return null;
-  }
+    return totalDistance;
+
+    function findDistance(startPosition, targetHeight, grid) {
+        const directions = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ];
+        let queue = [startPosition];
+        let distance = 0;
+        while (queue.length) {
+            const nextLevel = [];
+            for (const [row, col] of queue) {
+                if (grid[row][col] === targetHeight) return [
+                    [row, col], distance
+                ];
+                if (!grid[row][col]) continue;
+                for (const [deltaRow, deltaCol] of directions) {
+                    const newRow = row + deltaRow;
+                    const newCol = col + deltaCol;
+                    if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length && grid[newRow][newCol]) {
+                        nextLevel.push([newRow, newCol]);
+                    }
+                }
+                grid[row][col] = 0;
+            }
+            distance += 1;
+            queue = nextLevel;
+        }
+        return null;
+    }
 };

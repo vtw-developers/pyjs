@@ -10,19 +10,16 @@
  * If it is impossible to form any triangle of non-zero
  * area, return 0.
  */
-
 /**
  * @param {number[]} A
  * @return {number}
  */
 var largestPerimeter = function(A) {
-  A.sort((a, b) => a - b);
-
-  for (let i = A.length - 1; i > 1; --i) {
-    if (A[i] < A[i - 1] + A[i - 2]) {
-      return A[i] + A[i - 1] + A[i - 2];
+    A.sort((a, b) => a - b);
+    for (let i = A.length - 1; i > 1; --i) {
+        if (A[i] < A[i - 1] + A[i - 2]) {
+            return A[i] + A[i - 1] + A[i - 2];
+        }
     }
-  }
-
-  return 0;
+    return 0;
 };

@@ -16,11 +16,10 @@
  * Return true if such an array exists or false otherwise.
  * - A binary array is an array containing only 0's and 1's
  */
-
 /**
  * @param {number[]} derived
  * @return {boolean}
  */
 var doesValidArrayExist = function(derived) {
-  return derived.reduce((xor, n) => xor ^ n, 0) === 0;
+    return derived.reduce((xor, n) => xor ^ n, 0) === 0;
 };

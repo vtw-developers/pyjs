@@ -12,7 +12,6 @@
  * tree can be serialized to a string and this string can be deserialized to the original tree
  * structure.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val) {
@@ -20,7 +19,6 @@
  *     this.left = this.right = null;
  * }
  */
-
 /**
  * Encodes a tree to a single string.
  *
@@ -28,9 +26,8 @@
  * @return {string}
  */
 var serialize = function(root) {
-  return JSON.stringify(root);
+    return JSON.stringify(root);
 };
-
 /**
  * Decodes your encoded data to tree.
  *
@@ -38,5 +35,5 @@ var serialize = function(root) {
  * @return {TreeNode}
  */
 var deserialize = function(data) {
-  return JSON.parse(data);
+    return JSON.parse(data);
 };

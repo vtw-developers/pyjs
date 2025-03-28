@@ -11,15 +11,11 @@
  *   rank must be the same.
  * - Rank should be as small as possible.
  */
-
 /**
  * @param {number[]} arr
  * @return {number[]}
  */
 var arrayRankTransform = function(arr) {
-  const ranks = [...new Set(arr)]
-    .sort((a, b) => a - b)
-    .reduce((map, value, index) => map.set(value, index + 1), new Map());
-
-  return arr.map(rank => ranks.get(rank));
+    const ranks = [...new Set(arr)].sort((a, b) => a - b).reduce((map, value, index) => map.set(value, index + 1), new Map());
+    return arr.map(rank => ranks.get(rank));
 };

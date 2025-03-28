@@ -10,32 +10,25 @@
  * Note that the same word in the dictionary may be reused multiple times in
  * the segmentation.
  */
-
 /**
  * @param {string} s
  * @param {string[]} wordDict
  * @return {string[]}
  */
 var wordBreak = function(s, wordDict) {
-  const result = [];
-  backtrack(result, s, wordDict, '');
-  return result;
+    const result = [];
+    backtrack(result, s, wordDict, '');
+    return result;
 };
 
 function backtrack(result, s, wordDict, substr) {
-  if (!s.length) {
-    result.push(substr);
-    return;
-  }
-
-  wordDict.forEach(word => {
-    if (s.length >= word.length && word === s.substring(0, word.length)) {
-      backtrack(
-        result,
-        s.substring(word.length),
-        wordDict,
-        substr.length ? `${substr} ${word}` : word,
-      );
+    if (!s.length) {
+        result.push(substr);
+        return;
     }
-  });
+    wordDict.forEach(word => {
+        if (s.length >= word.length && word === s.substring(0, word.length)) {
+            backtrack(result, s.substring(word.length), wordDict, substr.length ? `${substr} ${word}` : word);
+        }
+    });
 }

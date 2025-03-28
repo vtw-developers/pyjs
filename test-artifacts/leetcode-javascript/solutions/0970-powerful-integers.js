@@ -13,7 +13,6 @@
  * You may return the answer in any order.  In your
  * answer, each value should occur at most once.
  */
-
 /**
  * @param {number} x
  * @param {number} y
@@ -21,17 +20,17 @@
  * @return {number[]}
  */
 var powerfulIntegers = function(x, y, bound) {
-  const result = new Set();
-
-  for (let i = 1; i < bound; i *= x) {
-    for (let j = 1; i + j <= bound; j *= y) {
-      result.add(i + j);
-
-      if (y === 1) { break };
+    const result = new Set();
+    for (let i = 1; i < bound; i *= x) {
+        for (let j = 1; i + j <= bound; j *= y) {
+            result.add(i + j);
+            if (y === 1) {
+                break
+            };
+        }
+        if (x === 1) {
+            break
+        };
     }
-
-    if (x === 1) { break };
-  }
-
-  return Array.from(result);
+    return Array.from(result);
 };

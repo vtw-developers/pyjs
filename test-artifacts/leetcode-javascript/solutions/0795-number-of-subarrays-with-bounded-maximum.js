@@ -9,7 +9,6 @@
  *
  * The test cases are generated so that the answer will fit in a 32-bit integer.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} left
@@ -17,20 +16,17 @@
  * @return {number}
  */
 var numSubarrayBoundedMax = function(nums, left, right) {
-  let result = 0;
-  let validCount = 0;
-  let prevInvalidGreater = -1;
-
-  for (let i = 0; i < nums.length; i++) {
-    if (nums[i] > right) {
-      validCount = 0;
-      prevInvalidGreater = i;
-    } else if (nums[i] >= left) {
-      validCount = i - prevInvalidGreater;
+    let result = 0;
+    let validCount = 0;
+    let prevInvalidGreater = -1;
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] > right) {
+            validCount = 0;
+            prevInvalidGreater = i;
+        } else if (nums[i] >= left) {
+            validCount = i - prevInvalidGreater;
+        }
+        result += validCount;
     }
-
-    result += validCount;
-  }
-
-  return result;
+    return result;
 };

@@ -18,7 +18,6 @@
  * - The given node will always be the first node with val = 1. You must return the copy of
  *   the given node as a reference to the cloned graph.
  */
-
 /**
  * // Definition for a Node.
  * function Node(val, neighbors) {
@@ -26,23 +25,20 @@
  *    this.neighbors = neighbors === undefined ? [] : neighbors;
  * };
  */
-
 /**
  * @param {Node} node
  * @return {Node}
  */
 var cloneGraph = function(node) {
-  const map = new Map();
-  return node && cloneNode(node, map);
+    const map = new Map();
+    return node && cloneNode(node, map);
 };
 
 function cloneNode(node, map) {
-  const cloned = new Node(node.val, node.neighbors);
-  map.set(node.val, cloned);
-
-  cloned.neighbors = node.neighbors && node.neighbors.map(n => {
-    return map.get(n.val) || cloneNode(n, map);
-  });
-
-  return cloned;
+    const cloned = new Node(node.val, node.neighbors);
+    map.set(node.val, cloned);
+    cloned.neighbors = node.neighbors && node.neighbors.map(n => {
+        return map.get(n.val) || cloneNode(n, map);
+    });
+    return cloned;
 }

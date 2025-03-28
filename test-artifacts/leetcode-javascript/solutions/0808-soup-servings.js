@@ -20,33 +20,24 @@
  * Return the probability that soup A will be empty first, plus half the probability that A and B
  * become empty at the same time. Answers within 10-5 of the actual answer will be accepted.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var soupServings = function(n) {
-  if (n >= 4800) return 1.0;
+    if (n >= 4800) return 1.0;
+    n = Math.ceil(n / 25);
+    const memo = new Map();
 
-  n = Math.ceil(n / 25);
-  const memo = new Map();
-
-  function calculateProbability(a, b) {
-    if (a <= 0 && b <= 0) return 0.5;
-    if (a <= 0) return 1.0;
-    if (b <= 0) return 0.0;
-
-    const key = a * 10000 + b;
-    if (memo.has(key)) return memo.get(key);
-
-    const probability = 0.25 * (
-      calculateProbability(a - 4, b) + calculateProbability(a - 3, b - 1)
-      + calculateProbability(a - 2, b - 2) + calculateProbability(a - 1, b - 3)
-    );
-
-    memo.set(key, probability);
-    return probability;
-  }
-
-  return calculateProbability(n, n);
+    function calculateProbability(a, b) {
+        if (a <= 0 && b <= 0) return 0.5;
+        if (a <= 0) return 1.0;
+        if (b <= 0) return 0.0;
+        const key = a * 10000 + b;
+        if (memo.has(key)) return memo.get(key);
+        const probability = 0.25 * (calculateProbability(a - 4, b) + calculateProbability(a - 3, b - 1) + calculateProbability(a - 2, b - 2) + calculateProbability(a - 1, b - 3));
+        memo.set(key, probability);
+        return probability;
+    }
+    return calculateProbability(n, n);
 };

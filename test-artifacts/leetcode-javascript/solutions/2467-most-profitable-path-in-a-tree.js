@@ -28,7 +28,6 @@
  *
  * Return the maximum net income Alice can have if she travels towards the optimal leaf node.
  */
-
 /**
  * @param {number[][]} edges
  * @param {number} bob
@@ -36,44 +35,37 @@
  * @return {number}
  */
 var mostProfitablePath = function(edges, bob, amount) {
-  const graph = new Array(edges.length + 1).fill().map(() => []);
-  const path = new Array(edges.length + 1).fill(-1);
-
-  for (const [u, v] of edges) {
-    graph[u].push(v);
-    graph[v].push(u);
-  }
-
-  function traceInitialPath(node, time) {
-    path[node] = time;
-    if (node === 0) {
-      return true;
-    }
-    for (const next of graph[node]) {
-      if (path[next] === -1 && traceInitialPath(next, time + 1)) {
-        return true;
-      }
-    }
-    path[node] = -1;
-    return false;
-  }
-
-  traceInitialPath(bob, 0);
-
-  function dfs(node, parent, time, income) {
-    const current = (time < path[node] || path[node] === -1)
-      ? amount[node]
-      : time === path[node] ? amount[node] / 2 : 0;
-    let maxIncome = graph[node].length === 1 && node !== 0 ? income + current : -Infinity;
-
-    for (const next of graph[node]) {
-      if (next !== parent) {
-        maxIncome = Math.max(maxIncome, dfs(next, node, time + 1, income + current));
-      }
+    const graph = new Array(edges.length + 1).fill().map(() => []);
+    const path = new Array(edges.length + 1).fill(-1);
+    for (const [u, v] of edges) {
+        graph[u].push(v);
+        graph[v].push(u);
     }
 
-    return maxIncome === -Infinity ? income + current : maxIncome;
-  }
+    function traceInitialPath(node, time) {
+        path[node] = time;
+        if (node === 0) {
+            return true;
+        }
+        for (const next of graph[node]) {
+            if (path[next] === -1 && traceInitialPath(next, time + 1)) {
+                return true;
+            }
+        }
+        path[node] = -1;
+        return false;
+    }
+    traceInitialPath(bob, 0);
 
-  return dfs(0, -1, 0, 0);
+    function dfs(node, parent, time, income) {
+        const current = (time < path[node] || path[node] === -1) ? amount[node] : time === path[node] ? amount[node] / 2 : 0;
+        let maxIncome = graph[node].length === 1 && node !== 0 ? income + current : -Infinity;
+        for (const next of graph[node]) {
+            if (next !== parent) {
+                maxIncome = Math.max(maxIncome, dfs(next, node, time + 1, income + current));
+            }
+        }
+        return maxIncome === -Infinity ? income + current : maxIncome;
+    }
+    return dfs(0, -1, 0, 0);
 };

@@ -10,31 +10,26 @@
  *
  * You may assume that each input would have exactly one solution.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} target
  * @return {number}
  */
 var threeSumClosest = function(nums, target) {
-  const sums = new Set();
-
-  nums.sort((a, b) => a - b);
-
-  for (let i = 0; i < nums.length - 2; i++) {
-    let j = i + 1;
-    let k = nums.length - 1;
-
-    while (j < k) {
-      const sum = nums[i] + nums[j] + nums[k];
-      sums.add(sum);
-      if (sum > target) {
-        k--;
-      } else {
-        j++;
-      }
+    const sums = new Set();
+    nums.sort((a, b) => a - b);
+    for (let i = 0; i < nums.length - 2; i++) {
+        let j = i + 1;
+        let k = nums.length - 1;
+        while (j < k) {
+            const sum = nums[i] + nums[j] + nums[k];
+            sums.add(sum);
+            if (sum > target) {
+                k--;
+            } else {
+                j++;
+            }
+        }
     }
-  }
-
-  return [...sums].reduce((p, c) => Math.abs(c - target) < Math.abs(p - target) ? c : p);
+    return [...sums].reduce((p, c) => Math.abs(c - target) < Math.abs(p - target) ? c : p);
 };

@@ -14,58 +14,50 @@
  * Return the least time until you can reach the bottom right square (n - 1, n - 1) if you start
  * at the top left square (0, 0).
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var swimInWater = function(grid) {
-  const n = grid.length;
-  let left = grid[0][0];
-  let right = n * n - 1;
-
-  const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-
-  const canReachDestination = (time) => {
-    if (grid[0][0] > time) return false;
-
-    const visited = Array(n).fill().map(() => Array(n).fill(false));
-    const queue = [[0, 0]];
-    visited[0][0] = true;
-
-    while (queue.length > 0) {
-      const [row, col] = queue.shift();
-
-      if (row === n - 1 && col === n - 1) {
-        return true;
-      }
-
-      for (const [dr, dc] of directions) {
-        const newRow = row + dr;
-        const newCol = col + dc;
-
-        if (
-          newRow >= 0 && newRow < n && newCol >= 0 && newCol < n
-          && !visited[newRow][newCol] && grid[newRow][newCol] <= time
-        ) {
-          queue.push([newRow, newCol]);
-          visited[newRow][newCol] = true;
+    const n = grid.length;
+    let left = grid[0][0];
+    let right = n * n - 1;
+    const directions = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0]
+    ];
+    const canReachDestination = (time) => {
+        if (grid[0][0] > time) return false;
+        const visited = Array(n).fill().map(() => Array(n).fill(false));
+        const queue = [
+            [0, 0]
+        ];
+        visited[0][0] = true;
+        while (queue.length > 0) {
+            const [row, col] = queue.shift();
+            if (row === n - 1 && col === n - 1) {
+                return true;
+            }
+            for (const [dr, dc] of directions) {
+                const newRow = row + dr;
+                const newCol = col + dc;
+                if (newRow >= 0 && newRow < n && newCol >= 0 && newCol < n && !visited[newRow][newCol] && grid[newRow][newCol] <= time) {
+                    queue.push([newRow, newCol]);
+                    visited[newRow][newCol] = true;
+                }
+            }
         }
-      }
+        return false;
+    };
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (canReachDestination(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
     }
-
-    return false;
-  };
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-
-    if (canReachDestination(mid)) {
-      right = mid;
-    } else {
-      left = mid + 1;
-    }
-  }
-
-  return left;
+    return left;
 };

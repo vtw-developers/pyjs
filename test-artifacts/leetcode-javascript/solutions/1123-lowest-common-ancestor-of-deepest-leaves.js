@@ -12,7 +12,6 @@
  * - The lowest common ancestor of a set S of nodes, is the node A with the largest depth such
  *   that every node in S is in the subtree with root A.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -26,19 +25,25 @@
  * @return {TreeNode}
  */
 var lcaDeepestLeaves = function(root) {
-  return findDepthAndNode(root).node;
+    return findDepthAndNode(root).node;
 
-  function findDepthAndNode(node) {
-    if (!node) return { depth: 0, node: null };
-
-    const left = findDepthAndNode(node.left);
-    const right = findDepthAndNode(node.right);
-
-    if (left.depth === right.depth) {
-      return { depth: left.depth + 1, node: node };
+    function findDepthAndNode(node) {
+        if (!node) return {
+            depth: 0,
+            node: null
+        };
+        const left = findDepthAndNode(node.left);
+        const right = findDepthAndNode(node.right);
+        if (left.depth === right.depth) {
+            return {
+                depth: left.depth + 1,
+                node: node
+            };
+        }
+        const deeper = left.depth > right.depth ? left : right;
+        return {
+            depth: deeper.depth + 1,
+            node: deeper.node
+        };
     }
-
-    const deeper = left.depth > right.depth ? left : right;
-    return { depth: deeper.depth + 1, node: deeper.node };
-  }
 };

@@ -14,14 +14,13 @@
  *
  * It is guaranteed that the insertion operations will be valid.
  */
-
 /**
  * @param {number[]} nums
  * @param {number[]} index
  * @return {number[]}
  */
 var createTargetArray = function(nums, index) {
-  const result = [];
-  index.forEach((i, j) => result.splice(i, 0, nums[j]));
-  return result;
+    const result = [];
+    index.forEach((i, j) => result.splice(i, 0, nums[j]));
+    return result;
 };

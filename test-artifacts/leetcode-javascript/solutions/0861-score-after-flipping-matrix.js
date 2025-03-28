@@ -13,33 +13,28 @@
  *
  * Return the highest possible score after making any number of moves (including zero moves).
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var matrixScore = function(grid) {
-  const rows = grid.length;
-  const cols = grid[0].length;
-
-  for (let row = 0; row < rows; row++) {
-    if (grid[row][0] === 0) {
-      for (let col = 0; col < cols; col++) {
-        grid[row][col] ^= 1;
-      }
-    }
-  }
-
-  let result = rows * (1 << (cols - 1));
-
-  for (let col = 1; col < cols; col++) {
-    let onesCount = 0;
+    const rows = grid.length;
+    const cols = grid[0].length;
     for (let row = 0; row < rows; row++) {
-      onesCount += grid[row][col];
+        if (grid[row][0] === 0) {
+            for (let col = 0; col < cols; col++) {
+                grid[row][col] ^= 1;
+            }
+        }
     }
-    const maxOnes = Math.max(onesCount, rows - onesCount);
-    result += maxOnes * (1 << (cols - 1 - col));
-  }
-
-  return result;
+    let result = rows * (1 << (cols - 1));
+    for (let col = 1; col < cols; col++) {
+        let onesCount = 0;
+        for (let row = 0; row < rows; row++) {
+            onesCount += grid[row][col];
+        }
+        const maxOnes = Math.max(onesCount, rows - onesCount);
+        result += maxOnes * (1 << (cols - 1 - col));
+    }
+    return result;
 };

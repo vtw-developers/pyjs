@@ -12,7 +12,6 @@
  * as long as the tree remains a BST after insertion. You can return
  * any of them.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -27,15 +26,13 @@
  * @return {TreeNode}
  */
 var insertIntoBST = function(root, val) {
-  if (!root) {
-    return new TreeNode(val);
-  }
-
-  if (val > root.val) {
-    root.right = insertIntoBST(root.right, val);
-  } else {
-    root.left = insertIntoBST(root.left, val);
-  }
-
-  return root;
+    if (!root) {
+        return new TreeNode(val);
+    }
+    if (val > root.val) {
+        root.right = insertIntoBST(root.right, val);
+    } else {
+        root.left = insertIntoBST(root.left, val);
+    }
+    return root;
 };

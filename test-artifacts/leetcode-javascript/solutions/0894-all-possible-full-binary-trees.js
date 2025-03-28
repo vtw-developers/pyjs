@@ -11,7 +11,6 @@
  *
  * A full binary tree is a binary tree where each node has exactly 0 or 2 children.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -25,28 +24,25 @@
  * @return {TreeNode[]}
  */
 var allPossibleFBT = function(n) {
-  const memo = new Map();
-  return generateTrees(n);
+    const memo = new Map();
+    return generateTrees(n);
 
-  function generateTrees(nodes) {
-    if (nodes % 2 === 0) return [];
-    if (nodes === 1) return [new TreeNode(0)];
-    if (memo.has(nodes)) return memo.get(nodes);
-
-    const result = [];
-    for (let leftNodes = 1; leftNodes < nodes - 1; leftNodes += 2) {
-      const rightNodes = nodes - 1 - leftNodes;
-      const leftTrees = generateTrees(leftNodes);
-      const rightTrees = generateTrees(rightNodes);
-
-      for (const left of leftTrees) {
-        for (const right of rightTrees) {
-          result.push(new TreeNode(0, left, right));
+    function generateTrees(nodes) {
+        if (nodes % 2 === 0) return [];
+        if (nodes === 1) return [new TreeNode(0)];
+        if (memo.has(nodes)) return memo.get(nodes);
+        const result = [];
+        for (let leftNodes = 1; leftNodes < nodes - 1; leftNodes += 2) {
+            const rightNodes = nodes - 1 - leftNodes;
+            const leftTrees = generateTrees(leftNodes);
+            const rightTrees = generateTrees(rightNodes);
+            for (const left of leftTrees) {
+                for (const right of rightTrees) {
+                    result.push(new TreeNode(0, left, right));
+                }
+            }
         }
-      }
+        memo.set(nodes, result);
+        return result;
     }
-
-    memo.set(nodes, result);
-    return result;
-  }
 };

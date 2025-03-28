@@ -11,14 +11,13 @@
  *
  * Note that 0 is neither positive nor negative.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var maximumCount = function(nums) {
-  const result = nums.reduce(([neg = 0, pos = 0], n) => {
-    return [neg + (n < 0 ? 1 : 0), pos + (n > 0 ? 1 : 0)];
-  }, []);
-  return Math.max(...result);
+    const result = nums.reduce(([neg = 0, pos = 0], n) => {
+        return [neg + (n < 0 ? 1 : 0), pos + (n > 0 ? 1 : 0)];
+    }, []);
+    return Math.max(...result);
 };

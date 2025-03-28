@@ -9,7 +9,6 @@
  *
  * It is guaranteed that the node to be deleted is not a tail node in the list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val) {
@@ -22,6 +21,6 @@
  * @return {void} Do not return anything, modify node in-place instead.
  */
 var deleteNode = function(node) {
-  node.val = node.next.val;
-  node.next = node.next.next;
+    node.val = node.next.val;
+    node.next = node.next.next;
 };

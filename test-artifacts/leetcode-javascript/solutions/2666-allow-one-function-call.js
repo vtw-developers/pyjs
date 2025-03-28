@@ -9,11 +9,10 @@
  * - The first time the returned function is called, it should return the same result as fn.
  * - Every subsequent time it is called, it should return undefined.
  */
-
 /**
  * @param {Function} fn
  * @return {Function}
  */
 var once = function(fn) {
-  return (...args) => fn && [fn(...args), fn = undefined][0];
+    return (...args) => fn && [fn(...args), fn = undefined][0];
 };

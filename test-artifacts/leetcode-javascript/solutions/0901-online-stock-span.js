@@ -23,24 +23,19 @@
  * - int next(int price) Returns the span of the stock's price given that today's
  *   price is price.
  */
-
 var StockSpanner = function() {
-  this.stack = [];
+    this.stack = [];
 };
-
 /**
  * @param {number} price
  * @return {number}
  */
 StockSpanner.prototype.next = function(price) {
-  let count = 1;
-
-  while (this.stack.length && price >= this.stack[this.stack.length - 1][0]) {
-    count += this.stack[this.stack.length - 1][1];
-    this.stack.pop();
-  }
-
-  this.stack.push([price, count]);
-
-  return count;
+    let count = 1;
+    while (this.stack.length && price >= this.stack[this.stack.length - 1][0]) {
+        count += this.stack[this.stack.length - 1][1];
+        this.stack.pop();
+    }
+    this.stack.push([price, count]);
+    return count;
 };

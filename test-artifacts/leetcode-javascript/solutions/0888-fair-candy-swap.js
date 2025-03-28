@@ -17,22 +17,20 @@
  * exchange. If there are multiple answers, you may return any one of them. It is guaranteed
  * that at least one answer exists.
  */
-
 /**
  * @param {number[]} aliceSizes
  * @param {number[]} bobSizes
  * @return {number[]}
  */
 var fairCandySwap = function(aliceSizes, bobSizes) {
-  const aliceTotal = aliceSizes.reduce((sum, size) => sum + size, 0);
-  const bobTotal = bobSizes.reduce((sum, size) => sum + size, 0);
-  const diff = (aliceTotal - bobTotal) / 2;
-  const bobSet = new Set(bobSizes);
-
-  for (const aliceBox of aliceSizes) {
-    const targetBobBox = aliceBox - diff;
-    if (bobSet.has(targetBobBox)) {
-      return [aliceBox, targetBobBox];
+    const aliceTotal = aliceSizes.reduce((sum, size) => sum + size, 0);
+    const bobTotal = bobSizes.reduce((sum, size) => sum + size, 0);
+    const diff = (aliceTotal - bobTotal) / 2;
+    const bobSet = new Set(bobSizes);
+    for (const aliceBox of aliceSizes) {
+        const targetBobBox = aliceBox - diff;
+        if (bobSet.has(targetBobBox)) {
+            return [aliceBox, targetBobBox];
+        }
     }
-  }
 };

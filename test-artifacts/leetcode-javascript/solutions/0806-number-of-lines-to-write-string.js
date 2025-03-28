@@ -16,26 +16,22 @@
  * - result[0] is the total number of lines.
  * - result[1] is the width of the last line in pixels.
  */
-
 /**
  * @param {number[]} widths
  * @param {string} s
  * @return {number[]}
  */
 var numberOfLines = function(widths, s) {
-  let lines = 1;
-  let width = 0;
-
-  for (const char of s) {
-    const charWidth = widths[char.charCodeAt(0) - 97];
-
-    if (width + charWidth > 100) {
-      lines++;
-      width = charWidth;
-    } else {
-      width += charWidth;
+    let lines = 1;
+    let width = 0;
+    for (const char of s) {
+        const charWidth = widths[char.charCodeAt(0) - 97];
+        if (width + charWidth > 100) {
+            lines++;
+            width = charWidth;
+        } else {
+            width += charWidth;
+        }
     }
-  }
-
-  return [lines, width];
+    return [lines, width];
 };

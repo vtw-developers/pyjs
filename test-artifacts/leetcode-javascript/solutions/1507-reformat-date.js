@@ -13,12 +13,11 @@
  * - MM denotes the 2 digit month.
  * - DD denotes the 2 digit day.
  */
-
 /**
  * @param {string} date
  * @return {string}
  */
 var reformatDate = function(date) {
-  const [_, day, month, year] = date.match(/(\d+)\w+\s+(\w+)\s+(\d+)/);
-  return new Date(`${day} ${month} ${year}`).toISOString().split('T')[0];
+    const [_, day, month, year] = date.match(/(\d+)\w+\s+(\w+)\s+(\d+)/);
+    return new Date(`${day} ${month} ${year}`).toISOString().split('T')[0];
 };

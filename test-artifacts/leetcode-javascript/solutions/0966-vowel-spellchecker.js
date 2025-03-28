@@ -26,19 +26,18 @@
  *
  * Given some queries, return a list of words answer, where answer[i] is the correct word for query = queries[i].
  */
-
 /**
  * @param {string[]} words
  * @param {string[]} queries
  * @return {string[]}
  */
 var spellchecker = function(words, queries) {
-  const set = new Set(words);
-  const map = new Map();
-  const format = s => s.toLowerCase().replace(/[aeiou]/g, '_');
-  words.forEach(word => {
-    if (!map.has(word.toLowerCase())) map.set(word.toLowerCase(), word);
-    if (!map.has(format(word))) map.set(format(word), word);
-  });
-  return queries.map(q => set.has(q) ? q : map.get(q.toLowerCase()) || map.get(format(q)) || '');
+    const set = new Set(words);
+    const map = new Map();
+    const format = s => s.toLowerCase().replace(/[aeiou]/g, '_');
+    words.forEach(word => {
+        if (!map.has(word.toLowerCase())) map.set(word.toLowerCase(), word);
+        if (!map.has(format(word))) map.set(format(word), word);
+    });
+    return queries.map(q => set.has(q) ? q : map.get(q.toLowerCase()) || map.get(format(q)) || '');
 };

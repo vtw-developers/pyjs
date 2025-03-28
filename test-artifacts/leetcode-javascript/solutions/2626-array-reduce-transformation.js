@@ -15,7 +15,6 @@
  *
  * Please solve it without using the built-in Array.reduce method.
  */
-
 /**
  * @param {number[]} nums
  * @param {Function} fn
@@ -23,11 +22,9 @@
  * @return {number}
  */
 var reduce = function(nums, fn, init) {
-  let result = init;
-
-  for (let i = 0; i < nums.length; i++) {
-    result = fn(result, nums[i]);
-  }
-
-  return result;
+    let result = init;
+    for (let i = 0; i < nums.length; i++) {
+        result = fn(result, nums[i]);
+    }
+    return result;
 };

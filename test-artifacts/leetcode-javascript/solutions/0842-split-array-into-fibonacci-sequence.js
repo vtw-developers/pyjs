@@ -16,32 +16,31 @@
  *
  * Return any Fibonacci-like sequence split from num, or return [] if it cannot be done.
  */
-
 /**
  * @param {string} num
  * @return {number[]}
  */
 var splitIntoFibonacci = function(num) {
-  const result = [];
-  const MAX_INT = 2 ** 31 - 1;
-  backtrack(0);
-  return result;
+    const result = [];
+    const MAX_INT = 2 ** 31 - 1;
+    backtrack(0);
+    return result;
 
-  function backtrack(index) {
-    if (index === num.length && result.length >= 3) return true;
-    for (let length = 1; length <= num.length - index; length++) {
-      if (num[index] === '0' && length > 1) break;
-      const current = parseInt(num.substring(index, index + length));
-      if (current > MAX_INT) break;
-      if (result.length >= 2) {
-        const sum = result[result.length - 1] + result[result.length - 2];
-        if (current > sum) break;
-        if (current < sum) continue;
-      }
-      result.push(current);
-      if (backtrack(index + length)) return true;
-      result.pop();
+    function backtrack(index) {
+        if (index === num.length && result.length >= 3) return true;
+        for (let length = 1; length <= num.length - index; length++) {
+            if (num[index] === '0' && length > 1) break;
+            const current = parseInt(num.substring(index, index + length));
+            if (current > MAX_INT) break;
+            if (result.length >= 2) {
+                const sum = result[result.length - 1] + result[result.length - 2];
+                if (current > sum) break;
+                if (current < sum) continue;
+            }
+            result.push(current);
+            if (backtrack(index + length)) return true;
+            result.pop();
+        }
+        return false;
     }
-    return false;
-  }
 };

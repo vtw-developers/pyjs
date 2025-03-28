@@ -10,11 +10,10 @@
  * A customer's wealth is the amount of money they have in all their bank
  * accounts. The richest customer is the customer that has the maximum wealth.
  */
-
 /**
  * @param {number[][]} accounts
  * @return {number}
  */
 var maximumWealth = function(accounts) {
-  return Math.max(...accounts.map(account => account.reduce((sum, n) => sum + n), 0));
+    return Math.max(...accounts.map(account => account.reduce((sum, n) => sum + n), 0));
 };

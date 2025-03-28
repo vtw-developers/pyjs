@@ -9,11 +9,10 @@
  * The returned string must contain only lowercase English letters. If there are multiples
  * valid strings, return any of them.
  */
-
 /**
  * @param {number} n
  * @return {string}
  */
 var generateTheString = function(n) {
-  return 'a'.repeat(n % 2 ? n : n - 1) + (n % 2 ? '' : 'z');
+    return 'a'.repeat(n % 2 ? n : n - 1) + (n % 2 ? '' : 'z');
 };

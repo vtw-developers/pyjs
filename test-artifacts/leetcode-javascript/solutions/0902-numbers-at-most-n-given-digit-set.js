@@ -10,39 +10,33 @@
  * Return the number of positive integers that can be generated that are less than or equal to
  * a given integer n.
  */
-
 /**
  * @param {string[]} digits
  * @param {number} n
  * @return {number}
  */
 var atMostNGivenDigitSet = function(digits, n) {
-  const str = n.toString();
-  const digitCount = digits.length;
-  let result = 0;
-
-  for (let i = 1; i < str.length; i++) {
-    result += Math.pow(digitCount, i);
-  }
-
-  function countValid(prefixLen) {
-    if (prefixLen === str.length) return 1;
-
-    const currentDigit = str[prefixLen];
-    let valid = 0;
-
-    for (const digit of digits) {
-      if (digit < currentDigit) {
-        valid += Math.pow(digitCount, str.length - prefixLen - 1);
-      } else if (digit === currentDigit) {
-        valid += countValid(prefixLen + 1);
-      } else {
-        break;
-      }
+    const str = n.toString();
+    const digitCount = digits.length;
+    let result = 0;
+    for (let i = 1; i < str.length; i++) {
+        result += Math.pow(digitCount, i);
     }
 
-    return valid;
-  }
-
-  return result + countValid(0);
+    function countValid(prefixLen) {
+        if (prefixLen === str.length) return 1;
+        const currentDigit = str[prefixLen];
+        let valid = 0;
+        for (const digit of digits) {
+            if (digit < currentDigit) {
+                valid += Math.pow(digitCount, str.length - prefixLen - 1);
+            } else if (digit === currentDigit) {
+                valid += countValid(prefixLen + 1);
+            } else {
+                break;
+            }
+        }
+        return valid;
+    }
+    return result + countValid(0);
 };

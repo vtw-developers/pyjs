@@ -23,13 +23,10 @@
  * Return the minimum number of operations needed to go back to the
  * main folder after the change folder operations.
  */
-
 /**
  * @param {string[]} logs
  * @return {number}
  */
 var minOperations = function(logs) {
-  return logs.reduce((depth, log) =>
-    Math.max(0, depth + (log === '../' ? -1 : log === './' ? 0 : 1)), 0
-  );
+    return logs.reduce((depth, log) => Math.max(0, depth + (log === '../' ? -1 : log === './' ? 0 : 1)), 0);
 };

@@ -9,26 +9,22 @@
  * A row and column pair is considered equal if they contain the same elements in the
  * same order (i.e., an equal array).
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var equalPairs = function(grid) {
-  const columns = new Map();
-  let count = 0;
-
-  for (let i = 0; i < grid.length; i++) {
-    const column = [];
-    for (let j = 0; j < grid[i].length; j++) {
-      column.push(grid[j][i]);
+    const columns = new Map();
+    let count = 0;
+    for (let i = 0; i < grid.length; i++) {
+        const column = [];
+        for (let j = 0; j < grid[i].length; j++) {
+            column.push(grid[j][i]);
+        }
+        columns.set(column.join(), (columns.get(column.join()) ?? 0) + 1);
     }
-    columns.set(column.join(), (columns.get(column.join()) ?? 0) + 1);
-  }
-
-  for (let i = 0; i < grid.length; i++) {
-    count += columns.get(grid[i].join()) ?? 0;
-  }
-
-  return count;
+    for (let i = 0; i < grid.length; i++) {
+        count += columns.get(grid[i].join()) ?? 0;
+    }
+    return count;
 };

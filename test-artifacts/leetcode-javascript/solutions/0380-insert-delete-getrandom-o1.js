@@ -16,37 +16,32 @@
  * You must implement the functions of the class such that each function works in average O(1)
  * time complexity.
  */
-
-
 var RandomizedSet = function() {
-  this.set = new Set();
+    this.set = new Set();
 };
-
 /**
  * @param {number} val
  * @return {boolean}
  */
 RandomizedSet.prototype.insert = function(val) {
-  const hasValue = this.set.has(val);
-  this.set.add(val);
-  return !hasValue;
+    const hasValue = this.set.has(val);
+    this.set.add(val);
+    return !hasValue;
 };
-
 /**
  * @param {number} val
  * @return {boolean}
  */
 RandomizedSet.prototype.remove = function(val) {
-  const hasValue = this.set.has(val);
-  this.set.delete(val);
-  return hasValue;
+    const hasValue = this.set.has(val);
+    this.set.delete(val);
+    return hasValue;
 };
-
 /**
  * @return {number}
  */
 RandomizedSet.prototype.getRandom = function() {
-  const item = Array.from(this.set);
-  const randomIndex = Math.floor(Math.random() * item.length);
-  return item[randomIndex];
+    const item = Array.from(this.set);
+    const randomIndex = Math.floor(Math.random() * item.length);
+    return item[randomIndex];
 };

@@ -9,17 +9,14 @@
  *
  * Given n, return the value of Tn.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var tribonacci = function(n) {
-  const nums = [0, 1, 1];
-
-  for (let i = 3; i <= n; i++) {
-    nums.push(nums[i - 3] + nums[i - 2] + nums[i - 1]);
-  }
-
-  return nums[n];
+    const nums = [0, 1, 1];
+    for (let i = 3; i <= n; i++) {
+        nums.push(nums[i - 3] + nums[i - 2] + nums[i - 1]);
+    }
+    return nums[n];
 };

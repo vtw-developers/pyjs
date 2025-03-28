@@ -13,24 +13,21 @@
  * - void addBack(int num) Adds a positive integer num back into the infinite set,
  *   if it is not already in the infinite set.
  */
-
 var SmallestInfiniteSet = function() {
-  this.set = new Array(1000).fill(1);
+    this.set = new Array(1000).fill(1);
 };
-
 /**
  * @return {number}
  */
 SmallestInfiniteSet.prototype.popSmallest = function() {
-  const num = this.set.findIndex(n => n);
-  this.set[num] = 0;
-  return num + 1;
+    const num = this.set.findIndex(n => n);
+    this.set[num] = 0;
+    return num + 1;
 };
-
 /**
  * @param {number} num
  * @return {void}
  */
 SmallestInfiniteSet.prototype.addBack = function(num) {
-  this.set[num - 1] = 1;
+    this.set[num - 1] = 1;
 };

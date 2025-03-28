@@ -13,18 +13,17 @@
  * Return a list of lists of the suggested products after each character of searchWord
  * is typed.
  */
-
 /**
  * @param {string[]} products
  * @param {string} searchWord
  * @return {string[][]}
  */
 var suggestedProducts = function(products, searchWord) {
-  products.sort();
-  const result = new Array(searchWord.length);
-  for (let i = 0; i < searchWord.length; i++) {
-    products = products.filter((word) => word[i] === searchWord[i]);
-    result[i] = products.slice(0, 3);
-  }
-  return result;
+    products.sort();
+    const result = new Array(searchWord.length);
+    for (let i = 0; i < searchWord.length; i++) {
+        products = products.filter((word) => word[i] === searchWord[i]);
+        result[i] = products.slice(0, 3);
+    }
+    return result;
 };

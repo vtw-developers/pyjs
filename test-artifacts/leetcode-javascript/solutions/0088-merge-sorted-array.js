@@ -14,7 +14,6 @@
  * where the first `m` elements denote the elements that should be merged, and the
  * last `n` elements are set to `0` and should be ignored. `nums2` has a length of `n`.
  */
-
 /**
  * @param {number[]} nums1
  * @param {number} m
@@ -23,12 +22,10 @@
  * @return {void} Do not return anything, modify nums1 in-place instead.
  */
 var merge = function(nums1, m, nums2, n) {
-  let i = m + n - 1;
-
-  m--;
-  n--;
-
-  while (n >= 0) {
-    nums1[i--] = nums1[m] > nums2[n] ? nums1[m--] : nums2[n--];
-  }
+    let i = m + n - 1;
+    m--;
+    n--;
+    while (n >= 0) {
+        nums1[i--] = nums1[m] > nums2[n] ? nums1[m--] : nums2[n--];
+    }
 };

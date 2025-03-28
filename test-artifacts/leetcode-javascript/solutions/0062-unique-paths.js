@@ -11,24 +11,20 @@
  * Given the two integers m and n, return the number of possible unique paths that
  * the robot can take to reach the bottom-right corner.
  */
-
 /**
  * @param {number} m
  * @param {number} n
  * @return {number}
  */
 var uniquePaths = function(m, n) {
-  const row = new Array(n);
-
-  for (let i = 0; i < n; i++) {
-    row[i] = 1;
-  }
-
-  for (let i = 1; i < m; i++) {
-    for (let j = 1; j < n; j++) {
-      row[j] += row[j - 1];
+    const row = new Array(n);
+    for (let i = 0; i < n; i++) {
+        row[i] = 1;
     }
-  }
-
-  return row[n - 1];
+    for (let i = 1; i < m; i++) {
+        for (let j = 1; j < n; j++) {
+            row[j] += row[j - 1];
+        }
+    }
+    return row[n - 1];
 };

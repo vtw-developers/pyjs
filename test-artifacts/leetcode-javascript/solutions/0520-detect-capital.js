@@ -11,11 +11,10 @@
  *
  * Given a string word, return true if the usage of capitals in it is right.
  */
-
 /**
  * @param {string} word
  * @return {boolean}
  */
 var detectCapitalUse = function(word) {
-  return /^[A-Z]?[a-z]+$|^[A-Z]+$/.test(word);
+    return /^[A-Z]?[a-z]+$|^[A-Z]+$/.test(word);
 };

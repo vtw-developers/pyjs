@@ -10,11 +10,10 @@
  *
  * You may assume the object or array is the output of JSON.parse.
  */
-
 /**
  * @param {Object|Array} obj
  * @return {boolean}
  */
 var isEmpty = function(obj) {
-  return !Object.keys(obj).length;
+    return !Object.keys(obj).length;
 };

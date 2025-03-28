@@ -13,7 +13,6 @@
  * hasApple, where hasApple[i] = true means that vertex i has an apple; otherwise, it does not
  * have any apple.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} edges
@@ -21,23 +20,21 @@
  * @return {number}
  */
 var minTime = function(n, edges, hasApple) {
-  const map = new Map();
-  const seen = new Set();
-  let time = 0;
-
-  edges.forEach(([value, key]) => map.set(key, value));
-  for (let i = n - 1; i >= 0; i--) {
-    if (hasApple[i]) {
-      dfs(i);
+    const map = new Map();
+    const seen = new Set();
+    let time = 0;
+    edges.forEach(([value, key]) => map.set(key, value));
+    for (let i = n - 1; i >= 0; i--) {
+        if (hasApple[i]) {
+            dfs(i);
+        }
     }
-  }
 
-  function dfs(key) {
-    if (key === 0 || seen.has(key)) return;
-    seen.add(key);
-    time += 2;
-    dfs(map.get(key));
-  }
-
-  return time;
+    function dfs(key) {
+        if (key === 0 || seen.has(key)) return;
+        seen.add(key);
+        time += 2;
+        dfs(map.get(key));
+    }
+    return time;
 };

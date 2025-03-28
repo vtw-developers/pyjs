@@ -9,24 +9,21 @@
  *
  * Return the minimum number of operations needed to make all columns of grid strictly increasing.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var minimumOperations = function(grid) {
-  let count = 0;
-
-  for (let i = 1; i < grid.length; i++) {
-    for (let j = 0; j < grid[i].length; j++) {
-      const [previous, current] = [grid[i - 1][j], grid[i][j]];
-      if (current <= previous) {
-        const operations = previous - current + 1;
-        grid[i][j] = operations + current;
-        count += operations;
-      }
+    let count = 0;
+    for (let i = 1; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+            const [previous, current] = [grid[i - 1][j], grid[i][j]];
+            if (current <= previous) {
+                const operations = previous - current + 1;
+                grid[i][j] = operations + current;
+                count += operations;
+            }
+        }
     }
-  }
-
-  return count;
+    return count;
 };

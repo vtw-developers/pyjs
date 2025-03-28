@@ -13,41 +13,34 @@
  * - int peek() Returns the element at the front of the queue.
  * - boolean empty() Returns true if the queue is empty, false otherwise.
  */
-
-
 var MyQueue = function() {
-  this.data = [];
+    this.data = [];
 };
-
 /**
  * @param {number} x
  * @return {void}
  */
 MyQueue.prototype.push = function(x) {
-  this.data.push(x);
+    this.data.push(x);
 };
-
 /**
  * @return {number}
  */
 MyQueue.prototype.pop = function() {
-  return this.data.shift();
+    return this.data.shift();
 };
-
 /**
  * @return {number}
  */
 MyQueue.prototype.peek = function() {
-  return this.data[0];
+    return this.data[0];
 };
-
 /**
  * @return {boolean}
  */
 MyQueue.prototype.empty = function() {
-  return !this.data.length;
+    return !this.data.length;
 };
-
 /**
  * Your MyQueue object will be instantiated and called as such:
  * var obj = new MyQueue()

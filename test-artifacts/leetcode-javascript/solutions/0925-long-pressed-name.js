@@ -9,13 +9,12 @@
  * You examine the typed characters of the keyboard.  Return True if it is possible that
  * it was your friends name, with some characters (possibly none) being long pressed.
  */
-
 /**
  * @param {string} name
  * @param {string} typed
  * @return {boolean}
  */
 var isLongPressedName = function(name, typed) {
-  let i = 0;
-  return typed.split('').filter(l => name[i] === l ? ++i : false).length === name.length;
+    let i = 0;
+    return typed.split('').filter(l => name[i] === l ? ++i : false).length === name.length;
 };

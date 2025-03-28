@@ -12,21 +12,18 @@
  * Note that the word should be built from left to right with each additional character being
  * added to the end of a previous word.
  */
-
 /**
  * @param {string[]} words
  * @return {string}
  */
 var longestWord = function(words) {
-  const set = new Set();
-  let result = '';
-
-  words.sort().forEach(word => {
-    if (word.length === 1 || set.has(word.slice(0, -1))) {
-      set.add(word);
-      result = word.length > result.length ? word : result;
-    }
-  });
-
-  return result;
+    const set = new Set();
+    let result = '';
+    words.sort().forEach(word => {
+        if (word.length === 1 || set.has(word.slice(0, -1))) {
+            set.add(word);
+            result = word.length > result.length ? word : result;
+        }
+    });
+    return result;
 };

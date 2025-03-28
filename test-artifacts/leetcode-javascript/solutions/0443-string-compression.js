@@ -17,26 +17,25 @@
  *
  * You must write an algorithm that uses only constant extra space.
  */
-
 /**
  * @param {character[]} chars
  * @return {number}
  */
 var compress = function(chars) {
-  let pointer = 0;
-  for (let i = 0; i < chars.length; i++) {
-    const char = chars[i];
-    let count = 0;
-    while (i < chars.length && chars[i] === char) {
-      count++;
-      i++;
+    let pointer = 0;
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+        let count = 0;
+        while (i < chars.length && chars[i] === char) {
+            count++;
+            i++;
+        }
+        chars[pointer++] = char;
+        if (count !== 1) {
+            String(count).split('').forEach(n => chars[pointer++] = n);
+        }
+        i--;
     }
-    chars[pointer++] = char;
-    if (count !== 1) {
-      String(count).split('').forEach(n => chars[pointer++] = n);
-    }
-    i--;
-  }
-  chars.length = pointer;
-  return pointer;
+    chars.length = pointer;
+    return pointer;
 };

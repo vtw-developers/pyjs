@@ -18,7 +18,6 @@
  *
  * Return a boolean array answer, where answer[j] is the answer to the jth query.
  */
-
 /**
  * @param {number} numCourses
  * @param {number[][]} prerequisites
@@ -26,18 +25,16 @@
  * @return {boolean[]}
  */
 var checkIfPrerequisite = function(numCourses, prerequisites, queries) {
-  const lookup = new Array(numCourses).fill().map(() => new Array(numCourses).fill(false));
-  prerequisites.forEach(([u, v]) => lookup[u][v] = true);
-
-  for (let i = 0; i < numCourses; i++) {
-    for (let j = 0; j < numCourses; j++) {
-      for (let k = 0; k < numCourses; k++) {
-        if (lookup[j][i] && lookup[i][k]) {
-          lookup[j][k] = true;
+    const lookup = new Array(numCourses).fill().map(() => new Array(numCourses).fill(false));
+    prerequisites.forEach(([u, v]) => lookup[u][v] = true);
+    for (let i = 0; i < numCourses; i++) {
+        for (let j = 0; j < numCourses; j++) {
+            for (let k = 0; k < numCourses; k++) {
+                if (lookup[j][i] && lookup[i][k]) {
+                    lookup[j][k] = true;
+                }
+            }
         }
-      }
     }
-  }
-
-  return queries.map(([u, v]) => lookup[u][v]);
+    return queries.map(([u, v]) => lookup[u][v]);
 };

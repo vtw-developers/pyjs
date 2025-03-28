@@ -13,14 +13,13 @@
  * - For the purpose of this problem, we will return 0 when needle is an empty string.
  *   This is consistent to C's strstr() and Java's indexOf().
  */
-
 /**
  * @param {string} haystack
  * @param {string} needle
  * @return {number}
  */
 var strStr = function(haystack, needle) {
-  if (!needle) return 0;
-  const split = haystack.split(needle);
-  return split.length > 1 ? split[0].length : -1;
+    if (!needle) return 0;
+    const split = haystack.split(needle);
+    return split.length > 1 ? split[0].length : -1;
 };

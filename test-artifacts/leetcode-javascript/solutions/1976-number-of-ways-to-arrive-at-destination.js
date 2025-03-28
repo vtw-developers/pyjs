@@ -16,45 +16,41 @@
  * Return the number of ways you can arrive at your destination in the shortest amount of time.
  * Since the answer may be large, return it modulo 109 + 7.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} roads
  * @return {number}
  */
 var countPaths = function(n, roads) {
-  const MOD = 1e9 + 7;
-  const graph = Array.from({ length: n }, () => []);
-  const distances = new Array(n).fill(Infinity);
-  const ways = new Array(n).fill(0);
-
-  for (const [u, v, time] of roads) {
-    graph[u].push([v, time]);
-    graph[v].push([u, time]);
-  }
-
-  const queue = [[0, 0]];
-  distances[0] = 0;
-  ways[0] = 1;
-
-  while (queue.length) {
-    const [dist, node] = queue.shift();
-
-    if (dist > distances[node]) continue;
-
-    for (const [next, time] of graph[node]) {
-      const newDist = dist + time;
-
-      if (newDist < distances[next]) {
-        distances[next] = newDist;
-        ways[next] = ways[node];
-        queue.push([newDist, next]);
-        queue.sort((a, b) => a[0] - b[0]);
-      } else if (newDist === distances[next]) {
-        ways[next] = (ways[next] + ways[node]) % MOD;
-      }
+    const MOD = 1e9 + 7;
+    const graph = Array.from({
+        length: n
+    }, () => []);
+    const distances = new Array(n).fill(Infinity);
+    const ways = new Array(n).fill(0);
+    for (const [u, v, time] of roads) {
+        graph[u].push([v, time]);
+        graph[v].push([u, time]);
     }
-  }
-
-  return ways[n - 1];
+    const queue = [
+        [0, 0]
+    ];
+    distances[0] = 0;
+    ways[0] = 1;
+    while (queue.length) {
+        const [dist, node] = queue.shift();
+        if (dist > distances[node]) continue;
+        for (const [next, time] of graph[node]) {
+            const newDist = dist + time;
+            if (newDist < distances[next]) {
+                distances[next] = newDist;
+                ways[next] = ways[node];
+                queue.push([newDist, next]);
+                queue.sort((a, b) => a[0] - b[0]);
+            } else if (newDist === distances[next]) {
+                ways[next] = (ways[next] + ways[node]) % MOD;
+            }
+        }
+    }
+    return ways[n - 1];
 };

@@ -13,24 +13,20 @@
  *
  * Note: The bottom face of each shape counts toward its surface area.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number}
  */
 var surfaceArea = function(grid) {
-  let result = 0;
-
-  for (let row = 0; row < grid.length; row++) {
-    for (let col = 0; col < grid.length; col++) {
-      if (grid[row][col]) {
-        result += 2 + 4 * grid[row][col];
-
-        result -= row > 0 ? Math.min(grid[row][col], grid[row - 1][col]) * 2 : 0;
-        result -= col > 0 ? Math.min(grid[row][col], grid[row][col - 1]) * 2 : 0;
-      }
+    let result = 0;
+    for (let row = 0; row < grid.length; row++) {
+        for (let col = 0; col < grid.length; col++) {
+            if (grid[row][col]) {
+                result += 2 + 4 * grid[row][col];
+                result -= row > 0 ? Math.min(grid[row][col], grid[row - 1][col]) * 2 : 0;
+                result -= col > 0 ? Math.min(grid[row][col], grid[row][col - 1]) * 2 : 0;
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 };

@@ -11,59 +11,50 @@
  *
  * Given an integer k, return the number of non-negative integers x have the property that f(x) = k.
  */
-
 /**
  * @param {number} k
  * @return {number}
  */
 var preimageSizeFZF = function(k) {
-  return findUpperBound(k) - findLowerBound(k);
+    return findUpperBound(k) - findLowerBound(k);
 };
 
 function findLowerBound(k) {
-  let left = 0;
-  let right = 5 * (10 ** 10);
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    const zeroes = countTrailingZeroes(mid);
-
-    if (zeroes < k) {
-      left = mid + 1;
-    } else {
-      right = mid;
+    let left = 0;
+    let right = 5 * (10 ** 10);
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        const zeroes = countTrailingZeroes(mid);
+        if (zeroes < k) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
     }
-  }
-
-  return left;
+    return left;
 }
 
 function findUpperBound(k) {
-  let left = 0;
-  let right = 5 * (10 ** 10);
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    const zeroes = countTrailingZeroes(mid);
-
-    if (zeroes <= k) {
-      left = mid + 1;
-    } else {
-      right = mid;
+    let left = 0;
+    let right = 5 * (10 ** 10);
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        const zeroes = countTrailingZeroes(mid);
+        if (zeroes <= k) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
     }
-  }
-
-  return left;
+    return left;
 }
 
 function countTrailingZeroes(n) {
-  let count = 0;
-  let powerOfFive = 5;
-
-  while (n >= powerOfFive) {
-    count += Math.floor(n / powerOfFive);
-    powerOfFive *= 5;
-  }
-
-  return count;
+    let count = 0;
+    let powerOfFive = 5;
+    while (n >= powerOfFive) {
+        count += Math.floor(n / powerOfFive);
+        powerOfFive *= 5;
+    }
+    return count;
 }

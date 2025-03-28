@@ -13,7 +13,6 @@
  * Return an integer array pairs of length n where pairs[i] is the number of potions that will form
  * a successful pair with the ith spell.
  */
-
 /**
  * @param {number[]} spells
  * @param {number[]} potions
@@ -21,24 +20,20 @@
  * @return {number[]}
  */
 var successfulPairs = function(spells, potions, success) {
-  const result = [];
-  potions.sort((a, b) => a - b);
-
-  for (let i = 0; i < spells.length; i++) {
-    let left = 0;
-    let right = potions.length - 1;
-
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
-      if (spells[i] * potions[mid] < success) {
-        left = mid + 1;
-      } else {
-        right = mid - 1;
-      }
+    const result = [];
+    potions.sort((a, b) => a - b);
+    for (let i = 0; i < spells.length; i++) {
+        let left = 0;
+        let right = potions.length - 1;
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            if (spells[i] * potions[mid] < success) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        result[i] = potions.length - left;
     }
-
-    result[i] = potions.length - left;
-  }
-
-  return result;
+    return result;
 };

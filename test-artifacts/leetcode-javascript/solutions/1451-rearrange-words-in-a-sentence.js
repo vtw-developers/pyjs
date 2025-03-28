@@ -12,16 +12,10 @@
  *
  * Return the new text following the format shown above.
  */
-
 /**
  * @param {string} text
  * @return {string}
  */
 var arrangeWords = function(text) {
-  return text
-    .split(/\s+/)
-    .sort((a, b) => a.length - b.length)
-    .join(' ')
-    .toLowerCase()
-    .replace(/^./, m => m.toUpperCase());
+    return text.split(/\s+/).sort((a, b) => a.length - b.length).join(' ').toLowerCase().replace(/^./, m => m.toUpperCase());
 };

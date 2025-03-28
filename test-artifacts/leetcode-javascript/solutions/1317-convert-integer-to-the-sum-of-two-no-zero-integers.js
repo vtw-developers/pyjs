@@ -14,16 +14,15 @@
  * It's guarateed that there is at least one valid solution.
  * If there are many valid solutions you can return any of them.
  */
-
 /**
  * @param {number} n
  * @return {number[]}
  */
 var getNoZeroIntegers = function(n) {
-  const hasNoZero = n => String(n).indexOf('0') === -1;
-  for (let i = n; i; --i) {
-    if (hasNoZero(i) && hasNoZero(n - i)) {
-      return [i, n - i];
+    const hasNoZero = n => String(n).indexOf('0') === -1;
+    for (let i = n; i; --i) {
+        if (hasNoZero(i) && hasNoZero(n - i)) {
+            return [i, n - i];
+        }
     }
-  }
 };

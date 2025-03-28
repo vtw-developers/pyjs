@@ -11,18 +11,17 @@
  * - notToBe(val) accepts another value and returns true if the two values !== each
  *   other. If they are equal, it should throw an error "Equal".
  */
-
 /**
  * @param {string} val
  * @return {Object}
  */
 var expect = function(val) {
-  const compareHelper = (error, fn) => {
-    if (fn()) throw new Error(error);
-    return true;
-  };
-  return {
-    toBe: input => compareHelper('Not Equal', () => input !== val),
-    notToBe: input => compareHelper('Equal', () => input === val),
-  };
+    const compareHelper = (error, fn) => {
+        if (fn()) throw new Error(error);
+        return true;
+    };
+    return {
+        toBe: input => compareHelper('Not Equal', () => input !== val),
+        notToBe: input => compareHelper('Equal', () => input === val),
+    };
 };

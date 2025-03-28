@@ -14,22 +14,19 @@
  *
  * It is guaranteed that there will be a winner of the game.
  */
-
 /**
  * @param {number[]} arr
  * @param {number} k
  * @return {number}
  */
 var getWinner = function(arr, k) {
-  let result = arr[0];
-
-  for (let i = 1, count = 0; i < arr.length && count < k; i++) {
-    if (result < arr[i]) {
-      result = arr[i];
-      count = 0;
+    let result = arr[0];
+    for (let i = 1, count = 0; i < arr.length && count < k; i++) {
+        if (result < arr[i]) {
+            result = arr[i];
+            count = 0;
+        }
+        count++;
     }
-    count++;
-  }
-
-  return result;
+    return result;
 };

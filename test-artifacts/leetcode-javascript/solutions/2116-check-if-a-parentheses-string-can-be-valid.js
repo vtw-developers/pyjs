@@ -17,38 +17,34 @@
  *
  * Return true if you can make s a valid parentheses string. Otherwise, return false.
  */
-
 /**
  * @param {string} s
  * @param {string} locked
  * @return {boolean}
  */
 var canBeValid = function(s, locked) {
-  if (s.length % 2) return false;
-
-  let symmetrical = 0;
-  for (let i = 0; i < s.length; i++) {
-    if (locked[i] === '0' || s[i] === '(') {
-      symmetrical++;
-    } else {
-      symmetrical--;
+    if (s.length % 2) return false;
+    let symmetrical = 0;
+    for (let i = 0; i < s.length; i++) {
+        if (locked[i] === '0' || s[i] === '(') {
+            symmetrical++;
+        } else {
+            symmetrical--;
+        }
+        if (symmetrical < 0) {
+            return false;
+        }
     }
-    if (symmetrical < 0) {
-      return false;
+    symmetrical = 0;
+    for (let i = s.length - 1; i >= 0; i--) {
+        if (locked[i] === '0' || s[i] === ')') {
+            symmetrical++;
+        } else {
+            symmetrical--;
+        }
+        if (symmetrical < 0) {
+            return false;
+        }
     }
-  }
-
-  symmetrical = 0;
-  for (let i = s.length - 1; i >= 0; i--) {
-    if (locked[i] === '0' || s[i] === ')') {
-      symmetrical++;
-    } else {
-      symmetrical--;
-    }
-    if (symmetrical < 0) {
-      return false;
-    }
-  }
-
-  return true;
+    return true;
 };

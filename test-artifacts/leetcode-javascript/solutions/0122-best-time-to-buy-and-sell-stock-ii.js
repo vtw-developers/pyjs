@@ -12,13 +12,12 @@
  *
  * Find and return the maximum profit you can achieve.
  */
-
 /**
  * @param {number[]} prices
  * @return {number}
  */
 var maxProfit = function(prices) {
-  return prices.reduce((result, price, i) => {
-    return prices[i - 1] < price ? result + (price - prices[i - 1]) : result;
-  }, 0);
+    return prices.reduce((result, price, i) => {
+        return prices[i - 1] < price ? result + (price - prices[i - 1]) : result;
+    }, 0);
 };

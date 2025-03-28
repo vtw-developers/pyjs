@@ -8,30 +8,26 @@
  *
  * A subarray is a contiguous part of an array.
  */
-
 /**
  * @param {number[]} nums
  * @param {number} k
  * @return {number}
  */
 var shortestSubarray = function(nums, k) {
-  const prefixSums = [0];
-  for (let i = 0; i < nums.length; i++) {
-    prefixSums.push(prefixSums[i] + nums[i]);
-  }
-
-  const deque = [];
-  let shortestLength = Infinity;
-
-  for (let i = 0; i < prefixSums.length; i++) {
-    while (deque.length && prefixSums[i] - prefixSums[deque[0]] >= k) {
-      shortestLength = Math.min(shortestLength, i - deque.shift());
+    const prefixSums = [0];
+    for (let i = 0; i < nums.length; i++) {
+        prefixSums.push(prefixSums[i] + nums[i]);
     }
-    while (deque.length && prefixSums[i] <= prefixSums[deque[deque.length - 1]]) {
-      deque.pop();
+    const deque = [];
+    let shortestLength = Infinity;
+    for (let i = 0; i < prefixSums.length; i++) {
+        while (deque.length && prefixSums[i] - prefixSums[deque[0]] >= k) {
+            shortestLength = Math.min(shortestLength, i - deque.shift());
+        }
+        while (deque.length && prefixSums[i] <= prefixSums[deque[deque.length - 1]]) {
+            deque.pop();
+        }
+        deque.push(i);
     }
-    deque.push(i);
-  }
-
-  return shortestLength === Infinity ? -1 : shortestLength;
+    return shortestLength === Infinity ? -1 : shortestLength;
 };

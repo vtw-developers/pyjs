@@ -15,21 +15,14 @@
  * For example, the saying and conversion for digit string "3322251":
  * Given a positive integer n, return the nth term of the count-and-say sequence.
  */
-
 /**
  * @param {number} n
  * @return {string}
  */
 var countAndSay = function(n) {
-  let result = '1';
-
-  for (let i = 1; i < n; i++) {
-    result = result.replace(/((\d)\2*)/g, '$1—')
-                   .split('—')
-                   .map(s => s ? `${s.length}${s[0]}` : '')
-                   .join('');
-  }
-
-  return result;
+    let result = '1';
+    for (let i = 1; i < n; i++) {
+        result = result.replace(/((\d)\2*)/g, '$1—').split('—').map(s => s ? `${s.length}${s[0]}` : '').join('');
+    }
+    return result;
 };
-

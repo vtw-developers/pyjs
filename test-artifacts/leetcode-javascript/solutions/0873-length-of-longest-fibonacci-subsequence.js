@@ -14,29 +14,24 @@
  * none) from arr, without changing the order of the remaining elements. For example, [3, 5, 8] is
  * a subsequence of [3, 4, 5, 6, 7, 8].
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var lenLongestFibSubseq = function(arr) {
-  const set = new Set(arr);
-  let max = 0;
-
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = i + 1; j < arr.length; j++) {
-      let [x, y, count] = [arr[i], arr[j], 2];
-
-      while (set.has(x + y)) {
-        const next = x + y;
-        x = y;
-        y = next;
-        count++;
-      }
-
-      max = Math.max(max, count);
+    const set = new Set(arr);
+    let max = 0;
+    for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+            let [x, y, count] = [arr[i], arr[j], 2];
+            while (set.has(x + y)) {
+                const next = x + y;
+                x = y;
+                y = next;
+                count++;
+            }
+            max = Math.max(max, count);
+        }
     }
-  }
-
-  return max >= 3 ? max : 0;
+    return max >= 3 ? max : 0;
 };

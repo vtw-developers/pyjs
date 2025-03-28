@@ -9,7 +9,6 @@
  * Return the smallest level x such that the sum of all the values of nodes at
  * level x is maximal.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -23,20 +22,18 @@
  * @return {number}
  */
 var maxLevelSum = function(root) {
-  const sums = [-Infinity];
+    const sums = [-Infinity];
+    traverse(root, 1);
+    return sums.indexOf(Math.max(...sums));
 
-  traverse(root, 1);
-
-  return sums.indexOf(Math.max(...sums));
-
-  function traverse(node, depth) {
-    if (!node) return;
-    if (sums[depth] === undefined) {
-      sums.push(node.val);
-    } else {
-      sums[depth] += node.val;
+    function traverse(node, depth) {
+        if (!node) return;
+        if (sums[depth] === undefined) {
+            sums.push(node.val);
+        } else {
+            sums[depth] += node.val;
+        }
+        traverse(node.left, depth + 1);
+        traverse(node.right, depth + 1);
     }
-    traverse(node.left, depth + 1);
-    traverse(node.right, depth + 1);
-  }
 };

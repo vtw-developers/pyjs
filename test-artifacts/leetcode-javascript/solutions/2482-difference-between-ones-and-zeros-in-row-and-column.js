@@ -14,23 +14,19 @@
  *
  * Return the difference matrix diff.
  */
-
 /**
  * @param {number[][]} grid
  * @return {number[][]}
  */
 var onesMinusZeros = function(grid) {
-  const rows = new Array(grid.length).fill(0);
-  const columns = new Array(grid[0].length).fill(0);
-
-  grid.forEach((row, r) => row.forEach((value, c) => {
-    rows[r] += value;
-    columns[c] += value;
-  }));
-
-  grid.forEach((row, r) => row.forEach((value, c) => {
-    grid[r][c] = 2 * rows[r] - grid.length + 2 * columns[c] - row.length;
-  }));
-
-  return grid;
+    const rows = new Array(grid.length).fill(0);
+    const columns = new Array(grid[0].length).fill(0);
+    grid.forEach((row, r) => row.forEach((value, c) => {
+        rows[r] += value;
+        columns[c] += value;
+    }));
+    grid.forEach((row, r) => row.forEach((value, c) => {
+        grid[r][c] = 2 * rows[r] - grid.length + 2 * columns[c] - row.length;
+    }));
+    return grid;
 };

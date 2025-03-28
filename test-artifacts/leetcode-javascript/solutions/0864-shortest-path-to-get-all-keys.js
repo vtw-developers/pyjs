@@ -23,56 +23,53 @@
  *
  * Return the lowest number of moves to acquire all keys. If it is impossible, return -1.
  */
-
 /**
  * @param {string[]} grid
  * @return {number}
  */
 var shortestPathAllKeys = function(grid) {
-  const rows = grid.length;
-  const cols = grid[0].length;
-  let startRow;
-  let startCol;
-  let totalKeys = 0;
-
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      if (grid[i][j] === '@') {
-        startRow = i;
-        startCol = j;
-      } else if (/[a-f]/.test(grid[i][j])) {
-        totalKeys++;
-      }
-    }
-  }
-
-  const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-  const queue = [[startRow, startCol, 0, 0]];
-  const visited = new Set([`${startRow},${startCol},0`]);
-
-  while (queue.length) {
-    const [row, col, keys, steps] = queue.shift();
-    if (keys === (1 << totalKeys) - 1) return steps;
-    for (const [dr, dc] of directions) {
-      const newRow = row + dr;
-      const newCol = col + dc;
-
-      if (newRow >= 0 && newRow < rows && newCol >= 0
-          && newCol < cols && grid[newRow][newCol] !== '#') {
-        const cell = grid[newRow][newCol];
-        const newKeys = /[a-f]/.test(cell)
-          ? keys | (1 << (cell.charCodeAt(0) - 97))
-          : keys;
-
-        if (/[A-F]/.test(cell) && !(keys & (1 << (cell.charCodeAt(0) - 65)))) continue;
-        const state = `${newRow},${newCol},${newKeys}`;
-        if (!visited.has(state)) {
-          visited.add(state);
-          queue.push([newRow, newCol, newKeys, steps + 1]);
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let startRow;
+    let startCol;
+    let totalKeys = 0;
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (grid[i][j] === '@') {
+                startRow = i;
+                startCol = j;
+            } else if (/[a-f]/.test(grid[i][j])) {
+                totalKeys++;
+            }
         }
-      }
     }
-  }
-
-  return -1;
+    const directions = [
+        [0, 1],
+        [1, 0],
+        [0, -1],
+        [-1, 0]
+    ];
+    const queue = [
+        [startRow, startCol, 0, 0]
+    ];
+    const visited = new Set([`${startRow},${startCol},0`]);
+    while (queue.length) {
+        const [row, col, keys, steps] = queue.shift();
+        if (keys === (1 << totalKeys) - 1) return steps;
+        for (const [dr, dc] of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && grid[newRow][newCol] !== '#') {
+                const cell = grid[newRow][newCol];
+                const newKeys = /[a-f]/.test(cell) ? keys | (1 << (cell.charCodeAt(0) - 97)) : keys;
+                if (/[A-F]/.test(cell) && !(keys & (1 << (cell.charCodeAt(0) - 65)))) continue;
+                const state = `${newRow},${newCol},${newKeys}`;
+                if (!visited.has(state)) {
+                    visited.add(state);
+                    queue.push([newRow, newCol, newKeys, steps + 1]);
+                }
+            }
+        }
+    }
+    return -1;
 };

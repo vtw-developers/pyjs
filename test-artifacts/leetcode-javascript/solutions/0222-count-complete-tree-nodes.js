@@ -11,7 +11,6 @@
  *
  * Design an algorithm that runs in less than O(n) time complexity.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -25,5 +24,5 @@
  * @return {number}
  */
 var countNodes = function(root) {
-  return !root ? 0 : 1 + countNodes(root.left) + countNodes(root.right);
+    return !root ? 0 : 1 + countNodes(root.left) + countNodes(root.right);
 };

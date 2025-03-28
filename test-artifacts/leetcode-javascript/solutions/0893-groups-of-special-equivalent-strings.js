@@ -20,21 +20,20 @@
  *
  * Return the number of groups of special-equivalent strings from words.
  */
-
 /**
  * @param {string[]} words
  * @return {number}
  */
 var numSpecialEquivGroups = function(words) {
-  return new Set(words.map(normalizeWord)).size;
+    return new Set(words.map(normalizeWord)).size;
 
-  function normalizeWord(word) {
-    const evenChars = [];
-    const oddChars = [];
-    for (let i = 0; i < word.length; i++) {
-      if (i % 2 === 0) evenChars.push(word[i]);
-      else oddChars.push(word[i]);
+    function normalizeWord(word) {
+        const evenChars = [];
+        const oddChars = [];
+        for (let i = 0; i < word.length; i++) {
+            if (i % 2 === 0) evenChars.push(word[i]);
+            else oddChars.push(word[i]);
+        }
+        return `${evenChars.sort().join('')}-${oddChars.sort().join('')}`;
     }
-    return `${evenChars.sort().join('')}-${oddChars.sort().join('')}`;
-  }
 };

@@ -16,26 +16,21 @@
  * Return the lexicographically largest resulting string possible after applying
  * the mentioned operations on the string.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 function makeLargestSpecial(s) {
-  if (s.length <= 2) return s;
-
-  let count = 0;
-  let start = 0;
-  const specials = [];
-
-  for (let i = 0; i < s.length; i++) {
-    count += s[i] === '1' ? 1 : -1;
-
-    if (count === 0) {
-      specials.push('1' + makeLargestSpecial(s.slice(start + 1, i)) + '0');
-      start = i + 1;
+    if (s.length <= 2) return s;
+    let count = 0;
+    let start = 0;
+    const specials = [];
+    for (let i = 0; i < s.length; i++) {
+        count += s[i] === '1' ? 1 : -1;
+        if (count === 0) {
+            specials.push('1' + makeLargestSpecial(s.slice(start + 1, i)) + '0');
+            start = i + 1;
+        }
     }
-  }
-
-  return specials.sort().reverse().join('');
+    return specials.sort().reverse().join('');
 }

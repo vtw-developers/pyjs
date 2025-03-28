@@ -13,7 +13,6 @@
  * Return the number of schemes that can be chosen. Since the answer may be very large, return
  * it modulo 109 + 7.
  */
-
 /**
  * @param {number} n
  * @param {number} minProfit
@@ -22,34 +21,29 @@
  * @return {number}
  */
 var profitableSchemes = function(n, minProfit, group, profit) {
-  const MOD = 1e9 + 7;
-  const dp = Array.from({ length: group.length + 1 }, () =>
-    Array.from({ length: n + 1 }, () => new Array(minProfit + 1).fill(0))
-  );
-
-  dp[0][0][0] = 1;
-
-  for (let crime = 1; crime <= group.length; crime++) {
-    const membersNeeded = group[crime - 1];
-    const profitGained = profit[crime - 1];
-
-    for (let members = 0; members <= n; members++) {
-      for (let currentProfit = 0; currentProfit <= minProfit; currentProfit++) {
-        dp[crime][members][currentProfit] = dp[crime - 1][members][currentProfit];
-
-        if (members >= membersNeeded) {
-          const prevProfit = Math.max(0, currentProfit - profitGained);
-          dp[crime][members][currentProfit] = (dp[crime][members][currentProfit]
-            + dp[crime - 1][members - membersNeeded][prevProfit]) % MOD;
+    const MOD = 1e9 + 7;
+    const dp = Array.from({
+        length: group.length + 1
+    }, () => Array.from({
+        length: n + 1
+    }, () => new Array(minProfit + 1).fill(0)));
+    dp[0][0][0] = 1;
+    for (let crime = 1; crime <= group.length; crime++) {
+        const membersNeeded = group[crime - 1];
+        const profitGained = profit[crime - 1];
+        for (let members = 0; members <= n; members++) {
+            for (let currentProfit = 0; currentProfit <= minProfit; currentProfit++) {
+                dp[crime][members][currentProfit] = dp[crime - 1][members][currentProfit];
+                if (members >= membersNeeded) {
+                    const prevProfit = Math.max(0, currentProfit - profitGained);
+                    dp[crime][members][currentProfit] = (dp[crime][members][currentProfit] + dp[crime - 1][members - membersNeeded][prevProfit]) % MOD;
+                }
+            }
         }
-      }
     }
-  }
-
-  let result = 0;
-  for (let members = 0; members <= n; members++) {
-    result = (result + dp[group.length][members][minProfit]) % MOD;
-  }
-
-  return result;
+    let result = 0;
+    for (let members = 0; members <= n; members++) {
+        result = (result + dp[group.length][members][minProfit]) % MOD;
+    }
+    return result;
 };

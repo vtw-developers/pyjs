@@ -19,28 +19,24 @@
  *   successfully without causing a triple booking. Otherwise, return false and do not add the event
  *   to the calendar.
  */
-
 var MyCalendarTwo = function() {
-  this.bookings = [];
-  this.overlaps = [];
+    this.bookings = [];
+    this.overlaps = [];
 };
-
 /**
  * @param {number} startTime
  * @param {number} endTime
  * @return {boolean}
  */
 MyCalendarTwo.prototype.book = function(startTime, endTime) {
-  for (const [start, end] of this.overlaps) {
-    if (startTime < end && endTime > start) return false;
-  }
-
-  for (const [start, end] of this.bookings) {
-    if (startTime < end && endTime > start) {
-      this.overlaps.push([Math.max(start, startTime), Math.min(end, endTime)]);
+    for (const [start, end] of this.overlaps) {
+        if (startTime < end && endTime > start) return false;
     }
-  }
-
-  this.bookings.push([startTime, endTime]);
-  return true;
+    for (const [start, end] of this.bookings) {
+        if (startTime < end && endTime > start) {
+            this.overlaps.push([Math.max(start, startTime), Math.min(end, endTime)]);
+        }
+    }
+    this.bookings.push([startTime, endTime]);
+    return true;
 };

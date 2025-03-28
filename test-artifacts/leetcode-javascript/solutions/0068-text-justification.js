@@ -22,42 +22,38 @@
  * - Each word's length is guaranteed to be greater than 0 and not exceed maxWidth.
  * - The input array words contains at least one word.
  */
-
 /**
  * @param {string[]} words
  * @param {number} maxWidth
  * @return {string[]}
  */
 var fullJustify = function(words, maxWidth) {
-  const result = [[]];
-  result[0].count = 0;
-
-  for (const word of words) {
-    let row = result[result.length - 1];
-    if (row.length && row.count + row.length + word.length > maxWidth) {
-      result.push([]);
-      row = result[result.length - 1];
-      row.count = 0;
+    const result = [
+        []
+    ];
+    result[0].count = 0;
+    for (const word of words) {
+        let row = result[result.length - 1];
+        if (row.length && row.count + row.length + word.length > maxWidth) {
+            result.push([]);
+            row = result[result.length - 1];
+            row.count = 0;
+        }
+        row.push(word);
+        row.count += word.length;
     }
-    row.push(word);
-    row.count += word.length;
-  }
-
-  for (let i = 0; i < result.length; i++) {
-    const row = result[i];
-    if (row.length === 1 || i === result.length - 1) {
-      result[i] = row.join(' ') + ' '.repeat(maxWidth - row.count - row.length + 1);
-      continue;
+    for (let i = 0; i < result.length; i++) {
+        const row = result[i];
+        if (row.length === 1 || i === result.length - 1) {
+            result[i] = row.join(' ') + ' '.repeat(maxWidth - row.count - row.length + 1);
+            continue;
+        }
+        const min = ' '.repeat(Math.floor((maxWidth - row.count) / (row.length - 1)));
+        for (let j = 1; j < row.length; j++) {
+            const delimiter = j <= (maxWidth - row.count) % (row.length - 1) ? ' ' : '';
+            row[0] += min + delimiter + row[j];
+        }
+        result[i] = row[0];
     }
-
-    const min = ' '.repeat(Math.floor((maxWidth - row.count) / (row.length - 1)));
-    for (let j = 1; j < row.length; j++) {
-      const delimiter = j <= (maxWidth - row.count) % (row.length - 1) ? ' ' : '';
-      row[0] += min + delimiter + row[j];
-    }
-
-    result[i] = row[0];
-  }
-
-  return result;
+    return result;
 };

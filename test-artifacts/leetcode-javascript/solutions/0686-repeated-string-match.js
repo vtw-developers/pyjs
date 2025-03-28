@@ -11,15 +11,14 @@
  * Return 3, because by repeating A three times (“abcdabcdabcd”), B is a
  * substring of it; and B is not a substring of A repeated two times ("abcdabcd").
  */
-
 /**
  * @param {string} A
  * @param {string} B
  * @return {number}
  */
 var repeatedStringMatch = function(A, B) {
-  const length = Math.ceil(B.length / A.length);
-  if (A.repeat(length).includes(B)) return length;
-  if ((A.repeat(length) + A).includes(B)) return length + 1;
-  return -1;
+    const length = Math.ceil(B.length / A.length);
+    if (A.repeat(length).includes(B)) return length;
+    if ((A.repeat(length) + A).includes(B)) return length + 1;
+    return -1;
 };

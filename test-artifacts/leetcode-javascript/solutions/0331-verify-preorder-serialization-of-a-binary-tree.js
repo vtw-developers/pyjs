@@ -20,19 +20,18 @@
  * For example, it could never contain two consecutive commas, such as "1,,3".
  * Note: You are not allowed to reconstruct the tree.
  */
-
 /**
  * @param {string} preorder
  * @return {boolean}
  */
 var isValidSerialization = function(preorder) {
-  let result = 1;
-  for (const node of preorder.split(',')) {
-    if (result) {
-      result += node === '#' ? -1 : 1;
-    } else {
-      return false;
+    let result = 1;
+    for (const node of preorder.split(',')) {
+        if (result) {
+            result += node === '#' ? -1 : 1;
+        } else {
+            return false;
+        }
     }
-  }
-  return result < 1;
+    return result < 1;
 };

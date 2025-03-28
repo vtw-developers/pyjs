@@ -14,33 +14,27 @@
  * Return the minimum possible good integer after flipping the cards. If there are no good integers,
  * return 0.
  */
-
 /**
  * @param {number[]} fronts
  * @param {number[]} backs
  * @return {number}
  */
 var flipgame = function(fronts, backs) {
-  const impossibleValues = new Set();
-  const n = fronts.length;
-
-  for (let i = 0; i < n; i++) {
-    if (fronts[i] === backs[i]) {
-      impossibleValues.add(fronts[i]);
+    const impossibleValues = new Set();
+    const n = fronts.length;
+    for (let i = 0; i < n; i++) {
+        if (fronts[i] === backs[i]) {
+            impossibleValues.add(fronts[i]);
+        }
     }
-  }
-
-  let minGoodValue = Infinity;
-
-  for (let i = 0; i < n; i++) {
-    if (!impossibleValues.has(fronts[i])) {
-      minGoodValue = Math.min(minGoodValue, fronts[i]);
+    let minGoodValue = Infinity;
+    for (let i = 0; i < n; i++) {
+        if (!impossibleValues.has(fronts[i])) {
+            minGoodValue = Math.min(minGoodValue, fronts[i]);
+        }
+        if (!impossibleValues.has(backs[i])) {
+            minGoodValue = Math.min(minGoodValue, backs[i]);
+        }
     }
-
-    if (!impossibleValues.has(backs[i])) {
-      minGoodValue = Math.min(minGoodValue, backs[i]);
-    }
-  }
-
-  return minGoodValue === Infinity ? 0 : minGoodValue;
+    return minGoodValue === Infinity ? 0 : minGoodValue;
 };

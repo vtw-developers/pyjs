@@ -9,10 +9,9 @@
  *
  * You may assume the array is the output of JSON.parse.
  */
-
 /**
  * @return {null|boolean|number|string|Array|Object}
  */
 Array.prototype.last = function() {
-  return !this.length ? -1 : this[this.length - 1];
+    return !this.length ? -1 : this[this.length - 1];
 };

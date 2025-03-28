@@ -12,7 +12,6 @@
  * corresponding substring of t with a cost less than or equal to maxCost. If there is no
  * substring from s that can be changed to its corresponding substring from t, return 0.
  */
-
 /**
  * @param {string} s
  * @param {string} t
@@ -20,16 +19,13 @@
  * @return {number}
  */
 var equalSubstring = function(s, t, maxCost) {
-  let left = -1;
-
-  for (let right = 0; right < s.length; right++) {
-    maxCost -= Math.abs(s.charCodeAt(right) - t.charCodeAt(right));
-
-    if (maxCost < 0) {
-      left++;
-      maxCost += Math.abs(s.charCodeAt(left) - t.charCodeAt(left));
+    let left = -1;
+    for (let right = 0; right < s.length; right++) {
+        maxCost -= Math.abs(s.charCodeAt(right) - t.charCodeAt(right));
+        if (maxCost < 0) {
+            left++;
+            maxCost += Math.abs(s.charCodeAt(left) - t.charCodeAt(left));
+        }
     }
-  }
-
-  return s.length - left - 1;
+    return s.length - left - 1;
 };

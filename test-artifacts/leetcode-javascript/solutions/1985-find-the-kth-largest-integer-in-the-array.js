@@ -12,12 +12,11 @@
  * ["1","2","2"], "2" is the first largest integer, "2" is the second-largest
  * integer, and "1" is the third-largest integer.
  */
-
 /**
  * @param {string[]} nums
  * @param {number} k
  * @return {string}
  */
 var kthLargestNumber = function(nums, k) {
-  return String(nums.map(BigInt).sort((a, b) => b - a >= 0 ? 1 : -1)[k - 1]);
+    return String(nums.map(BigInt).sort((a, b) => b - a >= 0 ? 1 : -1)[k - 1]);
 };

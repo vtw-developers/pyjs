@@ -14,7 +14,6 @@
  *
  * The test cases are generated so that the answer fits in a 32-bits integer.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -28,14 +27,14 @@
  * @return {number}
  */
 var sumRootToLeaf = function(root) {
-  return dfs(root);
+    return dfs(root);
 };
 
 function dfs(node, str = '') {
-  if (!node) return 0;
-  str += node.val;
-  if (!node.left && !node.right) {
-    return parseInt(str, 2)
-  }
-  return dfs(node.left, str) + dfs(node.right, str);
+    if (!node) return 0;
+    str += node.val;
+    if (!node.left && !node.right) {
+        return parseInt(str, 2)
+    }
+    return dfs(node.left, str) + dfs(node.right, str);
 }

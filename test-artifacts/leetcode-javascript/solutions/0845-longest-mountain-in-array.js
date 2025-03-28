@@ -12,36 +12,32 @@
  * Given an integer array arr, return the length of the longest subarray, which is a
  * mountain. Return 0 if there is no mountain subarray.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var longestMountain = function(arr) {
-  const n = arr.length;
-  if (n < 3) return 0;
-
-  let maxLength = 0;
-  let i = 1;
-
-  while (i < n - 1) {
-    const isPeak = arr[i] > arr[i - 1] && arr[i] > arr[i + 1];
-    if (!isPeak) {
-      i++;
-      continue;
+    const n = arr.length;
+    if (n < 3) return 0;
+    let maxLength = 0;
+    let i = 1;
+    while (i < n - 1) {
+        const isPeak = arr[i] > arr[i - 1] && arr[i] > arr[i + 1];
+        if (!isPeak) {
+            i++;
+            continue;
+        }
+        let leftBound = i - 1;
+        while (leftBound > 0 && arr[leftBound - 1] < arr[leftBound]) {
+            leftBound--;
+        }
+        let rightBound = i + 1;
+        while (rightBound < n - 1 && arr[rightBound] > arr[rightBound + 1]) {
+            rightBound++;
+        }
+        const mountainLength = rightBound - leftBound + 1;
+        maxLength = Math.max(maxLength, mountainLength);
+        i = rightBound + 1;
     }
-    let leftBound = i - 1;
-    while (leftBound > 0 && arr[leftBound - 1] < arr[leftBound]) {
-      leftBound--;
-    }
-    let rightBound = i + 1;
-    while (rightBound < n - 1 && arr[rightBound] > arr[rightBound + 1]) {
-      rightBound++;
-    }
-    const mountainLength = rightBound - leftBound + 1;
-    maxLength = Math.max(maxLength, mountainLength);
-    i = rightBound + 1;
-  }
-
-  return maxLength;
+    return maxLength;
 };

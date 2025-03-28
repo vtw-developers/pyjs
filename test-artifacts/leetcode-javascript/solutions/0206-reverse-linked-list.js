@@ -5,7 +5,6 @@
  *
  * Given the head of a singly linked list, reverse the list, and return the reversed list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val, next) {
@@ -18,15 +17,13 @@
  * @return {ListNode}
  */
 var reverseList = function(head) {
-  let prev = null;
-  let tail = head;
-
-  while (tail) {
-    const next = tail.next;
-    tail.next = prev;
-    prev = tail;
-    tail = next;
-  }
-
-  return prev;
+    let prev = null;
+    let tail = head;
+    while (tail) {
+        const next = tail.next;
+        tail.next = prev;
+        prev = tail;
+        tail = next;
+    }
+    return prev;
 };

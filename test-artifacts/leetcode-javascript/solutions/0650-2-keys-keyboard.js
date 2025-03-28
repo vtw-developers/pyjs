@@ -12,21 +12,18 @@
  * Given an integer n, return the minimum number of operations to get the character 'A'
  * exactly n times on the screen.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var minSteps = function(n) {
-  let result = 0;
-
-  for (let factor = 2; n > 1;) {
-    while (n % factor === 0) {
-      result += factor;
-      n /= factor;
+    let result = 0;
+    for (let factor = 2; n > 1;) {
+        while (n % factor === 0) {
+            result += factor;
+            n /= factor;
+        }
+        factor++;
     }
-    factor++;
-  }
-
-  return result;
+    return result;
 };

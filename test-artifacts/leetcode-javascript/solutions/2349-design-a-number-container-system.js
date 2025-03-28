@@ -14,37 +14,35 @@
  * - int find(int number) Returns the smallest index for the given number, or -1 if
  *   there is no index that is filled by number in the system.
  */
-
 var NumberContainers = function() {
-  this.indexMap = new Map();
-  this.lookup = new Map();
+    this.indexMap = new Map();
+    this.lookup = new Map();
 };
-
 /**
  * @param {number} index
  * @param {number} number
  * @return {void}
  */
 NumberContainers.prototype.change = function(index, number) {
-  this.indexMap.set(index, number);
-  this.getQueue(number).enqueue(index);
+    this.indexMap.set(index, number);
+    this.getQueue(number).enqueue(index);
 };
-
 /**
  * @param {number} number
  * @return {number}
  */
 NumberContainers.prototype.find = function(number) {
-  const queue = this.getQueue(number);
-  while (queue.size() && this.indexMap.get(queue.front()) !== number) {
-    queue.dequeue();
-  }
-  return queue.size() ? queue.front() : -1;
+    const queue = this.getQueue(number);
+    while (queue.size() && this.indexMap.get(queue.front()) !== number) {
+        queue.dequeue();
+    }
+    return queue.size() ? queue.front() : -1;
 };
-
 NumberContainers.prototype.getQueue = function(number) {
-  if (!this.lookup.has(number)) {
-    this.lookup.set(number, new PriorityQueue({ compare: (a, b) => a - b }));
-  }
-  return this.lookup.get(number);
+    if (!this.lookup.has(number)) {
+        this.lookup.set(number, new PriorityQueue({
+            compare: (a, b) => a - b
+        }));
+    }
+    return this.lookup.get(number);
 };

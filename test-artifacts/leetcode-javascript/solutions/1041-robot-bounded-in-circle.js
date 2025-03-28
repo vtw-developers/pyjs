@@ -13,22 +13,27 @@
  * Return true if and only if there exists a circle in the plane such that the
  * robot never leaves the circle.
  */
-
 /**
  * @param {string} instructions
  * @return {boolean}
  */
 var isRobotBounded = function(instructions) {
-  let x = 0, y = 0;
-  let dx = 0, dy = 1;
-
-  for (const direction of instructions) {
-    switch (direction) {
-      case 'R': [dx, dy] = [dy, -dx]; break;
-      case 'L': [dy, dx] = [dx, -dy]; break;
-      case 'G': [x, y] = [x + dx, y + dy]; break;
+    let x = 0,
+        y = 0;
+    let dx = 0,
+        dy = 1;
+    for (const direction of instructions) {
+        switch (direction) {
+            case 'R':
+                [dx, dy] = [dy, -dx];
+                break;
+            case 'L':
+                [dy, dx] = [dx, -dy];
+                break;
+            case 'G':
+                [x, y] = [x + dx, y + dy];
+                break;
+        }
     }
-  }
-
-  return (x === 0 && y === 0) || dy !== 1;
+    return (x === 0 && y === 0) || dy !== 1;
 }

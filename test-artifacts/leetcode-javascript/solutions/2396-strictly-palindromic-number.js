@@ -10,11 +10,10 @@
  *
  * A string is palindromic if it reads the same forward and backward.
  */
-
 /**
  * @param {number} n
  * @return {boolean}
  */
 var isStrictlyPalindromic = function(n) {
-  return false;
+    return false;
 };

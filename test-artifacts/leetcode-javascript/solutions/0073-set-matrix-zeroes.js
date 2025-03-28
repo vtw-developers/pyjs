@@ -8,26 +8,22 @@
  *
  * You must do it in place.
  */
-
 /**
  * @param {number[][]} matrix
  * @return {void} Do not return anything, modify matrix in-place instead.
  */
 var setZeroes = function(matrix) {
-  const columns = new Set();
-  const rows = new Set();
-
-  matrix.forEach((row, i) => {
-    row.forEach((value, j) => {
-      if (value === 0) {
-        columns.add(i);
-        rows.add(j);
-      }
+    const columns = new Set();
+    const rows = new Set();
+    matrix.forEach((row, i) => {
+        row.forEach((value, j) => {
+            if (value === 0) {
+                columns.add(i);
+                rows.add(j);
+            }
+        });
     });
-  });
-
-  [...columns].forEach(i => matrix[i].forEach((_, j) => matrix[i][j] = 0));
-  matrix.forEach((_, i) => [...rows].forEach(j => matrix[i][j] = 0));
-
-  return matrix;
+    [...columns].forEach(i => matrix[i].forEach((_, j) => matrix[i][j] = 0));
+    matrix.forEach((_, i) => [...rows].forEach(j => matrix[i][j] = 0));
+    return matrix;
 };

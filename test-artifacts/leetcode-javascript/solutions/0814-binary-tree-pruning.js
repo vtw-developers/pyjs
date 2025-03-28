@@ -8,7 +8,6 @@
  *
  * A subtree of a node node is node plus every node that is a descendant of node.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -22,11 +21,11 @@
  * @return {TreeNode}
  */
 var pruneTree = function(root) {
-  if (!root) return null;
-  root.left = pruneTree(root.left);
-  root.right = pruneTree(root.right);
-  if (!root.left && !root.right && root.val === 0) {
-    return null;
-  }
-  return root;
+    if (!root) return null;
+    root.left = pruneTree(root.left);
+    root.right = pruneTree(root.right);
+    if (!root.left && !root.right && root.val === 0) {
+        return null;
+    }
+    return root;
 };

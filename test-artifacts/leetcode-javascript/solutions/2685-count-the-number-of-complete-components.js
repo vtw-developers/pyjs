@@ -16,54 +16,48 @@
  * A connected component is said to be complete if there exists an edge between every pair of
  * its vertices.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} edges
  * @return {number}
  */
 var countCompleteComponents = function(n, edges) {
-  const adjacencyList = Array.from({ length: n }, () => new Set());
-  edges.forEach(([a, b]) => {
-    adjacencyList[a].add(b);
-    adjacencyList[b].add(a);
-  });
+    const adjacencyList = Array.from({
+        length: n
+    }, () => new Set());
+    edges.forEach(([a, b]) => {
+        adjacencyList[a].add(b);
+        adjacencyList[b].add(a);
+    });
+    const visited = new Set();
+    let result = 0;
 
-  const visited = new Set();
-  let result = 0;
-
-  function exploreComponent(vertex) {
-    const component = new Set([vertex]);
-    const queue = [vertex];
-    visited.add(vertex);
-
-    while (queue.length) {
-      const current = queue.shift();
-      adjacencyList[current].forEach(neighbor => {
-        if (!visited.has(neighbor)) {
-          component.add(neighbor);
-          queue.push(neighbor);
-          visited.add(neighbor);
+    function exploreComponent(vertex) {
+        const component = new Set([vertex]);
+        const queue = [vertex];
+        visited.add(vertex);
+        while (queue.length) {
+            const current = queue.shift();
+            adjacencyList[current].forEach(neighbor => {
+                if (!visited.has(neighbor)) {
+                    component.add(neighbor);
+                    queue.push(neighbor);
+                    visited.add(neighbor);
+                }
+            });
         }
-      });
+        return component;
     }
-    return component;
-  }
 
-  function isComplete(component) {
-    const size = component.size;
-    return [...component].every(vertex =>
-      adjacencyList[vertex].size === size - 1
-        && [...adjacencyList[vertex]].every(neighbor => component.has(neighbor))
-    );
-  }
-
-  for (let vertex = 0; vertex < n; vertex++) {
-    if (!visited.has(vertex)) {
-      const component = exploreComponent(vertex);
-      if (isComplete(component)) result++;
+    function isComplete(component) {
+        const size = component.size;
+        return [...component].every(vertex => adjacencyList[vertex].size === size - 1 && [...adjacencyList[vertex]].every(neighbor => component.has(neighbor)));
     }
-  }
-
-  return result;
+    for (let vertex = 0; vertex < n; vertex++) {
+        if (!visited.has(vertex)) {
+            const component = exploreComponent(vertex);
+            if (isComplete(component)) result++;
+        }
+    }
+    return result;
 };

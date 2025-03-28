@@ -26,27 +26,24 @@
  *
  * Since the answer may be very large, return it modulo 109 + 7.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var numDecodings = function(s) {
-  const mod = 1e9 + 7;
-  let [i0, i1, i2, i3] = [1, 0, 0, 0];
-
-  for (const c of s) {
-    if (c == '*') {
-      i3 = 9 * i0 + 9 * i1 + 6 * i2;
-      i1 = i0;
-      i2 = i0;
-    } else {
-      i3 = (c > '0') * i0 + i1 + (c <= '6') * i2;
-      i1 = (c == '1') * i0;
-      i2 = (c == '2') * i0;
+    const mod = 1e9 + 7;
+    let [i0, i1, i2, i3] = [1, 0, 0, 0];
+    for (const c of s) {
+        if (c == '*') {
+            i3 = 9 * i0 + 9 * i1 + 6 * i2;
+            i1 = i0;
+            i2 = i0;
+        } else {
+            i3 = (c > '0') * i0 + i1 + (c <= '6') * i2;
+            i1 = (c == '1') * i0;
+            i2 = (c == '2') * i0;
+        }
+        i0 = i3 % mod;
     }
-    i0 = i3 % mod;
-  }
-
-  return i0;
+    return i0;
 };

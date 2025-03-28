@@ -15,30 +15,24 @@
  * - double findMedian() returns the median of all elements so far. Answers within 10-5 of
  *   the actual answer will be accepted.
  */
-
-
 var MedianFinder = function() {
-  this.minHeap = new MinPriorityQueue();
-  this.maxHeap = new MaxPriorityQueue();
+    this.minHeap = new MinPriorityQueue();
+    this.maxHeap = new MaxPriorityQueue();
 };
-
 /**
  * @param {number} num
  * @return {void}
  */
 MedianFinder.prototype.addNum = function(num) {
-  this.minHeap.enqueue(num);
-  this.maxHeap.enqueue(this.minHeap.dequeue().element);
-  if (this.minHeap.size() < this.maxHeap.size()) {
-    this.minHeap.enqueue(this.maxHeap.dequeue().element);
-  }
+    this.minHeap.enqueue(num);
+    this.maxHeap.enqueue(this.minHeap.dequeue().element);
+    if (this.minHeap.size() < this.maxHeap.size()) {
+        this.minHeap.enqueue(this.maxHeap.dequeue().element);
+    }
 };
-
 /**
  * @return {number}
  */
 MedianFinder.prototype.findMedian = function() {
-  return this.minHeap.size() > this.maxHeap.size()
-    ? this.minHeap.front().element
-    : (this.minHeap.front().element + this.maxHeap.front().element) / 2;
+    return this.minHeap.size() > this.maxHeap.size() ? this.minHeap.front().element : (this.minHeap.front().element + this.maxHeap.front().element) / 2;
 };

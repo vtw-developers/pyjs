@@ -18,29 +18,24 @@
  *
  * Given the integer array fruits, return the maximum number of fruits you can pick.
  */
-
 /**
  * @param {number[]} fruits
  * @return {number}
  */
 var totalFruit = function(fruits) {
-  const map = new Map();
-  let result = 0;
-  let start = 0;
-
-  for (let end = 0; end < fruits.length; end++) {
-    map.set(fruits[end], (map.get(fruits[end]) || 0) + 1);
-
-    while (map.size > 2) {
-      map.set(fruits[start], map.get(fruits[start]) - 1);
-      if (map.get(fruits[start]) === 0) {
-        map.delete(fruits[start]);
-      }
-      start++;
+    const map = new Map();
+    let result = 0;
+    let start = 0;
+    for (let end = 0; end < fruits.length; end++) {
+        map.set(fruits[end], (map.get(fruits[end]) || 0) + 1);
+        while (map.size > 2) {
+            map.set(fruits[start], map.get(fruits[start]) - 1);
+            if (map.get(fruits[start]) === 0) {
+                map.delete(fruits[start]);
+            }
+            start++;
+        }
+        result = Math.max(result, end - start + 1);
     }
-
-    result = Math.max(result, end - start + 1);
-  }
-
-  return result;
+    return result;
 };

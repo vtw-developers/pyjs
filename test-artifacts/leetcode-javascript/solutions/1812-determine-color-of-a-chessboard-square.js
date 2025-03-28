@@ -11,12 +11,11 @@
  * The coordinate will always represent a valid chessboard square. The coordinate will
  * always have the letter first, and the number second.
  */
-
 /**
  * @param {string} coordinates
  * @return {boolean}
  */
 var squareIsWhite = function(coordinates) {
-  const [x, y] = coordinates;
-  return (x.charCodeAt() + +y) % 2 !== 0;
+    const [x, y] = coordinates;
+    return (x.charCodeAt() + +y) % 2 !== 0;
 };

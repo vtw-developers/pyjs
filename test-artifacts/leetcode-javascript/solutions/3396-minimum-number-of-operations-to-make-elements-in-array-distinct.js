@@ -10,20 +10,17 @@
  * Note that an empty array is considered to have distinct elements. Return the minimum number
  * of operations needed to make the elements in the array distinct.
  */
-
 /**
  * @param {number[]} nums
  * @return {number}
  */
 var minimumOperations = function(nums) {
-  const unique = new Set();
-
-  for (let i = nums.length - 1; i > -1; i--) {
-    if (unique.has(nums[i])) {
-      return Math.ceil((i + 1) / 3);
+    const unique = new Set();
+    for (let i = nums.length - 1; i > -1; i--) {
+        if (unique.has(nums[i])) {
+            return Math.ceil((i + 1) / 3);
+        }
+        unique.add(nums[i]);
     }
-    unique.add(nums[i]);
-  }
-
-  return 0;
+    return 0;
 };

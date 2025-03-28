@@ -10,7 +10,6 @@
  *
  * Return the k pairs (u1, v1), (u2, v2), ..., (uk, vk) with the smallest sums.
  */
-
 /**
  * @param {number[]} nums1
  * @param {number[]} nums2
@@ -18,21 +17,20 @@
  * @return {number[][]}
  */
 var kSmallestPairs = function(nums1, nums2, k) {
-  const heap = new MinPriorityQueue({ compare: (a, b) => a[0] - b[0] });
-  const result = [];
-
-  for (let i = 0; i < nums1.length; i++) {
-    heap.enqueue([nums1[i] + nums2[0], 0]);
-  }
-
-  while (k > 0 && !heap.isEmpty()) {
-    const [n, index] = heap.dequeue();
-    result.push([n - nums2[index], nums2[index]]);
-    if (index + 1 < nums2.length) {
-      heap.enqueue([n - nums2[index] + nums2[index + 1], index + 1]);
+    const heap = new MinPriorityQueue({
+        compare: (a, b) => a[0] - b[0]
+    });
+    const result = [];
+    for (let i = 0; i < nums1.length; i++) {
+        heap.enqueue([nums1[i] + nums2[0], 0]);
     }
-    k--;
-  }
-
-  return result;
+    while (k > 0 && !heap.isEmpty()) {
+        const [n, index] = heap.dequeue();
+        result.push([n - nums2[index], nums2[index]]);
+        if (index + 1 < nums2.length) {
+            heap.enqueue([n - nums2[index] + nums2[index + 1], index + 1]);
+        }
+        k--;
+    }
+    return result;
 };

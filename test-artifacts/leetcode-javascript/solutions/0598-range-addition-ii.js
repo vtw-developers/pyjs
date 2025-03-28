@@ -10,7 +10,6 @@
  * Count and return the number of maximum integers in the matrix after performing all the
  * operations.
  */
-
 /**
  * @param {number} m
  * @param {number} n
@@ -18,13 +17,11 @@
  * @return {number}
  */
 var maxCount = function(m, n, ops) {
-  let a = m;
-  let b = n;
-
-  for (const op of ops) {
-    a = Math.min(a, op[0]);
-    b = Math.min(b, op[1]);
-  }
-
-  return a * b;
+    let a = m;
+    let b = n;
+    for (const op of ops) {
+        a = Math.min(a, op[0]);
+        b = Math.min(b, op[1]);
+    }
+    return a * b;
 };

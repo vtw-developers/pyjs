@@ -21,18 +21,15 @@
  * Return an array (of length `num_people` and sum `candies`) that
  * represents the final distribution of candies.
  */
-
 /**
  * @param {number} candies
  * @param {number} num_people
  * @return {number[]}
  */
 var distributeCandies = function(candies, num_people) {
-  const answer = new Array(num_people).fill(0);
-
-  for (let amount = 0; candies > 0; candies -= amount) {
-    answer[amount % num_people] += Math.min(candies, ++amount);
-  }
-
-  return answer;
+    const answer = new Array(num_people).fill(0);
+    for (let amount = 0; candies > 0; candies -= amount) {
+        answer[amount % num_people] += Math.min(candies, ++amount);
+    }
+    return answer;
 };

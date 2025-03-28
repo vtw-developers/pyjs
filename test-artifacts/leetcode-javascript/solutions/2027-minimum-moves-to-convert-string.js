@@ -11,11 +11,10 @@
  * Return the minimum number of moves required so that all the characters of s are
  * converted ]to 'O'.
  */
-
 /**
  * @param {string} s
  * @return {number}
  */
 var minimumMoves = function(s) {
-  return s.match(/X.{0,2}/g)?.length ?? 0;
+    return s.match(/X.{0,2}/g)?.length ?? 0;
 };

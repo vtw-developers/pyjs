@@ -13,7 +13,6 @@
  * number of words in the shortest transformation sequence from beginWord to
  * endWord, or 0 if no such sequence exists.
  */
-
 /**
  * @param {string} beginWord
  * @param {string} endWord
@@ -21,32 +20,27 @@
  * @return {number}
  */
 var ladderLength = function(beginWord, endWord, wordList) {
-  const set = new Set(wordList);
-  let queue = [beginWord];
-  let count = 1;
-
-  while (queue.length) {
-    const group = [];
-
-    for (const word of queue) {
-      if (word === endWord) {
-        return count;
-      }
-
-      for (let i = 0; i < word.length; i++) {
-        for (let j = 0; j < 26; j++) {
-          const str = word.slice(0, i) + String.fromCharCode(j + 97) + word.slice(i + 1);
-          if (set.has(str)) {
-            group.push(str);
-            set.delete(str);
-          }
+    const set = new Set(wordList);
+    let queue = [beginWord];
+    let count = 1;
+    while (queue.length) {
+        const group = [];
+        for (const word of queue) {
+            if (word === endWord) {
+                return count;
+            }
+            for (let i = 0; i < word.length; i++) {
+                for (let j = 0; j < 26; j++) {
+                    const str = word.slice(0, i) + String.fromCharCode(j + 97) + word.slice(i + 1);
+                    if (set.has(str)) {
+                        group.push(str);
+                        set.delete(str);
+                    }
+                }
+            }
         }
-      }
+        queue = group;
+        count++;
     }
-
-    queue = group;
-    count++;
-  }
-
-  return 0;
+    return 0;
 };

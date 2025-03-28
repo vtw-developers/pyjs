@@ -15,28 +15,25 @@
  * to reorder or remove any digits in s. You may return the valid IP addresses
  * in any order.
  */
-
 /**
  * @param {string} s
  * @return {string[]}
  */
 var restoreIpAddresses = function(s) {
-  return backtrack([], s);
+    return backtrack([], s);
 };
 
 function backtrack(order, string, result = []) {
-  const isValid = s => +s <= 255 && `${+s}` === s;
-
-  if (order.length === 3 && isValid(string)) {
-    result.push([...order, string].join('.'));
-  } else {
-    for (let index = 1; index < 4; index++) {
-      const sliced = string.slice(0, index);
-      if (isValid(sliced)) {
-        backtrack([...order, sliced], string.slice(index), result);
-      }
+    const isValid = s => +s <= 255 && `${+s}` === s;
+    if (order.length === 3 && isValid(string)) {
+        result.push([...order, string].join('.'));
+    } else {
+        for (let index = 1; index < 4; index++) {
+            const sliced = string.slice(0, index);
+            if (isValid(sliced)) {
+                backtrack([...order, sliced], string.slice(index), result);
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 }

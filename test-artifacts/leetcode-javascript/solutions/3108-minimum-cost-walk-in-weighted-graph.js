@@ -23,7 +23,6 @@
  *
  * Return the array answer, where answer[i] denotes the minimum cost of a walk for query i.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} edges
@@ -31,28 +30,25 @@
  * @return {number[]}
  */
 var minimumCost = function(n, edges, query) {
-  const parent = new Array(n).fill().map((_, i) => i);
-  const costs = new Array(n).fill(2 ** 17 - 1);
-
-  for (const [u, v, w] of edges) {
-    const [p1, p2] = [find(u), find(v)];
-    parent[p1] = p2;
-    costs[p1] = costs[p2] = costs[p1] & costs[p2] & w;
-  }
-
-  for (let i = 0; i < n; i++) {
-    parent[i] = find(i);
-  }
-
-  return query.map(([s, t]) => {
-    if (s === t) return 0;
-    return parent[s] === parent[t] ? costs[parent[s]] : -1;
-  });
-
-  function find(key) {
-    if (parent[key] !== key) {
-      parent[key] = find(parent[key]);
+    const parent = new Array(n).fill().map((_, i) => i);
+    const costs = new Array(n).fill(2 ** 17 - 1);
+    for (const [u, v, w] of edges) {
+        const [p1, p2] = [find(u), find(v)];
+        parent[p1] = p2;
+        costs[p1] = costs[p2] = costs[p1] & costs[p2] & w;
     }
-    return parent[key];
-  }
+    for (let i = 0; i < n; i++) {
+        parent[i] = find(i);
+    }
+    return query.map(([s, t]) => {
+        if (s === t) return 0;
+        return parent[s] === parent[t] ? costs[parent[s]] : -1;
+    });
+
+    function find(key) {
+        if (parent[key] !== key) {
+            parent[key] = find(parent[key]);
+        }
+        return parent[key];
+    }
 };

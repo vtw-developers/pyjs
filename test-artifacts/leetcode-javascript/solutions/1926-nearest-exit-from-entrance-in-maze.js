@@ -16,30 +16,37 @@
  * Return the number of steps in the shortest path from the entrance to the nearest exit,
  * or -1 if no such path exists.
  */
-
 /**
  * @param {character[][]} maze
  * @param {number[]} entrance
  * @return {number}
  */
 var nearestExit = function(maze, entrance) {
-  const queue = [[entrance, 0]];
-
-  while (queue.length) {
-    const [cell, steps] = queue.shift();
-    const [i, j] = cell;
-    if (i === maze.length || i === -1 || j === maze[0].length || j === -1 || maze[i][j] !== '.') {
-      continue;
+    const queue = [
+        [entrance, 0]
+    ];
+    while (queue.length) {
+        const [cell, steps] = queue.shift();
+        const [i, j] = cell;
+        if (i === maze.length || i === -1 || j === maze[0].length || j === -1 || maze[i][j] !== '.') {
+            continue;
+        }
+        if ((i === maze.length - 1 || i === 0 || j === maze[0].length - 1 || j === 0) && steps !== 0) {
+            return steps;
+        }
+        maze[i][j] = '*';
+        queue.push([
+            [i, j + 1], steps + 1
+        ]);
+        queue.push([
+            [i, j - 1], steps + 1
+        ]);
+        queue.push([
+            [i + 1, j], steps + 1
+        ]);
+        queue.push([
+            [i - 1, j], steps + 1
+        ]);
     }
-    if ((i === maze.length - 1 || i === 0 || j === maze[0].length - 1 || j === 0) && steps !== 0) {
-      return steps;
-    }
-    maze[i][j] = '*';
-    queue.push([[i, j + 1], steps + 1]);
-    queue.push([[i, j - 1], steps + 1]);
-    queue.push([[i + 1, j], steps + 1]);
-    queue.push([[i - 1, j], steps + 1]);
-  }
-
-  return -1;
+    return -1;
 };

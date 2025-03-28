@@ -8,7 +8,6 @@
  * Nary-Tree input serialization is represented in their level order traversal. Each group
  * of children is separated by the null value (See examples)
  */
-
 /**
  * // Definition for a _Node.
  * function _Node(val,children) {
@@ -16,19 +15,18 @@
  *    this.children = children;
  * };
  */
-
 /**
  * @param {_Node|null} root
  * @return {number[]}
  */
 var postorder = function(root) {
-  const result = [];
-  traverse(root);
-  return result;
+    const result = [];
+    traverse(root);
+    return result;
 
-  function traverse(node) {
-    if (!node) return;
-    node.children.forEach(child => traverse(child));
-    result.push(node.val);
-  }
+    function traverse(node) {
+        if (!node) return;
+        node.children.forEach(child => traverse(child));
+        result.push(node.val);
+    }
 };

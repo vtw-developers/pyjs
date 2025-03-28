@@ -19,7 +19,6 @@
  * even if that would lower the overall price. You could use any of the special offers as many
  * times as you want.
  */
-
 /**
  * @param {number[]} price
  * @param {number[][]} special
@@ -27,28 +26,28 @@
  * @return {number}
  */
 var shoppingOffers = function(price, special, needs) {
-  const map = new Map();
-  return dp(needs);
+    const map = new Map();
+    return dp(needs);
 
-  function dp(input) {
-    const key = input.join(',');
-    if (map.has(key)) return map.get(key);
-    let minCost = input.reduce((sum, need, i) => sum + need * price[i], 0);
-    for (const offer of special) {
-      const nextNeeds = [...input];
-      let valid = true;
-      for (let i = 0; i < price.length; i++) {
-        if (nextNeeds[i] < offer[i]) {
-          valid = false;
-          break;
+    function dp(input) {
+        const key = input.join(',');
+        if (map.has(key)) return map.get(key);
+        let minCost = input.reduce((sum, need, i) => sum + need * price[i], 0);
+        for (const offer of special) {
+            const nextNeeds = [...input];
+            let valid = true;
+            for (let i = 0; i < price.length; i++) {
+                if (nextNeeds[i] < offer[i]) {
+                    valid = false;
+                    break;
+                }
+                nextNeeds[i] -= offer[i];
+            }
+            if (valid) {
+                minCost = Math.min(minCost, offer[price.length] + dp(nextNeeds));
+            }
         }
-        nextNeeds[i] -= offer[i];
-      }
-      if (valid) {
-        minCost = Math.min(minCost, offer[price.length] + dp(nextNeeds));
-      }
+        map.set(key, minCost);
+        return minCost;
     }
-    map.set(key, minCost);
-    return minCost;
-  }
 };

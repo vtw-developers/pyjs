@@ -14,18 +14,16 @@
  * Given the integer target, return the minimum number of moves required (i.e., the minimum
  * numMoves) to reach the destination.
  */
-
 /**
  * @param {number} target
  * @return {number}
  */
 var reachNumber = function(target) {
-  const absTarget = Math.abs(target);
-  let moves = Math.floor(Math.sqrt(2 * absTarget));
-
-  while (true) {
-    const sum = moves * (moves + 1) / 2;
-    if (sum >= absTarget && (sum - absTarget) % 2 === 0) return moves;
-    moves++;
-  }
+    const absTarget = Math.abs(target);
+    let moves = Math.floor(Math.sqrt(2 * absTarget));
+    while (true) {
+        const sum = moves * (moves + 1) / 2;
+        if (sum >= absTarget && (sum - absTarget) % 2 === 0) return moves;
+        moves++;
+    }
 };

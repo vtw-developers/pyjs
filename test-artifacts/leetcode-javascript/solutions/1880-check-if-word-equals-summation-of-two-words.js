@@ -19,7 +19,6 @@
  * Return true if the summation of the numerical values of firstWord and
  * secondWord equals the numerical value of targetWord, or false otherwise.
  */
-
 /**
  * @param {string} firstWord
  * @param {string} secondWord
@@ -27,8 +26,6 @@
  * @return {boolean}
  */
 var isSumEqual = function(firstWord, secondWord, targetWord) {
-  const [a, b, c] = [firstWord, secondWord, targetWord]
-    .map(str => +str.split('').map(v => v.charCodeAt() - 97).join(''));
-
-  return a + b === c;
+    const [a, b, c] = [firstWord, secondWord, targetWord].map(str => +str.split('').map(v => v.charCodeAt() - 97).join(''));
+    return a + b === c;
 };

@@ -14,7 +14,6 @@
  *
  * A leaf node is a node with no children.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -28,16 +27,15 @@
  * @return {number}
  */
 var sumNumbers = function(root) {
-  function traverse(node, value) {
-    if (!node) {
-      return null;
+    function traverse(node, value) {
+        if (!node) {
+            return null;
+        }
+        value += node.val;
+        if (!node.left && !node.right) {
+            return Number(value);
+        }
+        return traverse(node.left, value) + traverse(node.right, value);
     }
-    value += node.val;
-    if (!node.left && !node.right) {
-      return Number(value);
-    }
-    return traverse(node.left, value) + traverse(node.right, value);
-  }
-
-  return traverse(root, '');
+    return traverse(root, '');
 };

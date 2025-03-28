@@ -18,20 +18,18 @@
  *
  * Return the text after replacing the entities by the special characters.
  */
-
 /**
  * @param {string} text
  * @return {string}
  */
 var entityParser = function(text) {
-  const map = {
-    '&quot;': '"',
-    '&apos;': '\'',
-    '&amp;': '&',
-    '&gt;': '>',
-    '&lt;': '<',
-    '&frasl;': '/'
-  };
-
-  return text.replace(new RegExp(Object.keys(map).join('|'), 'g'), m => map[m]);
+    const map = {
+        '&quot;': '"',
+        '&apos;': '\'',
+        '&amp;': '&',
+        '&gt;': '>',
+        '&lt;': '<',
+        '&frasl;': '/'
+    };
+    return text.replace(new RegExp(Object.keys(map).join('|'), 'g'), m => map[m]);
 };

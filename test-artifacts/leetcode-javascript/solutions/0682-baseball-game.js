@@ -22,20 +22,17 @@
  * The test cases are generated such that the answer and all intermediate calculations fit in a
  * 32-bit integer and that all operations are valid.
  */
-
 /**
  * @param {string[]} ops
  * @return {number}
  */
 var calPoints = function(ops) {
-  const stack = [];
-
-  for (const op of ops) {
-    if (op === 'C') stack.pop();
-    else if (op === 'D') stack.push(stack.at(-1) * 2);
-    else if (op === '+') stack.push(stack.at(-1) + stack.at(-2));
-    else stack.push(Number(op));
-  }
-
-  return stack.reduce((sum, num) => sum + num, 0);
+    const stack = [];
+    for (const op of ops) {
+        if (op === 'C') stack.pop();
+        else if (op === 'D') stack.push(stack.at(-1) * 2);
+        else if (op === '+') stack.push(stack.at(-1) + stack.at(-2));
+        else stack.push(Number(op));
+    }
+    return stack.reduce((sum, num) => sum + num, 0);
 };

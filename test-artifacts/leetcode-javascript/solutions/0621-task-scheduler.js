@@ -10,28 +10,24 @@
  *
  * Return the minimum number of CPU intervals required to complete all tasks.
  */
-
 /**
  * @param {character[]} tasks
  * @param {number} n
  * @return {number}
  */
 var leastInterval = function(tasks, n) {
-  const map = new Map();
-  let maxValue = 0;
-  let maxCount = 0;
-
-  tasks.forEach(key => {
-    const value = map.has(key) ? map.get(key) + 1 : 1;
-    map.set(key, value);
-
-    if (value > maxValue) {
-      maxValue = value;
-      maxCount = 1;
-    } else if (value === maxValue) {
-      maxCount++;
-    }
-  });
-
-  return Math.max(tasks.length, (maxValue - 1) * (n + 1) + maxCount);
+    const map = new Map();
+    let maxValue = 0;
+    let maxCount = 0;
+    tasks.forEach(key => {
+        const value = map.has(key) ? map.get(key) + 1 : 1;
+        map.set(key, value);
+        if (value > maxValue) {
+            maxValue = value;
+            maxCount = 1;
+        } else if (value === maxValue) {
+            maxCount++;
+        }
+    });
+    return Math.max(tasks.length, (maxValue - 1) * (n + 1) + maxCount);
 };

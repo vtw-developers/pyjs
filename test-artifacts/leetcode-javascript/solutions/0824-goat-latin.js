@@ -22,13 +22,12 @@
  *
  * Return the final sentence representing the conversion from S to Goat Latin.
  */
-
 /**
  * @param {string} S
  * @return {string}
  */
 var toGoatLatin = function(S) {
-  return S.split(' ').map((word, index) => {
-    return `${word.replace(/^([^aeiou])(.*)/ig, '$2$1')}ma${'a'.repeat(index + 1)}`;
-  }).join(' ');
+    return S.split(' ').map((word, index) => {
+        return `${word.replace(/^([^aeiou])(.*)/ig, '$2$1')}ma${'a'.repeat(index + 1)}`;
+    }).join(' ');
 };

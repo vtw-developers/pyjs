@@ -10,18 +10,17 @@
  * Words in the list of banned words are given in lowercase, and free of punctuation.
  * Words in the paragraph are not case sensitive.  The answer is in lowercase.
  */
-
 /**
  * @param {string} paragraph
  * @param {string[]} banned
  * @return {string}
  */
 var mostCommonWord = function(paragraph, banned) {
-  const occurrences = new Map();
-  paragraph.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).forEach(word => {
-    if (!banned.includes(word)) {
-      occurrences.set(word, occurrences.has(word) ? occurrences.get(word) + 1 : 1);
-    }
-  });
-  return Array.from(occurrences).sort((a, b) => b[1] - a[1])[0][0];
+    const occurrences = new Map();
+    paragraph.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).forEach(word => {
+        if (!banned.includes(word)) {
+            occurrences.set(word, occurrences.has(word) ? occurrences.get(word) + 1 : 1);
+        }
+    });
+    return Array.from(occurrences).sort((a, b) => b[1] - a[1])[0][0];
 };

@@ -15,7 +15,6 @@
  *
  * Note that two recipes may contain each other in their ingredients.
  */
-
 /**
  * @param {string[]} recipes
  * @param {string[][]} ingredients
@@ -23,41 +22,37 @@
  * @return {string[]}
  */
 var findAllRecipes = function(recipes, ingredients, supplies) {
-  const available = new Set(supplies);
-  const recipeGraph = new Map();
-  const inDegree = new Map();
-  const queue = [];
-  const result = [];
-
-  recipes.forEach((recipe, index) => {
-    inDegree.set(recipe, ingredients[index].length);
-    ingredients[index].forEach(ing => {
-      if (!recipeGraph.has(ing)) recipeGraph.set(ing, []);
-      recipeGraph.get(ing).push(recipe);
+    const available = new Set(supplies);
+    const recipeGraph = new Map();
+    const inDegree = new Map();
+    const queue = [];
+    const result = [];
+    recipes.forEach((recipe, index) => {
+        inDegree.set(recipe, ingredients[index].length);
+        ingredients[index].forEach(ing => {
+            if (!recipeGraph.has(ing)) recipeGraph.set(ing, []);
+            recipeGraph.get(ing).push(recipe);
+        });
     });
-  });
-
-  available.forEach(supply => {
-    if (recipeGraph.has(supply)) {
-      recipeGraph.get(supply).forEach(recipe => {
-        const count = inDegree.get(recipe) - 1;
-        inDegree.set(recipe, count);
-        if (count === 0) queue.push(recipe);
-      });
+    available.forEach(supply => {
+        if (recipeGraph.has(supply)) {
+            recipeGraph.get(supply).forEach(recipe => {
+                const count = inDegree.get(recipe) - 1;
+                inDegree.set(recipe, count);
+                if (count === 0) queue.push(recipe);
+            });
+        }
+    });
+    while (queue.length) {
+        const currentRecipe = queue.shift();
+        result.push(currentRecipe);
+        if (recipeGraph.has(currentRecipe)) {
+            recipeGraph.get(currentRecipe).forEach(nextRecipe => {
+                const count = inDegree.get(nextRecipe) - 1;
+                inDegree.set(nextRecipe, count);
+                if (count === 0) queue.push(nextRecipe);
+            });
+        }
     }
-  });
-
-  while (queue.length) {
-    const currentRecipe = queue.shift();
-    result.push(currentRecipe);
-    if (recipeGraph.has(currentRecipe)) {
-      recipeGraph.get(currentRecipe).forEach(nextRecipe => {
-        const count = inDegree.get(nextRecipe) - 1;
-        inDegree.set(nextRecipe, count);
-        if (count === 0) queue.push(nextRecipe);
-      });
-    }
-  }
-
-  return result;
+    return result;
 };

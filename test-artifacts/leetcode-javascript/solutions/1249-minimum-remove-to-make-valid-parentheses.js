@@ -14,27 +14,24 @@
  * - It can be written as AB (A concatenated with B), where A and B are valid strings, or
  * - It can be written as (A), where A is a valid string.
  */
-
 /**
  * @param {string} s
  * @return {string}
  */
 var minRemoveToMakeValid = function(s) {
-  const inputArray = s.split('');
-  const stack = [];
-
-  inputArray.forEach((letter, index) => {
-    if (letter === '(') {
-      stack.push(index);
-    } else if (letter === ')') {
-      if (stack.length) {
-        stack.pop();
-      } else {
-        inputArray[index] = '';
-      }
-    }
-  });
-
-  stack.forEach(index => inputArray[index] = '');
-  return inputArray.join('');
+    const inputArray = s.split('');
+    const stack = [];
+    inputArray.forEach((letter, index) => {
+        if (letter === '(') {
+            stack.push(index);
+        } else if (letter === ')') {
+            if (stack.length) {
+                stack.pop();
+            } else {
+                inputArray[index] = '';
+            }
+        }
+    });
+    stack.forEach(index => inputArray[index] = '');
+    return inputArray.join('');
 };

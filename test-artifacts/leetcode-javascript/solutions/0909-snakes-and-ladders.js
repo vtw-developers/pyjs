@@ -29,42 +29,37 @@
  * Return the least number of dice rolls required to reach the square n2. If it is not possible to
  * reach the square, return -1.
  */
-
 /**
  * @param {number[][]} board
  * @return {number}
  */
 var snakesAndLadders = function(board) {
-  const target = board.length * board.length;
-  const queue = [1];
-  const seen = new Set([1]);
-  let moves = 0;
-
-  while (queue.length) {
-    const size = queue.length;
-    for (let i = 0; i < size; i++) {
-      const current = queue.shift();
-      if (current === target) return moves;
-      for (let dice = 1; dice <= 6 && current + dice <= target; dice++) {
-        const next = current + dice;
-        const [r, c] = getCoordinates(next);
-        const destination = board[r][c] === -1 ? next : board[r][c];
-        if (!seen.has(destination)) {
-          seen.add(destination);
-          queue.push(destination);
+    const target = board.length * board.length;
+    const queue = [1];
+    const seen = new Set([1]);
+    let moves = 0;
+    while (queue.length) {
+        const size = queue.length;
+        for (let i = 0; i < size; i++) {
+            const current = queue.shift();
+            if (current === target) return moves;
+            for (let dice = 1; dice <= 6 && current + dice <= target; dice++) {
+                const next = current + dice;
+                const [r, c] = getCoordinates(next);
+                const destination = board[r][c] === -1 ? next : board[r][c];
+                if (!seen.has(destination)) {
+                    seen.add(destination);
+                    queue.push(destination);
+                }
+            }
         }
-      }
+        moves++;
     }
-    moves++;
-  }
+    return -1;
 
-  return -1;
-
-  function getCoordinates(square) {
-    const r = board.length - 1 - Math.floor((square - 1) / board.length);
-    const c = (board.length - 1 - r) % 2 === 0
-      ? (square - 1) % board.length
-      : board.length - 1 - (square - 1) % board.length;
-    return [r, c];
-  }
+    function getCoordinates(square) {
+        const r = board.length - 1 - Math.floor((square - 1) / board.length);
+        const c = (board.length - 1 - r) % 2 === 0 ? (square - 1) % board.length : board.length - 1 - (square - 1) % board.length;
+        return [r, c];
+    }
 };

@@ -15,26 +15,22 @@
  *
  * Return the final string after all such shifts to s are applied.
  */
-
 /**
  * @param {string} s
  * @param {number[]} shifts
  * @return {string}
  */
 var shiftingLetters = function(s, shifts) {
-  const cumulativeShifts = new Array(s.length).fill(0);
-
-  cumulativeShifts[s.length - 1] = shifts[s.length - 1] % 26;
-  for (let i = s.length - 2; i >= 0; i--) {
-    cumulativeShifts[i] = (cumulativeShifts[i + 1] + shifts[i]) % 26;
-  }
-
-  let result = '';
-  for (let i = 0; i < s.length; i++) {
-    const charCode = s.charCodeAt(i);
-    const shiftedCode = ((charCode - 97 + cumulativeShifts[i]) % 26) + 97;
-    result += String.fromCharCode(shiftedCode);
-  }
-
-  return result;
+    const cumulativeShifts = new Array(s.length).fill(0);
+    cumulativeShifts[s.length - 1] = shifts[s.length - 1] % 26;
+    for (let i = s.length - 2; i >= 0; i--) {
+        cumulativeShifts[i] = (cumulativeShifts[i + 1] + shifts[i]) % 26;
+    }
+    let result = '';
+    for (let i = 0; i < s.length; i++) {
+        const charCode = s.charCodeAt(i);
+        const shiftedCode = ((charCode - 97 + cumulativeShifts[i]) % 26) + 97;
+        result += String.fromCharCode(shiftedCode);
+    }
+    return result;
 };

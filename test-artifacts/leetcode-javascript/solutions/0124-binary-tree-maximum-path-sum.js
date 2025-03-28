@@ -11,7 +11,6 @@
  *
  * Given the root of a binary tree, return the maximum path sum of any non-empty path.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -25,17 +24,15 @@
  * @return {number}
  */
 var maxPathSum = function(root) {
-  let result = -Infinity;
+    let result = -Infinity;
 
-  function traverse(node) {
-    if (!node) return 0;
-    const leftValue = Math.max(traverse(node.left), 0);
-    const rightValue = Math.max(traverse(node.right), 0);
-    result = Math.max(result, node.val + leftValue + rightValue);
-    return node.val + Math.max(leftValue, rightValue);
-  }
-
-  traverse(root);
-
-  return result;
+    function traverse(node) {
+        if (!node) return 0;
+        const leftValue = Math.max(traverse(node.left), 0);
+        const rightValue = Math.max(traverse(node.right), 0);
+        result = Math.max(result, node.val + leftValue + rightValue);
+        return node.val + Math.max(leftValue, rightValue);
+    }
+    traverse(root);
+    return result;
 };

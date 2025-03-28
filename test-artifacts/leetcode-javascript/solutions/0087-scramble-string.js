@@ -16,33 +16,28 @@
  * Given two strings s1 and s2 of the same length, return true if s2 is a scrambled string
  * of s1, otherwise, return false.
  */
-
 /**
  * @param {string} s1
  * @param {string} s2
  * @return {boolean}
  */
 var isScramble = function(s1, s2) {
-  const n = s1.length;
-  const dp = new Array(n).fill().map(() => new Array(n).fill().map(() => new Array(n).fill(null)));
+    const n = s1.length;
+    const dp = new Array(n).fill().map(() => new Array(n).fill().map(() => new Array(n).fill(null)));
 
-  function dfs(i1, j1, i2) {
-    if (dp[i1][j1][i2] !== null) {
-      return dp[i1][j1][i2];
+    function dfs(i1, j1, i2) {
+        if (dp[i1][j1][i2] !== null) {
+            return dp[i1][j1][i2];
+        }
+        if (i1 == j1) {
+            return dp[i1][j1][i2] = s1[i1] === s2[i2];
+        }
+        const j2 = j1 - i1 + i2;
+        let result = false;
+        for (let i = i1; i < j1; i++) {
+            result = result || (dfs(i1, i, i2) && dfs(i + 1, j1, i2 + i - i1 + 1)) || (dfs(i1, i, j2 - i + i1) && dfs(i + 1, j1, i2));
+        }
+        return dp[i1][j1][i2] = result;
     }
-    if (i1 == j1) {
-      return dp[i1][j1][i2] = s1[i1] === s2[i2];
-    }
-
-    const j2 = j1 - i1 + i2;
-    let result = false;
-    for (let i = i1; i < j1; i++) {
-      result = result || (dfs(i1, i, i2) && dfs(i + 1, j1, i2 + i - i1 + 1))
-        || (dfs(i1, i, j2 - i + i1) && dfs(i + 1, j1, i2));
-    }
-
-    return dp[i1][j1][i2] = result;
-  }
-
-  return dfs(0, n - 1, 0);
+    return dfs(0, n - 1, 0);
 };

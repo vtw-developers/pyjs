@@ -12,11 +12,10 @@
  *
  * Return the number of bulbs that are on after n rounds.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var bulbSwitch = function(n) {
-  return Math.floor(n ** 0.5);
+    return Math.floor(n ** 0.5);
 };

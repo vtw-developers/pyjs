@@ -10,25 +10,22 @@
  *
  * Return the largest number of chunks we can make to sort the array.
  */
-
 /**
  * @param {number[]} arr
  * @return {number}
  */
 var maxChunksToSorted = function(arr) {
-  const stack = [];
-
-  for (const num of arr) {
-    if (stack.length === 0 || stack[stack.length - 1] <= num) {
-      stack.push(num);
-    } else {
-      const max = stack.pop();
-      while (stack.length && stack[stack.length - 1] > num) {
-        stack.pop();
-      }
-      stack.push(max);
+    const stack = [];
+    for (const num of arr) {
+        if (stack.length === 0 || stack[stack.length - 1] <= num) {
+            stack.push(num);
+        } else {
+            const max = stack.pop();
+            while (stack.length && stack[stack.length - 1] > num) {
+                stack.pop();
+            }
+            stack.push(max);
+        }
     }
-  }
-
-  return stack.length;
+    return stack.length;
 };

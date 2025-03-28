@@ -19,25 +19,22 @@
  * Return true if it is possible to escape regardless of how the ghosts move, otherwise return
  * false.
  */
-
 /**
  * @param {number[][]} ghosts
  * @param {number[]} target
  * @return {boolean}
  */
 var escapeGhosts = function(ghosts, target) {
-  const distanceToTarget = calcDistance([0, 0], target);
-
-  for (const ghost of ghosts) {
-    const ghostDistance = calcDistance(ghost, target);
-    if (ghostDistance <= distanceToTarget) {
-      return false;
+    const distanceToTarget = calcDistance([0, 0], target);
+    for (const ghost of ghosts) {
+        const ghostDistance = calcDistance(ghost, target);
+        if (ghostDistance <= distanceToTarget) {
+            return false;
+        }
     }
-  }
-
-  return true;
+    return true;
 };
 
 function calcDistance(point1, point2) {
-  return Math.abs(point1[0] - point2[0]) + Math.abs(point1[1] - point2[1]);
+    return Math.abs(point1[0] - point2[0]) + Math.abs(point1[1] - point2[1]);
 }

@@ -15,46 +15,38 @@
  *
  * Return the largest possible overlap.
  */
-
 /**
  * @param {number[][]} img1
  * @param {number[][]} img2
  * @return {number}
  */
 var largestOverlap = function(img1, img2) {
-  const positions1 = [];
-  const positions2 = [];
-
-  for (let i = 0; i < img1.length; i++) {
-    for (let j = 0; j < img1.length; j++) {
-      if (img1[i][j] === 1) {
-        positions1.push([i, j]);
-      }
-      if (img2[i][j] === 1) {
-        positions2.push([i, j]);
-      }
+    const positions1 = [];
+    const positions2 = [];
+    for (let i = 0; i < img1.length; i++) {
+        for (let j = 0; j < img1.length; j++) {
+            if (img1[i][j] === 1) {
+                positions1.push([i, j]);
+            }
+            if (img2[i][j] === 1) {
+                positions2.push([i, j]);
+            }
+        }
     }
-  }
-
-  if (positions1.length === 0 || positions2.length === 0) {
-    return 0;
-  }
-
-  const translations = new Map();
-  let maxOverlap = 0;
-
-  for (const [r1, c1] of positions1) {
-    for (const [r2, c2] of positions2) {
-      const translation = `${r2 - r1},${c2 - c1}`;
-
-      if (!translations.has(translation)) {
-        translations.set(translation, 0);
-      }
-
-      translations.set(translation, translations.get(translation) + 1);
-      maxOverlap = Math.max(maxOverlap, translations.get(translation));
+    if (positions1.length === 0 || positions2.length === 0) {
+        return 0;
     }
-  }
-
-  return maxOverlap;
+    const translations = new Map();
+    let maxOverlap = 0;
+    for (const [r1, c1] of positions1) {
+        for (const [r2, c2] of positions2) {
+            const translation = `${r2 - r1},${c2 - c1}`;
+            if (!translations.has(translation)) {
+                translations.set(translation, 0);
+            }
+            translations.set(translation, translations.get(translation) + 1);
+            maxOverlap = Math.max(maxOverlap, translations.get(translation));
+        }
+    }
+    return maxOverlap;
 };

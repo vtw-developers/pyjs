@@ -8,7 +8,6 @@
  *
  * You can return the answer in any order.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val) {
@@ -23,37 +22,35 @@
  * @return {number[]}
  */
 var distanceK = function(root, target, k) {
-  const graph = new Map();
-  const result = [];
+    const graph = new Map();
+    const result = [];
+    buildGraph(root, null);
+    findNodesAtDistance(target.val, 0, new Set());
+    return result;
 
-  buildGraph(root, null);
-  findNodesAtDistance(target.val, 0, new Set());
-
-  return result;
-
-  function buildGraph(node, parent) {
-    if (!node) return;
-    if (parent) {
-      graph.set(node.val, graph.get(node.val) || new Set());
-      graph.get(node.val).add(parent.val);
-      graph.set(parent.val, graph.get(parent.val) || new Set());
-      graph.get(parent.val).add(node.val);
+    function buildGraph(node, parent) {
+        if (!node) return;
+        if (parent) {
+            graph.set(node.val, graph.get(node.val) || new Set());
+            graph.get(node.val).add(parent.val);
+            graph.set(parent.val, graph.get(parent.val) || new Set());
+            graph.get(parent.val).add(node.val);
+        }
+        buildGraph(node.left, node);
+        buildGraph(node.right, node);
     }
-    buildGraph(node.left, node);
-    buildGraph(node.right, node);
-  }
 
-  function findNodesAtDistance(currentVal, distance, visited) {
-    if (distance === k) {
-      result.push(currentVal);
-      return;
+    function findNodesAtDistance(currentVal, distance, visited) {
+        if (distance === k) {
+            result.push(currentVal);
+            return;
+        }
+        visited.add(currentVal);
+        const neighbors = graph.get(currentVal) || new Set();
+        for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+                findNodesAtDistance(neighbor, distance + 1, visited);
+            }
+        }
     }
-    visited.add(currentVal);
-    const neighbors = graph.get(currentVal) || new Set();
-    for (const neighbor of neighbors) {
-      if (!visited.has(neighbor)) {
-        findNodesAtDistance(neighbor, distance + 1, visited);
-      }
-    }
-  }
 };

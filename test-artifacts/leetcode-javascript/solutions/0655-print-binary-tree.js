@@ -16,7 +16,6 @@
  *
  * Return the constructed matrix res.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -30,25 +29,23 @@
  * @return {string[][]}
  */
 var printTree = function(root) {
-  const height = getHeight(root);
-  const columns = Math.pow(2, height + 1) - 1;
-  const result = new Array(height + 1).fill().map(() => {
-    return new Array(columns).fill('');
-  });
+    const height = getHeight(root);
+    const columns = Math.pow(2, height + 1) - 1;
+    const result = new Array(height + 1).fill().map(() => {
+        return new Array(columns).fill('');
+    });
+    fill(root, 0, Math.floor((columns - 1) / 2), height);
+    return result;
 
-  fill(root, 0, Math.floor((columns - 1) / 2), height);
+    function fill(node, r, c, h) {
+        if (!node) return;
+        result[r][c] = node.val.toString();
+        fill(node.left, r + 1, c - Math.pow(2, h - r - 1), h);
+        fill(node.right, r + 1, c + Math.pow(2, h - r - 1), h);
+    }
 
-  return result;
-
-  function fill(node, r, c, h) {
-    if (!node) return;
-    result[r][c] = node.val.toString();
-    fill(node.left, r + 1, c - Math.pow(2, h - r - 1), h);
-    fill(node.right, r + 1, c + Math.pow(2, h - r - 1), h);
-  }
-
-  function getHeight(node) {
-    if (!node) return -1;
-    return 1 + Math.max(getHeight(node.left), getHeight(node.right));
-  }
+    function getHeight(node) {
+        if (!node) return -1;
+        return 1 + Math.max(getHeight(node.left), getHeight(node.right));
+    }
 };

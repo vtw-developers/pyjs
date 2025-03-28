@@ -10,7 +10,6 @@
  *
  * Note: A leaf is a node with no children.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,9 +23,9 @@
  * @return {number}
  */
 var minDepth = function(root) {
-  if (!root) {
-    return 0;
-  }
-  const [left, right] = [root.left, root.right].map(minDepth);
-  return 1 + (Math.min(left, right) || Math.max(left, right));
+    if (!root) {
+        return 0;
+    }
+    const [left, right] = [root.left, root.right].map(minDepth);
+    return 1 + (Math.min(left, right) || Math.max(left, right));
 };

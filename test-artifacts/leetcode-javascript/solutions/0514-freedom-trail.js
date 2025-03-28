@@ -23,29 +23,28 @@
  *   to spell, which also counts as one step. After the pressing, you could begin to spell the
  *   next character in the key (next stage). Otherwise, you have finished all the spelling.
  */
-
 /**
  * @param {string} ring
  * @param {string} key
  * @return {number}
  */
 var findRotateSteps = function(ring, key) {
-  const map = new Map();
-  return dp(0, 0);
+    const map = new Map();
+    return dp(0, 0);
 
-  function dp(ringIndex, keyIndex) {
-    if (keyIndex === key.length) return 0;
-    const state = `${ringIndex},${keyIndex}`;
-    if (map.has(state)) return map.get(state);
-    let minSteps = Infinity;
-    for (let i = 0; i < ring.length; i++) {
-      if (ring[i] === key[keyIndex]) {
-        const distance = Math.abs(i - ringIndex);
-        const steps = Math.min(distance, ring.length - distance);
-        minSteps = Math.min(minSteps, steps + 1 + dp(i, keyIndex + 1));
-      }
+    function dp(ringIndex, keyIndex) {
+        if (keyIndex === key.length) return 0;
+        const state = `${ringIndex},${keyIndex}`;
+        if (map.has(state)) return map.get(state);
+        let minSteps = Infinity;
+        for (let i = 0; i < ring.length; i++) {
+            if (ring[i] === key[keyIndex]) {
+                const distance = Math.abs(i - ringIndex);
+                const steps = Math.min(distance, ring.length - distance);
+                minSteps = Math.min(minSteps, steps + 1 + dp(i, keyIndex + 1));
+            }
+        }
+        map.set(state, minSteps);
+        return minSteps;
     }
-    map.set(state, minSteps);
-    return minSteps;
-  }
 };

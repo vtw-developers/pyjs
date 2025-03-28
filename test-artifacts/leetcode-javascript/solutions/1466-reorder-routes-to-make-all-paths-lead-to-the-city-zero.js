@@ -15,35 +15,29 @@
  *
  * Your task consists of reorienting some roads such that each city can visit the city 0. Return
  * the minimum number of edges changed.
-
 It's guaranteed that each city can reach city 0 after reorder.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} connections
  * @return {number}
  */
 var minReorder = function(n, connections) {
-  const graph = new Array(n).fill(null).map(() => []);
-
-  connections.forEach(([k, v]) => {
-    graph[k].push([v, 1]);
-    graph[v].push([k, 0]);
-  });
-
-  function dfs(node, parent) {
-    let count = 0;
-
-    graph[node].forEach(([k, v]) => {
-      if (k !== parent) {
-        count += v;
-        count += dfs(k, node);
-      }
+    const graph = new Array(n).fill(null).map(() => []);
+    connections.forEach(([k, v]) => {
+        graph[k].push([v, 1]);
+        graph[v].push([k, 0]);
     });
 
-    return count;
-  }
-
-  return dfs(0, -1);
+    function dfs(node, parent) {
+        let count = 0;
+        graph[node].forEach(([k, v]) => {
+            if (k !== parent) {
+                count += v;
+                count += dfs(k, node);
+            }
+        });
+        return count;
+    }
+    return dfs(0, -1);
 };

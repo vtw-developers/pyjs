@@ -24,46 +24,45 @@
  *
  * The test cases are generated so that all the values in the output fit in a 32-bit integer.
  */
-
 /**
  * @param {string} formula
  * @return {string}
  */
 var countOfAtoms = function(formula) {
-  const [counts] = parseFormula(formula, 0);
-  return [...counts].sort().map(([atom, count]) => atom + (count > 1 ? count : '')).join('');
+    const [counts] = parseFormula(formula, 0);
+    return [...counts].sort().map(([atom, count]) => atom + (count > 1 ? count : '')).join('');
 
-  function parseFormula(str, index) {
-    const atomCounts = new Map();
-    while (index < str.length && str[index] !== ')') {
-      if (str[index] === '(') {
-        const [subCounts, nextIndex] = parseFormula(str, index + 1);
-        const [multiplier, updatedIndex] = extractNumber(str, nextIndex + 1);
-        for (const [atom, count] of subCounts) {
-          atomCounts.set(atom, (atomCounts.get(atom) || 0) + count * (multiplier || 1));
+    function parseFormula(str, index) {
+        const atomCounts = new Map();
+        while (index < str.length && str[index] !== ')') {
+            if (str[index] === '(') {
+                const [subCounts, nextIndex] = parseFormula(str, index + 1);
+                const [multiplier, updatedIndex] = extractNumber(str, nextIndex + 1);
+                for (const [atom, count] of subCounts) {
+                    atomCounts.set(atom, (atomCounts.get(atom) || 0) + count * (multiplier || 1));
+                }
+                index = updatedIndex;
+            } else {
+                const [atom, nextIndex] = extractAtom(str, index);
+                const [count, updatedIndex] = extractNumber(str, nextIndex);
+                atomCounts.set(atom, (atomCounts.get(atom) || 0) + (count || 1));
+                index = updatedIndex;
+            }
         }
-        index = updatedIndex;
-      } else {
-        const [atom, nextIndex] = extractAtom(str, index);
-        const [count, updatedIndex] = extractNumber(str, nextIndex);
-        atomCounts.set(atom, (atomCounts.get(atom) || 0) + (count || 1));
-        index = updatedIndex;
-      }
+        return [atomCounts, index];
     }
-    return [atomCounts, index];
-  }
 
-  function extractAtom(str, index) {
-    let atom = str[index];
-    while (++index < str.length && /[a-z]/.test(str[index])) atom += str[index];
-    return [atom, index];
-  }
-
-  function extractNumber(str, index) {
-    let number = 0;
-    while (index < str.length && /[0-9]/.test(str[index])) {
-      number = number * 10 + Number(str[index++]);
+    function extractAtom(str, index) {
+        let atom = str[index];
+        while (++index < str.length && /[a-z]/.test(str[index])) atom += str[index];
+        return [atom, index];
     }
-    return [number || null, index];
-  }
+
+    function extractNumber(str, index) {
+        let number = 0;
+        while (index < str.length && /[0-9]/.test(str[index])) {
+            number = number * 10 + Number(str[index++]);
+        }
+        return [number || null, index];
+    }
 };

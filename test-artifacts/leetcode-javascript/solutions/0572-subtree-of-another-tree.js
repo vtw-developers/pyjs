@@ -9,7 +9,6 @@
  * A subtree of a binary tree tree is a tree that consists of a node in tree and all of this
  * node's descendants. The tree tree could also be considered as a subtree of itself.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -24,8 +23,9 @@
  * @return {boolean}
  */
 var isSubtree = function(root, subRoot) {
-  return traverse(root).includes(traverse(subRoot));
-  function traverse(node) {
-    return !node ? '#' : `,${node.val},${traverse(node.left)},${traverse(node.right)}`;
-  }
+    return traverse(root).includes(traverse(subRoot));
+
+    function traverse(node) {
+        return !node ? '#' : `,${node.val},${traverse(node.left)},${traverse(node.right)}`;
+    }
 };

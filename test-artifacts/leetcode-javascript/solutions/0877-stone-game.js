@@ -15,11 +15,10 @@
  *
  * Assuming Alice and Bob play optimally, return true if Alice wins the game, or false if Bob wins.
  */
-
 /**
  * @param {number[]} piles
  * @return {boolean}
  */
 var stoneGame = function(piles) {
-  return true;
+    return true;
 };

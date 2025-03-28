@@ -18,58 +18,52 @@
  * - void unfollow(int followerId, int followeeId) The user with ID followerId started unfollowing
  *   the user with ID followeeId.
  */
-
-
 var Twitter = function() {
-  this.tweets = [];
-  this.followers = new Map();
+    this.tweets = [];
+    this.followers = new Map();
 };
-
 /**
  * @param {number} userId
  * @param {number} tweetId
  * @return {void}
  */
 Twitter.prototype.postTweet = function(userId, tweetId) {
-  this.tweets.unshift([userId, tweetId]);
+    this.tweets.unshift([userId, tweetId]);
 };
-
 /**
  * @param {number} userId
  * @return {number[]}
  */
 Twitter.prototype.getNewsFeed = function(userId) {
-  const result = [];
-  for (let i = 0; i < this.tweets.length && result.length < 10; i++) {
-    const [user, tweet] = this.tweets[i] ?? [];
-    if (user === userId || (this.followers.get(userId) && this.followers.get(userId).has(user))) {
-      result.push(tweet);
+    const result = [];
+    for (let i = 0; i < this.tweets.length && result.length < 10; i++) {
+        const [user, tweet] = this.tweets[i] ?? [];
+        if (user === userId || (this.followers.get(userId) && this.followers.get(userId).has(user))) {
+            result.push(tweet);
+        }
     }
-  }
-  return result;
+    return result;
 };
-
 /**
  * @param {number} followerId
  * @param {number} followeeId
  * @return {void}
  */
 Twitter.prototype.follow = function(followerId, followeeId) {
-  if (followerId !== followeeId) {
-    if (!this.followers.has(followerId)) {
-      this.followers.set(followerId, new Set());
+    if (followerId !== followeeId) {
+        if (!this.followers.has(followerId)) {
+            this.followers.set(followerId, new Set());
+        }
+        this.followers.get(followerId).add(followeeId);
     }
-    this.followers.get(followerId).add(followeeId);
-  }
 };
-
 /**
  * @param {number} followerId
  * @param {number} followeeId
  * @return {void}
  */
 Twitter.prototype.unfollow = function(followerId, followeeId) {
-  if (this.followers.has(followerId)) {
-    this.followers.get(followerId).delete(followeeId);
-  }
+    if (this.followers.has(followerId)) {
+        this.followers.get(followerId).delete(followeeId);
+    }
 };

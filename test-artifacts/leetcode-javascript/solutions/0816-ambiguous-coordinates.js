@@ -18,55 +18,46 @@
  * The final answer list can be returned in any order. All coordinates in the final answer have
  * exactly one space between them (occurring after the comma.)
  */
-
 /**
  * @param {string} s
  * @return {string[]}
  */
 var ambiguousCoordinates = function(s) {
-  const digits = s.slice(1, s.length - 1);
-  const result = [];
-
-  for (let i = 1; i < digits.length; i++) {
-    const leftPart = digits.substring(0, i);
-    const rightPart = digits.substring(i);
-
-    const validLeftCoords = getValidCoordinates(leftPart);
-    const validRightCoords = getValidCoordinates(rightPart);
-
-    for (const left of validLeftCoords) {
-      for (const right of validRightCoords) {
-        result.push(`(${left}, ${right})`);
-      }
+    const digits = s.slice(1, s.length - 1);
+    const result = [];
+    for (let i = 1; i < digits.length; i++) {
+        const leftPart = digits.substring(0, i);
+        const rightPart = digits.substring(i);
+        const validLeftCoords = getValidCoordinates(leftPart);
+        const validRightCoords = getValidCoordinates(rightPart);
+        for (const left of validLeftCoords) {
+            for (const right of validRightCoords) {
+                result.push(`(${left}, ${right})`);
+            }
+        }
     }
-  }
-
-  return result;
+    return result;
 };
 
 function getValidCoordinates(s) {
-  const coords = [];
-
-  if (isValidInteger(s)) {
-    coords.push(s);
-  }
-
-  for (let i = 1; i < s.length; i++) {
-    const integerPart = s.substring(0, i);
-    const decimalPart = s.substring(i);
-
-    if (isValidInteger(integerPart) && isValidDecimal(decimalPart)) {
-      coords.push(`${integerPart}.${decimalPart}`);
+    const coords = [];
+    if (isValidInteger(s)) {
+        coords.push(s);
     }
-  }
-
-  return coords;
+    for (let i = 1; i < s.length; i++) {
+        const integerPart = s.substring(0, i);
+        const decimalPart = s.substring(i);
+        if (isValidInteger(integerPart) && isValidDecimal(decimalPart)) {
+            coords.push(`${integerPart}.${decimalPart}`);
+        }
+    }
+    return coords;
 }
 
 function isValidInteger(s) {
-  return s === '0' || s[0] !== '0';
+    return s === '0' || s[0] !== '0';
 }
 
 function isValidDecimal(s) {
-  return s[s.length - 1] !== '0';
+    return s[s.length - 1] !== '0';
 }

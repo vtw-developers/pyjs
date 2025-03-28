@@ -21,7 +21,6 @@
  *
  * The answer is guaranteed to fit in a 32-bit signed integer.
  */
-
 /**
  * @param {number} k
  * @param {number} w
@@ -30,23 +29,20 @@
  * @return {number}
  */
 var findMaximizedCapital = function(k, w, profits, capital) {
-  const queue = new MinPriorityQueue();
-  const descendingQueue = new MaxPriorityQueue();
-
-  for (let i = 0; i < capital.length; i++) {
-    queue.enqueue([capital[i], profits[i]], capital[i]);
-  }
-
-  for (let i = 0; i < k; i++) {
-    while (!queue.isEmpty() && queue.front().element[0] <= w) {
-      const element = queue.dequeue().element;
-      descendingQueue.enqueue(element, element[1]);
+    const queue = new MinPriorityQueue();
+    const descendingQueue = new MaxPriorityQueue();
+    for (let i = 0; i < capital.length; i++) {
+        queue.enqueue([capital[i], profits[i]], capital[i]);
     }
-    if (descendingQueue.isEmpty()) {
-      return w;
+    for (let i = 0; i < k; i++) {
+        while (!queue.isEmpty() && queue.front().element[0] <= w) {
+            const element = queue.dequeue().element;
+            descendingQueue.enqueue(element, element[1]);
+        }
+        if (descendingQueue.isEmpty()) {
+            return w;
+        }
+        w += descendingQueue.dequeue().element[1];
     }
-    w += descendingQueue.dequeue().element[1];
-  }
-
-  return w;
+    return w;
 };

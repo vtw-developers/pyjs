@@ -13,21 +13,18 @@
  * - '*' could be treated as a single right parenthesis ')' or a single left parenthesis
  *   '(' or an empty string "".
  */
-
 /**
  * @param {string} s
  * @return {boolean}
  */
 var checkValidString = function(s) {
-  let result = 0;
-  let offset = 0;
-
-  for (const character of s) {
-    result += character === '(' ? 1 : -1;
-    offset += character !== ')' ? 1 : -1;
-    if (offset < 0) return false;
-    result = Math.max(0, result);
-  }
-
-  return !result;
+    let result = 0;
+    let offset = 0;
+    for (const character of s) {
+        result += character === '(' ? 1 : -1;
+        offset += character !== ')' ? 1 : -1;
+        if (offset < 0) return false;
+        result = Math.max(0, result);
+    }
+    return !result;
 };

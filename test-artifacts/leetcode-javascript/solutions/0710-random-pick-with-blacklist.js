@@ -15,29 +15,26 @@
  *   blacklisted integers blacklist.
  * - int pick() Returns a random integer in the range [0, n - 1] and not in blacklist.
  */
-
 /**
  * @param {number} n
  * @param {number[]} blacklist
  */
 var Solution = function(n, blacklist) {
-  this.size = n - blacklist.length;
-  this.mapping = new Map();
-  blacklist = new Set(blacklist);
-
-  let last = n - 1;
-  for (const b of blacklist) {
-    if (b < this.size) {
-      while (blacklist.has(last)) last--;
-      this.mapping.set(b, last--);
+    this.size = n - blacklist.length;
+    this.mapping = new Map();
+    blacklist = new Set(blacklist);
+    let last = n - 1;
+    for (const b of blacklist) {
+        if (b < this.size) {
+            while (blacklist.has(last)) last--;
+            this.mapping.set(b, last--);
+        }
     }
-  }
 };
-
 /**
  * @return {number}
  */
 Solution.prototype.pick = function() {
-  const index = Math.floor(Math.random() * this.size);
-  return this.mapping.get(index) ?? index;
+    const index = Math.floor(Math.random() * this.size);
+    return this.mapping.get(index) ?? index;
 };

@@ -14,7 +14,6 @@
  *
  * Do not modify the linked list.
  */
-
 /**
  * Definition for singly-linked list.
  * function ListNode(val) {
@@ -22,18 +21,17 @@
  *     this.next = null;
  * }
  */
-
 /**
  * @param {ListNode} head
  * @return {ListNode}
  */
 var detectCycle = function(head) {
-  while (head) {
-    if (head.visited) {
-      return head;
+    while (head) {
+        if (head.visited) {
+            return head;
+        }
+        head.visited = 1;
+        head = head.next;
     }
-    head.visited = 1;
-    head = head.next;
-  }
-  return head;
+    return head;
 };

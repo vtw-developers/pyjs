@@ -21,23 +21,20 @@
  * following format:
  * - "directory_path/file_name.txt"
  */
-
 /**
  * @param {string[]} paths
  * @return {string[][]}
  */
 var findDuplicate = function(paths) {
-  const map = new Map();
-
-  for (const path of paths) {
-    const [directory, ...files] = path.split(' ');
-    for (const file of files) {
-      const [name, content] = file.split('(');
-      const fullPath = `${directory}/${name}`;
-      const fileContent = content.slice(0, -1);
-      map.set(fileContent, (map.get(fileContent) || []).concat(fullPath));
+    const map = new Map();
+    for (const path of paths) {
+        const [directory, ...files] = path.split(' ');
+        for (const file of files) {
+            const [name, content] = file.split('(');
+            const fullPath = `${directory}/${name}`;
+            const fileContent = content.slice(0, -1);
+            map.set(fileContent, (map.get(fileContent) || []).concat(fullPath));
+        }
     }
-  }
-
-  return Array.from(map.values()).filter(group => group.length > 1);
+    return Array.from(map.values()).filter(group => group.length > 1);
 };

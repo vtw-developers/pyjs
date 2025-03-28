@@ -10,7 +10,6 @@
  * A root-to-leaf path is a path starting from the root and ending at any leaf node. A leaf is a
  * node with no children.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -25,19 +24,16 @@
  * @return {number[][]}
  */
 var pathSum = function(root, targetSum) {
-  if (!root) return [];
-  return traverse([], targetSum, root);
+    if (!root) return [];
+    return traverse([], targetSum, root);
 };
 
 function traverse(result, targetSum, node, history = []) {
-  const values = [...history, node.val];
-
-  if (!node.left && !node.right && values.reduce((sum, n) => sum + n, 0) === targetSum) {
-    result.push(values);
-  }
-
-  if (node.left) traverse(result, targetSum, node.left, values);
-  if (node.right) traverse(result, targetSum, node.right, values);
-
-  return result;
+    const values = [...history, node.val];
+    if (!node.left && !node.right && values.reduce((sum, n) => sum + n, 0) === targetSum) {
+        result.push(values);
+    }
+    if (node.left) traverse(result, targetSum, node.left, values);
+    if (node.right) traverse(result, targetSum, node.right, values);
+    return result;
 }

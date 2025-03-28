@@ -12,22 +12,19 @@
  *
  * You do not need to use up all the given intervals. You can select pairs in any order.
  */
-
 /**
  * @param {number[][]} pairs
  * @return {number}
  */
 var findLongestChain = function(pairs) {
-  pairs.sort((a, b) => a[1] - b[1]);
-  let pointer = -Infinity;
-  let result = 0;
-
-  for (const [start, end] of pairs) {
-    if (start > pointer) {
-      pointer = end;
-      result++;
+    pairs.sort((a, b) => a[1] - b[1]);
+    let pointer = -Infinity;
+    let result = 0;
+    for (const [start, end] of pairs) {
+        if (start > pointer) {
+            pointer = end;
+            result++;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

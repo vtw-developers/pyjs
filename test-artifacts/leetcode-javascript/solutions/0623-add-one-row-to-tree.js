@@ -17,7 +17,6 @@
  *   value val as the new root of the whole original tree, and the original tree is the new root's
  *   left subtree.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -33,21 +32,20 @@
  * @return {TreeNode}
  */
 var addOneRow = function(root, val, depth) {
-  if (depth === 1) {
-    return new TreeNode(val, root);
-  }
-  dfs(root, 1);
-
-  return root;
-
-  function dfs(node, level) {
-    if (!node) return;
-    if (level === depth - 1) {
-      node.left = new TreeNode(val, node.left);
-      node.right = new TreeNode(val, null, node.right);
-      return;
+    if (depth === 1) {
+        return new TreeNode(val, root);
     }
-    dfs(node.left, level + 1);
-    dfs(node.right, level + 1);
-  }
+    dfs(root, 1);
+    return root;
+
+    function dfs(node, level) {
+        if (!node) return;
+        if (level === depth - 1) {
+            node.left = new TreeNode(val, node.left);
+            node.right = new TreeNode(val, null, node.right);
+            return;
+        }
+        dfs(node.left, level + 1);
+        dfs(node.right, level + 1);
+    }
 };

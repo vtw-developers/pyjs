@@ -12,18 +12,15 @@
  * Note that the strings are considered in the order in which they appear in
  * the array.
  */
-
 /**
  * @param {string[]} arr
  * @param {number} k
  * @return {string}
  */
 var kthDistinct = function(arr, k) {
-  const map = new Map();
-  arr.forEach(n => map.set(n, (map.get(n) || 0) + 1));
-
-  const sorted = [...map].sort(([,a], [,b]) => a - b);
-  const [kth, count] = sorted[k - 1] || [];
-
-  return count === 1 ? kth : '';
+    const map = new Map();
+    arr.forEach(n => map.set(n, (map.get(n) || 0) + 1));
+    const sorted = [...map].sort(([, a], [, b]) => a - b);
+    const [kth, count] = sorted[k - 1] || [];
+    return count === 1 ? kth : '';
 };

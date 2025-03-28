@@ -26,31 +26,24 @@
  * The test cases are generated such that you can guess the secret word with a reasonable
  * strategy (other than using the bruteforce method).
  */
-
 /**
  * @param {string[]} words
  * @param {Master} master
  * @return {void}
  */
 var findSecretWord = function(words, master) {
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const randomWord = words[Math.floor(Math.random() * words.length)];
-    const matchCount = master.guess(randomWord);
-
-    if (matchCount === 6) return;
-
-    words = words.filter(word =>
-      matchCount === -1
-        ? countMatches(word, randomWord) === 0
-        : countMatches(word, randomWord) === matchCount
-    );
-  }
-
-  function countMatches(word1, word2) {
-    let matches = 0;
-    for (let i = 0; i < word1.length; i++) {
-      if (word1[i] === word2[i]) matches++;
+    for (let attempt = 0; attempt < 30; attempt++) {
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+        const matchCount = master.guess(randomWord);
+        if (matchCount === 6) return;
+        words = words.filter(word => matchCount === -1 ? countMatches(word, randomWord) === 0 : countMatches(word, randomWord) === matchCount);
     }
-    return matches;
-  }
+
+    function countMatches(word1, word2) {
+        let matches = 0;
+        for (let i = 0; i < word1.length; i++) {
+            if (word1[i] === word2[i]) matches++;
+        }
+        return matches;
+    }
 };

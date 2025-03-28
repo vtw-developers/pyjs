@@ -15,13 +15,12 @@
  *
  * Return true if and only if Alice wins the game, assuming both players play optimally.
  */
-
 /**
  * @param {number[]} nums
  * @return {boolean}
  */
 var xorGame = function(nums) {
-  const total = nums.reduce((xor, num) => xor ^ num, 0);
-  if (total === 0) return true;
-  return nums.length % 2 === 0;
+    const total = nums.reduce((xor, num) => xor ^ num, 0);
+    if (total === 0) return true;
+    return nums.length % 2 === 0;
 };

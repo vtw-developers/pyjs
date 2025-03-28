@@ -16,7 +16,6 @@
  *
  * Return the modified image after performing the flood fill.
  */
-
 /**
  * @param {number[][]} image
  * @param {number} sr
@@ -25,14 +24,18 @@
  * @return {number[][]}
  */
 var floodFill = function(image, sr, sc, newColor) {
-  fill(image, sr, sc, image[sr][sc], newColor);
-  return image;
+    fill(image, sr, sc, image[sr][sc], newColor);
+    return image;
 };
 
 function fill(image, x, y, initialColor, newColor) {
-  if (image[x] && image[x][y] === initialColor && initialColor !== newColor) {
-    image[x][y] = newColor;
-    [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]
-      .forEach(([x, y]) => fill(image, x, y, initialColor, newColor));
-  }
+    if (image[x] && image[x][y] === initialColor && initialColor !== newColor) {
+        image[x][y] = newColor;
+        [
+            [x - 1, y],
+            [x + 1, y],
+            [x, y - 1],
+            [x, y + 1]
+        ].forEach(([x, y]) => fill(image, x, y, initialColor, newColor));
+    }
 }

@@ -17,45 +17,38 @@
  * Return the maximum number of groups (i.e., maximum m) into which you can divide the nodes.
  * Return -1 if it is impossible to group the nodes with the given conditions.
  */
-
 /**
  * @param {number} n
  * @param {number[][]} edges
  * @return {number}
  */
 var magnificentSets = function(n, edges) {
-  const graph = new Array(n).fill().map(() => []);
-  for (const [i, j] of edges) {
-    graph[i - 1].push(j - 1);
-    graph[j - 1].push(i - 1);
-  }
-
-  const result = new Array(n).fill(0);
-  for (let i = 0; i < n; i++) {
-    const groups = new Array(n).fill(0);
-    const queue = [i];
-    let max = 1;
-    let root = i;
-
-    groups[i] = 1;
-
-    while (queue.length) {
-      const key = queue.shift();
-      root = Math.min(root, key);
-
-      for (const node of graph[key]) {
-        if (groups[node] === 0) {
-          groups[node] = groups[key] + 1;
-          max = Math.max(max, groups[node]);
-          queue.push(node);
-        } else if (Math.abs(groups[node] - groups[key]) !== 1) {
-          return -1;
-        }
-      }
+    const graph = new Array(n).fill().map(() => []);
+    for (const [i, j] of edges) {
+        graph[i - 1].push(j - 1);
+        graph[j - 1].push(i - 1);
     }
-
-    result[root] = Math.max(result[root], max);
-  }
-
-  return result.reduce((a, b) => a + b);
+    const result = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) {
+        const groups = new Array(n).fill(0);
+        const queue = [i];
+        let max = 1;
+        let root = i;
+        groups[i] = 1;
+        while (queue.length) {
+            const key = queue.shift();
+            root = Math.min(root, key);
+            for (const node of graph[key]) {
+                if (groups[node] === 0) {
+                    groups[node] = groups[key] + 1;
+                    max = Math.max(max, groups[node]);
+                    queue.push(node);
+                } else if (Math.abs(groups[node] - groups[key]) !== 1) {
+                    return -1;
+                }
+            }
+        }
+        result[root] = Math.max(result[root], max);
+    }
+    return result.reduce((a, b) => a + b);
 };

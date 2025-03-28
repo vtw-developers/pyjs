@@ -12,21 +12,20 @@
  * letters. For example, /leetcode and /leetcode/problems are valid
  * paths while an empty string and / are not.
  */
-
 /**
  * @param {string[]} folder
  * @return {string[]}
  */
 var removeSubfolders = function(folder) {
-  const set = new Set(folder);
-  return folder.filter(path => !getPathSegments(path).some(p => set.has(p)));
+    const set = new Set(folder);
+    return folder.filter(path => !getPathSegments(path).some(p => set.has(p)));
 };
 
 function getPathSegments(path) {
-  const split = path.split('/');
-  const segments = [split.shift()];
-  while (split.length > 1) {
-    segments.push(segments[segments.length - 1] + '/' + split.shift());
-  }
-  return segments;
+    const split = path.split('/');
+    const segments = [split.shift()];
+    while (split.length > 1) {
+        segments.push(segments[segments.length - 1] + '/' + split.shift());
+    }
+    return segments;
 }

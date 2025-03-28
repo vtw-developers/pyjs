@@ -15,28 +15,24 @@
  *
  * Return the minimum integer k such that she can eat all the bananas within h hours.
  */
-
 /**
  * @param {number[]} piles
  * @param {number} h
  * @return {number}
  */
 var minEatingSpeed = function(piles, h) {
-  const fn = speed => piles.reduce((sum, pile) => sum + Math.ceil(pile / speed), 0);
-  let min = 1;
-  let max = Math.max(...piles);
-  let result = max;
-
-  while (min <= max) {
-    const middle = Math.floor((min + max) / 2);
-
-    if (fn(middle) <= h) {
-      result = middle;
-      max = middle - 1;
-    } else {
-      min = middle + 1;
+    const fn = speed => piles.reduce((sum, pile) => sum + Math.ceil(pile / speed), 0);
+    let min = 1;
+    let max = Math.max(...piles);
+    let result = max;
+    while (min <= max) {
+        const middle = Math.floor((min + max) / 2);
+        if (fn(middle) <= h) {
+            result = middle;
+            max = middle - 1;
+        } else {
+            min = middle + 1;
+        }
     }
-  }
-
-  return result;
+    return result;
 };

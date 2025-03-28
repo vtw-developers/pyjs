@@ -8,24 +8,23 @@
  *
  * You may return the answer in any order.
  */
-
 /**
  * @param {number} n
  * @param {number} k
  * @return {number[][]}
  */
 var combine = function(n, k) {
-  const result = [];
-  backtrack(result, n, k);
-  return result;
+    const result = [];
+    backtrack(result, n, k);
+    return result;
 };
 
 function backtrack(result, n, k, combination = [], offset = 1) {
-  if (combination.length === k) {
-    result.push(combination);
-  } else {
-    while (offset <= n) {
-      backtrack(result, n, k, [...combination, offset], ++offset);
+    if (combination.length === k) {
+        result.push(combination);
+    } else {
+        while (offset <= n) {
+            backtrack(result, n, k, [...combination, offset], ++offset);
+        }
     }
-  }
 }

@@ -9,11 +9,10 @@
  * String words[i] is substring of words[j], if can be obtained removing
  * some characters to left and/or right side of words[j].
  */
-
 /**
  * @param {string[]} words
  * @return {string[]}
  */
 var stringMatching = function(words) {
-  return words.filter(s => words.some(word => word !== s && word.includes(s)));
+    return words.filter(s => words.some(word => word !== s && word.includes(s)));
 };

@@ -10,7 +10,6 @@
  * 1. Search for a node to remove.
  * 2. If the node is found, delete the node.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -25,24 +24,24 @@
  * @return {TreeNode}
  */
 var deleteNode = function(root, key) {
-  if (!root) return root;
-  if (root.val < key) {
-    root.right = deleteNode(root.right, key);
-  } else if (root.val > key) {
-    root.left = deleteNode(root.left, key);
-  } else {
-    if (root.left === null) {
-      return root.right;
-    } else if (root.right === null) {
-      return root.left;
+    if (!root) return root;
+    if (root.val < key) {
+        root.right = deleteNode(root.right, key);
+    } else if (root.val > key) {
+        root.left = deleteNode(root.left, key);
     } else {
-      let node = root.right;
-      while (node.left) {
-        node = node.left;
-      }
-      node.left = root.left;
-      return root.right;
+        if (root.left === null) {
+            return root.right;
+        } else if (root.right === null) {
+            return root.left;
+        } else {
+            let node = root.right;
+            while (node.left) {
+                node = node.left;
+            }
+            node.left = root.left;
+            return root.right;
+        }
     }
-  }
-  return root;
+    return root;
 };

@@ -16,14 +16,13 @@
  *
  * Note that there may be multiple seats or students in the same position at the beginning.
  */
-
 /**
  * @param {number[]} seats
  * @param {number[]} students
  * @return {number}
  */
 var minMovesToSeat = function(seats, students) {
-  seats.sort((a, b) => a - b);
-  students.sort((a, b) => a - b);
-  return seats.reduce((a, b, i) => a += Math.abs(seats[i] - students[i]), 0);
+    seats.sort((a, b) => a - b);
+    students.sort((a, b) => a - b);
+    return seats.reduce((a, b, i) => a += Math.abs(seats[i] - students[i]), 0);
 };

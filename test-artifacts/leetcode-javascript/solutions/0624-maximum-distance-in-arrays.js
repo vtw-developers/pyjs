@@ -11,23 +11,20 @@
  *
  * Return the maximum distance.
  */
-
 /**
  * @param {number[][]} arrays
  * @return {number}
  */
 var maxDistance = function(arrays) {
-  let result = 0;
-  let min = arrays[0][0];
-  let max = arrays[0][arrays[0].length - 1];
-
-  for (let i = 1; i < arrays.length; i++) {
-    const newMin = arrays[i][0];
-    const newMax = arrays[i][arrays[i].length - 1];
-    result = Math.max(result, Math.abs(newMax - min), Math.abs(max - newMin));
-    min = Math.min(min, newMin);
-    max = Math.max(max, newMax);
-  }
-
-  return result;
+    let result = 0;
+    let min = arrays[0][0];
+    let max = arrays[0][arrays[0].length - 1];
+    for (let i = 1; i < arrays.length; i++) {
+        const newMin = arrays[i][0];
+        const newMax = arrays[i][arrays[i].length - 1];
+        result = Math.max(result, Math.abs(newMax - min), Math.abs(max - newMin));
+        min = Math.min(min, newMin);
+        max = Math.max(max, newMax);
+    }
+    return result;
 };

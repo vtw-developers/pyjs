@@ -14,22 +14,19 @@
  *
  * Given the integer n, return the last number that remains in arr.
  */
-
 /**
  * @param {number} n
  * @return {number}
  */
 var lastRemaining = function(n) {
-  let result = 1;
-
-  for (let isRemaining = true, count = n, step = 1; count > 1;) {
-    if (isRemaining || count % 2 === 1) {
-      result += step;
+    let result = 1;
+    for (let isRemaining = true, count = n, step = 1; count > 1;) {
+        if (isRemaining || count % 2 === 1) {
+            result += step;
+        }
+        count = Math.floor(count / 2);
+        isRemaining = !isRemaining;
+        step *= 2;
     }
-    count = Math.floor(count / 2);
-    isRemaining = !isRemaining;
-    step *= 2;
-  }
-
-  return result;
+    return result;
 };

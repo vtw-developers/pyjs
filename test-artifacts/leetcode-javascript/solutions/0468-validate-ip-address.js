@@ -20,14 +20,12 @@
  * are valid IPv6 addresses, while "2001:0db8:85a3::8A2E:037j:7334" and
  * "02001:0db8:85a3:0000:0000:8a2e:0370:7334" are invalid IPv6 addresses.
  */
-
 /**
  * @param {string} queryIP
  * @return {string}
  */
 var validIPAddress = function(queryIP) {
-  const ipv4 = /^((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$/;
-  const ipv6 = /^([\da-fA-F]{1,4}:){7}[\da-fA-F]{1,4}$/;
-
-  return ipv4.test(queryIP) ? 'IPv4' : ipv6.test(queryIP) ? 'IPv6' : 'Neither';
+    const ipv4 = /^((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$/;
+    const ipv6 = /^([\da-fA-F]{1,4}:){7}[\da-fA-F]{1,4}$/;
+    return ipv4.test(queryIP) ? 'IPv4' : ipv6.test(queryIP) ? 'IPv6' : 'Neither';
 };

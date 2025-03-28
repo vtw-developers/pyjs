@@ -13,7 +13,6 @@
  * Return true if and only if the two given trees with head nodes root1 and root2 are
  * leaf-similar.
  */
-
 /**
  * Definition for a binary tree node.
  * function TreeNode(val, left, right) {
@@ -28,18 +27,18 @@
  * @return {boolean}
  */
 var leafSimilar = function(root1, root2) {
-  return traverse(root1, []).toString() === traverse(root2, []).toString();
+    return traverse(root1, []).toString() === traverse(root2, []).toString();
 };
 
 function traverse(root, result) {
-  if (!root.left && !root.right) {
-    result.push(root.val);
-  }
-  if (root.left) {
-    traverse(root.left, result);
-  }
-  if (root.right) {
-    traverse(root.right, result);
-  }
-  return result;
+    if (!root.left && !root.right) {
+        result.push(root.val);
+    }
+    if (root.left) {
+        traverse(root.left, result);
+    }
+    if (root.right) {
+        traverse(root.right, result);
+    }
+    return result;
 }

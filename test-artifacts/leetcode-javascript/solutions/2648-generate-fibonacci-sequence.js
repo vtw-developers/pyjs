@@ -9,16 +9,14 @@
  *
  * The first few numbers of the series are 0, 1, 1, 2, 3, 5, 8, 13.
  */
-
 /**
  * @return {Generator<number>}
  */
-var fibGenerator = function* () {
-  let current = 0;
-  let next = 1;
-
-  while (next) {
-    yield current;
-    [current, next] = [next, current + next];
-  }
+var fibGenerator = function*() {
+    let current = 0;
+    let next = 1;
+    while (next) {
+        yield current;
+        [current, next] = [next, current + next];
+    }
 };
