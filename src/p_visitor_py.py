@@ -6,7 +6,7 @@ Classes:
   - Tree: represents a Python AST
   - PrettyPrinter: a visitor class that prints a Python AST in a readable format
   - ParametrizableVariablesCollector: a visitor class that collects parametrizable variables in a Python AST
-  - PrintStatementInserter: a visitor class that inserts print statements in a Python AST
+  - LogStatementInserter: a visitor class that inserts print statements in a Python AST
 
 Constants:
   - NODE_TYPES_CLASSES: dictionary that maps node types to their respective classes
@@ -1516,6 +1516,447 @@ class ParametrizableVariablesCollector(pvis.Visitor):
     self.visit(node.children[0])
 
 
+class LogStatementInserter(pvis.Visitor):
+  '''
+  Assume that the LogStatementInserter works on a test script,
+  which contains a test function, a tested function (f_gold), and a test function invocation.
+  The LogStatementInserter works on the tested function (f_gold).
+  '''
+
+  def __init__(self, function_name: str):
+    super().__init__()
+
+    # name of the function that we are inserting print statements into
+    # this function must appear at the top level of the script
+    self.function_name = function_name
+
+    # counters for control-flow statements
+    self.if_counter = 0
+    self.elif_counter = 0
+    self.else_counter = 0
+    self.for_counter = 0
+    self.while_counter = 0
+
+  # NODE BUILDER METHODS
+  def build_ArgumentListNode(self, args: List[pvis.AbstractNode]) -> ArgumentListNode:
+    '''
+    print(json.dumps(arg, indent=2))
+                    ^^^^^^^^^^^^^^^
+    argument_list
+      *
+      *
+    '''
+
+    _SUPPORTED_ARG_TYPES = [
+      CallNode,
+      FloatNode,
+      IdentifierNode,
+      IntegerNode,
+      KeywordArgumentNode,
+      StringNode,
+    ]
+    for arg in args:
+      assert isinstance(arg, tuple(_SUPPORTED_ARG_TYPES)), f'Unsupported argument type: {type(arg)}'
+
+    # level 0
+    argument_list = ArgumentListNode('argument_list')
+
+    # level 1
+    open_par = pvis.TerminalNode('(')
+    argument_list.add_child(open_par)
+    open_par.set_parent(argument_list)
+
+    for idx, arg in enumerate(args):
+      argument_list.add_child(arg)
+      arg.set_parent(argument_list)
+
+      # add comma if not the last argument
+      if idx != len(args) - 1:
+        comma = pvis.TerminalNode(',')
+        argument_list.add_child(comma)
+        comma.set_parent(argument_list)
+
+    clos_par = pvis.TerminalNode(')')
+    argument_list.add_child(clos_par)
+    clos_par.set_parent(argument_list)
+
+    return argument_list
+
+  def build_AttributeNode(self, obj: str, attr: str) -> AttributeNode:
+    '''
+    print(json.dumps(arg, indent=2))
+          ^^^^^^^^^^
+
+    attribute
+      object: identifier1 'json'
+      attribute: identifier2 'dumps'
+    '''
+    assert isinstance(obj, str), 'obj must be a string'
+    assert isinstance(attr, str), 'attr must be a string'
+
+    # level 0
+    attribute = AttributeNode('attribute')
+
+    # level 1
+    identifier1 = self.build_IdentifierNode(obj)
+    attribute.object = identifier1
+    attribute.add_child(identifier1)
+    identifier1.set_parent(attribute)
+
+    identifier2 = self.build_IdentifierNode(attr)
+    attribute.attribute = identifier2
+    attribute.add_child(identifier2)
+    identifier2.set_parent(attribute)
+
+    return attribute
+
+  def build_CallNode(self, fname: pvis.AbstractNode, argument_list: ArgumentListNode) -> CallNode:
+    '''
+    call
+      function: *
+      arguments: *
+    '''
+    assert isinstance(fname, (IdentifierNode, AttributeNode)), f'unsupported function name type {type(fname)}'
+    assert isinstance(argument_list, ArgumentListNode), 'argument_list must be an ArgumentListNode'
+
+    # level 0
+    call = CallNode('call')
+
+    # level 1
+    call.function = fname
+    call.add_child(fname)
+    fname.set_parent(call)
+
+    call.arguments = argument_list
+    call.add_child(argument_list)
+    argument_list.set_parent(call)
+
+    return call
+
+  def build_IdentifierNode(self, val: str) -> IdentifierNode:
+    assert isinstance(val, str), 'val must be a string'
+    identifier = IdentifierNode('identifier')
+    terminal = pvis.TerminalNode(val)
+    identifier.add_child(terminal)
+    terminal.set_parent(identifier)
+    return identifier
+
+  def build_IntegerNode(self, val: Union[str, int]) -> IntegerNode:
+    assert isinstance(val, (str, int)), 'val must be a string or an integer'
+    integer = IntegerNode('integer')
+    terminal = pvis.TerminalNode(val if isinstance(val, str) else str(val))
+    integer.add_child(terminal)
+    terminal.set_parent(integer)
+    return integer
+
+  def build_ImportStatementNode(self, module_name: str) -> ImportStatementNode:
+    '''
+    import json
+
+    import_statement
+      name: dotted_name
+        identifier 'json'
+    '''
+    assert isinstance(module_name, str), 'module_name must be a string'
+
+    # level 0
+    import_statement = ImportStatementNode('import_statement')
+
+    # level 1
+    dotted_name = DottedNameNode('dotted_name')
+    # imp_statement.name = dotted_name  # not required
+    import_statement.add_child(dotted_name)
+    dotted_name.set_parent(import_statement)
+
+    # level 2
+    identifier = self.build_IdentifierNode(module_name)
+    dotted_name.add_child(identifier)
+    identifier.set_parent(dotted_name)
+
+    return import_statement
+
+  def build_KeywordArgumentNode(self, name: str, value: pvis.AbstractNode) -> KeywordArgumentNode:
+    '''
+    print(json.dumps(arg, indent=2))
+                          ^^^^^^^^
+    keyword_argument
+      name: identifier
+      value: integer
+    '''
+
+    _SUPPORTED_VALUE_TYPES = [
+      IntegerNode,
+      TrueNode,
+    ]
+
+    assert isinstance(name, str), 'name must be a string'
+    assert isinstance(value, tuple(_SUPPORTED_VALUE_TYPES)), f'Unsupported value type: {type(value)}'
+
+    # level 0
+    keyword_argument = KeywordArgumentNode('keyword_argument')
+
+    # level 1
+    identifier = self.build_IdentifierNode(name)
+    keyword_argument.name = identifier
+    keyword_argument.add_child(identifier)
+    identifier.set_parent(keyword_argument)
+
+    keyword_argument.value = value
+    keyword_argument.add_child(value)
+    value.set_parent(keyword_argument)
+
+    return keyword_argument
+
+  def build_ListNode(self, elements: List[pvis.AbstractNode]) -> ListNode:
+    '''
+    [1, 2, 3]
+
+    list
+      *
+      *
+    '''
+    _SUPPORTED_ELEMENT_TYPES = [
+      IdentifierNode,
+      IntegerNode,
+    ]
+    for elem in elements:
+      assert isinstance(elem, tuple(_SUPPORTED_ELEMENT_TYPES)), f'Unsupported element type: {type(elem)}'
+
+    # level 0
+    list_node = ListNode('list')
+
+    # level 1
+    open_br = pvis.TerminalNode('[')
+    list_node.add_child(open_br)
+    open_br.set_parent(list_node)
+
+    for idx, elem in enumerate(elements):
+      list_node.add_child(elem)
+      elem.set_parent(list_node)
+
+      # add comma if not the last element
+      if idx != len(elements) - 1:
+        comma = pvis.TerminalNode(',')
+        list_node.add_child(comma)
+        comma.set_parent(list_node)
+
+    clos_br = pvis.TerminalNode(']')
+    list_node.add_child(clos_br)
+    clos_br.set_parent(list_node)
+
+    return list_node
+
+  def build_StringNode(self, val: str) -> StringNode:
+    assert isinstance(val, str), 'val must be a string'
+    string = StringNode('string')
+    terminal = pvis.TerminalNode(f"'{val}'")
+    string.add_child(terminal)
+    terminal.set_parent(string)
+    return string
+
+  def build_TrueNode(self) -> TrueNode:
+    true = TrueNode('true')
+    terminal = pvis.TerminalNode('True')
+    true.add_child(terminal)
+    terminal.set_parent(true)
+    return true
+
+  # LOG STATEMENT BUILDER METHOD
+  def build_ArgLogStatement(self, arg: pvis.AbstractNode) -> ExpressionStatementNode:
+    '''
+    Build a print statement with the given argument where `arg`
+    can be any `AbstractNode` instance (as long as it respects grammar).
+
+    print(json.dumps(arg, sort_keys=True, indent=2))
+
+    expression_statement
+      call1
+        function: identifier1 'print'
+        arguments: argument_list1
+          call2
+            function: attribute
+              object: identifier2 'json'
+              attribute: identifier3 'dumps'
+            arguments: argument_list2
+              identifier4 'arg'
+              keyword_argument1
+                name: identifier5 'sort_keys'
+                value: true 'True'
+              keyword_argument2
+                name: identifier6 'indent'
+                value: integer '2'
+    '''
+    _SUPPORTED_TYPES = [
+      IntegerNode,
+      FloatNode,
+      StringNode,
+      IdentifierNode,
+    ]
+
+    assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'Unsupported argument type: {type(arg)}'
+
+    # build bottom-up
+    keyword_argument2 = self.build_KeywordArgumentNode('indent', self.build_IntegerNode(2))
+    keyword_argument1 = self.build_KeywordArgumentNode('sort_keys', self.build_TrueNode())
+
+    argument_list2 = self.build_ArgumentListNode([arg, keyword_argument1, keyword_argument2])
+    attribute = self.build_AttributeNode('json', 'dumps')
+
+    call2 = self.build_CallNode(attribute, argument_list2)
+
+    argument_list1 = self.build_ArgumentListNode([call2])
+
+    call1 = self.build_CallNode(self.build_IdentifierNode('print'), argument_list1)
+
+    expression_statement = ExpressionStatementNode('expression_statement')
+    expression_statement.add_child(call1)
+    call1.set_parent(expression_statement)
+
+    return expression_statement
+
+  # VISIT METHODS
+  def visit_BlockNode(self, node: BlockNode) -> None:
+    '''
+    Insert log statements after assignment statements.
+    Assignment appear only under block nodes.
+    '''
+    idx = 0
+    while idx < len(node.children):
+      child = node.children[idx]
+
+      if child.is_terminal():
+        idx += 1
+        continue
+
+      # visit the child
+      self.visit(child)
+
+      # check if child is a top-level node for assignment
+      if not isinstance(child, ExpressionStatementNode):
+        idx += 1
+        continue
+
+      aie = AssignedIdentifierExtractor()
+      aie.visit(child)
+      assigned_identifiers = aie.get_assigned_identifiers()
+      assert len(assigned_identifiers) <= 1, 'currently support only one assigned identifier'
+
+      if len(assigned_identifiers) == 0:
+        idx += 1
+        continue
+
+      ai = assigned_identifiers[0]
+
+      # build and insert log statement
+      arg = self.build_IdentifierNode(ai)
+      log_statement = self.build_ArgLogStatement(arg)
+      node.children.insert(idx + 1, log_statement)
+      log_statement.set_parent(node)
+      idx += 1
+
+  def visit_ForStatementNode(self, node: ForStatementNode) -> None:
+    '''
+    Insert print statements at the beginning of the for statement.
+    TODO insert in alternative clause (else) as well.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'for #{self.for_counter}'))
+    self.for_counter += 1
+    node.body.children.insert(0, log_statement)
+
+  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
+    '''
+    Insert import statement at the beginning of the function.
+    Ideally, this visit method is executed only once.
+    '''
+    self.visit(node.body)
+    imp = self.build_ImportStatementNode('json')
+    imp.set_parent(node.body)
+    node.body.children.insert(0, imp)
+
+  def visit_IfStatementNode(self, node: IfStatementNode) -> None:
+    '''
+    Insert print statements at the beginning of the if statement.
+    TODO insert in alternative clauses (elif, else) as well.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'if #{self.if_counter}'))
+    self.if_counter += 1
+    node.consequence.children.insert(0, log_statement)
+
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    '''
+    Given a top-level `module` node, find the function definition
+    with the name `self.function_name` and visit it.
+    '''
+    function_definitions = [child for child in node.children if isinstance(child, FunctionDefinitionNode)]
+    assert len(function_definitions), 'no function definitions found'
+    fgold_fns = [fn for fn in function_definitions if fn.name.val() == self.function_name]
+    assert len(fgold_fns) > 0, 'broken precondition: f_gold function not found'
+    assert len(fgold_fns) == 1, 'broken precondition: multiple f_gold functions found'
+    fgold_fn = fgold_fns[0]
+    self.visit(fgold_fn)
+
+
+class AssignedIdentifierExtractor(pvis.Visitor):
+  '''
+  Given the left hand side of an assignment statement, this visitor
+  extracts the identifiers that were assigned a value.
+  '''
+  def __init__(self):
+    super().__init__()
+    self.assigned_identifiers : List[str] = []
+
+  def add_assigned_identifier(self, lit: str) -> None:
+    self.assigned_identifiers.append(lit)
+
+  def get_assigned_identifiers(self) -> List[str]:
+    return self.assigned_identifiers
+
+  # VISIT METHODS
+  def default_visit(self, node):
+    raise NotImplementedError(f'visit_{node.__class__.__name__} is not implemented')
+
+  def visit_AssignmentNode(self, node: AssignmentNode) -> None:
+    '''
+    We care only about the left hand side.
+    '''
+    self.visit(node.left)
+
+  def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
+    '''
+    Extract the assigned identifiers from the expression statement node.
+
+    expression_statement: $ => choice(
+      $.expression,
+      seq(commaSep1($.expression), optional(',')),
+      $.assignment,
+      $.augmented_assignment,
+      $.yield
+    ),
+    '''
+    _ASSIGNMENT_RELATED_NODES = [
+      AssignmentNode,
+      AugmentedAssignmentNode,
+    ]
+
+    nt_children = node.get_nt_children()
+    assert len(nt_children) == 1, 'sanity check: expression statement has one child'
+    child = nt_children[0]
+
+    # visit only the following children of expression_statement
+    if isinstance(child, tuple(_ASSIGNMENT_RELATED_NODES)):
+      self.visit(child)
+
+  def visit_IdentifierNode(self, node: IdentifierNode) -> None:
+    self.add_assigned_identifier(node.val())
+
+  def visit_SubscriptNode(self, node: SubscriptNode) -> None:
+    self.add_assigned_identifier(node.value.val())
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')
@@ -1543,7 +1984,27 @@ def _test_parametrizable_variables_collector():
   print(pvc.parametrizable_identifiers)
 
 
+def _test_log_statement_inserter():
+  snippet = p_utils.read_tmp_text('test_inserter.py')
+  src_lang = 'py'
+
+  parser = p_consts.PARSER_DICT[src_lang]
+  ts_tree = parser.parse(bytes(snippet, 'utf8'))
+  tree = Tree.from_ts_tree(ts_tree)
+
+  # first pass: insert print statements and modify AST
+  psi = LogStatementInserter('f_gold')
+  psi.visit(tree.root_node)
+
+  # second pass: pretty print the modified AST
+  pp = PrettyPrinter(indent_with='    ')
+  code = pp.visit(tree.root_node)
+  p_utils.write_tmp_text('test_script_instrumented.py', code)
+  print(code)
+
+
 if __name__ == '__main__':
   # _test_pretty_printer()
   # _test_tree_from_ts_tree()
-  _test_parametrizable_variables_collector()
+  # _test_parametrizable_variables_collector()
+  _test_log_statement_inserter()
