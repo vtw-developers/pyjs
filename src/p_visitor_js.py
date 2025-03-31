@@ -5,7 +5,7 @@ Classes:
   - *Node: classes that represent nodes in a JavaScript AST
   - Tree: represents a JavaScript AST
   - PrettyPrinter: a visitor class that prints a JavaScript AST in a readable format
-  - PrintStatementInserter: a visitor class that inserts print statements in a JavaScript AST
+  - LogStatementInserter: a visitor class that inserts print statements in a JavaScript AST
 
 Constants:
   - NODE_TYPES_CLASSES: dictionary that maps node types to their respective classes
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import jsbeautifier
 import tree_sitter
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import p_consts
 import p_utils
@@ -49,7 +49,11 @@ class ArgumentsNode(pvis.AbstractNode): pass
 class ArrayNode(pvis.AbstractNode): pass
 class ArrayPatternNode(pvis.AbstractNode): pass
 class ArrowFunctionNode(pvis.AbstractNode): pass
-class AssignmentExpressionNode(pvis.AbstractNode): pass
+class AssignmentExpressionNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.left : pvis.AbstractNode = None
+    self.right : pvis.AbstractNode = None
 class AssignmentPatternNode(pvis.AbstractNode): pass
 class AugmentedAssignmentExpressionNode(pvis.AbstractNode): pass
 class AwaitExpressionNode(pvis.AbstractNode): pass
@@ -81,7 +85,13 @@ class FalseNode(pvis.AbstractNode): pass
 class FieldDefinitionNode(pvis.AbstractNode): pass
 class FinallyClauseNode(pvis.AbstractNode): pass
 class ForInStatementNode(pvis.AbstractNode): pass
-class ForStatementNode(pvis.AbstractNode): pass
+class ForStatementNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.initializer : pvis.AbstractNode = None
+    self.condition : pvis.AbstractNode = None
+    self.increment : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
 class FormalParametersNode(pvis.AbstractNode): pass
 class FunctionNode(pvis.AbstractNode):
   def __init__(self, node_type):
@@ -89,7 +99,12 @@ class FunctionNode(pvis.AbstractNode):
     self.name : pvis.AbstractNode = None
     self.parameters : pvis.AbstractNode = None
     self.body : pvis.AbstractNode = None
-class FunctionDeclarationNode(pvis.AbstractNode): pass
+class FunctionDeclarationNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.name : pvis.AbstractNode = None
+    self.parameters : pvis.AbstractNode = None
+    self.body : pvis.AbstractNode = None
 class GeneratorFunctionNode(pvis.AbstractNode): pass
 class GeneratorFunctionDeclarationNode(pvis.AbstractNode): pass
 class HashBangLineNode(pvis.AbstractNode): pass
@@ -102,7 +117,12 @@ class IdentifierNode(pvis.AbstractNode):
     assert len(self.children) == 1, 'sanity check'
     assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
-class IfStatementNode(pvis.AbstractNode): pass
+class IfStatementNode(pvis.AbstractNode):
+  def __init__(self, node_type):
+    super().__init__(node_type)
+    self.condition : pvis.AbstractNode = None
+    self.consequence : pvis.AbstractNode = None
+    self.alternative : pvis.AbstractNode = None
 class ImportNode(pvis.AbstractNode): pass
 class ImportClauseNode(pvis.AbstractNode): pass
 class ImportStatementNode(pvis.AbstractNode): pass
@@ -339,7 +359,11 @@ NODE_TYPES_CLASSES: Dict[str, pvis.AbstractNode] = {
 }
 
 NODES_WITH_FIELDS = [
+  'assignment_expression',
+  'for_statement',
   'function',
+  'function_declaration',
+  'if_statement',
   'member_expression',
   'regex',
   'subscript_expression',
@@ -569,6 +593,593 @@ class PrettyPrinter(pvis.Visitor):
     return node.children[0].node_type
 
 
+class LogStatementInserter(pvis.Visitor):
+  '''
+  Assume that the LogStatementInserter works on a test script,
+  which contains test function, tested function, and test function invocation.
+  The LogStatementInserter works on the tested function (f_gold).
+  '''
+  def __init__(self, function_name: str):
+    super().__init__()
+
+    # name of the function that we are inserting print statements into
+    # this function must appear at the top level of the script
+    self.function_name = function_name
+
+    # counters for control-flow statements
+    self.if_counter = 0
+    self.elif_counter = 0
+    self.else_counter = 0
+    self.for_counter = 0
+    self.while_counter = 0
+
+  # NODE BUILDER METHODS
+  def build_CallExpressionNode(self, function: MemberExpressionNode, arguments: ArgumentsNode) -> CallExpressionNode:
+    '''
+    console.log(JSON.stringify(obj, null, 2));
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    call_expression
+      function: <member_expression>
+      arguments: <arguments>
+    '''
+    assert isinstance(function, MemberExpressionNode), 'function must be a MemberExpressionNode'
+    assert isinstance(arguments, ArgumentsNode), 'arguments must be an ArgumentsNode'
+
+    # level 0
+    call_expression = CallExpressionNode('call_expression')
+
+    # level 1
+    call_expression.add_child(function)
+    function.set_parent(call_expression)
+
+    call_expression.add_child(arguments)
+    arguments.set_parent(call_expression)
+
+    return call_expression
+
+  def build_MemberExpressionNode(self, obj: str, prop: str) -> MemberExpressionNode:
+    '''
+    console.log(JSON.stringify(obj, null, 2));
+                ^^^^^^^^^^^^^^
+    member_expression
+      object: identifier 'JSON'
+      '.'
+      property: property_identifier 'stringify'
+
+    NOTE property_identifier is an alias for identifier
+    '''
+    assert isinstance(obj, str), 'obj must be a string'
+    assert isinstance(prop, str), 'prop must be a string'
+
+    # level 0
+    member_expression = MemberExpressionNode('member_expression')
+
+    # level 1
+    identifier = self.build_IdentifierNode(obj)
+    member_expression.object = identifier
+    member_expression.add_child(identifier)
+    identifier.set_parent(member_expression)
+
+    dot = pvis.TerminalNode('.')
+    member_expression.add_child(dot)
+    dot.set_parent(member_expression)
+
+    property_identifier = self.build_IdentifierNode(prop)
+    member_expression.property = property_identifier
+    member_expression.add_child(property_identifier)
+    property_identifier.set_parent(member_expression)
+
+    return member_expression
+
+  def build_IdentifierNode(self, val: str) -> IdentifierNode:
+    assert isinstance(val, str), 'val must be a string'
+    identifier = IdentifierNode('identifier')
+    terminal = pvis.TerminalNode(val)
+    identifier.add_child(terminal)
+    terminal.set_parent(identifier)
+    return identifier
+
+  def build_NumberNode(self, val: Union[str, int, float]) -> NumberNode:
+    assert isinstance(val, (str, int, float)), 'val must be a string, integer, or float'
+    number = NumberNode('number')
+    terminal = pvis.TerminalNode(val if isinstance(val, str) else str(val))
+    number.add_child(terminal)
+    terminal.set_parent(number)
+    return number
+
+  def build_StringNode(self, val: str) -> StringNode:
+    assert isinstance(val, str), 'val must be a string'
+    string = StringNode('string')
+    terminal = pvis.TerminalNode(f"'{val}'")
+    string.add_child(terminal)
+    terminal.set_parent(string)
+    return string
+
+  def build_ArgumentsNode(self, args: List[pvis.AbstractNode]) -> ArgumentsNode:
+    '''
+    console.log(JSON.stringify(obj, null, 2));
+                              ^^^^^^^^^^^^^^
+    arguments
+      '('
+      <arg>
+      ','
+      <arg>
+      ','
+      <arg>
+      ')'
+    '''
+
+    _SUPPORTED_ARG_TYPES = [
+      'call_expression',
+      'identifier',
+      'null',
+      'number',
+      'string',
+    ]
+    for arg in args:
+      assert arg.node_type in _SUPPORTED_ARG_TYPES, f'unsupported argument type: {arg.node_type}'
+
+    # level 0
+    arguments = ArgumentsNode('arguments')
+
+    # level 1
+    lparen = pvis.TerminalNode('(')
+    arguments.add_child(lparen)
+    lparen.set_parent(arguments)
+
+    for idx, arg in enumerate(args):
+      arguments.add_child(arg)
+      arg.set_parent(arguments)
+
+      if idx != len(args) - 1:
+        comma = pvis.TerminalNode(',')
+        arguments.add_child(comma)
+        comma.set_parent(arguments)
+
+    rparen = pvis.TerminalNode(')')
+    arguments.add_child(rparen)
+    rparen.set_parent(arguments)
+
+    return arguments
+
+  def build_ArrayNode(self, elements: List[pvis.AbstractNode]) -> ArrayNode:
+    '''
+    [1, 2, 3]
+
+    array
+      *
+      *
+    '''
+    _SUPPORTED_ELEMENT_TYPES = [
+      IdentifierNode,
+      NumberNode,
+    ]
+    for elem in elements:
+      assert isinstance(elem, tuple(_SUPPORTED_ELEMENT_TYPES)), f'Unsupported element type: {type(elem)}'
+
+    # level 0
+    array_node = ArrayNode('array')
+
+    # level 1
+    open_br = pvis.TerminalNode('[')
+    array_node.add_child(open_br)
+    open_br.set_parent(array_node)
+
+    for idx, elem in enumerate(elements):
+      array_node.add_child(elem)
+      elem.set_parent(array_node)
+
+      # add comma if not the last element
+      if idx != len(elements) - 1:
+        comma = pvis.TerminalNode(',')
+        array_node.add_child(comma)
+        comma.set_parent(array_node)
+
+    clos_br = pvis.TerminalNode(']')
+    array_node.add_child(clos_br)
+    clos_br.set_parent(array_node)
+
+    return array_node
+
+  # LOG STATEMENT BUILDER METHOD
+  def build_ArgLogStatement(self, arg: pvis.AbstractNode) -> ExpressionStatementNode:
+    '''
+    Build a print statement with the given argument where `arg`
+    can be any `AbstractNode` instance (as long as it respects grammar).
+
+    console.log(JSON.stringify(obj, null, 2));
+
+    expression_statement
+      call_expression1
+        function: member_expression1
+          object: identifier1 'console'
+          '.'
+          property: property_identifier1 'log'
+        arguments: arguments1
+          '('
+          call_expression2
+            function: member_expression2
+              object: identifier2 'JSON'
+              '.'
+              property: property_identifier2 'stringify'
+            arguments: arguments2
+              '('
+              identifier3 'obj'
+              ','
+              'null'
+              ','
+              number '2'
+              ')'
+          ')'
+      ';'
+    '''
+    _SUPPORTED_TYPES = [
+      IdentifierNode,
+      NumberNode,
+      StringNode,
+    ]
+
+    assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'unsupported argument type: {arg.node_type}'
+
+    # build bottom-up
+    arguments2 = self.build_ArgumentsNode([arg, pvis.TerminalNode('null'), self.build_NumberNode(2)])
+    member_expression2 = self.build_MemberExpressionNode('JSON', 'stringify')
+    call_expression2 = self.build_CallExpressionNode(member_expression2, arguments2)
+    arguments1 = self.build_ArgumentsNode([call_expression2])
+    member_expression1 = self.build_MemberExpressionNode('console', 'log')
+    call_expression1 = self.build_CallExpressionNode(member_expression1, arguments1)
+
+    expression_statement = ExpressionStatementNode('expression_statement')
+    expression_statement.add_child(call_expression1)
+    call_expression1.set_parent(expression_statement)
+
+    semicolon = pvis.TerminalNode(';')
+    expression_statement.add_child(semicolon)
+    semicolon.set_parent(expression_statement)
+
+    return expression_statement
+
+  # VISIT METHODS
+  def visit_ProgramNode(self, node: ProgramNode) -> None:
+    '''
+    Given a top-level `program` node, find the function definition
+    with the name `self.function_name` and visit it.
+    '''
+    function_declarations = [child for child in node.children if isinstance(child, FunctionDeclarationNode)]
+    assert len(function_declarations), 'no function declarations found'
+    fgold_fns = [fn for fn in function_declarations if fn.name.val() == self.function_name]
+    assert len(fgold_fns) > 0, 'broken precondition: f_gold function not found'
+    assert len(fgold_fns) == 1, 'broken precondition: multiple f_gold functions found'
+    fgold_fn = fgold_fns[0]
+    self.visit(fgold_fn)
+
+  def visit_ForStatementNode(self, node: ForStatementNode) -> None:
+    '''
+    Insert print statements at the beginning of the for statement.
+
+    NOTE for both for and if statements, it is possible that the consequence/body
+    is just a single statement, in which case parentheses are not required.
+    If we are inserting a log statement, we need to wrap the statement in parentheses
+    alongside with the log statement. TODO
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'for #{self.for_counter}'))
+    self.for_counter += 1
+    node.body.children.insert(1, log_statement)
+
+  def visit_FunctionDeclarationNode(self, node: FunctionDeclarationNode) -> None:
+    '''
+    Given a function declaration node, visit its body and insert print statements.
+    '''
+    self.visit(node.body)
+
+  def visit_IfStatementNode(self, node: IfStatementNode) -> None:
+    '''
+    Insert print statements at the beginning of the if statement.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'if #{self.if_counter}'))
+    self.if_counter += 1
+    node.consequence.children.insert(1, log_statement)
+
+  def visit_StatementBlockNode(self, node: StatementBlockNode) -> None:
+    '''
+    Insert log statements after assignment statements.
+    Assignment appear only under block nodes (?)
+    '''
+    idx = 0
+    while idx < len(node.children):
+      child = node.children[idx]
+
+      if child.is_terminal():
+        idx += 1
+        continue
+
+      # visit the child
+      self.visit(child)
+
+      # check if child is a top-level node for assignment
+      if not child.node_type in ['lexical_declaration', 'variable_declaration', 'expression_statement']:
+        idx += 1
+        continue
+
+      aie = AssignedIdentifierExtractor()
+      aie.visit(child)
+      assigned_identifiers = aie.get_assigned_identifiers()
+      assert len(assigned_identifiers) <= 1, 'currently support only one assigned identifier'
+
+      if len(assigned_identifiers) == 0:
+        idx += 1
+        continue
+
+      ai = assigned_identifiers[0]
+
+      # build and insert log statement
+      arg = self.build_IdentifierNode(ai)
+      log_statement = self.build_ArgLogStatement(arg)
+      node.children.insert(idx + 1, log_statement)
+      log_statement.set_parent(node)
+      idx += 1
+
+
+class AssignedIdentifierExtractor(pvis.Visitor):
+  '''
+  Given a child node of a statement node, specifically
+  lexical_declaration, variable_declaration, or expression_statement,
+  extract all assigned identifiers from the node.
+  '''
+  '''TREE-SITTER GRAMMAR RULES ASSOCIATED WITH ASSIGNMENT:
+
+  lexical_declaration: $ => seq(
+    field('kind', choice('let', 'const')),
+    commaSep1($.variable_declarator),
+    $._semicolon
+  ),
+
+  variable_declaration: $ => seq(
+    'var',
+    commaSep1($.variable_declarator),
+    $._semicolon
+  ),
+
+  variable_declarator: $ => seq(
+    field('name', choice($.identifier, $._destructuring_pattern)),
+    optional($._initializer)
+  ),
+
+  _destructuring_pattern: $ => choice(
+    $.object_pattern,
+    $.array_pattern
+  ),
+
+  _initializer: $ => seq(
+    '=',
+    field('value', $.expression)
+  ),
+
+
+  assignment_expression: $ => prec.right('assign', seq(
+    field('left', choice($.parenthesized_expression, $._lhs_expression)),
+    '=',
+    field('right', $.expression)
+  )),
+
+  augmented_assignment_expression: $ => prec.right('assign', seq(
+    field('left', $._augmented_assignment_lhs),
+    field('operator', choice('+=', '-=', '*=', '/=', '%=', '^=', '&=', '|=', '>>=', '>>>=',
+                              '<<=', '**=', '&&=', '||=', '??=')),
+    field('right', $.expression)
+  )),
+
+  _lhs_expression: $ => choice(
+    $.member_expression,
+    $.subscript_expression,
+    $._identifier,
+    alias($._reserved_identifier, $.identifier),
+    $._destructuring_pattern
+  ),
+
+  _augmented_assignment_lhs: $ => choice(
+    $.member_expression,
+    $.subscript_expression,
+    alias($._reserved_identifier, $.identifier),
+    $.identifier,
+    $.parenthesized_expression,
+  ),
+  '''
+  '''EXAMPLES:
+
+  `let x = 10;`
+  `const y = 30;`
+  lexical_declaration
+    kind: let|const
+    variable_declarator
+      name: identifier
+      value: number
+
+  `let [x, y] = [1, 2];`
+  lexical_declaration
+    kind: let
+    variable_declarator
+      name: array_pattern '[x, y]'
+      value: array '[1, 2]'
+
+  `let {name, age} = {name: "Alice", age: 30};`
+  lexical_declaration
+    kind: let
+    variable_declarator
+      name: object_pattern '{name, age}'
+      value: object '{name: "Alice", age: 30}'
+
+  `var z = 50;`
+  variable_declaration
+    var
+    variable_declarator
+      name: identifier 'z'
+      value: number '50'
+
+  `x = 20;`
+  expression_statement
+    assignment_expression
+      left: identifier
+      right: number
+
+  `obj.age = 2;`
+  expression_statement
+    assignment_expression
+      left: member_expression
+        object: identifier
+        .
+        property: property_identifier
+      =
+      right: number
+    ;
+
+  `arr[0] = 100;`
+  expression_statement
+    assignment_expression
+      left: subscript_expression
+        object: identifier
+
+        index: number
+        ]
+      =
+      right: number
+    ;
+
+  `Object.assign(target, source);`
+  expression_statement
+    call_expression
+      function: member_expression
+        object: identifier
+        .
+        property: property_identifier
+      arguments: arguments
+        (
+        identifier
+        ,
+        identifier
+        )
+    ;
+  '''
+
+  def __init__(self):
+    super().__init__()
+    self.assigned_identifiers : List[str] = []
+
+  def add_assigned_identifier(self, lit: str) -> None:
+    self.assigned_identifiers.append(lit)
+
+  def get_assigned_identifiers(self) -> List[str]:
+    return self.assigned_identifiers
+
+  # VISIT METHODS
+  def default_visit(self, node):
+    raise NotImplementedError(f'visit_{node.__class__.__name__} is not implemented')
+
+  def visit_AssignmentExpressionNode(self, node: AssignmentExpressionNode) -> None:
+    '''
+    assignment_expression: $ => prec.right('assign', seq(
+      field('left', choice($.parenthesized_expression, $._lhs_expression)),
+      '=',
+      field('right', $.expression)
+    )),
+    '''
+    self.visit(node.left)
+
+  def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
+    '''
+    Extract the assigned identifiers from the expression statement node.
+
+    expression: $ => choice(
+      $.primary_expression,
+      $._jsx_element,
+      $.jsx_fragment,
+      $.assignment_expression,
+      $.augmented_assignment_expression,
+      $.await_expression,
+      $.unary_expression,
+      $.binary_expression,
+      $.ternary_expression,
+      $.update_expression,
+      $.new_expression,
+      $.yield_expression,
+    ),
+    '''
+    _ASSIGNMENT_RELATED_NODES = [
+      AssignmentExpressionNode,
+      AugmentedAssignmentExpressionNode,
+      UpdateExpressionNode,
+    ]
+
+    nt_children = node.get_nt_children()
+    assert len(nt_children) == 1, 'sanity check: expression statement has one child'
+    child = nt_children[0]
+
+    # visit only the following children of expression_statement
+    if isinstance(child, tuple(_ASSIGNMENT_RELATED_NODES)):
+      self.visit(child)
+
+  def visit_IdentifierNode(self, node: IdentifierNode) -> None:
+    self.add_assigned_identifier(node.val())
+
+  def visit_LexicalDeclarationNode(self, node: LexicalDeclarationNode) -> None:
+    '''
+    lexical_declaration: $ => seq(
+      field('kind', choice('let', 'const')),
+      commaSep1($.variable_declarator),
+      $._semicolon
+    ),
+    '''
+    var_declarators = [child for child in node.children if isinstance(child, VariableDeclaratorNode)]
+    for var_declarator in var_declarators:
+      self.visit(var_declarator)
+
+  def visit_SubscriptExpressionNode(self, node: SubscriptExpressionNode) -> None:
+    '''
+    subscript_expression: $ => prec.right('member', seq(
+      field('object', choice($.expression, $.primary_expression)),
+      optional('?.'),
+      '[', field('index', $._expressions), ']'
+    )),
+    '''
+    self.visit(node.object)
+
+  def visit_VariableDeclarationNode(self, node: VariableDeclarationNode) -> None:
+    '''
+    variable_declaration: $ => seq(
+      'var',
+      commaSep1($.variable_declarator),
+      $._semicolon
+    ),
+    '''
+    var_declarators = [child for child in node.children if isinstance(child, VariableDeclaratorNode)]
+    for var_declarator in var_declarators:
+      self.visit(var_declarator)
+
+  def visit_VariableDeclaratorNode(self, node: VariableDeclaratorNode) -> None:
+    '''
+    variable_declarator: $ => seq(
+      field('name', choice($.identifier, $._destructuring_pattern)),
+      optional($._initializer)
+    ),
+    _destructuring_pattern: $ => choice(
+      $.object_pattern,
+      $.array_pattern
+    ),
+    _initializer: $ => seq(
+      '=',
+      field('value', $.expression)
+    ),
+    '''
+    # just a variable declaration without initialization (e.g. `let x;`)
+    if node.value is None:
+      return
+    self.visit(node.name)
+
+
 # TEST HARNESSES
 def _get_js_boilerplate_code():
   '''
@@ -608,6 +1219,26 @@ def _test_pretty_printer():
   print(code)
 
 
+def _test_log_statement_inserter():
+  snippet = p_utils.read_tmp_text('test_inserter.js')
+  src_lang = 'js'
+
+  parser = p_consts.PARSER_DICT[src_lang]
+  ts_tree = parser.parse(bytes(snippet, 'utf8'))
+  tree = Tree.from_ts_tree(ts_tree)
+
+  # first pass: insert print statements and modify AST
+  psi = LogStatementInserter('f_gold')
+  psi.visit(tree.root_node)
+
+  # second pass: pretty print the modified AST
+  pp = PrettyPrinter()
+  code = pp.visit(tree.root_node)
+  p_utils.write_tmp_text('test_script_instrumented.js', code)
+  print(code)
+
+
 if __name__ == '__main__':
   # _get_js_boilerplate_code()
-  _test_pretty_printer()
+  # _test_pretty_printer()
+  _test_log_statement_inserter()
