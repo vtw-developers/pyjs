@@ -193,6 +193,9 @@ def read_tmp_text(fname: str) -> Any:
 def write_tmp_json(fname: str, obj: Any) -> None:
   write_json(p_consts.TMP_DIR / fname, obj)
 
+def write_tmp_text(fname: str, contents: str) -> None:
+  write_text(p_consts.TMP_DIR / fname, contents)
+
 
 # Parsing and AST related
 def does_have_parse_error(content: str, lang: str):
