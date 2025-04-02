@@ -3,6 +3,7 @@ from typing import Tuple
 
 import p_consts
 import p_utils
+import p_visitor as pvis
 import p_visitor_py
 
 
@@ -10767,6 +10768,43 @@ class TestLogStatementInserter(unittest.TestCase):
     pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
     gold_code = p_utils.read_text(self.snippets_dir / 'L0001_output.py')
     self.assertEqual(pp_code, gold_code)
+
+
+class TestAssignedIdentifierExtractor(unittest.TestCase):
+  def setUp(self):
+    self.src_lang = 'py'
+    self.parser = p_consts.PARSER_DICT[self.src_lang]
+    self.maxDiff = None
+
+  def get_ast(self, snippet) -> pvis.AbstractNode:
+    ts_tree = self.parser.parse(bytes(snippet, 'utf-8'))
+    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    assert tree.root_node is not None
+    assert tree.root_node.node_type == 'module'
+    assert len(tree.root_node.children) == 1, 'snippet must contain a single statement'
+    return tree.root_node.children[0]
+
+  def extract_assigned_identifiers(self, snippet):
+    ast = self.get_ast(snippet)
+    extractor = p_visitor_py.AssignedIdentifierExtractor()
+    extractor.visit(ast)
+    return extractor.get_assigned_identifiers()
+
+  def test_single_assignment(self):
+    # Test a simple assignment
+    snippet = 'x = 10'
+    assigned_identifiers = self.extract_assigned_identifiers(snippet)
+    self.assertCountEqual(assigned_identifiers, ['x'])
+
+    snippet = 'num = 10'
+    assigned_identifiers = self.extract_assigned_identifiers(snippet)
+    self.assertCountEqual(assigned_identifiers, ['num'])
+
+  def test_subscript_assignment(self):
+    # Test subscript assignment
+    snippet = 'arr[0] = 10'
+    assigned_identifiers = self.extract_assigned_identifiers(snippet)
+    self.assertCountEqual(assigned_identifiers, ['arr'])
 
 
 if __name__ == '__main__':
