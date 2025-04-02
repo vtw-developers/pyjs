@@ -1,0 +1,150 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "p_pirel.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_pirel.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_validator.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_validator.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_data_structures.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_data_structures.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_llm_val.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_llm_val.py",
+      "console": "integratedTerminal",
+      "args": ["pathtoargsjson", "functionidx"],
+      "justMyCode": true
+    },
+    {
+      "name": "p_llm_gen.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_llm_gen.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_generator.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_generator.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_llm_messages.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_llm_messages.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_grammar.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_grammar.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_visitor.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_visitor.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_learn_rules.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_learn_rules.py",
+      "args": ["test"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_rule_inferencer.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "p_rule_inferencer.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "d_ast_parse.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/pirel/src/",
+      "program": "d_ast_parse.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "DuoGlot backend: Attach server_trans",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "0.0.0.0",
+        "port": 4444
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/src",
+          "remoteRoot": "/opt/duoglotcore-server"
+        }
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "DuoGlot backend: Attach server_testing",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "0.0.0.0",
+        "port": 4445
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/backend/test-server",
+          "remoteRoot": "/opt/test-server"
+        }
+      ],
+      "justMyCode": true
+    }
+  ]
+}

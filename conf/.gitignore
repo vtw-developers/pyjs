@@ -1,0 +1,8 @@
+# ignore everything
+*
+
+# except these
+!.gitignore
+!README.md
+!config.yaml
+!default.yaml
