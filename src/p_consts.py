@@ -1,0 +1,236 @@
+import json
+import logging
+from pathlib import Path
+
+import d_grammar
+from tree_sitter import Language, Parser
+
+################################################################################################
+#################################### DIRECTORIES ###############################################
+################################################################################################
+SRC_DIR = Path(__file__).parent
+ROOT_DIR = SRC_DIR.parent
+LOGS_DIR = ROOT_DIR / 'logs'
+CONFIGS_DIR = ROOT_DIR / 'conf'
+BENCHMARKS_DIR = ROOT_DIR / 'benchmarks'
+TRANSLATION_RULES_DIR = ROOT_DIR / 'translation-rules'
+TREE_SITTER_GRAMMARS_DIR = ROOT_DIR / 'tree-sitter-util'
+BUILD_DIR = ROOT_DIR / 'build'
+
+PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
+DUOGLOT_LOGS_DIR = LOGS_DIR / 'duoglot'
+LEARN_RULES_LOGS_DIR = LOGS_DIR / 'learn-rules'
+
+
+################################################################################################
+#################################### ENVIRONMENT ###############################################
+################################################################################################
+ENV_FILE = ROOT_DIR / '.env.json'
+
+
+################################################################################################
+#################################### TREESITTER RELATED ########################################
+################################################################################################
+_language_paths = [
+  TREE_SITTER_GRAMMARS_DIR / 'tree-sitter-javascript',
+  TREE_SITTER_GRAMMARS_DIR / 'tree-sitter-python'
+]
+Language.build_library(BUILD_DIR / 'my-languages.so', _language_paths)
+
+_py_language = Language(BUILD_DIR / 'my-languages.so', 'python')
+_js_language = Language(BUILD_DIR / 'my-languages.so', 'javascript')
+
+_py_parser = Parser()
+_js_parser = Parser()
+
+_py_parser.set_language(_py_language)
+_js_parser.set_language(_js_language)
+
+PARSER_DICT = {
+  'py': _py_parser,
+  'js': _js_parser
+}
+
+
+################################################################################################
+#################################### GRAMMAR RELATED ###########################################
+################################################################################################
+with open(_language_paths[1] / 'src' / 'grammar.json') as fin:
+  grammar_contents = fin.read()
+  _py_grammar = json.loads(grammar_contents)
+  _py_grammar_readonly = json.loads(grammar_contents)
+with open(_language_paths[0] / 'src' / 'grammar.json') as fin:
+  grammar_contents = fin.read()
+  _js_grammar = json.loads(grammar_contents)
+  _js_grammar_readonly = json.loads(grammar_contents)
+
+d_grammar.grm_preprocess('py', _py_grammar)
+d_grammar.grm_preprocess('js', _js_grammar)
+
+GRAMMAR_DICT = {
+  'py': _py_grammar,
+  'js': _js_grammar
+}
+
+GRAMMAR_DICT_READONLY = {
+  'py': _py_grammar_readonly,
+  'js': _js_grammar_readonly
+}
+
+PY_NOT_INLINED_NTS = d_grammar.grm_get_all_not_inlined_NTs(_py_grammar)
+JS_NOT_INLINED_NTS = d_grammar.grm_get_all_not_inlined_NTs(_js_grammar)
+
+NT_DICT = {
+  'py': PY_NOT_INLINED_NTS,
+  'js': JS_NOT_INLINED_NTS
+}
+
+
+################################################################################################
+############################# TSP GENERATION ###################################################
+################################################################################################
+BODY_NODE_TYPES = {
+  'py': ['block', 'list', 'dictionary']
+}
+
+# For the following node types we include (`template_origin`, `template_origin`)
+# as a TSP. This allows us to learn the most overfitted translation rules for them,
+# and avoid errors. This is applicable in such case:
+# `problematic_node` is `string` and `template_origin` is `dfs(0, 0, '')`
+# Translation rules for empty strings and non-empty strings are different.
+# However, the generator generates non-empty strings, and this does not let us
+# learn the translation rule for empty strings.
+# This is a workaround to avoid such issues.
+TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES = {
+  'py': ['string', 'slice']
+}
+
+PY_BUILT_IN_FUNCTIONS = {"abs", "aiter", "all", "anext", "any", "ascii", "bin", "bool", "breakpoint", "bytearray", "bytes", "callable", "chr", "classmethod", "compile", "complex", "delattr", "dict", "dir", "divmod", "enumerate", "eval", "exec", "filter", "float", "format", "frozenset", "getattr", "globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance", "issubclass", "iter", "len", "list", "locals", "map", "max", "memoryview", "min", "next", "object", "oct", "open", "ord", "pow", "print", "property", "range", "repr", "reversed", "round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super", "tuple", "type", "vars", "zip"}
+
+# an overfitted TSP is a TSP where only literal values are different from that of `template_origin`
+IS_GENERATE_OVERFITTED_TSP = True
+
+# LLM is used to decide whether a generated TSPS is syntactically correct or not.
+# If this flag is set to True, then syntactically incorrect TSPs are not used.
+# Regardless of this flag, syntactically incorrect TSPs are moved to the end of the list
+# to increase changes of using a correct TSP.
+IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM = False
+
+# controls the maximum number of fuzz node groups that are used to generate TSPs
+MAX_NUM_FUZZ_NODE_GROUPS = 14
+
+
+################################################################################################
+#################################### PIREL CONFIGS #############################################
+################################################################################################
+PLACEHOLDER_TEXT = '__'  # string representation of a hole
+CONTEXT_PH_TEXT = '<|pirel_context_hole|>'
+GENERIC_SECRET_FN = 'secret_fun_4071'
+GENERIC_SECRET_FN_INVOCATION = GENERIC_SECRET_FN + '()'
+PAR_PROG_PROB_NODE_REPLACE = 'pirel_replace_var'
+PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
+
+# template simplification
+# max depth for a node before it's simplified
+LLM_VAL_TS_MAX_DEPTH = 4
+
+# The number of TSPs might be big. Learning translation rules from many
+# TSPs takes a lot of resources (time + money). The following parameter
+# controls after how many TSPs that result in working translation rules
+# we do stop. That is, when the number of TSPs that we learnt working
+# translation rules from reaches MAX_NUM_USEFUL_TSPS, we stop the loop
+# and do not use the remaining TSPs.
+MAX_NUM_USEFUL_TSPS = 3
+
+# The number of attempts to learn translation rules from a single TSP
+LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
+
+
+################################################################################################
+#################################### LLM CONFIGS ###############################################
+################################################################################################
+GENERATION_TEMPERATURE_INCREMENT = 0.02
+GENERATION_TEMPERATURE_ROUND_DIGITS = 2
+GENERATION_NUM_VARIANTS_IN_RESPONSE = 5
+
+DEFAULT_MODEL_PARAMS = {
+  'model_name': 'gpt-4o',
+  'temperature': 1.0,
+  'max_tokens': 8192,
+  'request_timeout': None,
+  'max_retries': 2,
+  # 'num_completions': 1,  # can be used only with model._generate
+}
+
+TEMPLATE_SIMPLIFICATION_MAX_RETRIES = 5
+TRANSLATION_SP1_MAX_RETRIES = 2
+TRANSLATION_SP2_MAX_RETRIES = 4
+
+TEMPLATE_SIMPLIFICATION_MAX_FEEDBACKS = 1
+TRANSLATION_SP1_MAX_FEEDBACKS = 3
+TRANSLATION_SP2_MAX_FEEDBACKS = 3
+
+
+################################################################################################
+#################################### BENCHMARKS ################################################
+################################################################################################
+TEST_MAIN_CALL_DELIMITER = '"-----------------"'
+LONG_SRC_PROGRAM_THRESHOLD = 5000
+PARAM_HACK_FLAG = '"disabled" "paramhack"'
+
+STARTING_RULESET_FPATH = TRANSLATION_RULES_DIR / 'starting-ruleset.snart'
+
+LC_BENCHMARK_DIR = BENCHMARKS_DIR / 'leetcode' / 'py'
+LC_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'leet.snart'
+LC_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'leet.snart'
+
+GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'gfg' / 'py'
+GFG_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'gfg.snart'
+GFG_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'gfg.snart'
+GFG_TRULES_INSTR_SRC_FPATH = TRANSLATION_RULES_DIR / 'instr' / 'gfg.snart'
+GFG_TRULES_INSTR_TAR_FPATH = TRANSLATION_RULES_DIR / 'deinstr' / 'gfg.snart'
+
+CTCI_BENCHMARK_DIR = BENCHMARKS_DIR / 'ctci' / 'py'
+CTCI_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'ctci.snart'
+
+BENCHMARK_CONFIGS = {
+  'leetcode': {
+    'benchmark_dir': LC_BENCHMARK_DIR,
+    'translation_rules_main_code_fpath': LC_TRULES_MAIN_FPATH,
+    'translation_rules_test_code_fpath': LC_TRULES_TEST_FPATH,
+    'translation_rules_instr_src_fpath': None,
+    'translation_rules_instr_tar_fpath': None,
+    'is_three_split': True,
+    'is_mylog_inserted': True,
+    'needs_instrumentation': True
+  },
+  'gfg': {
+    'benchmark_dir': GFG_BENCHMARK_DIR,
+    'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
+    'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
+    'translation_rules_instr_src_fpath': GFG_TRULES_INSTR_SRC_FPATH,
+    'translation_rules_instr_tar_fpath': GFG_TRULES_INSTR_TAR_FPATH,
+    'is_three_split': True,
+    'is_mylog_inserted': False,
+    'needs_instrumentation': True
+  },
+  'ctci': {
+    'benchmark_dir': CTCI_BENCHMARK_DIR,
+    'translation_rules_main_code_fpath': CTCI_TRULES_MAIN_FPATH,
+    'translation_rules_test_code_fpath': None,
+    'translation_rules_instr_src_fpath': None,
+    'translation_rules_instr_tar_fpath': None,
+    'is_three_split': False,
+    'is_mylog_inserted': False,
+    'needs_instrumentation': False
+  }
+}
+
+
+################################################################################################
+#################################### GENERAL CONFIGS ###########################################
+################################################################################################
+LANG_DICT = {
+  'py': 'Python',
+  'js': 'JavaScript'
+}

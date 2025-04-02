@@ -1,0 +1,3 @@
+- 25 subjects in `py` selected from `py_all`
+- `py_all` contains the entire benchmark (why are some subjects ignored?)
+- same as in DuoGlot

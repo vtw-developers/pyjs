@@ -1,0 +1,321 @@
+'''
+PiREL utils
+'''
+
+import io
+import json
+import logging
+import time
+import tokenize
+import traceback
+import yaml
+from datetime import datetime
+from pathlib import Path
+from typing import Any, List, Optional, Tuple, Union
+
+import p_consts
+import requests
+
+
+# LOGGING
+def setup_logger(name: str) -> logging.Logger:
+  '''
+  Create and return a logger with a file handler (DEBUG and above)
+  and a console handler (ERROR and above).
+
+  NOTE Logging levels:
+  DEBUG, INFO, WARNING, ERROR, CRITICAL
+  '''
+  _LOG_FPATH = p_consts.LOGS_DIR / 'pirel.log'
+  _LOG_FMODE = 'a'
+  _LOG_FORMAT = '%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s'
+  _LOG_DATE_FORMAT = '%H:%M:%S'
+  _LOG_LEVEL_FILE = logging.DEBUG  # report everything to file
+  _LOG_LEVEL_CONSOLE = logging.INFO  # report only INFO and above to console
+  _LOG_LEVEL_3RDPARTY = logging.ERROR  # report only ERROR and above for 3rd party modules
+  _LOG_3RDPARTY_MODULES = ['werkzeug', 'httpx', 'openai._base_client', 'httpcore.connection', 'httpcore.http11']
+
+  logger = logging.getLogger(name)
+  logger.setLevel(logging.DEBUG)
+  for module in _LOG_3RDPARTY_MODULES:
+    logging.getLogger(module).setLevel(_LOG_LEVEL_3RDPARTY)
+
+  # Prevent adding handlers multiple times if the logger is already configured
+  if not logger.handlers:
+    # File handler
+    file_handler = logging.FileHandler(_LOG_FPATH, mode=_LOG_FMODE)
+    file_handler.setLevel(_LOG_LEVEL_FILE)
+
+    # Console (stream) handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(_LOG_LEVEL_CONSOLE)
+
+    # Formatter applied to both handlers
+    formatter = logging.Formatter(fmt=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT)
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    # Add handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+  return logger
+
+
+logger = setup_logger(__name__)
+
+
+# TEXT
+def indent(text: str, num_spaces=2) -> str:
+  spaces = ' ' * num_spaces
+  return '\n'.join([spaces + line for line in text.splitlines()])
+
+
+# SEQUENCES
+def are_same_lists(seq_a: List[Any], seq_b: List[Any]) -> bool:
+  '''
+  RETURN True if two unordered lists of anything are identical
+  (contain the same elements in any order)
+  https://stackoverflow.com/a/7829388/1852634
+  '''
+  seq_b = list(seq_b)  # make a mutable copy
+  try:
+    for elem in seq_a:
+      seq_b.remove(elem)
+  except ValueError:
+    return False
+  return not seq_b
+
+
+# TIME
+def current_time_sec() -> int:
+  '''
+  RETURN current epoch time in seconds.
+  '''
+  return int(time.time())
+
+def current_time() -> str:
+  '''
+  RETURN current date and time in this format:
+  YYYY-MM-DD-HH-MM-SS
+  '''
+  return datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+
+# IO
+def read_text(fpath: Union[Path, str]) -> str:
+  with open(fpath) as fin:
+    return fin.read()
+
+def read_text_or_none(fpath: Optional[Union[Path, str]]) -> Optional[str]:
+  if fpath is None:
+    return None
+  return read_text(fpath)
+
+def read_json(fpath: Union[Path, str]) -> Any:
+  with open(fpath) as fin:
+    return json.loads(fin.read())
+
+def read_yaml(fpath: Union[Path, str]) -> Any:
+  with open(fpath) as fin:
+    return yaml.safe_load(fin)
+
+def write_text(fpath: Union[Path, str], content: str) -> None:
+  write_file(fpath, content, include_timestamp=False)
+
+def write_json(fpath: Union[Path, str], obj: Any) -> None:
+  write_file(fpath, json.dumps(obj, default=str), include_timestamp=False)
+
+def write_file(fpath: Union[Path, str], contents: str, include_timestamp=False) -> None:
+  ''''''
+  assert isinstance(fpath, (Path, str))
+  if isinstance(fpath, str):
+    fpath = Path(fpath)
+
+  if include_timestamp:
+    now_dt = datetime.fromtimestamp(time.time())
+    now_st = now_dt.strftime('%m-%d-%H-%M-%S.%f')
+    # now_st = now_st[:-3]  # millisecond precision is enough
+    fpath = fpath.parent / f'{now_st}-{fpath.name}'
+
+  logger.debug(f'Writing a file to "{fpath}"')
+  with open(fpath, 'w') as fout:
+    fout.write(contents)
+
+
+# Helper functions to log directly to PiREL log dir
+def log_json(fname: str, obj: Any) -> None:
+  write_file(p_consts.PIREL_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=False)
+
+def log_json_time(fname: str, obj: Any) -> None:
+  write_file(p_consts.PIREL_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
+
+def log_file_time(fname: str, contents: str) -> None:
+  write_file(p_consts.PIREL_LOGS_DIR / fname, contents, include_timestamp=True)
+
+
+# Helper functions to log directly to Learning Phase log dir
+def llog_json_time(fname: str, obj: Any) -> None:
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
+
+def llog_text(fname: str, contents: str) -> None:
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, contents, include_timestamp=False)
+
+
+# Parsing and AST related
+def does_have_parse_error(content: str, lang: str):
+  '''
+  As name suggests, use a Tree-sitter parser to parse `content`.
+  Return True if there are no parse errors, False otherwise.
+
+  PARAMS
+  lang - 'py', 'js'
+  '''
+
+  parser = p_consts.PARSER_DICT[lang]
+  tree = parser.parse(bytes(content, 'utf8'))
+  root_node = tree.root_node
+  return root_node.has_error
+
+def compilable_py(code: str, mode: str = "exec") -> bool:
+  '''
+  Source https://github.com/Zac-HD/hypothesmith/blob/f3273dd2be316ea457e6b03e632295b62077208b/src/hypothesmith/cst.py#L254
+  Documentation for `compile` built-in function: https://docs.python.org/3/library/functions.html#compile
+
+  PARAM mode - one of `eval`, `exec`, `single`
+
+  NOTE Fails to confirm `break`, `break outside of loop`.
+  This does not allow us to learn rules.
+  '''
+
+  try:
+    compile(code, "<string>", mode)
+    return True
+  except (SyntaxError, ValueError):
+    return False
+
+def remove_comments_and_docstrings_py(source: str) -> str:
+  """
+  As per https://stackoverflow.com/a/2962727/1852634
+  https://stackoverflow.com/questions/1769332/script-to-remove-python-comments-docstrings#comment1653880_1769362
+  Returns 'source' minus comments and docstrings.
+  """
+  io_obj = io.StringIO(source)
+  out = ""
+  prev_toktype = tokenize.INDENT
+  last_lineno = -1
+  last_col = 0
+  for tok in tokenize.generate_tokens(io_obj.readline):
+    token_type = tok[0]
+    token_string = tok[1]
+    start_line, start_col = tok[2]
+    end_line, end_col = tok[3]
+    ltext = tok[4]
+    # The following two conditionals preserve indentation.
+    # This is necessary because we're not using tokenize.untokenize()
+    # (because it spits out code with copious amounts of oddly-placed
+    # whitespace).
+    if start_line > last_lineno:
+      last_col = 0
+    if start_col > last_col:
+      out += (" " * (start_col - last_col))
+    # Remove comments:
+    if token_type == tokenize.COMMENT:
+      pass
+    # This series of conditionals removes docstrings:
+    elif token_type == tokenize.STRING:
+      if prev_toktype != tokenize.INDENT:
+        # This is likely a docstring; double-check we're not inside an operator:
+        if prev_toktype != tokenize.NEWLINE:
+          # Note regarding NEWLINE vs NL: The tokenize module
+          # differentiates between newlines that start a new statement
+          # and newlines inside of operators such as parens, brackes,
+          # and curly braces.  Newlines inside of operators are
+          # NEWLINE and newlines that start new code are NL.
+          # Catch whole-module docstrings:
+          if start_col > 0:
+            # Unlabelled indentation means we're inside an operator
+            out += token_string
+          # Note regarding the INDENT token: The tokenize module does
+          # not label indentation inside of an operator (parens,
+          # brackets, and curly braces) as actual indentation.
+          # For example:
+          # def foo():
+          #     "The spaces before this docstring are tokenize.INDENT"
+          #     test = [
+          #         "The spaces before this string do not get a token"
+          #     ]
+    else:
+      out += token_string
+    prev_toktype = token_type
+    last_col = end_col
+    last_lineno = end_line
+  return out
+
+def remove_empty_lines(source: str) -> str:
+  return '\n'.join([line for line in source.splitlines() if line.strip()])
+
+
+# Send email notifications
+def _get_mailgun_credentials() -> Tuple[str, str]:
+  assert p_consts.ENV_FILE.exists(), f'Create a "{p_consts.ENV_FILE.name}" file with necessary environment variables'
+  env_dict = read_json(p_consts.ENV_FILE)
+  try:
+    mailgun_api_key = env_dict['MAILGUN_API_KEY']
+    mailgun_domain = env_dict['MAILGUN_DOMAIN']
+    return mailgun_api_key, mailgun_domain
+  except KeyError as err:
+    msg = f'An environment variable "{err}" must be set.'
+    logger.warning(msg)
+    raise err
+
+def send_text_email(subject: str, message: str) -> bool:
+  '''Return True if successfully sent, otherwise return False'''
+  try:
+    mailgun_api_key, mailgun_domain = _get_mailgun_credentials()
+  except KeyError:
+    logger.warning(f'Not sending an email. Unable to obtain Mailgun credentials.')
+    return False
+
+  url = f"https://api.mailgun.net/v3/{mailgun_domain}/messages"
+  data = {
+    "from": f"PiREL Notifications <postmaster@{mailgun_domain}>",
+    "to": "Satbek Abdyldayev <satbek@unist.ac.kr>",
+    "subject": subject,
+    "text": message
+  }
+  request_obj = requests.post(url, auth=("api", mailgun_api_key), data=data)
+  return request_obj.status_code == 200
+
+def email_safely(subject: str, message:str='intentionally left empty') -> bool:
+  try:
+    result = send_text_email(f'PiREL: {subject}', message)
+    if result:
+      logger.info('Email notification was sent successfully')
+    else:
+      logger.warning('Email notification was not sent')
+    return result
+  except Exception as exc:
+    logger.warning(f'Some exception "{exc}" occured in send_text_email()')
+    return False
+
+
+# MISC
+def exception_to_str(exc: Exception) -> str:
+  msg = f'{type(exc)}: {exc}\n\n'
+  msg += f'Traceback:\n{traceback.format_exc()}'
+  return msg
+
+def header(subject_name: str) -> str:
+  '''
+  for the purpose of separating different subjects in a single
+  log file
+  '''
+  return '\n' * 10 + f'<START>{subject_name}</START>' + '\n' * 10
+
+def footer(subject_name: str) -> str:
+  '''
+  for the purpose of separating different subjects in a single
+  log file
+  '''
+  return '\n' * 10 + f'<END>{subject_name}</END>' + '\n' * 10

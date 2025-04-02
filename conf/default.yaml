@@ -1,0 +1,19 @@
+# base
+benchmark_name: leetcode
+src_lang: py
+tar_lang: js
+
+# starting ruleset can be overriden by this config
+is_load_starting_ruleset: false
+starting_ruleset_fpath: logs/learn-rules/L0001_learned_rules.snart
+
+# sample
+sample:
+  is_random: false
+  size: 20
+  start_idx: 0
+  only: []
+  exclude: []
+
+# flags
+is_email_report: false

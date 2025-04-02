@@ -1,0 +1,87 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; base rules
+(match_expand
+  (fragment ("py.module" "*"))
+  (fragment ("js.program" "*1"))
+)
+
+(match_expand
+  (fragment ("py.function_definition" (str "def") "*") "*")
+  (fragment ("js.function_declaration" (str "function") "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.identifier" "_val_") "*")
+  (fragment ("js.identifier" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.parameters" "*") "*")
+  (fragment ("js.formal_parameters" "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.block" "*") "*")
+  (fragment ("js.statement_block" "*1") "*2")
+)
+
+
+;;;;;; the following rules are part of the function signature
+;;;;;; that we decided to assume that we have to facilitate
+;;;;;; testing of individual translation rules by running the
+;;;;;; programs that were used to create them.
+;;;;;; all unique parameter variations are:
+;;;;;; var
+;;;;;; var: int
+;;;;;; var: List[int]
+;;;;;; var: List[List[int]]
+
+; typed_parameter `num: int` -> `num`
+(match_expand
+  (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ".")) "*")
+  (fragment ("js.identifier" "_val1_") "*2")
+)
+
+; typed_parameter `nums: List[int]` -> `num`
+(match_expand
+  (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ("py.subscript" "." (str "[") "." (str "]")))) "*")
+  (fragment ("js.identifier" "_val1_") "*2")
+)
+
+; typed_parameter `board: List[List[str]]` -> `board`
+(match_expand
+  (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ("py.subscript" ("py.identifier" "_val_") (str "[") ("py.subscript" "." (str "[") "." (str "]")) (str "]")))) "*")
+  (fragment ("js.identifier" "_val1_") "*3")
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; rule(s) that we cannot learn
+(match_expand
+  (fragment ("py.type" ".") "*")
+  (fragment  "*2")
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; tricky rules to learn
+; COMMENT (IGNORE)
+(match_expand
+  (fragment ("py.comment" "_val_") "*")
+  (fragment "*1")
+)
+
+; from X import * (IGNORE)
+(match_expand
+  (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.wildcard_import" (str "*"))) "*")
+  (fragment "*1")
+)
+
+; from X import Y (IGNORE)
+(match_expand
+  (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
+  (fragment "*1")
+)
+
+; import X (IGNORE)
+(match_expand
+  (fragment ("py.import_statement" (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
+  (fragment "*1")
+)
