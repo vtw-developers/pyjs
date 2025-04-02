@@ -9,7 +9,7 @@ import p_visitor_py
 
 class TestParametrizableVariablesCollector(unittest.TestCase):
   def setUp(self):
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'TestParametrizableVariablesCollector'
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestParametrizableVariablesCollector'
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
     self.param_collector = p_visitor_py.ParametrizableVariablesCollector()
@@ -5391,7 +5391,7 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
 
 class TestPrettyPrinter(unittest.TestCase):
   def setUp(self):
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'TestPrettyPrinter'
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestPrettyPrinter'
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
     self.pp = p_visitor_py.PrettyPrinter(indent_with='    ')

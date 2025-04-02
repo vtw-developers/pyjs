@@ -9,7 +9,7 @@ import p_visitor_js
 
 class TestPrettyPrinter(unittest.TestCase):
   def setUp(self):
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'leetcode-javascript' / 'solutions'
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'js' / 'leetcode-javascript' / 'solutions'
     self.src_lang = 'js'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
     self.pp = p_visitor_js.PrettyPrinter()
