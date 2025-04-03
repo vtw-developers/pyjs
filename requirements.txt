@@ -1,0 +1,14 @@
+apted==1.0.3
+debugpy==1.6.7
+jsbeautifier==1.14.7
+langchain==0.3.7
+langchain-core==0.3.18
+langchain-openai==0.2.8
+langchain-text-splitters==0.3.2
+Levenshtein==0.21.0
+pydantic==2.8.2
+pydantic_core==2.20.1
+pyparsing==3.0.9
+PyYAML==6.0.1
+requests==2.31.0
+tree-sitter==0.20.1
