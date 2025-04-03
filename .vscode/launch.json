@@ -5,20 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "p_pirel.py",
+      "name": "d_ast_parse.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_pirel.py",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
-      "name": "p_validator.py",
-      "type": "debugpy",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_validator.py",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "d_ast_parse.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
@@ -26,27 +17,8 @@
       "name": "p_data_structures.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
+      "cwd": "${workspaceFolder}/src/",
       "program": "p_data_structures.py",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
-      "name": "p_llm_val.py",
-      "type": "debugpy",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_llm_val.py",
-      "console": "integratedTerminal",
-      "args": ["pathtoargsjson", "functionidx"],
-      "justMyCode": true
-    },
-    {
-      "name": "p_llm_gen.py",
-      "type": "debugpy",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_llm_gen.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
@@ -54,17 +26,8 @@
       "name": "p_generator.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
+      "cwd": "${workspaceFolder}/src/",
       "program": "p_generator.py",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
-      "name": "p_llm_messages.py",
-      "type": "debugpy",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_llm_messages.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
@@ -72,27 +35,55 @@
       "name": "p_grammar.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
+      "cwd": "${workspaceFolder}/src/",
       "program": "p_grammar.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "p_visitor.py",
+      "name": "p_learn_apply_rules.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_visitor.py",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_learn_apply_rules.py",
+      "args": ["test"],
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "p_learn_rules.py",
+      "name": "p_llm_gen.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "p_learn_rules.py",
-      "args": ["test"],
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_llm_gen.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_llm_messages.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_llm_messages.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "p_llm_val.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_llm_val.py",
+      "console": "integratedTerminal",
+      "args": ["pathtoargsjson", "functionidx"],
+      "justMyCode": true
+    },
+    {
+      "name": "p_pirel.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_pirel.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
@@ -100,51 +91,37 @@
       "name": "p_rule_inferencer.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
+      "cwd": "${workspaceFolder}/src/",
       "program": "p_rule_inferencer.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "d_ast_parse.py",
+      "name": "p_rule_validator.py",
       "type": "debugpy",
       "request": "launch",
-      "cwd": "${workspaceFolder}/pirel/src/",
-      "program": "d_ast_parse.py",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_rule_validator.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "DuoGlot backend: Attach server_trans",
+      "name": "p_visitor_js.py",
       "type": "debugpy",
-      "request": "attach",
-      "connect": {
-        "host": "0.0.0.0",
-        "port": 4444
-      },
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}/src",
-          "remoteRoot": "/opt/duoglotcore-server"
-        }
-      ],
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_visitor_js.py",
+      "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "DuoGlot backend: Attach server_testing",
+      "name": "p_visitor_py.py",
       "type": "debugpy",
-      "request": "attach",
-      "connect": {
-        "host": "0.0.0.0",
-        "port": 4445
-      },
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}/backend/test-server",
-          "remoteRoot": "/opt/test-server"
-        }
-      ],
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_visitor_py.py",
+      "console": "integratedTerminal",
       "justMyCode": true
-    }
+    },
   ]
 }
