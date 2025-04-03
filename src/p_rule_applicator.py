@@ -26,7 +26,7 @@ def _postprocess_src_program(translated_code: str, src_code: str, src_ann: dict)
   After the translation (instrumentation) is complete, `*` should be placed back
   to the instrumented code, which is accomplished by this function.
   '''
-  logger.debug('Starting p_validator._postprocess_src_program')
+  logger.debug('Starting p_rule_applicator._postprocess_src_program')
 
   regexp = re.compile(r'SOURCE_AST_IDX\((\d+)\)')
   all_matches : List[str] = regexp.findall(translated_code)
@@ -50,7 +50,7 @@ def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict)
   The intention of this function is similar to that of `_postprocess_src_program`.
   Please refer to that function.
   '''
-  logger.debug('Starting p_validator._postprocess_tar_program')
+  logger.debug('Starting p_rule_applicator._postprocess_tar_program')
 
   regexp = re.compile(r'SOURCE_AST_IDX\((\d+)\)')
   all_matches = regexp.findall(translated_code)
@@ -102,7 +102,7 @@ def _run_tests(
   '''
   RETURN `tar_error` - None if no error, else a dict containing error information.
   '''
-  logger.debug('Starting p_validator._run_tests')
+  logger.debug('Starting p_rule_applicator._run_tests')
 
   src_log, src_error = p_code_runner.run_src_program_with_mylog(
     src_program_instr,
@@ -124,7 +124,7 @@ def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
   "Instrumented" means that `mylog` invocations are added to the code.
   '''
 
-  logger.debug('Starting p_validator._get_instrumented_src_program')
+  logger.debug('Starting p_rule_applicator._get_instrumented_src_program')
 
   if not subject.needs_instrumentation:
     logger.debug('program does not need instrumentation')
@@ -197,7 +197,7 @@ def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
 
 def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
   ''''''
-  logger.debug('Starting p_validator._get_instrumented_tar_program_plausible')
+  logger.debug('Starting p_rule_applicator._get_instrumented_tar_program_plausible')
 
   # 1 split `src_program_instr` into test, main, test call code snippets
   src_test_code_instr, src_main_code, src_test_call_code = None, None, None
@@ -259,7 +259,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
 
 def _get_deinstrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
-  logger.debug('Starting p_validator._get_deinstrumented_tar_program')
+  logger.debug('Starting p_rule_applicator._get_deinstrumented_tar_program')
   tar_program_plausible_instr = _get_instrumented_tar_program_plausible(src_program_instr, subject)
 
   if not subject.needs_instrumentation:
@@ -308,7 +308,7 @@ def _get_instrumented_tar_test_code(src_test_code_instr: Optional[str], subject:
   '''
   Ideally, this function is run only once.
   '''
-  logger.debug(f'Starting p_validator._get_instrumented_tar_test_code')
+  logger.debug(f'Starting p_rule_applicator._get_instrumented_tar_test_code')
 
   if not subject.is_three_split:
     logger.debug('`src_program` is not three split: tar_test_code is None')
@@ -348,10 +348,12 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
   '''
   Translate `src_main_code` using `translation_rules_main_code` and `choices`.
   '''
-  logger.debug('Starting p_validator._get_tar_main_code')
+  logger.debug('Starting p_rule_applicator._get_tar_main_code')
   logger.debug('translating `src_main_code` to target language using choices:')
   logger.debug(json.dumps(choices, indent=2))
 
+  # TODO consider a case when `choices` leads to a problematic slot.
+  # i.e. a slot for which we don't have a translation rule.
   duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
     src_code=src_main_code,
     src_lang=subject.src_lang,
@@ -557,7 +559,7 @@ def _get_proposed_choices(
           return False
       return True
 
-    logger.debug('Starting p_validator._get_proposed_choices.__find_next_unique_choices')
+    logger.debug('Starting p_rule_applicator._get_proposed_choices.__find_next_unique_choices')
 
     type_ = current_choices['type']
     choices_list : list = current_choices['choices_list']
@@ -593,7 +595,7 @@ def _get_proposed_choices(
 
     raise RuntimeError('No unique choices found')
 
-  logger.debug('Starting p_validator._get_proposed_choices')
+  logger.debug('Starting p_rule_applicator._get_proposed_choices')
 
   error_msg = tar_error['error_msg']  # e.g. 'SyntaxError: invalid syntax'
   error_type = tar_error['error_type']  # e.g. 'SyntaxError'
@@ -685,14 +687,14 @@ def _get_proposed_choices(
 
 
 # API
-def validate_translation_rules(subject: p_subject.PirelSubject) -> str:
+def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
   '''
-  Validate the translation rules against the source program.
+  Apply the translation rules to the source program.
   Equivalent to index_bench.js::runBenchmarkHandler
 
   RETURN `tar_program_deinstr` - the target program that is deinstrumented.
   '''
-  logger.info('Starting p_validator.validate_translation_rules (a la DuoGlot)')
+  logger.info('Starting p_rule_applicator.apply_translation_rules (a la DuoGlot)')
 
   src_program_instr = _get_instrumented_src_program(subject)
   tar_program_deinstr = _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
@@ -702,7 +704,7 @@ def validate_translation_rules(subject: p_subject.PirelSubject) -> str:
 
 # USAGE
 # TODO all paths should be updated (p_consts.CWD)
-def usage_validate_translation_rules():
+def usage_apply_translation_rules():
   subject_config_dicts = {
     'short_leetcode': {
       'benchmark_name': 'leetcode',
@@ -760,7 +762,7 @@ def usage_validate_translation_rules():
   )
   subject_config.translation_rules_main_code = default_ruleset
 
-  tar_program_plausible = validate_translation_rules(subject_config)
+  tar_program_plausible = apply_translation_rules(subject_config)
   logger.info(f'Plausible target program:\n{tar_program_plausible}')
 
 
@@ -776,5 +778,5 @@ def _test_postprocess_src_program():
 
 
 if __name__ == '__main__':
-  usage_validate_translation_rules()
+  usage_apply_translation_rules()
   # _test_postprocess_src_program()

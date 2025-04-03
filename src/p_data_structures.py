@@ -6,8 +6,8 @@ These classes are used for:
 - checking whether LLM generated programs conform provided templates.
 
 These classes are not used for manipulating translation rules.
-For manipulating translation rules, classes in p_post_process_translation_rule.py are used.
-p_post_process_translation_rule.py data structures are a bit different than DuoGlot-style AST's.
+For manipulating translation rules, classes in p_rule_postprocessor.py are used.
+p_rule_postprocessor.py data structures are a bit different than DuoGlot-style AST's.
 '''
 
 import re

@@ -8,8 +8,8 @@ import p_consts
 import p_generator
 import p_grammar
 import p_llm_gen
-import p_post_process_translation_rule as pptr
 import p_rule_inferencer
+import p_rule_validator
 import p_subject
 import p_translators
 import p_utils
@@ -163,125 +163,6 @@ def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str
 
 
 # PIREL TRANSLATION RULE LEARNING MODULE
-def _is_valid_translation_rule(
-  subject: p_subject.PirelSubject,
-  translation_rule: str,
-  existing_ruleset: str
-) -> bool:
-  '''
-  Check if provided translation rule can translate the problematic node
-  PRE: exising ruleset fails to translate the code
-  '''
-
-  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule.json', locals())
-
-  def _get_used_translation_rule_ids(dbg_history: List[dict]) -> List[int]:
-    used_rule_ids : List[int] = []
-    for history_elem in dbg_history:
-      dbg_info : dict = history_elem['dbg_info']
-      notes : dict = dbg_info['notes']
-      rule_id = notes['rule_id']
-      used_rule_ids.append(rule_id)
-    return used_rule_ids
-
-  def _process_used_rules(rule_ids_before: List[int], rule_ids_after: List[int]) -> bool:
-    nonlocal existing_ruleset
-    logger.debug(f'rule_ids_before: {rule_ids_before}')
-    logger.debug(f'rule_ids_after: {rule_ids_after}')
-
-    # number of rules used after must be strictly greater than number of rules used before
-    if len(rule_ids_after) <= len(rule_ids_before):
-      logger.warning('Translation rule is BAD: rule_ids_after must strictly be greater than rule_ids_before')
-      return False
-
-    # used rule id's before must be identical to the first rule id's after
-    for i in range(len(rule_ids_before)):
-      if rule_ids_before[i] != rule_ids_after[i]:
-        logger.warning(f'Translation rule is BAD: used rules at index {i} are different')
-        logger.warning('Should not happen under normal circumstances. More debugging needed.')
-        return False
-
-    # id of the first rule used must be of rule under test
-    # `rule_ids_before = [3, 10, 4, 5, 6, 0]`
-    # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
-    # as in the example above, `17` must be id of the rule under test
-    num_rules_before = existing_ruleset.count('match_expand')
-    num_rules_after = num_rules_before + 1
-    rule_under_test_idx_in_after = len(rule_ids_before)
-    rule_under_test_id = num_rules_after - 1
-    if rule_under_test_id != rule_ids_after[rule_under_test_idx_in_after]:
-      logger.warning('Translation rule is BAD: the last used rule id is not of the rule under test')
-      logger.warning('Should not happen under normal circumstances. More debugging needed.')
-      return False
-
-    return True
-
-  logger.debug(f'Checking if translation rule is valid:\n{translation_rule}')
-
-  # ~~~ FIRST, CHECK IF THE MAPPINGS IN THE TRANSLATION RULE ARE CORRECT
-  expansion_programs, _ = d_grammar_rules.parse_analyze_rules(translation_rule)
-  assert len(expansion_programs) == 1, 'should not happen: there must be exactly one translation rule'
-  match_pattern, expand_pattern = expansion_programs[0]['match'], expansion_programs[0]['expand']
-  try:
-    _ = pptr.TranslationRule(match_pattern, expand_pattern)
-  except pptr.RuleMappingError as err:
-    msg = f'Translation rule is BAD:\n{translation_rule}\nis invalid due to rule mapping error:\n'
-    msg += p_utils.exception_to_str(err)
-    logger.warning(msg)
-    return False
-
-  # ~~~ SECOND, CHECK IF THE TRANSLATION RULE REALLY TRANSLATES THE PROBLEMATIC NODE
-  # ~~ get the translation result with the existing ruleset
-  dbg_history_before = None
-  try:
-    _ = duoglot_translate_wrapper(
-      subject.src_main_code,
-      subject.src_lang,
-      subject.tar_lang,
-      existing_ruleset,
-      subject.auto_backward,
-      subject.choices,
-      subject_name=subject.name
-    )
-  except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    logger.debug('Existing ruleset fails to translate as expected')
-    # NOTE dbg_history should have been set in duoglot_translate_wrapper
-    dbg_history_before = exc.dbg_history
-  except:
-    logger.error('Translation failed due to some error. Should not happen.')
-    raise RuntimeError('Only TranslationRuleNotFoundException is expected')
-
-  # ~~ get the translation result with the existing ruleset + rule under test
-  dbg_history_after = None
-  try:
-    _ = duoglot_translate_wrapper(
-      subject.src_main_code,
-      subject.src_lang,
-      subject.tar_lang,
-      existing_ruleset + '\n\n' + translation_rule,
-      subject.auto_backward,
-      subject.choices,
-      subject_name=subject.name
-    )
-    # translation rule translated the remaining nodes
-    logger.debug('Translation rule is GOOD. It translated the last problematic node.')
-    return True
-  except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    logger.debug('Existing ruleset and the rule under test failed to translate the code')
-    # NOTE dbg_history should have been set in duoglot_translate_wrapper
-    dbg_history_after = exc.dbg_history
-  except:
-    logger.debug('Exception other than TranslationRuleNotFoundException occurred')
-    logger.debug('Translation rule under test is bad')
-    return False
-
-  # there still is a problematic node
-  rule_ids_before = _get_used_translation_rule_ids(dbg_history_before)
-  rule_ids_after = _get_used_translation_rule_ids(dbg_history_after)
-
-  return _process_used_rules(rule_ids_before, rule_ids_after)
-
-
 def _learn_trans_rules_from_tsp(
   tsp: Tuple[str, str],
   template_dict: dict,
@@ -289,14 +170,16 @@ def _learn_trans_rules_from_tsp(
   translation_rules: str
 ) -> List[str]:
   '''
-  RETURN All possible translation rules inferred from all possible translations of `tsp`.
-  RAISE pass all exceptions to the caller
+  RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
+  RAISE Nothing. Pass all exceptions to the caller.
   '''
 
-  logger.debug(f'Starting p.pirel._learn_rules_from_tsp')
+  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
+  logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp')
 
   # translate TSP to get {SP1-TP1, SP2-TP2} (translation pair)
   translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict)
+  assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
 
   # infer translation rules from translation pairs
   trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs)
@@ -306,10 +189,11 @@ def _learn_trans_rules_from_tsp(
   for idx, translation_rule in enumerate(trules_list, start=1):
     logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
 
-    is_valid = _is_valid_translation_rule(subject, translation_rule, translation_rules)
-    if is_valid:
-      checked_trules_list.append(translation_rule)
+    is_syntax_valid = p_rule_validator.is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules)
+    if not is_syntax_valid:
+      continue
 
+    checked_trules_list.append(translation_rule)
     logger.debug(f'The number of correct translation rules so far is {len(checked_trules_list)}')
 
   return checked_trules_list
@@ -326,12 +210,12 @@ def _learn_trans_rules_from_tsp_with_retries(
   NOTE may return zero translation rules
   '''
 
-  logger.debug(f'Starting p.pirel._learn_rules_from_tsp_with_retries (num_attempts = {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
+  logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
 
   trules_list = []
   attempt = 1
   while attempt <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    logger.debug(f'Attempt at learning translation rules from a tsp #{attempt}')
+    logger.debug(f'Attempt at learning translation rules from a TSP #{attempt}')
 
     # catch only non-critical exceptions, after which
     # we can attempt to learn rules from a TSP again.
@@ -342,15 +226,15 @@ def _learn_trans_rules_from_tsp_with_retries(
         logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
         return trules_list
 
-    except p_llm_gen.CannotGetTranslationPairsFromTspError as err:
+    except p_llm_gen.NoTransPairsFromTSPError as err:
       msg = f'PiREL could not generate any translation pairs from a TSP:\n{json.dumps(tsp, indent=2)}\n'
       msg += f'This was attempt number {attempt}/{p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS}'
-      msg += p_utils.exception_to_str(err)
+      msg += str(err)
       logger.warning(msg)
 
     attempt += 1
 
-  logger.debug(f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.')
+  logger.warning(f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.')
   return trules_list
 
 
@@ -359,14 +243,100 @@ def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   translation_rules: str,
   templates_dict: dict
-) -> dict:
+) -> list:
   '''
   Run PiREL translation rule learning module for a problematic node.
 
   PRE There is a translation error.
-  RETURN {translation_rules, template_dict}
+  RETURN [translation_rules]
   RAISE `PirelError` if cannot generate a translation rule. Our goal is to never raise this error
   '''
+
+  # DEPRECATED
+  def _deprecated_init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
+    # 1 generate all TSPs
+    tsps = p_generator._deprecated_generate_tsps_with_generator_OLD(template_dict)
+    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
+    if len(tsps) == 0:
+      logger.warning(f'Zero TSPs generated for the problematic node type "{template_dict["problematic_node_type"]}"')
+
+    # 2 add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
+    if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
+      logger.debug('Adding `(template_origin, template_origin)` as a TSP')
+      tsps.append((template_dict['template_origin'], template_dict['template_origin']))
+
+    # 3 an overfitted TSP is a TSP where only literal values are different from that of `template_origin`.
+    if p_consts.IS_GENERATE_OVERFITTED_TSP:
+      overfitted_tsp = p_generator._deprecated_generate_tsp_overfitted(template_dict)
+      logger.debug('Adding an overfitted TSP')
+      tsps.append(overfitted_tsp)
+
+    assert len(tsps) > 0, 'Zero TSPs generated'
+    p_utils.log_json_time(f'{subject.name}_TSPs-all.json', tsps)
+
+    # 4 sort TSPs using LLM
+    tsps = _deprecated_sort_tsps_using_llm(tsps, subject, template_dict)
+    p_utils.log_json_time(f'{subject.name}_TSPs-all-llm-sorted.json', tsps)
+    return tsps
+
+  # DEPRECATED
+  def _deprecated_sort_tsps_using_llm(tsps: List[Tuple[str, str]], subject: p_subject.PirelSubject, template_dict: dict, **kwargs) -> List[Tuple[str, str]]:
+    '''
+    Sort TSPs using LLM.
+    We sort TSPs using LLM to get the most probable TSPs first.
+    This way we can learn translation rules from the most probable TSPs.
+
+    IDEA
+    Iterate over TSPs, if a TSP has a syntactic error, move it to the end of the list.
+    '''
+
+    def __are_both_snippets_single_token_in_tsp(tsp: Tuple[str, str]) -> bool:
+      '''
+      Check if both snippets in a TSP are single tokens
+      HACK assume that a single token is a token without spaces
+      '''
+      return len(tsp[0].split()) == 1 and len(tsp[1].split()) == 1
+
+    logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node._sort_tsps_using_llm')
+    logger.debug(f'Number of unsorted TSPs is {len(tsps)}:\n{json.dumps(tsps, indent=2)}')
+
+    syntactically_correct_tsps = []
+    syntactically_incorrect_tsps = []
+
+    for tsp_idx, tsp in enumerate(tsps, start=1):
+
+      # early decision if both snippets are single tokens
+      if __are_both_snippets_single_token_in_tsp(tsp):
+        syntactically_incorrect_tsps.append(tsp)
+        continue
+
+      tsp_is_correct = None
+      try:
+        tsp_is_correct = p_llm_gen._deprecated_is_tsp_syntactically_correct(tsp, subject, template_dict, **kwargs)
+      except p_llm_gen.LLMResponseFormatError as err:
+        logger.warning(f'Sorting TSPs: error in LLM response: {err}')
+        continue
+
+      assert tsp_is_correct is not None, 'should not happen: tsp_is_correct is None'
+      if tsp_is_correct:
+        syntactically_correct_tsps.append(tsp)
+      else:
+        syntactically_incorrect_tsps.append(tsp)
+
+    logger.debug(f'Number of syntactically correct TSPs: {len(syntactically_correct_tsps)}')
+    logger.debug(f'{json.dumps(syntactically_correct_tsps, indent=2)}')
+    p_utils.log_json_time(f'{subject.name}_syntactically_correct_TSPs.json', syntactically_correct_tsps)
+
+    logger.debug(f'Number of syntactically incorrect TSPs: {len(syntactically_incorrect_tsps)}')
+    logger.debug(f'{json.dumps(syntactically_incorrect_tsps, indent=2)}')
+    p_utils.log_json_time(f'{subject.name}_syntactically_incorrect_TSPs.json', syntactically_incorrect_tsps)
+
+    if p_consts._deprecated_IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM and len(syntactically_correct_tsps) > 0:
+      logger.debug('Ignoring syntactically incorrect TSPs')
+      return syntactically_correct_tsps
+
+    logger.debug('Returning syntactically correct TSPs + syntactically incorrect TSPs')
+    return syntactically_correct_tsps + syntactically_incorrect_tsps
 
   def _init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
 
@@ -395,11 +365,16 @@ def learn_trans_rules_for_prob_node(
         )
       except d_grammar_expand.TranslationRuleNotFoundException as exc:
         templates_dict = exc.get_templates_dict()
-        template_dict = templates_dict[templates_dict['num_templates'] - 1]
+
+        # in cases when templates_dict is loaded from str, keys are strings
+        _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
+        template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
         return template_dict
       raise RuntimeError('DuoGlot should fail to translate the context code')
 
-    template_dict = templates_dict[templates_dict['num_templates'] - 1]
+    # in cases when templates_dict is loaded from str, keys are strings
+    _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
+    template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_0_init.json', template_dict)
 
     # Rerun DuoGlot translation to obtain `template_dict`
@@ -426,122 +401,50 @@ def learn_trans_rules_for_prob_node(
     logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
     return template_dict
 
-  def _init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
-    # 1 generate all TSPs
-    tsps = p_generator.generate_tsp_with_generator(template_dict)
-    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
-    if len(tsps) == 0:
-      logger.warning(f'Zero TSPs generated for the problematic node type "{template_dict["problematic_node_type"]}"')
-
-    # 2 add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
+  def _init_tsps_new_algorithm(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
+    '''
+    Generate TSPs using a new algorithm.
+    TODO consider built-in function names
+    '''
+    # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
     if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
-      logger.debug('Adding `(template_origin, template_origin)` as a TSP')
-      tsps.append((template_dict['template_origin'], template_dict['template_origin']))
+      logger.debug('Using `(template_origin, template_origin)` as a TSP')
+      return (template_dict['template_origin'], template_dict['template_origin'])
 
-    # 3 an overfitted TSP is a TSP where only literal values are different from that of `template_origin`.
-    if p_consts.IS_GENERATE_OVERFITTED_TSP:
-      overfitted_tsp = p_generator.generate_tsp_overfitted(template_dict)
-      logger.debug('Adding an overfitted TSP')
-      tsps.append(overfitted_tsp)
-
+    # generate all possible TSPs
+    # NOTE new algorithm already adds overfitted TSPs
+    tsps = p_generator.generate_tsps_with_generator_new_algorithm(template_dict)
     assert len(tsps) > 0, 'Zero TSPs generated'
-    p_utils.log_json_time(f'{subject.name}_TSPs-all.json', tsps)
+    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
 
-    # 4 sort TSPs using LLM
-    tsps = _sort_tsps_using_llm(tsps, subject, template_dict)
-    p_utils.log_json_time(f'{subject.name}_TSPs-all-llm-sorted.json', tsps)
     return tsps
 
-  def _sort_tsps_using_llm(tsps: List[Tuple[str, str]], subject: p_subject.PirelSubject, template_dict: dict, **kwargs) -> List[Tuple[str, str]]:
-    '''
-    Sort TSPs using LLM.
-    We sort TSPs using LLM to get the most probable TSPs first.
-    This way we can learn translation rules from the most probable TSPs.
+  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
+  logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for {subject.name}')
 
-    IDEA
-    Iterate over TSPs, if a TSP has a syntactic error, move it to the end of the list.
-    '''
-
-    def __are_both_snippets_single_token_in_tsp(tsp: Tuple[str, str]) -> bool:
-      '''
-      Check if both snippets in a TSP are single tokens
-      HACK assume that a single token is a token without spaces
-      '''
-      return len(tsp[0].split()) == 1 and len(tsp[1].split()) == 1
-
-    logger.debug(f'Starting p_pirel._run_pirel._sort_tsps_using_llm')
-    logger.debug(f'Number of unsorted TSPs is {len(tsps)}:\n{json.dumps(tsps, indent=2)}')
-
-    syntactically_correct_tsps = []
-    syntactically_incorrect_tsps = []
-
-    for tsp_idx, tsp in enumerate(tsps, start=1):
-
-      # early decision if both snippets are single tokens
-      if __are_both_snippets_single_token_in_tsp(tsp):
-        syntactically_incorrect_tsps.append(tsp)
-        continue
-
-      tsp_is_correct = None
-      try:
-        tsp_is_correct = p_llm_gen.is_tsp_syntactically_correct(tsp, subject, template_dict, **kwargs)
-      except p_llm_gen.LLMResponseFormatError as err:
-        logger.warning(f'Sorting TSPs: error in LLM response: {err}')
-        continue
-
-      assert tsp_is_correct is not None, 'should not happen: tsp_is_correct is None'
-      if tsp_is_correct:
-        syntactically_correct_tsps.append(tsp)
-      else:
-        syntactically_incorrect_tsps.append(tsp)
-
-    logger.debug(f'Number of syntactically correct TSPs: {len(syntactically_correct_tsps)}')
-    logger.debug(f'{json.dumps(syntactically_correct_tsps, indent=2)}')
-    p_utils.log_json_time(f'{subject.name}_syntactically_correct_TSPs.json', syntactically_correct_tsps)
-
-    logger.debug(f'Number of syntactically incorrect TSPs: {len(syntactically_incorrect_tsps)}')
-    logger.debug(f'{json.dumps(syntactically_incorrect_tsps, indent=2)}')
-    p_utils.log_json_time(f'{subject.name}_syntactically_incorrect_TSPs.json', syntactically_incorrect_tsps)
-
-    if p_consts.IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM and len(syntactically_correct_tsps) > 0:
-      logger.debug('Ignoring syntactically incorrect TSPs')
-      return syntactically_correct_tsps
-
-    logger.debug('Returning syntactically correct TSPs + syntactically incorrect TSPs')
-    return syntactically_correct_tsps + syntactically_incorrect_tsps
-
-  logger.debug(f'Starting p_pirel._run_pirel for {subject.name}')
-
-  # ~~~ initialize template_dict and tsps
+  # ~~~ initialize template_dict and TSPs
   template_dict = _init_template_dict(subject, translation_rules, templates_dict)
-  tsps = _init_tsps(subject, template_dict)
+  tsps = _init_tsps_new_algorithm(subject, template_dict)
 
   # ~~~ iterate over TSPs (from abstract to concrete)
-  num_useful_tsps = 0
-  all_translation_rules = []
+  # NOTE since we are using an updated TSP generation algorithm,
+  # we stop at the first TSP from which we have learned a translation rule(s).
+  # There is a high chance that such a TSP is the first one in `tsps` list
+  # according to our new algorithm.
   for tsp_idx, tsp in enumerate(tsps, start=1):
     msg = f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n{json.dumps(tsp, indent=2)}'
     logger.info(msg)
     print(msg)
 
+    # `_learn_trans_rules_from_tsp` is responsible for translation rule validation
+    # it is called in `_learn_trans_rules_from_tsp_with_retries`
     trules_list = _learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules)
     if len(trules_list) == 0:
       logger.debug(f'Skipping a TSP: no translation rules were learnt from it (tsp_idx={tsp_idx})')
       logger.debug(f'TSP:\n{json.dumps(tsp, indent=2)}')
       continue
 
-    all_translation_rules.extend(trules_list)
-    num_useful_tsps += 1
-
-    if num_useful_tsps == p_consts.MAX_NUM_USEFUL_TSPS:
-      logger.info(f'GOOD: the number of translation rules is {len(all_translation_rules)}')
-      logger.info(f'The number of TSPs used is {num_useful_tsps}')
-      return all_translation_rules
-
-  if num_useful_tsps > 0:
-    logger.info(f'ALMOST GOOD: the number of translation rules is {len(all_translation_rules)}')
-    logger.info(f'The number of TSPs used is {num_useful_tsps}')
-    return all_translation_rules
+    return trules_list
 
   msg = f'Could not learn any translation rules to translate the problematic node.\n'
   msg += f'Problematic node type is "{template_dict["problematic_node_type"]}".\n'
@@ -567,6 +470,10 @@ def duoglot_translate_wrapper(
   Wrapper around DuoGlot's `grammar_expand.TransSession.get_translation()`.
   RAISE Propagate all exceptions to the caller.
   RETURN a dict containing all the relevant information about the target program.
+
+  KWARGS
+  - subject_name: str
+  - skip_template_extraction: bool (optional)
   '''
 
   assert 'subject_name' in kwargs, 'subject_name is missing'
@@ -632,8 +539,8 @@ def _test_translate_duoglot():
   p_utils.write_json('temporary_test_translate_duoglot.json', result_dict)
 
 
-def _test_is_valid_translation_rule():
-  test_harness_config : dict = p_utils.read_json('temporary_test_is_valid_translation_rule_config.json')
+def _test_is_valid_translation_rule_syntactic():
+  test_harness_config : dict = p_utils.read_json('temporary_test_is_valid_translation_rule_syntactic_config.json')
   args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
 
   translation_rule = args_dict['translation_rule']
@@ -646,12 +553,27 @@ def _test_is_valid_translation_rule():
   _optional_dbg_info_save_func = lambda *x: None
   kwargs = args_dict['kwargs']
 
-  result_dict = _is_valid_translation_rule(translation_rule, src_code, src_lang, tar_lang, existing_ruleset, auto_backward, choices, _optional_dbg_info_save_func, **kwargs)
+  result_dict = p_rule_inferencer.is_valid_translation_rule_syntactic(translation_rule, src_code, src_lang, tar_lang, existing_ruleset, auto_backward, choices, _optional_dbg_info_save_func, **kwargs)
   print(json.dumps(result_dict, indent=2))
-  p_utils.write_json('temporary_test_is_valid_translation_rule.json', result_dict)
+  p_utils.write_json('temporary_test_is_valid_translation_rule_syntactic.json', result_dict)
+
+
+def _test_learn_trans_rules_for_prob_node():
+  test_harness_config = p_utils.read_tmp_json('_test_learn_trans_rules_for_prob_node_config.json')
+  args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
+
+  subject_dict = json.loads(args_dict['subject'])
+  subject = p_subject.PirelSubject(**subject_dict)
+
+  translation_rules = args_dict['translation_rules']
+  templates_dict = args_dict['templates_dict']
+
+  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
+  print('\n\n'.join(result))
 
 
 if __name__ == '__main__':
   # _test_translate()
-  _test_translate_duoglot()
-  # _test_is_valid_translation_rule()
+  # _test_translate_duoglot()
+  # _test_is_valid_translation_rule_syntactic()
+  _test_learn_trans_rules_for_prob_node()

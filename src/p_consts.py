@@ -88,40 +88,6 @@ NT_DICT = {
 
 
 ################################################################################################
-############################# TSP GENERATION ###################################################
-################################################################################################
-BODY_NODE_TYPES = {
-  'py': ['block', 'list', 'dictionary']
-}
-
-# For the following node types we include (`template_origin`, `template_origin`)
-# as a TSP. This allows us to learn the most overfitted translation rules for them,
-# and avoid errors. This is applicable in such case:
-# `problematic_node` is `string` and `template_origin` is `dfs(0, 0, '')`
-# Translation rules for empty strings and non-empty strings are different.
-# However, the generator generates non-empty strings, and this does not let us
-# learn the translation rule for empty strings.
-# This is a workaround to avoid such issues.
-TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES = {
-  'py': ['string', 'slice']
-}
-
-PY_BUILT_IN_FUNCTIONS = {"abs", "aiter", "all", "anext", "any", "ascii", "bin", "bool", "breakpoint", "bytearray", "bytes", "callable", "chr", "classmethod", "compile", "complex", "delattr", "dict", "dir", "divmod", "enumerate", "eval", "exec", "filter", "float", "format", "frozenset", "getattr", "globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance", "issubclass", "iter", "len", "list", "locals", "map", "max", "memoryview", "min", "next", "object", "oct", "open", "ord", "pow", "print", "property", "range", "repr", "reversed", "round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super", "tuple", "type", "vars", "zip"}
-
-# an overfitted TSP is a TSP where only literal values are different from that of `template_origin`
-IS_GENERATE_OVERFITTED_TSP = True
-
-# LLM is used to decide whether a generated TSPS is syntactically correct or not.
-# If this flag is set to True, then syntactically incorrect TSPs are not used.
-# Regardless of this flag, syntactically incorrect TSPs are moved to the end of the list
-# to increase changes of using a correct TSP.
-IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM = False
-
-# controls the maximum number of fuzz node groups that are used to generate TSPs
-MAX_NUM_FUZZ_NODE_GROUPS = 14
-
-
-################################################################################################
 #################################### PIREL CONFIGS #############################################
 ################################################################################################
 PLACEHOLDER_TEXT = '__'  # string representation of a hole
@@ -141,10 +107,65 @@ LLM_VAL_TS_MAX_DEPTH = 4
 # we do stop. That is, when the number of TSPs that we learnt working
 # translation rules from reaches MAX_NUM_USEFUL_TSPS, we stop the loop
 # and do not use the remaining TSPs.
-MAX_NUM_USEFUL_TSPS = 3
+_deprecated_MAX_NUM_USEFUL_TSPS = 3
 
 # The number of attempts to learn translation rules from a single TSP
 LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
+
+
+################################################################################################
+############################# TSP GENERATION ###################################################
+################################################################################################
+BODY_NODE_TYPES = {
+  'py': ['block', 'list', 'dictionary']
+}
+ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES = True
+SPECIAL_TREATMENT_BODY_NODE_TYPES = {
+  'py': {
+    'block': GENERIC_SECRET_FN_INVOCATION,
+    'list': '[' + GENERIC_SECRET_FN_INVOCATION + ']',
+    'dictionary': '{' + f'foo: {GENERIC_SECRET_FN_INVOCATION}' + '}'
+  }
+}
+
+BASIC_NODE_TYPES = {
+  'py': ['identifier', 'integer', 'float']
+}
+
+NON_FUZZABLE_NODES = {
+  'py': ['string', 'generator_expression']
+}
+
+NON_FUZZABLE_NODE_PARENTS_SPECIAL = {
+  'py': ['string']
+}
+
+# For the following node types we include (`template_origin`, `template_origin`)
+# as a TSP. This allows us to learn the most overfitted translation rules for them,
+# and avoid errors. This is applicable in such case:
+# `problematic_node` is `string` and `template_origin` is `dfs(0, 0, '')`
+# Translation rules for empty strings and non-empty strings are different.
+# However, the generator generates non-empty strings, and this does not let us
+# learn the translation rule for empty strings.
+# This is a workaround to avoid such issues.
+TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES = {
+  'py': ['string', 'slice']
+}
+
+PY_BUILT_IN_FUNCTIONS = {"abs", "aiter", "all", "anext", "any", "ascii", "bin", "bool", "breakpoint", "bytearray", "bytes", "callable", "chr", "classmethod", "compile", "complex", "delattr", "dict", "dir", "divmod", "enumerate", "eval", "exec", "filter", "float", "format", "frozenset", "getattr", "globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance", "issubclass", "iter", "len", "list", "locals", "map", "max", "memoryview", "min", "next", "object", "oct", "open", "ord", "pow", "print", "property", "range", "repr", "reversed", "round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super", "tuple", "type", "vars", "zip"}
+
+# an overfitted TSP is a TSP where only literal values are different from that of `template_origin`
+IS_GENERATE_OVERFITTED_TSP = True
+
+# DEPRECATED
+# LLM is used to decide whether a generated TSPS is syntactically correct or not.
+# If this flag is set to True, then syntactically incorrect TSPs are not used.
+# Regardless of this flag, syntactically incorrect TSPs are moved to the end of the list
+# to increase changes of using a correct TSP.
+_deprecated_IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM = False
+
+# controls the maximum number of fuzz node groups that are used to generate TSPs
+MAX_NUM_FUZZ_NODE_GROUPS = 14
 
 
 ################################################################################################
