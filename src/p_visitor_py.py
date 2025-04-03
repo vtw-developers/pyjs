@@ -677,6 +677,34 @@ class Tree:
     return tree
 
 
+class PrettyPrinterForGeneratedCode(pvis.Visitor):
+  def __init__(self) -> None:
+    super().__init__()
+    self.indentation_level : int = 0
+    self.indentation_size : int = 2
+
+  def indent(self, text: str) -> str:
+    self.indentation_level += 1
+    code = p_utils.indent(text, self.indentation_level * self.indentation_size)
+    self.indentation_level -= 1
+    return code
+
+  def default_visit(self, node: pvis.AbstractNode, delimeter: str = ' ') -> str:
+    code = ''
+    for child in node.children:
+      child_code = self.visit(child)
+      code += (child_code + delimeter)
+    return code.strip()
+
+  def visit_TerminalNode(self, node: pvis.TerminalNode) -> str:
+    return node.node_type
+
+  def visit__SuiteNode(self, node: _SuiteNode) -> str:
+    code = self.default_visit(node, delimeter='\n')
+    code = self.indent(code)
+    return '\n' + code
+
+
 class PrettyPrinter(pvis.Visitor):
   def __init__(self, indent_with: str = '  ') -> None:
     super().__init__()
