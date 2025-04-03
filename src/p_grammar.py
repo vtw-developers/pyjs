@@ -1563,7 +1563,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
     ast = grammar.generate_simplest_ast(node_type)
     ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-    code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
+    code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
     return code
 
   def _get_num_nt_nodes(code: str, lang: str) -> int:
@@ -3285,7 +3285,7 @@ def simplify_program_context_usage() -> None:
     def __gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar):
       ast = grammar.generate_simplest_ast(node_type)
       ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-      code = ast_tree.root_node.accept(p_visitor_py.PrettyPrinter())
+      code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
       return code
 
     def __process_parent_nodes(
