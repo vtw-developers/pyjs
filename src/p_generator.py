@@ -1,6 +1,6 @@
 import itertools
 import json
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Set, Tuple, Union
 
 import d_ast_parse
 import p_consts
@@ -17,6 +17,7 @@ logger = p_utils.setup_logger(__name__)
 class _CannotGenerateCorrectProgramError(RuntimeError): pass
 
 
+# API FUNCTIONS
 def simplify_template_init(template_dict: dict):
   '''
   What we want to achieve with this function is the following:
@@ -124,7 +125,8 @@ def simplify_template_init(template_dict: dict):
   return template_dict
 
 
-def generate_tsp_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
+# DEPRECATED
+def _deprecated_generate_tsps_with_generator_OLD(template_dict: dict) -> List[Tuple[str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
   `context_node` is the only child of a `root_node` of `template_origin`s AST.
@@ -684,7 +686,8 @@ def generate_tsp_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   return unique_tsps
 
 
-def generate_tsp_overfitted(template_dict: dict) -> Tuple[str, str]:
+# DEPRECATED
+def _deprecated_generate_tsp_overfitted(template_dict: dict) -> Tuple[str, str]:
   '''
   Generate a TSP where literal nodes such as integer, float, identifier are fuzzed.
   '''
@@ -788,6 +791,577 @@ def generate_tsp_overfitted(template_dict: dict) -> Tuple[str, str]:
   return tsp
 
 
+# NEW TSP GENERATION ALGORITHM
+def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tuple[str, str]]:
+  '''
+  We have `template_origin`, `problematic_node`, `context_node`.
+  `context_node` is the only child of a `root_node` of `template_origin`s AST.
+  In the case, where the context is null, `context_node` == `problematic_node`.
+  We generate code under `problematic_node`. The two ASTs generated at
+  `problematic_node` should produce a matcher (when unified) that matches
+  the corresponding node in the AST of `template_origin`.
+
+  AST for ```m = (core + core) * pi```
+
+               expression_statement
+                        |
+                    assignment
+            /            |         \
+  identifier1           "="              binary_operator1
+       |                                /     |      \
+      "m"        parenthesized_expression    "*"    identifier2
+                /           |           \               |
+              "("    binary_operator2   ")"            "pi"
+                      /     |       \
+             identifier3   "+"    identifier4
+                 |                     |
+              "core"                "core"
+
+  This function is expected to generate a pair of programs (TSP)
+  no matter what. In the worst case, the generated programs can be
+  type-isomorphic to `template_origin`, whereby we learn an overfitted rule.
+  An overfitted rule can be used to translate code of the same structure
+  as `template_origin` (type-isomorphic).
+
+  Fuzz node groups:
+  [
+    [expression_statement],  # replace(assignment)
+    [assignment],  # basic(identifier1), replace(binary_operator1)
+    [identifier1, binary_operator1],  # basic_itself(identifier1), replace(parenthesized_expression), basic(identifier2)
+    [identifier1, parenthesized_expression, identifier2],  # replace(binary_operator2), basic_itself(identifier1), basic_itself(identifier2)
+    [identifier1, binary_operator2, identifier2],  # basic_itself(identifier1), basic_itself(identifier2), basic(identifier3), basic(identifier4)
+    [identifier1, identifier3, identifier4, identifier2],  # basic_itself(identifier1), basic_itself(identifier2), basic_itself(identifier3), basic_itself(identifier4)
+  ]
+
+  NOTE this function should be vocal about important errors
+  '''
+
+  def _init_problematic_node(template_dict: dict) -> pds.DuoGlotNode:
+    '''
+    Parse `template_origin` and return a reference to the `problematic_node`.
+    '''
+    # We need the `problematic_node`, which will be passed to the generator.
+    # Since `template_origin` is already simplified, we use it to get the `problematic_node`.
+    template_origin = template_dict['template_origin']
+    lang = template_dict['src_lang']
+    ast, _ = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=False)
+
+    # p_utils.write_tmp_json('1ast.json', ast)  # NOTE for debugging only
+
+    tree = pds.DuoGlotTree(ast)
+    # `root_node` of `tree` should have only a single child, which is a `context_node`
+    root_node = tree.get_root_node()
+    assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
+    context_node = root_node.get_children()[0]
+    problematic_node_path = template_dict['problematic_node_path']
+    problematic_node = context_node.get_child_by_path(problematic_node_path)
+    return problematic_node
+
+  def _is_valid_fuzz_node(node: pds.DuoGlotNode, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> bool:
+    '''
+    RETURN True if `node` can be passed to `p_grammar.get_alternative_starting_node_types`
+    In other words, it tells us whether we can generate alternative nodes for children of `node`.
+    Unlike, for example, an `integer` node. `integer` cannot be a fuzz
+    node, because it itself is templatized, i.e. it is a child of a fuzz node.
+
+    NOTE writes to `template_dict`.
+    TODO should we reset "template_dict['is_insert_secret_fn']" to False?
+    '''
+    # a valid fuzz node has to be non-terminal
+    if node.is_terminal():
+      return False
+
+    # a valid fuzz node must not be external
+    if grammar.is_external(node.get_ts_node_type()):
+      return False
+
+    # a valid fuzz node cannot be of a "body node type"
+    if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
+      # NOTE turn the flag on iff there is a non-terminal node
+      # e.g. for empty `list`s and `dictionary`s it will stay `False`
+      if node.get_num_nt_children() > 0:
+        template_dict['is_insert_secret_fn'] = True
+      return False
+
+    # a valid fuzz node has to have at least one non-terminal child
+    if node.get_num_nt_children() == 0:
+      return False
+
+    # a valid fuzz node must be a valid parent node for fuzz nodes
+    if not _is_valid_fuzz_node_parent(node, template_dict):
+      return False
+
+    return True
+
+  def _is_valid_fuzz_node_parent(node: pds.DuoGlotNode, template_dict: dict) -> bool:
+    '''
+    These nodes can be added to fuzz node groups, but none of their children can.
+    NOTE does not prevent a node from being added to a fuzz node group
+    '''
+    assert _can_be_added_to_fuzz_node_group(node, template_dict), 'precondition failed'
+
+    # literal nodes like `integer`, `float`, etc. cannot be fuzz node parents
+    # they don't have non-terminal children
+    if node.has_single_terminal_child():
+      return False
+
+    # `string` is also a literal node, however it needs a special treatment unlike e.g. `integer`
+    if node.get_ts_node_type() == p_consts.NON_FUZZABLE_NODE_PARENTS_SPECIAL[template_dict['src_lang']]:
+      return False
+
+    # nodes like `block`. `block` is treated specially during program generation
+    if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
+      return False
+
+    return True
+
+  def _can_be_added_to_fuzz_node_group(node_or_node_type: Union[pds.DuoGlotNode, str], template_dict: dict) -> bool:
+    '''
+    If a node does not appear in a fuzz node group, it will be kept intact.
+    That is, a sub-tree with a root at this node will be unchanged.
+
+    For example, if we want to avoid having `string` nodes fuzzed, we can add it here.
+    '''
+
+    assert isinstance(node_or_node_type, (str, pds.DuoGlotNode)), 'sanity check failed'
+
+    if isinstance(node_or_node_type, pds.DuoGlotNode):
+      node_type = node_or_node_type.get_ts_node_type()
+    elif isinstance(node_or_node_type, str):
+      node_type = node_or_node_type
+
+    if node_type in p_consts.NON_FUZZABLE_NODES[template_dict['src_lang']]:
+      return False
+
+    return True
+
+  def _gen_seq_fuzz_node_groups(problematic_node: pds.DuoGlotNode, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> List[List[pds.DuoGlotNode]]:
+    '''
+    Given an initial `problematic_node`, generate a sequence of node groups
+    which will be later passed to `p_grammar.get_alternative_starting_node_types`.
+
+    What is a fuzz node group?
+    A fuzz node group is a list of one or more nodes each of which:
+    1. Will be passed to `p_grammar.get_alternative_starting_node_types`
+    2. Will be a parent node of nodes at which
+       alternative ASTs will be generated (a.k.a. templatized nodes).
+
+    Why do we need this?
+    Generating an alternative AST right under the `problematic_node` might not
+    work in some cases. To solve this issue, we can try going one level down.
+
+    Let's say that `expression_statement` is a `problematic_node` in ```core = 1```:
+
+        expression_statement
+               |
+           assignment
+          /     |    \
+    identifier  "="   integer
+         |               |
+      "core"            "1"
+
+    Then, generating an AST with `expression_statement` at its root may not work
+    as in the case of ```id_foo```:
+
+     expression_statement
+              |
+          identifier
+              |
+          "id_foo"
+
+    Both of the ASTs have `expression_statement` at their root, but their
+    translations to JavaScript may not allow us to learn a translation rule
+    for `expression_statement`, since they can be not type-isomorphic.
+
+    If we go down one level, and generate an AST with a root at `assignment`,
+    then we have higher chances to get correct JavaScript translations, and
+    thus learn a working translation rule.
+
+    [[expression_statement], [assignment], [identifier, integer]] would be
+    a good candidate for "fuzz node groups".
+
+    NOTE Another example
+    AST for ```m = (core + core) * pi```
+
+                  expression_statement
+                          |
+                      assignment
+              /            |         \
+    identifier1            "="              binary_operator1
+          |                                /     |      \
+        "m"        parenthesized_expression    "*"    identifier2
+                  /           |           \               |
+                "("    binary_operator2    ")"            "pi"
+                        /     |       \
+                identifier3    "+"    identifier4
+                    |                     |
+                "core"                "core"
+
+    [
+      [expression_statement],  # assignment
+      [assignment],  # identifier1, binary_operator1
+      [identifier1, binary_operator1],  # parenthesized_expression, identifier2
+      [identifier1, parenthesized_expression, identifier2],  # binary_operator2
+      ...
+    ]
+
+    NOTE
+    1. When a node reaches Python 'block' node, it stops (just like at `identifier`, `integer`, etc.).
+    This allows us to use custom generation strategies for `block` nodes.
+    2. Generates all possible fuzz node group combinations.
+    3. This function is language specific (hacky).
+    4. A fuzz node group may contain both valid fuzz nodes AND nodes like `integer`, `float`, etc.
+    '''
+
+    def __get_descendable_children_fuzz_nodes(node: pds.DuoGlotNode, template_dict: dict) -> List[pds.DuoGlotNode]:
+      '''
+      Returns list of non-terminal nodes of `node` that `__rec_descend` will descend to.
+      That means that nodes returned by this function will be added to fuzz node groups.
+      '''
+      # simplest case: return all non-terminal children
+      # return node.get_nt_children()
+
+      # more controlled version
+      nodes = list(filter(lambda node: _can_be_added_to_fuzz_node_group(node, template_dict), node.get_nt_children()))
+      return nodes
+
+    def __rec_descend(start_node: pds.DuoGlotNode, template_dict: dict) -> List[List[pds.DuoGlotNode]]:
+      '''
+      Recursively get fuzz node group combinations for children nodes,
+      make their cartesian product, add the node itself, and return.
+
+      NOTE nodes that are `not _can_be_fuzz_node_ancestor` are added to the group
+      '''
+      # base case: last node (node from which cannot descend, a.k.a. "stop node")
+      # if _is_stop_node(start_node, template_dict):  # `integer`, `float`, `identifier`, `block`, `string`
+      if not _is_valid_fuzz_node_parent(start_node, template_dict):
+        return [[start_node]]
+
+      # collect children groups
+      children_generations = []
+      ch_fuzz_nodes = __get_descendable_children_fuzz_nodes(start_node, template_dict)
+      for ntchild in ch_fuzz_nodes:
+        child_generation = __rec_descend(ntchild, template_dict)
+        children_generations.append(child_generation)
+
+      # add start_node itself, and then add cartesian product of children
+      all_generations = [[start_node]]
+
+      # do not add a node if it has a single non-terminal child
+      # e.g. ... -> expression_statement -> assignment -> (identifier, "=", integer)
+      # "expression_statement" which is an "assignment"
+      if len(start_node.get_children()) == 1 and start_node.get_children()[0].is_nonterminal():
+        all_generations = []
+
+      for cart_prod in itertools.product(*children_generations):
+        generation = []
+        for child_generation in cart_prod:
+          generation.extend(child_generation)
+        all_generations.append(generation)
+
+      return all_generations
+
+    def __sort_key(group: List[pds.DuoGlotNode]) -> Union[int, float]:
+      '''
+      Sorting algorithm for fuzz node groups.
+      RETURN given the distances from nodes in `group` to the root node, return the maximum.
+      '''
+      max_depth = -1
+      for node in group:
+        node_depth = node.get_dist_root()
+        if node_depth > max_depth:
+          max_depth = node_depth
+      return max_depth
+
+    groups = __rec_descend(problematic_node, template_dict)
+    groups.sort(key=__sort_key)
+    return groups
+
+  _get_alt_starting_ntypes_cache = {}
+  def _get_alt_starting_ntypes_cached(node: pds.DuoGlotNode, grammar: p_grammar.TreeSitterGrammar) -> List[Tuple[pds.DuoGlotNode, List[str]]]:
+    ''''''
+    nonlocal _get_alt_starting_ntypes_cache
+    if node.get_id() in _get_alt_starting_ntypes_cache:
+      return _get_alt_starting_ntypes_cache[node.get_id()]
+    alt_starting_nodes = p_grammar.get_alternative_starting_node_types(node, grammar)
+    _get_alt_starting_ntypes_cache[node.get_id()] = alt_starting_nodes
+    return alt_starting_nodes
+
+  def _gen_code_for_node_type(node_type: str, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> str:
+    '''NOTE the generated code may have semantic errors'''
+
+    if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
+      spec_treatment_map = p_consts.SPECIAL_TREATMENT_BODY_NODE_TYPES[template_dict['src_lang']]
+      if node_type in spec_treatment_map:
+        return spec_treatment_map[node_type]
+
+    ast = grammar.generate_simplest_ast(node_type)
+    ast_tree = p_visitor.Tree.from_gen_ast(ast)
+    code = ast_tree.root_node.accept(p_visitor.PrettyPrinter())
+    return code
+
+  def _gen_code_pair_for_node_with_check(
+    mapped_node: pds.DuoGlotNode,
+    alt_node_types: List[str],
+    template_dict: dict,
+    grammar: p_grammar.TreeSitterGrammar
+  ) -> Tuple[str, str]:
+    '''
+    RETURN pair of "valid" programs or raise an exception.
+    RAISE _CannotGenerateCorrectProgramError if both programs are `None`.
+    '''
+
+    def __pop_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
+      '''
+      return a node type from `basic_ntypes_subset` that is ranked higher
+      in the list of basic node types.
+      '''
+      basic_ntypes = p_consts.BASIC_NODE_TYPES[template_dict['src_lang']]
+      assert set(basic_ntypes).issuperset(basic_ntypes_subset), 'sanity check failed'
+
+      for ntype in basic_ntypes:
+        if ntype in basic_ntypes_subset:
+          return ntype
+
+      raise RuntimeError('should not reach here')
+
+    def __get_alt_node_types(
+      mapped_node: pds.DuoGlotNode,
+      alt_node_types: List[str],
+      template_dict: dict,
+    ) -> Tuple[str, str]:
+      '''
+      Given a mapped node and a list of alternative node types,
+      return two alternative node types that can be used to generate
+      alternative ASTs.
+      '''
+      mapped_ntype = mapped_node.get_ts_node_type()
+      basic_ntypes = set(p_consts.BASIC_NODE_TYPES[template_dict['src_lang']])
+      alt_ntypes = set(alt_node_types)
+
+      # case 1: mapped_node has a basic type
+      if mapped_ntype in basic_ntypes:
+        # {identifier, integer, float}, {identifier, integer}, {identifier} -> {integer}
+        pure_alts = basic_ntypes.intersection(alt_ntypes).difference({mapped_ntype})
+
+        # choose alternative basic type if possible (mapped_ntype, alt_ntype)
+        if len(pure_alts) > 0:
+          alt_ntype1 = mapped_ntype
+          alt_ntype2 = __pop_ranked(pure_alts, template_dict)
+          return alt_ntype1, alt_ntype2
+
+        # otherwise fall back to the mapped_ntype (mapped_ntype, mapped_ntype)
+        else:
+          alt_ntype1 = mapped_ntype
+          alt_ntype2 = mapped_ntype
+          return alt_ntype1, alt_ntype2
+
+      # case 2: can choose both alternatives from basic types
+      in_both = basic_ntypes.intersection(alt_ntypes)
+      if len(in_both) >= 2:
+        # choose two different basic types from the intersection
+        alt_ntype1 = __pop_ranked(in_both, template_dict)
+        in_both.remove(alt_ntype1)
+        alt_ntype2 = __pop_ranked(in_both, template_dict)
+        return alt_ntype1, alt_ntype2
+
+      # case 3: can choose only one alternative from basic types
+      elif len(in_both) == 1:
+        # choose the only basic type from the intersection
+        alt_ntype1 = __pop_ranked(in_both, template_dict)
+        alt_ntype2 = mapped_ntype
+        return alt_ntype1, alt_ntype2
+
+      # case 4: no basic types in the intersection: use mapped_ntype itself
+      elif len(in_both) == 0:
+        alt_ntype1 = mapped_ntype
+        alt_ntype2 = mapped_ntype
+        return alt_ntype1, alt_ntype2
+
+      raise RuntimeError('should not reach here')
+
+    alt_ntype1, alt_ntype2 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+    # NOTE TODO no check is performed on the generated code
+    code1 = _gen_code_for_node_type(alt_ntype1, template_dict, grammar)
+    code2 = _gen_code_for_node_type(alt_ntype2, template_dict, grammar)
+    return code1, code2
+
+  def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
+    '''
+    Given alternative codes (code blocks) for particular nodes,
+    return an updated code with alternative codes applied.
+
+    PARAM alternative_code: keys are `node_id`s, values are alternative codes.
+    '''
+    # We need PirelTree as it supports `text` attribute that we rely on.
+    template_origin = template_dict['template_origin']
+    lang = template_dict['src_lang']
+    ast_text, ann = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=True)
+    tree = pds.PirelTree(ast_text, annotation=ann)
+    tree._fix_indentation()
+    # `root_node` of `tree` should have only a single child, which is a `context_node`
+    root_node = tree.get_root_node()
+    assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
+    context_node = root_node.get_children()[0]
+    # Original text that will be replaced by alternative codes at each mapped node.
+    # Need to replace starting from the end of the string so that indices in `ann`
+    # do not get shifted.
+    orig_text = context_node.get_text()
+    templatized_node_ids = sorted(alternative_codes.keys(), reverse=True)
+    for tni in templatized_node_ids:
+      start_point = tree.annotation[tni][0]
+      end_point = tree.annotation[tni][1]
+      orig_text = orig_text[:start_point] + alternative_codes[tni] + orig_text[end_point:]
+    return orig_text
+
+  def _gen_program_pair_new_algorithm(
+    all_alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]],
+    grammar: p_grammar.TreeSitterGrammar,
+    template_dict: dict
+  ) -> Tuple[str, str]:
+    ''''''
+    # FOR EACH TEMPLATIZED NODE, GENERATE AN ALTERNATIVE AST
+    alternative_codes_1 = {}
+    alternative_codes_2 = {}
+
+    # `alt_node_types` is a list of all alternative nodes including `mapped_node.get_type()`
+    for mapped_node, alt_node_types in all_alt_starting_nodes:
+      code_1, code_2 = _gen_code_pair_for_node_with_check(mapped_node, alt_node_types, template_dict, grammar)
+      alternative_codes_1[int(mapped_node.get_id())] = code_1
+      alternative_codes_2[int(mapped_node.get_id())] = code_2
+
+    # APPLY ALTERNATIVE CODES AT DESIGNATED LOCATIONS
+    gen_src_prog_1 = _apply_alt_codes(alternative_codes_1, template_dict)
+    gen_src_prog_2 = _apply_alt_codes(alternative_codes_2, template_dict)
+
+    return gen_src_prog_1, gen_src_prog_2
+
+  def _filter_program_pairs(program_pairs: List[Tuple[str, str]], template_dict: dict) -> List[Tuple[str, str]]:
+    '''
+    Given the final list of program pairs (TSPs),
+    sanity check them, remove duplicate entries.
+
+    Filter criteria:
+    1. Parseable
+    2. Keep only unique
+    '''
+    def __get_type_encoding_x_term(tree: pds.DuoGlotTree) -> str:
+      '''
+      Compute AHU encoding with
+      1. type information
+      2. terminals except literals (integer, float, identifier, etc.)
+      for comparing tree for type-isomorphism
+      https://www.baeldung.com/cs/isomorphic-trees#1-ahu-encoding
+      '''
+      def __rec_post_order(node: pds.DuoGlotNode):
+        # base case
+        if node.is_terminal():
+          # literals do not have siblings
+          if node.get_num_siblings() == 0:
+            return '0'
+          else:
+            return node.get_type()
+        children_encoding = ''
+        for child in node.get_children():
+          children_encoding += __rec_post_order(child) + ' '
+        children_encoding = children_encoding.strip()
+        return f'({node.get_type()} {children_encoding})'
+      encoding = __rec_post_order(tree.get_root_node())
+      return encoding
+
+    def __get_tree(code: str, lang: str) -> pds.DuoGlotTree:
+      '''
+      In case of any error, treat `code` as non-parseable and return `None`.
+      '''
+      try:
+        ast, ann = d_ast_parse.parse_text_dbg(code, lang, keep_text=False)
+        tree = pds.DuoGlotTree(ast)
+        return tree
+      except:
+        return None
+
+    lang = template_dict['src_lang']
+    filtered_program_pairs = []
+    unique_pair_encodings = []
+    for program_pair in program_pairs:
+      tree1, tree2 = __get_tree(program_pair[0], lang), __get_tree(program_pair[1], lang)
+      # skip if any of them has a parse error
+      if tree1 is None or tree2 is None:
+        continue
+      # skip duplicates
+      enc1, enc2 = __get_type_encoding_x_term(tree1), __get_type_encoding_x_term(tree2)
+      enc1, enc2 = sorted([enc1, enc2])  # make encodings order insensitive
+      pair_enc = enc1 + ' ' + enc2
+      if pair_enc in unique_pair_encodings:
+        continue
+      unique_pair_encodings.append(pair_enc)
+      # filtering step is over
+      filtered_program_pairs.append(program_pair)
+    return filtered_program_pairs
+
+  # p_utils.write_tmp_json('1template_dict.json', template_dict)  # NOTE for debugging only
+
+  logger.info('~~~ Starting API call to p_generator.generate_tsps_with_generator_new_algorithm')
+
+  # INPUTS TO THE GENERATOR
+  lang = template_dict['src_lang']
+  grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
+  problematic_node = _init_problematic_node(template_dict)
+  logger.debug(f'Problematic node is "{problematic_node}"')
+
+  # `program_pairs` is a list of tuples, each tuple is a pair of programs
+  program_pairs : List[Tuple[str, str]] = []
+  _program_pairs_dbg = []  # NOTE for debugging only
+
+  # GROUPS OF NODES THAT CAN BE ROOTS OF ALTERNATIVE ASTs (similar to templatized nodes)
+  fuzz_node_groups = _gen_seq_fuzz_node_groups(problematic_node, template_dict, grammar)
+  logger.debug(f'There are {len(fuzz_node_groups)} fuzz node groups.')
+
+  # p_utils.write_tmp_json('1fuzz_node_groups.json', fuzz_node_groups)  # NOTE for debugging only
+
+  for group_idx, fuzz_node_group in enumerate(fuzz_node_groups, start=1):
+    # NOTE EXPERIMENTAL resetting a flag in `template_dict`
+    # it is set to `True` in `_is_valid_fuzz_node`
+    template_dict['is_insert_secret_fn'] = False
+
+    # contains a list of alternative starting nodes for each node under
+    # every node in `fuzz_node_group`,
+    all_alt_starting_nodes : List[Tuple[pds.DuoGlotNode, List[str]]] = []
+
+    # FIND ALTERNATIVE STARTING NODE TYPES
+    for node in fuzz_node_group:
+      if _is_valid_fuzz_node(node, template_dict, grammar):
+        alt_starting_nodes = _get_alt_starting_ntypes_cached(node, grammar)
+        all_alt_starting_nodes.extend(alt_starting_nodes)
+      else:
+        all_alt_starting_nodes.append((node, [node.get_ts_node_type()]))
+
+    # p_utils.write_tmp_json(f'1fuzz_node_group_{group_idx}.json', all_alt_starting_nodes)  # NOTE for debugging only
+
+    # APPLY ALTERNATIVE CODES AT DESIGNATED LOCATIONS
+    # Since `fuzz_node_groups` are ordered from root nodes to leaf nodes,
+    # `program_pairs` ends up containing the most abstract program pairs
+    # first, and concrete program pairs next. That is, translation rule
+    # inferred from first TSP would be the most abstract, and translation
+    # rule inferred from last TSP would be the most concrete.
+    try:
+      gen_src_prog_1, gen_src_prog_2 = _gen_program_pair_new_algorithm(all_alt_starting_nodes, grammar, template_dict)
+      program_pairs.append((gen_src_prog_1, gen_src_prog_2))
+      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, str(fuzz_node_group)))  # NOTE for debugging only
+    except _CannotGenerateCorrectProgramError as err:
+      logger.warning(f'_gen_program_pair_new_algorithm: {p_utils.exception_to_str(err)}')
+      logger.debug(f'Cannot generate a TSP for this fuzz node group:\n{str(fuzz_node_group)}')
+      continue
+
+  # p_utils.write_tmp_json('1gen_program_pairs.json', _program_pairs_dbg)  # NOTE for debugging only
+
+  # remove duplicates, sanity check
+  unique_tsps = _filter_program_pairs(program_pairs, template_dict)
+  logger.debug(f'Generated {len(unique_tsps)} program pairs (TSPs):\n{json.dumps(unique_tsps, indent=2)}')
+
+  return unique_tsps
+
+
 # TEST HARNESSES
 def _test_simplify_template_init():
   test_harness_config:dict = p_utils.read_json('temporary_test_simplify_template_init_config.json')
@@ -801,8 +1375,14 @@ def _test_generate_tsp_with_generator():
   test_harness_config:dict = p_utils.read_json('temporary_test_generate_tsp_with_generator_config.json')
   template_dict = p_utils.read_json(test_harness_config['template_dict_path'])
   kwargs = test_harness_config['kwargs']
-  tsps = generate_tsp_with_generator(template_dict, **kwargs)
+  tsps = _deprecated_generate_tsps_with_generator_OLD(template_dict, **kwargs)
   p_utils.write_json('temporary_test_generate_tsp_with_generator.json', tsps)
+
+def _test_generate_tsps_with_generator_new_algorithm():
+  test_harness_config:dict = p_utils.read_tmp_json('test_generate_tsps_with_generator_new_algorithm_config.json')
+  template_dict = p_utils.read_json(test_harness_config['template_dict_path'])
+  tsps = generate_tsps_with_generator_new_algorithm(template_dict)
+  p_utils.write_tmp_json('temporary_test_generate_tsps_with_generator_new_algorithm.json', tsps)
 
 def _test_generate_tsp_overfitted():
   test_harness_config:dict = p_utils.read_json('temporary_test_generate_tsp_overfitted_config.json')
@@ -810,7 +1390,7 @@ def _test_generate_tsp_overfitted():
   kwargs = {
     'subject_name': 'test_generate_tsp_overfitted'
   }
-  tsp = generate_tsp_overfitted(template_dict, **kwargs)
+  tsp = _deprecated_generate_tsp_overfitted(template_dict, **kwargs)
   print(json.dumps(tsp, indent=2))
   p_utils.write_json('temporary_test_generate_tsp_overfitted.json', tsp)
 
@@ -818,4 +1398,5 @@ def _test_generate_tsp_overfitted():
 if __name__ == '__main__':
   # _test_simplify_template_init()
   # _test_generate_tsp_with_generator()
-  _test_generate_tsp_overfitted()
+  # _test_generate_tsp_overfitted()
+  _test_generate_tsps_with_generator_new_algorithm()

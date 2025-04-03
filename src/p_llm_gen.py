@@ -816,7 +816,8 @@ def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[s
   return all_translation_pairs
 
 
-def is_tsp_syntactically_correct(tsp: Tuple[str, str], subject: p_subject.PirelSubject, template_dict: dict) -> bool:
+# DEPRECATED
+def _deprecated_is_tsp_syntactically_correct(tsp: Tuple[str, str], subject: p_subject.PirelSubject, template_dict: dict) -> bool:
   '''
   Check if a given `tsp` is syntactically correct using LLM.
 

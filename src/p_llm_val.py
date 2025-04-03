@@ -737,7 +737,7 @@ def _context_exists(
   target_context: list,
 ) -> bool:
   '''
-  Implementation of this function is similar to p_post_process_translation_rule.TranslationRule.trim_context()
+  Implementation of this function is similar to p_rule_postprocessor.TranslationRule.trim_context()
   '''
 
   def __rec_pre_order_find_node_under_context(

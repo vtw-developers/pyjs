@@ -4,7 +4,7 @@ from typing import Callable, List
 import d_ast_match
 import d_ast_parse
 import p_consts
-import p_post_process_translation_rule as pptr
+import p_rule_postprocessor as prpp
 import p_subject
 import p_utils
 
@@ -674,7 +674,7 @@ def infer_translation_rule(
   # 10 post-process inferred rule
   # NOTE Creating an instance of `TranslationRule` might raise `pptr.RuleMappingError`
   # It is good to be vocal about errors in translation rules.
-  translation_rule = pptr.TranslationRule(src_unified_pattern, tar_unified_pattern)
+  translation_rule = prpp.TranslationRule(src_unified_pattern, tar_unified_pattern)
   if not _is_context_empty(context):
     result = translation_rule.trim_context(context)
     if result is None:
@@ -686,11 +686,11 @@ def infer_translation_rule(
     while True:
       try:
         logger.debug(f'Replacing secret identifier with `*` placeholder.')
-        translation_rule = pptr.TranslationRule(src_unified_pattern, tar_unified_pattern)
+        translation_rule = prpp.TranslationRule(src_unified_pattern, tar_unified_pattern)
         translation_rule.replace_secret_with_placeholder(p_consts.GENERIC_SECRET_FN)
         src_unified_pattern = translation_rule.src_as_s_expression()
         tar_unified_pattern = translation_rule.tar_as_s_expression()
-      except pptr.SecretNodeNotFoundError as err:
+      except prpp.SecretNodeNotFoundError as err:
         logger.warning(err)
         break
 

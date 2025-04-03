@@ -1,20 +1,61 @@
 import argparse
 import random
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import d_grammar_expand
 import p_consts
 import p_pirel
 import p_subject
 import p_utils
-import p_validator
+import p_rule_applicator
 
 
 logger = p_utils.setup_logger(__name__)
 
 
-def learn_rules_subject(subject: p_subject.PirelSubject, starting_ruleset: str) -> Tuple[str, str]:
+@dataclass
+class RuleLearningPhaseStats:
+  success: bool = None
+  start_time: int = None
+  end_time: int = None
+  translation_rules_main_code: str = None
+  error_as_list: List[str] = None
+
+@dataclass
+class RuleApplicationPhaseStats:
+  success: bool = None
+  start_time: int = None
+  end_time: int = None
+  tar_main_code: str = None
+  error_as_list: List[str] = None
+
+@dataclass
+class SubjectStats:
+  benchmark_name: str
+  subject_name: str
+  src_main_code: str
+  subject_idx: int
+  sample_size: int
+  start_time: int = None
+  end_time: int = None
+  stats_le: RuleLearningPhaseStats = None
+  stats_app: RuleApplicationPhaseStats = None
+
+  def get_total_time(self) -> str:
+    assert self.start_time is not None and self.end_time is not None, 'Start and end times must be set'
+    total_sec = self.end_time - self.start_time
+    if total_sec < 60:
+      return f'{total_sec}s'
+    total_min, total_sec = divmod(total_sec, 60)
+    total_hr, total_min = divmod(total_min, 60)
+    if total_hr == 0:
+      return f'{total_min}m {total_sec}s'
+    return f'{total_hr}h{total_min}m{total_sec}s'
+
+
+def rule_learning_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str) -> Tuple[str, str]:
   '''
   RETURN Tuple of learned translation rules and translated program.
   RAISE All errors propagate to the caller.
@@ -67,9 +108,9 @@ def learn_rules_subject(subject: p_subject.PirelSubject, starting_ruleset: str) 
       iteration += 1
 
 
-def learning_phase_single_subject(subject: p_subject.PirelSubject, starting_ruleset: str, **kwargs) -> dict:
+def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str, **kwargs) -> SubjectStats:
   '''
-  Run PiREL to learn and validate translation rules for a given subject.
+  Run PiREL to learn and apply translation rules for a given subject.
   Save source program, learned translation rules, and a plausible target program.
   RAISE Nothing. Take care of all exceptions.
   RETURN a stats dictionary
@@ -78,94 +119,90 @@ def learning_phase_single_subject(subject: p_subject.PirelSubject, starting_rule
   assert 'subject_idx' in kwargs
   assert 'sample_size' in kwargs
 
-  # all relevant statistics are collected here
-  stats = {
-    'benchmark_name': subject.benchmark_name,
-    'subject_name': subject.name,
-    'src_main_code': subject.src_program,
-    'subject_idx': kwargs['subject_idx'],
-    'sample_size': kwargs['sample_size'],
-    'learn_rules_phase': {
-      'success': None,
-      'total_time': None,
-      'translation_rules_main_code': None,
-      'error_as_list': None,
-    },
-    'validation_phase': {
-      'success': None,
-      'total_time': None,
-      'tar_main_code': None,
-      'error_as_list': None,
-    },
-  }
+  stats_subj = SubjectStats(
+    benchmark_name=subject.benchmark_name,
+    subject_name=subject.name,
+    src_main_code=subject.src_main_code,
+    subject_idx=kwargs['subject_idx'],
+    sample_size=kwargs['sample_size'],
+  )
 
-  # LEARN RULES PHASE
-  logger.debug(f'~~~ Starting learning phase for "{subject.name}"')
-  start_time = p_utils.current_time_sec()
+  # ~~~ RULE LEARNING PHASE
+  logger.debug(f'~~~ Starting rule learning phase for "{subject.name}"')
+  stats_le = RuleLearningPhaseStats()
+  stats_le.start_time = p_utils.current_time_sec()
+  stats_subj.stats_le = stats_le
+  stats_subj.start_time = stats_le.start_time
+
   try:
-    learned_trans_rules, tar_main_code = learn_rules_subject(subject, starting_ruleset)
+    learned_trans_rules, tar_main_code = rule_learning_phase_on_subject(subject, starting_ruleset)
 
     logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
     logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', learned_trans_rules)
     p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
 
-    stats['learn_rules_phase']['success'] = True
-    stats['learn_rules_phase']['translation_rules_main_code'] = learned_trans_rules
+    stats_le.success = True
+    stats_le.translation_rules_main_code = learned_trans_rules
 
   except Exception as exc:
     msg = f'FAIL Failed to translate "{subject.name}"\n'
     msg += p_utils.exception_to_str(exc)
     logger.error(msg)
 
-    stats['learn_rules_phase']['success'] = False
-    stats['learn_rules_phase']['error_as_list'] = msg.splitlines()  # so it looks better in json
+    stats_le.success = False
+    stats_le.error_as_list = msg.splitlines()  # so it looks better in json
 
-  total_time = p_utils.current_time_sec() - start_time
-  stats['learn_rules_phase']['total_time'] = total_time
+  stats_le.end_time = p_utils.current_time_sec()
+  logger.debug(f'Rule learning phase for "{subject.name}" is complete')
 
-  # VALIDATION PHASE
-  # NOTE validation phase runs only if 'learn rules' phase is successful
-  start_time = p_utils.current_time_sec()
-  if not stats['learn_rules_phase']['success']:
-    logger.debug(f'Learn rules phase was not successful. Skipping validation phase for "{subject.name}"')
-    return stats
+  # ~~~ RULE APPLICATION PHASE
+  # NOTE runs only if 'learn rules' phase is successful
+  logger.debug(f'~~~ Starting rule application phase for "{subject.name}"')
+  stats_app = RuleApplicationPhaseStats()
+  stats_subj.stats_app = stats_app
+  stats_app.start_time = p_utils.current_time_sec()
+  if not stats_le.success:
+    logger.debug(f'Rule learning phase was not successful. Skipping rule application phase for "{subject.name}"')
+    stats_subj.end_time = stats_app.start_time
+    return stats_subj
 
   try:
-    logger.debug(f'Learn rules phase was successful. Starting validation phase for "{subject.name}"')
-    # NOTE validation phase is run on the learned translation rules
+    logger.debug(f'Rule learning phase was successful. Starting rule application phase for "{subject.name}"')
+    # NOTE Rule application phase is run on the learned translation rules
     subject.translation_rules_main_code = learned_trans_rules
-    tar_program = p_validator.validate_translation_rules(subject)
+    tar_program = p_rule_applicator.apply_translation_rules(subject)
     tar_test_code, tar_main_code, tar_test_call_code = tar_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
-    logger.debug(f'Validation of "{subject.name}" is successful.')
+    logger.debug(f'Rule application phase for "{subject.name}" is successful.')
     logger.debug(f'Here is the source program:\n{subject.src_main_code}')
     logger.debug(f'Here is the target program:\n{tar_main_code}')
 
-    p_utils.write_text(p_consts.LEARN_RULES_LOGS_DIR / f'{subject.name}_source_program.py', subject.src_main_code)
-    p_utils.write_text(p_consts.LEARN_RULES_LOGS_DIR / f'{subject.name}_target_program.py', tar_main_code)
+    p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
+    p_utils.llog_text(f'{subject.name}_target_program.py', tar_main_code)
 
-    stats['validation_phase']['success'] = True
-    stats['validation_phase']['tar_main_code'] = tar_main_code
+    stats_app.success = True
+    stats_app.tar_main_code = tar_main_code
 
   except Exception as exc:
-    msg = f'FAIL Failed to validate "{subject.name}"\n'
+    msg = f'FAIL Failed to apply "{subject.name}"\n'
     msg += p_utils.exception_to_str(exc)
 
     logger.error(msg)
 
-    stats['validation_phase']['success'] = False
-    stats['validation_phase']['error_as_list'] = msg.splitlines()  # so it looks better in json
+    stats_app.success = False
+    stats_app.error_as_list = msg.splitlines()  # so it looks better in json
 
-  total_time = p_utils.current_time_sec() - start_time
-  stats['validation_phase']['total_time'] = total_time
+  stats_app.end_time = p_utils.current_time_sec()
+  stats_subj.end_time = stats_app.end_time
+  logger.debug(f'Rule application phase for "{subject.name}" is complete')
 
-  return stats
+  return stats_subj
 
 
-def learning_phase_all_subjects(conf_fpath: Path) -> None:
+def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
   '''
-  Run PiREL to learn and validate translation rules for a given benchmark.
+  Run PiREL to learn and apply translation rules for a given benchmark.
   '''
 
   def _load_benchmark_sample(conf: dict) -> List[Tuple[str, str]]:
@@ -224,66 +261,31 @@ def learning_phase_all_subjects(conf_fpath: Path) -> None:
     sample = dataset[start_idx:end_idx]
     return _exclude(sample, conf['sample']['exclude'])
 
-  def _email_report(subject_name: str, learning_phase_stats: dict) -> None:
-    '''
-    stats = {
-      'benchmark_name': conf['benchmark_name'],
-      'subject_name': subject_name,
-      'src_main_code': src_main_code,
-      'subject_idx': kwargs['subject_idx'],
-      'sample_size': kwargs['sample_size'],
-      'learn_rules_phase': {
-        'success': None,
-        'total_time': None,
-        'translation_rules_main_code': None,
-        'error_as_list': None,
-      },
-      'validation_phase': {
-        'success': None,
-        'total_time': None,
-        'tar_main_code': None,
-        'error_as_list': None,
-      },
-    }
-    '''
-    subject_result : dict = learning_phase_stats[subject_name]
+  def _email_report(subject_name: str, learning_phase_stats: Dict[str, SubjectStats]) -> None:
+    stats_subj = learning_phase_stats[subject_name]
+    stats_le = stats_subj.stats_le
+    stats_app = stats_subj.stats_app
 
-    subject_name : str = subject_result['subject_name']
-    src_main_code : str = subject_result['src_main_code']
-    subject_idx : int = subject_result['subject_idx']
-    sample_size : int = subject_result['sample_size']
+    # `L0001 1/20 7m11s: `
+    subject = f'{stats_subj.subject_name} {stats_subj.subject_idx}/{stats_subj.sample_size} '
+    subject += f'{stats_subj.get_total_time()}: '
+    message = f'{stats_subj.src_main_code}\n\n\n'
 
-    lph_success : bool = subject_result['learn_rules_phase']['success']
-    lph_total_time : int = subject_result['learn_rules_phase']['total_time']
-    lph_error_as_list : List[str] = subject_result['learn_rules_phase']['error_as_list']
+    assert stats_le.success in [True, False], 'Learn rules phase must have a result'
+    assert stats_app.success in [True, False, None], 'sanity check'
 
-    vph_success : Union[bool, None] = subject_result['validation_phase']['success']
-    vph_total_time : Union[int, None] = subject_result['validation_phase']['total_time']
-    vph_tar_main_code : Union[str, None] = subject_result['validation_phase']['tar_main_code']
-    vph_error_as_list : Union[List[str], None] = subject_result['validation_phase']['error_as_list']
-
-    totmin, totsec = divmod(lph_total_time, 60)
-    tothour, totmin = divmod(totmin, 60)
-
-    subject = f'{subject_name} {subject_idx}/{sample_size} ({tothour}h{totmin}m{totsec}s)'
-    message = f'{src_main_code}\n\n'
-
-    assert lph_success is not None, 'Learn rules phase must have a result'
-
-    if lph_success is True:
-      if vph_success is True:
-        subject = 'LEARN (SUCCESS), VAL (SUCCESS): ' + subject
-        message = message + vph_tar_main_code
-      elif vph_success is False:
-        subject = 'LEARN (SUCCESS), VAL (FAIL): ' + subject
-        message = message + '\n'.join(vph_error_as_list)
+    if stats_le.success is True:
+      assert stats_app.success in [True, False], 'Rule application phase must run if learn rules phase is successful'
+      if stats_app.success is True:
+        subject = subject + f'LE(+) AP(+)'
+        message = message + stats_app.tar_main_code
       else:
-        subject = 'LEARN (SUCCESS), VAL (?): ' + subject
-        message = message + 'Validation phase did not run.'
+        subject = subject + f'LE(+) AP(-)'
+        message = message + '\n'.join(stats_app.error_as_list)
     else:
-      assert vph_success is not True, 'Validation phase must not run if learn rules phase fails'
-      subject = 'LEARN (FAIL), VAL (?): ' + subject
-      message = message + '\n'.join(lph_error_as_list)
+      assert stats_app.success is None, 'Rule application phase must not run if learn rules phase fails'
+      subject = subject + f'LE(-) AP(?)'
+      message = message + '\n'.join(stats_le.error_as_list)
 
     p_utils.email_safely(subject=subject, message=message)
 
@@ -298,14 +300,14 @@ def learning_phase_all_subjects(conf_fpath: Path) -> None:
       return p_utils.read_text(starting_ruleset_fpath)
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
-  logger.info('~~~ Starting `p_learn_rules.learning_phase_all_subjects`')
+  logger.info('~~~ Starting `p_learn_apply_rules.learning_phase_all_subjects`')
 
   conf = p_utils.read_yaml(conf_fpath)
   starting_ruleset = _load_starting_ruleset(conf)
   benchmark_sample = _load_benchmark_sample(conf)
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
 
-  learning_phase_stats = {}
+  stats_for_email = {}
   for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
     msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
     logger.debug(p_utils.header(subject_name) + msg)
@@ -320,21 +322,20 @@ def learning_phase_all_subjects(conf_fpath: Path) -> None:
     )
 
     # ~~~ entry point for a single subject
-    subject_result = learning_phase_single_subject(
+    subject_stats = learn_and_application_phases_on_subject(
       subject,
       starting_ruleset,
       subject_idx=subject_idx,
       sample_size=len(benchmark_sample)
     )
 
-    learning_phase_stats[subject_name] = subject_result
-    p_utils.llog_json_time('learning-phase-stats-partial.json', learning_phase_stats)
+    stats_for_email[subject_name] = subject_stats
+    p_utils.llog_json_time(f'learning-phase-stats-{subject_name}.json', asdict(subject_stats))
     if conf['is_email_report']:
-      _email_report(subject_name, learning_phase_stats)
+      _email_report(subject_name, stats_for_email)
     logger.debug(p_utils.footer(subject_name))
 
   logger.info(f'~~~ Learning phase for all subjects is complete.')
-  p_utils.llog_json_time('learning-phase-stats-full.json', learning_phase_stats)
 
 
 if __name__ == '__main__':
@@ -346,7 +347,7 @@ if __name__ == '__main__':
   assert conf_fpath.exists(), f'Configuration file does not exist: {conf_fpath}'
 
   try:
-    learning_phase_all_subjects(conf_fpath)
+    learn_and_application_phases_on_sample(conf_fpath)
   except Exception as exc:
     p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise
