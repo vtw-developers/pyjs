@@ -6,17 +6,17 @@ def test():
 ### twoSum
 from typing import *
 def f_gold(nums: List[int], target: int) -> List[int]:
-    import json
     helper = {}
-    print(json.dumps(helper, sort_keys=True, indent=2))
+    pirel_log_obj(helper)
     for i, v in enumerate(nums):
-        print(json.dumps('for #0', sort_keys=True, indent=2))
+        pirel_log_obj('for #0')
         num = target - v
-        print(json.dumps(num, sort_keys=True, indent=2))
+        pirel_log_obj(num)
         if num in helper:
-            print(json.dumps('if #0', sort_keys=True, indent=2))
+            pirel_log_obj('if #0')
+            pirel_log_obj([helper[num], i])
             return [helper[num], i]
         helper[v] = i
-        print(json.dumps(helper, sort_keys=True, indent=2))
+        pirel_log_obj(helper)
 "-----------------"
 test()
