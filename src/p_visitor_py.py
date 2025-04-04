@@ -1585,10 +1585,12 @@ class LogStatementInserter(pvis.Visitor):
 
     _SUPPORTED_ARG_TYPES = [
       CallNode,
+      ExpressionListNode,
       FloatNode,
       IdentifierNode,
       IntegerNode,
       KeywordArgumentNode,
+      ListNode,
       StringNode,
     ]
     for arg in args:
@@ -1803,50 +1805,32 @@ class LogStatementInserter(pvis.Visitor):
     Build a print statement with the given argument where `arg`
     can be any `AbstractNode` instance (as long as it respects grammar).
 
-    print(json.dumps(arg, sort_keys=True, indent=2))
+    pirel_log_obj(arg)
 
     expression_statement
-      call1
-        function: identifier1 'print'
-        arguments: argument_list1
-          call2
-            function: attribute
-              object: identifier2 'json'
-              attribute: identifier3 'dumps'
-            arguments: argument_list2
-              identifier4 'arg'
-              keyword_argument1
-                name: identifier5 'sort_keys'
-                value: true 'True'
-              keyword_argument2
-                name: identifier6 'indent'
-                value: integer '2'
+      call
+        function: identifier 'pirel_log_obj'
+        arguments: argument_list
+          'arg'
     '''
     _SUPPORTED_TYPES = [
-      IntegerNode,
+      ExpressionListNode,
       FloatNode,
-      StringNode,
       IdentifierNode,
+      IntegerNode,
+      ListNode,
+      StringNode,
     ]
 
     assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'Unsupported argument type: {type(arg)}'
 
     # build bottom-up
-    keyword_argument2 = self.build_KeywordArgumentNode('indent', self.build_IntegerNode(2))
-    keyword_argument1 = self.build_KeywordArgumentNode('sort_keys', self.build_TrueNode())
-
-    argument_list2 = self.build_ArgumentListNode([arg, keyword_argument1, keyword_argument2])
-    attribute = self.build_AttributeNode('json', 'dumps')
-
-    call2 = self.build_CallNode(attribute, argument_list2)
-
-    argument_list1 = self.build_ArgumentListNode([call2])
-
-    call1 = self.build_CallNode(self.build_IdentifierNode('print'), argument_list1)
+    argument_list = self.build_ArgumentListNode([arg])
+    call = self.build_CallNode(self.build_IdentifierNode('pirel_log_obj'), argument_list)
 
     expression_statement = ExpressionStatementNode('expression_statement')
-    expression_statement.add_child(call1)
-    call1.set_parent(expression_statement)
+    expression_statement.add_child(call)
+    call.set_parent(expression_statement)
 
     return expression_statement
 
@@ -1862,6 +1846,35 @@ class LogStatementInserter(pvis.Visitor):
 
       if child.is_terminal():
         idx += 1
+        continue
+
+      # insert log statement before return_statement
+      if isinstance(child, ReturnStatementNode):
+
+        # no return value
+        if len(child.children) == 1:
+          assert child.children[0].is_terminal(), 'return statement has one child'
+          assert child.children[0].node_type == 'return', 'return statement has one child'
+          idx += 1
+          continue
+
+        # return value
+        assert len(child.children) == 2, 'return statement has two children'
+        assert child.children[0].is_terminal(), 'first child is terminal'
+        assert child.children[0].node_type == 'return', 'first child is terminal `return`'
+        assert child.children[1].is_nonterminal(), 'second child is non-terminal'
+        return_val = child.children[1]
+
+        # NOTE ideally make a deepcopy of return_val
+        # but since pretty printer just needs references to children,
+        # we can just use the reference
+        log_statement = self.build_ArgLogStatement(return_val)
+        node.children.insert(idx, log_statement)
+
+        # since we are not doing a deepcopy, setting the parent
+        # will break the tree structure
+        # log_statement.set_parent(node)
+        idx += 2
         continue
 
       # visit the child
@@ -1907,9 +1920,6 @@ class LogStatementInserter(pvis.Visitor):
     Ideally, this visit method is executed only once.
     '''
     self.visit(node.body)
-    imp = self.build_ImportStatementNode('json')
-    imp.set_parent(node.body)
-    node.body.children.insert(0, imp)
 
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     '''
