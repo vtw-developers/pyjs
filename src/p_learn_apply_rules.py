@@ -51,7 +51,7 @@ class SubjectStats:
     total_min, total_sec = divmod(total_sec, 60)
     total_hr, total_min = divmod(total_min, 60)
     if total_hr == 0:
-      return f'{total_min}m {total_sec}s'
+      return f'{total_min}m{total_sec}s'
     return f'{total_hr}h{total_min}m{total_sec}s'
 
 
