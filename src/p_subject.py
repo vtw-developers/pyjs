@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import json
+from pathlib import Path
 from typing import Optional
 
 import p_consts
@@ -185,3 +188,110 @@ class PirelSubject:
     self.translation_rules_instr_src = self.translation_rules_instr_src.replace(p_consts.PARAM_HACK_FLAG, '')
     self.translation_rules_test_code = self.translation_rules_test_code.replace(p_consts.PARAM_HACK_FLAG, '')
     self.translation_rules_instr_tar = self.translation_rules_instr_tar.replace(p_consts.PARAM_HACK_FLAG, '')
+
+  @classmethod
+  def from_file_config(cls, conf_fpath: Path) -> PirelSubject:
+    assert conf_fpath.exists(), f'Config file does not exist: {conf_fpath}'
+    assert conf_fpath.is_file(), f'Config file is not a file: {conf_fpath}'
+    assert conf_fpath.is_absolute(), f'Config file is not an absolute path: {conf_fpath}'
+    assert conf_fpath.suffix == '.yaml', f'Config file is not a YAML file: {conf_fpath}'
+    logger.debug(f'Loading subject from config file: {conf_fpath}')
+    conf : dict = p_utils.read_yaml(conf_fpath)
+    return cls.from_dict_config(conf)
+
+  @classmethod
+  def from_dict_config(cls, conf: dict) -> PirelSubject:
+    '''
+    Create a PirelSubject instance from a dictionary config.
+    CONFIG SCHEMA:
+    - benchmark_name: str
+    - name: str
+    - src_lang: str # py | js
+    - tar_lang: str # py | js
+    - OR
+      - src_program: str
+      - src_program_fpath: str # path to source program file
+    - [auto_backward]: bool # default: True
+    - [choices]: dict # default: {'type': 'ASTNODE', 'choices_list': []}
+    - [translation_rules_test_code_fpath]: str | None # default: None
+    - [translation_rules_main_code_fpath]: str | None # default: None
+    - [translation_rules_instr_src_fpath]: str | None # default: None
+    - [translation_rules_instr_tar_fpath]: str | None # default: None
+    - [is_three_split]: bool # default: True
+    - [is_mylog_inserted]: bool # default: True
+    - [needs_instrumentation]: bool # default: True
+    '''
+
+    # main attributes
+    attr_benchmark_name = conf['benchmark_name']
+    attr_name = conf['name']
+
+    attr_src_lang = conf['src_lang']
+    attr_tar_lang = conf['tar_lang']
+    assert attr_src_lang in p_consts.LANG_DICT, f'Source language is not supported: {attr_src_lang}'
+    assert attr_tar_lang in p_consts.LANG_DICT, f'Target language is not supported: {attr_tar_lang}'
+
+    attr_src_program = None
+    if 'src_program' in conf:
+      attr_src_program = conf['src_program']
+    else:
+      src_program_fpath = p_utils.make_abs(conf['src_program_fpath'], p_consts.ROOT_DIR)
+      assert src_program_fpath.exists(), f'Source program file does not exist: {src_program_fpath}'
+      attr_src_program = p_utils.read_text(src_program_fpath)
+
+    pirel_subject = PirelSubject(
+      benchmark_name=attr_benchmark_name,
+      name=attr_name,
+      src_program=attr_src_program,
+      src_lang=attr_src_lang,
+      tar_lang=attr_tar_lang
+    )
+
+    # PirelSubject instance for a benchmark has an entry in the benchmark configs
+    if attr_benchmark_name in p_consts.BENCHMARK_CONFIGS:
+      return pirel_subject
+
+    # create a custom PirelSubject instance from the config file
+    logger.debug('Creating custom PirelSubject instance from config file')
+
+    pirel_subject.auto_backward = conf.get('auto_backward', True)
+    pirel_subject.choices = conf.get('choices', {'type': 'ASTNODE', 'choices_list': []})
+
+    translation_rules_test_code_fpath = conf.get('translation_rules_test_code_fpath', None)
+    pirel_subject.translation_rules_test_code = None if translation_rules_test_code_fpath is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_test_code_fpath)
+
+    translation_rules_main_code_fpath = conf.get('translation_rules_main_code_fpath', None)
+    pirel_subject.translation_rules_main_code = None if translation_rules_main_code_fpath is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_main_code_fpath)
+
+    translation_rules_instr_src_fpath = conf.get('translation_rules_instr_src_fpath', None)
+    pirel_subject.translation_rules_instr_src = None if translation_rules_instr_src_fpath is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_instr_src_fpath)
+
+    translation_rules_instr_tar_fpath = conf.get('translation_rules_instr_tar_fpath', None)
+    pirel_subject.translation_rules_instr_tar = None if translation_rules_instr_tar_fpath is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_instr_tar_fpath)
+
+    pirel_subject.is_three_split = conf.get('is_three_split', True)
+    pirel_subject.is_mylog_inserted = conf.get('is_mylog_inserted', True)
+    pirel_subject.needs_instrumentation = conf.get('needs_instrumentation', True)
+
+    # attributes that are computed based on previous attributes
+    pirel_subject.is_long_requires_processing = pirel_subject._get_is_long_requires_processing()
+    if pirel_subject.is_long_requires_processing:
+      pirel_subject._translation_rules_process_for_long_source()
+
+    if pirel_subject.is_three_split:
+      assert pirel_subject.src_program.count(p_consts.TEST_MAIN_CALL_DELIMITER) == 2
+      _tmc_splits = pirel_subject.src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+      pirel_subject.src_test_code = _tmc_splits[0]
+      pirel_subject.src_main_code = _tmc_splits[1]
+      pirel_subject.src_test_call_code = _tmc_splits[2]
+    else:
+      assert p_consts.TEST_MAIN_CALL_DELIMITER not in pirel_subject.src_program
+      pirel_subject.src_test_code = None
+      pirel_subject.src_main_code = pirel_subject.src_program
+      pirel_subject.src_test_call_code = None
+
+    return pirel_subject
