@@ -706,65 +706,8 @@ def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
 
 
 # USAGE
-# TODO all paths should be updated (p_consts.CWD)
 def usage_apply_translation_rules():
-  subject_config_dicts = {
-    'short_leetcode': {
-      'benchmark_name': 'leetcode',
-      'subject_name': 'L0001',
-      'src_program_fpath': str(p_consts.ROOT_DIR / Path('benchmarks/leetcode/py/L0001_TwoSum.py')),
-      'default_ruleset_fpath': str(p_consts.ROOT_DIR / Path('translation-rules/main/leet.snart'))
-    },
-    # 'long_leetcode': 'no long program in benchmark',
-    'short_gfg': {
-      'benchmark_name': 'standalone',
-      'subject_name': 'GFG_ADD_1_TO_A_GIVEN_NUMBER',
-      'src_program_fpath': str(p_consts.ROOT_DIR / Path('benchmarks/standalone/py/GFG_ADD_1_TO_A_GIVEN_NUMBER.py')),
-      'default_ruleset_fpath': str(p_consts.ROOT_DIR / Path('translation-rules/main/gfg.snart'))
-    },
-    'long_gfg': {
-      'benchmark_name': 'standalone',
-      'subject_name': 'GFG_ROW_WISE_COMMON_ELEMENTS_TWO_DIAGONALS_SQUARE_MATRIX',
-      'src_program_fpath': str(p_consts.ROOT_DIR / Path('benchmarks/standalone/py/GFG_ROW_WISE_COMMON_ELEMENTS_TWO_DIAGONALS_SQUARE_MATRIX.py')),
-      'default_ruleset_fpath': str(p_consts.ROOT_DIR / Path('translation-rules/main/gfg.snart'))
-    },
-    'short_ctci': {
-      'benchmark_name': 'ctci',
-      'subject_name': 'AL054',
-      'src_program_fpath': str(p_consts.ROOT_DIR / Path('benchmarks/stactci/py/AL054_p02_robot_grid.py')),
-      'default_ruleset_fpath': str(p_consts.ROOT_DIR / Path('translation-rules/main/ctci.snart'))
-    },
-    'long_ctci': {
-      'benchmark_name': 'ctci',
-      'subject_name': 'AL078',
-      'src_program_fpath': str(p_consts.ROOT_DIR / Path('benchmarks/stactci/py/AL078_p12_eight_queens.py')),
-      'default_ruleset_fpath': str(p_consts.ROOT_DIR / Path('translation-rules/main/ctci.snart'))
-    },
-  }
-
-  # set this to choose a subject config from above
-  subject_config_id = 'short_leetcode'
-  subject_config_dict = subject_config_dicts[subject_config_id]
-
-  # constants, not indended to be changed
-  src_lang = 'py'
-  tar_lang = 'js'
-
-  # read from subject config dict
-  benchmark_name = subject_config_dict['benchmark_name']
-  subject_name = subject_config_dict['subject_name']
-  src_program = p_utils.read_text(subject_config_dict['src_program_fpath'])
-  default_ruleset = p_utils.read_text(subject_config_dict['default_ruleset_fpath'])
-
-  subject_config = p_subject.PirelSubject(
-    benchmark_name,
-    subject_name,
-    src_program,
-    src_lang,
-    tar_lang,
-  )
-  subject_config.translation_rules_main_code = default_ruleset
-
+  subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
   tar_program_plausible = apply_translation_rules(subject_config)
   logger.info(f'Plausible target program:\n{tar_program_plausible}')
 
