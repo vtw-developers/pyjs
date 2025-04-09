@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 import d_utils
+import p_subject
 import p_utils
 
 
@@ -337,7 +338,7 @@ def comment_out_tester_ph(code: str, lang: str) -> str:
 
 
 _last_run_cached = None
-def run_src_program_with_mylog(src_program_instr: str, src_lang: str) -> Tuple[list, Optional[dict]]:
+def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelSubject) -> Tuple[list, Optional[dict]]:
   '''
   This function runs the source program with mylog and returns the log list and error if any.
   '''
@@ -345,26 +346,26 @@ def run_src_program_with_mylog(src_program_instr: str, src_lang: str) -> Tuple[l
 
   # check the cache first
   global _last_run_cached
-  if _last_run_cached is not None and _last_run_cached[0] == src_program_instr and _last_run_cached[1] == src_lang:
+  if _last_run_cached is not None and _last_run_cached[0] == src_program_instr and _last_run_cached[1] == subject.src_lang:
     logger.debug('run_src_program_with_mylog: using cached result')
     return _last_run_cached[2], _last_run_cached[3]
 
-  assert src_lang in MYLOG_IMPL, f'mylog for {src_lang} is not implemented.'
-  src_program_run = MYLOG_IMPL[src_lang] + comment_out_tester_ph(src_program_instr, src_lang)
+  assert subject.src_lang in MYLOG_IMPL, f'mylog for {subject.src_lang} is not implemented.'
+  src_program_run = MYLOG_IMPL[subject.src_lang] + comment_out_tester_ph(src_program_instr, subject.src_lang)
 
-  stdout, stderr = _run_code(src_program_run, src_lang)
+  stdout, stderr = _run_code(src_program_run, subject.src_lang)
 
-  src_log = _extract_log_list_from_stdout(stdout, src_lang)
-  src_error = _extract_err_from_stderr(stderr, src_lang)
+  src_log = _extract_log_list_from_stdout(stdout, subject.src_lang)
+  src_error = _extract_err_from_stderr(stderr, subject.src_lang)
 
-  _last_run_cached = (src_program_instr, src_lang, src_log, src_error)
+  _last_run_cached = (src_program_instr, subject.src_lang, src_log, src_error)
 
   return src_log, src_error
 
 
 def run_tar_program_until_mylog_mismatch(
   tar_program_instr: str,
-  tar_lang: str,
+  subject: p_subject.PirelSubject,
   src_log: list,
   is_dry_run: bool
 ) -> Tuple[str, list, Optional[dict]]:
@@ -374,16 +375,16 @@ def run_tar_program_until_mylog_mismatch(
   '''
   logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
 
-  assert tar_lang in MYLOG_MATCH_IMPL, f'mylog (match) for {tar_lang} is not implemented.'
-  concode_prepart = MYLOG_MATCH_IMPL[tar_lang].replace('{MYLOG_LIST}', json.dumps(src_log))
-  tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, tar_lang)
+  assert subject.tar_lang in MYLOG_MATCH_IMPL, f'mylog (match) for {subject.tar_lang} is not implemented.'
+  concode_prepart = MYLOG_MATCH_IMPL[subject.tar_lang].replace('{MYLOG_LIST}', json.dumps(src_log))
+  tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, subject.tar_lang)
   if is_dry_run:
     tar_log = None
     tar_error = None
   else:
-    stdout, stderr = _run_code(tar_program_run, tar_lang)
-    tar_log = _extract_log_list_from_stdout(stdout, tar_lang)
-    tar_error = _extract_err_from_stderr(stderr, tar_lang)
+    stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
+    tar_log = _extract_log_list_from_stdout(stdout, subject.tar_lang)
+    tar_error = _extract_err_from_stderr(stderr, subject.tar_lang)
     if tar_error is not None and 'line_num' in tar_error:
       prepart_linecount = len(concode_prepart.split('\n')) - 1
       tar_error['line_num'][1] -= prepart_linecount
