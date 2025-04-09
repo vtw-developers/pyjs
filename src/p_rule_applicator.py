@@ -352,6 +352,9 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
   logger.debug('translating `src_main_code` to target language using choices:')
   logger.debug(json.dumps(choices, indent=2))
 
+  assert subject.translation_rules_main_code is not None, \
+    'translation rules for main code must be provided'
+
   # TODO consider a case when `choices` leads to a problematic slot.
   # i.e. a slot for which we don't have a translation rule.
   duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
