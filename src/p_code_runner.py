@@ -1,13 +1,12 @@
 import json
-import logging
 import os
 import signal
 import subprocess
-import sys
 from pathlib import Path
 from typing import Optional, Tuple
 
 import d_utils
+import p_consts
 import p_subject
 import p_utils
 
@@ -202,7 +201,6 @@ def myexactlog(*args):
   mylog(*args)
 '''
 
-
 MYLOG_IMPL = {
   'py': MYLOG_IMPL_PY
 }
@@ -210,6 +208,7 @@ MYLOG_IMPL = {
 MYLOG_MATCH_IMPL = {
   'js': MYLOG_MATCH_IMPL_JS,
 }
+
 
 CODE_RUN_COMMANDS = {
   'py': 'python {filename}',
@@ -238,9 +237,8 @@ def _command_execute(command: str, timeout=10) -> None:
 
 
 def _extract_log_list_from_stdout(stdout: str, lang: str) -> list:
-  logger.debug('Starting p_code_runner._extract_log_list_from_stdout')
-  mylog_lines = [x for x in stdout.split('\n') if x.startswith('["MYLOG')]
-  return [json.loads(x) for x in mylog_lines]
+  mylog_lines = [line for line in stdout.split('\n') if line.startswith('["MYLOG')]
+  return [json.loads(line) for line in mylog_lines]
 
 
 def _extract_err_from_stderr(stderr: str, lang: str) -> Optional[dict]:
@@ -258,7 +256,7 @@ def _extract_err_from_stderr(stderr: str, lang: str) -> Optional[dict]:
     'Error: Cannot find module',
   ]
 
-  assert lang in ['py', 'js'], f'Unsupported language: {lang}'
+  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
   if lang == 'js' and str(TMP_DIR) in stderr:
     # find the splitter
@@ -292,7 +290,7 @@ def _extract_err_from_stderr(stderr: str, lang: str) -> Optional[dict]:
     }
 
   if lang == 'py' and str(TMP_DIR) in stderr:
-    return {'error_type': 'UnknownError (Parser not implemented)'}
+    raise NotImplementedError('Python error extraction is not implemented yet')
 
 
 def _run_code(code: str, lang: str) -> Tuple[str, str]:
@@ -301,7 +299,7 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
   '''
   logger.debug('Starting p_code_runner._run_code')
 
-  assert lang in ['py', 'js'], f'Unsupported language: {lang}'
+  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
   temp_filename = _get_temp_filename(code, lang)
   p_utils.write_text(temp_filename, code)
 
@@ -316,24 +314,26 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
 
 def comment_out_tester_ph(code: str, lang: str) -> str:
   logger.debug('Starting p_code_runner.comment_out_tester_ph')
+  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
-  assert lang in ['py', 'js'], f'Unsupported language: {lang}'
-  _SPLITTER = '\n"+++++++++++++++++"'
+  _SPLITTER = '\n"+++++++++++++++++"\n'
+
   if lang == 'py':
     splits = code.split(_SPLITTER)
     if len(splits) == 1:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['# ' + x for x in to_comment_out.split('\n')])
+    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n')])
     return commented_out + _SPLITTER + rest
+
   if lang == 'js':
     splits = code.split(_SPLITTER)
     if len(splits) == 1:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['// ' + x for x in to_comment_out.split('\n')])
+    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n')])
     return commented_out + _SPLITTER + rest
 
 
@@ -378,14 +378,17 @@ def run_tar_program_until_mylog_mismatch(
   assert subject.tar_lang in MYLOG_MATCH_IMPL, f'mylog (match) for {subject.tar_lang} is not implemented.'
   concode_prepart = MYLOG_MATCH_IMPL[subject.tar_lang].replace('{MYLOG_LIST}', json.dumps(src_log))
   tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, subject.tar_lang)
+
   if is_dry_run:
-    tar_log = None
-    tar_error = None
-  else:
-    stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
-    tar_log = _extract_log_list_from_stdout(stdout, subject.tar_lang)
-    tar_error = _extract_err_from_stderr(stderr, subject.tar_lang)
-    if tar_error is not None and 'line_num' in tar_error:
-      prepart_linecount = len(concode_prepart.split('\n')) - 1
-      tar_error['line_num'][1] -= prepart_linecount
+    return tar_program_run, None, None
+
+  stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
+
+  tar_log = _extract_log_list_from_stdout(stdout, subject.tar_lang)
+  tar_error = _extract_err_from_stderr(stderr, subject.tar_lang)
+
+  if tar_error is not None and 'line_num' in tar_error:
+    prepart_linecount = len(concode_prepart.split('\n')) - 1
+    tar_error['line_num'][1] -= prepart_linecount
+
   return tar_program_run, tar_log, tar_error
