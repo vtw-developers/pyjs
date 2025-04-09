@@ -23,6 +23,8 @@ PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 DUOGLOT_LOGS_DIR = LOGS_DIR / 'duoglot'
 LEARN_RULES_LOGS_DIR = LOGS_DIR / 'learn-rules'
 
+LEARN_APPLY_RULES_CONFIGS_DIR = CONFIGS_DIR / 'p-learn-apply-rules'
+
 
 ################################################################################################
 #################################### ENVIRONMENT ###############################################

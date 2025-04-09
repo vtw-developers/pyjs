@@ -343,7 +343,7 @@ if __name__ == '__main__':
   argparser.add_argument('conf_fname', type=str, help='Name the configuration file (default=default.yaml)')
   args = argparser.parse_args()
   conf_fname : str = args.conf_fname if args.conf_fname.endswith('.yaml') else args.conf_fname + '.yaml'
-  conf_fpath = p_consts.CONFIGS_DIR / conf_fname
+  conf_fpath = p_consts.LEARN_APPLY_RULES_CONFIGS_DIR / conf_fname
   assert conf_fpath.exists(), f'Configuration file does not exist: {conf_fpath}'
 
   try:
