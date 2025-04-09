@@ -51,7 +51,6 @@ class PirelSubject:
     tar_lang: str,  # js
   ):
     logger.debug('Initializing PirelSubject instance')
-    assert benchmark_name in p_consts.BENCHMARK_CONFIGS
 
     # ATTRIBUTES PASSED BY CONSTRUCTOR
     self.benchmark_name = benchmark_name
@@ -60,9 +59,35 @@ class PirelSubject:
     self.src_lang = src_lang
     self.tar_lang = tar_lang
 
+    # explicitly setting all attributes to none
+    # to avoid using uninitialized attributes
+    self.auto_backward = None
+    self.choices = None
+    self.translation_rules_test_code = None
+    self.translation_rules_instr_src = None
+    self.translation_rules_instr_tar = None
+    self.is_three_split = None
+    self.is_mylog_inserted = None
+    self.needs_instrumentation = None
+    self.is_long_requires_processing = None
+    self.src_test_code = None
+    self.src_main_code = None
+    self.src_test_call_code = None
+    self.translation_rules_main_code = None  # must be set to trans.rules learned by PiREL
+
     # ATTRIBUTES WITH DEFAULT VALUES (PER DUOGLOT)
     self.auto_backward = True
     self.choices = {'type': 'ASTNODE', 'choices_list': []}
+
+    # if benchmark_name is not in the configs, then
+    # the remaining attributes must be set manually
+    if self.benchmark_name not in p_consts.BENCHMARK_CONFIGS:
+      logger.warning(f'benchmark_name "{self.benchmark_name}" not in benchmark configs')
+      logger.warning('all attributes must be set manually')
+      return
+
+    logger.debug(f'benchmark_name "{self.benchmark_name}" in benchmark configs')
+    logger.debug(f'loading benchmark configs for "{self.benchmark_name}" from p_consts module')
 
     # ATTRIBUTES LOADED FROM CONFIGS
     self.translation_rules_test_code = self._load_tr_test_code(benchmark_name)
@@ -73,7 +98,7 @@ class PirelSubject:
     self.is_mylog_inserted = p_consts.BENCHMARK_CONFIGS[benchmark_name]['is_mylog_inserted']
     self.needs_instrumentation = p_consts.BENCHMARK_CONFIGS[benchmark_name]['needs_instrumentation']
 
-    # COMPUTED ATTRIBUTES
+    # ATTRIBUTES THAT ARE COMPUTED BASED ON PREVIOUS ATTRIBUTES
     self.is_long_requires_processing = self._get_is_long_requires_processing()
     if self.is_long_requires_processing:
       self._translation_rules_process_for_long_source()
@@ -91,9 +116,6 @@ class PirelSubject:
       self.src_test_code = None
       self.src_main_code = self.src_program
       self.src_test_call_code = None
-
-    # this must be set to the translation rules learned by PiREL
-    self.translation_rules_main_code = None
 
   def __str__(self) -> str:
     attrs = {
