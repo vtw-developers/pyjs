@@ -215,7 +215,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
   # 2 get corresponding instrumented test code and test call code
   tar_test_code_instr = _get_instrumented_tar_test_code(src_test_code_instr, subject)
-  tar_test_call_code = _get_tar_test_call_code(src_test_call_code, subject)
+  tar_test_call_code = _get_tar_test_call_code(src_test_call_code)
 
   # 3 loop to get exhaustive translation of main code
   choices_history = []
@@ -336,7 +336,7 @@ def _get_instrumented_tar_test_code(src_test_code_instr: Optional[str], subject:
   return tar_test_code_instr
 
 
-def _get_tar_test_call_code(src_test_call_code: str, subject: p_subject.PirelSubject) -> str:
+def _get_tar_test_call_code(src_test_call_code: str) -> str:
   '''
   For the moment, just use `src_test_call_code` as `tar_test_call_code`,
   because Python and JavaScript function call syntax is the same.
