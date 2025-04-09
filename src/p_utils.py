@@ -360,3 +360,18 @@ def to_int(val: Union[str, int]) -> int:
   if isinstance(val, int):
     return val
   return int(val)
+
+def make_abs(fpath: Union[Path, str], base_dir: Union[Path, str]) -> Path:
+  '''
+  Make a relative path absolute with respect to base_dir.
+  '''
+  assert isinstance(fpath, (Path, str))
+  assert isinstance(base_dir, (Path, str))
+  if isinstance(fpath, str):
+    fpath = Path(fpath)
+  if isinstance(base_dir, str):
+    base_dir = Path(base_dir)
+  if fpath.is_absolute():
+    return fpath
+  assert base_dir.is_absolute()
+  return base_dir / fpath
