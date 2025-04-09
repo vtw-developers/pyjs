@@ -1,0 +1,35 @@
+# CONFIG SCHEMA:
+# - benchmark_name: str
+# - name: str
+# - src_lang: str # py | js
+# - tar_lang: str # py | js
+# - OR
+#   - src_program: str
+#   - src_program_fpath: str # path to source program file
+# - [auto_backward]: bool # default: True
+# - [choices]: dict # default: {'type': 'ASTNODE', 'choices_list': []}
+# - [translation_rules_test_code_fpath]: str | None # default: None
+# - [translation_rules_main_code_fpath]: str | None # default: None
+# - [translation_rules_instr_src_fpath]: str | None # default: None
+# - [translation_rules_instr_tar_fpath]: str | None # default: None
+# - [is_three_split]: bool # default: True
+# - [is_mylog_inserted]: bool # default: True
+# - [needs_instrumentation]: bool # default: True
+
+benchmark_name: example
+name: example
+src_lang: py
+tar_lang: js
+src_program_fpath: conf/pirel-subject/example.py
+
+auto_backward: True
+choices:
+  type: ASTNODE
+  choices_list: []
+translation_rules_test_code_fpath: None
+translation_rules_main_code_fpath: None
+translation_rules_instr_src_fpath: None
+translation_rules_instr_tar_fpath: None
+is_three_split: True
+is_mylog_inserted: True
+needs_instrumentation: True
