@@ -191,6 +191,12 @@ def _learn_trans_rules_from_tsp(
 
     is_syntax_valid = p_rule_validator.is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules)
     if not is_syntax_valid:
+      logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
+      continue
+
+    is_semantics_valid = p_rule_validator.is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules)
+    if not is_semantics_valid:
+      logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
       continue
 
     checked_trules_list.append(translation_rule)
