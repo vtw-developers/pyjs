@@ -792,7 +792,7 @@ def _deprecated_generate_tsp_overfitted(template_dict: dict) -> Tuple[str, str]:
 
 
 # NEW TSP GENERATION ALGORITHM
-def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tuple[str, str]]:
+def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
   `context_node` is the only child of a `root_node` of `template_origin`s AST.
@@ -834,6 +834,7 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
   ]
 
   NOTE this function should be vocal about important errors
+  NOTE this function returns a third sample that is used during trans.rule validation
   '''
 
   def _init_problematic_node(template_dict: dict) -> pds.DuoGlotNode:
@@ -1105,10 +1106,11 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
     alt_node_types: List[str],
     template_dict: dict,
     grammar: p_grammar.TreeSitterGrammar
-  ) -> Tuple[str, str]:
+  ) -> Tuple[str, str, str]:
     '''
     RETURN pair of "valid" programs or raise an exception.
     RAISE _CannotGenerateCorrectProgramError if both programs are `None`.
+    NOTE Additionally, return a third generated snippet for trans.rule validation.
     '''
 
     def __pop_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
@@ -1129,62 +1131,77 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
       mapped_node: pds.DuoGlotNode,
       alt_node_types: List[str],
       template_dict: dict,
-    ) -> Tuple[str, str]:
+    ) -> Tuple[str, str, str]:
       '''
       Given a mapped node and a list of alternative node types,
       return two alternative node types that can be used to generate
       alternative ASTs.
+      NOTE first two alternatives are for TSP, the third is for a program
+      snippet that is used for translation rule validation.
+      TODO is this always True -> `mapped_node.get_ts_node_type() in alt_node_types`
       '''
       mapped_ntype = mapped_node.get_ts_node_type()
       basic_ntypes = set(p_consts.BASIC_NODE_TYPES[template_dict['src_lang']])
       alt_ntypes = set(alt_node_types)
 
+      # alternatives from basic node types including mapped_ntype
+      basic_alts = basic_ntypes.intersection(alt_ntypes)
+
       # case 1: mapped_node has a basic type
       if mapped_ntype in basic_ntypes:
+        # alternatives from basic node types excluding mapped_ntype
         # {identifier, integer, float}, {identifier, integer}, {identifier} -> {integer}
-        pure_alts = basic_ntypes.intersection(alt_ntypes).difference({mapped_ntype})
+        pure_alts = basic_alts.difference({mapped_ntype})
 
+        # for the second alternative node type
         # choose alternative basic type if possible (mapped_ntype, alt_ntype)
         if len(pure_alts) > 0:
           alt_ntype1 = mapped_ntype
           alt_ntype2 = __pop_ranked(pure_alts, template_dict)
-          return alt_ntype1, alt_ntype2
+          alt_ntype3 = __pop_ranked(basic_alts, template_dict)
+          return alt_ntype1, alt_ntype2, alt_ntype3
 
         # otherwise fall back to the mapped_ntype (mapped_ntype, mapped_ntype)
         else:
           alt_ntype1 = mapped_ntype
           alt_ntype2 = mapped_ntype
-          return alt_ntype1, alt_ntype2
+          alt_ntype3 = __pop_ranked(basic_alts, template_dict)
+          return alt_ntype1, alt_ntype2, alt_ntype3
 
-      # case 2: can choose both alternatives from basic types
-      in_both = basic_ntypes.intersection(alt_ntypes)
-      if len(in_both) >= 2:
+      # case 2: mapped_node is not a basic type, but
+      # can choose both alternatives from basic types
+      if len(basic_alts) >= 2:
         # choose two different basic types from the intersection
-        alt_ntype1 = __pop_ranked(in_both, template_dict)
-        in_both.remove(alt_ntype1)
-        alt_ntype2 = __pop_ranked(in_both, template_dict)
-        return alt_ntype1, alt_ntype2
+        alt_ntype1 = __pop_ranked(basic_alts, template_dict)
+        basic_alts.remove(alt_ntype1)
+        alt_ntype2 = __pop_ranked(basic_alts, template_dict)
+        alt_ntype3 = alt_ntype1
+        return alt_ntype1, alt_ntype2, alt_ntype3
 
-      # case 3: can choose only one alternative from basic types
-      elif len(in_both) == 1:
+      # case 3: mapped_node is not a basic type, but
+      # can choose one alternative from basic types
+      elif len(basic_alts) == 1:
         # choose the only basic type from the intersection
-        alt_ntype1 = __pop_ranked(in_both, template_dict)
+        alt_ntype1 = list(basic_alts)[0]
         alt_ntype2 = mapped_ntype
-        return alt_ntype1, alt_ntype2
+        alt_ntype3 = alt_ntype1
+        return alt_ntype1, alt_ntype2, alt_ntype3
 
       # case 4: no basic types in the intersection: use mapped_ntype itself
-      elif len(in_both) == 0:
+      elif len(basic_alts) == 0:
         alt_ntype1 = mapped_ntype
         alt_ntype2 = mapped_ntype
-        return alt_ntype1, alt_ntype2
+        alt_ntype3 = mapped_ntype
+        return alt_ntype1, alt_ntype2, alt_ntype3
 
       raise RuntimeError('should not reach here')
 
-    alt_ntype1, alt_ntype2 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+    alt_ntype1, alt_ntype2, alt_ntype3 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
     # NOTE TODO no check is performed on the generated code
     code1 = _gen_code_for_node_type(alt_ntype1, template_dict, grammar)
     code2 = _gen_code_for_node_type(alt_ntype2, template_dict, grammar)
-    return code1, code2
+    code3 = _gen_code_for_node_type(alt_ntype3, template_dict, grammar)
+    return code1, code2, code3
 
   def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
     '''
@@ -1218,25 +1235,28 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
     all_alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]],
     grammar: p_grammar.TreeSitterGrammar,
     template_dict: dict
-  ) -> Tuple[str, str]:
+  ) -> Tuple[str, str, str]:
     ''''''
     # FOR EACH TEMPLATIZED NODE, GENERATE AN ALTERNATIVE AST
     alternative_codes_1 = {}
     alternative_codes_2 = {}
+    alternative_codes_3 = {}
 
     # `alt_node_types` is a list of all alternative nodes including `mapped_node.get_type()`
     for mapped_node, alt_node_types in all_alt_starting_nodes:
-      code_1, code_2 = _gen_code_pair_for_node_with_check(mapped_node, alt_node_types, template_dict, grammar)
+      code_1, code_2, code_3 = _gen_code_pair_for_node_with_check(mapped_node, alt_node_types, template_dict, grammar)
       alternative_codes_1[int(mapped_node.get_id())] = code_1
       alternative_codes_2[int(mapped_node.get_id())] = code_2
+      alternative_codes_3[int(mapped_node.get_id())] = code_3
 
     # APPLY ALTERNATIVE CODES AT DESIGNATED LOCATIONS
     gen_src_prog_1 = _apply_alt_codes(alternative_codes_1, template_dict)
     gen_src_prog_2 = _apply_alt_codes(alternative_codes_2, template_dict)
+    gen_src_prog_3 = _apply_alt_codes(alternative_codes_3, template_dict)
 
-    return gen_src_prog_1, gen_src_prog_2
+    return gen_src_prog_1, gen_src_prog_2, gen_src_prog_3
 
-  def _filter_program_pairs(program_pairs: List[Tuple[str, str]], template_dict: dict) -> List[Tuple[str, str]]:
+  def _filter_program_pairs(program_pairs: List[Tuple[str, str, str]], template_dict: dict) -> List[Tuple[str, str, str]]:
     '''
     Given the final list of program pairs (TSPs),
     sanity check them, remove duplicate entries.
@@ -1284,6 +1304,9 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
     filtered_program_pairs = []
     unique_pair_encodings = []
     for program_pair in program_pairs:
+
+      # NOTE The third snippet in `program_pair` is used for translation rule validation.
+      # We do not need to use it as a criteria for removing duplicate entries.
       tree1, tree2 = __get_tree(program_pair[0], lang), __get_tree(program_pair[1], lang)
       # skip if any of them has a parse error
       if tree1 is None or tree2 is None:
@@ -1310,7 +1333,7 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
   logger.debug(f'Problematic node is "{problematic_node}"')
 
   # `program_pairs` is a list of tuples, each tuple is a pair of programs
-  program_pairs : List[Tuple[str, str]] = []
+  program_pairs : List[Tuple[str, str, str]] = []
   _program_pairs_dbg = []  # NOTE for debugging only
 
   # GROUPS OF NODES THAT CAN BE ROOTS OF ALTERNATIVE ASTs (similar to templatized nodes)
@@ -1345,9 +1368,9 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
     # inferred from first TSP would be the most abstract, and translation
     # rule inferred from last TSP would be the most concrete.
     try:
-      gen_src_prog_1, gen_src_prog_2 = _gen_program_pair_new_algorithm(all_alt_starting_nodes, grammar, template_dict)
-      program_pairs.append((gen_src_prog_1, gen_src_prog_2))
-      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, str(fuzz_node_group)))  # NOTE for debugging only
+      gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair_new_algorithm(all_alt_starting_nodes, grammar, template_dict)
+      program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
+      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
     except _CannotGenerateCorrectProgramError as err:
       logger.warning(f'_gen_program_pair_new_algorithm: {p_utils.exception_to_str(err)}')
       logger.debug(f'Cannot generate a TSP for this fuzz node group:\n{str(fuzz_node_group)}')
