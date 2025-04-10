@@ -1805,11 +1805,11 @@ class LogStatementInserter(pvis.Visitor):
     Build a print statement with the given argument where `arg`
     can be any `AbstractNode` instance (as long as it respects grammar).
 
-    pirel_log_obj(arg)
+    PIREL_LOG_OBJ_FN_NAME(arg)
 
     expression_statement
       call
-        function: identifier 'pirel_log_obj'
+        function: identifier 'PIREL_LOG_OBJ_FN_NAME'
         arguments: argument_list
           'arg'
     '''
@@ -1826,7 +1826,7 @@ class LogStatementInserter(pvis.Visitor):
 
     # build bottom-up
     argument_list = self.build_ArgumentListNode([arg])
-    call = self.build_CallNode(self.build_IdentifierNode('pirel_log_obj'), argument_list)
+    call = self.build_CallNode(self.build_IdentifierNode(p_consts.PIREL_LOG_OBJ_FN_NAME), argument_list)
 
     expression_statement = ExpressionStatementNode('expression_statement')
     expression_statement.add_child(call)
