@@ -244,10 +244,12 @@ class PirelSubject:
     attr_src_program = None
     if 'src_program' in conf:
       attr_src_program = conf['src_program']
-    else:
+    elif 'src_program_fpath' in conf:
       src_program_fpath = p_utils.make_abs(conf['src_program_fpath'], p_consts.ROOT_DIR)
       assert src_program_fpath.exists(), f'Source program file does not exist: {src_program_fpath}'
       attr_src_program = p_utils.read_text(src_program_fpath)
+    else:
+      raise ValueError('Either `src_program` or `src_program_fpath` must be provided in the config')
 
     pirel_subject = PirelSubject(
       benchmark_name=attr_benchmark_name,
