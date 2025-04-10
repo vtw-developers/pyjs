@@ -1,0 +1,10 @@
+benchmark_name: snippet-under-test
+name: snippet
+src_lang: py
+tar_lang: js
+
+translation_rules_test_code_fpath: translation-rules/test/leet.snart
+
+is_three_split: True
+is_mylog_inserted: True
+needs_instrumentation: True
