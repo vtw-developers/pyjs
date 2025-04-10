@@ -1,4 +1,7 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;; base rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;; BASE RULES TO TRANSLATE FUNCTION HEADERS ;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (match_expand
   (fragment ("py.module" "*"))
   (fragment ("js.program" "*1"))
@@ -25,6 +28,10 @@
 )
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;; ADDITIONAL RULES TO TRANSLATE FUNCTION HEADERS ;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;; the following rules are part of the function signature
 ;;;;;; that we decided to assume that we have to facilitate
 ;;;;;; testing of individual translation rules by running the
@@ -35,52 +42,58 @@
 ;;;;;; var: List[int]
 ;;;;;; var: List[List[int]]
 
-; typed_parameter `num: int` -> `num`
+;;;;;; `num: int` -> `num`
 (match_expand
   (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ".")) "*")
   (fragment ("js.identifier" "_val1_") "*2")
 )
 
-; typed_parameter `nums: List[int]` -> `num`
+;;;;;; `nums: List[int]` -> `num`
 (match_expand
   (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ("py.subscript" "." (str "[") "." (str "]")))) "*")
   (fragment ("js.identifier" "_val1_") "*2")
 )
 
-; typed_parameter `board: List[List[str]]` -> `board`
+;;;;;; `board: List[List[str]]` -> `board`
 (match_expand
   (fragment ("py.typed_parameter" ("py.identifier" "_val_") (str ":") ("py.type" ("py.subscript" ("py.identifier" "_val_") (str "[") ("py.subscript" "." (str "[") "." (str "]")) (str "]")))) "*")
   (fragment ("js.identifier" "_val1_") "*3")
 )
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;; rule(s) that we cannot learn
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;; RULE(S) THAT WE WILL HANDLE LATER ;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (match_expand
   (fragment ("py.type" ".") "*")
   (fragment  "*2")
 )
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;; tricky rules to learn
-; COMMENT (IGNORE)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; RULE(S) THAT WE CANNOT LEARN AT THE MOMENT ;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;; COMMENT (IGNORE)
 (match_expand
   (fragment ("py.comment" "_val_") "*")
   (fragment "*1")
 )
 
-; from X import * (IGNORE)
+;;;;;; from X import * (IGNORE)
 (match_expand
   (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.wildcard_import" (str "*"))) "*")
   (fragment "*1")
 )
 
-; from X import Y (IGNORE)
+;;;;;; from X import Y (IGNORE)
 (match_expand
   (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
   (fragment "*1")
 )
 
-; import X (IGNORE)
+;;;;;; import X (IGNORE)
 (match_expand
   (fragment ("py.import_statement" (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
   (fragment "*1")
