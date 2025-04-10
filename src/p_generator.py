@@ -1113,7 +1113,7 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
     NOTE Additionally, return a third generated snippet for trans.rule validation.
     '''
 
-    def __pop_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
+    def __choose_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
       '''
       return a node type from `basic_ntypes_subset` that is ranked higher
       in the list of basic node types.
@@ -1157,24 +1157,24 @@ def generate_tsps_with_generator_new_algorithm(template_dict: dict) -> List[Tupl
         # choose alternative basic type if possible (mapped_ntype, alt_ntype)
         if len(pure_alts) > 0:
           alt_ntype1 = mapped_ntype
-          alt_ntype2 = __pop_ranked(pure_alts, template_dict)
-          alt_ntype3 = __pop_ranked(basic_alts, template_dict)
+          alt_ntype2 = __choose_ranked(pure_alts, template_dict)
+          alt_ntype3 = __choose_ranked(basic_alts, template_dict)
           return alt_ntype1, alt_ntype2, alt_ntype3
 
         # otherwise fall back to the mapped_ntype (mapped_ntype, mapped_ntype)
         else:
           alt_ntype1 = mapped_ntype
           alt_ntype2 = mapped_ntype
-          alt_ntype3 = __pop_ranked(basic_alts, template_dict)
+          alt_ntype3 = __choose_ranked(basic_alts, template_dict)
           return alt_ntype1, alt_ntype2, alt_ntype3
 
       # case 2: mapped_node is not a basic type, but
       # can choose both alternatives from basic types
       if len(basic_alts) >= 2:
         # choose two different basic types from the intersection
-        alt_ntype1 = __pop_ranked(basic_alts, template_dict)
+        alt_ntype1 = __choose_ranked(basic_alts, template_dict)
         basic_alts.remove(alt_ntype1)
-        alt_ntype2 = __pop_ranked(basic_alts, template_dict)
+        alt_ntype2 = __choose_ranked(basic_alts, template_dict)
         alt_ntype3 = alt_ntype1
         return alt_ntype1, alt_ntype2, alt_ntype3
 
