@@ -1,16 +1,15 @@
-import json
-from pathlib import Path
 from typing import List
 
-import d_ast_parse
 import d_grammar_expand
 import d_grammar_rules
 import p_consts
-import p_data_structures as pds
-import p_rule_postprocessor as prpp
 import p_pirel
+import p_pynguin
+import p_rule_applicator as prapp
+import p_rule_postprocessor as prpp
 import p_subject
 import p_utils
+import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
@@ -149,80 +148,62 @@ def is_valid_translation_rule_test_based(
   '''
 
 
-def collect_paramable_identifiers(
-  subject: p_subject.PirelSubject,
-  snippet: str
-) -> List[str]:
-  '''
-  Given a snippet of code that is used to test the newly learned translation rule,
-  collect all the identifiers that can be parametrized and used as parameters in
-  test program.
-
-  LOGIC
-  '''
-  ast, _ = d_ast_parse.parse_text_dbg(snippet, subject.src_lang, keep_text=False)
-  tree = pds.DuoGlotTree(ast)
-  return ['a','a']
-
-
 # INDIVIDUAL RULE VALIDATION USAGE
 def _validate_translation_rule_usage():
-  ''''''
-  # MINIMAL INPUTS REQUIRED:
-  # 1. GENERATED SAMPLE
-  # 2. TRANSLATION RULE
-  config = p_utils.read_tmp_json('_validate_translation_rule_usage_config.json')
-  args_dict_fpath = config['args_dict_fpath']
-  args_dict = p_utils.read_tmp_json(args_dict_fpath)
-
-  # args to _learn_trans_rules_from_tsp
-  tsp = args_dict['tsp']
-  template_dict = args_dict['template_dict']
-  subject = p_subject.PirelSubject(**json.loads(args_dict['subject']))
-  translation_rules = args_dict['translation_rules']
-
-  # checked translation rules
-  checked_trules_fpath = config['checked_trules_fpath']
-  checked_trules = p_utils.read_tmp_json(checked_trules_fpath)
-
-  # this is the third generated sample that has the same properties as TSPs
-  # it will be used to validate the translation rule
-  generated_sample = 'id_aqr = 32'
-
-  # the following is the translation rule to be validated
-  trule = checked_trules[0]
-
-  print('fin')
-
-
-# COLLECTING VARIABLES THAT CAN BE USED AS PARAMETERS USAGE
-def _collect_variables_that_can_be_used_as_parameters_usage():
-  # inputs
-  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
+  # we will check the translation of this snippet
+  snippet_under_test = 'c = d'
+  trule_under_test = p_utils.read_text(p_consts.ROOT_DIR / 'individual-trule-validation' / 'rule-validation-module-artifacts' / 'rule1-lex-decl.snart')
+  existing_ruleset = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
   src_lang = 'py'
 
-  # logic
-  parser = p_consts.PARSER_DICT[src_lang]
-  tree = parser.parse(bytes(snippet, 'utf8'))
-  print()
+  src_parser = p_consts.PARSER_DICT[src_lang]
+  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
+  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
 
+  # 1. extract parametrizable identifiers from the snippet
+  _ts_tree = src_parser.parse(bytes(snippet_under_test, 'utf-8'))
+  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
+  _param_collector = pvpy.ParametrizableVariablesCollector()
+  _param_collector.visit(_tree.root_node)
+  _parametrizable_identifiers = _param_collector.get_parametrizable_identifiers()
 
+  # 2. prepare f_gold() function
+  _params = ', '.join(_parametrizable_identifiers)
+  _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
+  _f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
 
-# TEST HARNESSES
-def _test_collect_paramable_identifiers():
-  snippet = p_utils.read_tmp_text('L0001_TwoSum.py')
-  subject = p_subject.PirelSubject(
-    'leetcode',
-    'L0001',
-    p_utils.read_text(p_consts.ROOT_DIR / Path('benchmarks/leetcode/py/L0001_TwoSum.py')),
-    'py',
-    'js'
+  # 3. generate pynguin tests
+  _test_fn_strs = p_pynguin.run_pynguin(_f_gold_fn_str)
+  assert len(_test_fn_strs) == 1, 'expecting a single test function'
+  _test_fn_str = _test_fn_strs[0]
+
+  # 4. combine into a test script without log statements
+  _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+    test_fn_str=_test_fn_str,
+    f_gold_fn_str=_f_gold_fn_str,
+    test_call_str='test()'
   )
-  identifiers = collect_paramable_identifiers(subject, snippet)
-  print(identifiers)
+
+  # 5. insert log statements into the test script
+  _ts_tree = src_parser.parse(bytes(_test_script_str, 'utf-8'))
+  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
+  _ls_inserter = pvpy.LogStatementInserter(function_name='f_gold')
+  _ls_inserter.visit(_tree.root_node)
+  _test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
+
+  # 6. translate the test script into the target language
+  _translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
+
+  pirel_subject_snippet_conf['src_program'] = _test_script_str
+  pirel_subject_snippet_conf['translation_rules_main_code'] = _translation_rules_main_code
+  _pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+  _tar_program_plausible = prapp.apply_translation_rules(_pirel_subject)
+
+  p_utils.write_tmp_text('test_script.py', _test_script_str)
+  p_utils.write_tmp_text('tar_program_plausible.js', _tar_program_plausible)
+
+  print('the translation rule is good')
 
 
 if __name__ == '__main__':
-  # _validate_translation_rule_usage()
-  # _test_collect_paramable_identifiers()
-  _collect_variables_that_can_be_used_as_parameters_usage()
+  _validate_translation_rule_usage()
