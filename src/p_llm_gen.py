@@ -746,7 +746,7 @@ def simplify_template(template_dict: dict) -> dict:
   return template_dict
 
 
-def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[str, str], template_dict: dict) -> List[Tuple[dict, dict]]:
+def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[str, str, str], template_dict: dict) -> List[Tuple[dict, dict]]:
   '''
   RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
   NOTE raised errors propagate to the caller.
@@ -767,7 +767,8 @@ def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[s
       translation_pairs.append(({'source': sp1, 'target': tp1}, {'source': sp2, 'target': tp1}))
     return translation_pairs
 
-  sp1, sp2 = tsp
+  # NOTE sp3 is used as a snippet to validate a translation rule
+  sp1, sp2, sp3 = tsp
 
   # translate `sp1` to produce sp1_tp1_cands (a.k.a. program pairs)
   trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1)

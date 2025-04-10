@@ -164,7 +164,7 @@ def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str
 
 # PIREL TRANSLATION RULE LEARNING MODULE
 def _learn_trans_rules_from_tsp(
-  tsp: Tuple[str, str],
+  tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
   translation_rules: str
@@ -200,7 +200,7 @@ def _learn_trans_rules_from_tsp(
 
 
 def _learn_trans_rules_from_tsp_with_retries(
-  tsp: Tuple[str, str],
+  tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
   translation_rules: str
@@ -401,7 +401,7 @@ def learn_trans_rules_for_prob_node(
     logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
     return template_dict
 
-  def _init_tsps_new_algorithm(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
+  def _init_tsps_new_algorithm(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
     '''
     Generate TSPs using a new algorithm.
     TODO consider built-in function names
