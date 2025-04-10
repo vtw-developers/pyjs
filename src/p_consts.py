@@ -323,6 +323,22 @@ BENCHMARK_CONFIGS = {
 
 
 ################################################################################################
+############################# TRANSLATION RULE VALIDATION ######################################
+################################################################################################
+PIREL_LOG_OBJ_FN_NAME = 'myexactlog'
+F_GOLD_SNIPPET_TEMPLATE = 'def f_gold({params}):\n{indented_snippet_block}'
+TEST_SCRIPT_TEMPLATE = (
+  '{test_fn_str}\n'
+  f'{TEST_MAIN_CALL_DELIMITER}\n'
+  '{f_gold_fn_str}\n'
+  f'{TEST_MAIN_CALL_DELIMITER}\n'
+  '{test_call_str}'
+)
+LOG_STAT_RULE_FPATH = TRANSLATION_RULES_DIR / 'log-statement.snart'
+SNIPPET_UNDER_TEST_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'snippet-under-test.yaml'
+
+
+################################################################################################
 #################################### GENERAL CONFIGS ###########################################
 ################################################################################################
 LANG_DICT = {
