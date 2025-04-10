@@ -4,5 +4,5 @@
 # except these
 !.gitignore
 !README.md
-!config.yaml
+!example.yaml
 !default.yaml
