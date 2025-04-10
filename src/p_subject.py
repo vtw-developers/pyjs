@@ -227,7 +227,9 @@ class PirelSubject:
     - [auto_backward]: bool # default: True
     - [choices]: dict # default: {'type': 'ASTNODE', 'choices_list': []}
     - [translation_rules_test_code_fpath]: str | None # default: None
-    - [translation_rules_main_code_fpath]: str | None # default: None
+    - [OR]
+      - [translation_rules_main_code]: str
+      - [translation_rules_main_code_fpath]: str
     - [translation_rules_instr_src_fpath]: str | None # default: None
     - [translation_rules_instr_tar_fpath]: str | None # default: None
     - [is_three_split]: bool # default: True
@@ -273,9 +275,19 @@ class PirelSubject:
     pirel_subject.translation_rules_test_code = None if translation_rules_test_code_fpath is None else \
       p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_test_code_fpath)
 
-    translation_rules_main_code_fpath = conf.get('translation_rules_main_code_fpath', None)
-    pirel_subject.translation_rules_main_code = None if translation_rules_main_code_fpath is None else \
-      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_main_code_fpath)
+    translation_rules_main_code = None
+    if 'translation_rules_main_code' in conf:
+      translation_rules_main_code = conf['translation_rules_main_code']
+    elif 'translation_rules_main_code_fpath' in conf:
+      translation_rules_main_code_fpath = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
+      assert translation_rules_main_code_fpath.exists(), f'Translation rules main code file does not exist: {translation_rules_main_code_fpath}'
+      translation_rules_main_code = p_utils.read_text(translation_rules_main_code_fpath)
+    else:
+      raise ValueError('Either `translation_rules_main_code` or `translation_rules_main_code_fpath` must be provided in the config')
+    assert translation_rules_main_code is not None, 'translation_rules_main_code is None'
+    assert isinstance(translation_rules_main_code, str), f'translation_rules_main_code must be a string: {translation_rules_main_code}'
+    assert translation_rules_main_code != '', 'translation_rules_main_code is empty'
+    pirel_subject.translation_rules_main_code = translation_rules_main_code
 
     translation_rules_instr_src_fpath = conf.get('translation_rules_instr_src_fpath', None)
     pirel_subject.translation_rules_instr_src = None if translation_rules_instr_src_fpath is None else \
