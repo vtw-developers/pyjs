@@ -140,12 +140,83 @@ def is_valid_translation_rule_syntactic(
 
 def is_valid_translation_rule_test_based(
   subject: p_subject.PirelSubject,
-  translation_rule: str,
+  snippet_under_test: str,
+  trule_under_test: str,
   existing_ruleset: str
 ) -> bool:
   '''
   Entry point for test-based checking if the provided translation rule is valid.
   '''
+  logger.debug('starting is_valid_translation_rule_test_based')
+  logger.debug(f'snippet_under_test:\n{snippet_under_test}')
+  logger.debug(f'trule_under_test:\n{trule_under_test}')
+
+  src_parser = p_consts.PARSER_DICT[subject.src_lang]
+  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
+  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
+
+  # 1. extract parametrizable identifiers from the snippet
+  _ts_tree = src_parser.parse(bytes(snippet_under_test, 'utf-8'))
+  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
+  _param_collector = pvpy.ParametrizableVariablesCollector()
+  _param_collector.visit(_tree.root_node)
+  _parametrizable_identifiers = _param_collector.get_parametrizable_identifiers()
+  logger.debug(f'parametrizable identifiers: {_parametrizable_identifiers}')
+
+  if len(_parametrizable_identifiers) == 0:
+    logger.warning('No parametrizable identifiers found. Cannot generate tests.')
+    return False
+
+  # 2. prepare f_gold() function
+  _params = ', '.join(_parametrizable_identifiers)
+  _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
+  _f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+
+  # 3. generate pynguin tests
+  # TODO improve error handling: detail all possible errors
+  _test_fn_strs = None
+  try:
+    _test_fn_strs = p_pynguin.run_pynguin(_f_gold_fn_str)
+  except Exception as err:
+    logger.warning(f'Pynguin failed to generate tests: {err}')
+    return False
+
+  assert len(_test_fn_strs) == 1, 'expecting a single test function'
+  _test_fn_str = _test_fn_strs[0]
+  logger.debug(f'generated test function:\n{_test_fn_str}')
+
+  # 4. combine into a test script without log statements
+  _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+    test_fn_str=_test_fn_str,
+    f_gold_fn_str=_f_gold_fn_str,
+    test_call_str='test()'
+  )
+  logger.debug('combined test function and f_gold() into a test script')
+
+  # 5. insert log statements into the test script
+  _ts_tree = src_parser.parse(bytes(_test_script_str, 'utf-8'))
+  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
+  _ls_inserter = pvpy.LogStatementInserter(function_name='f_gold')
+  _ls_inserter.visit(_tree.root_node)
+  _test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
+  logger.debug('instrumented the test script with log statements')
+
+  # 6. translate the test script into the target language
+  _translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
+
+  pirel_subject_snippet_conf['src_program'] = _test_script_str
+  pirel_subject_snippet_conf['translation_rules_main_code'] = _translation_rules_main_code
+  _pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+
+  try:
+    _tar_program_plausible = prapp.apply_translation_rules(_pirel_subject)
+  except Exception as err:
+    logger.warning(f'Failed to obtain the translation of the test script: {err}')
+    return False
+
+  logger.debug('obtained the translation of the test script')
+  logger.debug('translation rule is valid')
+  return True
 
 
 # INDIVIDUAL RULE VALIDATION USAGE
