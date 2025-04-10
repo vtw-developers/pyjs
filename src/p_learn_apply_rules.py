@@ -157,7 +157,24 @@ def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, sta
   logger.debug(f'Rule learning phase for "{subject.name}" is complete')
 
   # ~~~ RULE APPLICATION PHASE
-  # NOTE runs only if 'learn rules' phase is successful
+  '''NOTE runs only if 'learn rules' phase is successful
+  NOTE Rule Application Phase assumes that we have just enough
+  translation rules to obtain "some" translation of the source code,
+  i.e. there exists some combination of translation rules that
+  that are enough to obtain the target code:
+    - the translation is syntactically correct
+      - since it is checked during rule learning phase
+    - the translation may have compile errors
+      - interpreter errors for scripting languages
+        such as "var is not defined"
+      - if there are compile errors, rule application phase
+        will attempt to find another combination of translation rules
+        that will not have compile errors
+      - if there are still compile errors, the rule application phase
+        raises `RuntimeError('No unique choices found')`
+    - if there are no compile errors, there might still be semantic
+      errors, i.e. the target code does not produce the expected output.
+  '''
   logger.debug(f'~~~ Starting rule application phase for "{subject.name}"')
   stats_app = RuleApplicationPhaseStats()
   stats_subj.stats_app = stats_app
