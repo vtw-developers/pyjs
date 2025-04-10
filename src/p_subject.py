@@ -55,6 +55,19 @@ class PirelSubject:
   ):
     logger.debug('Initializing PirelSubject instance')
 
+    assert benchmark_name is not None, 'benchmark_name is None'
+    assert name is not None, 'name is None'
+    assert src_program is not None, 'src_program is None'
+    assert src_lang is not None, 'src_lang is None'
+    assert tar_lang is not None, 'tar_lang is None'
+    assert isinstance(benchmark_name, str), f'benchmark_name must be a string: {benchmark_name}'
+    assert isinstance(name, str), f'name must be a string: {name}'
+    assert isinstance(src_program, str), f'src_program must be a string: {src_program}'
+    assert isinstance(src_lang, str), f'src_lang must be a string: {src_lang}'
+    assert isinstance(tar_lang, str), f'tar_lang must be a string: {tar_lang}'
+    assert src_lang in p_consts.LANG_DICT, f'src_lang is not supported: {src_lang}'
+    assert tar_lang in p_consts.LANG_DICT, f'tar_lang is not supported: {tar_lang}'
+
     # ATTRIBUTES PASSED BY CONSTRUCTOR
     self.benchmark_name = benchmark_name
     self.name = name
@@ -225,11 +238,8 @@ class PirelSubject:
     # main attributes
     attr_benchmark_name = conf['benchmark_name']
     attr_name = conf['name']
-
     attr_src_lang = conf['src_lang']
     attr_tar_lang = conf['tar_lang']
-    assert attr_src_lang in p_consts.LANG_DICT, f'Source language is not supported: {attr_src_lang}'
-    assert attr_tar_lang in p_consts.LANG_DICT, f'Target language is not supported: {attr_tar_lang}'
 
     attr_src_program = None
     if 'src_program' in conf:
