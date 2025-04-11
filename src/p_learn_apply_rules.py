@@ -311,10 +311,10 @@ def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
     RETURN the starting ruleset for the learning phase from
     the configuration file or the default starting ruleset.
     '''
-    if conf.get('is_load_starting_ruleset', False):
-      starting_ruleset_fpath = p_consts.ROOT_DIR / conf['starting_ruleset_fpath']
-      assert starting_ruleset_fpath.exists(), 'Starting ruleset file does not exist'
-      return p_utils.read_text(starting_ruleset_fpath)
+    if conf.get('is_override_starting_ruleset', False):
+      overriding_ruleset_fpath = p_consts.ROOT_DIR / conf['overriding_ruleset_fpath']
+      assert overriding_ruleset_fpath.exists(), 'Starting ruleset file does not exist'
+      return p_utils.read_text(overriding_ruleset_fpath)
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
   logger.info('~~~ Starting `p_learn_apply_rules.learning_phase_all_subjects`')
