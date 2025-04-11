@@ -1,19 +1,47 @@
-# schema: refer to `p_subject.PirelSubject.from_dict_config()`
+# CONFIG SCHEMA:
+# - [benchmark_name]: str (default: 'custom')
+# - name: str
+# - src_lang: str
+# - tar_lang: str
+#
+# - OR
+#   - src_program: str
+#   - src_program_fpath: str
+#
+# - [auto_backward]: bool (default: true)
+# - [choices]: dict (default: {'type': 'ASTNODE', 'choices_list': []})
+#
+# - [OR] (when provided, replaces the starting ruleset)
+#   - translation_rules_main_code: str
+#   - translation_rules_main_code_fpath: str
+#
+# - [translation_rules_test_code_fpath]: str | null (default: null)
+# - [translation_rules_instr_src_fpath]: str | null (default: null)
+# - [translation_rules_instr_tar_fpath]: str | null (default: null)
+#
+# - [is_three_split]: bool (default: true)
+# - [is_mylog_inserted]: bool (default: true)
+# - [needs_instrumentation]: bool (default: true)
 
+# if benchmark_name is one of ['leetcode', 'gfg', 'ctci'],
+# then the configs from p_consts are loaded.
 benchmark_name: example
 name: example
 src_lang: py
 tar_lang: js
 src_program_fpath: conf/pirel-subject/example.py
 
-auto_backward: True
+auto_backward: true
 choices:
   type: ASTNODE
   choices_list: []
-translation_rules_test_code_fpath: None
-translation_rules_main_code_fpath: None
-translation_rules_instr_src_fpath: None
-translation_rules_instr_tar_fpath: None
-is_three_split: True
-is_mylog_inserted: True
-needs_instrumentation: True
+
+translation_rules_main_code_fpath: tmp/ruleset.snart
+
+translation_rules_test_code_fpath: null
+translation_rules_instr_src_fpath: null
+translation_rules_instr_tar_fpath: null
+
+is_three_split: true
+is_mylog_inserted: true
+needs_instrumentation: true
