@@ -227,9 +227,9 @@ class PirelSubject:
     - [auto_backward]: bool # default: True
     - [choices]: dict # default: {'type': 'ASTNODE', 'choices_list': []}
     - [translation_rules_test_code_fpath]: str | None # default: None
-    - [OR]
-      - [translation_rules_main_code]: str
-      - [translation_rules_main_code_fpath]: str
+    - OR
+      - translation_rules_main_code: str
+      - translation_rules_main_code_fpath: str
     - [translation_rules_instr_src_fpath]: str | None # default: None
     - [translation_rules_instr_tar_fpath]: str | None # default: None
     - [is_three_split]: bool # default: True
