@@ -216,29 +216,10 @@ class PirelSubject:
   def from_dict_config(cls, conf: dict) -> PirelSubject:
     '''
     Create a PirelSubject instance from a dictionary config.
-    CONFIG SCHEMA:
-    - benchmark_name: str
-    - name: str
-    - src_lang: str # py | js
-    - tar_lang: str # py | js
-    - OR
-      - src_program: str
-      - src_program_fpath: str # path to source program file
-    - [auto_backward]: bool # default: True
-    - [choices]: dict # default: {'type': 'ASTNODE', 'choices_list': []}
-    - [translation_rules_test_code_fpath]: str | None # default: None
-    - OR
-      - translation_rules_main_code: str
-      - translation_rules_main_code_fpath: str
-    - [translation_rules_instr_src_fpath]: str | None # default: None
-    - [translation_rules_instr_tar_fpath]: str | None # default: None
-    - [is_three_split]: bool # default: True
-    - [is_mylog_inserted]: bool # default: True
-    - [needs_instrumentation]: bool # default: True
     '''
 
     # main attributes
-    attr_benchmark_name = conf['benchmark_name']
+    attr_benchmark_name = conf.get('benchmark_name', 'custom')
     attr_name = conf['name']
     attr_src_lang = conf['src_lang']
     attr_tar_lang = conf['tar_lang']
@@ -271,23 +252,23 @@ class PirelSubject:
     pirel_subject.auto_backward = conf.get('auto_backward', True)
     pirel_subject.choices = conf.get('choices', {'type': 'ASTNODE', 'choices_list': []})
 
+    # translation_rules_main_code
+    if 'translation_rules_main_code' in conf:
+      _trmc = conf['translation_rules_main_code']
+    elif 'translation_rules_main_code_fpath' in conf:
+      _trmcp = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
+      assert _trmcp.exists(), f'Translation rules main code file does not exist: {_trmcp}'
+      _trmc = p_utils.read_text(_trmcp)
+    else:
+      _trmc = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
+    assert _trmc is not None, 'translation_rules_main_code is None'
+    assert isinstance(_trmc, str), f'translation_rules_main_code must be a string: {_trmc}'
+    assert _trmc != '', 'translation_rules_main_code is empty'
+    pirel_subject.translation_rules_main_code = _trmc
+
     translation_rules_test_code_fpath = conf.get('translation_rules_test_code_fpath', None)
     pirel_subject.translation_rules_test_code = None if translation_rules_test_code_fpath is None else \
       p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_test_code_fpath)
-
-    translation_rules_main_code = None
-    if 'translation_rules_main_code' in conf:
-      translation_rules_main_code = conf['translation_rules_main_code']
-    elif 'translation_rules_main_code_fpath' in conf:
-      translation_rules_main_code_fpath = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
-      assert translation_rules_main_code_fpath.exists(), f'Translation rules main code file does not exist: {translation_rules_main_code_fpath}'
-      translation_rules_main_code = p_utils.read_text(translation_rules_main_code_fpath)
-    else:
-      raise ValueError('Either `translation_rules_main_code` or `translation_rules_main_code_fpath` must be provided in the config')
-    assert translation_rules_main_code is not None, 'translation_rules_main_code is None'
-    assert isinstance(translation_rules_main_code, str), f'translation_rules_main_code must be a string: {translation_rules_main_code}'
-    assert translation_rules_main_code != '', 'translation_rules_main_code is empty'
-    pirel_subject.translation_rules_main_code = translation_rules_main_code
 
     translation_rules_instr_src_fpath = conf.get('translation_rules_instr_src_fpath', None)
     pirel_subject.translation_rules_instr_src = None if translation_rules_instr_src_fpath is None else \

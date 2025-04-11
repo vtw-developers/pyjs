@@ -55,7 +55,7 @@ class SubjectStats:
     return f'{total_hr}h{total_min}m{total_sec}s'
 
 
-def rule_learning_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str) -> Tuple[str, str]:
+def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str) -> Tuple[str, str]:
   '''
   RETURN Tuple of learned translation rules and translated program.
   RAISE All errors propagate to the caller.
@@ -135,7 +135,7 @@ def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, sta
   stats_subj.start_time = stats_le.start_time
 
   try:
-    learned_trans_rules, tar_main_code = rule_learning_phase_on_subject(subject, starting_ruleset)
+    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset)
 
     logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
     logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
@@ -217,7 +217,7 @@ def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, sta
   return stats_subj
 
 
-def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
+def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
@@ -228,8 +228,6 @@ def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
     `subject_name` is a five character prefix of the program in the dataset.
     `src_program` is contents of the program in the benchmark
     (includes test, main, test call code for leetcode).
-    Origin of the dataset is located at `data/duoglot/tests/staleetcode/pysep`.
-
     NOTE removes comments and docstrings from the main code.
     '''
     def _exclude(sample: List[Tuple[str, str]], exclude_list: List[str]) -> List[Tuple[str, str]]:
@@ -317,14 +315,13 @@ def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
       return p_utils.read_text(overriding_ruleset_fpath)
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
-  logger.info('~~~ Starting `p_learn_apply_rules.learning_phase_all_subjects`')
+  logger.info('~~~ Starting `p_learn_apply_rules.learn_and_application_phases_benchmark_mode`')
 
-  conf = p_utils.read_yaml(conf_fpath)
   starting_ruleset = _load_starting_ruleset(conf)
   benchmark_sample = _load_benchmark_sample(conf)
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
 
-  stats_for_email = {}
+  stats_for_email : Dict[str, SubjectStats] = {}
   for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
     msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
     logger.debug(p_utils.header(subject_name) + msg)
@@ -355,16 +352,45 @@ def learn_and_application_phases_on_sample(conf_fpath: Path) -> None:
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
+def learn_and_application_phases_custom_mode(conf: dict) -> None:
+  '''
+  Run PiREL to learn and apply translation rules for any program.
+
+  NOTE Right now, this function does not support rule application.
+  Only the learning phase is completed.
+  '''
+
+  logger.info('~~~ Starting `p_learn_apply_rules.learn_and_application_phases_custom_mode`')
+
+  subject = p_subject.PirelSubject.from_file_config(p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
+  learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code,)
+  p_utils.llog_text_time(f'learned-trules-{subject.name}.snart', learned_trans_rules)
+  p_utils.llog_text_time(f'target-code-{subject.name}.{subject.tar_lang}', tar_main_code)
+
+
+MODE_CALLBACKS = {
+  'benchmark': learn_and_application_phases_benchmark_mode,
+  'custom': learn_and_application_phases_custom_mode,
+}
+
+
 if __name__ == '__main__':
   argparser = argparse.ArgumentParser()
-  argparser.add_argument('conf_fname', type=str, help='Name the configuration file (default=default.yaml)')
+  argparser.add_argument('conf_fname', type=str, help='Name of the configuration file')
   args = argparser.parse_args()
+
   conf_fname : str = args.conf_fname if args.conf_fname.endswith('.yaml') else args.conf_fname + '.yaml'
   conf_fpath = p_consts.LEARN_APPLY_RULES_CONFIGS_DIR / conf_fname
   assert conf_fpath.exists(), f'Configuration file does not exist: {conf_fpath}'
 
+  conf = p_utils.read_yaml(conf_fpath)
+  mode = conf['mode']
+  assert mode in MODE_CALLBACKS, f'Invalid mode: {mode}. Must be one of {MODE_CALLBACKS}'
+  assert f'mode_{mode}' in conf, f'"mode_{mode}" mode configuration is missing in "{conf_fpath}"'
+  mode_conf = conf[f'mode_{mode}']
+
   try:
-    learn_and_application_phases_on_sample(conf_fpath)
+    MODE_CALLBACKS[mode](mode_conf)
   except Exception as exc:
     p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise
