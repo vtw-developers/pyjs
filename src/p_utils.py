@@ -182,6 +182,9 @@ def llog_json_time(fname: str, obj: Any) -> None:
 def llog_text(fname: str, contents: str) -> None:
   write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, contents, include_timestamp=False)
 
+def llog_text_time(fname: str, contents: str) -> None:
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, contents, include_timestamp=True)
+
 
 # Helper functions to read/write to TMP_DIR
 def read_tmp_json(fname: str) -> Any:
