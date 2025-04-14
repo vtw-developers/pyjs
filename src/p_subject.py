@@ -134,14 +134,13 @@ class PirelSubject:
       self.src_test_call_code = None
 
   def __str__(self) -> str:
-    attrs = {
-      'benchmark_name': self.benchmark_name,
-      'name': self.name,
-      'src_program': self.src_program,
-      'src_lang': self.src_lang,
-      'tar_lang': self.tar_lang,
-    }
-    return json.dumps(attrs)
+    return self.to_json_str()
+
+  def to_json_str(self) -> str:
+    '''
+    Convert the PirelSubject instance to a JSON string.
+    '''
+    return json.dumps(self.__dict__, sort_keys=True)
 
   def __repr__(self) -> str:
     return f'PirelSubject({self.name})'
@@ -300,3 +299,11 @@ class PirelSubject:
       pirel_subject.src_test_call_code = None
 
     return pirel_subject
+
+  @classmethod
+  def from_json_str(cls, json_str: str) -> PirelSubject:
+    '''
+    Create a PirelSubject instance from a JSON string.
+    '''
+    conf = json.loads(json_str)
+    return cls.from_dict_config(conf)
