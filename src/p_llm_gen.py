@@ -375,14 +375,27 @@ class BaseTranslateSP1Task(BasePirelTask):
     return []
 
   def get_starting_prompt_message(self) -> HumanMessage:
+    # src_program is non-zero context for template_origin
+    if self.template_dict['template_origin'] != self.template_dict['src_program']:
+      starting_prompt = HumanMessagePromptTemplate.from_template(
+        p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE
+      ).format(
+        src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
+        tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+        program_to_translate = self.sp1,
+        template_origin = self.template_dict['template_origin'],
+        src_program = self.template_dict['src_program']
+      )
+      return starting_prompt
+
+    # template_origin is the same as context
     starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE
+      p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE_SAME_CONTEXT
     ).format(
       src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
       tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
       program_to_translate = self.sp1,
       template_origin = self.template_dict['template_origin'],
-      src_program = self.template_dict['src_program']
     )
     return starting_prompt
 
