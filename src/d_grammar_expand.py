@@ -335,12 +335,17 @@ class TransSession():
 
       # 3 ~~~~~ PiREL template extraction entrypoint
       if expansion is None:
+        logger.warning(f'No expansion found for slot_id: {new_node_corres_slot_id} (idx: {slot_expan_idx})')
+        logger.debug('There is no translation rule for this node. PiREL template extraction will be performed.')
+
         skip_template_extraction = kwargs.get('skip_template_extraction', False)
         if skip_template_extraction:
+          logger.debug('Skipping template extraction. Just problematic node type and id will be returned.')
           prob_ntype, prob_nid = self.pirel_get_problematic_node(new_node_corres_slot_id, slot_expan_idx, **kwargs)
           templates_dict = {'problematic_node_type': prob_ntype, 'problematic_node_id': prob_nid}
           raise TranslationRuleNotFoundException(templates_dict)
 
+        logger.debug('Performing template extraction.')
         templates_dict: dict = self.pirel_get_templates(new_node_corres_slot_id, slot_expan_idx, **kwargs)
         raise TranslationRuleNotFoundException(templates_dict)
 

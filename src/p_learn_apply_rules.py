@@ -61,7 +61,7 @@ def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: st
   RAISE All errors propagate to the caller.
   '''
 
-  logger.info(f'Starting translation of {subject.name}')
+  logger.info(f'Starting translation of "{subject.name}"')
   translation_rules = starting_ruleset
   p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', translation_rules)
 
@@ -76,6 +76,8 @@ def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: st
     # cannot translate (a.k.a. problematic node), it will generate a
     # translation rule that translates the problematic node.
     try:
+      logger.debug(f'Attempting to translate "{subject.name}" with the current ruleset')
+      logger.debug(f'Number of translation rules in the ruleset: {translation_rules.count("match_expand")}')
       duoglot_result_dict = p_pirel.duoglot_translate_wrapper(
         subject.src_main_code,
         subject.src_lang,
@@ -89,7 +91,7 @@ def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: st
       return translation_rules, duoglot_result_dict['tar_code']
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
-      logger.warning('Translation failed. Attempting to learn translation rules for the problematic node.')
+      logger.warning('FAIL. Translation failed. Attempting to learn translation rules for the problematic node.')
       templates_dict = exc.get_templates_dict()
       trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
 
