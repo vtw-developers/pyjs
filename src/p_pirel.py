@@ -568,9 +568,7 @@ def _test_learn_trans_rules_for_prob_node():
   test_harness_config = p_utils.read_tmp_json('_test_learn_trans_rules_for_prob_node_config.json')
   args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
 
-  subject_dict = json.loads(args_dict['subject'])
-  subject = p_subject.PirelSubject(**subject_dict)
-
+  subject = p_subject.PirelSubject.from_json_str(args_dict['subject'])
   translation_rules = args_dict['translation_rules']
   templates_dict = args_dict['templates_dict']
 
