@@ -174,8 +174,8 @@ def _learn_trans_rules_from_tsp(
   RAISE Nothing. Pass all exceptions to the caller.
   '''
 
-  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
   logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp')
+  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
 
   # translate TSP to get {SP1-TP1, SP2-TP2} (translation pair)
   translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict)
@@ -425,8 +425,8 @@ def learn_trans_rules_for_prob_node(
 
     return tsps
 
+  logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"')
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
-  logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for {subject.name}')
 
   # ~~~ initialize template_dict and TSPs
   template_dict = _init_template_dict(subject, translation_rules, templates_dict)
@@ -499,6 +499,7 @@ def duoglot_translate_wrapper(
   )
 
   # NOTE raises all sorts of exceptions (check docs)
+  # If there are no raised exceptions, it means that the translation was successful.
   tar_ast, dbg_history = translator.get_translation(choices, auto_backward, **kwargs)
 
   logger.info(f'SUCCESS DuoGlot translation is successful!')
