@@ -7,16 +7,16 @@ def test():
 from typing import *
 def f_gold(nums: List[int], target: int) -> List[int]:
     helper = {}
-    pirel_log_obj(helper)
+    myexactlog(helper)
     for i, v in enumerate(nums):
-        pirel_log_obj('for #0')
+        myexactlog('for #0')
         num = target - v
-        pirel_log_obj(num)
+        myexactlog(num)
         if num in helper:
-            pirel_log_obj('if #0')
-            pirel_log_obj([helper[num], i])
+            myexactlog('if #0')
+            myexactlog([helper[num], i])
             return [helper[num], i]
         helper[v] = i
-        pirel_log_obj(helper)
+        myexactlog(helper)
 "-----------------"
 test()
