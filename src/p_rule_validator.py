@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import d_grammar_expand
 import d_grammar_rules
@@ -217,6 +217,39 @@ def is_valid_translation_rule_test_based(
   logger.debug('obtained the translation of the test script')
   logger.debug('translation rule is valid')
   return True
+
+
+def filter_translation_rules(
+  trules_list: List[str],
+  subject: p_subject.PirelSubject,
+  translation_rules: str,
+  tsp: Tuple[str, str, str]
+) -> List[str]:
+  '''
+  Filter out translation rules that are not valid.
+  The filtering is done by checking if the translation rule is valid syntactically and test-based.
+  '''
+  logger.debug('Filtering translation rules')
+
+  # filter out invalid translation rules
+  checked_trules_list = []
+  for idx, translation_rule in enumerate(trules_list, start=1):
+    logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
+
+    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules)
+    if not is_syntax_valid:
+      logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
+      continue
+
+    is_semantics_valid = is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules)
+    if not is_semantics_valid:
+      logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
+      continue
+
+    checked_trules_list.append(translation_rule)
+    logger.debug(f'The number of correct translation rules so far is {len(checked_trules_list)}')
+
+  return checked_trules_list
 
 
 # INDIVIDUAL RULE VALIDATION USAGE
