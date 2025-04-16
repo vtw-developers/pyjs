@@ -179,6 +179,43 @@ def log_file_time(fname: str, contents: str) -> None:
 def llog_json_time(fname: str, obj: Any) -> None:
   write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
 
+def llog_yaml_time(
+  fname: str,
+  obj: Any,
+  strs_as_lines: bool = False,
+  remove_null_vals: bool = False,
+  remove_empty_lists: bool = False,
+) -> None:
+  '''
+  PARAM strs_as_lines: If True, convert multiline strings into lists of lines.
+  PARAM remove_null_vals: If True, remove key-value pairs from dicts where value is None.
+  PARAM remove_empty_lists: If True, remove key-value pairs from dicts where value is an empty list.
+  '''
+  def _rec_process(obj: Any) -> Any:
+    nonlocal strs_as_lines
+    nonlocal remove_null_vals
+    if isinstance(obj, str):
+      if '\n' in obj and strs_as_lines: return obj.splitlines()
+      return obj
+    elif isinstance(obj, list):
+      return [_rec_process(item) for item in obj]
+    elif isinstance(obj, tuple):
+      return tuple(_rec_process(item) for item in obj)
+    elif isinstance(obj, dict):
+      new_dict = {}
+      for key, value in obj.items():
+        if remove_empty_lists and isinstance(value, list) and len(value) == 0:
+          continue
+        if remove_null_vals and value is None:
+          continue
+        new_dict[key] = _rec_process(value)
+      return new_dict
+    else:
+      return obj
+  new_obj = _rec_process(obj)
+  yaml_str = yaml.dump(new_obj, default_flow_style=False, indent=2, canonical=False, width=1000000)
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, yaml_str, include_timestamp=True)
+
 def llog_text(fname: str, contents: str) -> None:
   write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, contents, include_timestamp=False)
 
