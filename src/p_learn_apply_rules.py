@@ -7,9 +7,10 @@ from typing import Dict, List, Tuple
 import d_grammar_expand
 import p_consts
 import p_pirel
-import p_subject
-import p_utils
 import p_rule_applicator
+import p_subject
+import p_tree_log as ptlog
+import p_utils
 
 
 logger = p_utils.setup_logger(__name__)
@@ -55,7 +56,11 @@ class SubjectStats:
     return f'{total_hr}h{total_min}m{total_sec}s'
 
 
-def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str) -> Tuple[str, str]:
+def learn_phase_on_subject(
+  subject: p_subject.PirelSubject,
+  starting_ruleset: str,
+  lsubject: ptlog.Subject
+) -> Tuple[str, str]:
   '''
   RETURN Tuple of learned translation rules and translated program.
   RAISE All errors propagate to the caller.
@@ -72,12 +77,16 @@ def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: st
     logger.info(f'~~~~ Iteration #{iteration}')
     print(f'~~~~ Iteration #{iteration}')
 
+    ltrans_iteration = ptlog.TransIteration(iteration)
+    lsubject.translation_iterations.append(ltrans_iteration)
+
     # PiREL attempts to translate the code. If there is a node that PiREL
     # cannot translate (a.k.a. problematic node), it will generate a
     # translation rule that translates the problematic node.
     try:
       logger.debug(f'Attempting to translate "{subject.name}" with the current ruleset')
       logger.debug(f'Number of translation rules in the ruleset: {translation_rules.count("match_expand")}')
+
       duoglot_result_dict = p_pirel.duoglot_translate_wrapper(
         subject.src_main_code,
         subject.src_lang,
@@ -87,17 +96,32 @@ def learn_phase_on_subject(subject: p_subject.PirelSubject, starting_ruleset: st
         subject.choices,
         subject_name=subject.name,
       )
+
+      ltrans_iteration.success = True
+
       logger.info('SUCCESS. Translation is successful. Returning the target program.')
       return translation_rules, duoglot_result_dict['tar_code']
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
       logger.warning('FAIL. Translation failed. Attempting to learn translation rules for the problematic node.')
       templates_dict = exc.get_templates_dict()
-      trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
+
+      lprob_node = ptlog.ProbNode(templates_dict['problematic_node_id'], templates_dict['problematic_node_type'])
+      ltrans_iteration.success = False
+      ltrans_iteration.reason = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
+      ltrans_iteration.problematic_node = lprob_node
+
+      # ~~~ entering PiREL learning phase
+      # NOTE all raised errors are sent to the caller. If there are no exceptions,
+      # it means that there are translation rules to address the problematic node.
+      trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
 
       logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
       logger.debug(f'Number of translation rules: {len(trules_list)}')
       logger.debug(f'Prepending newly inferred translation rules to the existing ruleset')
+
+      ltrans_iteration.success = True
+      ltrans_iteration.reason = None
 
       # TODO do not add duplicate rules
       comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
@@ -365,9 +389,31 @@ def learn_and_application_phases_custom_mode(conf: dict) -> None:
   logger.info('~~~ Starting `p_learn_apply_rules.learn_and_application_phases_custom_mode`')
 
   subject = p_subject.PirelSubject.from_file_config(p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
-  learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code,)
-  p_utils.llog_text_time(f'learned-trules-{subject.name}.snart', learned_trans_rules)
-  p_utils.llog_text_time(f'target-code-{subject.name}.{subject.tar_lang}', tar_main_code)
+  lsubject = ptlog.Subject(subject.name)
+
+  try:
+    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code, lsubject)
+
+    lsubject.success = True
+    logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
+    logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
+    p_utils.llog_text(f'{subject.name}_learned_rules.snart', learned_trans_rules)
+    p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
+
+  except Exception as exc:
+    msg = f'FAIL Failed to translate "{subject.name}"\n'
+    msg += p_utils.exception_to_str(exc)
+    lsubject.success = False
+    lsubject.reason = msg
+    logger.error(msg)
+
+  p_utils.llog_yaml_time(
+    f'tree-log-{subject.name}.yaml',
+    asdict(lsubject),
+    strs_as_lines=True,
+    remove_null_vals=True,
+    remove_empty_lists=True
+  )
 
 
 MODE_CALLBACKS = {
