@@ -1,11 +1,12 @@
 import json
-from typing import Callable, List
+from typing import Callable, Dict, List, Tuple
 
 import d_ast_match
 import d_ast_parse
 import p_consts
 import p_rule_postprocessor as prpp
 import p_subject
+import p_tree_log as ptlog
 import p_utils
 
 
@@ -737,7 +738,12 @@ def infer_translation_rule_wrapper(
   return translation_rule
 
 
-def infer_translation_rules(subject: p_subject.PirelSubject, template_dict: dict, translation_pairs: dict) -> List[str]:
+def infer_translation_rules(
+  subject: p_subject.PirelSubject,
+  template_dict: dict,
+  translation_pairs: List[Tuple[Dict[str, str], Dict[str, str]]],
+  lprule_inf_log: ptlog.PRuleInfLog
+) -> List[str]:
   '''
   Infer translation rules for multiple translation pairs.
 
@@ -745,7 +751,7 @@ def infer_translation_rules(subject: p_subject.PirelSubject, template_dict: dict
   '''
   p_utils.log_json_time(f'{subject.name}_args-infer_translation_rules.json', locals())
 
-  contexts = template_dict['contexts']
+  contexts : List[Dict[str, List[List[str]]]] = template_dict['contexts']
   src_lang = template_dict['src_lang']
   tar_lang = template_dict['tar_lang']
   is_insert_secret_fn = template_dict['is_insert_secret_fn']
@@ -758,10 +764,20 @@ def infer_translation_rules(subject: p_subject.PirelSubject, template_dict: dict
   _pot_rule_idx = 0
   _num_pot_rules = len(translation_pairs) * len(contexts) * 2 * 2
   trules_list = []
+
   for i, translation_pair in enumerate(translation_pairs, start=1):
+    ltrans_pair = ptlog.TransPair.from_tuple(translation_pair)
+    lprule_inf_log.translation_pairs.append(ltrans_pair)
+
     for j, context in enumerate(contexts, start=1):
+      lcontext = ptlog.Context(j, context['source_context'], context['target_context'])
+      ltrans_pair.contexts.append(lcontext)
+
       for choose_largest_node in [True, False]:
         for is_ignore_semicolon in [True, False]:
+          lrule_inf_comb = ptlog.RuleInfComb()
+          lrule_inf_comb.largest_and_ignore = [choose_largest_node, is_ignore_semicolon]
+          lcontext.combinations.append(lrule_inf_comb)
 
           _pot_rule_idx += 1
           logger.debug(
@@ -787,13 +803,24 @@ def infer_translation_rules(subject: p_subject.PirelSubject, template_dict: dict
               trules_list.append(translation_rule)
               logger.debug(f'Added newly inferred translation rule to the list.')
               logger.debug(f'The number of translation rules so far is {len(trules_list)}')
+
+              ltrule = ptlog.TRule.from_str(translation_rule)
+              lrule_inf_comb.translation_rule = ltrule
+              lrule_inf_comb.num_inferred_rules += 1
+              lcontext.num_inferred_rules += 1
+              ltrans_pair.num_inferred_rules += 1
+              lprule_inf_log.num_inferred_rules += 1
+
             else:
-              logger.warning(f'This rule already exists in the list. Skipping.')
+              msg = 'This rule already exists in the list. Skipping.'
+              logger.warning(msg)
+              lrule_inf_comb.reason = msg
 
           except Exception as exc:
             msg = 'Error during rule inference. Skip this one\n'
             msg += p_utils.exception_to_str(exc)
             logger.error(msg)
+            lrule_inf_comb.reason = msg
 
           logger.debug(f'the number of translation rules so far is {len(trules_list)}')
 

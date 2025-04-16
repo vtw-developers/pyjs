@@ -8,6 +8,7 @@ import p_pynguin
 import p_rule_applicator as prapp
 import p_rule_postprocessor as prpp
 import p_subject
+import p_tree_log as ptlog
 import p_utils
 import p_visitor_py as pvpy
 
@@ -18,7 +19,8 @@ logger = p_utils.setup_logger(__name__)
 def is_valid_translation_rule_syntactic(
   subject: p_subject.PirelSubject,
   translation_rule: str,
-  existing_ruleset: str
+  existing_ruleset: str,
+  ltrule: ptlog.TRule
 ) -> bool:
   '''
   Check if the provided translation rule:
@@ -38,21 +40,31 @@ def is_valid_translation_rule_syntactic(
       used_rule_ids.append(rule_id)
     return used_rule_ids
 
-  def _process_used_rules(rule_ids_before: List[int], rule_ids_after: List[int]) -> bool:
+  def _process_used_rules(
+    rule_ids_before: List[int],
+    rule_ids_after: List[int],
+    ltrule_syntax_val_res: ptlog.TRuleSyntaxValRes
+  ) -> bool:
     nonlocal existing_ruleset
     logger.debug(f'rule_ids_before: {rule_ids_before}')
     logger.debug(f'rule_ids_after: {rule_ids_after}')
 
     # number of rules used after must be strictly greater than number of rules used before
     if len(rule_ids_after) <= len(rule_ids_before):
-      logger.warning('Translation rule is BAD: rule_ids_after must strictly be greater than rule_ids_before')
+      msg = 'Translation rule is BAD: rule_ids_after must strictly be greater than rule_ids_before'
+      logger.warning(msg)
+      ltrule_syntax_val_res.is_valid = False
+      ltrule_syntax_val_res.reason = msg
       return False
 
     # used rule id's before must be identical to the first rule id's after
     for i in range(len(rule_ids_before)):
       if rule_ids_before[i] != rule_ids_after[i]:
-        logger.warning(f'Translation rule is BAD: used rules at index {i} are different')
-        logger.warning('Should not happen under normal circumstances. More debugging needed.')
+        msg = f'Translation rule is BAD: used rules at index {i} are different. '
+        msg += 'Should not happen under normal circumstances. More debugging needed.'
+        logger.warning(msg)
+        ltrule_syntax_val_res.is_valid = False
+        ltrule_syntax_val_res.reason = msg
         return False
 
     # id of the first rule used must be of rule under test
@@ -64,13 +76,19 @@ def is_valid_translation_rule_syntactic(
     rule_under_test_idx_in_after = len(rule_ids_before)
     rule_under_test_id = num_rules_after - 1
     if rule_under_test_id != rule_ids_after[rule_under_test_idx_in_after]:
-      logger.warning('Translation rule is BAD: the last used rule id is not of the rule under test')
-      logger.warning('Should not happen under normal circumstances. More debugging needed.')
+      msg = 'Translation rule is BAD: the last used rule id is not of the rule under test. '
+      msg += 'Should not happen under normal circumstances. More debugging needed.'
+      logger.warning(msg)
+      ltrule_syntax_val_res.is_valid = False
+      ltrule_syntax_val_res.reason = msg
       return False
 
+    ltrule_syntax_val_res.is_valid = True
     return True
 
   logger.debug(f'Checking if translation rule is valid:\n{translation_rule}')
+  ltrule_syntax_val_res = ptlog.TRuleSyntaxValRes()
+  ltrule.syntax_val_res = ltrule_syntax_val_res
 
   # ~~~ FIRST, CHECK IF THE MAPPINGS IN THE TRANSLATION RULE ARE CORRECT
   expansion_programs, _ = d_grammar_rules.parse_analyze_rules(translation_rule)
@@ -82,6 +100,8 @@ def is_valid_translation_rule_syntactic(
     msg = f'Translation rule is BAD:\n{translation_rule}\nis invalid due to rule mapping error:\n'
     msg += p_utils.exception_to_str(err)
     logger.warning(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
     return False
 
   # ~~~ SECOND, CHECK IF THE TRANSLATION RULE REALLY TRANSLATES THE PROBLEMATIC NODE
@@ -103,7 +123,10 @@ def is_valid_translation_rule_syntactic(
     # NOTE dbg_history should have been set in duoglot_translate_wrapper
     dbg_history_before = exc.dbg_history
   except:
-    logger.error('Translation failed due to some error. Should not happen.')
+    msg = 'Translation failed with the existing ruleset. Should not happen.'
+    logger.error(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
     raise RuntimeError('Only TranslationRuleNotFoundException is expected')
 
   # ~~ get the translation result with the existing ruleset + rule under test
@@ -121,28 +144,34 @@ def is_valid_translation_rule_syntactic(
     )
     # translation rule translated the remaining nodes
     logger.debug('Translation rule is GOOD. It translated the last problematic node.')
+    ltrule_syntax_val_res.is_valid = True
     return True
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
     logger.debug('Existing ruleset and the rule under test failed to translate the code')
+    logger.debug('Will further check the rule ids used before and after the translation')
     # NOTE dbg_history should have been set in duoglot_translate_wrapper
     dbg_history_after = exc.dbg_history
   except:
-    logger.debug('Exception other than TranslationRuleNotFoundException occurred')
-    logger.debug('Translation rule under test is bad')
+    msg = 'Exception other than TranslationRuleNotFoundException occurred. '
+    msg += 'Translation rule under test is bad'
+    logger.debug(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
     return False
 
   # there still is a problematic node
   rule_ids_before = _get_used_translation_rule_ids(dbg_history_before)
   rule_ids_after = _get_used_translation_rule_ids(dbg_history_after)
 
-  return _process_used_rules(rule_ids_before, rule_ids_after)
+  return _process_used_rules(rule_ids_before, rule_ids_after, ltrule_syntax_val_res)
 
 
 def is_valid_translation_rule_test_based(
   subject: p_subject.PirelSubject,
   snippet_under_test: str,
   trule_under_test: str,
-  existing_ruleset: str
+  existing_ruleset: str,
+  ltrule: ptlog.TRule
 ) -> bool:
   '''
   Entry point for test-based checking if the provided translation rule is valid.
@@ -150,6 +179,9 @@ def is_valid_translation_rule_test_based(
   logger.debug('starting is_valid_translation_rule_test_based')
   logger.debug(f'snippet_under_test:\n{snippet_under_test}')
   logger.debug(f'trule_under_test:\n{trule_under_test}')
+
+  ltrule_test_based_val_res = ptlog.TRuleTestBasedValRes()
+  ltrule.test_based_val_res = ltrule_test_based_val_res
 
   src_parser = p_consts.PARSER_DICT[subject.src_lang]
   log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
@@ -164,7 +196,10 @@ def is_valid_translation_rule_test_based(
   logger.debug(f'parametrizable identifiers: {_parametrizable_identifiers}')
 
   if len(_parametrizable_identifiers) == 0:
-    logger.warning('No parametrizable identifiers found. Cannot generate tests.')
+    msg = 'No parametrizable identifiers found. Cannot generate tests.'
+    logger.warning(msg)
+    ltrule_test_based_val_res.is_valid = False
+    ltrule_test_based_val_res.reason = msg
     return False
 
   # 2. prepare f_gold() function
@@ -178,12 +213,16 @@ def is_valid_translation_rule_test_based(
   try:
     _test_fn_strs = p_pynguin.run_pynguin(_f_gold_fn_str)
   except Exception as err:
-    logger.warning(f'Pynguin failed to generate tests: {err}')
+    msg = f'Pynguin failed to generate tests: {err}'
+    logger.warning(msg)
+    ltrule_test_based_val_res.is_valid = False
+    ltrule_test_based_val_res.reason = msg
     return False
 
   assert len(_test_fn_strs) == 1, 'expecting a single test function'
   _test_fn_str = _test_fn_strs[0]
   logger.debug(f'generated test function:\n{_test_fn_str}')
+  ltrule_test_based_val_res.generated_test = _test_fn_str
 
   # 4. combine into a test script without log statements
   _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
@@ -211,11 +250,15 @@ def is_valid_translation_rule_test_based(
   try:
     _tar_program_plausible = prapp.apply_translation_rules(_pirel_subject)
   except Exception as err:
-    logger.warning(f'Failed to obtain the translation of the test script: {err}')
+    msg = f'Failed to obtain the translation of the test script: {err}'
+    logger.warning(msg)
+    ltrule_test_based_val_res.is_valid = False
+    ltrule_test_based_val_res.reason = msg
     return False
 
   logger.debug('obtained the translation of the test script')
   logger.debug('translation rule is valid')
+  ltrule_test_based_val_res.is_valid = True
   return True
 
 
@@ -223,7 +266,8 @@ def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   translation_rules: str,
-  tsp: Tuple[str, str, str]
+  tsp: Tuple[str, str, str],
+  lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
   '''
   Filter out translation rules that are not valid.
@@ -236,12 +280,15 @@ def filter_translation_rules(
   for idx, translation_rule in enumerate(trules_list, start=1):
     logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
 
-    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules)
+    ltrule = ptlog.TRule.from_str(translation_rule)
+    lprule_val_log.translation_rules.append(ltrule)
+
+    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules, ltrule)
     if not is_syntax_valid:
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
       continue
 
-    is_semantics_valid = is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules)
+    is_semantics_valid = is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules, ltrule)
     if not is_semantics_valid:
       logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
       continue

@@ -28,6 +28,12 @@ import copy
 import json
 import re
 from abc import ABC, abstractmethod
+from langchain_core.messages.ai import AIMessage
+from langchain_core.messages.base import BaseMessage
+from langchain_core.messages.human import HumanMessage
+from langchain_core.messages.system import SystemMessage
+from langchain_core.prompts.chat import HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain_openai import ChatOpenAI
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import d_ast_parse
@@ -37,14 +43,8 @@ import p_llm_messages
 import p_llm_templates
 import p_llm_val
 import p_subject
+import p_tree_log as ptlog
 import p_utils
-from langchain_core.messages.ai import AIMessage
-from langchain_core.messages.base import BaseMessage
-from langchain_core.messages.human import HumanMessage
-from langchain_core.messages.system import SystemMessage
-from langchain_core.prompts.chat import (HumanMessagePromptTemplate,
-                                         SystemMessagePromptTemplate)
-from langchain_openai import ChatOpenAI
 
 
 logger = p_utils.setup_logger(__name__)
@@ -82,7 +82,13 @@ class BasePirelTask(ABC):
   # error class for internal use
   class _TaskIterationFinishedError(RuntimeError): pass
 
-  def __init__(self, task_name: str, subject: p_subject.PirelSubject, template_dict: dict):
+  def __init__(
+    self,
+    task_name: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    lbase_trans: ptlog.BaseTrans
+  ):
     self.task_name : str = task_name
     self.chat_history : List[BaseMessage] = []
     self.code_blocks_history : List[List[str]] = []
@@ -92,6 +98,10 @@ class BasePirelTask(ABC):
     self.subject = subject
     self.model_params = {}
     self._log(f'creating an in instance of "{task_name}"')
+
+    # creating an attribute in PLLMGenLog
+    self.ltask_loop = ptlog.TaskLoop(self.task_name)
+    lbase_trans.task_loop = self.ltask_loop
 
   def __repr__(self) -> str:
     return self.__class__.__name__
@@ -109,22 +119,31 @@ class BasePirelTask(ABC):
     self._log('BasePirelTask.run: starting the task loop')
     while self.does_require_task_iteration():
 
+      ltask_iteration = ptlog.TaskIteration(self.task_iteration_counter)
+      self.ltask_loop.task_iterations.append(ltask_iteration)
+
       try:
         self._log(f'BasePirelTask.run: task loop (iteration #{self.task_iteration_counter})')
-        data = self._run_task_once()
+        data = self._run_task_once(ltask_iteration)
 
         self._log(f'BasePirelTask.run: SUCCESS task run successful. Ending.')
+        self.ltask_loop.success = True
         return data
 
       except BasePirelTask._TaskIterationFinishedError:
-        self._log(f'BasePirelTask.run: WARNING task run failed. Trying one more time.')
+        self._log('BasePirelTask.run: WARNING task run failed. Trying one more time.')
+        ltask_iteration.reason = 'BasePirelTask._TaskIterationFinishedError'
         self.task_iteration_counter += 1
+
       except p_llm_messages.FeedbackImpossibleError as err:
         self._log(f'BasePirelTask.run: WARNING task run failed due to "{str(err)}"')
         self._log('Trying one more time.')
+        ltask_iteration.reason = 'p_llm_messages.FeedbackImpossibleError'
         self.task_iteration_counter += 1
 
     self._log('BasePirelTask.run: FAIL task failed. Ending.')
+    self.ltask_loop.success = False
+    self.ltask_loop.reason = 'Failed this task for given number of iterations'
     self.run_failed()
 
   def run_init(self) -> None:
@@ -134,7 +153,7 @@ class BasePirelTask(ABC):
     '''Invoken when the task fails. Can be overridden by subclasses'''
 
   # TASK ITERATION
-  def _run_task_once(self) -> Any:
+  def _run_task_once(self, ltask_iteration: ptlog.TaskIteration) -> Any:
     '''
     A single iteration of a task.
     RETURN refer to `BaseValidationResult` and its subclasses.
@@ -158,12 +177,14 @@ class BasePirelTask(ABC):
     starting_raw_response = self._query_llm()
     self.chat_history.append(AIMessage(starting_raw_response))
     starting_code_blocks = self._extract_code_blocks(starting_raw_response)
+    ltask_iteration.starting_code_blocks = starting_code_blocks
     self.code_blocks_history.append(starting_code_blocks)
 
     # validate starting code blocks
     validation_result = self._validate_code_blocks()
     if validation_result.is_successful():
       self._log('_run_task_once: SUCCESS validation is successful. Returning the validation result')
+      ltask_iteration.success = True
       return validation_result.get_data()
 
     # FEEDBACK LOOP
@@ -173,6 +194,9 @@ class BasePirelTask(ABC):
       self._log(f'_run_task_once: feedback loop (run #{self.task_iteration_counter}) (iteration #{self.feedback_iteration_counter})')
       self.run_task_once_feedback_init()
 
+      lfeedback = ptlog.Feedback(self.feedback_iteration_counter)
+      ltask_iteration.feedbacks.append(lfeedback)
+
       # feedback prompt and response
       self._log('_run_task_once: generating a feedback message')
       feedback_message = self.get_feedback_message(validation_result)
@@ -180,16 +204,20 @@ class BasePirelTask(ABC):
       feedback_raw_response = self._query_llm()
       self.chat_history.append(AIMessage(feedback_raw_response))
       feedback_code_blocks = self._extract_code_blocks(feedback_raw_response)
+      lfeedback.code_blocks = feedback_code_blocks
       self.code_blocks_history.append(feedback_code_blocks)
 
       # validate code blocks
       validation_result = self._validate_code_blocks()
       if validation_result.is_successful():
         self._log('_run_task_once: SUCCESS validation is successful. Returning the validation result')
+        lfeedback.success = True
         return validation_result.get_data()
 
       self._log('_run_task_once: WARNING feedback loop unsuccessful. trying one more time.')
       self.feedback_iteration_counter += 1
+      lfeedback.success = False
+      lfeedback.reason = 'Code blocks are not valid'
       self.run_task_once_feedback_failed()
 
     self._log(f'_run_task_once: FAIL task iteration failure #{self.task_iteration_counter}')
@@ -294,8 +322,15 @@ class BaseTranslateSP1Task(BasePirelTask):
   `self.run` returns list of program pairs.
   '''
 
-  def __init__(self, task_name: str, subject: p_subject.PirelSubject, template_dict: dict, sp1: str):
-    super().__init__(task_name, subject, template_dict)
+  def __init__(
+    self,
+    task_name: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    sp1: str,
+    lbase_trans: ptlog.BaseTrans
+  ):
+    super().__init__(task_name, subject, template_dict, lbase_trans)
     self.sp1 = sp1
     self.log_args_as_json(
       'args_init.json', task_name=task_name, template_dict=template_dict, sp1=sp1
@@ -356,7 +391,13 @@ class BaseTranslateSP1Task(BasePirelTask):
     raise SP1TranslationRetryLimitError(msg)
 
   @classmethod
-  def dispatch(self, subject: p_subject.PirelSubject, template_dict: dict, sp1: str) -> 'BaseTranslateSP1Task':
+  def dispatch(
+    self,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    sp1: str,
+    lbase_trans: ptlog.BaseTrans
+  ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right translator subclass
     '''
@@ -365,11 +406,11 @@ class BaseTranslateSP1Task(BasePirelTask):
 
     if _is_context_empty(template_dict):
       logger.debug('BaseTranslateSP1Task.dispatch: Context is empty. Will use direct translation of SP1.')
-      task_obj = SP1_DirectTransG('tr_sp1_dir_tr', subject, template_dict, sp1)
+      task_obj = SP1_DirectTransG('tr_sp1_dir_tr', subject, template_dict, sp1, lbase_trans)
 
     else:
       logger.debug('BaseTranslateSP1Task.dispatch: Context is not empty. Will use partial translation of SP1.')
-      task_obj = SP1_PartialProgramG('tr_sp1_par_pr', subject, template_dict, sp1)
+      task_obj = SP1_PartialProgramG('tr_sp1_par_pr', subject, template_dict, sp1, lbase_trans)
 
     logger.debug(f'BaseTranslateSP1Task.dispatch: returning task object "{repr(task_obj)}"')
     return task_obj
@@ -435,11 +476,19 @@ class BaseTranslateSP2Task(BasePirelTask):
   `self.run` returns list of program pairs.
   '''
 
-  def __init__(self, task_name: str, subject: p_subject.PirelSubject, template_dict: dict, sp1_tp1_cand: dict, sp2: str):
+  def __init__(
+    self,
+    task_name: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    sp1_tp1_cand: dict,
+    sp2: str,
+    lbase_trans: ptlog.BaseTrans
+  ):
     '''
     PARAM sp1_tp1_cand: (sp1_i, tp1_i_j)
     '''
-    super().__init__(task_name, subject, template_dict)
+    super().__init__(task_name, subject, template_dict, lbase_trans)
     self.sp1 = sp1_tp1_cand['source']
     self.tp1_cand = sp1_tp1_cand['target']
     self.sp2 = sp2
@@ -482,7 +531,14 @@ class BaseTranslateSP2Task(BasePirelTask):
     raise SP2TranslationRetryLimitError(msg)
 
   @classmethod
-  def dispatch(self, subject: p_subject.PirelSubject, template_dict: dict, sp1_tp1_cand: dict, sp2: str) -> 'BaseTranslateSP1Task':
+  def dispatch(
+    self,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    sp1_tp1_cand: dict,
+    sp2: str,
+    lbase_trans: ptlog.BaseTrans
+  ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right subclass (translator)
     '''
@@ -492,11 +548,11 @@ class BaseTranslateSP2Task(BasePirelTask):
 
     if _is_context_empty(template_dict):
       logger.debug('BaseTranslateSP2Task.dispatch: Context is empty. Will use direct translation of SP2 (similar to SP1).')
-      task_obj = SP2_DirectTransG('tr_sp2_dir_tr', subject, template_dict, sp1_tp1_cand, sp2)
+      task_obj = SP2_DirectTransG('tr_sp2_dir_tr', subject, template_dict, sp1_tp1_cand, sp2, lbase_trans)
 
     else:
       logger.debug('BaseTranslateSP2Task.dispatch: Context is not empty. Will use partial translation of SP2 (similar to SP1).')
-      task_obj = SP2_PartialProgramG('tr_sp2_par_pr', subject, template_dict, sp1_tp1_cand, sp2)
+      task_obj = SP2_PartialProgramG('tr_sp2_par_pr', subject, template_dict, sp1_tp1_cand, sp2, lbase_trans)
 
     logger.debug(f'BaseTranslateSP2Task.dispatch: returning task object "{repr(task_obj)}"')
     return task_obj
@@ -671,6 +727,7 @@ def get_translation_pairs_from_tsp(
   subject: p_subject.PirelSubject,
   tsp: Tuple[str, str, str],
   template_dict: dict,
+  lpllm_gen_log: ptlog.PLLMGenLog
 ) -> List[Tuple[dict, dict]]:
   '''
   RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
@@ -696,12 +753,20 @@ def get_translation_pairs_from_tsp(
   sp1, sp2, sp3 = tsp
 
   # translate `sp1` to produce sp1_tp1_cands (a.k.a. program pairs)
-  trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1)
+  ltrans_sp1 = ptlog.TransSP1()
+  ltrans_sp1.sp1 = sp1
+  lpllm_gen_log.trans_sp1 = ltrans_sp1
+  trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1, ltrans_sp1)
 
   try:
     sp1_tp1_cands = trans_sp1.run()
+    ltrans_sp1.success = True
+    ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_dict(_c) for _c in sp1_tp1_cands]
   except SP1TranslationRetryLimitError as err:
-    logger.warning(f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}')
+    msg = f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}'
+    logger.warning(msg)
+    ltrans_sp1.success = False
+    ltrans_sp1.reason = msg
     raise NoTransPairsFromTSPError from err
 
   logger.debug(f'Generated {len(sp1_tp1_cands)} candidate translations for SP1:\n{json.dumps(sp1_tp1_cands, indent=2)}')
@@ -710,23 +775,39 @@ def get_translation_pairs_from_tsp(
   all_translation_pairs = []
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
     logger.debug(f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})')
+    ltrans_sp2 = ptlog.TransSP2()
+    ltrans_sp2.id = cand_idx
+    ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_dict(sp1_tp1_cand)
+    ltrans_sp2.sp2 = sp2
+    lpllm_gen_log.trans_sp2s.append(ltrans_sp2)
 
     # check if SP1 and SP2 are identical
     translation_pairs = _check_sp1_sp2_identical(sp1_tp1_cands, sp2)
     if translation_pairs is not None:
       all_translation_pairs.extend(translation_pairs)
+      ltrans_sp2.sp1_sp2_are_identical = True
+      ltrans_sp2.success = True
+      ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pairs]
       continue
 
-    trans_sp2 = BaseTranslateSP2Task.dispatch(subject, template_dict, sp1_tp1_cand, sp2)
+    trans_sp2 = BaseTranslateSP2Task.dispatch(subject, template_dict, sp1_tp1_cand, sp2, ltrans_sp2)
 
     try:
       translation_pair_cands = trans_sp2.run()
     except SP2TranslationRetryLimitError as err:
-      logger.warning(f'BAD: Reached a retry limit for SP2 translation:\n{str(err)}')
-      logger.debug(f'Will try with the next TP1 cands ({len(sp1_tp1_cands)-cand_idx} left)')
+      msg = (
+        f'BAD: Reached a retry limit for SP2 translation:\n'
+        f'{str(err)}\n'
+        f'Will try with the next TP1 cands ({len(sp1_tp1_cands)-cand_idx} left)'
+      )
+      logger.warning(msg)
+      ltrans_sp2.success = False
+      ltrans_sp2.reason = msg
       continue
 
     all_translation_pairs.extend(translation_pair_cands)
+    ltrans_sp2.success = True
+    ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pair_cands]
     logger.debug(f'Generated {len(translation_pair_cands)} new translation pairs from (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})')
     logger.debug(f'The number of all translation pairs so far is {len(all_translation_pairs)}')
     logger.debug(f'New translation pairs:\n{json.dumps(translation_pair_cands, indent=2)}')
@@ -737,8 +818,11 @@ def get_translation_pairs_from_tsp(
   if len(all_translation_pairs) == 0:
     msg = f'BAD: Could not generate any translation pairs from a program pair:\n{json.dumps(sp1_tp1_cands, indent=2)}'
     logger.warning(msg)
+    lpllm_gen_log.success = False
+    lpllm_gen_log.reason = msg
     raise NoTransPairsFromTSPError(msg)
 
+  lpllm_gen_log.success = True
   return all_translation_pairs
 
 

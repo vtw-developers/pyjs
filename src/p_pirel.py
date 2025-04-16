@@ -11,6 +11,7 @@ import p_rule_inferencer
 import p_rule_validator
 import p_subject
 import p_translators
+import p_tree_log as ptlog
 import p_utils
 
 
@@ -166,7 +167,8 @@ def _learn_trans_rules_from_tsp(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str
+  translation_rules: str,
+  ltrule_learn_attempt: ptlog.TRuleLearnAttempt
 ) -> List[str]:
   '''
   RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
@@ -176,15 +178,22 @@ def _learn_trans_rules_from_tsp(
   logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp')
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
 
-  # translate TSP to get {SP1-TP1, SP2-TP2} (translation pair)
-  translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict)
+  # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
+  lpllm_gen_log = ptlog.PLLMGenLog()
+  ltrule_learn_attempt.p_llm_gen_log = lpllm_gen_log
+
+  translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
   assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
 
-  # infer translation rules from translation pairs
-  trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs)
+  # INFER TRANSLATION RULES FROM TRANSLATION PAIRS
+  lprule_inf_log = ptlog.PRuleInfLog()
+  ltrule_learn_attempt.p_rule_inferencer_log = lprule_inf_log
+  trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs, lprule_inf_log)
 
-  # check translation rules
-  checked_trules_list = p_rule_validator.filter_translation_rules(trules_list, subject, translation_rules, tsp)
+  # CHECK TRANSLATION RULES
+  lprule_val_log = ptlog.PRuleValLog()
+  ltrule_learn_attempt.p_rule_validator_log = lprule_val_log
+  checked_trules_list = p_rule_validator.filter_translation_rules(trules_list, subject, translation_rules, tsp, lprule_val_log)
   return checked_trules_list
 
 
@@ -192,7 +201,8 @@ def _learn_trans_rules_from_tsp_with_retries(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str
+  translation_rules: str,
+  ltsp: ptlog.TSP
 ) -> List[str]:
   '''
   RETURN All possible translation rules inferred from all possible translations of `tsp`.
@@ -202,28 +212,46 @@ def _learn_trans_rules_from_tsp_with_retries(
   logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
 
   trules_list = []
-  attempt = 1
-  while attempt <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    logger.debug(f'Attempt at learning translation rules from a TSP #{attempt}')
+  attempt_idx = 1
+  while attempt_idx <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
+    logger.debug(f'Attempt at learning translation rules from a TSP #{attempt_idx}')
+
+    ltrule_learn_attempt = ptlog.TRuleLearnAttempt(attempt_idx)
+    ltsp.trans_rule_learn_attempts.append(ltrule_learn_attempt)
 
     # catch only non-critical exceptions, after which
     # we can attempt to learn rules from a TSP again.
     # TODO how about regenerating a TSP?
     try:
-      trules_list = _learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules)
+      trules_list = _learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules, ltrule_learn_attempt)
       if len(trules_list) > 0:
         logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
+        ltrule_learn_attempt.num_trules = len(trules_list)
+        ltrule_learn_attempt.success = True
+        ltsp.success = True
         return trules_list
+      else:
+        logger.debug(f'No translation rules were learned from TSP.')
+        ltrule_learn_attempt.success = False
+        ltrule_learn_attempt.reason = 'No translation rules were learned from TSP.'
 
     except p_llm_gen.NoTransPairsFromTSPError as err:
-      msg = f'PiREL could not generate any translation pairs from a TSP:\n{json.dumps(tsp, indent=2)}\n'
-      msg += f'This was attempt number {attempt}/{p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS}'
-      msg += str(err)
+      msg = (
+        f'Error: {str(err)}\n'
+        f'PiREL could not generate any translation pairs from a TSP:\n'
+        f'{json.dumps(tsp, indent=2)}\n'
+        f'This was attempt number {attempt_idx}/{p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS}'
+      )
+      ltrule_learn_attempt.success = False
+      ltrule_learn_attempt.reason = msg
       logger.warning(msg)
 
-    attempt += 1
+    attempt_idx += 1
 
-  logger.warning(f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.')
+  msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
+  logger.warning(msg)
+  ltsp.success = False
+  ltsp.reason = msg
   return trules_list
 
 
@@ -231,7 +259,8 @@ def _learn_trans_rules_from_tsp_with_retries(
 def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   translation_rules: str,
-  templates_dict: dict
+  templates_dict: dict,
+  lprob_node: ptlog.ProbNode
 ) -> list:
   '''
   Run PiREL translation rule learning module for a problematic node.
@@ -341,14 +370,18 @@ def learn_trans_rules_for_prob_node(
     logger.info(msg)
     print(msg)
 
+    ltsp = ptlog.TSP(tsp_idx, *tsp)
+    lprob_node.tsps.append(ltsp)
+
     # `_learn_trans_rules_from_tsp` is responsible for translation rule validation
     # it is called in `_learn_trans_rules_from_tsp_with_retries`
-    trules_list = _learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules)
+    trules_list = _learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules, ltsp)
     if len(trules_list) == 0:
       logger.debug(f'Skipping a TSP: no translation rules were learnt from it (tsp_idx={tsp_idx})')
       logger.debug(f'TSP:\n{json.dumps(tsp, indent=2)}')
       continue
 
+    lprob_node.success = True
     return trules_list
 
   msg = (
@@ -357,6 +390,8 @@ def learn_trans_rules_for_prob_node(
     f'len(tsps) = {len(tsps)}\n'
   )
   logger.critical(msg)
+  lprob_node.success = False
+  lprob_node.reason = msg
   raise PirelError(msg)
 
 
