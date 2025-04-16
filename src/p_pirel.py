@@ -185,23 +185,7 @@ def _learn_trans_rules_from_tsp(
   trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs)
 
   # check translation rules
-  checked_trules_list = []
-  for idx, translation_rule in enumerate(trules_list, start=1):
-    logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
-
-    is_syntax_valid = p_rule_validator.is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules)
-    if not is_syntax_valid:
-      logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
-      continue
-
-    is_semantics_valid = p_rule_validator.is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules)
-    if not is_semantics_valid:
-      logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
-      continue
-
-    checked_trules_list.append(translation_rule)
-    logger.debug(f'The number of correct translation rules so far is {len(checked_trules_list)}')
-
+  checked_trules_list = p_rule_validator.filter_translation_rules(trules_list, subject, translation_rules, tsp)
   return checked_trules_list
 
 
