@@ -334,7 +334,10 @@ def learn_trans_rules_for_prob_node(
   # There is a high chance that such a TSP is the first one in `tsps` list
   # according to our new algorithm.
   for tsp_idx, tsp in enumerate(tsps, start=1):
-    msg = f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n{json.dumps(tsp, indent=2)}'
+    msg = (
+      f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
+      f'{json.dumps(tsp, indent=2)}'
+    )
     logger.info(msg)
     print(msg)
 
@@ -348,12 +351,11 @@ def learn_trans_rules_for_prob_node(
 
     return trules_list
 
-  msg = f'Could not learn any translation rules to translate the problematic node.\n'
-  msg += f'Problematic node type is "{template_dict["problematic_node_type"]}".\n'
-  msg += f'Generated {len(tsps)} TSPs and none of them was successfully translated\n'
-  msg += f'into target language to form translation pairs and further to infer translation rules.\n'
-  msg += f'Here are the generated TSPs:\n{json.dumps(tsps, indent=2)}\n'
-  msg += f'Here is the template_dict:\n{json.dumps(template_dict, indent=2)}'
+  msg = (
+    f'Could not learn valid translation rules to translate the problematic node with any of the TSPs.\n'
+    f'problematic_node_type = "{template_dict["problematic_node_type"]}".\n'
+    f'len(tsps) = {len(tsps)}\n'
+  )
   logger.critical(msg)
   raise PirelError(msg)
 
