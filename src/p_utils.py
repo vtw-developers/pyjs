@@ -376,9 +376,12 @@ def email_safely(subject: str, message:str='intentionally left empty') -> bool:
 
 
 # MISC
-def exception_to_str(exc: Exception) -> str:
-  msg = f'{type(exc)}: {exc}\n\n'
-  msg += f'Traceback:\n{traceback.format_exc()}'
+def exception_to_str(exc: Exception, include_traceback : bool = True) -> str:
+  msg = (
+    f'type(exc) = "{type(exc)}"\n'
+    f'str(exc):\n{str(exc)}'
+    f'\ntraceback:\n{traceback.format_exc()}' if include_traceback else ''
+  )
   return msg
 
 def header(subject_name: str) -> str:
