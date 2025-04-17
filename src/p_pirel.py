@@ -242,92 +242,6 @@ def learn_trans_rules_for_prob_node(
   RAISE `PirelError` if cannot generate a translation rule. Our goal is to never raise this error
   '''
 
-  # DEPRECATED
-  def _deprecated_init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
-    # 1 generate all TSPs
-    tsps = p_generator._deprecated_generate_tsps_with_generator_OLD(template_dict)
-    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
-    if len(tsps) == 0:
-      logger.warning(f'Zero TSPs generated for the problematic node type "{template_dict["problematic_node_type"]}"')
-
-    # 2 add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
-    if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
-      logger.debug('Adding `(template_origin, template_origin)` as a TSP')
-      tsps.append((template_dict['template_origin'], template_dict['template_origin']))
-
-    # 3 an overfitted TSP is a TSP where only literal values are different from that of `template_origin`.
-    if p_consts.IS_GENERATE_OVERFITTED_TSP:
-      overfitted_tsp = p_generator._deprecated_generate_tsp_overfitted(template_dict)
-      logger.debug('Adding an overfitted TSP')
-      tsps.append(overfitted_tsp)
-
-    assert len(tsps) > 0, 'Zero TSPs generated'
-    p_utils.log_json_time(f'{subject.name}_TSPs-all.json', tsps)
-
-    # 4 sort TSPs using LLM
-    tsps = _deprecated_sort_tsps_using_llm(tsps, subject, template_dict)
-    p_utils.log_json_time(f'{subject.name}_TSPs-all-llm-sorted.json', tsps)
-    return tsps
-
-  # DEPRECATED
-  def _deprecated_sort_tsps_using_llm(tsps: List[Tuple[str, str]], subject: p_subject.PirelSubject, template_dict: dict, **kwargs) -> List[Tuple[str, str]]:
-    '''
-    Sort TSPs using LLM.
-    We sort TSPs using LLM to get the most probable TSPs first.
-    This way we can learn translation rules from the most probable TSPs.
-
-    IDEA
-    Iterate over TSPs, if a TSP has a syntactic error, move it to the end of the list.
-    '''
-
-    def __are_both_snippets_single_token_in_tsp(tsp: Tuple[str, str]) -> bool:
-      '''
-      Check if both snippets in a TSP are single tokens
-      HACK assume that a single token is a token without spaces
-      '''
-      return len(tsp[0].split()) == 1 and len(tsp[1].split()) == 1
-
-    logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node._sort_tsps_using_llm')
-    logger.debug(f'Number of unsorted TSPs is {len(tsps)}:\n{json.dumps(tsps, indent=2)}')
-
-    syntactically_correct_tsps = []
-    syntactically_incorrect_tsps = []
-
-    for tsp_idx, tsp in enumerate(tsps, start=1):
-
-      # early decision if both snippets are single tokens
-      if __are_both_snippets_single_token_in_tsp(tsp):
-        syntactically_incorrect_tsps.append(tsp)
-        continue
-
-      tsp_is_correct = None
-      try:
-        tsp_is_correct = p_llm_gen._deprecated_is_tsp_syntactically_correct(tsp, subject, template_dict, **kwargs)
-      except p_llm_gen.LLMResponseFormatError as err:
-        logger.warning(f'Sorting TSPs: error in LLM response: {err}')
-        continue
-
-      assert tsp_is_correct is not None, 'should not happen: tsp_is_correct is None'
-      if tsp_is_correct:
-        syntactically_correct_tsps.append(tsp)
-      else:
-        syntactically_incorrect_tsps.append(tsp)
-
-    logger.debug(f'Number of syntactically correct TSPs: {len(syntactically_correct_tsps)}')
-    logger.debug(f'{json.dumps(syntactically_correct_tsps, indent=2)}')
-    p_utils.log_json_time(f'{subject.name}_syntactically_correct_TSPs.json', syntactically_correct_tsps)
-
-    logger.debug(f'Number of syntactically incorrect TSPs: {len(syntactically_incorrect_tsps)}')
-    logger.debug(f'{json.dumps(syntactically_incorrect_tsps, indent=2)}')
-    p_utils.log_json_time(f'{subject.name}_syntactically_incorrect_TSPs.json', syntactically_incorrect_tsps)
-
-    if p_consts._deprecated_IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM and len(syntactically_correct_tsps) > 0:
-      logger.debug('Ignoring syntactically incorrect TSPs')
-      return syntactically_correct_tsps
-
-    logger.debug('Returning syntactically correct TSPs + syntactically incorrect TSPs')
-    return syntactically_correct_tsps + syntactically_incorrect_tsps
-
   def _init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
 
     def __rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> dict:
@@ -391,7 +305,7 @@ def learn_trans_rules_for_prob_node(
     logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
     return template_dict
 
-  def _init_tsps_new_algorithm(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
+  def _init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
     '''
     Generate TSPs using a new algorithm.
     TODO consider built-in function names
@@ -414,7 +328,7 @@ def learn_trans_rules_for_prob_node(
 
   # ~~~ initialize template_dict and TSPs
   template_dict = _init_template_dict(subject, translation_rules, templates_dict)
-  tsps = _init_tsps_new_algorithm(subject, template_dict)
+  tsps = _init_tsps(subject, template_dict)
 
   # ~~~ iterate over TSPs (from abstract to concrete)
   # NOTE since we are using an updated TSP generation algorithm,
