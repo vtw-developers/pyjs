@@ -1,5 +1,4 @@
 import json
-import logging
 from pathlib import Path
 
 import d_grammar
@@ -104,14 +103,6 @@ PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
 # template simplification
 # max depth for a node before it's simplified
 LLM_VAL_TS_MAX_DEPTH = 4
-
-# The number of TSPs might be big. Learning translation rules from many
-# TSPs takes a lot of resources (time + money). The following parameter
-# controls after how many TSPs that result in working translation rules
-# we do stop. That is, when the number of TSPs that we learnt working
-# translation rules from reaches MAX_NUM_USEFUL_TSPS, we stop the loop
-# and do not use the remaining TSPs.
-_deprecated_MAX_NUM_USEFUL_TSPS = 3
 
 # The number of attempts to learn translation rules from a single TSP
 LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
@@ -227,19 +218,6 @@ PY_BUILT_IN_MODULES = {
   'xmlrpc.client', 'xmlrpc.server', 'zipapp', 'zipfile', 'zipimport', 'zlib', 'zoneinfo'
 }
 
-# an overfitted TSP is a TSP where only literal values are different from that of `template_origin`
-IS_GENERATE_OVERFITTED_TSP = True
-
-# DEPRECATED
-# LLM is used to decide whether a generated TSPS is syntactically correct or not.
-# If this flag is set to True, then syntactically incorrect TSPs are not used.
-# Regardless of this flag, syntactically incorrect TSPs are moved to the end of the list
-# to increase changes of using a correct TSP.
-_deprecated_IS_IGNORE_SYNTACTICALLY_INCORRECT_TSP_PER_LLM = False
-
-# controls the maximum number of fuzz node groups that are used to generate TSPs
-MAX_NUM_FUZZ_NODE_GROUPS = 14
-
 
 ################################################################################################
 #################################### LLM CONFIGS ###############################################
@@ -257,11 +235,9 @@ DEFAULT_MODEL_PARAMS = {
   # 'num_completions': 1,  # can be used only with model._generate
 }
 
-TEMPLATE_SIMPLIFICATION_MAX_RETRIES = 5
 TRANSLATION_SP1_MAX_RETRIES = 2
 TRANSLATION_SP2_MAX_RETRIES = 4
 
-TEMPLATE_SIMPLIFICATION_MAX_FEEDBACKS = 1
 TRANSLATION_SP1_MAX_FEEDBACKS = 3
 TRANSLATION_SP2_MAX_FEEDBACKS = 3
 

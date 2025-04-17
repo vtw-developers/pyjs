@@ -70,44 +70,6 @@ class BaseMessageFactory(ABC):
     pass
 
 
-# SIMPLIFY TEMPLATE
-class SimplifyTemplateF(BaseMessageFactory):
-  def __init__(self, template_dict: dict, subject: p_subject.PirelSubject, val: p_llm_val.SimplifyTemplateValidationResult):
-    super().__init__(template_dict, subject)
-    self.val = val
-
-  def get_message_exceed_depth(self) -> HumanMessage:
-    return HumanMessage('Fill in the holes with simpler code snippets than what you have provided.')
-
-  def get_message_change_outside_holes(self) -> HumanMessage:
-    return HumanMessage('Fill in only the holes, other parts of the template MUST BE kept unchanged.')
-
-  def get_feedback_message(self) -> HumanMessage:
-    self._log(f'the number of generated st_cands is {len(self.val.st_cands)}')
-    self._log(f'here is the stats for them:\n{json.dumps(self.val.st_cands_stats, indent=2)}')
-
-    # case 1: checking if all st_cands exceed the depth threshold
-    self._log('case 1: checking if all st_cands exceed the depth threshold')
-    if self.val.all_exceed_depth_threshold():
-      self._log('all generated st_cands exceed the depth threshold at templatized nodes')
-      self._log('returning the feedback message')
-      feedback_message = self.get_message_exceed_depth()
-      return feedback_message
-    self._log('case 1: some/all st_cands do not exceed the depth threshold')
-
-    # case 2: checking if all st_cands change parts outside of holes
-    self._log('case 2: checking if all st_cands change parts outside of holes')
-    if self.val.all_change_parts_outside_holes():
-      self._log('all st_cands change parts of the template outside the holes')
-      self._log('returning the feedback message')
-      feedback_message = self.get_message_change_outside_holes()
-      return feedback_message
-    self._log('case 2: some/all st_cands fill in the holes correctly, do not change parts outside the holes')
-
-    self.log_args(val_dict=self.val.validation_result, subject_name=self.subject.name)
-    raise NotImplementedError('new feedback case identified in SimplifyTemplate')
-
-
 # TRANSLATE SP1
 class BaseTranslateSP1Factory(BaseMessageFactory):
   def __init__(self, template_dict: dict, subject: p_subject.PirelSubject, val: p_llm_val.TranslateSP1ValidationResult):

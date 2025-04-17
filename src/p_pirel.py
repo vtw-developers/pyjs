@@ -1,9 +1,8 @@
 import json
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import d_ast_pretty
 import d_grammar_expand
-import d_grammar_rules
 import p_consts
 import p_generator
 import p_grammar
@@ -289,8 +288,7 @@ def learn_trans_rules_for_prob_node(
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context.json', template_dict)
 
     # simplify the context
-    # template_dict = p_llm_gen.simplify_template(template_dict, **kwargs)  # LLM-based
-    template_dict = p_grammar.simplify_template(subject, template_dict)  # generator-based
+    template_dict = p_grammar.simplify_template(subject, template_dict)
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify.json', template_dict)
 
     # prepare partial program
@@ -317,7 +315,7 @@ def learn_trans_rules_for_prob_node(
 
     # generate all possible TSPs
     # NOTE new algorithm already adds overfitted TSPs
-    tsps = p_generator.generate_tsps_with_generator_new_algorithm(template_dict)
+    tsps = p_generator.generate_tsps_with_generator(template_dict)
     assert len(tsps) > 0, 'Zero TSPs generated'
     p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
 

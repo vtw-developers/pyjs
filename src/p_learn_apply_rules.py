@@ -2,7 +2,7 @@ import argparse
 import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import d_grammar_expand
 import p_consts
