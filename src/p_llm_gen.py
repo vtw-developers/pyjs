@@ -10,7 +10,7 @@ Class diagram
                                         │     │    │
                                         │     │    │
                   ◄─────────────────────┘     ▼    └──────────────────────►
-        SimplifyTemplateG              BaseTranslateSP1Task         BaseTranslateSP2Task
+        *SimplifyTemplateG             BaseTranslateSP1Task         BaseTranslateSP2Task
                                           │  │                            │     │
                                           │  │                            │     │
                                           │  │                            │     │
@@ -19,6 +19,8 @@ Class diagram
                                           │  │                            │     │
                ◄──────────────────────────┘  ▼                            ▼     └──────────────►
       SP1_DirectTransG            SP1_PartialProgramG            SP2_DirectTransG        SP2_PartialProgramG
+
+*SimplifyTemplateG - deprecated and removed
 '''
 
 
@@ -31,7 +33,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import d_ast_parse
 import p_consts
 import p_data_structures as pds
-import p_generator
 import p_llm_messages
 import p_llm_templates
 import p_llm_val
@@ -50,7 +51,6 @@ logger = p_utils.setup_logger(__name__)
 
 
 # ERROR CLASSES
-class TemplateSimplificationRetryLimitError(RuntimeError): pass
 class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
@@ -285,67 +285,6 @@ class BasePirelTask(ABC):
   @abstractmethod
   def does_require_task_iteration(self) -> bool:
     '''Return True if need to run one more task iteration'''
-
-
-# SIMPLIFY TEMPLATE
-class SimplifyTemplateG(BasePirelTask):
-  def __init__(self, task_name, template_dict):
-    super().__init__(task_name, template_dict)
-    self.temperature = 1.0
-
-  def run_task_once_feedback_failed(self) -> None:
-    self._log('increasing the model temperature')
-    llm_temp = self.temperature + p_consts.GENERATION_TEMPERATURE_INCREMENT
-    self.temperature = round(llm_temp, p_consts.GENERATION_TEMPERATURE_ROUND_DIGITS)
-    self.model_params['temperature'] = self.temperature
-
-  def get_system_message(self) -> BaseMessage:
-    src_language = p_consts.LANG_DICT[self.template_dict['src_lang']]
-    system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.SimplifyTemplate.System.FILLIN_GENERIC
-    ).format(
-      language=src_language
-    )
-    return system_message
-
-  def get_few_shot_messages(self) -> List[BaseMessage]:
-    return []
-
-  def get_starting_prompt_message(self) -> HumanMessage:
-    src_language = p_consts.LANG_DICT[self.template_dict['src_lang']]
-    template = self.template_dict['template_context_simplification']
-    num_variants = p_consts.GENERATION_NUM_VARIANTS_IN_RESPONSE
-    starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.SimplifyTemplate.Prompt.FILLIN_GENERIC
-    ).format(
-      language=src_language,
-      template=template,
-      num_variants=num_variants
-    )
-    return starting_prompt
-
-  def get_feedback_message(self, validation_result: p_llm_val.SimplifyTemplateValidationResult) -> HumanMessage:
-    self._log('initiating a feedback message factory')
-    factory = p_llm_messages.SimplifyTemplateF(self.template_dict, self.subject, validation_result)
-    feedback_message = factory.get_feedback_message()
-    return feedback_message
-
-  def validate_code_blocks(self) -> p_llm_val.SimplifyTemplateValidationResult:
-    self._log('starting simplified template candidates validation')
-    all_st_cands = self.get_all_gen_code_blocks()
-    val_results_obj = p_llm_val.val_simplified_template_candidates(all_st_cands, self.template_dict, subject_name=self.subject.name)
-    return val_results_obj
-
-  def does_require_feedback_iteration(self) -> bool:
-    return self.feedback_iteration_counter <= p_consts.TEMPLATE_SIMPLIFICATION_MAX_FEEDBACKS
-
-  def does_require_task_iteration(self) -> bool:
-    return self.task_iteration_counter <= p_consts.TEMPLATE_SIMPLIFICATION_MAX_RETRIES
-
-  def run_failed(self) -> None:
-    msg = f'Could not simplify the template. Reached retry limit. Check the logs.'
-    self._log(f'ERROR {msg}')
-    raise TemplateSimplificationRetryLimitError(msg)
 
 
 # TRANSLATE SP1
@@ -728,38 +667,11 @@ def _is_context_empty(template_dict: dict) -> bool:
 
 
 # API
-def simplify_template(template_dict: dict) -> dict:
-  '''
-  Simplify template and return it.
-  NOTE writes to `template_dict`
-  RETURN updated `template_dict`
-  '''
-  logger.info(f'~~~ Starting API call to p_llm_gen.simplify_template')
-
-  # this is a necessary step to prepare a template for program simplification
-  template_dict = p_generator.simplify_template_init(template_dict)
-
-  # check if we need simplification step
-  if len(template_dict['templatized_node_ids_context']) == 0:
-    logger.debug('GOOD: We do not need template simplification')
-    template_dict['template'] = template_dict['template_context_str_replace']
-    template_dict['template_origin'] = template_dict['template_context_str_replace']
-    return template_dict
-
-  simplify_template = SimplifyTemplateG('simpl_templ', template_dict)
-  simplification_dict = simplify_template.run()
-
-  simplified_template = simplification_dict['simplified_template']
-  simplified_template_origin = simplification_dict['simplified_template_origin']
-
-  template_dict['template_origin_before_simplification'] = template_dict['template_origin']
-  template_dict['template'] = simplified_template
-  template_dict['template_origin'] = simplified_template_origin
-
-  return template_dict
-
-
-def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[str, str, str], template_dict: dict) -> List[Tuple[dict, dict]]:
+def get_translation_pairs_from_tsp(
+  subject: p_subject.PirelSubject,
+  tsp: Tuple[str, str, str],
+  template_dict: dict,
+) -> List[Tuple[dict, dict]]:
   '''
   RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
   NOTE raised errors propagate to the caller.
@@ -828,77 +740,6 @@ def get_translation_pairs_from_tsp(subject: p_subject.PirelSubject, tsp: Tuple[s
     raise NoTransPairsFromTSPError(msg)
 
   return all_translation_pairs
-
-
-# DEPRECATED
-def _deprecated_is_tsp_syntactically_correct(tsp: Tuple[str, str], subject: p_subject.PirelSubject, template_dict: dict) -> bool:
-  '''
-  Check if a given `tsp` is syntactically correct using LLM.
-
-  NOTE not using `BasePirelTask` because this is a simple check
-  RAISE LLMResponseFormatError if LLM response is not in the expected format
-  '''
-  def _get_system_message(template_dict: dict) -> SystemMessage:
-    src_language = p_consts.LANG_DICT[template_dict['src_lang']]
-    system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.CheckTSP.System.GENERIC
-    ).format(
-      src_language=src_language
-    )
-    return system_message
-
-  def _get_prompt_message(tsp: Tuple[str, str], template_dict: dict) -> HumanMessage:
-    sp1, sp2 = tsp
-    src_lang = template_dict['src_lang']
-    src_language = p_consts.LANG_DICT[src_lang]
-    prompt_message = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.CheckTSP.Prompt.GENERIC
-    ).format(
-      src_language=src_language,
-      src_lang=src_lang,
-      sp1=sp1,
-      sp2=sp2
-    )
-    return prompt_message
-
-  def _get_messages(tsp: Tuple[str, str], template_dict: dict) -> List[BaseMessage]:
-    return [_get_system_message(template_dict), _get_prompt_message(tsp, template_dict)]
-
-  logger.debug(f'~~~ Starting API call to p_llm_gen.is_tsp_syntactically_correct')
-
-  messages = _get_messages(tsp, template_dict)
-  p_utils.log_file_time(f'{subject.name}_check_tsp_messages.md', langchain_msgs_to_md(messages))
-
-  raw_response = query_llm(messages)
-  p_utils.log_file_time(f'{subject.name}_check_tsp_raw_response.md', raw_response)
-
-  code_blocks = extract_code_blocks(raw_response)
-  p_utils.log_json_time(f'{subject.name}_check_tsp_code_blocks.json', code_blocks)
-
-  if len(code_blocks) == 0:
-    raise LLMResponseFormatError('No code blocks were generated')
-
-  if len(code_blocks) > 1:
-    raise LLMResponseFormatError('Multiple code blocks were generated')
-
-  llm_resp_obj = json.loads(code_blocks[0])
-  if 'snippet1' not in llm_resp_obj or 'snippet2' not in llm_resp_obj:
-    raise LLMResponseFormatError('LLM response does not contain "snippet1" and "snippet2" keys')
-
-  sp1_verdict = llm_resp_obj['snippet1']
-  sp2_verdict = llm_resp_obj['snippet2']
-
-  if sp1_verdict not in ['correct', 'incorrect']:
-    raise LLMResponseFormatError('LLM response value for "snippet1" is not "correct" or "incorrect"')
-  if sp2_verdict not in ['correct', 'incorrect']:
-    raise LLMResponseFormatError('LLM response value for "snippet2" is not "correct" or "incorrect"')
-
-  logger.debug(f'TSP: {json.dumps(tsp, indent=2)}')
-  logger.debug(f'LLM response:\n{json.dumps(llm_resp_obj, indent=2)}')
-
-  # both must be `correct` to be considered correct
-  is_correct = sp1_verdict == 'correct' and sp2_verdict == 'correct'
-  return is_correct
 
 
 # TEST HARNESSES
