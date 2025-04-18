@@ -135,7 +135,12 @@ def learn_phase_on_subject(
       iteration += 1
 
 
-def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, starting_ruleset: str, **kwargs) -> SubjectStats:
+def learn_and_application_phases_on_subject(
+  subject: p_subject.PirelSubject,
+  starting_ruleset: str,
+  lsubject: ptlog.Subject,
+  **kwargs
+) -> SubjectStats:
   '''
   Run PiREL to learn and apply translation rules for a given subject.
   Save source program, learned translation rules, and a plausible target program.
@@ -162,8 +167,9 @@ def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, sta
   stats_subj.start_time = stats_le.start_time
 
   try:
-    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset)
+    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset, lsubject)
 
+    lsubject.success = True
     logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
     logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', learned_trans_rules)
@@ -175,10 +181,20 @@ def learn_and_application_phases_on_subject(subject: p_subject.PirelSubject, sta
   except Exception as exc:
     msg = f'FAIL Failed to translate "{subject.name}"\n'
     msg += p_utils.exception_to_str(exc)
+    lsubject.success = False
+    lsubject.reason = msg
     logger.error(msg)
 
     stats_le.success = False
     stats_le.error_as_list = msg.splitlines()  # so it looks better in json
+
+  p_utils.llog_yaml_time(
+    f'tree-log-{subject.name}.yaml',
+    asdict(lsubject),
+    strs_as_lines=True,
+    remove_null_vals=True,
+    remove_empty_lists=True
+  )
 
   stats_le.end_time = p_utils.current_time_sec()
   logger.debug(f'Rule learning phase for "{subject.name}" is complete')
@@ -361,11 +377,13 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       src_lang=conf['src_lang'],
       tar_lang=conf['tar_lang'],
     )
+    lsubject = ptlog.Subject(subject.name)
 
     # ~~~ entry point for a single subject
     subject_stats = learn_and_application_phases_on_subject(
       subject,
       starting_ruleset,
+      lsubject,
       subject_idx=subject_idx,
       sample_size=len(benchmark_sample)
     )
