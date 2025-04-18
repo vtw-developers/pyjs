@@ -773,7 +773,7 @@ def get_translation_pairs_from_tsp(
   # NOTE sp3 is used as a snippet to validate a translation rule
   sp1, sp2, sp3 = tsp
 
-  # translate `sp1` to produce sp1_tp1_cands (a.k.a. program pairs)
+  # ~~~ TRANSLATE `SP1` TO PRODUCE SP1_TP1_CANDS (A.K.A. PROGRAM PAIRS)
   ltrans_sp1 = ptlog.TransSP1()
   ltrans_sp1.sp1 = sp1
   lpllm_gen_log.trans_sp1 = ltrans_sp1
@@ -792,7 +792,7 @@ def get_translation_pairs_from_tsp(
 
   logger.debug(_aux_log_msg_sp1_tp1_cands(sp1_tp1_cands))
 
-  # for each `sp1_tp1_cand` generate all possible `translation_pair` candidates
+  # ~~~ FOR EACH `SP1_TP1_CAND` GENERATE ALL POSSIBLE `TRANSLATION_PAIR` CANDIDATES
   all_translation_pairs = []
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
     msg = (
