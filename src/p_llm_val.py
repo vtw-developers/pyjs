@@ -379,6 +379,11 @@ def val_tp1_candidates(tp1_cands: List[str], sp1: str, template_dict: dict, **kw
   p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_tp1_candidates.json', locals())
   logger.info(f'~~~ Starting validation of {len(tp1_cands)} TP1 candidates')
 
+  tp1_cands_uniq = p_utils.deduplicate(tp1_cands)
+  if len(tp1_cands_uniq) != len(tp1_cands):
+    logger.warning(f'WARNING: {len(tp1_cands) - len(tp1_cands_uniq)} duplicate TP1 candidates were found')
+    tp1_cands = tp1_cands_uniq
+
   return_dict = {}
   return_dict['tp1_cands'] = tp1_cands
   return_dict['sp1'] = sp1
