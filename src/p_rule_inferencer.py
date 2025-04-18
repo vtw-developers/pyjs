@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Tuple
 
 import d_ast_match
 import d_ast_parse
+import d_utils
 import p_consts
 import p_rule_postprocessor as prpp
 import p_subject
@@ -732,7 +733,10 @@ def infer_translation_rule_wrapper(
     pretty_print_tree_like=False
   )
 
-  logger.debug(f'Inferred translation rule:\n{translation_rule}')
+  logger.debug(
+    f'Inferred translation rule:\n{translation_rule}\n'
+    f'Rule hash value: {d_utils.string_sha256(translation_rule)}'
+  )
   p_utils.log_file_time(f'{subject.name}_learned-translation-rule.snart', translation_rule)
 
   return translation_rule

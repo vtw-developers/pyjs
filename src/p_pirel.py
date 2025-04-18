@@ -214,7 +214,11 @@ def _learn_trans_rules_from_tsp_with_retries(
   trules_list = []
   attempt_idx = 1
   while attempt_idx <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    logger.debug(f'Attempt at learning translation rules from a TSP #{attempt_idx}')
+    msg = (
+      f'Attempt at learning translation rules from a TSP #{attempt_idx}\n'
+      f'tsp.id = {ltsp.id}, trans_rule_learn_attempt.id = {attempt_idx}\n'
+    )
+    logger.debug(msg)
 
     ltrule_learn_attempt = ptlog.TRuleLearnAttempt(attempt_idx)
     ltsp.trans_rule_learn_attempts.append(ltrule_learn_attempt)
@@ -304,6 +308,8 @@ def learn_trans_rules_for_prob_node(
         return template_dict
       raise RuntimeError('DuoGlot should fail to translate the context code')
 
+    logger.debug('Starting template_dict initialization')
+
     # in cases when templates_dict is loaded from str, keys are strings
     _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
     template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
@@ -329,6 +335,7 @@ def learn_trans_rules_for_prob_node(
     template_dict['src_program'] = subject.src_main_code
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_final.json', template_dict)
 
+    logger.debug('Finished template_dict initialization')
     logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
     return template_dict
 
@@ -337,6 +344,8 @@ def learn_trans_rules_for_prob_node(
     Generate TSPs using a new algorithm.
     TODO consider built-in function names
     '''
+    logger.debug(f'Starting TSP generation')
+
     # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
     if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
       logger.debug('Using `(template_origin, template_origin)` as a TSP')
@@ -346,11 +355,16 @@ def learn_trans_rules_for_prob_node(
     # NOTE new algorithm already adds overfitted TSPs
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     assert len(tsps) > 0, 'Zero TSPs generated'
-    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
 
+    logger.debug(f'Finished TSP generation')
+    p_utils.log_json_time(f'{subject.name}_TSPs-only-generated.json', tsps)
     return tsps
 
-  logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"')
+  msg = (
+    f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"\n'
+    f'problematic_node.node_id = {lprob_node.node_id}, problematic_node.node_type = {lprob_node.node_type}\n'
+  )
+  logger.debug(msg)
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
@@ -365,7 +379,8 @@ def learn_trans_rules_for_prob_node(
   for tsp_idx, tsp in enumerate(tsps, start=1):
     msg = (
       f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
-      f'{json.dumps(tsp, indent=2)}'
+      f'tsp.id = {tsp_idx}\n'
+      f'{json.dumps(tsp, indent=2)}\n'
     )
     logger.info(msg)
     print(msg)
@@ -385,7 +400,8 @@ def learn_trans_rules_for_prob_node(
     return trules_list
 
   msg = (
-    f'Could not learn valid translation rules to translate the problematic node with any of the TSPs.\n'
+    f'Could not learn valid translation rules to translate\n'
+    f'the problematic node with any of the {len(tsps)} TSPs.'
     f'problematic_node_type = "{template_dict["problematic_node_type"]}".\n'
     f'len(tsps) = {len(tsps)}\n'
   )
