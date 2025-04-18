@@ -128,6 +128,15 @@ def is_valid_translation_rule_syntactic(
     ltrule_syntax_val_res.is_valid = False
     ltrule_syntax_val_res.reason = msg
     raise RuntimeError('Only TranslationRuleNotFoundException is expected')
+  else:
+    msg = (
+      'Unexpected: existing ruleset translated the code\n'
+      'This case needs to be debugged.'
+    )
+    logger.error(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
+    return False
 
   # ~~ get the translation result with the existing ruleset + rule under test
   dbg_history_after = None
