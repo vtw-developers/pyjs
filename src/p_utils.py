@@ -107,6 +107,15 @@ def are_same_lists(seq_a: List[Any], seq_b: List[Any]) -> bool:
     return False
   return not seq_b
 
+def deduplicate(seq: List[Any]) -> List[Any]:
+  '''
+  Remove duplicates from a list while preserving the order.
+  https://stackoverflow.com/a/480227/1852634
+  '''
+  seen = set()
+  seen_add = seen.add
+  return [x for x in seq if not (x in seen or seen_add(x))]
+
 
 # TIME
 def current_time_sec() -> int:
