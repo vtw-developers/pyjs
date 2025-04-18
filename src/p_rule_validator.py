@@ -1,3 +1,4 @@
+import json
 from typing import List, Tuple
 
 import d_grammar_expand
@@ -365,5 +366,34 @@ def _validate_translation_rule_usage():
   print('the translation rule is good')
 
 
+# TEST HARNESSES
+def _test_is_valid_translation_rule_syntactic():
+  '''
+  def is_valid_translation_rule_syntactic(
+    subject: p_subject.PirelSubject,
+    translation_rule: str,
+    existing_ruleset: str,
+    ltrule: ptlog.TRule
+  ) -> bool:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_syntactic_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  translation_rule = args_dict['translation_rule']
+  existing_ruleset = args_dict['existing_ruleset']
+  ltrule = ptlog.TRule.from_str(translation_rule)
+
+  is_valid = is_valid_translation_rule_syntactic(
+    subject,
+    translation_rule,
+    existing_ruleset,
+    ltrule
+  )
+  print(is_valid)
+
+
 if __name__ == '__main__':
-  _validate_translation_rule_usage()
+  # _validate_translation_rule_usage()
+  _test_is_valid_translation_rule_syntactic()
