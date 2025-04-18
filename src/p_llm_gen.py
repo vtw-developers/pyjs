@@ -37,6 +37,7 @@ from langchain_openai import ChatOpenAI
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import d_ast_parse
+import d_utils
 import p_consts
 import p_data_structures as pds
 import p_llm_messages
@@ -749,6 +750,26 @@ def get_translation_pairs_from_tsp(
       translation_pairs.append(({'source': sp1, 'target': tp1}, {'source': sp2, 'target': tp1}))
     return translation_pairs
 
+  def _aux_log_msg_sp1_tp1_cands(sp1_tp1_cands: List[Dict[str, str]]) -> str:
+    s = f'Generated {len(sp1_tp1_cands)} candidate translations for SP1:\n'
+    for idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
+      hash = d_utils.string_sha256(sp1_tp1_cand['source'] + sp1_tp1_cand['target'])
+      cand = json.dumps(sp1_tp1_cand, indent=2)
+      s += f'[{idx}] {hash}:\n{cand}\n'
+    return s
+
+  def _aux_log_msb_trans_pair_cands(translation_pair_cands: List[Dict[str, str]]) -> str:
+    s = f'Generated {len(translation_pair_cands)} new translation pairs:\n'
+    for idx, translation_pair_cand in enumerate(translation_pair_cands, start=1):
+      sp1 = translation_pair_cand[0]['source']
+      tp1 = translation_pair_cand[0]['target']
+      sp2 = translation_pair_cand[1]['source']
+      tp2 = translation_pair_cand[1]['target']
+      hash = d_utils.string_sha256(f'{sp1}{tp1}{sp2}{tp2}')
+      cand = json.dumps(translation_pair_cand, indent=2)
+      s += f'[{idx}] {hash}:\n{cand}\n'
+    return s
+
   # NOTE sp3 is used as a snippet to validate a translation rule
   sp1, sp2, sp3 = tsp
 
@@ -769,12 +790,17 @@ def get_translation_pairs_from_tsp(
     ltrans_sp1.reason = msg
     raise NoTransPairsFromTSPError from err
 
-  logger.debug(f'Generated {len(sp1_tp1_cands)} candidate translations for SP1:\n{json.dumps(sp1_tp1_cands, indent=2)}')
+  logger.debug(_aux_log_msg_sp1_tp1_cands(sp1_tp1_cands))
 
   # for each `sp1_tp1_cand` generate all possible `translation_pair` candidates
   all_translation_pairs = []
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
-    logger.debug(f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})')
+    msg = (
+      f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
+      f'trans_sp2.id = {cand_idx}\n'
+    )
+    logger.debug(msg)
+
     ltrans_sp2 = ptlog.TransSP2()
     ltrans_sp2.id = cand_idx
     ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_dict(sp1_tp1_cand)
@@ -808,9 +834,7 @@ def get_translation_pairs_from_tsp(
     all_translation_pairs.extend(translation_pair_cands)
     ltrans_sp2.success = True
     ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pair_cands]
-    logger.debug(f'Generated {len(translation_pair_cands)} new translation pairs from (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})')
-    logger.debug(f'The number of all translation pairs so far is {len(all_translation_pairs)}')
-    logger.debug(f'New translation pairs:\n{json.dumps(translation_pair_cands, indent=2)}')
+    logger.debug(_aux_log_msb_trans_pair_cands(translation_pair_cands))
 
   logger.debug(f'~~~ Finishing API call to p_llm_gen.get_translation_pairs_from_tsp')
   logger.debug(f'The number of all translation pairs is {len(all_translation_pairs)}:\n{json.dumps(all_translation_pairs, indent=2)}')
