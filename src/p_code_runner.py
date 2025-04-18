@@ -353,6 +353,7 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
   assert subject.src_lang in MYLOG_IMPL, f'mylog for {subject.src_lang} is not implemented.'
   src_program_run = MYLOG_IMPL[subject.src_lang] + comment_out_tester_ph(src_program_instr, subject.src_lang)
 
+  p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
 
   src_log = _extract_log_list_from_stdout(stdout, subject.src_lang)
@@ -382,6 +383,7 @@ def run_tar_program_until_mylog_mismatch(
   if is_dry_run:
     return tar_program_run, None, None
 
+  p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
 
   tar_log = _extract_log_list_from_stdout(stdout, subject.tar_lang)
