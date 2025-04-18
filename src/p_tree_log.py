@@ -68,8 +68,13 @@ class TRuleSyntaxValRes:
 @dataclass
 class TRuleTestBasedValRes:
   is_valid: Optional[bool] = None
+  snippet_under_test: Optional[str] = None
+  f_gold_for_pynguin: Optional[str] = None
+  num_generated_tests: Optional[int] = None
+  test_script: Optional[str] = None
+  pynguin_generated_tests: List[str] = field(default_factory=list)
   reason: Optional[str] = None
-  generated_test: Optional[str] = None
+  generated_test_that_is_used: Optional[str] = None
 
 @dataclass
 class PRuleValLog:
@@ -176,6 +181,7 @@ class TSP:
   success: bool = False
   reason: Optional[str] = None
   trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
+  learned_translation_rules: List[TRule] = field(default_factory=list)
 
 @dataclass
 class ProbNode:

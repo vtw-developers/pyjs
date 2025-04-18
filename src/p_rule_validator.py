@@ -245,6 +245,7 @@ def is_valid_translation_rule_test_based(
   logger.debug(msg)
 
   ltrule_test_based_val_res = ptlog.TRuleTestBasedValRes()
+  ltrule_test_based_val_res.snippet_under_test = snippet_under_test
   ltrule.test_based_val_res = ltrule_test_based_val_res
 
   src_parser = p_consts.PARSER_DICT[subject.src_lang]
@@ -272,6 +273,7 @@ def is_valid_translation_rule_test_based(
   _params = ', '.join(_parametrizable_identifiers)
   _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
   _f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+  ltrule_test_based_val_res.f_gold_for_pynguin = _f_gold_fn_str
   logger.debug(f'~ f_gold() function:\n{_f_gold_fn_str}')
 
   # 3. generate pynguin tests
@@ -294,9 +296,12 @@ def is_valid_translation_rule_test_based(
       'Will use the first one. Debug this case.\n'
     )
     logger.warning(msg)
+
+  ltrule_test_based_val_res.num_generated_tests = len(_test_fn_strs)
+  ltrule_test_based_val_res.pynguin_generated_tests = _test_fn_strs
   _test_fn_str = _test_fn_strs[0]
   logger.debug(f'generated test function:\n{_test_fn_str}')
-  ltrule_test_based_val_res.generated_test = _test_fn_str
+  ltrule_test_based_val_res.generated_test_that_is_used = _test_fn_str
 
   # 4. combine into a test script without log statements
   _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
@@ -314,6 +319,7 @@ def is_valid_translation_rule_test_based(
   _ls_inserter.visit(_tree.root_node)
   _test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
   logger.debug('~ instrumented the test script with log statements:\n{_test_script_str}')
+  ltrule_test_based_val_res.test_script = _test_script_str
 
   # 6. translate the test script into the target language
   _translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
