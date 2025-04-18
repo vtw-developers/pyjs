@@ -231,7 +231,14 @@ def is_valid_translation_rule_test_based(
     ltrule_test_based_val_res.reason = msg
     return False
 
-  assert len(_test_fn_strs) == 1, 'expecting a single test function'
+  assert len(_test_fn_strs) >= 1, 'expecting at least single test function'
+  if len(_test_fn_strs) > 1:
+    msg = (
+      'Pynguin generated multiple test functions:\n'
+      f'{json.dumps(_test_fn_strs, indent=2)}\n'
+      'Will use the first one. Debug this case.\n'
+    )
+    logger.warning(msg)
   _test_fn_str = _test_fn_strs[0]
   logger.debug(f'generated test function:\n{_test_fn_str}')
   ltrule_test_based_val_res.generated_test = _test_fn_str
