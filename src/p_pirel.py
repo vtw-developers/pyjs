@@ -233,6 +233,7 @@ def _learn_trans_rules_from_tsp_with_retries(
         ltrule_learn_attempt.num_trules = len(trules_list)
         ltrule_learn_attempt.success = True
         ltsp.success = True
+        ltsp.learned_translation_rules = [ptlog.TRule.from_str(trule) for trule in trules_list]
         return trules_list
       else:
         logger.debug(f'No translation rules were learned from TSP.')
