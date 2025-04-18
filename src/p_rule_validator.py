@@ -72,11 +72,13 @@ def is_valid_translation_rule_syntactic(
     # `rule_ids_before = [3, 10, 4, 5, 6, 0]`
     # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
     # as in the example above, `17` must be id of the rule under test
-    num_rules_before = existing_ruleset.count('match_expand')
-    num_rules_after = num_rules_before + 1
-    rule_under_test_idx_in_after = len(rule_ids_before)
-    rule_under_test_id = num_rules_after - 1
-    if rule_under_test_id != rule_ids_after[rule_under_test_idx_in_after]:
+    existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(existing_ruleset)
+    num_rules_in_before_ruleset = len(existing_rules_list)
+    # this will be id of the rule under test
+    rule_under_test_idx_in_after_ruleset = num_rules_in_before_ruleset
+    num_rules_used_in_before_rule_ids = len(rule_ids_before)
+    rule_under_test_idx_in_after_rule_ids = num_rules_used_in_before_rule_ids
+    if rule_under_test_idx_in_after_ruleset != rule_ids_after[rule_under_test_idx_in_after_rule_ids]:
       msg = 'Translation rule is BAD: the last used rule id is not of the rule under test. '
       msg += 'Should not happen under normal circumstances. More debugging needed.'
       logger.warning(msg)
