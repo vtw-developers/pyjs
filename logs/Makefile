@@ -6,21 +6,73 @@ new_directory := ./$(timestamp)
 clean:
 	@read -p "Are you sure you want to delete all files as specified? [y/N] " confirm && [ "$$confirm" = "y" ]
 
-	# This command finds all files (excluding directories) starting from the current directory,
-	# with a minimum depth of 2 (i.e., it skips the current directory and its immediate subdirectories).
-	# It excludes files named '.gitignore' and prints the paths of the found files before deleting them.
-	find . -mindepth 2 -type f ! -name '.gitignore' -print -delete
-
+	find learn-rules/ -type f ! -name '.gitignore' -print -delete
+	find pirel/ -type f ! -name '.gitignore' -print -delete
 	rm -fv pirel.log
 
+# make backup name=debug-03
 backup:
-	# Create the directory specified by the variable 'new_directory' if it doesn't already exist
-	mkdir -p $(new_directory)
+	# Ensure the 'name' variable is provided
+	@if [ -z "$(name)" ]; then \
+		echo "Error: 'name' variable is not set. Use 'make backup name=<name>'."; \
+		exit 1; \
+	fi
 
-	# Find all files (excluding '.gitignore') starting from the current directory, 
-	# but not including files in the 'new_directory' path, and copy them to 'new_directory' 
-	# while preserving their directory structure
-	find . -mindepth 2 -type f ! -name '.gitignore' -not -path "$(new_directory)/*" -exec cp --parents {} $(new_directory) \;
+	# Create the directory specified by the variable 'name' if it doesn't already exist
+	mkdir -p $(name)
 
-	# Copy the file 'pirel.log' to 'new_directory'
-	cp pirel.log $(new_directory)
+	cp -rv learn-rules $(name)
+	cp -rv pirel $(name)
+	cp pirel.log $(name)
+
+	rm $(name)/learn-rules/.gitignore
+	rm $(name)/pirel/.gitignore
+
+	# zip and move to archive directory
+	zip -r $(name).zip $(name)
+	mv $(name).zip archive/
+	rm -rf $(name)
+
+# make restore_backup name=/path/to/backup.zip/in/archive
+restore_backup:
+	# Ensure the 'name' variable is provided
+	@if [ -z "$(name)" ]; then \
+		echo "Error: 'name' variable is not set. Use 'make backup name=<name>'."; \
+		exit 1; \
+	fi
+
+	# Ensure the backup directory exists before attempting to restore
+	if [ -f "archive/$(name).zip" ]; then \
+		# Restore all files from the backup directory to their original locations \
+		cp archive/$(name).zip .; \
+		unzip $(name).zip; \
+		rm $(name).zip; \
+		cd $(name) && find . -type f -exec cp --parents {} ../ \; ; \
+		cd .. && rm -rf $(name); \
+	else \
+		echo "Backup file 'archive/$(name).zip' does not exist. Cannot restore."; \
+	fi
+
+# alias
+restore: restore_backup
+
+format_json:
+	@directory="pirel"; \
+	total=$$(find $$directory -type f -name '*.json' | wc -l); \
+	count=0; \
+	echo "Total JSON files to format: $$total"; \
+	find $$directory -type f -name '*.json' | while read -r file; do \
+		count=$$(($$count + 1)); \
+		echo "Formatting $$count/$$total: $$file"; \
+		jq . "$$file" > "$$file.tmp" && mv "$$file.tmp" "$$file"; \
+	done
+
+	@directory="learn-rules"; \
+	total=$$(find $$directory -type f -name '*.json' | wc -l); \
+	count=0; \
+	echo "Total JSON files to format: $$total"; \
+	find $$directory -type f -name '*.json' | while read -r file; do \
+		count=$$(($$count + 1)); \
+		echo "Formatting $$count/$$total: $$file"; \
+		jq . "$$file" > "$$file.tmp" && mv "$$file.tmp" "$$file"; \
+	done
