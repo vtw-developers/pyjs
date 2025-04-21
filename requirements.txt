@@ -1,10 +1,10 @@
 apted==1.0.3
 debugpy==1.6.7
 jsbeautifier==1.14.7
-langchain==0.3.7
-langchain-core==0.3.18
-langchain-openai==0.2.8
-langchain-text-splitters==0.3.2
+langchain==0.3.23
+langchain-core==0.3.54
+langchain-openai==0.3.14
+langchain-text-splitters==0.3.8
 Levenshtein==0.21.0
 pydantic==2.8.2
 pydantic_core==2.20.1
