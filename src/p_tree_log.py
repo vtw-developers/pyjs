@@ -199,11 +199,24 @@ class TransIteration:
   problematic_node: Optional[ProbNode] = None
 
 @dataclass
+class RuleLearnPhase:
+  translation_iterations: List[TransIteration] = field(default_factory=list)
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
+class RuleApplicationPhase:
+  plausible_target_program: Optional[str] = None
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
 class Subject:
   subject_name: str
   id: Optional[int] = None
+  rule_learn_phase: Optional[RuleLearnPhase] = None
+  rule_application_phase: Optional[RuleApplicationPhase] = None
   success: bool = False
-  translation_iterations: List[TransIteration] = field(default_factory=list)
   reason: Optional[str] = None
 
 @dataclass
