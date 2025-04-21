@@ -201,6 +201,13 @@ class TransIteration:
 @dataclass
 class Subject:
   subject_name: str
+  id: Optional[int] = None
   success: bool = False
   translation_iterations: List[TransIteration] = field(default_factory=list)
   reason: Optional[str] = None
+
+@dataclass
+class Benchmark:
+  benchmark_name: str
+  sample_size: Optional[int] = None
+  subjects: List[Subject] = field(default_factory=list)
