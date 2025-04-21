@@ -201,12 +201,16 @@ class TransIteration:
 @dataclass
 class RuleLearnPhase:
   translation_iterations: List[TransIteration] = field(default_factory=list)
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
   success: bool = False
   reason: Optional[str] = None
 
 @dataclass
 class RuleApplicationPhase:
   plausible_target_program: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
   success: bool = False
   reason: Optional[str] = None
 
@@ -218,6 +222,25 @@ class Subject:
   rule_application_phase: Optional[RuleApplicationPhase] = None
   success: bool = False
   reason: Optional[str] = None
+  def get_total_time(self) -> str:
+    assert self.rule_learn_phase.start_time is not None, 'Start time must be set'
+    assert self.rule_learn_phase.end_time is not None, 'End time must be set'
+    # only rule learn phase ran
+    start_time = self.rule_learn_phase.start_time
+    end_time = self.rule_learn_phase.end_time
+    # if rule application phase ran, end time is the end time of the rule application phase
+    if self.rule_application_phase is not None:
+      assert self.rule_application_phase.start_time is not None, 'Start time must be set'
+      assert self.rule_application_phase.end_time is not None, 'End time must be set'
+      end_time = self.rule_application_phase.end_time
+    total_sec = end_time - start_time
+    if total_sec < 60:
+      return f'{total_sec}s'
+    total_min, total_sec = divmod(total_sec, 60)
+    total_hr, total_min = divmod(total_min, 60)
+    if total_hr == 0:
+      return f'{total_min}m{total_sec}s'
+    return f'{total_hr}h{total_min}m{total_sec}s'
 
 @dataclass
 class Benchmark:
