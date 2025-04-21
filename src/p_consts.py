@@ -227,9 +227,9 @@ GENERATION_TEMPERATURE_ROUND_DIGITS = 2
 GENERATION_NUM_VARIANTS_IN_RESPONSE = 5
 
 DEFAULT_MODEL_PARAMS = {
-  'model_name': 'gpt-4o',
+  'model_name': 'o4-mini',
   'temperature': 1.0,
-  'max_tokens': 8192,
+  'max_completion_tokens': 16384,
   'request_timeout': None,
   'max_retries': 2,
   # 'num_completions': 1,  # can be used only with model._generate
