@@ -1551,6 +1551,21 @@ class ParametrizableVariablesCollector(pvis.Visitor):
     '''
     self.visit(node.children[0])
 
+  # API
+  @classmethod
+  def get_paramable_ids(cls, snippet: str) -> List[str]:
+    '''
+    Get all identifiers that are parametrizable for the given snippet.
+    The snippet is expected to be a body of a function definition.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(snippet, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    param_collector = cls()
+    param_collector.visit(tree.root_node)
+    parametrizable_identifiers = param_collector.get_parametrizable_identifiers()
+    return parametrizable_identifiers
+
 
 class LogStatementInserter(pvis.Visitor):
   '''
