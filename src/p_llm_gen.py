@@ -851,6 +851,27 @@ def get_translation_pairs_from_tsp(
 
 
 # TEST HARNESSES
+def _test_query_llm():
+  '''
+  SCHEMA:
+  messages:
+    system: str
+    human: str
+  model_params: dict
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_query_llm_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  messages = [
+    SystemMessage(content=config['messages']['system']),
+    HumanMessage(content=config['messages']['human'])
+  ]
+  model_params = config['model_params']
+  raw_response = query_llm(messages, model_params=model_params)
+
+  print('--- raw_response ---')
+  print(raw_response)
+
+
 def _test_translate_sp1():
   template_dict = p_utils.read_json('/code/repo-duoglot/backend/duoglotcore-server/pirel-logs/debug-11-broken-split/L0009/11-12-09-24-06.754595-L0009_SIMPLIFIED-TEMPLATE-p_llm_gen.json')
   sp1 = 'if id_puox:\n    secret_fun_4071()'
@@ -901,8 +922,9 @@ def _test_get_feedback_message_trans_sp2_partial():
 
 
 if __name__ == '__main__':
+  _test_query_llm()
   # _test_translate_sp1()
   # _test_translate_sp2()
   # _test_get_translation_pairs_from_tsp()
   # _test_get_feedback_message_trans_sp1_partial()
-  _test_get_feedback_message_trans_sp2_partial()
+  # _test_get_feedback_message_trans_sp2_partial()
