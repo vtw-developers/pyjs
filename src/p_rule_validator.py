@@ -1,5 +1,5 @@
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import d_grammar_expand
 import d_grammar_rules
@@ -231,7 +231,101 @@ def is_valid_translation_rule_test_based(
 ) -> bool:
   '''
   Entry point for test-based checking if the provided translation rule is valid.
+
+  1. Start with snippet_under_test -> `a = b`
+  2. Extract paramable_ids from snippet_under_test -> `[b]`
+  3. Prepare f_gold_fn_str using snippet_under_test and paramable_ids
+  ```
+  def f_gold(b):
+      a = b
+  ```
+  4. Generate Pynguin tests for test_fn_str
+  ```
+  def test():
+      args_sets = [[1], [2]]
+      for idx, args_set in enumerate(args_sets):
+          f_gold(*args_set)
+  ```
+  5. Combine test_fn_str and f_gold_fn_str into a test script
+  ```
+  def test():
+      args_sets = [[1], [2]]
+      for idx, args_set in enumerate(args_sets):
+          f_gold(*args_set)
+  def f_gold(b):
+      a = b
+  test()
+  ```
+  6. Insert log statements into the test script
+  ```
+  def test():
+      args_sets = [[1], [2]]
+      for idx, args_set in enumerate(args_sets):
+          f_gold(*args_set)
+  def f_gold(b):
+      a = b
+      myexactlog(b)
+  test()
+  ```
+  7. Translate the test script into the target language and compare output traces.
   '''
+
+  def _get_f_gold_fn_str(paramable_ids: List[str], snippet_under_test: str) -> str:
+    logger.debug('~ preparing f_gold() function')
+    _params = ', '.join(paramable_ids)
+    _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
+    f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+    logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
+    return f_gold_fn_str
+
+  def _get_test_fn_str(paramable_ids: List[str], ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes) -> Union[str, bool]:
+    '''
+    RETURN str | bool: If str is returned, it is the test function.
+    If bool is returned, it means that no test function was generated.
+    '''
+    if len(paramable_ids) == 0:
+      msg = 'No parametrizable identifiers found. Cannot generate tests.'
+      logger.warning(msg)
+      ltrule_test_based_val_res.is_valid = False
+      ltrule_test_based_val_res.reason = msg
+      return False
+
+    # NOTE p_pynguin.run_pynguin() returns a list of test functions
+    test_fn_strs = None
+    try:
+      test_fn_strs = p_pynguin.run_pynguin(f_gold_fn_str)
+    except Exception as err:
+      msg = f'Pynguin failed to generate tests: {err}'
+      logger.warning(msg)
+      ltrule_test_based_val_res.is_valid = False
+      ltrule_test_based_val_res.reason = msg
+      return False
+
+    # no test functions generated
+    if len(test_fn_strs) == 0:
+      msg = 'Pynguin generated no test functions'
+      logger.warning(msg)
+      ltrule_test_based_val_res.num_generated_tests = 0
+      ltrule_test_based_val_res.is_valid = False
+      ltrule_test_based_val_res.reason = msg
+      return False
+
+    if len(test_fn_strs) > 1:
+      msg = (
+        'Pynguin generated multiple test functions:\n'
+        f'{json.dumps(test_fn_strs, indent=2)}\n'
+        'Will use the first one. Debug this case.\n'
+      )
+      logger.warning(msg)
+
+    test_fn_str = test_fn_strs[0]
+    logger.debug(f'generated test function:\n{test_fn_str}')
+
+    ltrule_test_based_val_res.num_generated_tests = len(test_fn_strs)
+    ltrule_test_based_val_res.pynguin_generated_tests = test_fn_strs
+    ltrule_test_based_val_res.generated_test_that_is_used = test_fn_str
+
+    return test_fn_str
 
   p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
 
@@ -248,89 +342,55 @@ def is_valid_translation_rule_test_based(
   ltrule_test_based_val_res.snippet_under_test = snippet_under_test
   ltrule.test_based_val_res = ltrule_test_based_val_res
 
-  src_parser = p_consts.PARSER_DICT[subject.src_lang]
-  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
-  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
-
   # 1. extract parametrizable identifiers from the snippet
-  logger.debug('~ extracting parametrizable identifiers from the snippet')
-  _ts_tree = src_parser.parse(bytes(snippet_under_test, 'utf-8'))
-  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
-  _param_collector = pvpy.ParametrizableVariablesCollector()
-  _param_collector.visit(_tree.root_node)
-  _parametrizable_identifiers = _param_collector.get_parametrizable_identifiers()
-  logger.debug(f'~ parametrizable identifiers: {_parametrizable_identifiers}')
-
-  if len(_parametrizable_identifiers) == 0:
-    msg = 'No parametrizable identifiers found. Cannot generate tests.'
-    logger.warning(msg)
-    ltrule_test_based_val_res.is_valid = False
-    ltrule_test_based_val_res.reason = msg
-    return False
+  # these identifiers are used as parameters of f_gold() function
+  paramable_ids = pvpy.ParametrizableVariablesCollector.get_paramable_ids(snippet_under_test)
+  ltrule_test_based_val_res.paramable_ids = paramable_ids
+  logger.debug(f'~ parametrizable identifiers: {paramable_ids}')
 
   # 2. prepare f_gold() function
-  logger.debug('~ preparing f_gold() function for Pynguin')
-  _params = ', '.join(_parametrizable_identifiers)
-  _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
-  _f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
-  ltrule_test_based_val_res.f_gold_for_pynguin = _f_gold_fn_str
-  logger.debug(f'~ f_gold() function:\n{_f_gold_fn_str}')
+  # f_gold() function is a wrapper function that contains the snippet under test
+  f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, snippet_under_test)
+  ltrule_test_based_val_res.f_gold_for_pynguin = f_gold_fn_str
 
-  # 3. generate pynguin tests
-  # TODO improve error handling: detail all possible errors
-  _test_fn_strs = None
-  try:
-    _test_fn_strs = p_pynguin.run_pynguin(_f_gold_fn_str)
-  except Exception as err:
-    msg = f'Pynguin failed to generate tests: {err}'
-    logger.warning(msg)
-    ltrule_test_based_val_res.is_valid = False
-    ltrule_test_based_val_res.reason = msg
-    return False
-
-  assert len(_test_fn_strs) >= 1, 'expecting at least single test function'
-  if len(_test_fn_strs) > 1:
-    msg = (
-      'Pynguin generated multiple test functions:\n'
-      f'{json.dumps(_test_fn_strs, indent=2)}\n'
-      'Will use the first one. Debug this case.\n'
-    )
-    logger.warning(msg)
-
-  ltrule_test_based_val_res.num_generated_tests = len(_test_fn_strs)
-  ltrule_test_based_val_res.pynguin_generated_tests = _test_fn_strs
-  _test_fn_str = _test_fn_strs[0]
-  logger.debug(f'generated test function:\n{_test_fn_str}')
-  ltrule_test_based_val_res.generated_test_that_is_used = _test_fn_str
+  # 3. generate Pynguin tests for f_gold() function
+  # Pynguin uses parameters of f_gold() function to generate test() function
+  _result = _get_test_fn_str(paramable_ids, ltrule_test_based_val_res)
+  if isinstance(_result, bool):
+    return _result
+  test_fn_str = _result
 
   # 4. combine into a test script without log statements
-  _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str=_test_fn_str,
-    f_gold_fn_str=_f_gold_fn_str,
+  # a test script contains a test() function, f_gold() function
+  # and test function invocation
+  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+    test_fn_str=test_fn_str,
+    f_gold_fn_str=f_gold_fn_str,
     test_call_str='test()'
   )
   logger.debug('combined test function and f_gold() into a test script')
 
   # 5. insert log statements into the test script
-  logger.debug('~ inserting log statements into the test script')
-  _ts_tree = src_parser.parse(bytes(_test_script_str, 'utf-8'))
-  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
-  _ls_inserter = pvpy.LogStatementInserter(function_name='f_gold')
-  _ls_inserter.visit(_tree.root_node)
-  _test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
-  logger.debug('~ instrumented the test script with log statements:\n{_test_script_str}')
-  ltrule_test_based_val_res.test_script = _test_script_str
+  # log statements are inserted into the test script
+  # log statements print the values of assigned variables to produce a trace
+  test_script_str = pvpy.LogStatementInserter.insert_log_statements(test_script_str)
+  logger.debug('~ instrumented the test script with log statements:\n{test_script_str}')
+  ltrule_test_based_val_res.test_script = test_script_str
 
   # 6. translate the test script into the target language
-  _translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
+  # the test script is translated into the target language
+  # to compare its trace to the traces generated by test script in src language
+  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
+  translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
 
-  pirel_subject_snippet_conf['src_program'] = _test_script_str
-  pirel_subject_snippet_conf['translation_rules_main_code'] = _translation_rules_main_code
-  _pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
+  pirel_subject_snippet_conf['src_program'] = test_script_str
+  pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
+  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
 
   logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
   try:
-    _tar_program_plausible = prapp.apply_translation_rules(_pirel_subject)
+    tar_program_plausible = prapp.apply_translation_rules(pirel_subject)
   except Exception as err:
     msg = (
       f'Failed to obtain a plausible translation of the test script:\n'
@@ -401,42 +461,42 @@ def _validate_translation_rule_usage():
   _tree = pvpy.Tree.from_ts_tree(_ts_tree)
   _param_collector = pvpy.ParametrizableVariablesCollector()
   _param_collector.visit(_tree.root_node)
-  _parametrizable_identifiers = _param_collector.get_parametrizable_identifiers()
+  paramable_ids = _param_collector.get_parametrizable_identifiers()
 
   # 2. prepare f_gold() function
-  _params = ', '.join(_parametrizable_identifiers)
+  _params = ', '.join(paramable_ids)
   _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
-  _f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+  f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
 
   # 3. generate pynguin tests
-  _test_fn_strs = p_pynguin.run_pynguin(_f_gold_fn_str)
-  assert len(_test_fn_strs) == 1, 'expecting a single test function'
-  _test_fn_str = _test_fn_strs[0]
+  test_fn_strs = p_pynguin.run_pynguin(f_gold_fn_str)
+  assert len(test_fn_strs) == 1, 'expecting a single test function'
+  test_fn_str = test_fn_strs[0]
 
   # 4. combine into a test script without log statements
-  _test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str=_test_fn_str,
-    f_gold_fn_str=_f_gold_fn_str,
+  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+    test_fn_str=test_fn_str,
+    f_gold_fn_str=f_gold_fn_str,
     test_call_str='test()'
   )
 
   # 5. insert log statements into the test script
-  _ts_tree = src_parser.parse(bytes(_test_script_str, 'utf-8'))
+  _ts_tree = src_parser.parse(bytes(test_script_str, 'utf-8'))
   _tree = pvpy.Tree.from_ts_tree(_ts_tree)
   _ls_inserter = pvpy.LogStatementInserter(function_name='f_gold')
   _ls_inserter.visit(_tree.root_node)
-  _test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
+  test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
 
   # 6. translate the test script into the target language
-  _translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
+  translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
 
-  pirel_subject_snippet_conf['src_program'] = _test_script_str
-  pirel_subject_snippet_conf['translation_rules_main_code'] = _translation_rules_main_code
-  _pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-  _tar_program_plausible = prapp.apply_translation_rules(_pirel_subject)
+  pirel_subject_snippet_conf['src_program'] = test_script_str
+  pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
+  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+  tar_program_plausible = prapp.apply_translation_rules(pirel_subject)
 
-  p_utils.write_tmp_text('test_script.py', _test_script_str)
-  p_utils.write_tmp_text('tar_program_plausible.js', _tar_program_plausible)
+  p_utils.write_tmp_text('test_script.py', test_script_str)
+  p_utils.write_tmp_text('tar_program_plausible.js', tar_program_plausible)
 
   print('the translation rule is good')
 
