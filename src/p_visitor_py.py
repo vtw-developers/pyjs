@@ -1960,6 +1960,21 @@ class LogStatementInserter(pvis.Visitor):
     fgold_fn = fgold_fns[0]
     self.visit(fgold_fn)
 
+  @classmethod
+  def insert_log_statements(cls, test_script_str: str) -> str:
+    '''
+    Insert log statements into the test script.
+    The test script is expected to be a body of a function definition.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(test_script_str, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    inserter = cls(function_name='f_gold')
+    inserter.visit(tree.root_node)
+    pretty_printer = PrettyPrinter(indent_with='    ')
+    code = pretty_printer.visit(tree.root_node)
+    return code.strip()
+
 
 class AssignedIdentifierExtractor(pvis.Visitor):
   '''
