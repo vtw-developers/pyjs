@@ -365,6 +365,10 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
 
   stats_for_email : Dict[str, SubjectStats] = {}
+
+  lbenchmark = ptlog.Benchmark(conf['benchmark_name'])
+  lbenchmark.sample_size = len(benchmark_sample)
+
   for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
     msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
     logger.debug(p_utils.header(subject_name) + msg)
@@ -377,7 +381,10 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       src_lang=conf['src_lang'],
       tar_lang=conf['tar_lang'],
     )
+
     lsubject = ptlog.Subject(subject.name)
+    lsubject.id = subject_idx
+    lbenchmark.subjects.append(lsubject)
 
     # ~~~ entry point for a single subject
     subject_stats = learn_and_application_phases_on_subject(
@@ -394,6 +401,13 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       _email_report(subject_name, stats_for_email)
     logger.debug(p_utils.footer(subject_name))
 
+  p_utils.llog_yaml_time(
+    f'tree-log-{conf["benchmark_name"]}.yaml',
+    asdict(lbenchmark),
+    strs_as_lines=True,
+    remove_null_vals=True,
+    remove_empty_lists=True
+  )
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
