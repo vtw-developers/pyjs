@@ -283,12 +283,17 @@ def is_valid_translation_rule_test_based(
     RETURN str | bool: If str is returned, it is the test function.
     If bool is returned, it means that no test function was generated.
     '''
+
+    # cases such as `helper = {}` (L0001)
+    # in such cases, the test function just invokes the f_gold() function
     if len(paramable_ids) == 0:
-      msg = 'No parametrizable identifiers found. Cannot generate tests.'
-      logger.warning(msg)
-      ltrule_test_based_val_res.is_valid = False
-      ltrule_test_based_val_res.reason = msg
-      return False
+      msg = (
+        'No parametrizable identifiers found.\n'
+        'Will not generate Pynguin tests for this snippet.\n'
+        'Will run the snippet directly after inserting the log statements.'
+      )
+      logger.debug(msg)
+      return '''def test():\n    f_gold()'''
 
     # NOTE p_pynguin.run_pynguin() returns a list of test functions
     test_fn_strs = None
