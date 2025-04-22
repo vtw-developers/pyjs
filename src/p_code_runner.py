@@ -100,10 +100,21 @@ function mylog_obj_to_comp(is_exact, arg) {
     return ["Unknown", str_result.length, str_result];
   }
 }
+function sortKeysReplacer(key, value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return Object.keys(value)
+      .sort() // Sort the keys alphabetically
+      .reduce((sortedObj, sortedKey) => {
+        sortedObj[sortedKey] = value[sortedKey];
+        return sortedObj;
+      }, {});
+  }
+  return value; // Return the value as-is for non-objects
+}
 function _mylog() {
   let is_exact = arguments[0];
   let prefix = is_exact ? "MYLOGEX:" : "MYLOGAP:";
-  let info_list = [prefix + arguments[1]];
+  let info_list = [prefix + JSON.stringify(arguments[1], sortKeysReplacer)];
   if (SKIP_LOGGING === true && arguments[1] === -1) return;
   for (let i = 2; i < arguments.length; i++) {
     info_list.push(mylog_obj_to_comp(is_exact, arguments[i]));
@@ -161,7 +172,7 @@ def mylog_obj_to_comp(is_exact, arg):
     return ["Unknown", len(str_result), str_result]
 def _mylog(is_exact, *args):
   prefix = "MYLOGEX:" if is_exact else "MYLOGAP:"
-  info_list = [prefix + str(args[0])]
+  info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(',', ':'))]
   for arg in args[1:]:
     info_list.append(mylog_obj_to_comp(is_exact, arg))
   _default_print("\\n" + json.dumps(info_list))
