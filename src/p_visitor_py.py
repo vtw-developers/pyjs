@@ -116,7 +116,17 @@ class ExceptClauseNode(pvis.AbstractNode): pass
 class ExecStatementNode(pvis.AbstractNode): pass
 class ExpressionNode(pvis.AbstractNode): pass
 class ExpressionListNode(pvis.AbstractNode): pass
-class ExpressionStatementNode(pvis.AbstractNode): pass
+class ExpressionStatementNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls, child_node: pvis.AbstractNode) -> ExpressionStatementNode:
+    '''
+    Build an expression statement as a parent of `child_node`
+    NOTE developer is responsible for ensuring grammatical correctness
+    '''
+    node = cls('expression_statement')
+    node.add_child(child_node)
+    child_node.set_parent(node)
+    return node
 class FalseNode(pvis.AbstractNode): pass
 class FinallyClauseNode(pvis.AbstractNode): pass
 class FloatNode(pvis.AbstractNode):
