@@ -2051,6 +2051,31 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     self.add_assigned_identifier(node.value.val())
 
 
+class BreakStatementInserter(pvis.Visitor):
+  '''
+  Insert a break statement at the end of each loop.
+  This visitor is used in pre-context extraction.
+  '''
+  # VISIT METHODS
+  def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
+    # visit the body
+    self.visit(node.body)
+
+    # insert break statement
+    break_statement = BreakStatementNode('break_statement')
+    node.body.children.append(break_statement)
+    break_statement.set_parent(node.body)
+
+  def visit_ForStatementNode(self, node: ForStatementNode) -> None:
+    # visit the body
+    self.visit(node.body)
+
+    # insert break statement
+    break_statement = BreakStatementNode('break_statement')
+    node.body.children.append(break_statement)
+    break_statement.set_parent(node.body)
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')
