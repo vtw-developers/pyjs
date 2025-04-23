@@ -194,7 +194,8 @@ def _learn_trans_rules_from_tsp(
   # CHECK TRANSLATION RULES
   lprule_val_log = ptlog.PRuleValLog()
   ltrule_learn_attempt.p_rule_validator_log = lprule_val_log
-  checked_trules_list = p_rule_validator.filter_translation_rules(trules_list, subject, translation_rules, tsp, lprule_val_log)
+  checked_trules_list = p_rule_validator.filter_translation_rules(
+    trules_list, subject, translation_rules, tsp, template_dict, lprule_val_log)
   return checked_trules_list
 
 
