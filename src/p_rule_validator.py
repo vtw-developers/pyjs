@@ -224,6 +224,7 @@ def is_valid_translation_rule_syntactic(
 
 def is_valid_translation_rule_test_based(
   subject: p_subject.PirelSubject,
+  pre_context: str,
   snippet_under_test: str,
   trule_under_test: str,
   existing_ruleset: str,
@@ -270,11 +271,38 @@ def is_valid_translation_rule_test_based(
   7. Translate the test script into the target language and compare output traces.
   '''
 
-  def _get_f_gold_fn_str(paramable_ids: List[str], snippet_under_test: str) -> str:
+  def _get_f_gold_fn_str(paramable_ids: List[str], pre_context: str, snippet_under_test: str) -> str:
     logger.debug('~ preparing f_gold() function')
     _params = ', '.join(paramable_ids)
-    _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
+
+    # 1. combine pre_context and snippet_under_test
+    assert pre_context.count(p_consts.PRE_CTX_SPEC_IDENT) == 1, \
+      'should not happen: pre_context must contain exactly one line with special identifier'
+    prectx_lines = pre_context.split('\n')
+    spec_id_line_idx = -1
+    for i, line in enumerate(prectx_lines):
+      if p_consts.PRE_CTX_SPEC_IDENT in line:
+        spec_id_line_idx = i
+        break
+    spec_id_indentation = p_utils.count_leading_spaces(prectx_lines[spec_id_line_idx])
+    indented_sut = p_utils.indent(snippet_under_test, spec_id_indentation)
+    indented_sut_lines = indented_sut.split('\n')
+    prectx_lines = prectx_lines[:spec_id_line_idx] + indented_sut_lines + prectx_lines[spec_id_line_idx + 1:]
+    prectx_w_sut = '\n'.join(prectx_lines)
+
+    # 2. prepare f_gold() function
+    _indented_snippet_block = p_utils.indent(prectx_w_sut, 4)
     f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+
+    # 3. insert break statements in loops
+    # this is needed to avoid infinite loops
+    # NOTE: this is a workaround for Pynguin
+    if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
+      tree = pvpy.Tree.from_str(f_gold_fn_str)
+      break_inserter = pvpy.BreakStatementInserter()
+      break_inserter.visit(tree.root_node)
+      f_gold_fn_str = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
+
     logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
     return f_gold_fn_str
 
@@ -355,7 +383,7 @@ def is_valid_translation_rule_test_based(
 
   # 2. prepare f_gold() function
   # f_gold() function is a wrapper function that contains the snippet under test
-  f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, snippet_under_test)
+  f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, pre_context, snippet_under_test)
   ltrule_test_based_val_res.f_gold_for_pynguin = f_gold_fn_str
 
   # 3. generate Pynguin tests for f_gold() function
@@ -423,6 +451,7 @@ def filter_translation_rules(
   subject: p_subject.PirelSubject,
   translation_rules: str,
   tsp: Tuple[str, str, str],
+  template_dict: dict,
   lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
   '''
@@ -444,7 +473,8 @@ def filter_translation_rules(
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
       continue
 
-    is_semantics_valid = is_valid_translation_rule_test_based(subject, tsp[2], translation_rule, translation_rules, ltrule)
+    pre_context = template_dict['pre_context']
+    is_semantics_valid = is_valid_translation_rule_test_based(subject, pre_context, tsp[2], translation_rule, translation_rules, ltrule)
     if not is_semantics_valid:
       logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
       continue
@@ -544,6 +574,7 @@ def _test_is_valid_translation_rule_test_based():
   '''
   def is_valid_translation_rule_test_based(
     subject: p_subject.PirelSubject,
+    pre_context: str,
     snippet_under_test: str,
     trule_under_test: str,
     existing_ruleset: str,
@@ -555,6 +586,7 @@ def _test_is_valid_translation_rule_test_based():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  pre_context = args_dict['pre_context']
   snippet_under_test = args_dict['snippet_under_test']
   trule_under_test = args_dict['trule_under_test']
   existing_ruleset = args_dict['existing_ruleset']
@@ -562,6 +594,7 @@ def _test_is_valid_translation_rule_test_based():
 
   is_valid = is_valid_translation_rule_test_based(
     subject,
+    pre_context,
     snippet_under_test,
     trule_under_test,
     existing_ruleset,
