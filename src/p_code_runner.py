@@ -320,11 +320,15 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
 
   stdout = p_utils.read_text(f'{temp_filename}.stdout')
   stderr = p_utils.read_text(f'{temp_filename}.stderr')
+
+  logger.debug(f'stdout: "{stdout}"')
+  logger.debug(f'stderr: "{stderr}"')
+  logger.debug('Finished p_code_runner._run_code')
+
   return stdout, stderr
 
 
 def comment_out_tester_ph(code: str, lang: str) -> str:
-  logger.debug('Starting p_code_runner.comment_out_tester_ph')
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
   _SPLITTER = '\n"+++++++++++++++++"\n'
@@ -366,6 +370,9 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
+
+  if stderr != '':
+    logger.error('Test script in src_lang should run without errors.')
 
   src_log = _extract_log_list_from_stdout(stdout, subject.src_lang)
   src_error = _extract_err_from_stderr(stderr, subject.src_lang)

@@ -458,7 +458,7 @@ def learn_trans_rules_for_prob_node(
 
   msg = (
     f'Could not learn valid translation rules to translate\n'
-    f'the problematic node with any of the {len(tsps)} TSPs.'
+    f'the problematic node with any of the {len(tsps)} TSPs.\n'
     f'problematic_node_type = "{template_dict["problematic_node_type"]}".\n'
     f'len(tsps) = {len(tsps)}\n'
   )
