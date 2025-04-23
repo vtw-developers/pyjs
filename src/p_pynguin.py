@@ -61,15 +61,14 @@ def run_pynguin(f_gold_str: str) -> List[str]:
     temp_output_dir.cleanup()
 
 
-if __name__ == '__main__':
-  input_file = '''# triangle example from
-# https://pynguin.readthedocs.io/en/latest/user/quickstart.html#a-simple-example
-def f_gold(x: int, y: int, z: int) -> str:
-    if x == y == z:
-        return "Equilateral triangle"
-    if x in {y, z} or y == z:
-        return "Isosceles triangle"
-    return "Scalene triangle"'''
+# TEST HARNESSES
+def _test_run_pynguin():
+  fgold_fpath = p_consts.TMP_DIR / 'f_gold.py'
+  input_file = p_utils.read_text(fgold_fpath)
   result_files = run_pynguin(input_file)
   for result_file in result_files:
     print(f'Generated test file:\n{result_file}')
+
+
+if __name__ == '__main__':
+  _test_run_pynguin()
