@@ -313,6 +313,8 @@ TEST_SCRIPT_TEMPLATE = (
 LOG_STAT_RULE_FPATH = TRANSLATION_RULES_DIR / 'log-statement.snart'
 SNIPPET_UNDER_TEST_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'snippet-under-test.yaml'
 
+PYNGUIN_TIMEOUT_SECONDS = 60
+
 
 ################################################################################################
 #################################### GENERAL CONFIGS ###########################################
