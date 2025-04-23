@@ -91,6 +91,15 @@ def to_camel_case(node_type: str) -> str:
     # Add the leading underscore back if it existed
     return f'{leading_underscore}{camel_case_name}Node'
 
+def count_leading_spaces(text: str) -> int:
+  count = 0
+  for char in text:
+    if char == ' ':
+      count += 1
+    else:
+      break
+  return count
+
 
 # SEQUENCES
 def are_same_lists(seq_a: List[Any], seq_b: List[Any]) -> bool:
