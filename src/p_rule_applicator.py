@@ -341,6 +341,7 @@ def _get_tar_test_call_code(src_test_call_code: str) -> str:
   For the moment, just use `src_test_call_code` as `tar_test_call_code`,
   because Python and JavaScript function call syntax is the same.
   '''
+  logger.debug(f'Starting p_rule_applicator._get_tar_test_call_code')
   return src_test_call_code
 
 
