@@ -694,6 +694,16 @@ class Tree:
     tree = Tree(root_node)
     return tree
 
+  @classmethod
+  def from_str(cls, code: str) -> Tree:
+    '''
+    Construct a Tree from a string
+    '''
+    parser = p_consts.PARSER_DICT['py']
+    ts_tree = parser.parse(bytes(code, 'utf8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    return tree
+
 
 class PrettyPrinterForGeneratedCode(pvis.Visitor):
   '''
