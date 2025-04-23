@@ -1,0 +1,13 @@
+;;;;;;;; these rules are needed to obtain the translation of the test script in source language
+
+;;;;;;;; translates `secret_fun_4071()` function call that is inserted in `block` of body node types
+(match_expand
+  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "secret_fun_4071")) ("py.argument_list" (str "(") (str ")")))) "*")
+  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "secret_fun_4071")) ("js.arguments" (str "(") (str ")")))) "*1")
+)
+
+;;;;;;;; inserted into loops so that they terminate
+(match_expand
+  (fragment ("py.break_statement") "*")
+  (fragment ("js.break_statement") "*1")
+)
