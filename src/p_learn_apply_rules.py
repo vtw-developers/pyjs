@@ -125,7 +125,7 @@ def learn_and_application_phases_on_subject(
     msg = f'FAIL Failed to translate "{subject.name}"\n'
     msg += p_utils.exception_to_str(exc)
     lrule_learn_phase.success = False
-    lrule_learn_phase.reason = msg
+    lrule_learn_phase.reason = str(exc)
     lsubject.success = False
     lsubject.reason = 'Translation rule learning phase failed'
     logger.error(msg)
