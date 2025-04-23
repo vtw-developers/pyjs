@@ -170,6 +170,14 @@ class IdentifierNode(pvis.AbstractNode):
     assert len(self.children) == 1, 'sanity check'
     assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
+  @classmethod
+  def build(cls, name: str) -> IdentifierNode:
+    '''Build an identifier node from a string'''
+    node = cls('identifier')
+    tnode = pvis.TerminalNode(name)
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class IfClauseNode(pvis.AbstractNode): pass
 class IfStatementNode(pvis.AbstractNode):
   '''
