@@ -198,6 +198,7 @@ def extract_templates(
     # LLM-based TSP generation by generator-based TSP generation.
     # For example, `templatized_node_ids`, `is_insert_secret_fn`.
     # They can be recovered from `TemplateTree` class and git history.
+    templates_dict['context_node_path'] = template_tree.root_node.get_path_to_child(context_node_cursor)
     templates_dict[template_id] = {
       'template_id': template_id,
       'src_lang': src_lang,
