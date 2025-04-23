@@ -2,6 +2,7 @@ import json
 import re
 from typing import Dict, List, Optional, Tuple
 
+import d_grammar_expand
 import p_code_runner
 import p_consts
 import p_pirel
@@ -356,16 +357,22 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
 
   # TODO consider a case when `choices` leads to a problematic slot.
   # i.e. a slot for which we don't have a translation rule.
-  duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
-    src_code=src_main_code,
-    src_lang=subject.src_lang,
-    tar_lang=subject.tar_lang,
-    trans_rules=subject.translation_rules_main_code,
-    auto_backward=subject.auto_backward,
-    choices=choices,
-    subject_name=subject.name,
-    skip_template_extraction=True
-  )
+  try:
+    duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
+      src_code=src_main_code,
+      src_lang=subject.src_lang,
+      tar_lang=subject.tar_lang,
+      trans_rules=subject.translation_rules_main_code,
+      auto_backward=subject.auto_backward,
+      choices=choices,
+      subject_name=subject.name,
+      skip_template_extraction=True
+    )
+  except d_grammar_expand.TranslationRuleNotFoundException as exc:
+    templates_dict = exc.get_templates_dict()
+    logger.warning(f'Caught TranslationRuleNotFoundException: {exc}')
+    logger.warning(f'templates_dict: {json.dumps(templates_dict, indent=2)}')
+    raise
 
   tar_main_code = duoglot_translate_result['tar_code']
   map_to_exid = duoglot_translate_result['map_to_exid']
