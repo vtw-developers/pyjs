@@ -516,14 +516,24 @@ def _test_is_valid_translation_rule_syntactic():
 
 
 def _test_learn_trans_rules_for_prob_node():
-  test_harness_config = p_utils.read_tmp_json('_test_learn_trans_rules_for_prob_node_config.json')
-  args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
+  '''
+  def learn_trans_rules_for_prob_node(
+    subject: p_subject.PirelSubject,
+    translation_rules: str,
+    templates_dict: dict,
+    lprob_node: ptlog.ProbNode
+  ) -> list:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_learn_trans_rules_for_prob_node_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_json_str(args_dict['subject'])
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   translation_rules = args_dict['translation_rules']
   templates_dict = args_dict['templates_dict']
+  lprob_node = ptlog.ProbNode(0, 'some_type')
 
-  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
+  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
   print('\n\n'.join(result))
 
 
@@ -544,5 +554,5 @@ if __name__ == '__main__':
   # _test_translate()
   # _test_translate_duoglot()
   # _test_is_valid_translation_rule_syntactic()
-  # _test_learn_trans_rules_for_prob_node()
-  _test_learn_trans_rules_from_tsp()
+  _test_learn_trans_rules_for_prob_node()
+  # _test_learn_trans_rules_from_tsp()
