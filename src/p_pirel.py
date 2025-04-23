@@ -428,6 +428,8 @@ def learn_trans_rules_for_prob_node(
   template_dict = _init_template_dict(subject, translation_rules, templates_dict)
   tsps = _init_tsps(subject, template_dict)
 
+  lprob_node.template_origin = template_dict['template_origin']
+
   # ~~~ iterate over TSPs (from abstract to concrete)
   # NOTE since we are using an updated TSP generation algorithm,
   # we stop at the first TSP from which we have learned a translation rule(s).

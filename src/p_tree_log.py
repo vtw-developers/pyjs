@@ -188,6 +188,7 @@ class TSP:
 class ProbNode:
   node_id: int
   node_type: str
+  template_origin: Optional[str] = None
   success: bool = False
   reason: Optional[str] = None
   tsps: List[TSP] = field(default_factory=list)
