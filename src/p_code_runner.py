@@ -14,213 +14,6 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-# the following snippets of code are inserted
-# into `tar_program` to log input and output to the program under test
-# `MYLOG_IMPL_XX` is for `src_program`
-# `MYLOG_MATCH_IMPL_XX` is for `tar_program`
-# TODO those starting with underscore are not implemented yet
-_MYLOG_IMPL_JS = '''
-"use strict";
-function mylog_obj_to_comp(arg) {
-  let typearg = typeof arg;
-  if (arg === true || arg === false) return ["bool", arg];
-  else if (typearg === "number") return ["num", arg];
-  else if (typearg === "string") return ["string", arg.length, arg.length < 10 ? arg : arg.slice(0,10)];
-  else if (Array.isArray(arg)) return ["list", arg.length, arg.length > 0 ? mylog_obj_to_comp(arg[0]) : "EMPTY", arg.length > 1 ? mylog_obj_to_comp(arg[1]) : "EMPTY"];
-  else if (arg === null || arg === undefined) return ["none"];
-  else return ["Unknown"];
-}
-function mylog() {
-  let info_list = ["MYLOG:" + arguments[0]];
-  for (let i = 1; i < arguments.length; i++) {
-    info_list.push(mylog_obj_to_comp(arguments[i]));
-  }
-  console.log("\\n" + JSON.stringify(info_list));
-}
-function myexactlog() {
-  mylog(...arguments);
-}
-'''
-
-MYLOG_MATCH_IMPL_JS = '''
-"use strict";
-const SKIP_LOGGING = false;
-const MYLOG_LIST = {MYLOG_LIST};
-let _console_log = console.log;
-let mylog_callcount = 0;
-function _list_compare(ls1, ls2) {
-  if (ls1.length !== ls2.length) return false;
-  if (ls1.length > 0 && ls1[0] === "num" && ls2.length > 0 && ls2[0] === "num") {
-    if (ls1[1] === ls2[1]) return true;
-    else {
-      try {
-        if (Math.abs(ls1[1]) > 1e-6 && Math.abs(ls2[1]) > 1e-6) {
-          if (Math.abs(ls1[1]) > 2 * Math.abs(ls2[1])) return false;
-          else if (2 * Math.abs(ls1[1]) < Math.abs(ls2[1])) return false;
-          else if (Math.abs(Math.abs(ls1[1] / ls2[1]) - 1) > 1e-6) return false;
-          else return true;
-        }
-        else if (Math.abs(ls1[1]) <= 1e-6 && Math.abs(ls2[1]) <= 1e-6) return true;
-        else return false;
-      } catch (e) {
-        throw Error("MyLogError _list_compare num error: " + ls1 + " <==> " + ls2 + " " + e);
-      }
-    }
-  }
-  else if (ls1.length > 0 && ls1[0] === "string" && ls2.length > 0 && ls2[0] === "Unknown") {
-    return ls1[2] === ls2[2];
-  }
-  let anyDiff = false;
-  for (let i = 0; i < ls1.length; i++) {
-    let ls1e = ls1[i], ls2e = ls2[i];
-    if (Array.isArray(ls1e) && Array.isArray(ls2e)) {
-      let elem_anydiff = !_list_compare(ls1e, ls2e);
-      anyDiff = anyDiff || elem_anydiff;
-    }
-    else anyDiff = anyDiff || (ls1e !== ls2e);
-    if (anyDiff) break;
-  }
-  return !anyDiff;
-}
-function mylog_obj_to_comp(is_exact, arg) {
-  let typearg = typeof arg;
-  if (arg === true || arg === false) return ["bool", arg];
-  else if (typearg === "number") return ["num", arg];
-  else if (typearg === "string") {
-    if (is_exact) return ["string", arg.length, arg];
-    else return ["string", arg.length, arg.length < 10 ? arg : arg.slice(0,10)];
-  }
-  else if (Array.isArray(arg)) {
-    if (is_exact) return ["list", arg.length, arg.map(x => mylog_obj_to_comp(is_exact, x))];
-    else return ["list", arg.length, arg.length > 0 ? mylog_obj_to_comp(is_exact, arg[0]) : "EMPTY", arg.length > 1 ? mylog_obj_to_comp(is_exact, arg[1]) : "EMPTY"];
-  }
-  else if (arg === null || arg === undefined) return ["none"];
-  else {
-    let str_result = String(arg);
-    return ["Unknown", str_result.length, str_result];
-  }
-}
-function sortKeysReplacer(key, value) {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return Object.keys(value)
-      .sort() // Sort the keys alphabetically
-      .reduce((sortedObj, sortedKey) => {
-        sortedObj[sortedKey] = value[sortedKey];
-        return sortedObj;
-      }, {});
-  }
-  return value; // Return the value as-is for non-objects
-}
-function _mylog() {
-  let is_exact = arguments[0];
-  let prefix = is_exact ? "MYLOGEX:" : "MYLOGAP:";
-  let info_list = [prefix + JSON.stringify(arguments[1], sortKeysReplacer)];
-  if (SKIP_LOGGING === true && arguments[1] === -1) return;
-  for (let i = 2; i < arguments.length; i++) {
-    info_list.push(mylog_obj_to_comp(is_exact, arguments[i]));
-  }
-  _console_log("\\n" + JSON.stringify(info_list));
-  while (SKIP_LOGGING === true && mylog_callcount < MYLOG_LIST.length && MYLOG_LIST[mylog_callcount][0].endsWith(":-1")) {
-    mylog_callcount += 1;
-  }
-  if (mylog_callcount >= MYLOG_LIST.length) {
-    throw Error("MyLogError MYLOG_LENGTH_EXCEEDED COUNT:" + String(mylog_callcount) + " CALL_ID:" + String(arguments[0]));
-  }
-  else {
-    if (_list_compare(info_list, MYLOG_LIST[mylog_callcount])) {
-      mylog_callcount += 1;
-      return;
-    } else {
-      throw Error("MyLogError MISMATCH CALL_ID:" + String(arguments[1])
-        + " MISMATCH_IDX:" + String(mylog_callcount)
-        + " OBSERVED:" + JSON.stringify(info_list)
-        + " EXPECTED:" + JSON.stringify(MYLOG_LIST[mylog_callcount]));
-    }
-  }
-}
-function mylog() {
-  _mylog(false, ...arguments);
-}
-function myexactlog() {
-  _mylog(true, ...arguments);
-}
-console.log = function () {
-  myexactlog(-1, [...arguments]);
-  _console_log(...arguments);
-}
-'''
-
-MYLOG_IMPL_PY = '''
-import json
-_default_print = print
-def mylog_obj_to_comp(is_exact, arg):
-  if isinstance(arg, bool): return ["bool", arg]
-  elif isinstance(arg, str):
-    if is_exact:
-      return ["string", len(arg), arg]
-    else:
-      return ["string", len(arg), arg if len(arg) < 10 else arg[0:10]]
-  elif isinstance(arg, int) or isinstance(arg, float): return ["num", arg]
-  elif isinstance(arg, list) or isinstance(arg, tuple):
-    if is_exact:
-      return ["list", len(arg), [mylog_obj_to_comp(is_exact, x) for x in arg]]
-    else:
-      return ["list", len(arg), mylog_obj_to_comp(is_exact, arg[0]) if len(arg) > 0 else "EMPTY", mylog_obj_to_comp(is_exact, arg[1]) if len(arg) > 1 else "EMPTY"]
-  elif arg is None: return ["none"]
-  else:
-    str_result = str(arg)
-    return ["Unknown", len(str_result), str_result]
-def _mylog(is_exact, *args):
-  prefix = "MYLOGEX:" if is_exact else "MYLOGAP:"
-  info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(',', ':'))]
-  for arg in args[1:]:
-    info_list.append(mylog_obj_to_comp(is_exact, arg))
-  _default_print("\\n" + json.dumps(info_list))
-def mylog(*args):
-  _mylog(False, *args)
-def myexactlog(*args):
-  _mylog(True, *args)
-def print(*args, **kargs):
-  myexactlog(-1, args)
-  return _default_print(*args, **kargs)
-'''
-
-_MYLOG_MATCH_IMPL_PY = '''
-MYLOG_LIST = {MYLOG_LIST}
-import json
-mylog_callcount = 0
-def _list_compare(ls1, ls2):
-  raise NotImplementedError
-def mylog_obj_to_comp(arg):
-  if isinstance(arg, bool): return ["bool", arg]
-  elif isinstance(arg, str): return ["string", len(arg), arg if len(arg) < 10 else arg[0:10]]
-  elif isinstance(arg, int) or isinstance(arg, float): return ["num", arg]
-  elif isinstance(arg, list) or isinstance(arg, tuple): return ["list", len(arg), mylog_obj_to_comp(arg[0]) if len(arg) > 0 else "EMPTY", mylog_obj_to_comp(arg[1]) if len(arg) > 1 else "EMPTY"]
-  elif arg is None: return ["none"]
-  else: return ["Unknown"]
-def mylog(*args):
-  info_list = ["MYLOG:" + str(args[0])]
-  for arg in args[1:]:
-    info_list.append(mylog_obj_to_comp(arg))
-  print("\\n" + json.dumps(info_list))
-  if _list_compare(info_list, MYLOG_LIST[mylog_callcount]):
-    mylog_callcount += 1
-    return
-  else:
-    raise Exception("MyLogError CALL_ID:" + str(args[0]) + " MISMATCH_IDX:" + str(mylog_callcount))
-def myexactlog(*args):
-  mylog(*args)
-'''
-
-MYLOG_IMPL = {
-  'py': MYLOG_IMPL_PY
-}
-
-MYLOG_MATCH_IMPL = {
-  'js': MYLOG_MATCH_IMPL_JS,
-}
-
-
 CODE_RUN_COMMANDS = {
   'py': 'python {filename}',
   'js': 'node {filename}'
@@ -228,6 +21,26 @@ CODE_RUN_COMMANDS = {
 
 TMP_DIR = Path('/tmp/pirel_code_runner')
 TMP_DIR.mkdir(exist_ok=True)
+
+
+def get_mylog_implementation(lang: str) -> str:
+  '''
+  Get the mylog implementation for the given language.
+  '''
+  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
+  mylog_fpath = p_consts.MYLOG_DEFINITIONS_DIR / lang / f'mylog.{lang}'
+  assert mylog_fpath.exists(), f'Mylog implementation not found for {lang}'
+  return p_utils.read_text(mylog_fpath)
+
+
+def get_mylog_match_implementation(lang: str) -> str:
+  '''
+  Get the mylog match implementation for the given language.
+  '''
+  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
+  mylog_match_fpath = p_consts.MYLOG_DEFINITIONS_DIR / lang / f'mylog_match.{lang}'
+  assert mylog_match_fpath.exists(), f'Mylog match implementation not found for {lang}'
+  return p_utils.read_text(mylog_match_fpath)
 
 
 def _get_temp_filename(text: str, lang: str) -> str:
@@ -365,8 +178,8 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
     logger.debug('run_src_program_with_mylog: using cached result')
     return _last_run_cached[2], _last_run_cached[3]
 
-  assert subject.src_lang in MYLOG_IMPL, f'mylog for {subject.src_lang} is not implemented.'
-  src_program_run = MYLOG_IMPL[subject.src_lang] + comment_out_tester_ph(src_program_instr, subject.src_lang)
+  mylog_implementation = get_mylog_implementation(subject.src_lang)
+  src_program_run = mylog_implementation + comment_out_tester_ph(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
@@ -394,8 +207,8 @@ def run_tar_program_until_mylog_mismatch(
   '''
   logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
 
-  assert subject.tar_lang in MYLOG_MATCH_IMPL, f'mylog (match) for {subject.tar_lang} is not implemented.'
-  concode_prepart = MYLOG_MATCH_IMPL[subject.tar_lang].replace('{MYLOG_LIST}', json.dumps(src_log))
+  mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
+  concode_prepart = mylog_match_implementation.replace('{MYLOG_LIST}', json.dumps(src_log))
   tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, subject.tar_lang)
 
   if is_dry_run:
