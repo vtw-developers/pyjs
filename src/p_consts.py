@@ -17,6 +17,7 @@ TREE_SITTER_GRAMMARS_DIR = ROOT_DIR / 'tree-sitter-util'
 BUILD_DIR = ROOT_DIR / 'build'
 TMP_DIR = ROOT_DIR / 'tmp'
 TEST_ARTIFACTS_DIR = ROOT_DIR / 'test-artifacts'
+MYLOG_DEFINITIONS_DIR = ROOT_DIR / 'mylog-definitions'
 
 PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 DUOGLOT_LOGS_DIR = LOGS_DIR / 'duoglot'
