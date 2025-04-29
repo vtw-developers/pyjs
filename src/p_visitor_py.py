@@ -1946,10 +1946,29 @@ class LogStatementInserter(pvis.Visitor):
       log_statement.set_parent(node)
       idx += 1
 
+  def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
+    '''
+    Insert print statements at the beginning of the elif statement.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.elif_counter))
+    self.elif_counter += 1
+    node.consequence.children.insert(0, log_statement)
+
+  def visit_ElseClauseNode(self, node: ElseClauseNode) -> None:
+    '''
+    Insert print statements at the beginning of the else statement.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.else_counter))
+    self.else_counter += 1
+    node.body.children.insert(0, log_statement)
+
   def visit_ForStatementNode(self, node: ForStatementNode) -> None:
     '''
     Insert print statements at the beginning of the for statement.
-    TODO insert in alternative clause (else) as well.
     '''
     for child in node.get_nt_children():
       self.visit(child)
@@ -1967,7 +1986,6 @@ class LogStatementInserter(pvis.Visitor):
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     '''
     Insert print statements at the beginning of the if statement.
-    TODO insert in alternative clauses (elif, else) as well.
     '''
     for child in node.get_nt_children():
       self.visit(child)
@@ -1987,6 +2005,16 @@ class LogStatementInserter(pvis.Visitor):
     assert len(fgold_fns) == 1, 'broken precondition: multiple f_gold functions found'
     fgold_fn = fgold_fns[0]
     self.visit(fgold_fn)
+
+  def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
+    '''
+    Insert print statements at the beginning of the while statement.
+    '''
+    for child in node.get_nt_children():
+      self.visit(child)
+    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.while_counter))
+    self.while_counter += 1
+    node.body.children.insert(0, log_statement)
 
   @classmethod
   def insert_log_statements(cls, test_script_str: str) -> str:
