@@ -720,6 +720,19 @@ def usage_apply_translation_rules():
 
 
 # TEST HARNESSES
+def _test_apply_translation_rules():
+  '''
+  def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_apply_translation_rules_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  tar_program_deinstr = apply_translation_rules(subject)
+  print(f'Plausible target program:\n{tar_program_deinstr}')
+
+
 def _test_postprocess_src_program():
   translated_code = p_utils.read_text('temporary_validator_translated_code.py')
   src_code = p_utils.read_text('temporary_validator_src_code.py')
@@ -731,5 +744,6 @@ def _test_postprocess_src_program():
 
 
 if __name__ == '__main__':
-  usage_apply_translation_rules()
+  # usage_apply_translation_rules()
+  _test_apply_translation_rules()
   # _test_postprocess_src_program()
