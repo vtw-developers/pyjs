@@ -53,3 +53,8 @@ def myexactlog(*args):
 def print(*args, **kargs):
   myexactlog(-1, args)
   return _default_print(*args, **kargs)
+
+
+# this function is inserted into body node types' `block`
+def secret_fun_4071():
+  return 0
