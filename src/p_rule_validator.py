@@ -325,13 +325,23 @@ def is_valid_translation_rule_test_based(
 
     # NOTE p_pynguin.run_pynguin() returns a list of test functions
     test_fn_strs = None
-    try:
-      test_fn_strs = p_pynguin.run_pynguin(f_gold_fn_str)
-    except Exception as err:
-      msg = f'Pynguin failed to generate tests: {err}'
-      logger.warning(msg)
+    attempt_count = 0
+    errors_str = ''
+    while attempt_count < p_consts.PYNGUIN_NUM_ATTEMPTS:
+      attempt_count += 1
+      logger.debug(f'~ attempt {attempt_count} to generate tests using Pynguin')
+      try:
+        test_fn_strs = p_pynguin.run_pynguin(f_gold_fn_str)
+        break
+      except Exception as err:
+        errors_str += f'Attempt {attempt_count} failed:\n{str(err)}\n'
+
+    ltrule_test_based_val_res.num_pynguin_attempts = attempt_count
+    if test_fn_strs is None:
+      logger.warning('Pynguin failed to generate tests')
+      logger.warning(errors_str)
       ltrule_test_based_val_res.is_valid = False
-      ltrule_test_based_val_res.reason = msg
+      ltrule_test_based_val_res.reason = errors_str
       return False
 
     # no test functions generated
