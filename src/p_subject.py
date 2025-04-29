@@ -265,9 +265,15 @@ class PirelSubject:
     assert _trmc != '', 'translation_rules_main_code is empty'
     pirel_subject.translation_rules_main_code = _trmc
 
-    translation_rules_test_code_fpath = conf.get('translation_rules_test_code_fpath', None)
-    pirel_subject.translation_rules_test_code = None if translation_rules_test_code_fpath is None else \
-      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_test_code_fpath)
+    # translation_rules_test_code
+    _trtc = None
+    if 'translation_rules_test_code' in conf:
+      _trtc = conf['translation_rules_test_code']
+    elif 'translation_rules_test_code_fpath' in conf:
+      _trtcp = p_utils.make_abs(conf['translation_rules_test_code_fpath'], p_consts.ROOT_DIR)
+      assert _trtcp.exists(), f'Translation rules test code file does not exist: {_trtcp}'
+      _trtc = p_utils.read_text(_trtcp)
+    pirel_subject.translation_rules_test_code = _trtc
 
     translation_rules_instr_src_fpath = conf.get('translation_rules_instr_src_fpath', None)
     pirel_subject.translation_rules_instr_src = None if translation_rules_instr_src_fpath is None else \
