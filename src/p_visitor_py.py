@@ -1953,7 +1953,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'for #{self.for_counter}'))
+    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.for_counter))
     self.for_counter += 1
     node.body.children.insert(0, log_statement)
 
@@ -1971,7 +1971,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_StringNode(f'if #{self.if_counter}'))
+    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.if_counter))
     self.if_counter += 1
     node.consequence.children.insert(0, log_statement)
 
