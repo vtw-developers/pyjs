@@ -154,3 +154,8 @@ console.log = function () {
   myexactlog(-1, [...arguments]);
   _console_log(...arguments);
 };
+
+// this function is inserted into body node types' `block`
+function secret_fun_4071() {
+  return 0;
+}
