@@ -703,6 +703,7 @@ def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
 
   RETURN `tar_program_deinstr` - the target program that is deinstrumented.
   '''
+  p_utils.log_json_time(f'{subject.name}_args-apply_translation_rules.json', locals())
   logger.info('Starting p_rule_applicator.apply_translation_rules (a la DuoGlot)')
 
   src_program_instr = _get_instrumented_src_program(subject)
