@@ -39,7 +39,7 @@ def _mylog(is_exact, *args):
   info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(",", ":"))]
   for arg in args[1:]:
     info_list.append(mylog_obj_to_comp(is_exact, arg))
-  _default_print("\\n" + json.dumps(info_list))
+  _default_print(json.dumps(info_list))
 
 
 def mylog(*args):
