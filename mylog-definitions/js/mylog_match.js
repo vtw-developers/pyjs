@@ -113,7 +113,7 @@ function _mylog() {
   for (let i = 2; i < arguments.length; i++) {
     info_list.push(mylog_obj_to_comp(is_exact, arguments[i]));
   }
-  _console_log("\\n" + JSON.stringify(info_list));
+  _console_log(JSON.stringify(info_list));
   while (
     SKIP_LOGGING === true &&
     mylog_callcount < MYLOG_LIST.length &&
