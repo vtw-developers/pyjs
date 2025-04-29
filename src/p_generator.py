@@ -422,13 +422,40 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     _get_alt_starting_ntypes_cache[node.get_id()] = alt_starting_nodes
     return alt_starting_nodes
 
-  def _gen_code_for_node_type(node_type: str, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> str:
+  def _is_builtin_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Check if `mapped_node` is an identifier of a built-in function.
+    For example, `enumerate(nums)`
+                  ^^^^^^^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of a call node
+    if mapped_node.get_parent().get_ts_node_type() != 'call':
+      return False
+    # mapped node must be the first child of a call node
+    if mapped_node.get_parent().children[0] != mapped_node:
+      return False
+    if mapped_node.children[0].node_type in p_consts.PY_BUILT_IN_FUNCTIONS:
+      return True
+    return False
+
+  def _gen_code_for_node_type(
+    node_type: str,
+    mapped_node: pds.DuoGlotNode,
+    template_dict: dict,
+    grammar: p_grammar.TreeSitterGrammar
+  ) -> str:
     '''NOTE the generated code may have semantic errors'''
 
     if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
       spec_treatment_map = p_consts.SPECIAL_TREATMENT_BODY_NODE_TYPES[template_dict['src_lang']]
       if node_type in spec_treatment_map:
         return spec_treatment_map[node_type]
+
+    if _is_builtin_fn_name_PY(mapped_node):
+      return mapped_node.children[0].node_type
 
     ast = grammar.generate_simplest_ast(node_type)
     ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
@@ -532,9 +559,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
     alt_ntype1, alt_ntype2, alt_ntype3 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
     # NOTE TODO no check is performed on the generated code
-    code1 = _gen_code_for_node_type(alt_ntype1, template_dict, grammar)
-    code2 = _gen_code_for_node_type(alt_ntype2, template_dict, grammar)
-    code3 = _gen_code_for_node_type(alt_ntype3, template_dict, grammar)
+    code1 = _gen_code_for_node_type(alt_ntype1, mapped_node, template_dict, grammar)
+    code2 = _gen_code_for_node_type(alt_ntype2, mapped_node, template_dict, grammar)
+    code3 = _gen_code_for_node_type(alt_ntype3, mapped_node, template_dict, grammar)
     return code1, code2, code3
 
   def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
