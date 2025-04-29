@@ -73,6 +73,7 @@ class TRuleTestBasedValRes:
   is_valid: Optional[bool] = None
   reason: Optional[str] = None
   num_generated_tests: Optional[int] = None
+  num_pynguin_attempts: Optional[int] = None
   pynguin_generated_tests: List[str] = field(default_factory=list)
   generated_test_that_is_used: Optional[str] = None
   test_script: Optional[str] = None
