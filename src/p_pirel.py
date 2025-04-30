@@ -433,6 +433,10 @@ def duoglot_translate_wrapper(
   '''
 
   assert 'subject_name' in kwargs, 'subject_name is missing'
+
+  # since this function may be invoked many times, log locals() only for debugging
+  p_utils.log_json_time(f'{kwargs["subject_name"]}_args-duoglot_translate_wrapper.json', locals())
+
   subject_name = kwargs['subject_name']
   logger.info(f'Starting p_pirel.duoglot_translate_wrapper (subject_name={subject_name})')
 
