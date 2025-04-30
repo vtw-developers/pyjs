@@ -318,8 +318,8 @@ SNIPPET_UNDER_TEST_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'snippet-under-test.
 PRE_CTX_SPEC_IDENT = 'pirel_pre_ctx_spec_identifier'
 PRE_CTX_INSERT_BREAK_IN_LOOPS = True
 
-PYNGUIN_TIMEOUT_SECONDS = 60
-PYNGUIN_NUM_ATTEMPTS = 7
+PYNGUIN_TIMEOUT_SECONDS = 20
+PYNGUIN_NUM_ATTEMPTS = 5
 
 
 ################################################################################################
