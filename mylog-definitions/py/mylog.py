@@ -34,9 +34,15 @@ def mylog_obj_to_comp(is_exact: bool, arg):
     return ["Unknown", len(str_result), str_result]
 
 
+def pirel_obj_serialize(obj):
+  if isinstance(obj, set):
+    return list(obj)
+  return obj
+
+
 def _mylog(is_exact, *args):
   prefix = "MYLOGEX:" if is_exact else "MYLOGAP:"
-  info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(",", ":"))]
+  info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(",", ":"), default=pirel_obj_serialize)]
   for arg in args[1:]:
     info_list.append(mylog_obj_to_comp(is_exact, arg))
   _default_print(json.dumps(info_list))

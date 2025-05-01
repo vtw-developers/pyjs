@@ -91,14 +91,17 @@ function mylog_obj_to_comp(is_exact, arg) {
 
 function sortKeysReplacer(key, value) {
   // this function is used to sort the keys of an object
-  // before logging it, to ensure that the order of keys  
-  if (value && typeof value === "object" && !Array.isArray(value)) {
+  // before logging it, to ensure that the order of keys
+  if (value && Object.prototype.toString.call(value) === "[object Object]") {
     return Object.keys(value)
       .sort() // Sort the keys alphabetically
       .reduce((sortedObj, sortedKey) => {
         sortedObj[sortedKey] = value[sortedKey];
         return sortedObj;
       }, {});
+  }
+  if (value && Object.prototype.toString.call(value) === "[object Set]") {
+    return Array.from(value);
   }
   return value; // Return the value as-is for non-objects
 }
