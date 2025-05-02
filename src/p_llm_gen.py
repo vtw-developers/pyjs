@@ -56,6 +56,8 @@ class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
 class LLMResponseFormatError(RuntimeError): pass
+class GTF_NoCodeBlocksError(RuntimeError): pass
+class GTF_MultipleCodeBlocksError(RuntimeError): pass
 
 
 class BasePirelTask(ABC):
@@ -848,6 +850,27 @@ def get_translation_pairs_from_tsp(
 
   lpllm_gen_log.success = True
   return all_translation_pairs
+
+
+def gen_test_function(f_gold_function: str):
+  '''
+  Generate a test function for validating a translation rule.
+  '''
+  system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
+  one_shot_message = HumanMessage(p_llm_templates.GenTestFunction.OneShot.GENERIC_PY)
+  prompt_message = HumanMessagePromptTemplate.from_template(
+    p_llm_templates.GenTestFunction.Prompt.GENERIC_PY
+  ).format(
+    f_gold_function=f_gold_function
+  )
+  messages = [system_message, one_shot_message, prompt_message]
+  raw_response = query_llm(messages)
+  code_blocks = extract_code_blocks(raw_response)
+  if len(code_blocks) == 0:
+    raise GTF_NoCodeBlocksError
+  if len(code_blocks) > 1:
+    raise GTF_MultipleCodeBlocksError
+  return code_blocks[0]
 
 
 # TEST HARNESSES
