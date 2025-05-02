@@ -489,3 +489,99 @@ class CheckTSP:
       'Constraints:\n'
       'Only the final JSON object containing your response should be in ```triple backticks format```. Otherwise, use only `one backtick format` when needed.\n'
     )
+
+class GenTestFunction:
+  '''
+  Contains templates for generating test functions for
+  validating the translation rules.
+  '''
+  class System:
+    GENERIC_PY = (
+      'You are a world class software tester. You specialize in Python programming language.'
+    )
+
+  class OneShot:
+    GENERIC_PY = (
+      (
+        'human',
+        'You will be given a Python function with one or more parameters.\n'
+        'Your task is to generate a set of inputs for this functions.\n'
+        'You need to use your deep knowledge of Python programming language to correctly infer the types of the parameters.\n'
+        '\n'
+        'The generated inputs must satisfy the following conditions:\n'
+        '1. The inferred types must be correct. (Strive to create inputs with correct types)\n'
+        '2. The inputs must cover as many statements as possible. (Strive to cover the code as much as possible)\n'
+        '\n'
+        'Below, I will explain the format of your response with an example.\n'
+        '\n'
+        '## Example\n'
+        '\n'
+        'This is a function for which you need to generate inputs:\n'
+        '```py\n'
+        'def f_gold(nums, target):\n'
+        '''    helper = {{1: 'a', 2: 'b'}}\n'''
+        '    for i, v in enumerate(nums):\n'
+        '        num = target - v\n'
+        '        if num in helper:\n'
+        '            return 1\n'
+        '    return 0\n'
+        '```\n'
+        '\n'
+        'Here are the possible inputs:\n'
+        '1. `f_gold([], 0)` - correctly inferred the type of `nums`, which must be a sequence.\n'
+        '2. `f_gold([1], 3)` - covers the body of the for statement and the if statement.\n'
+        '3. `f_gold([1], 4)` - covers `then` branch of the if statement inside the for statement.\n'
+        '\n'
+        'The outputs are then put into a function called `test`:\n'
+        '```py\n'
+        'def test():\n'
+        '    args_sets = [([], 0), ([1], 3), ([1], 4)]\n'
+        '    for idx, args_set in enumerate(args_sets):\n'
+        '        f_gold(*args_set)\n'
+        '```\n'
+        '\n'
+        'The entire test script will then look as follows:\n'
+        '```py\n'
+        'def f_gold(nums, target):\n'
+        '''    helper = {{1: 'a', 2: 'b'}}\n'''
+        '    for i, v in enumerate(nums):\n'
+        '        num = target - v\n'
+        '        if num in helper:\n'
+        '            return 1\n'
+        '    return 0\n'
+        '\n'
+        'def test():\n'
+        '    args_sets = [([], 0), ([1], 3), ([1], 4)]\n'
+        '    for idx, args_set in enumerate(args_sets):\n'
+        '        f_gold(*args_set)\n'
+        '\n'
+        'test()\n'
+        '```\n'
+        '\n'
+        '## Response format\n'
+        '\n'
+        'Your response must be a `test()` function where `__generated__arguments__` are the inputs you came up with.\n'
+        '```py\n'
+        'def test():\n'
+        '    args_sets = [__generated__arguments__]\n'
+        '    for idx, args_set in enumerate(args_sets):\n'
+        '        f_gold(*args_set)\n'
+        '```\n'
+        '\n'
+        '1. **Step-by-Step Explanation**:\n'
+        '   Provide a detailed reasoning process for the test generation, explaining key decisions.\n'
+        '2. **Output**:\n'
+        '   The final `test()` function must be surrounded with ```triple backticks```. For other code snippets, use `single backticks` where necessary.\n'
+        '3. **No comments**:\n'
+        '   Replace `__generated__arguments__` with only the inputs you generated. No comments are required explaining the inputs.\n'
+      )
+    )
+
+  class Prompt:
+    GENERIC_PY = (
+      'Generate a test function for\n'
+      '\n'
+      '```py\n'
+      '{f_gold_function}\n'
+      '```\n'
+    )
