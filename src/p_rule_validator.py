@@ -309,7 +309,7 @@ def is_valid_translation_rule_test_based(
     logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
     return f_gold_fn_str
 
-  def _get_test_fn_str(paramable_ids: List[str], ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes) -> Union[str, bool]:
+  def _get_test_fn_str_pynguin(paramable_ids: List[str], ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes) -> Union[str, bool]:
     '''
     RETURN str | bool: If str is returned, it is the test function.
     If bool is returned, it means that no test function was generated.
@@ -404,7 +404,7 @@ def is_valid_translation_rule_test_based(
 
   # 4. generate Pynguin tests for f_gold() function
   # Pynguin uses parameters of f_gold() function to generate test() function
-  _result = _get_test_fn_str(paramable_ids, ltrule_test_based_val_res)
+  _result = _get_test_fn_str_pynguin(paramable_ids, ltrule_test_based_val_res)
   if isinstance(_result, bool):
     return _result
   test_fn_str = _result
