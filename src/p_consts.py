@@ -321,6 +321,8 @@ PRE_CTX_INSERT_BREAK_IN_LOOPS = True
 PYNGUIN_TIMEOUT_SECONDS = 20
 PYNGUIN_NUM_ATTEMPTS = 5
 
+GEN_TEST_FN_LLM_NUM_ATTEMPTS = 3
+
 
 ################################################################################################
 #################################### GENERAL CONFIGS ###########################################
