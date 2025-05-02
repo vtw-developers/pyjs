@@ -311,7 +311,7 @@ def learn_trans_rules_for_prob_node(
         return template_dict
       raise RuntimeError('DuoGlot should fail to translate the context code')
 
-    def __get_pre_context(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
+    def __get_pre_context_global(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
       '''
       A pre-context is part of the code that appears before the context node
       of the problematic node inside a function body.
@@ -388,7 +388,7 @@ def learn_trans_rules_for_prob_node(
 
     # prepare pre-context of the context node of the problematic node
     # NOTE pre-context is used in translation rule validation
-    pre_context = __get_pre_context(subject, templates_dict)
+    pre_context = __get_pre_context_global(subject, templates_dict)
     template_dict['pre_context'] = pre_context
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_pre_context_FINAL.json', template_dict)
 
