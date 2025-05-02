@@ -401,8 +401,9 @@ def learn_trans_rules_for_prob_node(
       context_node.parent.children[context_node_idx_as_child] = spec_id_stat
 
       # 3. pretty print the parent of `block`
+      block_parent = cursor_node if isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode) else cursor_node.get_parent()
       pp = pvpy.PrettyPrinter(indent_with='    ')
-      pp.visit(cursor_node.parent)
+      pp.visit(block_parent)
       pre_context = '\n'.join(pp.lines)
       return pre_context
 
