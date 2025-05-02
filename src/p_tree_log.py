@@ -72,6 +72,7 @@ class TRuleTestBasedValRes:
   f_gold_for_pynguin: Optional[str] = None
   is_valid: Optional[bool] = None
   reason: Optional[str] = None
+  num_llm_attempts: Optional[int] = None
   num_generated_tests: Optional[int] = None
   num_pynguin_attempts: Optional[int] = None
   pynguin_generated_tests: List[str] = field(default_factory=list)

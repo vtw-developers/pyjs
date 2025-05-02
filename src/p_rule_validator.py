@@ -4,6 +4,7 @@ from typing import List, Tuple, Union
 import d_grammar_expand
 import d_grammar_rules
 import p_consts
+import p_llm_gen
 import p_pirel
 import p_pynguin
 import p_rule_applicator as prapp
@@ -373,6 +374,57 @@ def is_valid_translation_rule_test_based(
 
     return test_fn_str
 
+  def _get_test_fn_str_llm(
+    paramable_ids: List[str],
+    f_gold_fn_str: str,
+    ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes
+  ) -> Union[str, bool]:
+    '''
+    RETURN str | bool: If str is returned, it is the test function.
+    If bool is returned, it means that no test function was generated.
+    '''
+
+    # cases such as `helper = {}` (L0001)
+    # in such cases, the test function just invokes the f_gold() function
+    if len(paramable_ids) == 0:
+      msg = (
+        'No parametrizable identifiers found.\n'
+        'Will not generate Pynguin tests for this snippet.\n'
+        'Will run the snippet directly after inserting the log statements.'
+      )
+      logger.debug(msg)
+      return '''def test():\n    f_gold()'''
+
+    test_fn_str = None
+    attempt_count = 0
+    errors_str = ''
+    while attempt_count < p_consts.GEN_TEST_FN_LLM_NUM_ATTEMPTS:
+      attempt_count += 1
+      logger.debug(f'~ attempt {attempt_count} to generate tests using LLM')
+      try:
+        test_fn_str = p_llm_gen.gen_test_function(f_gold_fn_str)
+        break
+      except p_llm_gen.GTF_NoCodeBlocksError:
+        logger.debug('~ no code blocks in the generated test function')
+        errors_str += f'Attempt {attempt_count} failed:\nNo code blocks in the generated test function\n'
+      except p_llm_gen.GTF_MultipleCodeBlocksError:
+        logger.debug('~ multiple code blocks in the generated test function')
+        errors_str += f'Attempt {attempt_count} failed:\nMultiple code blocks in the generated test function\n'
+      except Exception as exc:
+        logger.debug('~ exception occurred while generating test function')
+        errors_str += f'Attempt {attempt_count} failed:\n{str(exc)}\n'
+
+    ltrule_test_based_val_res.num_llm_attempts = attempt_count
+    if test_fn_str is None:
+      logger.warning('LLM failed to generate tests')
+      logger.warning(errors_str)
+      ltrule_test_based_val_res.is_valid = False
+      ltrule_test_based_val_res.reason = errors_str
+      return False
+
+    logger.debug(f'generated test function:\n{test_fn_str}')
+    return test_fn_str
+
   p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
 
   msg = (
@@ -404,7 +456,7 @@ def is_valid_translation_rule_test_based(
 
   # 4. generate Pynguin tests for f_gold() function
   # Pynguin uses parameters of f_gold() function to generate test() function
-  _result = _get_test_fn_str_pynguin(paramable_ids, ltrule_test_based_val_res)
+  _result = _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, ltrule_test_based_val_res)
   if isinstance(_result, bool):
     return _result
   test_fn_str = _result
