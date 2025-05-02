@@ -857,13 +857,13 @@ def gen_test_function(f_gold_function: str):
   Generate a test function for validating a translation rule.
   '''
   system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
-  one_shot_message = HumanMessage(p_llm_templates.GenTestFunction.OneShot.GENERIC_PY)
+  context_message = HumanMessage(p_llm_templates.GenTestFunction.Context.GENERIC_PY)
   prompt_message = HumanMessagePromptTemplate.from_template(
     p_llm_templates.GenTestFunction.Prompt.GENERIC_PY
   ).format(
     f_gold_function=f_gold_function
   )
-  messages = [system_message, one_shot_message, prompt_message]
+  messages = [system_message, context_message, prompt_message]
   raw_response = query_llm(messages)
   code_blocks = extract_code_blocks(raw_response)
   if len(code_blocks) == 0:
