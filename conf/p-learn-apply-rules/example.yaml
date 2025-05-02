@@ -16,6 +16,7 @@ mode: benchmark
 #
 # [is_override_starting_ruleset]: bool (default: false)
 # [overriding_ruleset_fpath]: str (required if is_override_starting_ruleset is true)
+# [is_reuse_trans_rules_across_subjects]: bool (default: false)
 #
 # sample: object
 #   is_random: bool
@@ -35,6 +36,7 @@ mode_benchmark:
   # starting ruleset can be overriden by this config
   is_override_starting_ruleset: false
   overriding_ruleset_fpath: logs/learn-rules/L0001_learned_rules.snart
+  is_reuse_trans_rules_across_subjects: false
 
   # sample
   sample:
