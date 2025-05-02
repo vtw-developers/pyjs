@@ -944,8 +944,19 @@ def _test_get_feedback_message_trans_sp2_partial():
   feedback_message.pretty_print()
 
 
+def _test_gen_test_function():
+  '''
+  def gen_test_function(f_gold_function: str):
+  '''
+  f_gold_fpath = p_consts.TMP_DIR / 'f_gold.py'
+  f_gold_function = p_utils.read_text(f_gold_fpath)
+  test_function = gen_test_function(f_gold_function)
+  print(test_function)
+
+
 if __name__ == '__main__':
-  _test_query_llm()
+  # _test_query_llm()
+  _test_gen_test_function()
   # _test_translate_sp1()
   # _test_translate_sp2()
   # _test_get_translation_pairs_from_tsp()
