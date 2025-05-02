@@ -346,6 +346,14 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
     # ~~~ entry point for a single subject
     trans_rules = learn_and_application_phases_on_subject(subject, starting_ruleset, lsubject)
 
+    # update the starting ruleset for the next subject
+    # by adding the learned rules if specified in the config
+    if trans_rules is not None:
+      assert isinstance(trans_rules, str), 'learned translation rules must be a string'
+      if conf.get('is_reuse_trans_rules_across_subjects', False):
+        starting_ruleset += trans_rules
+        logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
+
     if conf['is_email_report']:
       _email_report(lsubject, lbenchmark)
     logger.debug(p_utils.footer(subject_name))
