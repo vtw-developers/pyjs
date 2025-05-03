@@ -56,8 +56,7 @@ class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
 class LLMResponseFormatError(RuntimeError): pass
-class GTF_NoCodeBlocksError(RuntimeError): pass
-class GTF_MultipleCodeBlocksError(RuntimeError): pass
+class GenTestFunctionRetryLimitError(RuntimeError): pass
 
 
 class BasePirelTask(ABC):
@@ -620,6 +619,75 @@ class SP2_PartialProgramG(BaseTranslateSP2Task):
     return feedback_message
 
 
+# GENERATE TEST FUNCTION
+class GenTestFunction(BasePirelTask):
+  '''
+  Generate a test function for validating a translation rule.
+  '''
+  def __init__(
+    self,
+    task_name: str,
+    f_gold_function: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    lbase_task: ptlog.BaseTask
+  ):
+    super().__init__(task_name, subject, template_dict, lbase_task)
+    self.f_gold_function = f_gold_function
+    self.log_args_as_json(
+      'args_init.json',
+      task_name=task_name,
+      f_gold_function=f_gold_function,
+      subject=subject,
+      template_dict=template_dict,
+      lbase_task=lbase_task
+    )
+
+  def get_system_message(self) -> BaseMessage:
+    system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
+    return system_message
+
+  def get_few_shot_messages(self) -> List[BaseMessage]:
+    context_message = HumanMessage(p_llm_templates.GenTestFunction.Context.GENERIC_PY)
+    return [context_message]
+
+  def get_starting_prompt_message(self) -> HumanMessage:
+    starting_prompt = HumanMessagePromptTemplate.from_template(
+      p_llm_templates.GenTestFunction.Prompt.GENERIC_PY
+    ).format(
+      f_gold_function=self.f_gold_function
+    )
+    return starting_prompt
+
+  def get_feedback_message(self, validation_result: p_llm_val.GenTestFunctionValidationResult) -> HumanMessage:
+    self._log('initiating a feedback message factory')
+    factory = p_llm_messages.GenTestFunctionF(self.template_dict, self.subject, validation_result)
+    feedback_message = factory.get_feedback_message()
+    return feedback_message
+
+  def validate_code_blocks(self) -> p_llm_val.GenTestFunctionValidationResult:
+    self._log('starting gen test function validation')
+    all_test_function_cands = self.get_all_gen_code_blocks()
+    val_result_obj = p_llm_val.val_gen_test_function_candidates(
+      all_test_function_cands,
+      self.f_gold_function,
+      self.template_dict,
+      subject_name=self.subject.name
+    )
+    return val_result_obj
+
+  def does_require_feedback_iteration(self) -> bool:
+    return self.feedback_iteration_counter <= p_consts.GEN_TEST_FN_LLM_FEEDBACKS
+
+  def does_require_task_iteration(self) -> bool:
+    return self.task_iteration_counter <= p_consts.GEN_TEST_FN_LLM_NUM_ATTEMPTS
+
+  def run_failed(self) -> None:
+    msg = f'Could not generate test function. Reached retry limit. Check the logs.'
+    self._log(f'ERROR {msg}')
+    raise GenTestFunctionRetryLimitError(msg)
+
+
 # HELPER FUNCTIONS
 def get_openai_credentials() -> Tuple[str, str]:
   assert p_consts.ENV_FILE.exists(), f'Create a "{p_consts.ENV_FILE.name}" file with necessary environment variables'
@@ -852,29 +920,47 @@ def get_translation_pairs_from_tsp(
   return all_translation_pairs
 
 
-def gen_test_function(f_gold_function: str):
+def gen_test_function(
+  f_gold_function: str,
+  subject: p_subject.PirelSubject,
+  template_dict: dict,
+  ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes
+) -> Optional[str]:
   '''
   Generate a test function for validating a translation rule.
+  RETURN: test function or None if failed
   '''
-  system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
-  context_message = HumanMessage(p_llm_templates.GenTestFunction.Context.GENERIC_PY)
-  prompt_message = HumanMessagePromptTemplate.from_template(
-    p_llm_templates.GenTestFunction.Prompt.GENERIC_PY
-  ).format(
-    f_gold_function=f_gold_function
+  lgen_test_function = ptlog.GenTestFunction()
+  lgen_test_function.f_gold_function = f_gold_function
+  ltrule_test_based_val_res.gen_test_function = lgen_test_function
+
+  gen_task = GenTestFunction(
+    task_name='gen_test_function',
+    f_gold_function=f_gold_function,
+    subject=subject,
+    template_dict=template_dict,
+    lbase_task=lgen_test_function
   )
-  messages = [system_message, context_message, prompt_message]
-  raw_response = query_llm(messages)
 
-  p_utils.log_file_time('gen_test_function_messages.md', langchain_msgs_to_md(messages))
-  p_utils.log_file_time('gen_test_function_raw_response.md', raw_response)
+  try:
+    test_functions = gen_task.run()
+  except GenTestFunctionRetryLimitError as err:
+    logger.warning(str(err))
+    lgen_test_function.success = False
+    lgen_test_function.reason = str(err)
+    return None
 
-  code_blocks = extract_code_blocks(raw_response)
-  if len(code_blocks) == 0:
-    raise GTF_NoCodeBlocksError
-  if len(code_blocks) > 1:
-    raise GTF_MultipleCodeBlocksError
-  return code_blocks[0]
+  assert len(test_functions) > 0, 'sanity check'
+  if len(test_functions) > 1:
+    msg = f'More than one test function generated:\n{json.dumps(test_functions, indent=2)}'
+    msg += 'Will use the first one'
+    logger.warning(msg)
+
+  test_function = test_functions[0]
+  assert isinstance(test_function, str), 'sanity check'
+  lgen_test_function.success = True
+  lgen_test_function.test_function = test_function
+  return test_function
 
 
 # TEST HARNESSES

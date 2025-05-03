@@ -308,6 +308,56 @@ class SP2_PartialProgramF(BaseTranslateSP2Factory):
     raise NotImplementedError('new feedback case identified in SP2_PartialProgram')
 
 
+# GENERATE TEST FUNCTION
+class GenTestFunctionF(BaseMessageFactory):
+  def __init__(self, template_dict: dict, subject: p_subject.PirelSubject, val: p_llm_val.GenTestFunctionValidationResult):
+    super().__init__(template_dict, subject)
+    self.val = val
+
+  def get_message_have_parse_error(self, cands_w_error: List[str]) -> HumanMessage:
+    cands_str = ''
+    for cand_code in cands_w_error:
+      cands_str += f'```python\n{cand_code}\n```\n'
+    return HumanMessage(f'All generated test functions have parse error. Here are the candidates:\n{cands_str}')
+
+  def get_message_not_a_single_fn_defn_test(self) -> HumanMessage:
+    return HumanMessage(
+      f'Please make sure that the generated test function is a single function definition named `test()`.'
+    )
+
+  def get_feedback_message(self) -> HumanMessage:
+    self._log(f'the number of generated test functions is {len(self.val.gen_test_fn_cands)}')
+    self._log(f'here is the stats for them:\n{json.dumps(self.val.gen_test_fn_cands_stats, indent=2)}')
+
+    # case 1: checking for the presence of code blocks
+    self._log('case 1: checking for the presence of code blocks')
+    if self.val.has_no_gen_test_fn_cands():
+      self._log('no gen_test_fn_cands found')
+      self._log('returning the feedback message')
+      feedback_message = self.get_message_no_code_blocks()
+      return feedback_message
+    self._log('case 1: gen_test_fn_cands found')
+
+    # case 2: checking if all gen_test_fn_cands have parse error
+    self._log('case 2: checking if all gen_test_fn_cands have parse error')
+    if self.val.all_have_parse_error():
+      self._log('all gen_test_fn_cands have parse error')
+      self._log('returning the feedback message')
+      feedback_message = self.get_message_have_parse_error(self.val.gen_test_fn_cands)
+      return feedback_message
+    self._log('case 2: some/all gen_test_fn_cands do not have parse error')
+
+    # case 3: checking if all gen_test_fn_cands have a single function defn `test()`
+    self._log('case 3: checking if all gen_test_fn_cands have a single function defn `test()`')
+    if self.val.not_a_single_fn_def_test():
+      self._log('not a single generated test function is a single function defn `test()`')
+      self._log('returning the feedback message')
+      feedback_message = self.get_message_not_a_single_fn_defn_test()
+      return feedback_message
+
+    raise NotImplementedError('new feedback case identified in GenTestFunctionF')
+
+
 # HELPER FUNCTIONS
 def get_partial_program_affix(partial_program: str) -> Tuple[str, str]:
   '''
