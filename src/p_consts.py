@@ -322,6 +322,7 @@ PYNGUIN_TIMEOUT_SECONDS = 20
 PYNGUIN_NUM_ATTEMPTS = 5
 
 GEN_TEST_FN_LLM_NUM_ATTEMPTS = 3
+GEN_TEST_FN_LLM_FEEDBACKS = 3
 
 
 ################################################################################################

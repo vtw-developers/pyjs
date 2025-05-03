@@ -224,6 +224,44 @@ class TranslateSP2ValidationResult(BaseValidationResult):
     return self.translation_pairs
 
 
+class GenTestFunctionValidationResult(BaseValidationResult):
+  def __init__(self, validation_result):
+    super().__init__(validation_result)
+    self.gen_test_fn_cands : List[str] = validation_result['gen_test_fn_cands']
+    self.test_functions : List[str] = validation_result['test_functions']
+    self.success : bool = validation_result['success']
+    self.gen_test_fn_cands_stats : List[dict] = validation_result['gen_test_fn_cands_stats']
+
+  # BOOLEAN METHODS
+  def has_no_gen_test_fn_cands(self) -> bool:
+    return len(self.gen_test_fn_cands) == 0
+
+  def all_have_parse_error(self) -> bool:
+    flags = list(map(self.ad_has_parse_error, self.gen_test_fn_cands_stats))
+    return all(flags)
+
+  def not_a_single_fn_def_test(self) -> bool:
+    flags = list(map(self.ad_has_single_fn_def_test, self.gen_test_fn_cands_stats))
+    return not any(flags)
+
+  # ADAPTER METHODS TO `gen_test_fn_cands_stats` (have `ad` prefix)
+  def ad_gen_test_fn_cand(self, gen_test_fn_stat: dict) -> str:
+    return gen_test_fn_stat['gen_test_fn_cand']
+
+  def ad_success(self, gen_test_fn_stat: dict) -> bool:
+    return gen_test_fn_stat['success'] is True
+
+  def ad_has_parse_error(self, gen_test_fn_stat: dict) -> bool:
+    return gen_test_fn_stat['has_parse_error'] is True
+
+  def ad_has_single_fn_def_test(self, gen_test_fn_stat: dict) -> bool:
+    return gen_test_fn_stat['has_single_fn_def_test'] is True
+
+  # ABSTRACT METHOD IMPLEMENTATIONS
+  def get_data(self) -> List[str]:
+    return self.test_functions
+
+
 # VALIDATE SIMPLIFIED TEMPLATE CANDIDATES
 def val_simplified_template_candidates(st_cands: List[str], template_dict: dict, **kwargs) -> SimplifyTemplateValidationResult:
   '''
@@ -660,6 +698,106 @@ def _get_type_ahu_encoding_x_ident(tree: pds.DuoGlotTree) -> str:
     return f'({node.get_type()} {children_encoding})'
 
   return __rec_post_order(tree.get_root_node())
+
+
+# VALIDATE GENERATED TEST FUNCTION CANDIDATES
+def val_gen_test_function_candidates(
+  gen_test_fn_cands: List[str],
+  f_gold_function: str,
+  template_dict: dict,
+  **kwargs
+) -> GenTestFunctionValidationResult:
+  '''
+  This function is invoked to check if the generated test function candidates
+  are valid or not.
+
+  CRITERIA:
+  1. generated test function candidates have no parse errors
+  '''
+  p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_gen_test_function_candidates.json', locals())
+  logger.info(f'~~~ Starting validation of {len(gen_test_fn_cands)} generated test function candidates')
+
+  return_dict = {}
+  return_dict['gen_test_fn_cands'] = gen_test_fn_cands
+  return_dict['test_functions'] = []
+  return_dict['success'] = False
+  return_dict['gen_test_fn_cands_stats'] = []
+
+  test_functions = []
+  for idx, gen_test_fn_cand in enumerate(gen_test_fn_cands, start=1):
+    logger.debug(f'Checking if generated test function candidate ({idx}/{len(gen_test_fn_cands)}) satisfies our criteria')
+    gen_test_fn_cand_stats = _gen_test_fn_cand_gather_stats(gen_test_fn_cand, f_gold_function, template_dict)
+    return_dict['gen_test_fn_cands_stats'].append(gen_test_fn_cand_stats)
+    success = gen_test_fn_cand_stats['success']
+
+    if success:
+      test_functions.append(gen_test_fn_cand)
+
+    logger.debug(f'Generated test function candidate satisfies our criteria => ({success})')
+    logger.debug(f'The number of good test functions so far is {len(test_functions)}/{len(gen_test_fn_cands)}')
+
+  if len(test_functions) == 0:
+    _ = {'gen_test_fn_cands': gen_test_fn_cands}
+    logger.warning(f'BAD: no test functions were formed with {len(gen_test_fn_cands)} generated test function candidates:\n{json.dumps(_, indent=2)}')
+    return GenTestFunctionValidationResult(return_dict)
+
+  return_dict['success'] = True
+  return_dict['test_functions'] = test_functions
+  logger.debug(f'GOOD End of generated test function candidates validation.')
+  logger.debug(f'The number of good test functions is {len(test_functions)}/{len(gen_test_fn_cands)}')
+  return GenTestFunctionValidationResult(return_dict)
+
+
+def _gen_test_fn_cand_gather_stats(gen_test_fn_cand: str, f_gold_function: str, template_dict: dict) -> dict:
+  return_dict = {
+    'gen_test_fn_cand': gen_test_fn_cand,
+    'success': None,
+    'has_parse_error': None,
+    'has_single_fn_def_test': None,
+  }
+
+  logger.debug(f'Checking if generated test function candidate satisfies our criteria')
+  logger.debug(f'\ngen_test_fn_cand:\n{repr(gen_test_fn_cand)}')
+
+  # criteria 1
+  if p_utils.does_have_parse_error(gen_test_fn_cand, template_dict['src_lang']):
+    logger.debug(f'BAD: generated test function candidate has a parse error')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = True
+    return return_dict
+
+  # criteria 2
+  # generated test function candidate should have:
+  # 1. only one function definition
+  # 2. and that function definition should be `def test()`
+  ast, _ = d_ast_parse.parse_text_dbg(gen_test_fn_cand, template_dict['src_lang'])
+  tree = pds.DuoGlotTree(ast)
+  root_node = tree.get_root_node()
+  if root_node.get_num_nt_children() != 1:
+    logger.debug(f'BAD: generated test function candidate has multiple non-terminal children at root node')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['has_single_fn_def_test'] = False
+    return return_dict
+  fn_defn_node = root_node.get_nt_children()[0]
+  if fn_defn_node.get_ts_node_type() != 'function_definition':
+    logger.debug(f'BAD: generated test function candidate is not a function definition')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['has_single_fn_def_test'] = False
+    return return_dict
+  if 'def test():' not in gen_test_fn_cand:
+    logger.debug(f'BAD: generated test function candidate is not a test function definition')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['has_single_fn_def_test'] = True
+    return return_dict
+
+  logger.debug(f'GOOD: generated test function candidate passed the validation step.')
+  return_dict['success'] = True
+  return_dict['has_parse_error'] = False
+  return_dict['has_single_fn_def_test'] = True
+  return return_dict
 
 
 # COMMONLY USED FUNCTIONS IN THIS MODULE

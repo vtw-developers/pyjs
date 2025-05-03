@@ -225,10 +225,10 @@ def is_valid_translation_rule_syntactic(
 
 def is_valid_translation_rule_test_based(
   subject: p_subject.PirelSubject,
-  pre_context: str,
   snippet_under_test: str,
   trule_under_test: str,
   existing_ruleset: str,
+  template_dict: dict,
   ltrule: ptlog.TRule
 ) -> bool:
   '''
@@ -377,7 +377,9 @@ def is_valid_translation_rule_test_based(
   def _get_test_fn_str_llm(
     paramable_ids: List[str],
     f_gold_fn_str: str,
-    ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes,
   ) -> Union[str, bool]:
     '''
     RETURN str | bool: If str is returned, it is the test function.
@@ -395,31 +397,10 @@ def is_valid_translation_rule_test_based(
       logger.debug(msg)
       return '''def test():\n    f_gold()'''
 
-    test_fn_str = None
-    attempt_count = 0
-    errors_str = ''
-    while attempt_count < p_consts.GEN_TEST_FN_LLM_NUM_ATTEMPTS:
-      attempt_count += 1
-      logger.debug(f'~ attempt {attempt_count} to generate tests using LLM')
-      try:
-        test_fn_str = p_llm_gen.gen_test_function(f_gold_fn_str)
-        break
-      except p_llm_gen.GTF_NoCodeBlocksError:
-        logger.debug('~ no code blocks in the generated test function')
-        errors_str += f'Attempt {attempt_count} failed:\nNo code blocks in the generated test function\n'
-      except p_llm_gen.GTF_MultipleCodeBlocksError:
-        logger.debug('~ multiple code blocks in the generated test function')
-        errors_str += f'Attempt {attempt_count} failed:\nMultiple code blocks in the generated test function\n'
-      except Exception as exc:
-        logger.debug('~ exception occurred while generating test function')
-        errors_str += f'Attempt {attempt_count} failed:\n{str(exc)}\n'
-
-    ltrule_test_based_val_res.num_llm_attempts = attempt_count
+    test_fn_str = p_llm_gen.gen_test_function(f_gold_fn_str, subject, template_dict, ltrule_test_based_val_res)
     if test_fn_str is None:
-      logger.warning('LLM failed to generate tests')
-      logger.warning(errors_str)
       ltrule_test_based_val_res.is_valid = False
-      ltrule_test_based_val_res.reason = errors_str
+      ltrule_test_based_val_res.reason = 'LLM failed to generate test function'
       return False
 
     logger.debug(f'generated test function:\n{test_fn_str}')
@@ -441,7 +422,7 @@ def is_valid_translation_rule_test_based(
   ltrule.test_based_val_res = ltrule_test_based_val_res
 
   # 1. combine pre_context and snippet_under_test
-  pcsut = _combine_pre_context_and_sut(pre_context, snippet_under_test)
+  pcsut = _combine_pre_context_and_sut(template_dict['pre_context'], snippet_under_test)
 
   # 2. extract parametrizable identifiers from pre_context + snippet_under_test
   # these identifiers are used as parameters of f_gold() function
@@ -456,7 +437,13 @@ def is_valid_translation_rule_test_based(
 
   # 4. generate Pynguin tests for f_gold() function
   # Pynguin uses parameters of f_gold() function to generate test() function
-  _result = _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, ltrule_test_based_val_res)
+  _result = _get_test_fn_str_llm(
+    paramable_ids,
+    f_gold_fn_str,
+    subject,
+    template_dict,
+    ltrule_test_based_val_res
+  )
   if isinstance(_result, bool):
     return _result
   test_fn_str = _result
@@ -541,8 +528,14 @@ def filter_translation_rules(
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
       continue
 
-    pre_context = template_dict['pre_context']
-    is_semantics_valid = is_valid_translation_rule_test_based(subject, pre_context, tsp[2], translation_rule, translation_rules, ltrule)
+    is_semantics_valid = is_valid_translation_rule_test_based(
+      subject,
+      tsp[2],
+      translation_rule,
+      translation_rules,
+      template_dict,
+      ltrule
+    )
     if not is_semantics_valid:
       logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
       continue
