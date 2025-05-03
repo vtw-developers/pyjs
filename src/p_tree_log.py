@@ -69,7 +69,7 @@ class TRuleSyntaxValRes:
 class TRuleTestBasedValRes:
   snippet_under_test: Optional[str] = None
   paramable_ids: Optional[List[str]] = None
-  f_gold_for_pynguin: Optional[str] = None
+  f_gold_fn_str: Optional[str] = None
   is_valid: Optional[bool] = None
   reason: Optional[str] = None
   num_llm_attempts: Optional[int] = None
