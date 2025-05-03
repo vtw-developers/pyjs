@@ -150,6 +150,7 @@ def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str
         new_trans_rules,
         subject.auto_backward,
         subject.choices,
+        subject_name=subject.name,
         skip_template_extraction=True
       )
       tar_code = duoglot_result_dict['tar_code']
