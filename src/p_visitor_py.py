@@ -2160,8 +2160,15 @@ def _test_log_statement_inserter():
   print(code)
 
 
+def _test_classmethod_insert_log_statements():
+  snippet = p_utils.read_tmp_text('test_inserter.py')
+  output = LogStatementInserter.insert_log_statements(snippet)
+  print(output)
+
+
 if __name__ == '__main__':
   # _test_pretty_printer()
   # _test_tree_from_ts_tree()
   # _test_parametrizable_variables_collector()
-  _test_log_statement_inserter()
+  # _test_log_statement_inserter()
+  _test_classmethod_insert_log_statements()
