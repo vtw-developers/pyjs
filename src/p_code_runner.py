@@ -134,8 +134,8 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
   stdout = p_utils.read_text(f'{temp_filename}.stdout')
   stderr = p_utils.read_text(f'{temp_filename}.stderr')
 
-  logger.debug(f'stdout: "{stdout}"')
-  logger.debug(f'stderr: "{stderr}"')
+  logger.debug(f'stdout: "\n{stdout.strip()}\n"')
+  logger.debug(f'stderr: "\n{stderr.strip()}\n"')
   logger.debug('Finished p_code_runner._run_code')
 
   return stdout, stderr

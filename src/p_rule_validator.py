@@ -469,7 +469,7 @@ def is_valid_translation_rule_test_based(
     f_gold_fn_str=f_gold_fn_str,
     test_call_str='test()'
   )
-  logger.debug('combined test function and f_gold() into a test script')
+  logger.debug(f'combined test function and f_gold() into a test script:\n{test_script_str}')
 
   # 6. insert log statements into the test script
   # log statements are inserted into the test script
