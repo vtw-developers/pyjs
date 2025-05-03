@@ -441,6 +441,23 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       return True
     return False
 
+  def _is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Return true, if `mapped_node` is an identifier of an attribute of a call node.
+    For example, `chars.remove(c)`
+                        ^^^^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of an attribute node
+    if mapped_node.get_parent().get_ts_node_type() != 'attribute':
+      return False
+    # mapped node must be the last node of the attribute node
+    if mapped_node.get_parent().children[-1] != mapped_node:
+      return False
+    return True
+
   def _gen_code_for_node_type(
     node_type: str,
     mapped_node: pds.DuoGlotNode,
@@ -455,6 +472,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
         return spec_treatment_map[node_type]
 
     if _is_builtin_fn_name_PY(mapped_node):
+      return mapped_node.children[0].node_type
+
+    if _is_call_attribute_PY(mapped_node):
       return mapped_node.children[0].node_type
 
     ast = grammar.generate_simplest_ast(node_type)
