@@ -865,6 +865,10 @@ def gen_test_function(f_gold_function: str):
   )
   messages = [system_message, context_message, prompt_message]
   raw_response = query_llm(messages)
+
+  p_utils.log_file_time('gen_test_function_messages.md', langchain_msgs_to_md(messages))
+  p_utils.log_file_time('gen_test_function_raw_response.md', raw_response)
+
   code_blocks = extract_code_blocks(raw_response)
   if len(code_blocks) == 0:
     raise GTF_NoCodeBlocksError
