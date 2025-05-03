@@ -90,7 +90,7 @@ class BasePirelTask(ABC):
     task_name: str,
     subject: p_subject.PirelSubject,
     template_dict: dict,
-    lbase_trans: ptlog.BaseTask
+    lbase_task: ptlog.BaseTask
   ):
     self.task_name : str = task_name
     self.chat_history : List[BaseMessage] = []
@@ -104,7 +104,7 @@ class BasePirelTask(ABC):
 
     # creating an attribute in PLLMGenLog
     self.ltask_loop = ptlog.TaskLoop(self.task_name)
-    lbase_trans.task_loop = self.ltask_loop
+    lbase_task.task_loop = self.ltask_loop
 
   def __repr__(self) -> str:
     return self.__class__.__name__
@@ -331,9 +331,9 @@ class BaseTranslateSP1Task(BasePirelTask):
     subject: p_subject.PirelSubject,
     template_dict: dict,
     sp1: str,
-    lbase_trans: ptlog.BaseTask
+    lbase_task: ptlog.BaseTask
   ):
-    super().__init__(task_name, subject, template_dict, lbase_trans)
+    super().__init__(task_name, subject, template_dict, lbase_task)
     self.sp1 = sp1
     self.log_args_as_json(
       'args_init.json', task_name=task_name, template_dict=template_dict, sp1=sp1
@@ -399,7 +399,7 @@ class BaseTranslateSP1Task(BasePirelTask):
     subject: p_subject.PirelSubject,
     template_dict: dict,
     sp1: str,
-    lbase_trans: ptlog.BaseTask
+    lbase_task: ptlog.BaseTask
   ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right translator subclass
@@ -409,11 +409,11 @@ class BaseTranslateSP1Task(BasePirelTask):
 
     if _is_context_empty(template_dict):
       logger.debug('BaseTranslateSP1Task.dispatch: Context is empty. Will use direct translation of SP1.')
-      task_obj = SP1_DirectTransG('tr_sp1_dir_tr', subject, template_dict, sp1, lbase_trans)
+      task_obj = SP1_DirectTransG('tr_sp1_dir_tr', subject, template_dict, sp1, lbase_task)
 
     else:
       logger.debug('BaseTranslateSP1Task.dispatch: Context is not empty. Will use partial translation of SP1.')
-      task_obj = SP1_PartialProgramG('tr_sp1_par_pr', subject, template_dict, sp1, lbase_trans)
+      task_obj = SP1_PartialProgramG('tr_sp1_par_pr', subject, template_dict, sp1, lbase_task)
 
     logger.debug(f'BaseTranslateSP1Task.dispatch: returning task object "{repr(task_obj)}"')
     return task_obj
@@ -486,12 +486,12 @@ class BaseTranslateSP2Task(BasePirelTask):
     template_dict: dict,
     sp1_tp1_cand: dict,
     sp2: str,
-    lbase_trans: ptlog.BaseTask
+    lbase_task: ptlog.BaseTask
   ):
     '''
     PARAM sp1_tp1_cand: (sp1_i, tp1_i_j)
     '''
-    super().__init__(task_name, subject, template_dict, lbase_trans)
+    super().__init__(task_name, subject, template_dict, lbase_task)
     self.sp1 = sp1_tp1_cand['source']
     self.tp1_cand = sp1_tp1_cand['target']
     self.sp2 = sp2
@@ -540,7 +540,7 @@ class BaseTranslateSP2Task(BasePirelTask):
     template_dict: dict,
     sp1_tp1_cand: dict,
     sp2: str,
-    lbase_trans: ptlog.BaseTask
+    lbase_task: ptlog.BaseTask
   ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right subclass (translator)
@@ -551,11 +551,11 @@ class BaseTranslateSP2Task(BasePirelTask):
 
     if _is_context_empty(template_dict):
       logger.debug('BaseTranslateSP2Task.dispatch: Context is empty. Will use direct translation of SP2 (similar to SP1).')
-      task_obj = SP2_DirectTransG('tr_sp2_dir_tr', subject, template_dict, sp1_tp1_cand, sp2, lbase_trans)
+      task_obj = SP2_DirectTransG('tr_sp2_dir_tr', subject, template_dict, sp1_tp1_cand, sp2, lbase_task)
 
     else:
       logger.debug('BaseTranslateSP2Task.dispatch: Context is not empty. Will use partial translation of SP2 (similar to SP1).')
-      task_obj = SP2_PartialProgramG('tr_sp2_par_pr', subject, template_dict, sp1_tp1_cand, sp2, lbase_trans)
+      task_obj = SP2_PartialProgramG('tr_sp2_par_pr', subject, template_dict, sp1_tp1_cand, sp2, lbase_task)
 
     logger.debug(f'BaseTranslateSP2Task.dispatch: returning task object "{repr(task_obj)}"')
     return task_obj
