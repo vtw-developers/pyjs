@@ -810,6 +810,17 @@ class PrettyPrinter(pvis.Visitor):
     arguments = self.visit(node.arguments)
     return f'{function}({arguments})'
 
+  def visit_ClassDefinitionNode(self, node: ClassDefinitionNode) -> None:
+    signature = 'class '
+    # according to grammar, first child is `name`
+    # and the last child is `body`
+    for child in node.children[1:-1]:
+      signature += self.visit(child)
+    self.write_line(signature)
+    self.level += 1
+    self.visit(node.children[-1])
+    self.level -= 1
+
   def visit_CommentNode(self, node: CommentNode) -> None:
     self.write_line(f'{node.children[0].node_type}')
 
