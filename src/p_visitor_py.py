@@ -1048,7 +1048,7 @@ class PrettyPrinter(pvis.Visitor):
     return f'[{body} {clauses}]'
 
   def visit_ListNode(self, node: ListNode) -> str:
-    elements = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    elements = ', '.join([self.visit(child) for child in node.get_nt_children() if not isinstance(child, CommentNode)])
     return f'[{elements}]'
 
   def visit_ListSplatNode(self, node: ListSplatNode) -> str:
