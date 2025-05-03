@@ -609,5 +609,43 @@ def _test_learn_trans_rules_for_prob_node():
   print('\n\n'.join(result))
 
 
+def _test_duoglot_translate_wrapper():
+  '''
+  def duoglot_translate_wrapper(
+    src_code: str,
+    src_lang: str,
+    tar_lang: str,
+    trans_rules: str,
+    auto_backward: bool,
+    choices: dict,
+    **kwargs
+  ) -> dict:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_duoglot_translate_wrapper_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  src_code = args_dict['src_code']
+  src_lang = args_dict['src_lang']
+  tar_lang = args_dict['tar_lang']
+  trans_rules = args_dict['trans_rules']
+  auto_backward = args_dict['auto_backward']
+  choices = args_dict['choices']
+  kwargs = args_dict['kwargs']
+
+  result = duoglot_translate_wrapper(
+    src_code,
+    src_lang,
+    tar_lang,
+    trans_rules,
+    auto_backward,
+    choices,
+    **kwargs
+  )
+  print(json.dumps(result, indent=2))
+  print(result['tar_code'])
+
+
 if __name__ == '__main__':
-  _test_learn_trans_rules_for_prob_node()
+  # _test_learn_trans_rules_for_prob_node()
+  _test_duoglot_translate_wrapper()
