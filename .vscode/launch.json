@@ -141,5 +141,14 @@
       "console": "integratedTerminal",
       "justMyCode": true
     },
+    {
+      "name": "src_program_run.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/tmp/",
+      "program": "src_program_run.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
   ]
 }
