@@ -1,9 +1,4 @@
 (match_expand
-  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "myexactlog")) ("py.argument_list" (str "(") ("py.identifier" "_val_") (str ")")))) "*")
-  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "myexactlog")) ("js.arguments" (str "(") ("js.identifier" "_val1_") (str ")")))) "*1")
-)
-
-(match_expand
-  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "myexactlog")) ("py.argument_list" (str "(") ("py.integer" "_val_") (str ")")))) "*")
-  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "myexactlog")) ("js.arguments" (str "(") ("js.number" "_val1_") (str ")")))) "*1")
+  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "myexactlog")) ("py.argument_list" (str "(") "." (str ")")))) "*")
+  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "myexactlog")) ("js.arguments" (str "(") ".1" (str ")")))) "*2")
 )
