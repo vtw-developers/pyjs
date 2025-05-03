@@ -13,6 +13,7 @@ import p_subject
 import p_translators
 import p_tree_log as ptlog
 import p_utils
+import p_visitor as pvis
 import p_visitor_py as pvpy
 
 
@@ -401,7 +402,16 @@ def learn_trans_rules_for_prob_node(
       context_node.parent.children[context_node_idx_as_child] = spec_id_stat
 
       # 3. pretty print the parent of `block`
-      block_parent = cursor_node if isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode) else cursor_node.get_parent()
+      # cursor_node is a block node, so we need to go up one more level
+      block_parent = cursor_node.get_parent()
+      if any(map(lambda x: isinstance(x, pvpy.BlockNode), context_node.get_nt_children())):
+        # if the context node contains a block node, we stay at context node
+        # e.g. if_statement, for_statement, etc.
+        block_parent = spec_id_stat
+      elif isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode):
+        # if the block is a function body, we stay at cursor_node
+        # cursor_node is a block node, that's ok, pretty printer can handle it
+        block_parent = cursor_node
       pp = pvpy.PrettyPrinter(indent_with='    ')
       pp.visit(block_parent)
       pre_context = '\n'.join(pp.lines)
