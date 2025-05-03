@@ -134,11 +134,11 @@ class TaskLoop:
   reason: Optional[str] = None
 
 @dataclass
-class BaseTrans:
+class BaseTask:
   task_loop: Optional[TaskLoop] = None
 
 @dataclass
-class TransSP2(BaseTrans):
+class TransSP2(BaseTask):
   id: Optional[int] = None
   sp1_tp1_cand: Optional[Sp1Tp1Cand] = None
   sp2: Optional[str] = None
@@ -148,7 +148,7 @@ class TransSP2(BaseTrans):
   translation_pairs: List[TransPair] = field(default_factory=list)
 
 @dataclass
-class TransSP1(BaseTrans):
+class TransSP1(BaseTask):
   sp1: Optional[str] = None
   success: bool = False
   reason: Optional[str] = None
