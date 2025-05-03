@@ -90,7 +90,7 @@ class BasePirelTask(ABC):
     task_name: str,
     subject: p_subject.PirelSubject,
     template_dict: dict,
-    lbase_trans: ptlog.BaseTrans
+    lbase_trans: ptlog.BaseTask
   ):
     self.task_name : str = task_name
     self.chat_history : List[BaseMessage] = []
@@ -331,7 +331,7 @@ class BaseTranslateSP1Task(BasePirelTask):
     subject: p_subject.PirelSubject,
     template_dict: dict,
     sp1: str,
-    lbase_trans: ptlog.BaseTrans
+    lbase_trans: ptlog.BaseTask
   ):
     super().__init__(task_name, subject, template_dict, lbase_trans)
     self.sp1 = sp1
@@ -399,7 +399,7 @@ class BaseTranslateSP1Task(BasePirelTask):
     subject: p_subject.PirelSubject,
     template_dict: dict,
     sp1: str,
-    lbase_trans: ptlog.BaseTrans
+    lbase_trans: ptlog.BaseTask
   ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right translator subclass
@@ -486,7 +486,7 @@ class BaseTranslateSP2Task(BasePirelTask):
     template_dict: dict,
     sp1_tp1_cand: dict,
     sp2: str,
-    lbase_trans: ptlog.BaseTrans
+    lbase_trans: ptlog.BaseTask
   ):
     '''
     PARAM sp1_tp1_cand: (sp1_i, tp1_i_j)
@@ -540,7 +540,7 @@ class BaseTranslateSP2Task(BasePirelTask):
     template_dict: dict,
     sp1_tp1_cand: dict,
     sp2: str,
-    lbase_trans: ptlog.BaseTrans
+    lbase_trans: ptlog.BaseTask
   ) -> 'BaseTranslateSP1Task':
     '''
     Based on the values of the arguments provided, choose the right subclass (translator)
