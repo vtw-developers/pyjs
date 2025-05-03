@@ -452,7 +452,7 @@ def is_valid_translation_rule_test_based(
   # 3. prepare f_gold() function
   # f_gold() function is a wrapper function that contains the snippet under test
   f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, pcsut)
-  ltrule_test_based_val_res.f_gold_for_pynguin = f_gold_fn_str
+  ltrule_test_based_val_res.f_gold_fn_str = f_gold_fn_str
 
   # 4. generate Pynguin tests for f_gold() function
   # Pynguin uses parameters of f_gold() function to generate test() function
