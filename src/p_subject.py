@@ -243,6 +243,8 @@ class PirelSubject:
 
     # PirelSubject instance for a benchmark has an entry in the benchmark configs
     if attr_benchmark_name in p_consts.BENCHMARK_CONFIGS:
+      if 'translation_rules_main_code' in conf:
+        pirel_subject.translation_rules_main_code = conf['translation_rules_main_code']
       return pirel_subject
 
     # create a custom PirelSubject instance from the config file
