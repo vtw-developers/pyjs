@@ -1869,6 +1869,7 @@ class LogStatementInserter(pvis.Visitor):
           'arg'
     '''
     _SUPPORTED_TYPES = [
+      CallNode,
       ExpressionListNode,
       FloatNode,
       IdentifierNode,
