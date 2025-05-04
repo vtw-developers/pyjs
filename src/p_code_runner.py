@@ -144,7 +144,7 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
 def comment_out_tester_ph(code: str, lang: str) -> str:
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
-  _SPLITTER = '\n"+++++++++++++++++"\n'
+  _SPLITTER = '"+++++++++++++++++"'
 
   if lang == 'py':
     splits = code.split(_SPLITTER)
@@ -152,8 +152,8 @@ def comment_out_tester_ph(code: str, lang: str) -> str:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n')])
-    return commented_out + _SPLITTER + rest
+    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n') if line.strip() != ''])
+    return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
 
   if lang == 'js':
     splits = code.split(_SPLITTER)
@@ -161,8 +161,8 @@ def comment_out_tester_ph(code: str, lang: str) -> str:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n')])
-    return commented_out + _SPLITTER + rest
+    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n') if line.strip() != ''])
+    return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
 
 
 _last_run_cached = None
