@@ -633,17 +633,22 @@ def _test_duoglot_translate_wrapper():
   choices = args_dict['choices']
   kwargs = args_dict['kwargs']
 
-  result = duoglot_translate_wrapper(
-    src_code,
-    src_lang,
-    tar_lang,
-    trans_rules,
-    auto_backward,
-    choices,
-    **kwargs
-  )
-  print(json.dumps(result, indent=2))
-  print(result['tar_code'])
+  try:
+    result = duoglot_translate_wrapper(
+      src_code,
+      src_lang,
+      tar_lang,
+      trans_rules,
+      auto_backward,
+      choices,
+      **kwargs
+    )
+    print(json.dumps(result, indent=2))
+    print(result['tar_code'])
+  except d_grammar_expand.TranslationRuleNotFoundException as exc:
+    templates_dict = exc.get_templates_dict()
+    print(f'Error: {exc}')
+    print(f'Templates dict:\n{json.dumps(templates_dict, indent=2)}')
 
 
 if __name__ == '__main__':
