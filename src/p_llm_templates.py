@@ -674,6 +674,8 @@ class GenTestFunction:
       '   Provide a detailed reasoning process for the test generation, explaining key decisions.\n'
       '2. **Output**:\n'
       '   The final `test()` function must be surrounded with ```triple backticks```. For other code snippets, use `single backticks` where necessary.\n'
+      '   Use ```triple backticks``` **only** for the generated `test()` function. Do not use triple backticks for any other part of your response.\n'
+      '   All other code snippets or explanations should use single backticks (`) where necessary.\n'
       '3. **No comments**:\n'
       '   Replace `__generated__arguments__` with only the inputs you generated. No comments are required explaining the inputs.\n'
       '4. **No need to test different data types**\n'
