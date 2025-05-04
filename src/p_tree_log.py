@@ -61,13 +61,6 @@ class Sp1Tp1Cand:
 ##################################################################
 
 @dataclass
-class GenTestFunction('BaseTask'):
-  f_gold_function: Optional[str] = None
-  test_function: Optional[str] = None
-  success: bool = False
-  reason: Optional[str] = None
-
-@dataclass
 class TRuleSyntaxValRes:
   is_valid: Optional[bool] = None
   reason: Optional[str] = None
@@ -81,7 +74,7 @@ class TRuleTestBasedValRes:
   reason: Optional[str] = None
   test_script: Optional[str] = None
   # the following fields are used when generating with LLM
-  gen_test_function: Optional[GenTestFunction] = None
+  gen_test_function: Optional['GenTestFunction'] = None
   # the following fields are used when generating with Pynguin
   num_generated_tests: Optional[int] = None
   num_pynguin_attempts: Optional[int] = None
@@ -145,6 +138,13 @@ class TaskLoop:
 @dataclass
 class BaseTask:
   task_loop: Optional[TaskLoop] = None
+
+@dataclass
+class GenTestFunction(BaseTask):
+  f_gold_function: Optional[str] = None
+  test_function: Optional[str] = None
+  success: bool = False
+  reason: Optional[str] = None
 
 @dataclass
 class TransSP2(BaseTask):
