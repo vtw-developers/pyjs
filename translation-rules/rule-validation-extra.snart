@@ -17,3 +17,9 @@
   (fragment ("py.break_statement") "*")
   (fragment ("js.break_statement") "*1")
 )
+
+;;;;;;;; generated as a simplest `block`
+(match_expand
+  (fragment ("py.return_statement") "*")
+  (fragment ("js.return_statement") "*1")
+)
