@@ -790,7 +790,7 @@ def _gen_test_fn_cand_gather_stats(gen_test_fn_cand: str, f_gold_function: str, 
     logger.debug(f'BAD: generated test function candidate is not a test function definition')
     return_dict['success'] = False
     return_dict['has_parse_error'] = False
-    return_dict['has_single_fn_def_test'] = True
+    return_dict['has_single_fn_def_test'] = False
     return return_dict
 
   logger.debug(f'GOOD: generated test function candidate passed the validation step.')
