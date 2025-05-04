@@ -635,10 +635,10 @@ def _test_is_valid_translation_rule_test_based():
   '''
   def is_valid_translation_rule_test_based(
     subject: p_subject.PirelSubject,
-    pre_context: str,
     snippet_under_test: str,
     trule_under_test: str,
     existing_ruleset: str,
+    template_dict: dict,
     ltrule: ptlog.TRule
   ) -> bool:
   '''
@@ -647,18 +647,18 @@ def _test_is_valid_translation_rule_test_based():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  pre_context = args_dict['pre_context']
   snippet_under_test = args_dict['snippet_under_test']
   trule_under_test = args_dict['trule_under_test']
   existing_ruleset = args_dict['existing_ruleset']
+  template_dict = args_dict['template_dict']
   ltrule = ptlog.TRule.from_str(trule_under_test)
 
   is_valid = is_valid_translation_rule_test_based(
     subject,
-    pre_context,
     snippet_under_test,
     trule_under_test,
     existing_ruleset,
+    template_dict,
     ltrule
   )
   print(is_valid)
