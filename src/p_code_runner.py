@@ -205,6 +205,9 @@ def run_tar_program_until_mylog_mismatch(
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
   '''
+  # commented to be used when necessary, actual args can be obtained
+  # from running `p_rule_applicator.apply_translation_rules()`.
+  # p_utils.log_json_time(f'{subject.name}_args-run_tar_program_until_mylog_mismatch.json', locals())
   logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
 
   mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
@@ -225,3 +228,30 @@ def run_tar_program_until_mylog_mismatch(
     tar_error['line_num'][1] -= prepart_linecount
 
   return tar_program_run, tar_log, tar_error
+
+
+# TEST HARNESSES
+def _test_run_tar_program_until_mylog_mismatch():
+  '''
+  def run_tar_program_until_mylog_mismatch(
+    tar_program_instr: str,
+    subject: p_subject.PirelSubject,
+    src_log: list,
+    is_dry_run: bool
+  ) -> Tuple[str, list, Optional[dict]]:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_run_tar_program_until_mylog_mismatch_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  tar_program_instr = args_dict['tar_program_instr']
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  src_log = args_dict['src_log']
+  is_dry_run = args_dict['is_dry_run']
+
+  result = run_tar_program_until_mylog_mismatch(tar_program_instr, subject, src_log, is_dry_run)
+  print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+  _test_run_tar_program_until_mylog_mismatch()
