@@ -462,7 +462,7 @@ def is_valid_translation_rule_test_based(
   # log statements are inserted into the test script
   # log statements print the values of assigned variables to produce a trace
   test_script_str = pvpy.LogStatementInserter.insert_log_statements(test_script_str)
-  logger.debug('~ instrumented the test script with log statements:\n{test_script_str}')
+  logger.debug(f'~ instrumented the test script with log statements:\n{test_script_str}')
   ltrule_test_based_val_res.test_script = test_script_str
 
   # 7. translate the test script into the target language
