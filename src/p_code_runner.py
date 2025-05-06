@@ -198,8 +198,7 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
 def run_tar_program_until_mylog_mismatch(
   tar_program_instr: str,
   subject: p_subject.PirelSubject,
-  src_log: list,
-  is_dry_run: bool
+  src_log: list
 ) -> Tuple[str, list, Optional[dict]]:
   '''
   This function runs the target program until the log list mismatch
@@ -213,9 +212,6 @@ def run_tar_program_until_mylog_mismatch(
   mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
   concode_prepart = mylog_match_implementation.replace('{MYLOG_LIST}', json.dumps(src_log))
   tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, subject.tar_lang)
-
-  if is_dry_run:
-    return tar_program_run, None, None
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
@@ -236,8 +232,7 @@ def _test_run_tar_program_until_mylog_mismatch():
   def run_tar_program_until_mylog_mismatch(
     tar_program_instr: str,
     subject: p_subject.PirelSubject,
-    src_log: list,
-    is_dry_run: bool
+    src_log: list
   ) -> Tuple[str, list, Optional[dict]]:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_run_tar_program_until_mylog_mismatch_config.yaml'
@@ -247,9 +242,8 @@ def _test_run_tar_program_until_mylog_mismatch():
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   src_log = args_dict['src_log']
-  is_dry_run = args_dict['is_dry_run']
 
-  result = run_tar_program_until_mylog_mismatch(tar_program_instr, subject, src_log, is_dry_run)
+  result = run_tar_program_until_mylog_mismatch(tar_program_instr, subject, src_log)
   print(json.dumps(result, indent=2))
 
 
