@@ -31,19 +31,9 @@ def get_mylog_implementation(lang: str) -> str:
   Get the mylog implementation for the given language.
   '''
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
-  mylog_fpath = p_consts.MYLOG_DEFINITIONS_DIR / lang / f'mylog.{lang}'
+  mylog_fpath = p_consts.MYLOG_DEFINITIONS_DIR / lang / f'mylog_pirel.{lang}'
   assert mylog_fpath.exists(), f'Mylog implementation not found for {lang}'
   return p_utils.read_text(mylog_fpath)
-
-
-def get_mylog_match_implementation(lang: str) -> str:
-  '''
-  Get the mylog match implementation for the given language.
-  '''
-  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
-  mylog_match_fpath = p_consts.MYLOG_DEFINITIONS_DIR / lang / f'mylog_match.{lang}'
-  assert mylog_match_fpath.exists(), f'Mylog match implementation not found for {lang}'
-  return p_utils.read_text(mylog_match_fpath)
 
 
 def _get_temp_filename(text: str, lang: str) -> str:
@@ -82,56 +72,80 @@ def _extract_log_list_from_stdout(stdout: str) -> list:
   return mylog_objs
 
 
-def _extract_err_from_stderr(stderr: str, lang: str) -> Optional[dict]:
-  logger.debug('Starting p_code_runner._extract_err_from_stderr')
-  logger.debug('stderr: ' + stderr)
+def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
+  '''
+  Parse the error message from the stderr of the JS code.
 
-  _SPLITTERS_JS = [
-    'SyntaxError:',
-    'ReferenceError:',
-    'Error: MyLogError',
-    'Error: MyAssertError',
-    'Error: MyTraceError',
-    'TypeError:',
-    'RangeError:',
-    'Error: Cannot find module',
-  ]
+  Sample stderr:
+  ```
+  /tmp/pirel_code_runner/706fcc78.js:177
+      if (id_px.has(id_shcx)) {
+                ^
 
-  assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
+  TypeError: id_px.has is not a function
+      at f_gold (/tmp/pirel_code_runner/706fcc78.js:177:15)
+      at test (/tmp/pirel_code_runner/706fcc78.js:172:9)
+      at Object.<anonymous> (/tmp/pirel_code_runner/706fcc78.js:184:1)
+      at Module._compile (node:internal/modules/cjs/loader:1375:14)
+      at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)
+      at Module.load (node:internal/modules/cjs/loader:1206:32)
+      at Module._load (node:internal/modules/cjs/loader:1022:12)
+      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:142:12)
+      at node:internal/main/run_main_module:28:49
 
-  if lang == 'js' and str(TMP_DIR) in stderr:
-    # find the splitter
-    splitter = None
-    for s in _SPLITTERS_JS:
-      if s in stderr:
-        splitter = s
+  Node.js v21.5.0
+  ```
+  '''
+
+  def __get_error_type(stderr: str) -> str:
+    # works in conjuction with `p_rule_applicator._get_proposed_choices()`
+    _SUPPORTED_ERROR_TYPES_JS = [
+      'SyntaxError:',
+      'ReferenceError:',
+      'TypeError:'
+    ]
+
+    error_type = None
+    for _et in _SUPPORTED_ERROR_TYPES_JS:
+      if _et in stderr:
+        error_type = _et
         break
-    assert splitter is not None, f'Unknown error type in stderr: {stderr}'
 
-    splitted = stderr.split(splitter)
-    assert len(splitted) == 2, f'Unexpected error format in stderr: {stderr}'
+    # new error type identified
+    if error_type is None:
+      msg = f'_extract_err_from_stderr_JS: Unknown error type in stderr: {stderr}'
+      logger.error(msg)
+      raise RuntimeError(msg)
 
-    pos_lines = splitted[0].strip().split('\n')
-    if pos_lines[0].startswith(str(TMP_DIR)):
-      line_num_raw = pos_lines[0].split(':')
-      assert len(line_num_raw) == 2
-      line_num = [line_num_raw[0], int(line_num_raw[1])]
-      line_content = pos_lines[1].strip()
-    else:
-      line_num = [pos_lines[0], -1] # not accurate
-      line_content = 'NOT_IMPLEMENTED_DONT_KNOW'
+    return error_type
 
-    errorlines = splitted[1].strip().split('\n')
-    error_msg = errorlines[0]
-    return {
-      'error_type': splitter,
-      'error_msg': error_msg,
-      'line_num': line_num,
-      'line_content': line_content
-    }
+  logger.debug('Starting p_code_runner._extract_err_from_stderr')
+  assert lang == 'js', f'Unsupported language: {lang}'
+  assert str(TMP_DIR) in stderr, f'Expected "{TMP_DIR}" in stderr: {stderr}'
 
-  if lang == 'py' and str(TMP_DIR) in stderr:
-    raise NotImplementedError('Python error extraction is not implemented yet')
+  error_type = __get_error_type(stderr)
+  splits = stderr.split(error_type)
+  assert len(splits) == 2, f'Unexpected error format in stderr: {stderr}'
+
+  error_loc_lines = splits[0].strip().split('\n')
+  if error_loc_lines[0].startswith(str(TMP_DIR)):
+    fpath_and_line_num = error_loc_lines[0].split(':')
+    assert len(fpath_and_line_num) == 2
+    line_num = [fpath_and_line_num[0], int(fpath_and_line_num[1])]
+    line_content = error_loc_lines[1].strip()
+  else:
+    line_num = [error_loc_lines[0], -1] # not accurate
+    line_content = 'NOT_IMPLEMENTED_DONT_KNOW'
+    raise RuntimeError('Error location not found in stderr')
+
+  error_lines = splits[1].strip().split('\n')
+  error_msg = error_lines[0]
+  return {
+    'error_type': error_type,
+    'error_msg': error_msg,
+    'line_num': line_num,
+    'line_content': line_content
+  }
 
 
 def _run_code(code: str, lang: str) -> Tuple[str, str]:
@@ -224,11 +238,10 @@ def run_src_program_with_mylog(
   return src_log
 
 
-def run_tar_program_until_mylog_mismatch(
+def run_tar_program_with_mylog(
   tar_program_instr: str,
   subject: p_subject.PirelSubject,
-  src_log: list
-) -> Tuple[str, list, Optional[dict]]:
+) -> Tuple[list, Optional[dict]]:
   '''
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
@@ -236,21 +249,22 @@ def run_tar_program_until_mylog_mismatch(
   p_utils.log_json_time(f'{subject.name}_args-run_tar_program_until_mylog_mismatch.json', locals())
   logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
 
-  mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
-  concode_prepart = mylog_match_implementation.replace('{MYLOG_LIST}', json.dumps(src_log))
-  tar_program_run = concode_prepart + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
+  mylog_implementation = get_mylog_implementation(subject.tar_lang)
+  tar_program_run = mylog_implementation + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
 
   tar_log = _extract_log_list_from_stdout(stdout)
-  tar_error = _extract_err_from_stderr(stderr, subject.tar_lang)
-
-  if tar_error is not None and 'line_num' in tar_error:
-    prepart_linecount = len(concode_prepart.split('\n')) - 1
+  tar_error = None
+  if stderr != '':
+    tar_error = _extract_err_from_stderr_JS(stderr, subject.tar_lang)
+    assert tar_error is not None
+    assert 'line_num' in tar_error
+    prepart_linecount = len(mylog_implementation.split('\n')) - 1
     tar_error['line_num'][1] -= prepart_linecount
 
-  return tar_program_run, tar_log, tar_error
+  return tar_log, tar_error
 
 
 # TEST HARNESSES
@@ -277,7 +291,6 @@ def _test_run_tar_program_until_mylog_mismatch():
   def run_tar_program_until_mylog_mismatch(
     tar_program_instr: str,
     subject: p_subject.PirelSubject,
-    src_log: list
   ) -> Tuple[str, list, Optional[dict]]:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_run_tar_program_until_mylog_mismatch_config.yaml'
@@ -286,9 +299,8 @@ def _test_run_tar_program_until_mylog_mismatch():
 
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  src_log = args_dict['src_log']
 
-  result = run_tar_program_until_mylog_mismatch(tar_program_instr, subject, src_log)
+  result = run_tar_program_with_mylog(tar_program_instr, subject)
   print(json.dumps(result, indent=2))
 
 
