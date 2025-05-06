@@ -233,9 +233,7 @@ def run_tar_program_until_mylog_mismatch(
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
   '''
-  # commented to be used when necessary, actual args can be obtained
-  # from running `p_rule_applicator.apply_translation_rules()`.
-  # p_utils.log_json_time(f'{subject.name}_args-run_tar_program_until_mylog_mismatch.json', locals())
+  p_utils.log_json_time(f'{subject.name}_args-run_tar_program_until_mylog_mismatch.json', locals())
   logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
 
   mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
