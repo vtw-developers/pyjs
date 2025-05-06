@@ -106,6 +106,7 @@ def _run_tests(
   # 1. run `src_program_instr` and collect output trace
   src_log = p_code_runner.run_src_program_with_mylog(src_program_instr, subject)
 
+  # 2. run `tar_program_instr` and collect output trace
   tar_program_run, tar_log, tar_error = p_code_runner.run_tar_program_until_mylog_mismatch(
     tar_program_instr,
     subject,
