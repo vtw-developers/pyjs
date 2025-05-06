@@ -28,9 +28,7 @@ def serialize_dict(arg: dict):
   serialized_key_value_pairs = []
   sorted_keys = sorted(arg.keys())
   for key in sorted_keys:
-    serialized_key = serialize(key)
-    serialized_value = serialize(arg[key])
-    serialized_key_value_pairs.append([serialized_key, serialized_value])
+    serialized_key_value_pairs.append(serialize([key, arg[key]]))
   return ["dict", len(arg), serialized_key_value_pairs]
 
 def serialize(arg):
