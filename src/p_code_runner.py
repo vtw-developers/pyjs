@@ -63,7 +63,7 @@ def _command_execute(command: str, timeout=10) -> None:
     raise exc
 
 
-def _extract_log_list_from_stdout(stdout: str, lang: str) -> list:
+def _extract_log_list_from_stdout(stdout: str) -> list:
   mylog_lines = [line for line in stdout.split('\n') if line.startswith('["MYLOG')]
   return [json.loads(line) for line in mylog_lines]
 
@@ -204,7 +204,7 @@ def run_src_program_with_mylog(
     logger.error(msg)
     raise SourceTestScriptError(msg)
 
-  src_log = _extract_log_list_from_stdout(stdout, subject.src_lang)
+  src_log = _extract_log_list_from_stdout(stdout)
   src_error = _extract_err_from_stderr(stderr, subject.src_lang)
 
   _last_run_cached = (src_program_instr, subject.src_lang, src_log, src_error)
@@ -233,7 +233,7 @@ def run_tar_program_until_mylog_mismatch(
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
 
-  tar_log = _extract_log_list_from_stdout(stdout, subject.tar_lang)
+  tar_log = _extract_log_list_from_stdout(stdout)
   tar_error = _extract_err_from_stderr(stderr, subject.tar_lang)
 
   if tar_error is not None and 'line_num' in tar_error:
