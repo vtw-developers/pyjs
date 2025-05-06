@@ -141,7 +141,15 @@ def _run_code(code: str, lang: str) -> Tuple[str, str]:
   return stdout, stderr
 
 
-def comment_out_tester_ph(code: str, lang: str) -> str:
+def comment_out_default_mylog_impls(code: str, lang: str) -> str:
+  '''
+  Leetcode benchmark subjects come with default values for
+  `mylog` and `myexactlog` in the source code.
+  This function comments out the lines between the
+  `# ++++++ to be replaced by tester ++++++` and
+  `# "+++++++++++++++++"` lines.
+  '''
+
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
   _SPLITTER = '"+++++++++++++++++"'
@@ -179,7 +187,7 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
     return _last_run_cached[2], _last_run_cached[3]
 
   mylog_implementation = get_mylog_implementation(subject.src_lang)
-  src_program_run = mylog_implementation + comment_out_tester_ph(src_program_instr, subject.src_lang)
+  src_program_run = mylog_implementation + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
@@ -211,7 +219,7 @@ def run_tar_program_until_mylog_mismatch(
 
   mylog_match_implementation = get_mylog_match_implementation(subject.tar_lang)
   concode_prepart = mylog_match_implementation.replace('{MYLOG_LIST}', json.dumps(src_log))
-  tar_program_run = concode_prepart + comment_out_tester_ph(tar_program_instr, subject.tar_lang)
+  tar_program_run = concode_prepart + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
