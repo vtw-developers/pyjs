@@ -194,9 +194,10 @@ _last_run_cached = None
 def run_src_program_with_mylog(
   src_program_instr: str,
   subject: p_subject.PirelSubject
-) -> Tuple[list, Optional[dict]]:
+) -> list:
   '''
   This function runs the source program with mylog and returns the log list and error if any.
+  RAISE SourceTestScriptError if the source program fails to run.
   '''
   p_utils.log_json_time(f'{subject.name}_args-run_src_program_with_mylog.json', locals())
   logger.debug('Starting p_code_runner.run_src_program_with_mylog')
@@ -205,7 +206,7 @@ def run_src_program_with_mylog(
   global _last_run_cached
   if _last_run_cached is not None and _last_run_cached[0] == src_program_instr and _last_run_cached[1] == subject.src_lang:
     logger.debug('run_src_program_with_mylog: using cached result')
-    return _last_run_cached[2], _last_run_cached[3]
+    return _last_run_cached[2]
 
   mylog_implementation = get_mylog_implementation(subject.src_lang)
   src_program_run = mylog_implementation + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
@@ -219,11 +220,8 @@ def run_src_program_with_mylog(
     raise SourceTestScriptError(msg)
 
   src_log = _extract_log_list_from_stdout(stdout)
-  src_error = _extract_err_from_stderr(stderr, subject.src_lang)
-
-  _last_run_cached = (src_program_instr, subject.src_lang, src_log, src_error)
-
-  return src_log, src_error
+  _last_run_cached = (src_program_instr, subject.src_lang, src_log)
+  return src_log
 
 
 def run_tar_program_until_mylog_mismatch(
