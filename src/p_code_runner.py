@@ -204,7 +204,6 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
     return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
 
 
-_last_run_cached = None
 def run_src_program_with_mylog(
   src_program_instr: str,
   subject: p_subject.PirelSubject
@@ -215,12 +214,6 @@ def run_src_program_with_mylog(
   '''
   p_utils.log_json_time(f'{subject.name}_args-run_src_program_with_mylog.json', locals())
   logger.debug('Starting p_code_runner.run_src_program_with_mylog')
-
-  # check the cache first
-  global _last_run_cached
-  if _last_run_cached is not None and _last_run_cached[0] == src_program_instr and _last_run_cached[1] == subject.src_lang:
-    logger.debug('run_src_program_with_mylog: using cached result')
-    return _last_run_cached[2]
 
   mylog_implementation = get_mylog_implementation(subject.src_lang)
   src_program_run = mylog_implementation + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
@@ -234,7 +227,6 @@ def run_src_program_with_mylog(
     raise SourceTestScriptError(msg)
 
   src_log = _extract_log_list_from_stdout(stdout)
-  _last_run_cached = (src_program_instr, subject.src_lang, src_log)
   return src_log
 
 
