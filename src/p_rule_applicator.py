@@ -731,6 +731,26 @@ def _test_apply_translation_rules():
   print(f'Plausible target program:\n{tar_program_deinstr}')
 
 
+def _test_run_tests():
+  '''
+  def _run_tests(
+    src_program_instr: str,
+    tar_program_instr: str,
+    subject: p_subject.PirelSubject
+  ) -> Optional[dict]:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_run_tests_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  src_program_instr = args_dict['src_program_instr']
+  tar_program_instr = args_dict['tar_program_instr']
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+
+  result = _run_tests(src_program_instr, tar_program_instr, subject)
+  print(json.dumps(result, indent=2))
+
+
 def _test_postprocess_src_program():
   translated_code = p_utils.read_text('temporary_validator_translated_code.py')
   src_code = p_utils.read_text('temporary_validator_src_code.py')
@@ -744,4 +764,5 @@ def _test_postprocess_src_program():
 if __name__ == '__main__':
   # usage_apply_translation_rules()
   _test_apply_translation_rules()
+  # _test_run_tests()
   # _test_postprocess_src_program()
