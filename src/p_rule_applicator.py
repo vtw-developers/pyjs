@@ -99,19 +99,20 @@ def _run_tests(
   subject: p_subject.PirelSubject
 ) -> Optional[dict]:
   '''
-  RETURN `tar_error` - None if no error, else a dict containing error information.
+  RETURN `tar_error_dict` - None if no error, else a dict containing error information.
   '''
   logger.debug('Starting p_rule_applicator._run_tests')
 
   # 1. run `src_program_instr` and collect output trace
-  src_log = p_code_runner.run_src_program_with_mylog(src_program_instr, subject)
+  src_trace = p_code_runner.run_src_test_script(src_program_instr, subject)
 
   # 2. run `tar_program_instr` and collect output trace
-  tar_log, tar_error = p_code_runner.run_tar_program_with_mylog(
+  tar_trace, tar_error_dict = p_code_runner.run_tar_test_script(
     tar_program_instr,
     subject
   )
-  return tar_error
+
+  return tar_error_dict
 
 
 def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
@@ -229,9 +230,9 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
     tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
     tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
-    tar_error = _run_tests(src_program_instr, tar_program_instr, subject)
+    tar_error_dict = _run_tests(src_program_instr, tar_program_instr, subject)
 
-    if tar_error is None:
+    if tar_error_dict is None:
       logger.debug('GOOD: no error in running tests')
       break
     logger.debug('BAD: error in running tests')
@@ -239,7 +240,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
     proposed_choices = _get_proposed_choices(
       tar_program_instr,
       tar_main_code,
-      tar_error,
+      tar_error_dict,
       current_choices,
       choices_history,
       map_to_exid,
@@ -399,7 +400,7 @@ def _concatenate_tar_snippets(
 def _get_proposed_choices(
   tar_program_instr: str,
   tar_main_code: str,
-  tar_error: dict,
+  tar_error_dict: dict,
   current_choices: dict,
   choices_history: List[dict],
   map_to_exid: Dict[int, List[dict]],
@@ -603,11 +604,11 @@ def _get_proposed_choices(
 
   logger.debug('Starting p_rule_applicator._get_proposed_choices')
 
-  error_msg = tar_error['error_msg']  # e.g. 'SyntaxError: invalid syntax'
-  error_type = tar_error['error_type']  # e.g. 'SyntaxError'
-  line_content = tar_error['line_content']  # code snippet at the line of error in `tar_program_instr`
-  err_file_tpi = tar_error['line_num'][0]  # absolute path to the file where the error occurred
-  err_line_tpi = tar_error['line_num'][1]  # line number in the file where the error occurred
+  error_msg = tar_error_dict['error_msg']  # e.g. 'SyntaxError: invalid syntax'
+  error_type = tar_error_dict['error_type']  # e.g. 'SyntaxError'
+  line_content = tar_error_dict['line_content']  # code snippet at the line of error in `tar_program_instr`
+  err_file_tpi = tar_error_dict['line_num'][0]  # absolute path to the file where the error occurred
+  err_line_tpi = tar_error_dict['line_num'][1]  # line number in the file where the error occurred
 
   SUPPORTED_ERROR_TYPES = ['SyntaxError:', 'ReferenceError:', 'TypeError:']
   assert error_type in SUPPORTED_ERROR_TYPES, f'unsupported error type {error_type}'

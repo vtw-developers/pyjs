@@ -26,7 +26,7 @@ TMP_DIR = Path('/tmp/pirel_code_runner')
 TMP_DIR.mkdir(exist_ok=True)
 
 
-def get_mylog_implementation(lang: str) -> str:
+def get_mylog_impl(lang: str) -> str:
   '''
   Get the mylog implementation for the given language.
   '''
@@ -204,7 +204,7 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
     return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
 
 
-def run_src_program_with_mylog(
+def run_src_test_script(
   src_program_instr: str,
   subject: p_subject.PirelSubject
 ) -> list:
@@ -212,11 +212,11 @@ def run_src_program_with_mylog(
   This function runs the source program with mylog and returns the log list and error if any.
   RAISE SourceTestScriptError if the source program fails to run.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-run_src_program_with_mylog.json', locals())
-  logger.debug('Starting p_code_runner.run_src_program_with_mylog')
+  p_utils.log_json_time(f'{subject.name}_args-run_src_test_script.json', locals())
+  logger.debug('Starting p_code_runner.run_src_test_script')
 
-  mylog_implementation = get_mylog_implementation(subject.src_lang)
-  src_program_run = mylog_implementation + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
+  mylog_impl = get_mylog_impl(subject.src_lang)
+  src_program_run = mylog_impl + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
@@ -226,11 +226,11 @@ def run_src_program_with_mylog(
     logger.error(msg)
     raise SourceTestScriptError(msg)
 
-  src_log = _extract_log_list_from_stdout(stdout)
-  return src_log
+  src_trace = _extract_log_list_from_stdout(stdout)
+  return src_trace
 
 
-def run_tar_program_with_mylog(
+def run_tar_test_script(
   tar_program_instr: str,
   subject: p_subject.PirelSubject,
 ) -> Tuple[list, Optional[dict]]:
@@ -238,64 +238,64 @@ def run_tar_program_with_mylog(
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-run_tar_program_until_mylog_mismatch.json', locals())
-  logger.debug('Starting p_code_runner.run_tar_program_until_mylog_mismatch')
+  p_utils.log_json_time(f'{subject.name}_args-run_tar_test_script.json', locals())
+  logger.debug('Starting p_code_runner.run_tar_test_script')
 
-  mylog_implementation = get_mylog_implementation(subject.tar_lang)
-  tar_program_run = mylog_implementation + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
+  mylog_impl = get_mylog_impl(subject.tar_lang)
+  tar_program_run = mylog_impl + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
 
-  tar_log = _extract_log_list_from_stdout(stdout)
-  tar_error = None
+  tar_trace = _extract_log_list_from_stdout(stdout)
+  tar_error_dict = None
   if stderr != '':
-    tar_error = _extract_err_from_stderr_JS(stderr, subject.tar_lang)
-    assert tar_error is not None
-    assert 'line_num' in tar_error
-    prepart_linecount = len(mylog_implementation.split('\n')) - 1
-    tar_error['line_num'][1] -= prepart_linecount
+    tar_error_dict = _extract_err_from_stderr_JS(stderr, subject.tar_lang)
+    assert tar_error_dict is not None
+    assert 'line_num' in tar_error_dict
+    prepart_linecount = len(mylog_impl.split('\n')) - 1
+    tar_error_dict['line_num'][1] -= prepart_linecount
 
-  return tar_log, tar_error
+  return tar_trace, tar_error_dict
 
 
 # TEST HARNESSES
-def _test_run_src_program_with_mylog():
+def _test_run_src_test_script():
   '''
-  def run_src_program_with_mylog(
+  def run_src_test_script(
     src_program_instr: str,
     subject: p_subject.PirelSubject
   ) -> Tuple[list, Optional[dict]]:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_run_src_program_with_mylog_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_run_src_test_script_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   src_program_instr = args_dict['src_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
 
-  result = run_src_program_with_mylog(src_program_instr, subject)
+  result = run_src_test_script(src_program_instr, subject)
   print(json.dumps(result, indent=2))
 
 
-def _test_run_tar_program_until_mylog_mismatch():
+def _test_run_tar_test_script():
   '''
   def run_tar_program_until_mylog_mismatch(
     tar_program_instr: str,
     subject: p_subject.PirelSubject,
   ) -> Tuple[str, list, Optional[dict]]:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_run_tar_program_until_mylog_mismatch_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_run_tar_test_script_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
 
-  result = run_tar_program_with_mylog(tar_program_instr, subject)
+  result = run_tar_test_script(tar_program_instr, subject)
   print(json.dumps(result, indent=2))
 
 
 if __name__ == '__main__':
-  _test_run_src_program_with_mylog()
-  # _test_run_tar_program_until_mylog_mismatch()
+  _test_run_src_test_script()
+  # _test_run_tar_test_script()
