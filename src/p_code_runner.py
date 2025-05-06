@@ -64,8 +64,22 @@ def _command_execute(command: str, timeout=10) -> None:
 
 
 def _extract_log_list_from_stdout(stdout: str) -> list:
-  mylog_lines = [line for line in stdout.split('\n') if line.startswith('["MYLOG')]
-  return [json.loads(line) for line in mylog_lines]
+  '''
+  Parses whatever was produced by the `mylog` function
+
+  sample stdout:
+  ["MYLOGEX:0"]
+  ["MYLOGEX:5"]
+  ["MYLOGEX:0"]
+  ["MYLOGEX:6"]
+  '''
+  lines_str = stdout.split('\n')
+  mylog_objs = []
+  for line_str in lines_str:
+    if line_str.startswith('["MYLOG'):
+      line_obj = json.loads(line_str)
+      mylog_objs.append(line_obj)
+  return mylog_objs
 
 
 def _extract_err_from_stderr(stderr: str, lang: str) -> Optional[dict]:
