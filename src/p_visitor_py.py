@@ -2071,6 +2071,12 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     '''
     self.visit(node.left)
 
+  def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
+    '''
+    We care only about the left hand side.
+    '''
+    self.visit(node.left)
+
   def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
     '''
     Extract the assigned identifiers from the expression statement node.
