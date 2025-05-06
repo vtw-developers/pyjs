@@ -96,8 +96,7 @@ def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict)
 def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
-  subject: p_subject.PirelSubject,
-  is_dry_run: bool
+  subject: p_subject.PirelSubject
 ) -> Optional[dict]:
   '''
   RETURN `tar_error` - None if no error, else a dict containing error information.
@@ -112,8 +111,7 @@ def _run_tests(
   tar_program_run, tar_log, tar_error = p_code_runner.run_tar_program_until_mylog_mismatch(
     tar_program_instr,
     subject,
-    src_log,
-    is_dry_run
+    src_log
   )
   return tar_error
 
@@ -233,7 +231,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
     tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
     tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
-    tar_error = _run_tests(src_program_instr, tar_program_instr, subject, is_dry_run=False)
+    tar_error = _run_tests(src_program_instr, tar_program_instr, subject)
 
     if tar_error is None:
       logger.debug('GOOD: no error in running tests')
