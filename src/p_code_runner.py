@@ -177,10 +177,14 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
 
 
 _last_run_cached = None
-def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelSubject) -> Tuple[list, Optional[dict]]:
+def run_src_program_with_mylog(
+  src_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[list, Optional[dict]]:
   '''
   This function runs the source program with mylog and returns the log list and error if any.
   '''
+  p_utils.log_json_time(f'{subject.name}_args-run_src_program_with_mylog.json', locals())
   logger.debug('Starting p_code_runner.run_src_program_with_mylog')
 
   # check the cache first
@@ -240,6 +244,24 @@ def run_tar_program_until_mylog_mismatch(
 
 
 # TEST HARNESSES
+def _test_run_src_program_with_mylog():
+  '''
+  def run_src_program_with_mylog(
+    src_program_instr: str,
+    subject: p_subject.PirelSubject
+  ) -> Tuple[list, Optional[dict]]:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_run_src_program_with_mylog_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  src_program_instr = args_dict['src_program_instr']
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+
+  result = run_src_program_with_mylog(src_program_instr, subject)
+  print(json.dumps(result, indent=2))
+
+
 def _test_run_tar_program_until_mylog_mismatch():
   '''
   def run_tar_program_until_mylog_mismatch(
@@ -261,4 +283,5 @@ def _test_run_tar_program_until_mylog_mismatch():
 
 
 if __name__ == '__main__':
-  _test_run_tar_program_until_mylog_mismatch()
+  _test_run_src_program_with_mylog()
+  # _test_run_tar_program_until_mylog_mismatch()
