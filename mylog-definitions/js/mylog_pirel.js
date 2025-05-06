@@ -29,12 +29,10 @@ function serializeSet(arg) {
 }
 
 function serializeObject(arg) {
-  const serializedKeyValuePairs = [];
+  let serializedKeyValuePairs = [];
   const sortedKeys = Object.keys(arg).sort(); // Sort keys alphabetically
   for (const key of sortedKeys) {
-      const serializedKey = serialize(key);
-      const serializedValue = serialize(arg[key]);
-      serializedKeyValuePairs.push([serializedKey, serializedValue]);
+      serializedKeyValuePairs.push(serialize([key, arg[key]]));
   }
   return ["dict", sortedKeys.length, serializedKeyValuePairs];
 }
