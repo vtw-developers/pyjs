@@ -1,33 +1,64 @@
 import json
+from typing import Union
 
 _default_print = print
 
-def mylog_obj_to_comp(arg):
-  if isinstance(arg, bool):
-    return ["bool", arg]
-  if isinstance(arg, str):
-    return ["string", len(arg), arg]
-  if isinstance(arg, (int, float)):
-    return ["num", arg]
-  if isinstance(arg, (list, tuple)):
-    rec_arg = [mylog_obj_to_comp(x) for x in arg]
-    return ["list", len(arg), rec_arg]
-  if arg is None:
-    return ["none"]
-  str_result = str(arg)
-  return ["Unknown", len(str_result), str_result]
+def serialize_none():
+  return ["null"]
 
-def pirel_obj_serialize(obj):
-  if isinstance(obj, set):
-    return list(obj)
-  return obj
+def serialize_bool(arg: bool):
+  return ["bool", arg]
+
+def serialize_str(arg: str):
+  return ["string", len(arg), arg]
+
+def serialize_num(arg: Union[int, float]):
+  return ["number", arg]
+
+def serialize_list(arg: Union[list, tuple]):
+  serialized_vals = [serialize(val) for val in arg]
+  return ["list", len(arg), serialized_vals]
+
+def serialize_set(arg: set):
+  sorted_vals = sorted(arg)
+  serialized_vals = [serialize(val) for val in sorted_vals]
+  return ["set", len(arg), serialized_vals]
+
+def serialize_dict(arg: dict):
+  serialized_key_value_pairs = []
+  sorted_keys = sorted(arg.keys())
+  for key in sorted_keys:
+    serialized_key = serialize(key)
+    serialized_value = serialize(arg[key])
+    serialized_key_value_pairs.append([serialized_key, serialized_value])
+  return ["dict", len(arg), serialized_key_value_pairs]
+
+def serialize(arg):
+  if arg is None:
+    return serialize_none()
+  if isinstance(arg, bool):
+    return serialize_bool(arg)
+  if isinstance(arg, str):
+    return serialize_str(arg)
+  if isinstance(arg, (int, float)):
+    return serialize_num(arg)
+  if isinstance(arg, (list, tuple)):
+    return serialize_list(arg)
+  if isinstance(arg, set):
+    return serialize_set(arg)
+  if isinstance(arg, dict):
+    return serialize_dict(arg)
+  str_result = str(arg)
+  return ["unknown", len(str_result), str_result]
 
 def myexactlog(*args):
-  prefix = "MYLOGEX:"
-  info_list = [prefix + json.dumps(args[0], sort_keys=True, separators=(",", ":"), default=pirel_obj_serialize)]
-  for arg in args[1:]:
-    info_list.append(mylog_obj_to_comp(arg))
+  info_list = ["MYLOGEX:"]
+  for arg in args:
+    info_list.append(serialize(arg))
   _default_print(json.dumps(info_list))
+
+def mylog(*args):
+  myexactlog(args)
 
 def print(*args, **kwargs):
   myexactlog(args)
