@@ -1,50 +1,73 @@
 "use strict";
 let _default_console_log = console.log;
 
-function mylog_obj_to_comp(arg) {
-  if (arg === true || arg === false) {
-    return ["bool", arg];
-  }
-  if (typeof arg === "string") {
-    return ["string", arg.length, arg];
-  }
-  if (typeof arg === "number") {
-    return ["num", arg];
-  }
-  if (Array.isArray(arg)) {
-    let rec_arg = arg.map((x) => mylog_obj_to_comp(is_exact, x))
-    return ["list", arg.length, rec_arg];
-  }
-  if (arg === null) {
-    return ["none"];
-  }
-  let str_result = String(arg);
-  return ["Unknown", str_result.length, str_result];
+function serializeNull() {
+  return ["null"];
 }
 
-function pirel_obj_serialize(key, value) {
-  // sort the keys of an object before logging it to ensure the order of keys
-  if (value && Object.prototype.toString.call(value) === "[object Object]") {
-    return Object.keys(value)
-      .sort() // Sort the keys alphabetically
-      .reduce((sortedObj, sortedKey) => {
-        sortedObj[sortedKey] = value[sortedKey];
-        return sortedObj;
-      }, {});
+function serializeBool(arg) {
+  return ["bool", arg];
+}
+
+function serializeString(arg) {
+  return ["string", arg.length, arg];
+}
+
+function serializeNum(arg) {
+  return ["number", arg];
+}
+
+function serializeArray(arg) {
+  const serializedVals = arg.map(val => serialize(val));
+  return ["list", arg.length, serializedVals];
+}
+
+function serializeSet(arg) {
+  const sortedVals = Array.from(arg).sort(); // Convert Set to Array and sort
+  const serializedVals = sortedVals.map(val => serialize(val));
+  return ["set", sortedVals.length, serializedVals];
+}
+
+function serializeObject(arg) {
+  const serializedKeyValuePairs = [];
+  const sortedKeys = Object.keys(arg).sort(); // Sort keys alphabetically
+  for (const key of sortedKeys) {
+      const serializedKey = serialize(key);
+      const serializedValue = serialize(arg[key]);
+      serializedKeyValuePairs.push([serializedKey, serializedValue]);
   }
-  if (value && Object.prototype.toString.call(value) === "[object Set]") {
-    return Array.from(value);
-  }
-  return value; // Return the value as-is for non-objects
+  return ["dict", sortedKeys.length, serializedKeyValuePairs];
+}
+
+function serialize(arg) {
+  if (arg === null)
+    return serializeNull();
+  if (arg === true || arg === false)
+    return serializeBool(arg);
+  if (typeof arg === "string")
+    return serializeString(arg);
+  if (typeof arg === "number")
+    return serializeNum(arg);
+  if (Array.isArray(arg))
+    return serializeArray(arg);
+  if (Object.prototype.toString.call(arg) === "[object Set]")
+    return serializeSet(arg);
+  if (Object.prototype.toString.call(arg) === "[object Object]")
+    return serializeObject(arg);
+  let str_result = String(arg);
+  return ["unknown", str_result.length, str_result];
 }
 
 function myexactlog(...args) {
-  let prefix = "MYLOGEX:";
-  let info_list = [prefix + JSON.stringify(args[0], pirel_obj_serialize)];
-  for (let i = 1; i < args.length; i++) {
-    info_list.push(mylog_obj_to_comp(args[i]));
+  let info_list = ["MYLOGEX:"];
+  for (let i = 0; i < args.length; i++) {
+    info_list.push(serialize(args[i]));
   }
   _default_console_log(JSON.stringify(info_list));
+}
+
+function mylog(...args) {
+  myexactlog(args);
 }
 
 console.log = function () {
