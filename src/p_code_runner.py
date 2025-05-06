@@ -14,6 +14,9 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
+class SourceTestScriptError(RuntimeError): pass
+
+
 CODE_RUN_COMMANDS = {
   'py': 'python {filename}',
   'js': 'node {filename}'
@@ -187,13 +190,15 @@ def run_src_program_with_mylog(src_program_instr: str, subject: p_subject.PirelS
     return _last_run_cached[2], _last_run_cached[3]
 
   mylog_implementation = get_mylog_implementation(subject.src_lang)
-  src_program_run = mylog_implementation + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
+  src_program_run = mylog_implementation + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
 
   if stderr != '':
-    logger.error('Test script in src_lang should run without errors.')
+    msg = f'Source test script error: {stderr}'
+    logger.error(msg)
+    raise SourceTestScriptError(msg)
 
   src_log = _extract_log_list_from_stdout(stdout, subject.src_lang)
   src_error = _extract_err_from_stderr(stderr, subject.src_lang)
