@@ -93,18 +93,85 @@ def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict)
   return restored_code
 
 
+def _compare_traces(src_trace: list, tar_trace: list) -> bool:
+  '''
+  Compare the traces from the source and target programs.
+  '''
+
+  # base case: lengths must be equal
+  if len(src_trace) != len(tar_trace):
+    return False
+
+  # base case: types must be same
+  type1, type2 = src_trace[0], tar_trace[0]
+  if type1 != type2:
+    return False
+
+  assert type1 == type2, f'compare_traces: {type1} != {type2}'
+
+  # base case: types are null
+  if type1 == 'null':
+    return True
+
+  # base case: types are bool
+  if type1 == 'bool':
+    val1, val2 = src_trace[1], tar_trace[1]
+    return val1 == val2
+
+  # base case: types are string
+  if type1 == 'string':
+    len1, len2 = src_trace[1], tar_trace[1]
+    str1, str2 = src_trace[2], tar_trace[2]
+    return len1 == len2 and str1 == str2
+
+  # base case: types are num
+  if type1 == 'number':
+    val1, val2 = src_trace[1], tar_trace[1]
+    return p_utils.are_equal(val1, val2)
+
+  # recurse
+  if type1 in ['list', 'set', 'dict']:
+    len1, len2 = src_trace[1], tar_trace[1]
+    if len1 != len2:
+      return False
+    list1, list2 = src_trace[2], tar_trace[2]
+    for ch1, ch2 in zip(list1, list2):
+      child_res = _compare_traces(ch1, ch2)
+      if not child_res:
+        return False
+    return True
+
+  if type1 == 'unknown':
+    logger.warning('_compare_traces: unknown type')
+    len1, len2 = src_trace[1], tar_trace[1]
+    str1, str2 = src_trace[2], tar_trace[2]
+    return len1 == len2 and str1 == str2
+
+  raise RuntimeError(f'Unknown type in _compare_traces: {type1}')
+
+
 def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
   subject: p_subject.PirelSubject
 ) -> Optional[dict]:
   '''
-  RETURN `tar_error_dict` - None if no error, else a dict containing error information.
+  RETURN `tar_error_dict` - None if no error when running tar test script,
+  otherwise a dict containing error information.
+
+  RAISE `RuntimeError` if there is an error when running src test script.
   '''
+  p_utils.log_json_time(f'{subject.name}_args-run_tests.json', locals())
   logger.debug('Starting p_rule_applicator._run_tests')
 
   # 1. run `src_program_instr` and collect output trace
-  src_trace = p_code_runner.run_src_test_script(src_program_instr, subject)
+  src_trace, src_stderr = p_code_runner.run_src_test_script(src_program_instr, subject)
+
+  # there is an error in running src test script
+  if src_stderr != '':
+    msg = f'Error running src test script: {src_stderr}'
+    logger.error(msg)
+    raise RuntimeError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_error_dict = p_code_runner.run_tar_test_script(
@@ -112,7 +179,16 @@ def _run_tests(
     subject
   )
 
-  return tar_error_dict
+  # there is an error in running tar test script
+  if tar_error_dict is not None:
+    return tar_error_dict
+
+  # 3. compare traces
+  are_traces_identical = _compare_traces(src_trace, tar_trace)
+  if are_traces_identical:
+    return None
+
+  raise RuntimeError('No error in running src and tar test scripts, but traces are not identical!')
 
 
 def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:

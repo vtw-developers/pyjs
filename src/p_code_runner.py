@@ -14,9 +14,6 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-class SourceTestScriptError(RuntimeError): pass
-
-
 CODE_RUN_COMMANDS = {
   'py': 'python {filename}',
   'js': 'node {filename}'
@@ -58,18 +55,16 @@ def _extract_log_list_from_stdout(stdout: str) -> list:
   Parses whatever was produced by the `mylog` function
 
   sample stdout:
-  ["MYLOGEX:0"]
-  ["MYLOGEX:5"]
-  ["MYLOGEX:0"]
-  ["MYLOGEX:6"]
+  ["MYLOGEX:", ["number", 0]]
+  ["MYLOGEX:", ["number", 42]]
   '''
   lines_str = stdout.split('\n')
-  mylog_objs = []
+  trace = []
   for line_str in lines_str:
     if line_str.startswith('["MYLOG'):
       line_obj = json.loads(line_str)
-      mylog_objs.append(line_obj)
-  return mylog_objs
+      trace.append(['list', len(line_obj) - 1, line_obj[1:]])
+  return ['list', len(trace), trace]
 
 
 def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
@@ -207,10 +202,9 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
 def run_src_test_script(
   src_program_instr: str,
   subject: p_subject.PirelSubject
-) -> list:
+) -> Tuple[list, str]:
   '''
-  This function runs the source program with mylog and returns the log list and error if any.
-  RAISE SourceTestScriptError if the source program fails to run.
+  This function runs the source program with mylog and returns the log list and error.
   '''
   p_utils.log_json_time(f'{subject.name}_args-run_src_test_script.json', locals())
   logger.debug('Starting p_code_runner.run_src_test_script')
@@ -220,14 +214,9 @@ def run_src_test_script(
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
-
-  if stderr != '':
-    msg = f'Source test script error: {stderr}'
-    logger.error(msg)
-    raise SourceTestScriptError(msg)
-
   src_trace = _extract_log_list_from_stdout(stdout)
-  return src_trace
+
+  return src_trace, stderr
 
 
 def run_tar_test_script(
