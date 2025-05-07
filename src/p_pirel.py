@@ -430,26 +430,37 @@ def learn_trans_rules_for_prob_node(
     # This is done to get the updated values for
     # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
     template_dict = __rerun_translation_for_context(subject, translation_rules, template_dict)
-    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context.json', template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
     # simplify the context
     template_dict = p_grammar.simplify_template(subject, template_dict)
-    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify.json', template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify_1.json', template_dict)
+
+    # simplify the template using the generator
+    template_dict = p_generator.simplify_template_with_generator(subject, template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_simplify_2.json', template_dict)
+
+    # Rerun DuoGlot translation to obtain `template_dict`
+    # for the context code snippet, not the entire program.
+    # This is done to get the updated values for
+    # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
+    template_dict = __rerun_translation_for_context(subject, translation_rules, template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
     # prepare partial program
     partial_program = _get_partial_program(subject, translation_rules, template_dict)
     template_dict['partial_program'] = partial_program
-    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_par_prog.json', template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
 
     # `src_program` is needed for a prompt that uses it as a reference
     template_dict['src_program'] = subject.src_main_code
-    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_src_program.json', template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_6_src_program.json', template_dict)
 
     # prepare pre-context of the context node of the problematic node
     # NOTE pre-context is used in translation rule validation
     pre_context = __get_pre_context_local(subject, templates_dict)
     template_dict['pre_context'] = pre_context
-    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_pre_context_FINAL.json', template_dict)
+    p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_7_pre_context_FINAL.json', template_dict)
 
     logger.debug('Finished template_dict initialization')
     logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
