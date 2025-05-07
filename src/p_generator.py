@@ -612,7 +612,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       orig_text = orig_text[:start_point] + alternative_codes[tni] + orig_text[end_point:]
     return orig_text
 
-  def _gen_program_pair_new_algorithm(
+  def _gen_program_pair(
     all_alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]],
     grammar: p_grammar.TreeSitterGrammar,
     template_dict: dict
@@ -749,11 +749,11 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # inferred from first TSP would be the most abstract, and translation
     # rule inferred from last TSP would be the most concrete.
     try:
-      gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair_new_algorithm(all_alt_starting_nodes, grammar, template_dict)
+      gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
       program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
       _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
     except _CannotGenerateCorrectProgramError as err:
-      logger.warning(f'_gen_program_pair_new_algorithm: {p_utils.exception_to_str(err)}')
+      logger.warning(f'_gen_program_pair: {p_utils.exception_to_str(err)}')
       logger.debug(f'Cannot generate a TSP for this fuzz node group:\n{str(fuzz_node_group)}')
       continue
 
