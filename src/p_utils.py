@@ -165,6 +165,10 @@ def write_text(fpath: Union[Path, str], content: str) -> None:
 def write_json(fpath: Union[Path, str], obj: Any) -> None:
   write_file(fpath, json.dumps(obj, default=str), include_timestamp=False)
 
+def write_yaml(fpath: Union[Path, str], obj: Any) -> None:
+  yaml_str = yaml.dump(obj, default_flow_style=False, indent=2, canonical=False, width=1000000)
+  write_file(fpath, yaml_str, include_timestamp=False)
+
 def write_file(fpath: Union[Path, str], contents: str, include_timestamp=False) -> None:
   ''''''
   assert isinstance(fpath, (Path, str))
