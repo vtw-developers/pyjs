@@ -255,8 +255,12 @@ class PirelSubject:
 
     # translation_rules_main_code
     if 'translation_rules_main_code' in conf:
+      assert isinstance(conf['translation_rules_main_code'], str), \
+        'translation_rules_main_code must be a string'
       _trmc = conf['translation_rules_main_code']
     elif 'translation_rules_main_code_fpath' in conf:
+      assert isinstance(conf['translation_rules_main_code_fpath'], str), \
+        'translation_rules_main_code_fpath must be a string'
       _trmcp = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
       assert _trmcp.exists(), f'Translation rules main code file does not exist: {_trmcp}'
       _trmc = p_utils.read_text(_trmcp)
@@ -270,8 +274,12 @@ class PirelSubject:
     # translation_rules_test_code
     _trtc = None
     if 'translation_rules_test_code' in conf:
+      assert isinstance(conf['translation_rules_test_code'], str), \
+        'translation_rules_test_code must be a string'
       _trtc = conf['translation_rules_test_code']
     elif 'translation_rules_test_code_fpath' in conf:
+      assert isinstance(conf['translation_rules_test_code_fpath'], str), \
+        'translation_rules_test_code_fpath must be a string'
       _trtcp = p_utils.make_abs(conf['translation_rules_test_code_fpath'], p_consts.ROOT_DIR)
       assert _trtcp.exists(), f'Translation rules test code file does not exist: {_trtcp}'
       _trtc = p_utils.read_text(_trtcp)
