@@ -1,11 +1,12 @@
 import itertools
 import json
-from typing import Dict, List, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
 import p_consts
 import p_data_structures as pds
 import p_grammar
+import p_subject
 import p_utils
 import p_visitor_py
 
@@ -764,6 +765,224 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
   logger.debug(f'Generated {len(unique_tsps)} program pairs (TSPs):\n{json.dumps(unique_tsps, indent=2)}')
 
   return unique_tsps
+
+
+def simplify_template_with_generator(subject: p_subject.PirelSubject, template_dict: dict) -> dict:
+  '''
+  Given a template_origin, problematic_node, and context_node,
+  replace everything around problematic_node with a generated basic type
+  wherever it is possible (according to grammar).
+
+  Example,
+  `m = c + d if a > b else e - f`
+  can be simplified to
+  `m = id1 if a > b else id2`
+  where `a > b` is problematic.
+
+  NOTE the idea is very similar to `generate_tsps_with_generator`.
+  '''
+
+  def _get_context_problematic_nodes(
+    program_text: str,
+    lang: str,
+    problematic_node_path: List[int] = None,
+  ) -> Tuple[pds.DuoGlotNode, pds.DuoGlotNode]:
+    ast, _ = d_ast_parse.parse_text_dbg(program_text, lang, keep_text=False)
+    tree = pds.DuoGlotTree(ast)
+    root_node = tree.root_node
+    assert len(root_node.get_children()) == 1, 'sanity check: root node must have exactly one child'
+    context_node = root_node.get_children()[0]
+    assert problematic_node_path is not None, 'sanity check'
+    assert isinstance(problematic_node_path, list), 'sanity check'
+    problematic_node = context_node.get_child_by_path(problematic_node_path)
+    return context_node, problematic_node
+
+  def _rec_collect_simplifiable_nodes(node: pds.DuoGlotNode, template_node: pds.DuoGlotNode, src_lang: str) -> List[pds.DuoGlotNode]:
+    '''
+    Collect nodes that can be simplified.
+    We need to collect all nodes that are not `problematic_node` itself,
+    but are still children of `problematic_node`.
+    '''
+    # base case
+    if node == template_node:
+      return []
+    simplifiable_nodes = []
+    if node.is_ancestor_or_itself(template_node):
+      for child in node.get_nt_children():
+        child_res = _rec_collect_simplifiable_nodes(child, template_node, src_lang)
+        simplifiable_nodes.extend(child_res)
+      return simplifiable_nodes
+    if node.get_ts_node_type() not in p_consts.BASIC_NODE_TYPES[src_lang]:
+      simplifiable_nodes.append(node)
+    return simplifiable_nodes
+
+  def _get_simplifiable_parents(simplifiable_nodes: List[pds.DuoGlotNode]) -> List[Tuple[pds.DuoGlotNode, List[pds.DuoGlotNode]]]:
+    '''
+    From the given list of simplifiable nodes, get their parents.
+    We need the parents for `_get_alt_starting_ntypes`.
+    '''
+    parent_id_children = {}
+    for node in simplifiable_nodes:
+      parent_id_children.setdefault(node.get_parent().get_id(), []).append(node)
+    result_dict = []
+    for parent_id, children in parent_id_children.items():
+      result_dict.append((children[0].get_parent(), children))
+    return result_dict
+
+  def _get_alt_ntypes_for_child(child: pds.DuoGlotNode, alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]]) -> List[str]:
+    for alt_starting_node in alt_starting_nodes:
+      if child.get_id() == alt_starting_node[0].get_id():
+        return alt_starting_node[1]
+    raise RuntimeError('should not reach here')
+
+  def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
+    '''NOTE the generated code may have semantic errors'''
+    ast = grammar.generate_simplest_ast(node_type)
+    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
+    code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
+    return code
+
+  def _gen_code_for_node_with_check(
+    mapped_node: pds.DuoGlotNode,
+    alt_node_types: List[str],
+    template_dict: dict,
+    grammar: p_grammar.TreeSitterGrammar
+  ) -> Optional[str]:
+    '''
+    RETURN a simplified code, else None
+    RAISE _CannotGenerateCorrectProgramError if program is `None`.
+    '''
+
+    def __choose_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
+      '''
+      return a node type from `basic_ntypes_subset` that is ranked higher
+      in the list of basic node types.
+      '''
+      basic_ntypes = p_consts.BASIC_NODE_TYPES[template_dict['src_lang']]
+      assert set(basic_ntypes).issuperset(basic_ntypes_subset), 'sanity check failed'
+
+      for ntype in basic_ntypes:
+        if ntype in basic_ntypes_subset:
+          return ntype
+
+      raise RuntimeError('should not reach here')
+
+    def __get_alt_node_types(mapped_node: pds.DuoGlotNode, alt_node_types: List[str], template_dict: dict) -> Optional[str]:
+      '''
+      Given a mapped node and a list of alternative node types,
+      return one alternative node type that can be used to generate
+      an alternative AST.
+      RETURN None if cannot simplify the `mapped_node`.
+      TODO is this always True -> `mapped_node.get_ts_node_type() in alt_node_types`
+      '''
+      mapped_ntype = mapped_node.get_ts_node_type()
+      basic_ntypes = set(p_consts.BASIC_NODE_TYPES[template_dict['src_lang']])
+      alt_ntypes = set(alt_node_types)
+
+      # alternatives from basic node types including mapped_ntype
+      basic_alts = basic_ntypes.intersection(alt_ntypes)
+
+      # case 1: mapped_node has a basic type: do not touch
+      if mapped_ntype in basic_ntypes:
+        return None
+
+      # case 2: mapped_node is not a basic type, but
+      # can choose an alternative from basic types
+      if len(basic_alts) > 0:
+        alt_ntype = __choose_ranked(basic_alts, template_dict)
+        return alt_ntype
+
+      # case 3: no basic types in the intersection: use mapped_ntype itself
+      elif len(basic_alts) == 0:
+        return None
+
+      raise RuntimeError('should not reach here')
+
+    alt_ntype = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+    if alt_ntype is None:
+      return None
+    code = _gen_code_for_node_type(alt_ntype, grammar)
+    return code
+
+  def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
+    '''
+    Given alternative codes (code blocks) for particular nodes,
+    return an updated code with alternative codes applied.
+
+    PARAM alternative_code: keys are `node_id`s, values are alternative codes.
+    '''
+    # We need PirelTree as it supports `text` attribute that we rely on.
+    template_origin = template_dict['template_origin']
+    lang = template_dict['src_lang']
+    ast_text, ann = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=True)
+    tree = pds.PirelTree(ast_text, annotation=ann)
+    tree._fix_indentation()
+    # `root_node` of `tree` should have only a single child, which is a `context_node`
+    root_node = tree.get_root_node()
+    assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
+    context_node = root_node.get_children()[0]
+    # Original text that will be replaced by alternative codes at each mapped node.
+    # Need to replace starting from the end of the string so that indices in `ann`
+    # do not get shifted.
+    orig_text = context_node.get_text()
+    templatized_node_ids = sorted(alternative_codes.keys(), reverse=True)
+    for tni in templatized_node_ids:
+      start_point = tree.annotation[tni][0]
+      end_point = tree.annotation[tni][1]
+      orig_text = orig_text[:start_point] + alternative_codes[tni] + orig_text[end_point:]
+    return orig_text
+
+  def _gen_program(
+    all_alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]],
+    grammar: p_grammar.TreeSitterGrammar,
+    template_dict: dict
+  ) -> str:
+    alternative_codes = {}
+    # `alt_node_types` is a list of all alternative nodes including `mapped_node.get_type()`
+    for mapped_node, alt_node_types in all_alt_starting_nodes:
+      code = _gen_code_for_node_with_check(mapped_node, alt_node_types, template_dict, grammar)
+      # cannot/no need to simplify the `mapped_node`
+      if code is None:
+        continue
+      alternative_codes[int(mapped_node.get_id())] = code
+    gen_src_prog = _apply_alt_codes(alternative_codes, template_dict)
+    return gen_src_prog
+
+  logger.debug('~~~ Starting API call to simplify_template_with_generator')
+  grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[subject.src_lang])
+  context_node, problematic_node = _get_context_problematic_nodes(
+    template_dict['template_origin'],
+    subject.src_lang,
+    template_dict['problematic_node_path']
+  )
+  simplifiable_nodes = _rec_collect_simplifiable_nodes(context_node, problematic_node, subject.src_lang)
+  simplifiable_parents = _get_simplifiable_parents(simplifiable_nodes)
+
+  all_alt_starting_nodes : List[Tuple[pds.DuoGlotNode, List[str]]] = []
+  for parent, children in simplifiable_parents:
+    alt_starting_nodes = p_grammar.get_alternative_starting_node_types(parent, grammar)
+    for child in children:
+      alt_ntypes = _get_alt_ntypes_for_child(child, alt_starting_nodes)
+      all_alt_starting_nodes.append((child, alt_ntypes))
+
+  simplified_template = _gen_program(all_alt_starting_nodes, grammar, template_dict)
+
+  # NOTE problematic_node_path must be the same, since we haven't removed any nodes
+  upd_context_node, upd_problematic_node = _get_context_problematic_nodes(
+    simplified_template,
+    subject.src_lang,
+    template_dict['problematic_node_path']
+  )
+
+  assert context_node.get_id() == upd_context_node.get_id(), 'sanity check'
+  assert problematic_node.get_type() == upd_problematic_node.get_type(), 'sanity check'
+  assert problematic_node.debug_str() == upd_problematic_node.debug_str(), 'sanity check'
+
+  template_dict['template_origin_before_simpl_w_gen'] = template_dict['template_origin']
+  template_dict['template_origin'] = simplified_template
+  template_dict['problematic_node_id'] = upd_problematic_node.get_id()
+
+  return template_dict
 
 
 # TEST HARNESSES
