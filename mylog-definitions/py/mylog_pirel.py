@@ -13,6 +13,10 @@ def serialize_str(arg: str):
   return ["string", len(arg), arg]
 
 def serialize_num(arg: Union[int, float]):
+  if arg == float('inf'):
+    return serialize_str("inf")
+  if arg == -float('inf'):
+    return serialize_str("-inf")
   return ["number", arg]
 
 def serialize_list(arg: Union[list, tuple]):
