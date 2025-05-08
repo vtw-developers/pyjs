@@ -18,7 +18,6 @@ logger = p_utils.setup_logger(__name__)
 class _CannotGenerateCorrectProgramError(RuntimeError): pass
 
 
-# NEW TSP GENERATION ALGORITHM
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -875,17 +874,3 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
   template_dict['problematic_node_id'] = upd_problematic_node.get_id()
 
   return template_dict
-
-
-# TEST HARNESSES
-def _test_generate_tsps_with_generator_new_algorithm():
-  test_harness_config:dict = p_utils.read_tmp_json('test_generate_tsps_with_generator_new_algorithm_config.json')
-  template_dict = p_utils.read_json(test_harness_config['template_dict_path'])
-  tsps = generate_tsps_with_generator(template_dict)
-  p_utils.write_tmp_json('temporary_test_generate_tsps_with_generator_new_algorithm.json', tsps)
-
-
-if __name__ == '__main__':
-  # _test_generate_tsp_with_generator()
-  # _test_generate_tsp_overfitted()
-  _test_generate_tsps_with_generator_new_algorithm()
