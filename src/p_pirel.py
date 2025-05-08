@@ -476,7 +476,7 @@ def learn_trans_rules_for_prob_node(
     # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
     if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
       logger.debug('Using `(template_origin, template_origin)` as a TSP')
-      return (template_dict['template_origin'], template_dict['template_origin'])
+      return [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
 
     # generate all possible TSPs
     # NOTE new algorithm already adds overfitted TSPs
