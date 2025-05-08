@@ -2448,22 +2448,6 @@ def _rank_node_types(node_types: List[str], grammar: TreeSitterGrammar) -> List[
   Sort node types in ascending order.
   Node types that reach to literal tokens faster appear first.
   '''
-  def __get_min_distance(from_node: str, to_node: str) -> Union[int, float]:
-    nonlocal grammar
-    # get all available paths
-    try:
-      paths = grammar.get_production_paths(from_node, to_node)
-    except PP_UnreachableError:
-      return float('inf')
-    # remove hidden rules from each path
-    for i, path in enumerate(paths):
-      path = [rule for rule in path if not grammar.is_hidden(rule)]
-      paths[i] = path
-    # sort paths by length
-    paths.sort(key=lambda path: len(path))
-    # return size of the shortest path
-    return len(paths[0])
-
   def __get_min_distance_optimized(from_node: str, to_node: str) -> Union[int, float]:
     '''
     Author: Jinwoo Choi
