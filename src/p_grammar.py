@@ -26,7 +26,7 @@ ERR_INVRULE = 'invalid rule type'
 # Functions that generate tokens
 def PY_gen_identifier() -> str:
   '''Generate an identifier according to Python grammar'''
-  size = random.randint(1, 4)
+  size = random.randint(3, 4)
   chars = list(string.ascii_lowercase)
   sample = random.sample(population=chars, k=size)
   # prepend `id_` to make sure that we don't return a reserved word like `if`
