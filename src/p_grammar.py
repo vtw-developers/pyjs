@@ -91,8 +91,8 @@ class TreeSitterGrammar():
   Composite rule types: sep1, commaSep1, optional
   '''
 
-  # cache use id `self.get_production_paths`
-  get_production_paths_cache = {}
+  # cache use id `self.get_production_paths_deprecated`
+  get_production_paths_cache_deprecated = {}
 
   def __init__(self, name, rules, extras, precedences, externals, inline, conflicts, supertypes) -> None:
     self.name : str = name
@@ -296,7 +296,7 @@ class TreeSitterGrammar():
     optional_rule = rule.members[0]
     return optional_rule
 
-  def get_production_paths(self, from_rule: str, to_rule: str) -> List[List[str]]:
+  def get_production_paths_deprecated(self, from_rule: str, to_rule: str) -> List[List[str]]:
     '''
     Uses tree search algorithm (recursive).
     Raises PP_UnreachableError if path is not found.
@@ -334,10 +334,10 @@ class TreeSitterGrammar():
         raise PP_UnreachableError
       return paths
 
-    if (from_rule, to_rule) in TreeSitterGrammar.get_production_paths_cache:
-      return TreeSitterGrammar.get_production_paths_cache[(from_rule, to_rule)]
+    if (from_rule, to_rule) in TreeSitterGrammar.get_production_paths_cache_deprecated:
+      return TreeSitterGrammar.get_production_paths_cache_deprecated[(from_rule, to_rule)]
     paths = _get_production_paths_rec(from_rule, to_rule, [])
-    TreeSitterGrammar.get_production_paths_cache[(from_rule, to_rule)] = paths
+    TreeSitterGrammar.get_production_paths_cache_deprecated[(from_rule, to_rule)] = paths
 
     return paths
 
