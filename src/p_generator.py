@@ -715,6 +715,23 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
         return alt_starting_node[1]
     raise RuntimeError('should not reach here')
 
+  def _is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Return true, if `mapped_node` is an attribute of a call node.
+    For example, `chars.remove(c)`
+                  ^^^^^^^^^^^^
+    '''
+    # mapped node must be an attribute
+    if mapped_node.get_ts_node_type() != 'attribute':
+      return False
+    # mapped node must be a child of a call node
+    if mapped_node.get_parent().get_ts_node_type() != 'call':
+      return False
+    # mapped node must be the first child of the call node
+    if mapped_node.get_parent().children[0] != mapped_node:
+      return False
+    return True
+
   def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
     '''NOTE the generated code may have semantic errors'''
     ast = grammar.generate_simplest_ast(node_type)
@@ -776,6 +793,10 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
         return None
 
       raise RuntimeError('should not reach here')
+
+    # make sure that we do not simplify method calls on objects
+    if _is_call_attribute_PY(mapped_node):
+      return None
 
     alt_ntype = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
     if alt_ntype is None:
