@@ -2071,11 +2071,27 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     '''
     self.visit(node.left)
 
+  def visit_AttributeNode(self, node: AttributeNode) -> None:
+    '''
+    chars.remove(s[i])
+    ^^^^^
+    '''
+    assert isinstance(node.object, IdentifierNode), 'sanity check'
+    self.add_assigned_identifier(node.object.val())
+
   def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
     '''
     We care only about the left hand side.
     '''
     self.visit(node.left)
+
+  def visit_CallNode(self, node: CallNode) -> None:
+    '''
+    chars.remove(s[i])
+    ^^^^^
+    '''
+    if isinstance(node.function, AttributeNode):
+      self.visit(node.function)
 
   def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
     '''
@@ -2092,6 +2108,7 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     _ASSIGNMENT_RELATED_NODES = [
       AssignmentNode,
       AugmentedAssignmentNode,
+      CallNode,
     ]
 
     nt_children = node.get_nt_children()
