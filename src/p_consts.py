@@ -108,6 +108,9 @@ LLM_VAL_TS_MAX_DEPTH = 4
 # The number of attempts to learn translation rules from a single TSP
 LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
 
+# Maximum number of TSPs from which some rules are learned
+MAX_NUM_USEFUL_TSPS = 2
+
 
 ################################################################################################
 ############################# TSP GENERATION ###################################################
