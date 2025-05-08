@@ -9,11 +9,20 @@ import p_consts
 import p_pirel
 import p_rule_applicator
 import p_subject
+import p_translators
 import p_tree_log as ptlog
 import p_utils
 
 
 logger = p_utils.setup_logger(__name__)
+
+
+def cleanup():
+  '''
+  Clear global caches.
+  '''
+  logger.info('Cleaning up global caches')
+  p_translators._TRANSLATORS_CACHE.clear()
 
 
 def learn_phase_on_subject(
@@ -357,6 +366,7 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
     if conf['is_email_report']:
       _email_report(lsubject, lbenchmark)
     logger.debug(p_utils.footer(subject_name))
+    cleanup()
 
   p_utils.llog_yaml_time(
     f'tree-log-{conf["benchmark_name"]}.yaml',
