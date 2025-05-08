@@ -309,11 +309,11 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     _get_alt_starting_ntypes_cache[node.get_id()] = alt_starting_nodes
     return alt_starting_nodes
 
-  def _is_builtin_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
+  def _is_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
     '''
-    Check if `mapped_node` is an identifier of a built-in function.
-    For example, `enumerate(nums)`
-                  ^^^^^^^^^
+    Check if `mapped_node` is a function name.
+    For example, `enumerate(nums)`, `findKth(i, j, k)
+                  ^^^^^^^^^          ^^^^^^^
     '''
     # mapped node must be an identifier
     if mapped_node.get_ts_node_type() != 'identifier':
@@ -324,9 +324,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # mapped node must be the first child of a call node
     if mapped_node.get_parent().children[0] != mapped_node:
       return False
-    if mapped_node.children[0].node_type in p_consts.PY_BUILT_IN_FUNCTIONS:
-      return True
-    return False
+    return True
 
   def _is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
     '''
@@ -358,7 +356,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       if node_type in spec_treatment_map:
         return spec_treatment_map[node_type]
 
-    if _is_builtin_fn_name_PY(mapped_node):
+    if _is_fn_name_PY(mapped_node):
       return mapped_node.children[0].node_type
 
     if _is_call_attribute_PY(mapped_node):
