@@ -505,6 +505,8 @@ def learn_trans_rules_for_prob_node(
   # we stop at the first TSP from which we have learned a translation rule(s).
   # There is a high chance that such a TSP is the first one in `tsps` list
   # according to our new algorithm.
+  num_useful_tsps = 0
+  all_trules_list = []
   for tsp_idx, tsp in enumerate(tsps, start=1):
     msg = (
       f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
@@ -520,13 +522,21 @@ def learn_trans_rules_for_prob_node(
     # `_learn_trans_rules_from_tsp` is responsible for translation rule validation
     # it is called in `_learn_trans_rules_from_tsp_with_retries`
     trules_list = _learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules, ltsp)
+
+    # go to the next TSP if no translation rules were learned
     if len(trules_list) == 0:
       logger.debug(f'Skipping a TSP: no translation rules were learnt from it (tsp_idx={tsp_idx})')
       logger.debug(f'TSP:\n{json.dumps(tsp, indent=2)}')
       continue
 
+    num_useful_tsps += 1
+    all_trules_list.extend(trules_list)
+    if num_useful_tsps >= p_consts.MAX_NUM_USEFUL_TSPS:
+      break
+
+  if len(all_trules_list) > 0:
     lprob_node.success = True
-    return trules_list
+    return all_trules_list
 
   msg = (
     f'Could not learn valid translation rules to translate\n'
