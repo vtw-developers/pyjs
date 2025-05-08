@@ -302,7 +302,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
   _get_alt_starting_ntypes_cache = {}
   def _get_alt_starting_ntypes_cached(node: pds.DuoGlotNode, grammar: p_grammar.TreeSitterGrammar) -> List[Tuple[pds.DuoGlotNode, List[str]]]:
-    ''''''
     nonlocal _get_alt_starting_ntypes_cache
     if node.get_id() in _get_alt_starting_ntypes_cache:
       return _get_alt_starting_ntypes_cache[node.get_id()]
