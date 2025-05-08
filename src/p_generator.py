@@ -18,114 +18,6 @@ logger = p_utils.setup_logger(__name__)
 class _CannotGenerateCorrectProgramError(RuntimeError): pass
 
 
-# API FUNCTIONS
-def simplify_template_init(template_dict: dict):
-  '''
-  What we want to achieve with this function is the following:
-  p_templates.extract_templates prepares the following artifacts:
-  1. templatized_node_ids_context  # this is to know exactly what nodes were simplified
-  2. template_context_simplification  # this is sent to LLM for filling in
-  3. template_context_str_replace  # this is used to prepare the final simplified template/program
-
-  We want to prepare these artifacts using techniques from `generate_tsp_with_generator`.
-
-  HOW?
-  1. Collect nodes that should be simplified
-  2. That's it
-
-  WHAT ARTIFACTS DO WE USE?
-  1. template_origin
-  2. problematic_node_path
-  3. src_lang
-
-  NOTE copied and adapted from `p_templates.TemplateTree.get_template_dict_for_node_id`
-  '''
-
-  logger.debug('~~~ Starting p_generator.simplify_template_init')
-  logger.debug('Preparing a template for program simplification')
-
-  def _context_node_can_be_simplified(node: pds.PirelNode, template_node: pds.PirelNode) -> bool:
-    '''
-    RETURN True if this node in context can be simplified
-    '''
-    # terminals are already simple
-    if node.is_terminal():
-      return False
-    assert node.is_nonterminal(), 'scope invariant'
-
-    # cannot shadow the template node (a.k.a. problematic node)
-    if node.is_ancestor_or_itself(template_node):
-      return False
-    assert not node.is_ancestor_or_itself(template_node), 'scope invariant'
-
-    children = node.get_children()
-    if len(children) == 1:
-      only_child = children[0]
-
-      # most literals and identifiers
-      if only_child.is_terminal():
-        return False
-      assert only_child.is_nonterminal(), 'scope invariant'
-
-      # TODO maybe should update to 'string of NT-NT-T of width 1'?
-      return True
-
-    assert len(children) > 1, 'scope invariant'
-    if node.all_children_nonterminal():
-      return True
-
-    assert node.has_terminal_child()
-    return False
-
-  template_origin = template_dict['template_origin']
-  src_lang = template_dict['src_lang']
-  problematic_node_path = template_dict['problematic_node_path']
-
-  context_ast_text, context_annotation = d_ast_parse.parse_text_dbg(template_origin, lang=src_lang, keep_text=True)
-  context_tree = pds.PirelTree(context_ast_text, annotation=context_annotation)
-  context_tree._fix_indentation()
-
-  context_node = context_tree.get_root_node().get_children()[0]
-  problematic_node = context_node.get_child_by_path(problematic_node_path)
-
-  templatized_node_ids_context : dict = {}
-
-  def _rec_collect_simplified_nodes_context_node(at_node: pds.PirelNode, template_node: pds.PirelNode, context_node: pds.PirelNode) -> None:
-    '''modifies simplified_node_ids_context'''
-    nonlocal templatized_node_ids_context
-    # do not enter template node sub-ast
-    if at_node == template_node:
-      return
-    if _context_node_can_be_simplified(at_node, template_node):
-      templatized_node_ids_context[at_node.get_id()] = context_node.get_path_to_child(at_node)
-      return
-    for child_node in at_node.get_children():
-      _rec_collect_simplified_nodes_context_node(child_node, template_node, context_node)
-
-  _rec_collect_simplified_nodes_context_node(context_node, problematic_node, context_node)
-
-  def _rec_templatize(node: pds.PirelNode, templatized_node_ids: List[int], placeholder_context: str) -> str:
-    nonlocal context_tree
-    orig_text = node.get_text()
-    simplified_node_ids = sorted(templatized_node_ids, reverse=True)
-    for snid in simplified_node_ids:
-      start_point = context_tree.annotation[snid][0]
-      end_point = context_tree.annotation[snid][1]
-      orig_text = orig_text[:start_point] + placeholder_context + orig_text[end_point:]
-    return orig_text
-
-  template_context_simplification = _rec_templatize(context_node, list(templatized_node_ids_context.keys()), p_consts.PLACEHOLDER_TEXT)
-  template_context_str_replace = _rec_templatize(context_node, list(templatized_node_ids_context.keys()), p_consts.CONTEXT_PH_TEXT)
-
-  template_dict['template_context_simplification'] = template_context_simplification
-  template_dict['template_context_str_replace'] = template_context_str_replace
-  template_dict['templatized_node_ids_context'] = templatized_node_ids_context
-
-  logger.debug(f'Template for program simplification looks like this:\n{template_context_simplification}')
-
-  return template_dict
-
-
 # NEW TSP GENERATION ALGORITHM
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
@@ -986,15 +878,6 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
 
 
 # TEST HARNESSES
-def _test_simplify_template_init():
-  test_harness_config:dict = p_utils.read_json('temporary_test_simplify_template_init_config.json')
-  template_dict = p_utils.read_json(test_harness_config['template_dict_path'])
-  kwargs = test_harness_config['kwargs']
-  result_dict = simplify_template_init(template_dict, **kwargs)
-  print(json.dumps(result_dict, indent=2))
-  p_utils.write_json('temporary_test_simplify_template_init.json', result_dict)
-
-
 def _test_generate_tsps_with_generator_new_algorithm():
   test_harness_config:dict = p_utils.read_tmp_json('test_generate_tsps_with_generator_new_algorithm_config.json')
   template_dict = p_utils.read_json(test_harness_config['template_dict_path'])
@@ -1003,7 +886,6 @@ def _test_generate_tsps_with_generator_new_algorithm():
 
 
 if __name__ == '__main__':
-  # _test_simplify_template_init()
   # _test_generate_tsp_with_generator()
   # _test_generate_tsp_overfitted()
   _test_generate_tsps_with_generator_new_algorithm()
