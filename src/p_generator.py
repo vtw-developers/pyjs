@@ -14,10 +14,6 @@ import p_visitor_py
 logger = p_utils.setup_logger(__name__)
 
 
-# ERROR CLASSES
-class _CannotGenerateCorrectProgramError(RuntimeError): pass
-
-
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -382,7 +378,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
   ) -> Tuple[str, str, str]:
     '''
     RETURN pair of "valid" programs or raise an exception.
-    RAISE _CannotGenerateCorrectProgramError if both programs are `None`.
     NOTE Additionally, return a third generated snippet for trans.rule validation.
     '''
 
@@ -640,14 +635,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # first, and concrete program pairs next. That is, translation rule
     # inferred from first TSP would be the most abstract, and translation
     # rule inferred from last TSP would be the most concrete.
-    try:
-      gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
-      program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
-      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
-    except _CannotGenerateCorrectProgramError as err:
-      logger.warning(f'_gen_program_pair: {p_utils.exception_to_str(err)}')
-      logger.debug(f'Cannot generate a TSP for this fuzz node group:\n{str(fuzz_node_group)}')
-      continue
+    gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
+    program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
+    _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
 
   # p_utils.write_tmp_json('1gen_program_pairs.json', _program_pairs_dbg)  # NOTE for debugging only
 
@@ -741,7 +731,6 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
   ) -> Optional[str]:
     '''
     RETURN a simplified code, else None
-    RAISE _CannotGenerateCorrectProgramError if program is `None`.
     '''
 
     def __choose_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
