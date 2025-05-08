@@ -129,7 +129,7 @@ BASIC_NODE_TYPES = {
 }
 
 NON_FUZZABLE_NODES = {
-  'py': ['string', 'generator_expression']
+  'py': ['string', 'generator_expression', 'call']
 }
 
 NON_FUZZABLE_NODE_PARENTS_SPECIAL = {
