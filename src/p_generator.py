@@ -111,17 +111,22 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       return False
 
     # a valid fuzz node must be a valid parent node for fuzz nodes
-    if not _is_valid_fuzz_node_parent(node, template_dict):
+    if not _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(node, template_dict):
       return False
 
     return True
 
-  def _is_valid_fuzz_node_parent(node: pds.DuoGlotNode, template_dict: dict) -> bool:
+  def _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(node: pds.DuoGlotNode, template_dict: dict) -> bool:
     '''
     These nodes can be added to fuzz node groups, but none of their children can.
     NOTE does not prevent a node from being added to a fuzz node group
     '''
-    assert _can_be_added_to_fuzz_node_group(node, template_dict), 'precondition failed'
+    # In case of `call`, we don't want to generate `call` nodes,
+    # since the generator doesn't care about the number of arguments,
+    # and will generate an AST that doesn't match the original one.
+    # However, we still do want to descend from `call` node to check its children.
+    # That's why this assertion is no longer needed.
+    # assert _can_be_added_to_fuzz_node_group(node, template_dict), 'precondition failed'
 
     # literal nodes like `integer`, `float`, etc. cannot be fuzz node parents
     # they don't have non-terminal children
@@ -257,7 +262,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       '''
       # base case: last node (node from which cannot descend, a.k.a. "stop node")
       # if _is_stop_node(start_node, template_dict):  # `integer`, `float`, `identifier`, `block`, `string`
-      if not _is_valid_fuzz_node_parent(start_node, template_dict):
+      if not _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(start_node, template_dict):
         return [[start_node]]
 
       # collect children groups
@@ -268,7 +273,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
         children_generations.append(child_generation)
 
       # add start_node itself, and then add cartesian product of children
-      all_generations = [[start_node]]
+      all_generations = [[start_node]] if _can_be_added_to_fuzz_node_group(start_node, template_dict) else []
 
       # do not add a node if it has a single non-terminal child
       # e.g. ... -> expression_statement -> assignment -> (identifier, "=", integer)
