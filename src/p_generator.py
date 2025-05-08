@@ -158,7 +158,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
     return True
 
-  def _gen_seq_fuzz_node_groups(problematic_node: pds.DuoGlotNode, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> List[List[pds.DuoGlotNode]]:
+  def _gen_seq_fuzz_node_groups(problematic_node: pds.DuoGlotNode, template_dict: dict) -> List[List[pds.DuoGlotNode]]:
     '''
     Given an initial `problematic_node`, generate a sequence of node groups
     which will be later passed to `p_grammar.get_alternative_starting_node_types`.
@@ -605,7 +605,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
   _program_pairs_dbg = []  # NOTE for debugging only
 
   # GROUPS OF NODES THAT CAN BE ROOTS OF ALTERNATIVE ASTs (similar to templatized nodes)
-  fuzz_node_groups = _gen_seq_fuzz_node_groups(problematic_node, template_dict, grammar)
+  fuzz_node_groups = _gen_seq_fuzz_node_groups(problematic_node, template_dict)
   logger.debug(f'There are {len(fuzz_node_groups)} fuzz node groups.')
 
   # p_utils.write_tmp_json('1fuzz_node_groups.json', fuzz_node_groups)  # NOTE for debugging only
