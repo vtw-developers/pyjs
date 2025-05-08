@@ -723,7 +723,7 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
     code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
     return code
 
-  def _gen_code_for_node_with_check(
+  def _gen_code_for_node(
     mapped_node: pds.DuoGlotNode,
     alt_node_types: List[str],
     template_dict: dict,
@@ -820,7 +820,7 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
     alternative_codes = {}
     # `alt_node_types` is a list of all alternative nodes including `mapped_node.get_type()`
     for mapped_node, alt_node_types in all_alt_starting_nodes:
-      code = _gen_code_for_node_with_check(mapped_node, alt_node_types, template_dict, grammar)
+      code = _gen_code_for_node(mapped_node, alt_node_types, template_dict, grammar)
       # cannot/no need to simplify the `mapped_node`
       if code is None:
         continue
