@@ -575,6 +575,19 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     unique_pair_encodings = []
     for program_pair in program_pairs:
 
+      if template_dict['is_insert_secret_fn']:
+        logger.debug('Secret function is inserted')
+        if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[0]:
+          logger.debug(f'Program "\n{program_pair[0]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
+          continue
+        if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[1]:
+          logger.debug(f'Program "\n{program_pair[1]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
+          continue
+        if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[2]:
+          logger.debug(f'Program "\n{program_pair[2]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
+          continue
+        logger.debug('all three programs contain secret function invocation')
+
       # NOTE The third snippet in `program_pair` is used for translation rule validation.
       # We do not need to use it as a criteria for removing duplicate entries.
       tree1, tree2 = __get_tree(program_pair[0], lang), __get_tree(program_pair[1], lang)
