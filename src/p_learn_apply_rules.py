@@ -192,8 +192,8 @@ def learn_and_application_phases_on_subject(
     logger.debug(f'Here is the source program:\n{subject.src_main_code}')
     logger.debug(f'Here is the target program:\n{tar_main_code}')
 
-    p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
-    p_utils.llog_text(f'{subject.name}_target_program.py', tar_main_code)
+    p_utils.llog_text(f'{subject.name}_source_program.{subject.src_lang}', subject.src_main_code)
+    p_utils.llog_text(f'{subject.name}_target_program.{subject.tar_lang}', tar_main_code)
 
     lrule_application_phase.success = True
     lrule_application_phase.end_time = p_utils.current_time_sec()
