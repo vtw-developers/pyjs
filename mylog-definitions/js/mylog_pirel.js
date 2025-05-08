@@ -14,6 +14,10 @@ function serializeString(arg) {
 }
 
 function serializeNum(arg) {
+  if (arg === Infinity)
+    return serializeString("inf");
+  if (arg === -Infinity)
+    return serializeString("-inf");
   return ["number", arg];
 }
 
