@@ -904,3 +904,31 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
   template_dict['problematic_node_id'] = upd_problematic_node.get_id()
 
   return template_dict
+
+
+# TEST HARNESSES
+def _test_generate_tsps_with_generator():
+  '''
+  TEST harness for `generate_tsps_with_generator`.
+  template_dict must include:
+  - template_origin: str
+  - src_lang: str
+  - problematic_node_path: List[int]
+  - is_insert_secret_fn: bool
+  '''
+  template_dict_fpath = p_consts.TMP_DIR / 'test_generate_tsps_with_generator_template_dict.yaml'
+  template_dict = p_utils.read_yaml(template_dict_fpath)
+  tsps = generate_tsps_with_generator(template_dict)
+
+  print(template_dict['template_origin'])
+  print('')
+  print(f'Generated {len(tsps)} TSPs:')
+  for tsp in tsps:
+    print(f'  {tsp[0]}')
+    print(f'  {tsp[1]}')
+    print(f'  {tsp[2]}')
+    print('')
+
+
+if __name__ == '__main__':
+  _test_generate_tsps_with_generator()
