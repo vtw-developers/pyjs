@@ -316,7 +316,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
   def _is_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
     '''
-    Check if `mapped_node` is a function name.
+    Check if `mapped_node` is a function name (identifier).
     For example, `enumerate(nums)`, `findKth(i, j, k)
                   ^^^^^^^^^          ^^^^^^^
     '''
@@ -333,7 +333,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
   def _is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
     '''
-    Return true, if `mapped_node` is an identifier of an attribute of a call node.
+    Return true, if `mapped_node` is an attribute of a call node (identifier).
     For example, `chars.remove(c)`
                         ^^^^^^
     '''
