@@ -131,11 +131,7 @@ BASIC_NODE_TYPES = {
   'py': ['identifier', 'integer', 'float']
 }
 
-NON_FUZZABLE_NODES = {
-  'py': ['string', 'generator_expression', 'call']
-}
-
-NON_FUZZABLE_NODE_PARENTS_SPECIAL = {
+NON_DESCENDABLE_NODES = {
   'py': ['string']
 }
 
