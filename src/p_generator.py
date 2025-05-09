@@ -14,6 +14,9 @@ import p_visitor_py
 logger = p_utils.setup_logger(__name__)
 
 
+class _CannotGenerateProgramPairError(RuntimeError): pass
+
+
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -98,67 +101,16 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     if grammar.is_external(node.get_ts_node_type()):
       return False
 
+    # a valid fuzz node has to have at least one non-terminal child
+    if node.get_num_nt_children() == 0:
+      return False
+
     # a valid fuzz node cannot be of a "body node type"
     if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
       # NOTE turn the flag on iff there is a non-terminal node
       # e.g. for empty `list`s and `dictionary`s it will stay `False`
       if node.get_num_nt_children() > 0:
         template_dict['is_insert_secret_fn'] = True
-      return False
-
-    # a valid fuzz node has to have at least one non-terminal child
-    if node.get_num_nt_children() == 0:
-      return False
-
-    # a valid fuzz node must be a valid parent node for fuzz nodes
-    if not _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(node, template_dict):
-      return False
-
-    return True
-
-  def _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(node: pds.DuoGlotNode, template_dict: dict) -> bool:
-    '''
-    These nodes can be added to fuzz node groups, but none of their children can.
-    NOTE does not prevent a node from being added to a fuzz node group
-    '''
-    # In case of `call`, we don't want to generate `call` nodes,
-    # since the generator doesn't care about the number of arguments,
-    # and will generate an AST that doesn't match the original one.
-    # However, we still do want to descend from `call` node to check its children.
-    # That's why this assertion is no longer needed.
-    # assert _can_be_added_to_fuzz_node_group(node, template_dict), 'precondition failed'
-
-    # literal nodes like `integer`, `float`, etc. cannot be fuzz node parents
-    # they don't have non-terminal children
-    if node.has_single_terminal_child():
-      return False
-
-    # `string` is also a literal node, however it needs a special treatment unlike e.g. `integer`
-    if node.get_ts_node_type() == p_consts.NON_FUZZABLE_NODE_PARENTS_SPECIAL[template_dict['src_lang']]:
-      return False
-
-    # nodes like `block`. `block` is treated specially during program generation
-    if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
-      return False
-
-    return True
-
-  def _can_be_added_to_fuzz_node_group(node_or_node_type: Union[pds.DuoGlotNode, str], template_dict: dict) -> bool:
-    '''
-    If a node does not appear in a fuzz node group, it will be kept intact.
-    That is, a sub-tree with a root at this node will be unchanged.
-
-    For example, if we want to avoid having `string` nodes fuzzed, we can add it here.
-    '''
-
-    assert isinstance(node_or_node_type, (str, pds.DuoGlotNode)), 'sanity check failed'
-
-    if isinstance(node_or_node_type, pds.DuoGlotNode):
-      node_type = node_or_node_type.get_ts_node_type()
-    elif isinstance(node_or_node_type, str):
-      node_type = node_or_node_type
-
-    if node_type in p_consts.NON_FUZZABLE_NODES[template_dict['src_lang']]:
       return False
 
     return True
@@ -241,45 +193,40 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     4. A fuzz node group may contain both valid fuzz nodes AND nodes like `integer`, `float`, etc.
     '''
 
-    def __get_descendable_children_fuzz_nodes(node: pds.DuoGlotNode, template_dict: dict) -> List[pds.DuoGlotNode]:
+    def __can_descend(node: pds.DuoGlotNode, template_dict: dict) -> bool:
       '''
-      Returns list of non-terminal nodes of `node` that `__rec_descend` will descend to.
-      That means that nodes returned by this function will be added to fuzz node groups.
+      Base conditions to stop descending down the tree.
       '''
-      # simplest case: return all non-terminal children
-      # return node.get_nt_children()
+      if node.is_terminal():
+        return False
 
-      # more controlled version
-      nodes = list(filter(lambda node: _can_be_added_to_fuzz_node_group(node, template_dict), node.get_nt_children()))
-      return nodes
+      # `string` is a literal node, however it needs a special treatment unlike e.g. `integer`
+      if node.get_ts_node_type() == p_consts.NON_DESCENDABLE_NODES[template_dict['src_lang']]:
+        return False
+
+      # nodes like `block`. `block` is treated specially during program generation
+      if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
+        return False
+
+      return True
 
     def __rec_descend(start_node: pds.DuoGlotNode, template_dict: dict) -> List[List[pds.DuoGlotNode]]:
       '''
       Recursively get fuzz node group combinations for children nodes,
       make their cartesian product, add the node itself, and return.
-
-      NOTE nodes that are `not _can_be_fuzz_node_ancestor` are added to the group
       '''
-      # base case: last node (node from which cannot descend, a.k.a. "stop node")
-      # if _is_stop_node(start_node, template_dict):  # `integer`, `float`, `identifier`, `block`, `string`
-      if not _is_valid_fuzz_node_parent_aka_not_stop_node_aka_can_descend(start_node, template_dict):
+      # base case
+      if not __can_descend(start_node, template_dict):
         return [[start_node]]
 
       # collect children groups
       children_generations = []
-      ch_fuzz_nodes = __get_descendable_children_fuzz_nodes(start_node, template_dict)
-      for ntchild in ch_fuzz_nodes:
-        child_generation = __rec_descend(ntchild, template_dict)
+      for child in start_node.get_children():
+        child_generation = __rec_descend(child, template_dict)
         children_generations.append(child_generation)
 
       # add start_node itself, and then add cartesian product of children
-      all_generations = [[start_node]] if _can_be_added_to_fuzz_node_group(start_node, template_dict) else []
-
-      # do not add a node if it has a single non-terminal child
-      # e.g. ... -> expression_statement -> assignment -> (identifier, "=", integer)
-      # "expression_statement" which is an "assignment"
-      if len(start_node.get_children()) == 1 and start_node.get_children()[0].is_nonterminal():
-        all_generations = []
+      all_generations = [[start_node]]
 
       for cart_prod in itertools.product(*children_generations):
         generation = []
@@ -289,9 +236,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
       return all_generations
 
-    def __sort_key(group: List[pds.DuoGlotNode]) -> Union[int, float]:
+    def __max_depth(group: List[pds.DuoGlotNode]) -> Union[int, float]:
       '''
-      Sorting algorithm for fuzz node groups.
       RETURN given the distances from nodes in `group` to the root node, return the maximum.
       '''
       max_depth = -1
@@ -301,8 +247,89 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
           max_depth = node_depth
       return max_depth
 
+    def __min_depth(group: List[pds.DuoGlotNode]) -> Union[int, float]:
+      '''
+      RETURN given the distances from nodes in `group` to the root node, return the minimum.
+      '''
+      min_depth = float('inf')
+      for node in group:
+        node_depth = node.get_dist_root()
+        if node_depth < min_depth:
+          min_depth = node_depth
+      return min_depth
+
+    def __is_within_max_span(group: List[pds.DuoGlotNode], max_span: int) -> bool:
+      '''
+      RETURN True if the max and min distances are within a certain threshold.
+      '''
+      return abs(__min_depth(group) - __max_depth(group)) <= max_span
+
+    def __remove_terminals(group: List[pds.DuoGlotNode]) -> List[pds.DuoGlotNode]:
+      '''
+      Remove terminal nodes from `group`.
+      '''
+      return [node for node in group if not node.is_terminal()]
+
+    def __remove_subgroups(groups: List[List[pds.DuoGlotNode]]) -> List[List[pds.DuoGlotNode]]:
+      '''
+      Remove subgroups from `group`.
+      PRE: `groups` is a list of unique groups.
+      '''
+      result = []
+      for i, group in enumerate(groups):
+        is_subgroup = False
+        for j, other_group in enumerate(groups):
+          if i == j:
+            continue
+          if __is_subgroup_of(group, other_group):
+            is_subgroup = True
+            break
+        if not is_subgroup:
+          result.append(group)
+      return result
+
+    def __is_subgroup_of(subgroup: List[pds.DuoGlotNode], main_group: List[pds.DuoGlotNode]) -> bool:
+      '''
+      Check if `subgroup` is a subsequence of `main_group`.
+      '''
+      if len(subgroup) > len(main_group):
+        return False
+      for node in subgroup:
+        if node not in main_group:
+          return False
+      return True
+
+    def __remove_nts_with_single_nt_child(group: List[pds.DuoGlotNode]) -> List[pds.DuoGlotNode]:
+      '''
+      Remove nodes that have a single child which is a non-terminal.
+      e.g. ... -> expression_statement -> assignment -> (identifier, "=", integer)
+      "expression_statement" which is an "assignment"
+      '''
+      nodes = []
+      for node in group:
+        if len(node.get_children()) != 1:
+          nodes.append(node)
+          continue
+        child = node.get_children()[0]
+        if child.is_terminal():
+          nodes.append(node)
+      return nodes
+
+    _MAX_SPAN = 2
+    # all combinations
     groups = __rec_descend(problematic_node, template_dict)
-    groups.sort(key=__sort_key)
+    # keep groups within certain span
+    groups = [group for group in groups if __is_within_max_span(group, _MAX_SPAN)]
+    # remove terminal nodes from groups
+    groups = [__remove_terminals(group) for group in groups]
+    # remove nodes that have a single child which is a non-terminal
+    groups = [__remove_nts_with_single_nt_child(group) for group in groups]
+    # remove empty groups
+    groups = [group for group in groups if len(group) > 0]
+    # remove subgroups
+    groups = __remove_subgroups(groups)
+    # sort ascending by distance to root
+    groups.sort(key=__max_depth)
     return groups
 
   _get_alt_starting_ntypes_cache = {}
@@ -480,6 +507,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
     PARAM alternative_code: keys are `node_id`s, values are alternative codes.
     '''
+    assert len(alternative_codes) > 0, 'sanity check: alternative_codes must not be empty'
     # We need PirelTree as it supports `text` attribute that we rely on.
     template_origin = template_dict['template_origin']
     lang = template_dict['src_lang']
@@ -518,6 +546,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       alternative_codes_1[int(mapped_node.get_id())] = code_1
       alternative_codes_2[int(mapped_node.get_id())] = code_2
       alternative_codes_3[int(mapped_node.get_id())] = code_3
+
+    if len(alternative_codes_1) == 0 or len(alternative_codes_2) == 0 or len(alternative_codes_3) == 0:
+      raise _CannotGenerateProgramPairError('Cannot generate program pair')
 
     # APPLY ALTERNATIVE CODES AT DESIGNATED LOCATIONS
     gen_src_prog_1 = _apply_alt_codes(alternative_codes_1, template_dict)
@@ -655,9 +686,12 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # first, and concrete program pairs next. That is, translation rule
     # inferred from first TSP would be the most abstract, and translation
     # rule inferred from last TSP would be the most concrete.
-    gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
-    program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
-    _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
+    try:
+      gen_src_prog_1, gen_src_prog_2, gen_src_prog_3 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
+      program_pairs.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3))
+      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, gen_src_prog_3, str(fuzz_node_group)))  # NOTE for debugging only
+    except _CannotGenerateProgramPairError:
+      continue
 
   # p_utils.write_tmp_json('1gen_program_pairs.json', _program_pairs_dbg)  # NOTE for debugging only
 
