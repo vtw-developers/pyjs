@@ -299,19 +299,36 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
           return False
       return True
 
-    def __remove_nts_with_single_nt_child(group: List[pds.DuoGlotNode]) -> List[pds.DuoGlotNode]:
+    def __remove_nts_with_single_nt_child(group: List[pds.DuoGlotNode], template_dict: dict) -> List[pds.DuoGlotNode]:
       '''
       Remove nodes that have a single child which is a non-terminal.
       e.g. ... -> expression_statement -> assignment -> (identifier, "=", integer)
       "expression_statement" which is an "assignment"
+
+      NOTE the loop works in reverse: instead of removing undesirable nodes,
+      we keep the desirable ones.
       '''
       nodes = []
       for node in group:
+        # keep nodes with multiple children
         if len(node.get_children()) != 1:
           nodes.append(node)
           continue
+        # at this point, we know that `node` has a single child
+        assert len(node.get_children()) == 1, ''
+        # keep nodes if their only child is terminal
         child = node.get_children()[0]
         if child.is_terminal():
+          nodes.append(node)
+          continue
+        # at this point, we know that the only `child` is non-terminal
+        assert not child.is_terminal()
+        # keep nodes whose only child that is non-terminal,
+        # if these nodes are of body node types.
+        # they can potentially have single non-terminal child like in case of
+        # `block` -> `return_statement`
+        ts_node_type = node.get_ts_node_type()
+        if ts_node_type in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
           nodes.append(node)
       return nodes
 
@@ -323,7 +340,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # remove terminal nodes from groups
     groups = [__remove_terminals(group) for group in groups]
     # remove nodes that have a single child which is a non-terminal
-    groups = [__remove_nts_with_single_nt_child(group) for group in groups]
+    groups = [__remove_nts_with_single_nt_child(group, template_dict) for group in groups]
     # remove empty groups
     groups = [group for group in groups if len(group) > 0]
     # remove subgroups
