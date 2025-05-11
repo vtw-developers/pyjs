@@ -510,7 +510,11 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
       raise RuntimeError('should not reach here')
 
-    alt_ntype1, alt_ntype2, alt_ntype3 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+    if p_consts.IS_FORCE_IDENTIFIERS and mapped_node.get_ts_node_type() == 'identifier':
+      alt_ntype1, alt_ntype2, alt_ntype3 = 'identifier', 'identifier', 'identifier'
+    else:
+      alt_ntype1, alt_ntype2, alt_ntype3 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+
     # NOTE TODO no check is performed on the generated code
     code1 = _gen_code_for_node_type(alt_ntype1, mapped_node, template_dict, grammar)
     code2 = _gen_code_for_node_type(alt_ntype2, mapped_node, template_dict, grammar)

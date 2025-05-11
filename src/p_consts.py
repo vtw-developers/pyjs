@@ -131,6 +131,10 @@ BASIC_NODE_TYPES = {
   'py': ['identifier', 'integer', 'float']
 }
 
+# When set to True, the generator will generate `identifier` node
+# if the `mapped_node` is of type `identifier`.
+IS_FORCE_IDENTIFIERS = True
+
 NON_DESCENDABLE_NODES = {
   'py': ['string']
 }
