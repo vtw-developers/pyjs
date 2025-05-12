@@ -1039,6 +1039,7 @@ def _run_generate_tsps_with_generator():
   import p_data_structures
   all_tdict_fpaths = sorted(dir_path.glob('*.json'))
   for idx, td_fpath in enumerate(all_tdict_fpaths, start=1):
+    # if idx not in []: continue
     logger.debug(f'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Processing {idx}/{len(all_tdict_fpaths)}: {td_fpath.name}')
 
     # unpack the template_dict
@@ -1067,6 +1068,10 @@ def _run_generate_tsps_with_generator():
     logger.debug(f'context code: \n"{context_node.get_ts_node_type()}"\n"\n{context_node.get_text()}\n"')
     logger.debug(f'problematic code: \n"{problematic_node.get_ts_node_type()}"\n"\n{problematic_node.get_text()}\n"')
     tsps = generate_tsps_with_generator(template_dict)
+
+    # NOTE uncomment to update the template_dict with generated TSPs
+    # template_dict['tsps'] = tsps
+    # p_utils.write_json(td_fpath, template_dict)
 
 
 if __name__ == '__main__':
