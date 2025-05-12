@@ -693,12 +693,20 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     # it is set to `True` in `_is_valid_fuzz_node`
     template_dict['is_insert_secret_fn'] = False
 
-    # contains a list of alternative starting nodes for each node under
-    # every node in `fuzz_node_group`,
+    # contains a list of alternative starting nodes for
+    # 1. each node under every node in `fuzz_node_group` OR
+    # 2. the node itself.
+    # We will generate ASTs to replace these nodes in the tree.
     all_alt_starting_nodes : List[Tuple[pds.DuoGlotNode, List[str]]] = []
 
     # FIND ALTERNATIVE STARTING NODE TYPES
     for node in fuzz_node_group:
+
+      # do not generate AST for certain node types
+      if node.get_ts_node_type() in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
+        continue
+
+      # check if we can pass the node to `p_grammar.get_alternative_starting_node_types`
       if _is_valid_fuzz_node(node, template_dict, grammar):
         alt_starting_nodes = _get_alt_starting_ntypes_cached(node, grammar)
         all_alt_starting_nodes.extend(alt_starting_nodes)
