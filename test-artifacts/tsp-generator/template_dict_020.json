@@ -30,14 +30,9 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "if id_fqn:\n    return",
-      "if 8205:\n    return",
-      "if id_myb:\n    return"
-    ],
-    [
-      "if id_gbeq >= id_hrbi:\n    secret_fun_4071()",
-      "if id_wle >= id_dlr:\n    secret_fun_4071()",
-      "if id_fuzn >= id_ksdg:\n    secret_fun_4071()"
+      "if id_brp >= id_onmk:\n    secret_fun_4071()",
+      "if id_wvg >= id_sxbt:\n    secret_fun_4071()",
+      "if id_xshk >= id_qeul:\n    secret_fun_4071()"
     ]
   ]
 }

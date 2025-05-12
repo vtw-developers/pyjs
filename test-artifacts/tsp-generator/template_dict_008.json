@@ -29,24 +29,19 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "while id_uyme:\n    return",
-      "while 3775:\n    return",
-      "while id_nerx:\n    return"
+      "while id_olk < id_txdj:\n    secret_fun_4071()",
+      "while id_vugl < 4918:\n    secret_fun_4071()",
+      "while id_pib < id_qys:\n    secret_fun_4071()"
     ],
     [
-      "while id_zid < id_jbpy:\n    secret_fun_4071()",
-      "while id_vqam < 3739:\n    secret_fun_4071()",
-      "while id_zyn < id_durh:\n    secret_fun_4071()"
+      "while id_stv < len( ):\n    secret_fun_4071()",
+      "while id_soay < len( ):\n    secret_fun_4071()",
+      "while id_ksre < len( ):\n    secret_fun_4071()"
     ],
     [
-      "while id_eizw < len( ):\n    secret_fun_4071()",
-      "while id_mby < len( ):\n    secret_fun_4071()",
-      "while id_rdw < len( ):\n    secret_fun_4071()"
-    ],
-    [
-      "while id_uxt < len(id_xbrv):\n    secret_fun_4071()",
-      "while id_gvy < len(id_pulz):\n    secret_fun_4071()",
-      "while id_uoh < len(id_ska):\n    secret_fun_4071()"
+      "while id_ohr < len(id_cvr):\n    secret_fun_4071()",
+      "while id_icw < len(id_xlkj):\n    secret_fun_4071()",
+      "while id_bzk < len(id_iov):\n    secret_fun_4071()"
     ]
   ]
 }
