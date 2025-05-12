@@ -985,5 +985,76 @@ def _test_generate_tsps_with_generator():
     print('')
 
 
+def _run_generate_tsps_with_generator():
+  '''
+  Run `generate_tsps_with_generator` on a list of template_dicts
+  to check the TSP generation on multitude of templates.
+  template_dict must include:
+  - template_origin: str
+  - src_lang: str
+  - problematic_node_path: List[int]
+  - is_insert_secret_fn: bool
+  '''
+  dir_path = p_consts.TEST_ARTIFACTS_DIR / 'tsp-generator'
+
+  # NOTE use this to bulk rename the files
+  # for idx, td_fpath in enumerate(dir_path.glob('*.json'), start=1):
+  #   new_fpath = dir_path / f'template_dict_{idx:03d}.json'
+  #   td_fpath.rename(new_fpath)
+  # return
+
+  # NOTE use this to remove duplicate template_dicts
+  # import d_utils
+  # hashes = []
+  # for idx, td_fpath in enumerate(sorted(dir_path.glob('*.json')), start=1):
+  #   template_dict = p_utils.read_json(td_fpath)
+  #   template_origin = template_dict['template_origin']
+  #   context_node_type = template_dict['context_node_type']
+  #   context_node_id = template_dict['context_node_id']
+  #   problematic_node_type = template_dict['problematic_node_type']
+  #   problematic_node_id = template_dict['problematic_node_id']
+  #   problematic_node_path = template_dict['problematic_node_path']
+  #   dna = f'{template_origin}{context_node_type}({context_node_id}){problematic_node_type}({problematic_node_id})[{problematic_node_path}]'
+  #   dna_hash = d_utils.string_sha256(dna)
+  #   if dna_hash in hashes:
+  #     td_fpath.unlink()
+  #     continue
+  #   hashes.append(dna_hash)
+  # return
+
+  import p_data_structures
+  all_tdict_fpaths = sorted(dir_path.glob('*.json'))
+  for idx, td_fpath in enumerate(all_tdict_fpaths, start=1):
+    logger.debug(f'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Processing {idx}/{len(all_tdict_fpaths)}: {td_fpath.name}')
+
+    # unpack the template_dict
+    template_dict = p_utils.read_json(td_fpath)
+    template_origin = template_dict['template_origin']
+    context_node_type = template_dict['context_node_type']
+    context_node_id = template_dict['context_node_id']
+    problematic_node_type = template_dict['problematic_node_type']
+    problematic_node_id = template_dict['problematic_node_id']
+    problematic_node_path = template_dict['problematic_node_path']
+
+    # get the context and problematic nodes
+    ast_text, ann_text = d_ast_parse.parse_text_dbg(template_origin, template_dict['src_lang'], keep_text=True)
+    tree_text = p_data_structures.PirelTree(ast_text, ann_text)
+    tree_text._fix_indentation()
+    root_node = tree_text.get_root_node()
+    assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
+    context_node = root_node.get_children()[0]
+    problematic_node = context_node.get_child_by_path(problematic_node_path)
+    assert context_node.get_id() == context_node_id, 'sanity check'
+    assert problematic_node.get_id() == problematic_node_id, 'sanity check'
+    assert context_node.get_ts_node_type() == context_node_type, 'sanity check'
+    assert problematic_node.get_ts_node_type() == problematic_node_type, 'sanity check'
+
+    # generate TSPs
+    logger.debug(f'context code: \n"{context_node.get_ts_node_type()}"\n"\n{context_node.get_text()}\n"')
+    logger.debug(f'problematic code: \n"{problematic_node.get_ts_node_type()}"\n"\n{problematic_node.get_text()}\n"')
+    tsps = generate_tsps_with_generator(template_dict)
+
+
 if __name__ == '__main__':
-  _test_generate_tsps_with_generator()
+  # _test_generate_tsps_with_generator()
+  _run_generate_tsps_with_generator()
