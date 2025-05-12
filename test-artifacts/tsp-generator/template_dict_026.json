@@ -30,24 +30,19 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "for id_pym in id_qel:\n    return",
-      "for id_uak in 2570:\n    return",
-      "for id_tkmw in id_zva:\n    return"
+      "for id_mvyb in id_vlwj:\n    return",
+      "for id_lgei in 3576:\n    return",
+      "for id_jof in id_cqe:\n    return"
     ],
     [
-      "for id_pxve in range( ):\n    secret_fun_4071()",
-      "for id_asmf in range( ):\n    secret_fun_4071()",
-      "for id_rmj in range( ):\n    secret_fun_4071()"
+      "for id_fcvr in range(6728, id_eico):\n    secret_fun_4071()",
+      "for id_oegn in range(id_tokb, 4424):\n    secret_fun_4071()",
+      "for id_uyxv in range(id_cjw, id_kftv):\n    secret_fun_4071()"
     ],
     [
-      "for id_xpdo in range(1617, id_knqc):\n    secret_fun_4071()",
-      "for id_tkif in range(id_oxdb, 5917):\n    secret_fun_4071()",
-      "for id_rvh in range(id_wxqh, id_vkn):\n    secret_fun_4071()"
-    ],
-    [
-      "for id_ram in range(1055, id_gyx + 6924):\n    secret_fun_4071()",
-      "for id_rjy in range(5604, id_fwo + id_qwoy):\n    secret_fun_4071()",
-      "for id_xhy in range(762, id_kco + id_clgv):\n    secret_fun_4071()"
+      "for id_nihu in range(2025, id_cwhx + 9136):\n    secret_fun_4071()",
+      "for id_bnux in range(1276, id_bctw + id_mha):\n    secret_fun_4071()",
+      "for id_cga in range(7281, id_arut + id_ygw):\n    secret_fun_4071()"
     ]
   ]
 }
