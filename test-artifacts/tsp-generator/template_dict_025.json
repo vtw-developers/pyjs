@@ -1,0 +1,48 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "chars = set()",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "call",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.call",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.lexical_declaration"
+        ]
+      ]
+    }
+  ],
+  "template_origin_before_simplification": "chars = set()",
+  "partial_program": "const chars = pirel_replace_var;",
+  "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
+  "pre_context": "i = ans = 0\npirel_pre_ctx_spec_identifier"
+}

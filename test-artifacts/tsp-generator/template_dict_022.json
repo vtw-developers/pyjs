@@ -1,0 +1,67 @@
+{
+  "template_id": 3,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "chars.remove(s[i])",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "subscript",
+  "problematic_node_id": 7,
+  "problematic_node_path": [
+    0,
+    1,
+    1
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.subscript"
+        ],
+        [
+          "py.argument_list",
+          "py.attribute"
+        ],
+        [
+          "py.call"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.binary_expression",
+          "js.identifier"
+        ],
+        [
+          "js.arrow_function"
+        ],
+        [
+          "js.arguments",
+          "js.member_expression"
+        ],
+        [
+          "js.call_expression",
+          "js.identifier"
+        ],
+        [
+          "js.assignment_expression"
+        ],
+        [
+          "js.expression_statement"
+        ]
+      ]
+    }
+  ],
+  "template_origin_before_simplification": "chars.remove(s[i])",
+  "partial_program": "chars = chars.filter(element => element !== pirel_replace_var);",
+  "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
+  "pre_context": "while c in chars:\n    pirel_pre_ctx_spec_identifier"
+}
