@@ -26,5 +26,27 @@
   ],
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str, numRows: int) -> str:\n    if numRows == 1:\n        return s\n    group = 2 * numRows - 2\n    ans = []\n    for i in range(1, numRows + 1):\n        interval = group if i == numRows else 2 * numRows - 2 * i\n        idx = i - 1\n        while idx < len(s):\n            ans.append(s[idx])\n            idx += interval\n            interval = group - interval\n            if interval == 0:\n                interval = group\n    return ''.join(ans)\n",
-  "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier"
+  "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "id_chl = id_xub",
+      "id_xzq = 1607",
+      "id_jwy = id_osm"
+    ],
+    [
+      "id_zxbo = id_terc - 9480",
+      "id_bcjx = 8430 - id_jie",
+      "id_fbz = id_okir - id_wovh"
+    ],
+    [
+      "id_ows = 2552 * id_asrn - 5475",
+      "id_etgo = id_lpy * id_clpj - 2487",
+      "id_fjlp = id_fkb * id_acw - 2441"
+    ],
+    [
+      "id_jbw = 9523 * id_fkwi - 4839",
+      "id_vyh = 9458 * id_dcn - 7164",
+      "id_hzum = 7331 * id_hwif - 6514"
+    ]
+  ]
 }

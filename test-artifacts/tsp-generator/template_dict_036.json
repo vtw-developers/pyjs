@@ -9,7 +9,7 @@
   "problematic_node_id": 1,
   "problematic_node_path": [],
   "is_valid_template": true,
-  "is_insert_secret_fn": false,
+  "is_insert_secret_fn": true,
   "contexts": [
     {
       "source_context": [
@@ -27,5 +27,22 @@
   "template_origin_before_simplification": "for i, v in enumerate(nums):\n    num = target - v\n    if num in helper:\n        return [helper[num], i]\n    helper[v] = i",
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(nums: List[int], target: int) -> List[int]:\n    helper = {}\n    for i, v in enumerate(nums):\n        num = target - v\n        if num in helper:\n            return [helper[num], i]\n        helper[v] = i\n",
-  "pre_context": "helper = {}\npirel_pre_ctx_spec_identifier"
+  "pre_context": "helper = {}\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "for id_dnt in id_rlv:\n    return",
+      "for id_dan , in 5386:\n    return",
+      "for id_pmtr in id_lnu:\n    return"
+    ],
+    [
+      "for id_xuab, id_rwxn in enumerate( ):\n    secret_fun_4071()",
+      "for id_iwn, id_yoz in enumerate( ):\n    secret_fun_4071()",
+      "for id_hbqk, id_tvdl in enumerate( ):\n    secret_fun_4071()"
+    ],
+    [
+      "for id_xhju, id_odt in enumerate(id_ciq):\n    secret_fun_4071()",
+      "for id_zifs, id_lnm in enumerate(id_jndc):\n    secret_fun_4071()",
+      "for id_yoi, id_xdcw in enumerate(id_wbl):\n    secret_fun_4071()"
+    ]
+  ]
 }

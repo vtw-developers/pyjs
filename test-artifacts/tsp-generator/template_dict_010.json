@@ -9,7 +9,7 @@
   "problematic_node_id": 1,
   "problematic_node_path": [],
   "is_valid_template": true,
-  "is_insert_secret_fn": false,
+  "is_insert_secret_fn": true,
   "contexts": [
     {
       "source_context": [
@@ -26,5 +26,17 @@
   ],
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(nums: List[int], target: int) -> List[int]:\n    helper = {}\n    for i, v in enumerate(nums):\n        num = target - v\n        if num in helper:\n            return [helper[num], i]\n        helper[v] = i\n",
-  "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier"
+  "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "return id_cgo",
+      "return 3205",
+      "return id_aum"
+    ],
+    [
+      "return [secret_fun_4071()]",
+      "return [secret_fun_4071()]",
+      "return [secret_fun_4071()]"
+    ]
+  ]
 }

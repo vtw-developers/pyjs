@@ -42,5 +42,12 @@
   "template_origin_before_simplification": "return [helper[num], i]",
   "partial_program": "return [pirel_replace_var, i];",
   "src_program": "\nfrom typing import *\ndef f_gold(nums: List[int], target: int) -> List[int]:\n    helper = {}\n    for i, v in enumerate(nums):\n        num = target - v\n        if num in helper:\n            return [helper[num], i]\n        helper[v] = i\n",
-  "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier"
+  "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "return [id_kis[id_itlm], i]",
+      "return [id_wrj[id_tcil], i]",
+      "return [id_hnre[id_orqs], i]"
+    ]
+  ]
 }

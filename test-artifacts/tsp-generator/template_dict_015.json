@@ -26,5 +26,27 @@
   ],
   "partial_program": "pirel_replace_var;",
   "src_program": "\nimport math\nfrom math import inf\nfrom typing import *\ndef f_gold(nums1: List[int], nums2: List[int]) -> float:\n    def findKth(i, j, k):\n        if i >= m:\n            return nums2[j + k - 1]\n        if j >= n:\n            return nums1[i + k - 1]\n        if k == 1:\n            return min(nums1[i], nums2[j])\n        midVal1 = nums1[i + k // 2 - 1] if i + k // 2 - 1 < m else float('inf')\n        midVal2 = nums2[j + k // 2 - 1] if j + k // 2 - 1 < n else float('inf')\n        if midVal1 < midVal2:\n            return findKth(i + k // 2, j, k - k // 2)\n        return findKth(i, j + k // 2, k - k // 2)\n    m, n = len(nums1), len(nums2)\n    left, right = (m + n + 1) // 2, (m + n + 2) // 2\n    return (findKth(0, 0, left) + findKth(0, 0, right)) / 2\n",
-  "pre_context": "if i >= m:\n    pirel_pre_ctx_spec_identifier"
+  "pre_context": "if i >= m:\n    pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "return id_rca",
+      "return 3493",
+      "return id_gsfk"
+    ],
+    [
+      "return id_qehv[id_wyh]",
+      "return id_fieu[7030]",
+      "return id_qgu[id_fwm]"
+    ],
+    [
+      "return id_zmn[id_vfsj - 6307]",
+      "return id_hmr[4066 - id_ydu]",
+      "return id_novg[id_unz - id_uoh]"
+    ],
+    [
+      "return id_svu[id_axep + id_whz - 1605]",
+      "return id_gykb[id_lmf + id_oyex - 8176]",
+      "return id_ugsx[id_ehc + id_aoyh - 2042]"
+    ]
+  ]
 }

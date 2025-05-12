@@ -63,5 +63,12 @@
   "template_origin_before_simplification": "chars.remove(s[i])",
   "partial_program": "chars = chars.filter(element => element !== pirel_replace_var);",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
-  "pre_context": "while c in chars:\n    pirel_pre_ctx_spec_identifier"
+  "pre_context": "while c in chars:\n    pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "chars.remove(id_qlit[id_exd])",
+      "chars.remove(id_aky[id_trev])",
+      "chars.remove(id_njh[id_oqu])"
+    ]
+  ]
 }

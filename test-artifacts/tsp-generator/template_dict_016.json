@@ -27,5 +27,57 @@
   "template_origin_before_simplification": "midVal1 = nums1[i + k // 2 - 1] if i + k // 2 - 1 < m else float('inf')",
   "partial_program": "pirel_replace_var;",
   "src_program": "\nimport math\nfrom math import inf\nfrom typing import *\ndef f_gold(nums1: List[int], nums2: List[int]) -> float:\n    def findKth(i, j, k):\n        if i >= m:\n            return nums2[j + k - 1]\n        if j >= n:\n            return nums1[i + k - 1]\n        if k == 1:\n            return min(nums1[i], nums2[j])\n        midVal1 = nums1[i + k // 2 - 1] if i + k // 2 - 1 < m else float('inf')\n        midVal2 = nums2[j + k // 2 - 1] if j + k // 2 - 1 < n else float('inf')\n        if midVal1 < midVal2:\n            return findKth(i + k // 2, j, k - k // 2)\n        return findKth(i, j + k // 2, k - k // 2)\n    m, n = len(nums1), len(nums2)\n    left, right = (m + n + 1) // 2, (m + n + 2) // 2\n    return (findKth(0, 0, left) + findKth(0, 0, right)) / 2\n",
-  "pre_context": "if i >= m:\n    return nums2[j + k - 1]\nif j >= n:\n    return nums1[i + k - 1]\nif k == 1:\n    return min(nums1[i], nums2[j])\npirel_pre_ctx_spec_identifier"
+  "pre_context": "if i >= m:\n    return nums2[j + k - 1]\nif j >= n:\n    return nums1[i + k - 1]\nif k == 1:\n    return min(nums1[i], nums2[j])\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "id_hcoq = id_hlw",
+      "id_cuk = 1063",
+      "id_urnd = id_rdl"
+    ],
+    [
+      "id_bkgm = id_pvm if id_miqo else id_qjwg",
+      "id_cbx = 6954 if 2601 else 1324",
+      "id_xif = id_qpi if id_ygb else id_tlx"
+    ],
+    [
+      "id_qzf = id_ekwp[id_hxiy] if id_btz < id_phqf else float( )",
+      "id_rqu = id_qto[7482] if 5206 < id_ype else float( )",
+      "id_pakr = id_awf[id_osan] if id_uzs < id_cek else float( )"
+    ],
+    [
+      "id_emt = id_vck[id_clqr] if id_foyh < id_pnzo else float(id_wmdr)",
+      "id_ufmk = id_ukd[9986] if 3713 < id_ugo else float(4038)",
+      "id_mzrv = id_sryv[id_eynh] if id_osc < id_qlr else float(id_moe)"
+    ],
+    [
+      "id_tpc = id_kdcl[id_hupg] if id_wrp - 8154 < id_suqe else float( )",
+      "id_clo = id_wzgn[1558] if 5144 - id_grkl < id_vrx else float( )",
+      "id_mrw = id_gcq[id_edvp] if id_oey - id_rebu < id_jql else float( )"
+    ],
+    [
+      "id_fzk = id_hvq[id_tyga] if id_oul - 9699 < id_dris else float(id_kcav)",
+      "id_knu = id_xthn[492] if 5075 - id_wmhf < id_bngc else float(9173)",
+      "id_lhy = id_aonu[id_jnb] if id_xjcf - id_arz < id_utc else float(id_szoq)"
+    ],
+    [
+      "id_lwyd = id_uxb[id_gkj - 8856] if id_mkqv < id_iuer else float( )",
+      "id_wnzh = id_flxb[3337 - id_dwl] if 7086 < id_gasi else float( )",
+      "id_jdln = id_aevx[id_crqj - id_yam] if id_czj < id_njv else float( )"
+    ],
+    [
+      "id_ntdp = id_rvcp[id_urm - 7648] if id_kwzu < id_ridv else float(id_fkx)",
+      "id_okbd = id_lbzy[8684 - id_xzde] if 2050 < id_cxn else float(9470)",
+      "id_derv = id_ocj[id_bpvh - id_tlbe] if id_ywc < id_iwbe else float(id_wrsl)"
+    ],
+    [
+      "id_zae = id_drc[id_uhi - 1668] if id_sru - 8433 < id_ocb else float( )",
+      "id_vwsa = id_pxot[7727 - id_pdw] if 8126 - id_qasc < id_rbld else float( )",
+      "id_vyf = id_xrd[id_bwyd - id_hdn] if id_olnd - id_skcw < id_ogyw else float( )"
+    ],
+    [
+      "id_gkw = id_cwi[id_vnhu - 3758] if id_bhzg - 8758 < id_pig else float(id_tbr)",
+      "id_zpfv = id_fia[3094 - id_lvmq] if 8862 - id_gnm < id_jpfo else float(8912)",
+      "id_qept = id_nif[id_qcvi - id_nul] if id_kqjn - id_tkw < id_fopv else float(id_scx)"
+    ]
+  ]
 }
