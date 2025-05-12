@@ -201,7 +201,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
         return False
 
       # `string` is a literal node, however it needs a special treatment unlike e.g. `integer`
-      if node.get_ts_node_type() == p_consts.NON_DESCENDABLE_NODES[template_dict['src_lang']]:
+      if node.get_ts_node_type() in p_consts.NON_DESCENDABLE_NODES[template_dict['src_lang']]:
         return False
 
       # nodes like `block`. `block` is treated specially during program generation
