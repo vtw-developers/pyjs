@@ -147,7 +147,7 @@ NON_DESCENDABLE_NODES = {
 # However, the generator generates non-empty strings, and this does not let us
 # learn the translation rule for empty strings.
 # This is a workaround to avoid such issues.
-TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES = {
+DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES = {
   'py': ['string', 'slice']
 }
 
