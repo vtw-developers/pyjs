@@ -17,6 +17,50 @@ logger = p_utils.setup_logger(__name__)
 class _CannotGenerateProgramPairError(RuntimeError): pass
 
 
+def is_invalid_pattern_detected_PY(
+  node_type: str,
+  mapped_node: pds.DuoGlotNode,
+) -> bool:
+  '''
+  Given a node type for which to generate the simplest AST,
+  and a mapped node which is replaced with the simplest AST,
+  check the node type matches one of the invalid patterns.
+  '''
+  def _pattern_1_argument_list_for_range(node_type: str, mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    exclude such cases `range( )`
+    '''
+    # mapped_node must be an argument_list
+    if mapped_node.get_ts_node_type() != 'argument_list':
+      return False
+    parent = mapped_node.get_parent()
+    # parent must be a call node
+    if parent.get_ts_node_type() != 'call':
+      return False
+    # parent must have two non-terminal children
+    if len(parent.get_nt_children()) != 2:
+      return False
+    # first child must be identifier
+    first_child = parent.get_children()[0]
+    if first_child.get_ts_node_type() != 'identifier':
+      return False
+    # function name must be `range`
+    terminal = first_child.get_children()[0].node_type
+    if terminal != 'range':
+      return False
+    logger.warning(f'Invalid pattern detected: generating argument_list for range')
+    return True
+
+  pattern_callbacks = [
+    lambda: _pattern_1_argument_list_for_range(node_type, mapped_node),
+  ]
+
+  for pattern_callback in pattern_callbacks:
+    if pattern_callback():
+      return True
+  return False
+
+
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -399,6 +443,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     grammar: p_grammar.TreeSitterGrammar
   ) -> str:
     '''NOTE the generated code may have semantic errors'''
+
+    if is_invalid_pattern_detected_PY(node_type, mapped_node):
+      raise _CannotGenerateProgramPairError('Invalid pattern detected')
 
     if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
       spec_treatment_map = p_consts.SPECIAL_TREATMENT_BODY_NODE_TYPES[template_dict['src_lang']]
