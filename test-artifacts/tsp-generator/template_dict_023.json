@@ -44,5 +44,22 @@
   "template_origin_before_simplification": "group = 2 * numRows - 2",
   "partial_program": "const group = pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str, numRows: int) -> str:\n    if numRows == 1:\n        return s\n    group = 2 * numRows - 2\n    ans = []\n    for i in range(1, numRows + 1):\n        interval = group if i == numRows else 2 * numRows - 2 * i\n        idx = i - 1\n        while idx < len(s):\n            ans.append(s[idx])\n            idx += interval\n            interval = group - interval\n            if interval == 0:\n                interval = group\n    return ''.join(ans)\n",
-  "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier"
+  "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "group = id_mudh - 5963",
+      "group = 6876 - id_kci",
+      "group = id_pzuv - id_abkh"
+    ],
+    [
+      "group = 5987 * id_entk - 3492",
+      "group = id_ahi * id_nmwl - 2432",
+      "group = id_hvfn * id_vhjt - 260"
+    ],
+    [
+      "group = 5299 * id_nejm - 3349",
+      "group = 2348 * id_swb - 5746",
+      "group = 9200 * id_rxwy - 5549"
+    ]
+  ]
 }

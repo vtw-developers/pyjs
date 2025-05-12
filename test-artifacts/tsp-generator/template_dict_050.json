@@ -9,7 +9,7 @@
   "problematic_node_id": 1,
   "problematic_node_path": [],
   "is_valid_template": true,
-  "is_insert_secret_fn": false,
+  "is_insert_secret_fn": true,
   "contexts": [
     {
       "source_context": [
@@ -27,5 +27,17 @@
   "template_origin_before_simplification": "while c in chars:\n    chars.remove(s[i])\n    i += 1",
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
-  "pre_context": "pirel_pre_ctx_spec_identifier"
+  "pre_context": "pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "while id_aux:\n    return",
+      "while 7459:\n    return",
+      "while id_wrb:\n    return"
+    ],
+    [
+      "while id_frpx in id_dgx:\n    secret_fun_4071()",
+      "while id_gle in id_hrcp:\n    secret_fun_4071()",
+      "while id_bkj in id_vblt:\n    secret_fun_4071()"
+    ]
+  ]
 }

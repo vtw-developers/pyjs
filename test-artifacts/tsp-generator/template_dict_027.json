@@ -27,5 +27,22 @@
   "template_origin_before_simplification": "i = ans = 0",
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
-  "pre_context": "pirel_pre_ctx_spec_identifier"
+  "pre_context": "pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "id_nzs = id_hqm",
+      "id_foq = 8601",
+      "id_zqr = id_pgh"
+    ],
+    [
+      "id_ehav = id_lnoy = 659",
+      "id_iha = id_gms = id_ptmx",
+      "id_ckyx = id_zcwi = id_vqge"
+    ],
+    [
+      "id_ulg = id_wou = 5281",
+      "id_fxed = id_ljud = 9452",
+      "id_aob = id_lvhz = 6265"
+    ]
+  ]
 }

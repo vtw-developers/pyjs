@@ -12,7 +12,7 @@
     2
   ],
   "is_valid_template": true,
-  "is_insert_secret_fn": false,
+  "is_insert_secret_fn": true,
   "contexts": [
     {
       "source_context": [
@@ -44,5 +44,42 @@
   "template_origin_before_simplification": "dp = [[False] * n for _ in range(n)]",
   "partial_program": "const dp = pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> str:\n    n = len(s)\n    dp = [[False] * n for _ in range(n)]\n    start, mx = 0, 1\n    for j in range(n):\n        for i in range(j + 1):\n            if j - i < 2:\n                dp[i][j] = s[i] == s[j]\n            else:\n                dp[i][j] = dp[i + 1][j - 1] and s[i] == s[j]\n            if dp[i][j] and mx < j - i + 1:\n                start, mx = i, j - i + 1\n    return s[start : start + mx]\n",
-  "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier"
+  "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "dp = [id_xis for id_vru in id_jfsd]",
+      "dp = [1420 for id_axgy in id_rnz]",
+      "dp = [id_rxvl for id_gzxj in id_ulre]"
+    ],
+    [
+      "dp = [id_oxs * id_idjq for id_aqwt in id_gifj]",
+      "dp = [1501 * id_dskj for id_pmhy in 4086]",
+      "dp = [id_sqtp * id_ustk for id_jnaw in id_mxur]"
+    ],
+    [
+      "dp = [id_spy * id_hgvo for id_pfu in range( )]",
+      "dp = [1763 * id_uant for id_sghb in range( )]",
+      "dp = [id_sfx * id_vdos for id_gve in range( )]"
+    ],
+    [
+      "dp = [[secret_fun_4071()] * id_sqel for id_rcy in id_tof]",
+      "dp = [[secret_fun_4071()] * id_qsdy for id_ahm in 717]",
+      "dp = [[secret_fun_4071()] * id_fgd for id_ypxu in id_lwzd]"
+    ],
+    [
+      "dp = [[secret_fun_4071()] * id_jqf for id_woa in range( )]",
+      "dp = [[secret_fun_4071()] * id_fpta for id_vfr in range( )]",
+      "dp = [[secret_fun_4071()] * id_ohu for id_rnq in range( )]"
+    ],
+    [
+      "dp = [id_cwtj * id_nzvk for id_nod in range(id_ngt)]",
+      "dp = [1836 * id_rqwc for id_kmdw in range(id_cdi)]",
+      "dp = [id_wyj * id_bfd for id_xotc in range(id_gneu)]"
+    ],
+    [
+      "dp = [[secret_fun_4071()] * id_hvzr for id_imut in range(id_byh)]",
+      "dp = [[secret_fun_4071()] * id_apog for id_ovi in range(id_kyia)]",
+      "dp = [[secret_fun_4071()] * id_zeno for id_qhfs in range(id_bcn)]"
+    ]
+  ]
 }

@@ -44,5 +44,12 @@
   "template_origin_before_simplification": "helper = {}",
   "partial_program": "let helper = pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(nums: List[int], target: int) -> List[int]:\n    helper = {}\n    for i, v in enumerate(nums):\n        num = target - v\n        if num in helper:\n            return [helper[num], i]\n        helper[v] = i\n",
-  "pre_context": "pirel_pre_ctx_spec_identifier"
+  "pre_context": "pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "helper = { }",
+      "helper = { }",
+      "helper = { }"
+    ]
+  ]
 }

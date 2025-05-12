@@ -9,7 +9,7 @@
   "problematic_node_id": 1,
   "problematic_node_path": [],
   "is_valid_template": true,
-  "is_insert_secret_fn": false,
+  "is_insert_secret_fn": true,
   "contexts": [
     {
       "source_context": [
@@ -27,5 +27,22 @@
   "template_origin_before_simplification": "for j, c in enumerate(s):\n    while c in chars:\n        chars.remove(s[i])\n        i += 1\n    chars.add(c)\n    ans = max(ans, j - i + 1)",
   "partial_program": "pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> int:\n    i = ans = 0\n    chars = set()\n    for j, c in enumerate(s):\n        while c in chars:\n            chars.remove(s[i])\n            i += 1\n        chars.add(c)\n        ans = max(ans, j - i + 1)\n    return ans\n",
-  "pre_context": "pirel_pre_ctx_spec_identifier"
+  "pre_context": "pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "for id_ylq in id_wul:\n    return",
+      "for id_nxf , in 6584:\n    return",
+      "for id_iqw in id_aqe:\n    return"
+    ],
+    [
+      "for id_tpxg, id_vgbp in enumerate( ):\n    secret_fun_4071()",
+      "for id_tfnx, id_dqat in enumerate( ):\n    secret_fun_4071()",
+      "for id_nwl, id_tciv in enumerate( ):\n    secret_fun_4071()"
+    ],
+    [
+      "for id_cds, id_qipy in enumerate(id_vsu):\n    secret_fun_4071()",
+      "for id_evn, id_tqh in enumerate(id_srq):\n    secret_fun_4071()",
+      "for id_kru, id_mtok in enumerate(id_lgaz):\n    secret_fun_4071()"
+    ]
+  ]
 }

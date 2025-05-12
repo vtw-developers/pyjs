@@ -72,5 +72,17 @@
   "template_origin_before_simplification": "dp = [[False] * n for _ in range(n)]",
   "partial_program": "let dp = (() => {\n    const arr = [];\n    for (const _ of pirel_replace_var) {\n        arr.push(pirel_dummy_var * n);\n    }\n    return arr;\n})();",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> str:\n    n = len(s)\n    dp = [[False] * n for _ in range(n)]\n    start, mx = 0, 1\n    for j in range(n):\n        for i in range(j + 1):\n            if j - i < 2:\n                dp[i][j] = s[i] == s[j]\n            else:\n                dp[i][j] = dp[i + 1][j - 1] and s[i] == s[j]\n            if dp[i][j] and mx < j - i + 1:\n                start, mx = i, j - i + 1\n    return s[start : start + mx]\n",
-  "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier"
+  "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "dp = [[False] * n for _ in range( )]",
+      "dp = [[False] * n for _ in range( )]",
+      "dp = [[False] * n for _ in range( )]"
+    ],
+    [
+      "dp = [[False] * n for _ in range(id_lgfz)]",
+      "dp = [[False] * n for _ in range(id_ber)]",
+      "dp = [[False] * n for _ in range(id_eahy)]"
+    ]
+  ]
 }

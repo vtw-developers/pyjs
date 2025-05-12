@@ -44,5 +44,37 @@
   "template_origin_before_simplification": "interval = group if i == numRows else 2 * numRows - 2 * i",
   "partial_program": "var interval = pirel_replace_var;",
   "src_program": "\nfrom typing import *\ndef f_gold(s: str, numRows: int) -> str:\n    if numRows == 1:\n        return s\n    group = 2 * numRows - 2\n    ans = []\n    for i in range(1, numRows + 1):\n        interval = group if i == numRows else 2 * numRows - 2 * i\n        idx = i - 1\n        while idx < len(s):\n            ans.append(s[idx])\n            idx += interval\n            interval = group - interval\n            if interval == 0:\n                interval = group\n    return ''.join(ans)\n",
-  "pre_context": "for i in range(1, numRows + 1):\n    pirel_pre_ctx_spec_identifier"
+  "pre_context": "for i in range(1, numRows + 1):\n    pirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "interval = id_bsq if id_ofe else id_zcgh",
+      "interval = id_lbyg if 2709 else 1196",
+      "interval = id_wjp if id_ejdt else id_puxo"
+    ],
+    [
+      "interval = id_aeh if id_sczn == id_xvd else id_nez - id_ndek",
+      "interval = id_tso if id_muvq == id_utzd else 2386 - 422",
+      "interval = id_wrf if id_esdh == id_buwh else id_pnm - id_sge"
+    ],
+    [
+      "interval = id_wanr if id_pjq == id_ufhk else 2675 * id_svrz - 9126 * id_kgv",
+      "interval = id_xsrg if id_tdb == id_xkpl else id_kfw * id_nbv - id_gev * id_rjy",
+      "interval = id_oaz if id_wai == id_jhs else id_wis * id_dyv - id_loi * id_uqv"
+    ],
+    [
+      "interval = id_sgqv if id_mkbn == id_met else 6812 * id_fzs - 2096 * id_amt",
+      "interval = id_nlk if id_dxl == id_tpi else id_lav * id_cxi - 16 * id_gdcs",
+      "interval = id_wdj if id_nqo == id_vkli else id_zyl * id_vhoe - 8830 * id_qno"
+    ],
+    [
+      "interval = id_sjgm if id_kah == id_mxvf else 8388 * id_dge - 9332 * id_yzd",
+      "interval = id_vzoy if id_wzx == id_smd else 3329 * id_ycdf - id_pimg * id_erny",
+      "interval = id_lgmy if id_dmfp == id_kgo else 4747 * id_bhg - id_hdg * id_hbt"
+    ],
+    [
+      "interval = id_vomc if id_zdy == id_gcm else 8427 * id_pyit - 4077 * id_azh",
+      "interval = id_cmg if id_xjyw == id_hmq else 5143 * id_pbi - 5058 * id_skm",
+      "interval = id_thgx if id_zos == id_xua else 7455 * id_wrj - 7275 * id_ivj"
+    ]
+  ]
 }
