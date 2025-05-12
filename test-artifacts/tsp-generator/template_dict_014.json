@@ -30,14 +30,9 @@
   "pre_context": "for i, v in enumerate(nums):\n    num = target - v\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "if id_wzbl:\n    return",
-      "if 642:\n    return",
-      "if id_lodr:\n    return"
-    ],
-    [
-      "if id_bmk in id_rhpe:\n    secret_fun_4071()",
-      "if id_ajzb in id_uyrg:\n    secret_fun_4071()",
-      "if id_mcq in id_edo:\n    secret_fun_4071()"
+      "if id_wat in id_irj:\n    secret_fun_4071()",
+      "if id_twbz in id_eury:\n    secret_fun_4071()",
+      "if id_olv in id_zxu:\n    secret_fun_4071()"
     ]
   ]
 }

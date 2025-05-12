@@ -18,15 +18,15 @@ class _CannotGenerateProgramPairError(RuntimeError): pass
 
 
 def is_invalid_pattern_detected_PY(
-  node_type: str,
   mapped_node: pds.DuoGlotNode,
+  template_dict: dict,
 ) -> bool:
   '''
   Given a node type for which to generate the simplest AST,
   and a mapped node which is replaced with the simplest AST,
   check the node type matches one of the invalid patterns.
   '''
-  def _pattern_1_argument_list_for_range(node_type: str, mapped_node: pds.DuoGlotNode) -> bool:
+  def _pattern_1_argument_list_for_range(mapped_node: pds.DuoGlotNode) -> bool:
     '''
     exclude such cases `range( )`
     '''
@@ -51,8 +51,24 @@ def is_invalid_pattern_detected_PY(
     logger.warning(f'Invalid pattern detected: generating argument_list for range')
     return True
 
+  def _pattern_2_block_without_secret_fn_turned_on(mapped_node: pds.DuoGlotNode, template_dict: dict) -> bool:
+    '''
+    exclude cases where need to generate a body node type,
+    but `is_insert_secret_fn` is False
+    '''
+    # is_insert_secret_fn must be turned off
+    if template_dict['is_insert_secret_fn']:
+      return False
+    # mapped_node must be a block node
+    node_type = mapped_node.get_ts_node_type()
+    if node_type != 'block':
+      return False
+    logger.warning(f'Invalid pattern detected: generating `block` with is_insert_secret_fn turned off')
+    return True
+
   pattern_callbacks = [
-    lambda: _pattern_1_argument_list_for_range(node_type, mapped_node),
+    lambda: _pattern_1_argument_list_for_range(mapped_node),
+    lambda: _pattern_2_block_without_secret_fn_turned_on(mapped_node, template_dict),
   ]
 
   for pattern_callback in pattern_callbacks:
@@ -444,7 +460,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
   ) -> str:
     '''NOTE the generated code may have semantic errors'''
 
-    if is_invalid_pattern_detected_PY(node_type, mapped_node):
+    if is_invalid_pattern_detected_PY(mapped_node, template_dict):
       raise _CannotGenerateProgramPairError('Invalid pattern detected')
 
     if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
@@ -673,25 +689,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     filtered_program_pairs = []
     unique_pair_encodings = []
     for program_pair in program_pairs:
-
-      # Deprecated
-      # Throws away good program pairs such as
-      # `return 1`, `return 2` that were generated from `return [val1, val2]`
-      # `list` is a body node type, that's why it needs a secret function invocation.
-      # Need to rethink this.
-      # if template_dict['is_insert_secret_fn']:
-      #   logger.debug('Secret function is inserted')
-      #   if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[0]:
-      #     logger.debug(f'Program "\n{program_pair[0]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
-      #     continue
-      #   if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[1]:
-      #     logger.debug(f'Program "\n{program_pair[1]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
-      #     continue
-      #   if p_consts.GENERIC_SECRET_FN_INVOCATION not in program_pair[2]:
-      #     logger.debug(f'Program "\n{program_pair[2]}\n" does not contain "{p_consts.GENERIC_SECRET_FN_INVOCATION}"')
-      #     continue
-      #   logger.debug('all three programs contain secret function invocation')
-
       # NOTE The third snippet in `program_pair` is used for translation rule validation.
       # We do not need to use it as a criteria for removing duplicate entries.
       tree1, tree2 = __get_tree(program_pair[0], lang), __get_tree(program_pair[1], lang)

@@ -30,19 +30,14 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "if id_lxzb:\n    return",
-      "if 7595:\n    return",
-      "if id_otx:\n    return"
+      "if id_szb == 7942:\n    secret_fun_4071()",
+      "if id_urnc == id_qhod:\n    secret_fun_4071()",
+      "if id_ltm == id_tsk:\n    secret_fun_4071()"
     ],
     [
-      "if id_ftnz == 7754:\n    secret_fun_4071()",
-      "if id_xsv == id_fzy:\n    secret_fun_4071()",
-      "if id_cuzr == id_hgaw:\n    secret_fun_4071()"
-    ],
-    [
-      "if id_buo == 4946:\n    secret_fun_4071()",
-      "if id_tvg == 8081:\n    secret_fun_4071()",
-      "if id_yzxg == 8241:\n    secret_fun_4071()"
+      "if id_ahnp == 1320:\n    secret_fun_4071()",
+      "if id_jxb == 313:\n    secret_fun_4071()",
+      "if id_krpz == 4363:\n    secret_fun_4071()"
     ]
   ]
 }
