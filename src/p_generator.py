@@ -666,6 +666,12 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
   logger.info('~~~ Starting API call to p_generator.generate_tsps_with_generator')
 
+  # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
+  if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
+    tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
+    logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
+    return tsps
+
   # INPUTS TO THE GENERATOR
   lang = template_dict['src_lang']
   grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
