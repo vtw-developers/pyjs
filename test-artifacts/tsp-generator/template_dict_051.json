@@ -1,0 +1,48 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "num = target - v",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "binary_operator",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.binary_operator",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.lexical_declaration"
+        ]
+      ]
+    }
+  ],
+  "template_origin_before_simplification": "num = target - v",
+  "partial_program": "let num = pirel_replace_var;",
+  "src_program": "\nfrom typing import *\ndef f_gold(nums: List[int], target: int) -> List[int]:\n    helper = {}\n    for i, v in enumerate(nums):\n        num = target - v\n        if num in helper:\n            return [helper[num], i]\n        helper[v] = i\n",
+  "pre_context": "for i, v in enumerate(nums):\n    pirel_pre_ctx_spec_identifier"
+}

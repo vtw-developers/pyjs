@@ -1,0 +1,76 @@
+{
+  "template_id": 4,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "dp = [[False] * n for _ in range(n)]",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "call",
+  "problematic_node_id": 11,
+  "problematic_node_path": [
+    0,
+    2,
+    2,
+    3
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.call",
+          "py.identifier"
+        ],
+        [
+          "py.for_in_clause",
+          "py.binary_operator"
+        ],
+        [
+          "py.list_comprehension",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.for_in_statement",
+          "js.lexical_declaration"
+        ],
+        [
+          "js.statement_block",
+          "js.formal_parameters"
+        ],
+        [
+          "js.arrow_function"
+        ],
+        [
+          "js.parenthesized_expression"
+        ],
+        [
+          "js.call_expression",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.lexical_declaration"
+        ]
+      ]
+    }
+  ],
+  "template_origin_before_simplification": "dp = [[False] * n for _ in range(n)]",
+  "partial_program": "let dp = (() => {\n    const arr = [];\n    for (const _ of pirel_replace_var) {\n        arr.push(pirel_dummy_var * n);\n    }\n    return arr;\n})();",
+  "src_program": "\nfrom typing import *\ndef f_gold(s: str) -> str:\n    n = len(s)\n    dp = [[False] * n for _ in range(n)]\n    start, mx = 0, 1\n    for j in range(n):\n        for i in range(j + 1):\n            if j - i < 2:\n                dp[i][j] = s[i] == s[j]\n            else:\n                dp[i][j] = dp[i + 1][j - 1] and s[i] == s[j]\n            if dp[i][j] and mx < j - i + 1:\n                start, mx = i, j - i + 1\n    return s[start : start + mx]\n",
+  "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier"
+}

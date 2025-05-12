@@ -1,0 +1,31 @@
+{
+  "template_id": 0,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "for i in range(1, numRows + 1):\n    return",
+  "context_node_type": "for_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "for_statement",
+  "problematic_node_id": 1,
+  "problematic_node_path": [],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.for_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown"
+        ]
+      ]
+    }
+  ],
+  "template_origin_before_simplification": "for i in range(1, numRows + 1):\n    interval = group if i == numRows else 2 * numRows - 2 * i\n    idx = i - 1\n    while idx < len(s):\n        ans.append(s[idx])\n        idx += interval\n        interval = group - interval\n        if interval == 0:\n            interval = group",
+  "partial_program": "pirel_replace_var;",
+  "src_program": "\nfrom typing import *\ndef f_gold(s: str, numRows: int) -> str:\n    if numRows == 1:\n        return s\n    group = 2 * numRows - 2\n    ans = []\n    for i in range(1, numRows + 1):\n        interval = group if i == numRows else 2 * numRows - 2 * i\n        idx = i - 1\n        while idx < len(s):\n            ans.append(s[idx])\n            idx += interval\n            interval = group - interval\n            if interval == 0:\n                interval = group\n    return ''.join(ans)\n",
+  "pre_context": "pirel_pre_ctx_spec_identifier"
+}
