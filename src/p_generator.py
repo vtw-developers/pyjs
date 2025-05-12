@@ -667,7 +667,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
   logger.info('~~~ Starting API call to p_generator.generate_tsps_with_generator')
 
   # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
-  if template_dict['problematic_node_type'] in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
+  if template_dict['problematic_node_type'] in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
     tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
     logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
     return tsps
@@ -703,7 +703,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     for node in fuzz_node_group:
 
       # do not generate AST for certain node types
-      if node.get_ts_node_type() in p_consts.TSP_INCLUDE_TEMPLATE_ORIGIN_NODE_TYPES[template_dict['src_lang']]:
+      if node.get_ts_node_type() in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
         continue
 
       # check if we can pass the node to `p_grammar.get_alternative_starting_node_types`
