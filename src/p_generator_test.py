@@ -50,15 +50,15 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     root_node = tree.get_root_node()
     return root_node
 
-  def pre_order(self, node: pds.DuoGlotNode, boolean_callback: callable) -> bool:
+  def pre_order(self, node: pds.DuoGlotNode, boolean_callback: callable, *callback_args) -> bool:
     '''
     Pre-order traversal of the tree.
     '''
-    result = boolean_callback(node)
+    result = boolean_callback(node, *callback_args)
     if result is True:
       return True
     for child in node.get_children():
-      child_res = self.pre_order(child, boolean_callback)
+      child_res = self.pre_order(child, boolean_callback, *callback_args)
       if child_res is True:
         return True
     return False
@@ -71,10 +71,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_002(self):
     template_dict = self.load_template_dict('002')
@@ -84,10 +86,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_003(self):
     template_dict = self.load_template_dict('003')
@@ -97,10 +101,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_004(self):
     template_dict = self.load_template_dict('004')
@@ -110,10 +116,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_005(self):
     template_dict = self.load_template_dict('005')
@@ -123,10 +131,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_006(self):
     template_dict = self.load_template_dict('006')
@@ -136,10 +146,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_007(self):
     template_dict = self.load_template_dict('007')
@@ -149,10 +161,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_008(self):
     template_dict = self.load_template_dict('008')
@@ -162,10 +176,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_009(self):
     template_dict = self.load_template_dict('009')
@@ -175,10 +191,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_010(self):
     template_dict = self.load_template_dict('010')
@@ -188,10 +206,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_011(self):
     template_dict = self.load_template_dict('011')
@@ -201,10 +221,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_012(self):
     template_dict = self.load_template_dict('012')
@@ -214,10 +236,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_013(self):
     template_dict = self.load_template_dict('013')
@@ -227,10 +251,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_014(self):
     template_dict = self.load_template_dict('014')
@@ -240,10 +266,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_015(self):
     template_dict = self.load_template_dict('015')
@@ -253,10 +281,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_016(self):
     template_dict = self.load_template_dict('016')
@@ -266,10 +296,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_017(self):
     template_dict = self.load_template_dict('017')
@@ -279,10 +311,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_018(self):
     template_dict = self.load_template_dict('018')
@@ -292,10 +326,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_019(self):
     template_dict = self.load_template_dict('019')
@@ -305,10 +341,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_020(self):
     template_dict = self.load_template_dict('020')
@@ -318,10 +356,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_021(self):
     template_dict = self.load_template_dict('021')
@@ -331,10 +371,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_022(self):
     template_dict = self.load_template_dict('022')
@@ -344,10 +386,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_023(self):
     template_dict = self.load_template_dict('023')
@@ -357,10 +401,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_024(self):
     template_dict = self.load_template_dict('024')
@@ -370,10 +416,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_025(self):
     template_dict = self.load_template_dict('025')
@@ -383,10 +431,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_026(self):
     template_dict = self.load_template_dict('026')
@@ -396,10 +446,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_027(self):
     template_dict = self.load_template_dict('027')
@@ -409,10 +461,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_028(self):
     template_dict = self.load_template_dict('028')
@@ -422,10 +476,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_029(self):
     template_dict = self.load_template_dict('029')
@@ -435,10 +491,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_030(self):
     template_dict = self.load_template_dict('030')
@@ -448,10 +506,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_031(self):
     template_dict = self.load_template_dict('031')
@@ -461,10 +521,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_032(self):
     template_dict = self.load_template_dict('032')
@@ -474,10 +536,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_033(self):
     template_dict = self.load_template_dict('033')
@@ -487,10 +551,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_034(self):
     template_dict = self.load_template_dict('034')
@@ -500,10 +566,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_035(self):
     template_dict = self.load_template_dict('035')
@@ -513,10 +581,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_036(self):
     template_dict = self.load_template_dict('036')
@@ -526,10 +596,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_037(self):
     template_dict = self.load_template_dict('037')
@@ -539,10 +611,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_038(self):
     template_dict = self.load_template_dict('038')
@@ -552,10 +626,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_039(self):
     template_dict = self.load_template_dict('039')
@@ -565,10 +641,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_040(self):
     template_dict = self.load_template_dict('040')
@@ -578,10 +656,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_041(self):
     template_dict = self.load_template_dict('041')
@@ -591,10 +671,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_042(self):
     template_dict = self.load_template_dict('042')
@@ -604,10 +686,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_043(self):
     template_dict = self.load_template_dict('043')
@@ -617,10 +701,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_044(self):
     template_dict = self.load_template_dict('044')
@@ -630,10 +716,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_045(self):
     template_dict = self.load_template_dict('045')
@@ -643,10 +731,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_046(self):
     template_dict = self.load_template_dict('046')
@@ -656,10 +746,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_047(self):
     template_dict = self.load_template_dict('047')
@@ -669,10 +761,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_048(self):
     template_dict = self.load_template_dict('048')
@@ -682,10 +776,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_049(self):
     template_dict = self.load_template_dict('049')
@@ -695,10 +791,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_050(self):
     template_dict = self.load_template_dict('050')
@@ -708,10 +806,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_051(self):
     template_dict = self.load_template_dict('051')
@@ -721,10 +821,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_052(self):
     template_dict = self.load_template_dict('052')
@@ -734,10 +836,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
   def test_053(self):
     template_dict = self.load_template_dict('053')
@@ -747,10 +851,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     for tsp in tsps:
       for snippet in tsp:
         root_node = self.parse_snippet(snippet, template_dict)
-        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
-        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_empty_arglist_for_range)
+        has_range_with_empty_arglist = self.pre_order(root_node, pat.pattern_2_has_range_with_empty_argument_list)
         self.assertFalse(has_range_with_empty_arglist, f'Empty argument list for range found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_3_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
 
 
 if __name__ == '__main__':
