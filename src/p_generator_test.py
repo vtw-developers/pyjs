@@ -36,271 +36,325 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     assert context_node.get_ts_node_type() == context_node_type, 'sanity check'
     assert problematic_node.get_ts_node_type() == problematic_node_type, 'sanity check'
 
+    logger.debug('~' * 80)
     logger.debug(f'context code: \n"{context_node.get_ts_node_type()}"\n"\n{context_node.get_text()}\n"')
     logger.debug(f'problematic code: \n"{problematic_node.get_ts_node_type()}"\n"\n{problematic_node.get_text()}\n"')
 
   def test_001(self):
     template_dict = self.load_template_dict('001')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_002(self):
     template_dict = self.load_template_dict('002')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_003(self):
     template_dict = self.load_template_dict('003')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_004(self):
     template_dict = self.load_template_dict('004')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_005(self):
     template_dict = self.load_template_dict('005')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_006(self):
     template_dict = self.load_template_dict('006')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_007(self):
     template_dict = self.load_template_dict('007')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_008(self):
     template_dict = self.load_template_dict('008')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_009(self):
     template_dict = self.load_template_dict('009')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_010(self):
     template_dict = self.load_template_dict('010')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_011(self):
     template_dict = self.load_template_dict('011')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_012(self):
     template_dict = self.load_template_dict('012')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_013(self):
     template_dict = self.load_template_dict('013')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_014(self):
     template_dict = self.load_template_dict('014')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_015(self):
     template_dict = self.load_template_dict('015')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_016(self):
     template_dict = self.load_template_dict('016')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_017(self):
     template_dict = self.load_template_dict('017')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_018(self):
     template_dict = self.load_template_dict('018')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_019(self):
     template_dict = self.load_template_dict('019')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_020(self):
     template_dict = self.load_template_dict('020')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_021(self):
     template_dict = self.load_template_dict('021')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_022(self):
     template_dict = self.load_template_dict('022')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_023(self):
     template_dict = self.load_template_dict('023')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_024(self):
     template_dict = self.load_template_dict('024')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_025(self):
     template_dict = self.load_template_dict('025')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_026(self):
     template_dict = self.load_template_dict('026')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_027(self):
     template_dict = self.load_template_dict('027')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_028(self):
     template_dict = self.load_template_dict('028')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_029(self):
     template_dict = self.load_template_dict('029')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_030(self):
     template_dict = self.load_template_dict('030')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_031(self):
     template_dict = self.load_template_dict('031')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_032(self):
     template_dict = self.load_template_dict('032')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_033(self):
     template_dict = self.load_template_dict('033')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_034(self):
     template_dict = self.load_template_dict('034')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_035(self):
     template_dict = self.load_template_dict('035')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_036(self):
     template_dict = self.load_template_dict('036')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_037(self):
     template_dict = self.load_template_dict('037')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_038(self):
     template_dict = self.load_template_dict('038')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_039(self):
     template_dict = self.load_template_dict('039')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_040(self):
     template_dict = self.load_template_dict('040')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_041(self):
     template_dict = self.load_template_dict('041')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_042(self):
     template_dict = self.load_template_dict('042')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_043(self):
     template_dict = self.load_template_dict('043')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_044(self):
     template_dict = self.load_template_dict('044')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_045(self):
     template_dict = self.load_template_dict('045')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_046(self):
     template_dict = self.load_template_dict('046')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_047(self):
     template_dict = self.load_template_dict('047')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_048(self):
     template_dict = self.load_template_dict('048')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_049(self):
     template_dict = self.load_template_dict('049')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_050(self):
     template_dict = self.load_template_dict('050')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_051(self):
     template_dict = self.load_template_dict('051')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_052(self):
     template_dict = self.load_template_dict('052')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
   def test_053(self):
     template_dict = self.load_template_dict('053')
+    self.log_ctx_prob_nodes(template_dict)
     tsps = p_generator.generate_tsps_with_generator(template_dict)
     self.assertEqual(len(tsps), len(template_dict['tsps']))
 
