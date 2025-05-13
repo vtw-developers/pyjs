@@ -47,14 +47,9 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "n = len( )",
-      "n = len( )",
-      "n = len( )"
-    ],
-    [
-      "n = len(id_crya)",
-      "n = len(id_fap)",
-      "n = len(id_esr)"
+      "n = len(id_qmj)",
+      "n = len(id_hmy)",
+      "n = len(id_fjqz)"
     ]
   ]
 }

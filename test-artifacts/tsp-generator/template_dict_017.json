@@ -38,19 +38,14 @@
   "pre_context": "if k == 1:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return min( )",
-      "return min( )",
-      "return min( )"
+      "return min(id_fiml, id_jwq)",
+      "return min(1274, 6850)",
+      "return min(id_sga, id_juz)"
     ],
     [
-      "return min(id_lca, id_rhk)",
-      "return min(1831, 4377)",
-      "return min(id_zgn, id_gce)"
-    ],
-    [
-      "return min(id_nflm[id_rnov], id_qsr[id_oswe])",
-      "return min(id_mxwl[id_lie], id_cnqw[id_wsr])",
-      "return min(id_ehf[id_vidm], id_kyh[id_jhb])"
+      "return min(id_vou[id_tcpe], id_jho[id_acis])",
+      "return min(id_bhjx[id_cnr], id_fqsp[id_iynd])",
+      "return min(id_zeb[id_hpf], id_kypz[id_sqj])"
     ]
   ]
 }

@@ -49,14 +49,9 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "while idx < len( ):\n    return",
-      "while idx < len( ):\n    return",
-      "while idx < len( ):\n    return"
-    ],
-    [
-      "while idx < len(id_zmf):\n    return",
-      "while idx < len(id_bzs):\n    return",
-      "while idx < len(id_naw):\n    return"
+      "while idx < len(id_yiup):\n    return",
+      "while idx < len(id_pqno):\n    return",
+      "while idx < len(id_xvar):\n    return"
     ]
   ]
 }
