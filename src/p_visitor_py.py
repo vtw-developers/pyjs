@@ -1647,6 +1647,7 @@ class LogStatementInserter(pvis.Visitor):
       ListNode,
       StringNode,
       SubscriptNode,
+      UnaryOperatorNode,
     ]
     for arg in args:
       assert isinstance(arg, tuple(_SUPPORTED_ARG_TYPES)), f'Unsupported argument type: {type(arg)}'
@@ -1877,6 +1878,7 @@ class LogStatementInserter(pvis.Visitor):
       ListNode,
       StringNode,
       SubscriptNode,
+      UnaryOperatorNode,
     ]
 
     assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'Unsupported argument type: {type(arg)}'
