@@ -250,7 +250,7 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       return list(filter(lambda x: x[0] not in exclude_list, sample))
 
     benchmark_name = conf['benchmark_name']
-    assert benchmark_name in ['leetcode'], 'TODO add support for other benchmarks'
+    assert benchmark_name in ['leetcode', 'gfg'], f'benchmark "{benchmark_name}" not supported'
 
     benchmark_conf = p_consts.BENCHMARK_CONFIGS[benchmark_name]
     benchmark_dir = benchmark_conf['benchmark_dir']
@@ -268,7 +268,7 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       src_main_code = p_utils.remove_empty_lines(src_main_code)
       src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code, src_main_code, src_test_call_code])
 
-      # NOTE first five characters of the filename is the subject name for `leetcode`
+      # NOTE first five characters of the filename is the subject name for `leetcode` and `gfg`
       subject_name = subject_fpath.stem[:5]
       dataset.append((subject_name, src_program))
 
