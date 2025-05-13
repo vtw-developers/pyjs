@@ -140,7 +140,10 @@ NON_DESCENDABLE_NODES = {
 }
 
 FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST = {
-  'py': ['range', 'float']
+  'py': [
+    'abs', 'all', 'any', 'chr', 'divmod', 'enumerate', 'float', 'len',
+    'min', 'max','ord', 'pow', 'range', 'reversed', 'round', 'sorted', 'sum'
+    ]
 }
 
 # For the following node types we include (`template_origin`, `template_origin`)
