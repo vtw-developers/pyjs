@@ -77,6 +77,30 @@ def is_invalid_pattern_detected_PY(
   return False
 
 
+def is_force_identifiers_PY(
+  mapped_node: pds.DuoGlotNode,
+) -> bool:
+  '''
+  These are the cases where we want to generate identifiers
+  irregardless of the alternative node types. For example,
+  grammar rule for `call` allows integers as function names.
+  We will check such cases and force using identifiers only.
+  '''
+  def _pattern_1_mapped_node_is_identifier(mapped_node: pds.DuoGlotNode) -> bool:
+    if mapped_node.get_ts_node_type() == 'identifier':
+      return True
+    return False
+
+  pattern_callbacks = [
+    lambda: _pattern_1_mapped_node_is_identifier(mapped_node),
+  ]
+
+  for pattern_callback in pattern_callbacks:
+    if pattern_callback():
+      return True
+  return False
+
+
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -573,7 +597,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
       raise RuntimeError('should not reach here')
 
-    if p_consts.IS_FORCE_IDENTIFIERS and mapped_node.get_ts_node_type() == 'identifier':
+    if p_consts.IS_FORCE_IDENTIFIERS and is_force_identifiers_PY(mapped_node):
       alt_ntype1, alt_ntype2, alt_ntype3 = 'identifier', 'identifier', 'identifier'
     else:
       alt_ntype1, alt_ntype2, alt_ntype3 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
