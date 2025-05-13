@@ -66,9 +66,35 @@ def is_invalid_pattern_detected_PY(
     logger.warning(f'Invalid pattern detected: generating `block` with is_insert_secret_fn turned off')
     return True
 
+  def _pattern_3_argument_list_for_float(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    exclude such cases `float( )`
+    '''
+    # mapped_node must be an argument_list
+    if mapped_node.get_ts_node_type() != 'argument_list':
+      return False
+    parent = mapped_node.get_parent()
+    # parent must be a call node
+    if parent.get_ts_node_type() != 'call':
+      return False
+    # parent must have two non-terminal children
+    if len(parent.get_nt_children()) != 2:
+      return False
+    # first child must be identifier
+    first_child = parent.get_children()[0]
+    if first_child.get_ts_node_type() != 'identifier':
+      return False
+    # function name must be `float`
+    terminal = first_child.get_children()[0].node_type
+    if terminal != 'float':
+      return False
+    logger.warning(f'Invalid pattern detected: generating argument_list for float')
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_argument_list_for_range(mapped_node),
     lambda: _pattern_2_block_without_secret_fn_turned_on(mapped_node, template_dict),
+    lambda: _pattern_3_argument_list_for_float(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
