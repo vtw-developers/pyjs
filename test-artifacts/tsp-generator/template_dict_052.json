@@ -46,144 +46,99 @@
   "pre_context": "if i >= m:\n    return nums2[j + k - 1]\nif j >= n:\n    return nums1[i + k - 1]\nif k == 1:\n    return min(nums1[i], nums2[j])\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "midVal1 = id_dtg if id_vlk else id_two",
-      "midVal1 = 3095 if 1711 else 2102",
-      "midVal1 = id_alz if id_peoa else id_zux"
+      "midVal1 = id_grjz if id_dtu else id_puvl",
+      "midVal1 = 3016 if 4648 else 1009",
+      "midVal1 = id_xpta if id_bmj else id_fscx"
     ],
     [
-      "midVal1 = id_ohzc[id_nhtl] if id_qhu < id_iuw else float( )",
-      "midVal1 = id_bhfu[740] if 9968 < id_gth else float( )",
-      "midVal1 = id_txbp[id_kzq] if id_fnd < id_dtqi else float( )"
+      "midVal1 = id_hsjp[id_xwk] if id_yxv < id_gbo else float(id_mhat)",
+      "midVal1 = id_rfvw[6053] if 2142 < id_yanx else float(1733)",
+      "midVal1 = id_bapd[id_onz] if id_azxf < id_mpz else float(id_wvxr)"
     ],
     [
-      "midVal1 = id_jlet[id_tivz] if id_rbn < id_ocuy else float(id_ncve)",
-      "midVal1 = id_hicz[3054] if 4363 < id_kihf else float(4997)",
-      "midVal1 = id_ziw[id_arxb] if id_odx < id_aywm else float(id_uhdr)"
+      "midVal1 = id_xpe[id_dhan] if id_udxg - 9877 < id_elm else float(id_tjpi)",
+      "midVal1 = id_jin[1708] if 615 - id_hxar < id_ertz else float(4849)",
+      "midVal1 = id_jbk[id_wsv] if id_kmr - id_ptk < id_mld else float(id_sbgj)"
     ],
     [
-      "midVal1 = id_xbj[id_uwlj] if id_hzj - 1662 < id_gar else float( )",
-      "midVal1 = id_vmti[3579] if 946 - id_rgf < id_ixv else float( )",
-      "midVal1 = id_ian[id_byn] if id_ytiz - id_cens < id_bxj else float( )"
+      "midVal1 = id_qoxm[id_stw - 4826] if id_xor < id_pmre else float(id_skjl)",
+      "midVal1 = id_ynjs[5925 - id_oas] if 2356 < id_eom else float(6949)",
+      "midVal1 = id_lfdu[id_vqz - id_miy] if id_ews < id_vsfm else float(id_huge)"
     ],
     [
-      "midVal1 = id_swi[id_tky] if id_dgsq - 2495 < id_wzkn else float(id_zsjk)",
-      "midVal1 = id_mrq[396] if 9085 - id_igb < id_okj else float(3912)",
-      "midVal1 = id_blt[id_fxe] if id_ubmh - id_gzbi < id_jpc else float(id_zfsa)"
+      "midVal1 = id_ypzo[id_emvx - 4122] if id_xdb - 2780 < id_awer else float(id_tqu)",
+      "midVal1 = id_cnla[5308 - id_fgln] if 6481 - id_nlj < id_qeba else float(6955)",
+      "midVal1 = id_ofq[id_kce - id_pem] if id_mchr - id_bjq < id_czaf else float(id_dkxm)"
     ],
     [
-      "midVal1 = id_hkdl[id_qdoi - 1620] if id_bow < id_myvk else float( )",
-      "midVal1 = id_zwv[9082 - id_pxw] if 7733 < id_utd else float( )",
-      "midVal1 = id_tfs[id_cowm - id_uvtg] if id_doq < id_dqr else float( )"
+      "midVal1 = id_gequ[id_qfk] if id_dsje < id_vire else float('inf')",
+      "midVal1 = id_sgi[5182] if 4057 < id_jupc else float('inf')",
+      "midVal1 = id_vwb[id_vidy] if id_hbsz < id_xrb else float('inf')"
     ],
     [
-      "midVal1 = id_zgtq[id_sowy - 9948] if id_gnkr < id_lwjh else float(id_kjwr)",
-      "midVal1 = id_qovh[6089 - id_neq] if 6999 < id_hmg else float(6202)",
-      "midVal1 = id_qwr[id_xrvi - id_uwqy] if id_zxiw < id_hvx else float(id_ezq)"
+      "midVal1 = id_gen[id_lwh] if id_ubcn - 4610 < id_wkr else float('inf')",
+      "midVal1 = id_sfa[6387] if 5149 - id_xaue < id_jgu else float('inf')",
+      "midVal1 = id_efj[id_sfwi] if id_hfb - id_ger < id_fjzc else float('inf')"
     ],
     [
-      "midVal1 = id_rtvn[id_uka - 3761] if id_boh - 1383 < id_wam else float( )",
-      "midVal1 = id_yku[7362 - id_emvy] if 1331 - id_uyhs < id_yobp else float( )",
-      "midVal1 = id_ilu[id_bwfn - id_yktv] if id_hojg - id_pztv < id_bpqg else float( )"
+      "midVal1 = id_qjdp[id_wig] if id_cpu + id_ejq - 2173 < id_qdf else float(id_sie)",
+      "midVal1 = id_rey[317] if id_quhx + 8710 - 9646 < id_iotn else float(8767)",
+      "midVal1 = id_cjm[id_uiby] if id_fmc + id_ymdj - 1005 < id_maxj else float(id_kxd)"
     ],
     [
-      "midVal1 = id_uyl[id_lswn - 6038] if id_teg - 5465 < id_weot else float(id_dkcr)",
-      "midVal1 = id_phaz[9064 - id_kacf] if 1875 - id_vha < id_tpb else float(5143)",
-      "midVal1 = id_ogv[id_pzu - id_aibc] if id_bmz - id_mwy < id_ymld else float(id_yjlx)"
+      "midVal1 = id_jxaq[id_pycw] if id_rnkc + id_ybw - 1023 < id_cst else float('inf')",
+      "midVal1 = id_qjbm[3791] if id_grm + 2003 - 1666 < id_ynr else float('inf')",
+      "midVal1 = id_vig[id_eyc] if id_kmis + id_kfoq - 3315 < id_pmqi else float('inf')"
     ],
     [
-      "midVal1 = id_ocr[id_eah] if id_vbkc < id_rzqj else float('inf')",
-      "midVal1 = id_zrin[7309] if 3621 < id_gbvz else float('inf')",
-      "midVal1 = id_wli[id_gbh] if id_grxw < id_pit else float('inf')"
+      "midVal1 = id_dxim[id_cnre - 5584] if id_cryg < id_rqk else float('inf')",
+      "midVal1 = id_rdm[2390 - id_ktei] if 6980 < id_nuf else float('inf')",
+      "midVal1 = id_aguv[id_xdhu - id_nhmz] if id_bfh < id_fygj else float('inf')"
     ],
     [
-      "midVal1 = id_qeg[id_lumz] if id_rtb - 3660 < id_fnvk else float('inf')",
-      "midVal1 = id_wcn[9894] if 5632 - id_mdgt < id_eac else float('inf')",
-      "midVal1 = id_rae[id_koh] if id_jnof - id_dqf < id_clbi else float('inf')"
+      "midVal1 = id_kmu[id_tkqc - 8825] if id_whmu - 7967 < id_pxh else float('inf')",
+      "midVal1 = id_skq[4898 - id_ouq] if 6554 - id_zsr < id_rox else float('inf')",
+      "midVal1 = id_sach[id_kfj - id_zsm] if id_lsu - id_tng < id_moi else float('inf')"
     ],
     [
-      "midVal1 = id_han[id_xdt] if id_eun + id_huk - 4754 < id_hpbr else float( )",
-      "midVal1 = id_exm[5153] if id_wyh + 5926 - 3530 < id_xmt else float( )",
-      "midVal1 = id_oqk[id_sitn] if id_psdq + id_jbn - 4529 < id_kda else float( )"
+      "midVal1 = id_gzek[id_pmxn - 4581] if id_amx + id_kvy - 2341 < id_yled else float(id_tkpl)",
+      "midVal1 = id_xepj[886 - id_flw] if id_nepa + 7262 - 4711 < id_rflx else float(853)",
+      "midVal1 = id_ksoh[id_qug - id_brtg] if id_mbaf + id_aetn - 7336 < id_goy else float(id_mxbo)"
     ],
     [
-      "midVal1 = id_uae[id_uqnz] if id_piao + id_jywq - 8464 < id_gunb else float(id_aylp)",
-      "midVal1 = id_jtnk[6521] if id_mvc + 8256 - 156 < id_tfz else float(2248)",
-      "midVal1 = id_kwue[id_efr] if id_xwo + id_mvrg - 6102 < id_eqa else float(id_rhct)"
+      "midVal1 = id_sgqz[id_htwb - 6098] if id_enax + id_xrb - 9072 < id_gjp else float('inf')",
+      "midVal1 = id_xjhg[4620 - id_flid] if id_ylpw + 7441 - 6648 < id_ilwg else float('inf')",
+      "midVal1 = id_ahl[id_mca - id_rqj] if id_eidp + id_lnx - 4901 < id_jhpe else float('inf')"
     ],
     [
-      "midVal1 = id_tmd[id_cfz] if id_zcxm + id_xjv - 8833 < id_bjdq else float('inf')",
-      "midVal1 = id_ziak[3752] if id_wpzs + 3552 - 3074 < id_inrq else float('inf')",
-      "midVal1 = id_vxn[id_kwb] if id_atn + id_hfv - 8117 < id_dfpx else float('inf')"
+      "midVal1 = id_beh[id_peig + id_itpe - 8357] if id_ejw < id_mzha else float(id_buz)",
+      "midVal1 = id_skwt[id_kepy + 7416 - 4776] if 4551 < id_nxqw else float(3750)",
+      "midVal1 = id_dysv[id_gto + id_ozfs - 8125] if id_dcov < id_nzlw else float(id_qrwa)"
     ],
     [
-      "midVal1 = id_fxp[id_eof - 1100] if id_tcu < id_nfry else float('inf')",
-      "midVal1 = id_bme[2603 - id_ruf] if 1019 < id_gen else float('inf')",
-      "midVal1 = id_kftj[id_yiub - id_jvr] if id_kden < id_yol else float('inf')"
+      "midVal1 = id_zpx[id_xvh + id_gsm - 3] if id_ofpl < id_gyct else float('inf')",
+      "midVal1 = id_kla[id_jtbz + 3430 - 9597] if 4502 < id_hsa else float('inf')",
+      "midVal1 = id_fayn[id_cwd + id_kmd - 5095] if id_cmh < id_ejn else float('inf')"
     ],
     [
-      "midVal1 = id_ymzv[id_cyht - 870] if id_nbzf - 3684 < id_cwr else float('inf')",
-      "midVal1 = id_wieq[4444 - id_ewiu] if 8306 - id_yxtf < id_atgl else float('inf')",
-      "midVal1 = id_gpna[id_betr - id_szy] if id_irgu - id_ctis < id_ilxp else float('inf')"
+      "midVal1 = id_nei[id_hpj + id_yvhb - 3185] if id_xhu - 2140 < id_kjb else float(id_hfd)",
+      "midVal1 = id_jfpt[id_ekv + 9073 - 6528] if 1618 - id_cbx < id_bifc else float(349)",
+      "midVal1 = id_mgl[id_yfp + id_sdh - 7659] if id_ces - id_vnbw < id_feiw else float(id_qne)"
     ],
     [
-      "midVal1 = id_kjo[id_rcs - 5006] if id_usf + id_luv - 1392 < id_qngv else float( )",
-      "midVal1 = id_hpys[6600 - id_rig] if id_voel + 4782 - 1622 < id_hej else float( )",
-      "midVal1 = id_iygc[id_adtl - id_yinj] if id_eiqo + id_txr - 6120 < id_vnd else float( )"
+      "midVal1 = id_txoq[id_mcs + id_swec - 4831] if id_sagz - 7223 < id_brma else float('inf')",
+      "midVal1 = id_qus[id_xew + 1412 - 5278] if 9367 - id_tved < id_lapf else float('inf')",
+      "midVal1 = id_whn[id_hcik + id_bky - 9078] if id_tnz - id_izc < id_tds else float('inf')"
     ],
     [
-      "midVal1 = id_xte[id_kzt - 4701] if id_dxcg + id_vlqf - 148 < id_kyij else float(id_ebt)",
-      "midVal1 = id_vldc[508 - id_ulsb] if id_hqvj + 6592 - 863 < id_fady else float(7815)",
-      "midVal1 = id_zuv[id_aiyc - id_hqc] if id_gfm + id_wzck - 2676 < id_mhvj else float(id_akr)"
+      "midVal1 = id_luri[id_spo + id_eqbu - 3697] if id_tzj + id_ubjp - 3090 < id_pdlu else float(id_ltnc)",
+      "midVal1 = id_fpl[id_blf + 5793 - 8761] if id_eiu + 8644 - 3279 < id_sha else float(3640)",
+      "midVal1 = id_xlg[id_tism + id_gwkd - 3307] if id_byr + id_tna - 6129 < id_wre else float(id_aymz)"
     ],
     [
-      "midVal1 = id_ymtk[id_vpka - 8641] if id_hot + id_uoq - 5721 < id_gmr else float('inf')",
-      "midVal1 = id_rqu[5460 - id_byri] if id_bgn + 8484 - 9569 < id_opjm else float('inf')",
-      "midVal1 = id_dhv[id_ysdz - id_axw] if id_hdq + id_eoag - 6605 < id_rwfs else float('inf')"
-    ],
-    [
-      "midVal1 = id_zgrb[id_wbdy + id_adi - 7558] if id_pqf < id_wuz else float( )",
-      "midVal1 = id_jme[id_zche + 7359 - 2281] if 607 < id_syg else float( )",
-      "midVal1 = id_yix[id_lvr + id_rzm - 5910] if id_hkcd < id_fsqy else float( )"
-    ],
-    [
-      "midVal1 = id_bsij[id_pemk + id_kmzj - 6777] if id_qdn < id_iaor else float(id_fcvg)",
-      "midVal1 = id_nrma[id_hoir + 6565 - 7108] if 6180 < id_kxc else float(4323)",
-      "midVal1 = id_ktc[id_gwjq + id_hwnz - 8153] if id_apgu < id_tebp else float(id_cqhu)"
-    ],
-    [
-      "midVal1 = id_gjpc[id_xfd + id_lwit - 5345] if id_chbs < id_hrw else float('inf')",
-      "midVal1 = id_vzu[id_gabo + 5987 - 9140] if 474 < id_roi else float('inf')",
-      "midVal1 = id_kgr[id_kyx + id_mthq - 7690] if id_yxvg < id_zdu else float('inf')"
-    ],
-    [
-      "midVal1 = id_ftl[id_ykut + id_rzd - 1265] if id_reno - 6409 < id_eml else float( )",
-      "midVal1 = id_exps[id_xqg + 9359 - 7173] if 8043 - id_tlka < id_jvdy else float( )",
-      "midVal1 = id_qde[id_hqon + id_joag - 3978] if id_pygn - id_fcab < id_cvi else float( )"
-    ],
-    [
-      "midVal1 = id_rugd[id_exnj + id_rzt - 8335] if id_pbz - 6935 < id_vwe else float(id_lzxf)",
-      "midVal1 = id_zkix[id_qot + 7623 - 8106] if 8187 - id_bxd < id_ueo else float(5927)",
-      "midVal1 = id_mhd[id_aoen + id_tjp - 7951] if id_lpgb - id_fyem < id_kxy else float(id_udro)"
-    ],
-    [
-      "midVal1 = id_igan[id_nzvu + id_ekb - 2513] if id_cwz - 4798 < id_qak else float('inf')",
-      "midVal1 = id_pfcw[id_bily + 4439 - 4986] if 1724 - id_ejk < id_fpb else float('inf')",
-      "midVal1 = id_rpwx[id_pjh + id_tuyo - 7698] if id_usna - id_niv < id_ujbe else float('inf')"
-    ],
-    [
-      "midVal1 = id_rbcm[id_nzt + id_pbty - 5849] if id_voq + id_ofdv - 97 < id_mtbg else float( )",
-      "midVal1 = id_ogk[id_pdr + 681 - 8580] if id_yunf + 2177 - 2168 < id_yjq else float( )",
-      "midVal1 = id_qdv[id_njkv + id_rkcw - 9067] if id_sbr + id_ijya - 6776 < id_ewhv else float( )"
-    ],
-    [
-      "midVal1 = id_tjpf[id_xvy + id_rfg - 9479] if id_kws + id_kfq - 809 < id_khyz else float(id_fleh)",
-      "midVal1 = id_sqoh[id_bheg + 1843 - 2614] if id_pavw + 3668 - 3250 < id_jwoh else float(2121)",
-      "midVal1 = id_nxg[id_mkgd + id_koeq - 1556] if id_tjml + id_qza - 5116 < id_yaf else float(id_doyj)"
-    ],
-    [
-      "midVal1 = id_meog[id_evbs + id_typ - 4198] if id_nhpo + id_kjq - 6421 < id_rev else float('inf')",
-      "midVal1 = id_yxq[id_vxyo + 9517 - 2865] if id_sqv + 2521 - 3172 < id_xpa else float('inf')",
-      "midVal1 = id_vwu[id_bjmi + id_yfg - 4052] if id_psxu + id_wyx - 8996 < id_uzjk else float('inf')"
+      "midVal1 = id_xmap[id_vwf + id_lomu - 9567] if id_tiky + id_zuo - 4923 < id_vjln else float('inf')",
+      "midVal1 = id_ydqv[id_hui + 6378 - 703] if id_anpd + 5247 - 1017 < id_fzl else float('inf')",
+      "midVal1 = id_eoyx[id_vrb + id_fnr - 3704] if id_myeh + id_eqw - 4191 < id_oywc else float('inf')"
     ]
   ]
 }

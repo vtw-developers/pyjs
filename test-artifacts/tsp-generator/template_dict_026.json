@@ -30,14 +30,14 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "for id_iaeo in range(4380, id_lfw):\n    secret_fun_4071()",
-      "for id_ewo in range(id_nkhe, 94):\n    secret_fun_4071()",
-      "for id_ploz in range(id_qer, id_oly):\n    secret_fun_4071()"
+      "for id_vzc in range(1770, id_rwsx):\n    secret_fun_4071()",
+      "for id_btnm in range(id_wkd, 8155):\n    secret_fun_4071()",
+      "for id_nzub in range(id_fnv, id_ijo):\n    secret_fun_4071()"
     ],
     [
-      "for id_jncd in range(535, id_ejbx + 3191):\n    secret_fun_4071()",
-      "for id_wsrz in range(8879, id_xmd + id_fsq):\n    secret_fun_4071()",
-      "for id_mog in range(3223, id_pmox + id_byaw):\n    secret_fun_4071()"
+      "for id_jba in range(5490, id_ygv + 168):\n    secret_fun_4071()",
+      "for id_zjmo in range(3018, id_chwu + id_byd):\n    secret_fun_4071()",
+      "for id_tyvm in range(2981, id_zhw + id_oxi):\n    secret_fun_4071()"
     ]
   ]
 }

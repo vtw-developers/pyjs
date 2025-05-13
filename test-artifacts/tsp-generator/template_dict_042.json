@@ -42,54 +42,54 @@
       "return findKth( )"
     ],
     [
-      "return findKth(id_ctmk, id_cdyf, id_shmo)",
-      "return findKth(5340, id_esk, 2649)",
-      "return findKth(id_fjo, id_ejys, id_otg)"
+      "return findKth(id_ibvu, id_lnga, id_ryt)",
+      "return findKth(3827, id_adky, 7492)",
+      "return findKth(id_wtu, id_ezl, id_htra)"
     ],
     [
-      "return findKth(id_xjn + id_bnsr, id_ygri, id_chad - id_qpni)",
-      "return findKth(id_txy + 4475, id_utj, id_ihjw - 7459)",
-      "return findKth(id_raf + id_ekxz, id_yrok, id_svgr - id_gfv)"
+      "return findKth(id_huef + id_aomh, id_ril, id_vxjg - id_jnv)",
+      "return findKth(id_sbp + 2019, id_tbnf, id_brka - 4158)",
+      "return findKth(id_gwi + id_fbm, id_drfs, id_koim - id_hjq)"
     ],
     [
-      "return findKth(id_xyv + id_zex, id_pik, id_xuq - id_gych // 6628)",
-      "return findKth(id_myf + 8545, id_pdx, id_ebjz - id_gtd // id_fglu)",
-      "return findKth(id_dxrc + id_myji, id_muld, id_fyo - id_lfto // id_ybv)"
+      "return findKth(id_qxh + id_rnhv, id_zlif, id_edl - id_rjks // 8360)",
+      "return findKth(id_hjo + 6510, id_fzn, id_jgqh - id_jbes // id_qmdp)",
+      "return findKth(id_mdh + id_tyuz, id_sydm, id_ury - id_ktgz // id_xblg)"
     ],
     [
-      "return findKth(id_dokc + id_hti // 9208, id_qosn, id_gmz - id_btk)",
-      "return findKth(id_sdwf + id_bqd // id_yiqr, id_cqv, id_mst - 4877)",
-      "return findKth(id_znei + id_jme // id_leqp, id_zvf, id_vyc - id_ztnl)"
+      "return findKth(id_qnpr + id_rvqw // 4085, id_asld, id_ejf - id_rla)",
+      "return findKth(id_nuqp + id_oyjr // id_clb, id_gat, id_sai - 9711)",
+      "return findKth(id_vof + id_wpo // id_usge, id_gbtv, id_rcw - id_swop)"
     ],
     [
-      "return findKth(id_jcu + id_eplu // 3998, id_rtqg, id_wfqu - id_qjlc // 1376)",
-      "return findKth(id_yhs + id_jytn // id_zov, id_baqr, id_hxjv - id_ynxz // id_vah)",
-      "return findKth(id_jvrd + id_qrjw // id_ncpk, id_qnx, id_rekg - id_buc // id_vslf)"
+      "return findKth(id_qpsc + id_rno // 3781, id_jab, id_mih - id_rnyl // 1603)",
+      "return findKth(id_mwec + id_pde // id_shk, id_bulz, id_donu - id_hmyp // id_pah)",
+      "return findKth(id_yim + id_rgb // id_lcpg, id_tvxf, id_fagd - id_ouk // id_opz)"
     ],
     [
-      "return findKth(id_yehg + id_bykl, id_ibqk, id_cur - id_qkpd // 9661)",
-      "return findKth(id_cio + 4899, id_lehq, id_wyr - id_trlu // 7701)",
-      "return findKth(id_nvo + id_jxw, id_xngq, id_vonl - id_jahk // 7863)"
+      "return findKth(id_wyut + id_hyl, id_snxg, id_efmp - id_ywm // 112)",
+      "return findKth(id_mdz + 6576, id_zpc, id_mvj - id_rzjy // 5485)",
+      "return findKth(id_bwju + id_jfz, id_nbx, id_qdex - id_vlq // 3585)"
     ],
     [
-      "return findKth(id_ogna + id_kje // 3184, id_pdo, id_lndc - id_vbli // 4432)",
-      "return findKth(id_ryt + id_vqhn // id_ndqs, id_vpz, id_dcsa - id_kib // 5224)",
-      "return findKth(id_uogv + id_tbw // id_wps, id_xori, id_bop - id_xmd // 9708)"
+      "return findKth(id_gxoj + id_lmcd // 8433, id_plj, id_tqdi - id_wip // 9606)",
+      "return findKth(id_pqyx + id_dyor // id_xlwf, id_wxac, id_ujav - id_dfkq // 2704)",
+      "return findKth(id_zqv + id_sfmv // id_slr, id_rny, id_vfch - id_xum // 7176)"
     ],
     [
-      "return findKth(id_itdl + id_zjc // 5413, id_tgic, id_guoc - id_pozd)",
-      "return findKth(id_sofh + id_xey // 7727, id_khdl, id_ldv - 3210)",
-      "return findKth(id_zbm + id_dsrf // 5957, id_gyuv, id_wfnr - id_ojz)"
+      "return findKth(id_yln + id_xndg // 69, id_nvmp, id_fjl - id_abp)",
+      "return findKth(id_bydp + id_luw // 4300, id_xvb, id_dith - 8259)",
+      "return findKth(id_gwyb + id_kihu // 369, id_jwfs, id_gae - id_qslr)"
     ],
     [
-      "return findKth(id_ycd + id_hpvc // 2233, id_ijbs, id_ksgd - id_ihy // 9623)",
-      "return findKth(id_bvp + id_ofs // 6092, id_duey, id_qpsr - id_oixv // id_woq)",
-      "return findKth(id_wqjc + id_wuhc // 4455, id_fdsp, id_rbi - id_cda // id_xuhf)"
+      "return findKth(id_mtr + id_fes // 4205, id_lbze, id_pqki - id_dulo // 1056)",
+      "return findKth(id_bkgs + id_urk // 6054, id_xac, id_sqk - id_evu // id_ueav)",
+      "return findKth(id_skad + id_haef // 2873, id_wku, id_kzrc - id_ofba // id_cda)"
     ],
     [
-      "return findKth(id_vwp + id_cbu // 1447, id_vibl, id_vept - id_smjy // 6984)",
-      "return findKth(id_sijv + id_ayj // 6612, id_hrn, id_ljck - id_uqyj // 3829)",
-      "return findKth(id_sjh + id_amiz // 3481, id_xlcf, id_nzuh - id_kgfe // 44)"
+      "return findKth(id_yrzf + id_vwb // 2456, id_lyqw, id_hbw - id_jtlr // 2800)",
+      "return findKth(id_mkj + id_odr // 2666, id_ynf, id_cltk - id_uohc // 9970)",
+      "return findKth(id_agk + id_zhq // 9562, id_olcs, id_ewt - id_guxw // 9490)"
     ]
   ]
 }

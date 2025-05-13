@@ -54,9 +54,9 @@
   "pre_context": "for i in range(1, numRows + 1):\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "interval = group if id_ervz == id_ejl else id_rsxm",
-      "interval = group if id_gsvr == id_oef else id_rsxm",
-      "interval = group if id_hicv == id_atf else id_rsxm"
+      "interval = group if id_xfi == id_pjy else id_rsxm",
+      "interval = group if id_motb == id_zjr else id_rsxm",
+      "interval = group if id_atek == id_ckyb else id_rsxm"
     ]
   ]
 }

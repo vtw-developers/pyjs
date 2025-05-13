@@ -29,9 +29,9 @@
   "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return id_cgo",
-      "return 3205",
-      "return id_aum"
+      "return id_fgm",
+      "return 1499",
+      "return id_hgpw"
     ],
     [
       "return [secret_fun_4071()]",

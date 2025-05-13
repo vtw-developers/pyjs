@@ -30,9 +30,9 @@
   "pre_context": "if numRows == 1:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return id_kyc",
-      "return id_hjwy",
-      "return id_ael"
+      "return id_kub",
+      "return id_qyb",
+      "return id_jqlm"
     ]
   ]
 }

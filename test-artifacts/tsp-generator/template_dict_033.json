@@ -30,9 +30,9 @@
   "pre_context": "while idx < len(s):\n    ans.append(s[idx])\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_dwqm += id_djoy",
-      "id_mewu += id_urk",
-      "id_svzt += id_ewyh"
+      "id_bqk += id_afbu",
+      "id_xulb += id_vnit",
+      "id_vci += id_klme"
     ]
   ]
 }

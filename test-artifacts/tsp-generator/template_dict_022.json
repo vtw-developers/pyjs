@@ -66,9 +66,9 @@
   "pre_context": "while c in chars:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "chars.remove(id_qlit[id_exd])",
-      "chars.remove(id_aky[id_trev])",
-      "chars.remove(id_njh[id_oqu])"
+      "chars.remove(id_pkud[id_rct])",
+      "chars.remove(id_onb[id_ncm])",
+      "chars.remove(id_xbvp[id_nmbx])"
     ]
   ]
 }

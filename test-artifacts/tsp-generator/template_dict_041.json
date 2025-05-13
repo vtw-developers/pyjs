@@ -75,9 +75,9 @@
   "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "dp = [[False] * n for _ in range(id_rws)]",
-      "dp = [[False] * n for _ in range(id_eil)]",
-      "dp = [[False] * n for _ in range(id_jnaw)]"
+      "dp = [[False] * n for _ in range(id_ozq)]",
+      "dp = [[False] * n for _ in range(id_cagn)]",
+      "dp = [[False] * n for _ in range(id_eoy)]"
     ]
   ]
 }

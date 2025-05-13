@@ -29,24 +29,24 @@
   "pre_context": "if i >= m:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return id_rca",
-      "return 3493",
-      "return id_gsfk"
+      "return id_djg",
+      "return 4961",
+      "return id_keon"
     ],
     [
-      "return id_qehv[id_wyh]",
-      "return id_fieu[7030]",
-      "return id_qgu[id_fwm]"
+      "return id_iekp[id_ndkp]",
+      "return id_tzom[9402]",
+      "return id_owps[id_mvry]"
     ],
     [
-      "return id_zmn[id_vfsj - 6307]",
-      "return id_hmr[4066 - id_ydu]",
-      "return id_novg[id_unz - id_uoh]"
+      "return id_gmuh[id_qtv - 5009]",
+      "return id_wbed[9424 - id_nld]",
+      "return id_owcu[id_ftp - id_cdg]"
     ],
     [
-      "return id_svu[id_axep + id_whz - 1605]",
-      "return id_gykb[id_lmf + id_oyex - 8176]",
-      "return id_ugsx[id_ehc + id_aoyh - 2042]"
+      "return id_pca[id_zlc + id_rqbd - 7798]",
+      "return id_tyr[id_grtu + id_abqh - 6781]",
+      "return id_qcx[id_euoa + id_aofc - 5338]"
     ]
   ]
 }

@@ -29,24 +29,24 @@
   "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_chl = id_xub",
-      "id_xzq = 1607",
-      "id_jwy = id_osm"
+      "id_nolt = id_kjcd",
+      "id_dmc = 3245",
+      "id_fbmp = id_xgu"
     ],
     [
-      "id_zxbo = id_terc - 9480",
-      "id_bcjx = 8430 - id_jie",
-      "id_fbz = id_okir - id_wovh"
+      "id_fju = id_urie - 3198",
+      "id_hpxy = 9060 - id_qjp",
+      "id_lhpy = id_fyrz - id_vhm"
     ],
     [
-      "id_ows = 2552 * id_asrn - 5475",
-      "id_etgo = id_lpy * id_clpj - 2487",
-      "id_fjlp = id_fkb * id_acw - 2441"
+      "id_kqsh = 5673 * id_okv - 2597",
+      "id_ibj = id_qeho * id_bat - 5548",
+      "id_hvsp = id_oru * id_bajf - 2954"
     ],
     [
-      "id_jbw = 9523 * id_fkwi - 4839",
-      "id_vyh = 9458 * id_dcn - 7164",
-      "id_hzum = 7331 * id_hwif - 6514"
+      "id_azus = 4435 * id_mwhd - 9657",
+      "id_ijk = 6911 * id_urf - 7218",
+      "id_msvo = 3170 * id_efpl - 4492"
     ]
   ]
 }

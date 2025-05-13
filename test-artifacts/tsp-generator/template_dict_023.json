@@ -47,19 +47,19 @@
   "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "group = id_mudh - 5963",
-      "group = 6876 - id_kci",
-      "group = id_pzuv - id_abkh"
+      "group = id_iha - 8841",
+      "group = 7821 - id_svu",
+      "group = id_phjx - id_qlv"
     ],
     [
-      "group = 5987 * id_entk - 3492",
-      "group = id_ahi * id_nmwl - 2432",
-      "group = id_hvfn * id_vhjt - 260"
+      "group = 7803 * id_tid - 2330",
+      "group = id_hqg * id_rdxu - 9488",
+      "group = id_vdt * id_sqk - 5778"
     ],
     [
-      "group = 5299 * id_nejm - 3349",
-      "group = 2348 * id_swb - 5746",
-      "group = 9200 * id_rxwy - 5549"
+      "group = 1887 * id_ohga - 8174",
+      "group = 318 * id_tspf - 5625",
+      "group = 3325 * id_ohsl - 8247"
     ]
   ]
 }

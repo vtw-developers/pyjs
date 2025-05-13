@@ -47,29 +47,29 @@
   "pre_context": "n = len(s)\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "dp = [id_ixz for id_xew in id_brp]",
-      "dp = [2527 for id_cwo in id_dkh]",
-      "dp = [id_uso for id_wzg in id_gawk]"
+      "dp = [id_sdav for id_kjw in id_fvko]",
+      "dp = [2577 for id_rne in id_xnv]",
+      "dp = [id_bjfa for id_wntv in id_duh]"
     ],
     [
-      "dp = [id_lbfs * id_oms for id_zgkt in id_tjh]",
-      "dp = [7225 * id_zwt for id_sfi in 6720]",
-      "dp = [id_nsav * id_jnr for id_hzp in id_opd]"
+      "dp = [id_jifz * id_fbqa for id_omp in id_dspc]",
+      "dp = [1444 * id_alp for id_ifns in 744]",
+      "dp = [id_bor * id_vxio for id_nky in id_dzr]"
     ],
     [
-      "dp = [[secret_fun_4071()] * id_hbo for id_xtyj in id_fkc]",
-      "dp = [[secret_fun_4071()] * id_jgvo for id_tcsl in 6061]",
-      "dp = [[secret_fun_4071()] * id_dxp for id_smhj in id_mzuc]"
+      "dp = [[secret_fun_4071()] * id_oba for id_sog in id_dsc]",
+      "dp = [[secret_fun_4071()] * id_slo for id_onky in 8269]",
+      "dp = [[secret_fun_4071()] * id_rgc for id_xndy in id_hisr]"
     ],
     [
-      "dp = [id_uxk * id_lbt for id_cld in range(id_ipda)]",
-      "dp = [8648 * id_sley for id_lou in range(id_vxb)]",
-      "dp = [id_utq * id_nfju for id_pbun in range(id_wty)]"
+      "dp = [id_myvr * id_vwf for id_luj in range(id_xwu)]",
+      "dp = [4806 * id_tzb for id_vfq in range(id_xyqa)]",
+      "dp = [id_fndk * id_btls for id_zesv in range(id_vtkc)]"
     ],
     [
-      "dp = [[secret_fun_4071()] * id_anlf for id_cruj in range(id_iah)]",
-      "dp = [[secret_fun_4071()] * id_cpt for id_idj in range(id_iqn)]",
-      "dp = [[secret_fun_4071()] * id_mip for id_svrg in range(id_yzm)]"
+      "dp = [[secret_fun_4071()] * id_usc for id_uyh in range(id_clr)]",
+      "dp = [[secret_fun_4071()] * id_kbwg for id_wjno in range(id_leh)]",
+      "dp = [[secret_fun_4071()] * id_wbyt for id_cteg in range(id_hco)]"
     ]
   ]
 }
