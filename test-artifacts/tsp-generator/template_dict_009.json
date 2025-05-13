@@ -29,19 +29,19 @@
   "pre_context": "while idx < len(s):\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_fnpd( )",
-      "6812( )",
-      "id_chup( )"
+      "id_vek( )",
+      "id_gts( )",
+      "id_ecg( )"
     ],
     [
-      "id_pjb.append(id_qjnm)",
-      "id_fiwh.append(8597)",
-      "id_aqsf.append(id_iatz)"
+      "id_wcon.append(id_jnh)",
+      "id_czwa.append(2842)",
+      "id_xys.append(id_csry)"
     ],
     [
-      "id_xlm.append(id_mer[id_bfp])",
-      "id_jzqb.append(id_jsod[id_uea])",
-      "id_wyzn.append(id_gaup[id_hzwq])"
+      "id_qbym.append(id_pnha[id_wsnq])",
+      "id_zvo.append(id_lzrp[id_ajgh])",
+      "id_sayw.append(id_gpc[id_zxq])"
     ]
   ]
 }
