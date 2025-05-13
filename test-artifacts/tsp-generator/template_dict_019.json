@@ -29,19 +29,14 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_hbd = id_pkco",
-      "id_mib = 3145",
-      "id_uvt = id_qsg"
+      "id_ypmi = id_zsf",
+      "id_yph = 7501",
+      "id_zpa = id_fxc"
     ],
     [
-      "id_rcv = len( )",
-      "id_apys = len( )",
-      "id_qjy = len( )"
-    ],
-    [
-      "id_osaj = len(id_zrcw)",
-      "id_xnci = len(id_hcvz)",
-      "id_rbn = len(id_ulsi)"
+      "id_cao = len(id_kdnr)",
+      "id_zstj = len(id_bsem)",
+      "id_fxev = len(id_fnu)"
     ]
   ]
 }
