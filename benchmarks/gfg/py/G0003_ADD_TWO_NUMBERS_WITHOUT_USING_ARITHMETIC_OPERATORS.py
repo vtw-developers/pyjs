@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x, y):
-  while(y != 0):
-    carry = x & y
-    x = x ^ y
-    y = carry << 1
-  return x
+    while y != 0:
+        carry = x & y
+        x = x ^ y
+        y = carry << 1
+    return x
 "-----------------"
 test()

@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): return 1 if(n == 1 or n == 0)else n * f_gold(n - 1);
+def f_gold(n):
+    return 1 if (n == 1 or n == 0) else n * f_gold(n - 1)
 "-----------------"
 test()

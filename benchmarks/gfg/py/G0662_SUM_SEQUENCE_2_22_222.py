@@ -5,7 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
-def f_gold(n): return 0.0246 *(math.pow(10, n)- 1 -(9 * n))
+import math
+
+
+def f_gold(n):
+    return 0.0246 * (math.pow(10, n) - 1 - (9 * n))
 "-----------------"
 test()

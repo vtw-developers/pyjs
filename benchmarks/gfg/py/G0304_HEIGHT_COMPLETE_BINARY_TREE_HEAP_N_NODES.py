@@ -5,7 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
-def f_gold(N): return math.ceil(math.log2(N + 1))- 1
+import math
+
+
+def f_gold(N):
+    return math.ceil(math.log2(N + 1)) - 1
 "-----------------"
 test()

@@ -6,11 +6,11 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x):
-  m = 1 ;
-  while(x & m):
+    m = 1
+    while x & m:
+        x = x ^ m
+        m <<= 1
     x = x ^ m
-    m <<= 1
-  x = x ^ m
-  return x
+    return x
 "-----------------"
 test()

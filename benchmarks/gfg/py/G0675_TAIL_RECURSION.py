@@ -6,7 +6,8 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-  if(n == 0): return 1
-  return n * f_gold(n - 1)
+    if n == 0:
+        return 1
+    return n * f_gold(n - 1)
 "-----------------"
 test()

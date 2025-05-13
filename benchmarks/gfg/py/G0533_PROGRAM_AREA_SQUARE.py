@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(side):
-  area = side * side
-  return area
+    area = side * side
+    return area
 "-----------------"
 test()

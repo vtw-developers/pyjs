@@ -6,8 +6,9 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(str, n):
-  l = len(str)
-  if(l >= n): return True
-  return False
+    l = len(str)
+    if l >= n:
+        return True
+    return False
 "-----------------"
 test()

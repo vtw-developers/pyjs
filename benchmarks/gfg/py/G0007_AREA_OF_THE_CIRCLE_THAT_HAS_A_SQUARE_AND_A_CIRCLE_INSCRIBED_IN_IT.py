@@ -5,9 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
+import math
+
+
 def f_gold(a):
-  area =(math.pi * a * a)/ 4
-  return area
+    area = (math.pi * a * a) / 4
+    return area
 "-----------------"
 test()

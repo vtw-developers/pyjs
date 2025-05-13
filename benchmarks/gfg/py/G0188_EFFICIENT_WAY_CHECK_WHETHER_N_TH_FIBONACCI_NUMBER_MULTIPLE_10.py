@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): return(n % 15 == 0)
+def f_gold(n):
+    return n % 15 == 0
 "-----------------"
 test()

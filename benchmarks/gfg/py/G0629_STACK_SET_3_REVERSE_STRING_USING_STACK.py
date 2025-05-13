@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(string):
-  string = string[:: - 1]
-  return string
+    string = string[::-1]
+    return string
 "-----------------"
 test()

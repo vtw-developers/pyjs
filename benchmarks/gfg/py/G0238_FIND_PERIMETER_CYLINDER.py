@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(diameter, height): return 2 *(diameter + height)
+def f_gold(diameter, height):
+    return 2 * (diameter + height)
 "-----------------"
 test()

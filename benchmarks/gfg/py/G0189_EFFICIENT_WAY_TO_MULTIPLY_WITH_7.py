@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): return((n << 3)- n)
+def f_gold(n):
+    return (n << 3) - n
 "-----------------"
 test()

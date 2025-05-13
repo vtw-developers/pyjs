@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n, m): return(m * n *(n + 1)*(m + 1))// 4
+def f_gold(n, m):
+    return (m * n * (n + 1) * (m + 1)) // 4
 "-----------------"
 test()

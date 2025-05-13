@@ -5,11 +5,13 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
+import math
+
+
 def f_gold(n):
-  nthElement = 19 +(n - 1)* 9
-  outliersCount = int(math.log10(nthElement))- 1
-  nthElement += 9 * outliersCount
-  return nthElement
+    nthElement = 19 + (n - 1) * 9
+    outliersCount = int(math.log10(nthElement)) - 1
+    nthElement += 9 * outliersCount
+    return nthElement
 "-----------------"
 test()

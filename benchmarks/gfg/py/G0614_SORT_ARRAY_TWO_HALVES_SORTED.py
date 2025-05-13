@@ -6,6 +6,7 @@ def test():
     f_gold(* parameters_set)
     result = parameters_set
 "-----------------"
-def f_gold(A, n): A.sort()
+def f_gold(A, n):
+    A.sort()
 "-----------------"
 test()

@@ -6,7 +6,8 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(num, divisor):
-  while(num >= divisor): num -= divisor ;
-  return num ;
+    while num >= divisor:
+        num -= divisor
+    return num
 "-----------------"
 test()

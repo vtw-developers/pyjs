@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(x): return((x & 0x0F)<< 4 |(x & 0xF0)>> 4)
+def f_gold(x):
+    return (x & 0x0F) << 4 | (x & 0xF0) >> 4
 "-----------------"
 test()

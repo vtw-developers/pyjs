@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-  res = 1
-  for i in range(0, n):
-    res *=(2 * n - i)
-    res /=(i + 1)
-  return res /(n + 1)
+    res = 1
+    for i in range(0, n):
+        res *= 2 * n - i
+        res /= i + 1
+    return res / (n + 1)
 "-----------------"
 test()

@@ -5,7 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
-def f_gold(side): return(2 *(math.sqrt(3))*(side * side))
+import math
+
+
+def f_gold(side):
+    return 2 * (math.sqrt(3)) * (side * side)
 "-----------------"
 test()

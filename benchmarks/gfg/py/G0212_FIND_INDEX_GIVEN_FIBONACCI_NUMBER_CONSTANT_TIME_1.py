@@ -5,9 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
+import math
+
+
 def f_gold(n):
-  fibo = 2.078087 * math.log(n)+ 1.672276
-  return round(fibo)
+    fibo = 2.078087 * math.log(n) + 1.672276
+    return round(fibo)
 "-----------------"
 test()
