@@ -87,12 +87,30 @@ def is_force_identifiers_PY(
   We will check such cases and force using identifiers only.
   '''
   def _pattern_1_mapped_node_is_identifier(mapped_node: pds.DuoGlotNode) -> bool:
-    if mapped_node.get_ts_node_type() == 'identifier':
-      return True
-    return False
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    logger.warning('Forcing identifiers: mapped_node is an identifier')
+    return True
+
+  def _pattern_2_call_attribute(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    When generating an attribute for a call, always use identifiers.
+    For example, grammar rule for `call` allows integers as function names.
+    Use identifiers instead.
+    '''
+    # mapped_node must be an attribute
+    if mapped_node.get_ts_node_type() != 'attribute':
+      return False
+    # parent of mapped_node must be call
+    parent = mapped_node.get_parent()
+    if parent.get_ts_node_type() != 'call':
+      return False
+    logger.warning('Forcing identifiers: mapped_node is an attribute of a call')
+    return True
 
   pattern_callbacks = [
     lambda: _pattern_1_mapped_node_is_identifier(mapped_node),
+    lambda: _pattern_2_call_attribute(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
