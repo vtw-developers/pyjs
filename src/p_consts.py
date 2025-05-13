@@ -139,6 +139,10 @@ NON_DESCENDABLE_NODES = {
   'py': ['string']
 }
 
+FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST = {
+  'py': ['range', 'float']
+}
+
 # For the following node types we include (`template_origin`, `template_origin`)
 # as a TSP. This allows us to learn the most overfitted translation rules for them,
 # and avoid errors. This is applicable in such case:
