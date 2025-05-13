@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(k): return k * k * k
+def f_gold(k):
+    return k * k * k
 "-----------------"
 test()

@@ -6,8 +6,9 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(s, n):
-  s1 = s
-  for i in range(1, n): s += s1
-  return s
+    s1 = s
+    for i in range(1, n):
+        s += s1
+    return s
 "-----------------"
 test()

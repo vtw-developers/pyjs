@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): return(n != 0 and((n &(n - 1))== 0)and not(n & 0xAAAAAAAA));
+def f_gold(n):
+    return n != 0 and ((n & (n - 1)) == 0) and not (n & 0xAAAAAAAA)
 "-----------------"
 test()

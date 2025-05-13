@@ -6,9 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n, x):
-  for i in arr:
-    for j in arr:
-      if i * j == x: return True
-  return False
+    for i in arr:
+        for j in arr:
+            if i * j == x:
+                return True
+    return False
 "-----------------"
 test()

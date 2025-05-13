@@ -5,6 +5,8 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): ans = 2 *(pow(3, n))- 1 ; return ans ;
+def f_gold(n):
+    ans = 2 * (pow(3, n)) - 1
+    return ans
 "-----------------"
 test()

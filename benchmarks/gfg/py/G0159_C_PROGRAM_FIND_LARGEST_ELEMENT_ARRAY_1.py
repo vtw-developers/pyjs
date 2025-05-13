@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(arr, n): return max(arr)
+def f_gold(arr, n):
+    return max(arr)
 "-----------------"
 test()

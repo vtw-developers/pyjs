@@ -5,7 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
-def f_gold(base, area): return math.ceil((2 * area)/ base)
+import math
+
+
+def f_gold(base, area):
+    return math.ceil((2 * area) / base)
 "-----------------"
 test()

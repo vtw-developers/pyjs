@@ -5,11 +5,13 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-import math ;
+import math
+
+
 def f_gold(a, b):
-  AM =(a + b)/ 2
-  GM = math.sqrt(a * b)
-  HM =(GM * GM)/ AM
-  return HM
+    AM = (a + b) / 2
+    GM = math.sqrt(a * b)
+    HM = (GM * GM) / AM
+    return HM
 "-----------------"
 test()

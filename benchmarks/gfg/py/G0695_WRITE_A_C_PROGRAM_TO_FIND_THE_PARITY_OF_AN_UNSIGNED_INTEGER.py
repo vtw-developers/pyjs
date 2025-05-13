@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-  parity = 0
-  while n:
-    parity = ~ parity
-    n = n &(n - 1)
-  return parity
+    parity = 0
+    while n:
+        parity = ~parity
+        n = n & (n - 1)
+    return parity
 "-----------------"
 test()

@@ -5,6 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(n): return int((n *(2 * n - 1)*(2 * n + 1))/ 3)
+def f_gold(n):
+    return int((n * (2 * n - 1) * (2 * n + 1)) / 3)
 "-----------------"
 test()

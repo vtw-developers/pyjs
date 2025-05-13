@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n):
-  arr.sort()
-  return(arr[n - 1] + arr[n - 2] + arr[n - 3])
+    arr.sort()
+    return arr[n - 1] + arr[n - 2] + arr[n - 3]
 "-----------------"
 test()

@@ -5,6 +5,8 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str): n = len(str); return int(n *(n + 1)/ 2);
+def f_gold(str):
+    n = len(str)
+    return int(n * (n + 1) / 2)
 "-----------------"
 test()

@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(r):
-  PI = 3.142
-  return PI *(r * r);
+    PI = 3.142
+    return PI * (r * r)
 "-----------------"
 test()

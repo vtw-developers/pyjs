@@ -6,9 +6,11 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-  p = 1
-  if(n and not(n &(n - 1))): return n
-  while(p < n): p <<= 1
-  return p ;
+    p = 1
+    if n and not (n & (n - 1)):
+        return n
+    while p < n:
+        p <<= 1
+    return p
 "-----------------"
 test()
