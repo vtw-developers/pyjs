@@ -1,8 +1,7 @@
-import d_ast_parse
 import p_data_structures as pds
 
 
-def pattern_1_has_integer_as_call_function(node: pds.DuoGlotNode) -> bool:
+def pattern_1_has_integer_as_function_name(node: pds.DuoGlotNode) -> bool:
   '''
   RETURN True if the snippet contains an integer as function name.
   '''
@@ -21,9 +20,9 @@ def pattern_1_has_integer_as_call_function(node: pds.DuoGlotNode) -> bool:
   return True
 
 
-def pattern_2_empty_arglist_for_range(node: pds.DuoGlotNode) -> bool:
+def pattern_2_has_range_with_empty_argument_list(node: pds.DuoGlotNode) -> bool:
   '''
-  RETURN True if the snippet contains an empty argument list for range.
+  RETURN True if the snippet contains an empty argument list for `range` function.
   '''
   # node must be non-terminal
   if node.is_terminal():
@@ -49,5 +48,29 @@ def pattern_2_empty_arglist_for_range(node: pds.DuoGlotNode) -> bool:
     return False
   # argument_list must have zero non-terminal children
   if second_child.get_num_nt_children() > 0:
+    return False
+  return True
+
+
+def pattern_3_has_block_with_ret_stat_secretfn_flag_on(node: pds.DuoGlotNode, template_dict: dict) -> bool:
+  '''
+  RETURN True if the snippet contains a block with a return statement
+  when is_insert_secret_fn flag is turned on.
+  '''
+  # is_insert_secret_fn must be turned on
+  if not template_dict['is_insert_secret_fn']:
+    return False
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must be block
+  if node.get_ts_node_type() != 'block':
+    return False
+  # must have a single non-terminal child
+  if node.get_num_nt_children() != 1:
+    return False
+  # child must be an return_statement
+  first_child = node.get_children()[0]
+  if first_child.get_ts_node_type() != 'return_statement':
     return False
   return True
