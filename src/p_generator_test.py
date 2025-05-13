@@ -4,6 +4,7 @@ import d_ast_parse
 import p_consts
 import p_data_structures as pds
 import p_generator
+import p_generator_invalid_patterns as pat
 import p_utils
 
 
@@ -40,6 +41,15 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     logger.debug(f'context code: \n"{context_node.get_ts_node_type()}"\n"\n{context_node.get_text()}\n"')
     logger.debug(f'problematic code: \n"{problematic_node.get_ts_node_type()}"\n"\n{problematic_node.get_text()}\n"')
 
+  def parse_snippet(self, snippet: str, template_dict: dict) -> pds.DuoGlotNode:
+    '''
+    Parse the snippet and return the root node of the tree.
+    '''
+    ast, _ = d_ast_parse.parse_text_dbg(snippet, template_dict['src_lang'])
+    tree = pds.DuoGlotTree(ast)
+    root_node = tree.get_root_node()
+    return root_node
+
   def pre_order(self, node: pds.DuoGlotNode, boolean_callback: callable) -> bool:
     '''
     Pre-order traversal of the tree.
@@ -53,31 +63,6 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
         return True
     return False
 
-  def has_integer_as_call_function(self, template_dict: dict, snippet: str) -> bool:
-    '''
-    RETURN True if the snippet contains an integer as function name.
-    '''
-    def _has_int_as_call_function(node: pds.DuoGlotNode) -> bool:
-      # node must be non-terminal
-      if node.is_terminal():
-        return False
-      # node must be call
-      if node.get_ts_node_type() != 'call':
-        return False
-      # first child must be non-terminal
-      first_child = node.get_children()[0]
-      assert first_child.is_nonterminal(), 'first child must be non-terminal'
-      # first child must be an integer
-      if first_child.get_ts_node_type() != 'integer':
-        return False
-      return True
-
-    ast, _ = d_ast_parse.parse_text_dbg(snippet, template_dict['src_lang'])
-    tree = pds.DuoGlotTree(ast)
-    root_node = tree.get_root_node()
-    result = self.pre_order(root_node, _has_int_as_call_function)
-    return result
-
   def test_001(self):
     template_dict = self.load_template_dict('001')
     self.log_ctx_prob_nodes(template_dict, '001')
@@ -85,7 +70,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_002(self):
@@ -95,7 +81,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_003(self):
@@ -105,7 +92,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_004(self):
@@ -115,7 +103,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_005(self):
@@ -125,7 +114,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_006(self):
@@ -135,7 +125,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_007(self):
@@ -145,7 +136,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_008(self):
@@ -155,7 +147,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_009(self):
@@ -165,7 +158,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_010(self):
@@ -175,7 +169,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_011(self):
@@ -185,7 +180,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_012(self):
@@ -195,7 +191,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_013(self):
@@ -205,7 +202,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_014(self):
@@ -215,7 +213,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_015(self):
@@ -225,7 +224,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_016(self):
@@ -235,7 +235,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_017(self):
@@ -245,7 +246,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_018(self):
@@ -255,7 +257,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_019(self):
@@ -265,7 +268,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_020(self):
@@ -275,7 +279,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_021(self):
@@ -285,7 +290,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_022(self):
@@ -295,7 +301,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_023(self):
@@ -305,7 +312,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_024(self):
@@ -315,7 +323,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_025(self):
@@ -325,7 +334,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_026(self):
@@ -335,7 +345,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_027(self):
@@ -345,7 +356,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_028(self):
@@ -355,7 +367,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_029(self):
@@ -365,7 +378,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_030(self):
@@ -375,7 +389,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_031(self):
@@ -385,7 +400,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_032(self):
@@ -395,7 +411,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_033(self):
@@ -405,7 +422,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_034(self):
@@ -415,7 +433,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_035(self):
@@ -425,7 +444,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_036(self):
@@ -435,7 +455,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_037(self):
@@ -445,7 +466,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_038(self):
@@ -455,7 +477,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_039(self):
@@ -465,7 +488,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_040(self):
@@ -475,7 +499,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_041(self):
@@ -485,7 +510,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_042(self):
@@ -495,7 +521,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_043(self):
@@ -505,7 +532,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_044(self):
@@ -515,7 +543,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_045(self):
@@ -525,7 +554,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_046(self):
@@ -535,7 +565,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_047(self):
@@ -545,7 +576,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_048(self):
@@ -555,7 +587,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_049(self):
@@ -565,7 +598,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_050(self):
@@ -575,7 +609,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_051(self):
@@ -585,7 +620,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_052(self):
@@ -595,7 +631,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
   def test_053(self):
@@ -605,7 +642,8 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
     self.assertEqual(len(tsps), len(template_dict['tsps']))
     for tsp in tsps:
       for snippet in tsp:
-        has_int_as_call_function = self.has_integer_as_call_function(template_dict, snippet)
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_call_function)
         self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
 
 
