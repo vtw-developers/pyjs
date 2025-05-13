@@ -60,14 +60,14 @@
   "pre_context": "if numRows == 1:\n    return s\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "group = 9684 * id_mqd - 2",
-      "group = id_srcu * id_vreq - 2",
-      "group = id_stj * id_bdtv - 2"
+      "group = 1037 * id_xdl - 2",
+      "group = id_hkub * id_alc - 2",
+      "group = id_zdk * id_huef - 2"
     ],
     [
-      "group = 8286 * id_renb - 2",
-      "group = 1639 * id_bwt - 2",
-      "group = 9282 * id_qkm - 2"
+      "group = 439 * id_guyq - 2",
+      "group = 9337 * id_ytx - 2",
+      "group = 817 * id_fmch - 2"
     ]
   ]
 }

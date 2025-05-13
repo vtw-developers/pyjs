@@ -45,9 +45,9 @@
   "pre_context": "if num in helper:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return [id_kis[id_itlm], i]",
-      "return [id_wrj[id_tcil], i]",
-      "return [id_hnre[id_orqs], i]"
+      "return [id_yosz[id_xkqr], i]",
+      "return [id_ieq[id_nko], i]",
+      "return [id_xbgi[id_pnot], i]"
     ]
   ]
 }

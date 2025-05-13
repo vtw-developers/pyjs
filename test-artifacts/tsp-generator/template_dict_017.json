@@ -43,14 +43,14 @@
       "return min( )"
     ],
     [
-      "return min(id_hox, id_sgtn)",
-      "return min(3445, 9986)",
-      "return min(id_bolt, id_coub)"
+      "return min(id_lca, id_rhk)",
+      "return min(1831, 4377)",
+      "return min(id_zgn, id_gce)"
     ],
     [
-      "return min(id_twi[id_wkg], id_odcp[id_udm])",
-      "return min(id_hais[id_dpw], id_ywdh[id_lcbs])",
-      "return min(id_xmg[id_tha], id_rpz[id_yas])"
+      "return min(id_nflm[id_rnov], id_qsr[id_oswe])",
+      "return min(id_mxwl[id_lie], id_cnqw[id_wsr])",
+      "return min(id_ehf[id_vidm], id_kyh[id_jhb])"
     ]
   ]
 }

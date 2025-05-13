@@ -51,14 +51,14 @@
   "pre_context": "if i >= m:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return nums2[id_zqxr - 4097]",
-      "return nums2[1109 - id_onqv]",
-      "return nums2[id_mrca - id_yuhm]"
+      "return nums2[id_rya - 8936]",
+      "return nums2[1029 - id_nhvo]",
+      "return nums2[id_ogq - id_lrt]"
     ],
     [
-      "return nums2[id_dvbu + id_lgd - 7295]",
-      "return nums2[id_gpq + id_wduo - 6372]",
-      "return nums2[id_hqi + id_xibf - 6137]"
+      "return nums2[id_dyk + id_gvpb - 526]",
+      "return nums2[id_jflo + id_tscg - 5162]",
+      "return nums2[id_kagb + id_jtx - 1211]"
     ]
   ]
 }

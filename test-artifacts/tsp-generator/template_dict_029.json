@@ -30,14 +30,14 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "for id_fsr, id_oip in enumerate( ):\n    secret_fun_4071()",
-      "for id_zenq, id_rdih in enumerate( ):\n    secret_fun_4071()",
-      "for id_jivn, id_vsuw in enumerate( ):\n    secret_fun_4071()"
+      "for id_tpb, id_yduv in enumerate( ):\n    secret_fun_4071()",
+      "for id_rfda, id_zrk in enumerate( ):\n    secret_fun_4071()",
+      "for id_jrv, id_bysi in enumerate( ):\n    secret_fun_4071()"
     ],
     [
-      "for id_qdsj, id_bqdw in enumerate(id_hyi):\n    secret_fun_4071()",
-      "for id_flv, id_rzbq in enumerate(id_evl):\n    secret_fun_4071()",
-      "for id_dbq, id_gcv in enumerate(id_ievl):\n    secret_fun_4071()"
+      "for id_qfyx, id_exv in enumerate(id_tnu):\n    secret_fun_4071()",
+      "for id_lvrh, id_qreu in enumerate(id_pawx):\n    secret_fun_4071()",
+      "for id_pqiv, id_pkj in enumerate(id_jmx):\n    secret_fun_4071()"
     ]
   ]
 }

@@ -71,9 +71,9 @@
   "pre_context": "for i in range(1, numRows + 1):\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "interval = group if id_htoe == id_kmie else 2 * numRows - 2 * i",
-      "interval = group if id_iru == id_xcrg else 2 * numRows - 2 * i",
-      "interval = group if id_qio == id_dzce else 2 * numRows - 2 * i"
+      "interval = group if id_ynke == id_oyu else 2 * numRows - 2 * i",
+      "interval = group if id_owms == id_qmha else 2 * numRows - 2 * i",
+      "interval = group if id_frp == id_unk else 2 * numRows - 2 * i"
     ]
   ]
 }
