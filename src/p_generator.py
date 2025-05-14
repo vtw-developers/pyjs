@@ -488,10 +488,15 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     if mapped_node.get_ts_node_type() != 'identifier':
       return False
     # mapped node must be a child of an attribute node
-    if mapped_node.get_parent().get_ts_node_type() != 'attribute':
+    attribute_node = mapped_node.get_parent()
+    if attribute_node.get_ts_node_type() != 'attribute':
       return False
     # mapped node must be the last node of the attribute node
-    if mapped_node.get_parent().children[-1] != mapped_node:
+    if attribute_node.children[-1] != mapped_node:
+      return False
+    # attribute node must be a child of a call node
+    call_node = attribute_node.get_parent()
+    if call_node.get_ts_node_type() != 'call':
       return False
     return True
 
