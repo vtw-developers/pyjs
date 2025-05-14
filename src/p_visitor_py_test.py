@@ -23,6 +23,15 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
         return tree
     raise FileNotFoundError(f"No file starting with '{subject_name}' found in {self.snippets_dir}")
 
+  def test_identifier_in_keyword_argument(self):
+    code = '''while i < j:
+    print(id_wpyb, id_xafp=id_evw)
+    break'''
+    ts_tree = self.parser.parse(bytes(code, 'utf8'))
+    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    self.param_collector.visit(tree.root_node)
+    self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['i', 'j', 'id_wpyb', 'id_evw'])
+
   def test_L0001(self):
     tree = self.load_tree_from('L0001')
     self.param_collector.visit(tree.root_node)
