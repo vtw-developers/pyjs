@@ -126,8 +126,22 @@ def generate_tsps_manually_PY(
 
   # case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
   if template_dict['problematic_node_type'] in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
+    logger.warning(f'problematic_node_type is "{template_dict["problematic_node_type"]}": manual TSP generation')
     tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
     logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
+    return tsps
+
+  # case 2: math.pi
+  ast_text, ann_text = d_ast_parse.parse_text_dbg(template_dict['template_origin'], template_dict['src_lang'], keep_text=True)
+  tree = pds.PirelTree(ast_text, ann_text)
+  tree._fix_indentation()
+  root_node = tree.get_root_node()
+  assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
+  context_node = root_node.get_children()[0]
+  problematic_node = context_node.get_child_by_path(template_dict['problematic_node_path'])
+  if problematic_node.get_text() == 'math.pi':
+    logger.warning(f'problematic_node is "math.pi": manual TSP generation')
+    tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
     return tsps
 
   return None
