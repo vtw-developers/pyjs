@@ -661,6 +661,23 @@ def _test_duoglot_translate_wrapper():
     print(f'Templates dict:\n{json.dumps(templates_dict, indent=2)}')
 
 
+def _test_get_pre_context():
+  '''
+  def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_get_pre_context_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  src_main_code = args_dict['src_main_code']
+  lang = args_dict['lang']
+  statement_nid = args_dict['statement_nid']
+
+  pre_context = get_pre_context(src_main_code, lang, statement_nid)
+  print(f'Pre-context for statement node {statement_nid}:\n{pre_context}')
+
+
 if __name__ == '__main__':
-  # _test_learn_trans_rules_for_prob_node()
-  _test_duoglot_translate_wrapper()
+  _test_learn_trans_rules_for_prob_node()
+  # _test_duoglot_translate_wrapper()
+  # _test_get_pre_context()
