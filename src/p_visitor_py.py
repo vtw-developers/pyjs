@@ -1276,7 +1276,13 @@ class ParametrizableVariablesCollector(pvis.Visitor):
     if self.ctx and self.ctx[-1] == 'call.arguments':
       return False
     # L0749: idx = boundaries.index(max(boundaries, key=len))
+    #                                                   ^^^
     if self.ctx and self.ctx[-1] == 'keyword_argument.value':
+      # the value of a keyword argument might be a generated identifier
+      # such as `id_evw`
+      if node.val().startswith('id_'):
+        return False
+      # by default, all values are considered as built-in or defined function names
       return True
     return node.val() in p_consts.PY_BUILT_IN_FUNCTIONS
 
