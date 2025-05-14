@@ -9,11 +9,11 @@ def f_gold(nums: List[int], target: int) -> List[int]:
     helper = {}
     myexactlog(helper)
     for i, v in enumerate(nums):
-        myexactlog('for #0')
+        myexactlog(0)
         num = target - v
         myexactlog(num)
         if num in helper:
-            myexactlog('if #0')
+            myexactlog(0)
             myexactlog([helper[num], i])
             return [helper[num], i]
         helper[v] = i
