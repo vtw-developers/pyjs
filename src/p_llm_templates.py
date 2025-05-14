@@ -147,6 +147,9 @@ class TranslateAny:
       '\n'
       'Constraints:\n'
       '1. If the {src_language} program is a single statement or expression, the {tar_language} translation should also be a single statement or expression.\n'
+      '2. When translating assignment expression or assignment statement to JavaScript, provide exactly two translations:\n'
+      '   i. Variable declaration with `let` (e.g. `a = 1` -> `let a = 1;`)\n'
+      '   ii. Assignment expression without `let` (e.g. `a = 1` -> `a = 1;`)\n'
       '\n'
       '<<<end of the task section>>>\n'
     )
@@ -197,6 +200,9 @@ class TranslateAny:
       '\n'
       'Constraints:\n'
       '1. If the {src_language} program is a single statement or expression, the {tar_language} translation should also be a single statement or expression.\n'
+      '2. When translating assignment expression or assignment statement to JavaScript, provide exactly two translations:\n'
+      '   i. Variable declaration with `let` (e.g. `a = 1` -> `let a = 1;`)\n'
+      '   ii. Assignment expression without `let` (e.g. `a = 1` -> `a = 1;`)\n'
       '\n'
       '<<<end of the task section>>>\n'
     )
