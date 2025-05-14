@@ -120,6 +120,19 @@ def is_force_identifiers_PY(
   return False
 
 
+def generate_tsps_manually_PY(
+  template_dict: dict
+) -> Optional[List[Tuple[str, str, str]]]:
+
+  # case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
+  if template_dict['problematic_node_type'] in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
+    tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
+    logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
+    return tsps
+
+  return None
+
+
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, str]]:
   '''
   We have `template_origin`, `problematic_node`, `context_node`.
@@ -758,17 +771,18 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
 
   logger.info('~~~ Starting API call to p_generator.generate_tsps_with_generator')
 
-  # base case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
-  if template_dict['problematic_node_type'] in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
-    tsps = [(template_dict['template_origin'], template_dict['template_origin'], template_dict['template_origin'])]
-    logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
-    return tsps
-
   # INPUTS TO THE GENERATOR
   lang = template_dict['src_lang']
   grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
   problematic_node = _init_problematic_node(template_dict)
   logger.debug(f'Problematic node is "{problematic_node}"')
+
+  # before automatic generation, check if we can use manually generated TSPs
+  # specific to Python
+  manually_generated_tsps = generate_tsps_manually_PY(template_dict)
+  if manually_generated_tsps is not None:
+    logger.debug('Using manually generated TSPs')
+    return manually_generated_tsps
 
   # `program_pairs` is a list of tuples, each tuple is a pair of programs
   program_pairs : List[Tuple[str, str, str]] = []
