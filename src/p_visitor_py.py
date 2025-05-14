@@ -1644,6 +1644,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
 
     _SUPPORTED_ARG_TYPES = [
+      BinaryOperatorNode,
       CallNode,
       ExpressionListNode,
       FloatNode,
@@ -1876,6 +1877,7 @@ class LogStatementInserter(pvis.Visitor):
           'arg'
     '''
     _SUPPORTED_TYPES = [
+      BinaryOperatorNode,
       CallNode,
       ExpressionListNode,
       FloatNode,
