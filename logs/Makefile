@@ -76,3 +76,12 @@ format_json:
 		echo "Formatting $$count/$$total: $$file"; \
 		jq . "$$file" > "$$file.tmp" && mv "$$file.tmp" "$$file"; \
 	done
+
+# alias
+format: format_json
+
+split_log:
+	python makefile_helper.py split
+
+# alias
+split: split_log
