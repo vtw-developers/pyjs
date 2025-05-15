@@ -120,6 +120,90 @@ def is_force_identifiers_PY(
   return False
 
 
+def is_do_not_change_identifier_PY(
+  mapped_node: pds.DuoGlotNode
+) -> bool:
+  '''
+  These are the cases where we do not want to change identifiers
+  '''
+
+  def _pattern_1_is_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Check if `mapped_node` is a function name (identifier).
+    For example, `enumerate(nums)`, `findKth(i, j, k)
+                  ^^^^^^^^^          ^^^^^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of a call node
+    if mapped_node.get_parent().get_ts_node_type() != 'call':
+      return False
+    # mapped node must be the first child of a call node
+    if mapped_node.get_parent().children[0] != mapped_node:
+      return False
+    return True
+
+  def _pattern_2_is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Return true, if `mapped_node` is an attribute of a call node (identifier).
+    For example, `chars.remove(c)`
+                        ^^^^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of an attribute node
+    attribute_node = mapped_node.get_parent()
+    if attribute_node.get_ts_node_type() != 'attribute':
+      return False
+    # mapped node must be the last node of the attribute node
+    if attribute_node.children[-1] != mapped_node:
+      return False
+    # attribute node must be a child of a call node
+    call_node = attribute_node.get_parent()
+    if call_node.get_ts_node_type() != 'call':
+      return False
+    return True
+
+  def _pattern_3_is_keyword_argument_of_call_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Return true, if `mapped_node` is a keyword argument of a call node (identifier).
+    For example, `print(a, end='')`
+                           ^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of a keyword_argument node
+    kwarg_node = mapped_node.get_parent()
+    if kwarg_node.get_ts_node_type() != 'keyword_argument':
+      return False
+    # mapped node must be the first child of a keyword_argument node
+    if kwarg_node.children[0] != mapped_node:
+      return False
+    # kwarg node must be a child of an argument_list node
+    arg_list_node = kwarg_node.get_parent()
+    if arg_list_node.get_ts_node_type() != 'argument_list':
+      return False
+    # arg_list node must be a child of a call node
+    call_node = arg_list_node.get_parent()
+    if call_node.get_ts_node_type() != 'call':
+      return False
+    return True
+
+  pattern_callbacks = [
+    lambda: _pattern_1_is_fn_name_PY(mapped_node),
+    lambda: _pattern_2_is_call_attribute_PY(mapped_node),
+    lambda: _pattern_3_is_keyword_argument_of_call_PY(mapped_node),
+  ]
+
+  for pattern_callback in pattern_callbacks:
+    if pattern_callback():
+      return True
+  return False
+
+
 def generate_tsps_manually_PY(
   template_dict: dict
 ) -> Optional[List[Tuple[str, str, str]]]:
@@ -488,71 +572,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
     _get_alt_starting_ntypes_cache[node.get_id()] = alt_starting_nodes
     return alt_starting_nodes
 
-  def _is_fn_name_PY(mapped_node: pds.DuoGlotNode) -> bool:
-    '''
-    Check if `mapped_node` is a function name (identifier).
-    For example, `enumerate(nums)`, `findKth(i, j, k)
-                  ^^^^^^^^^          ^^^^^^^
-    '''
-    # mapped node must be an identifier
-    if mapped_node.get_ts_node_type() != 'identifier':
-      return False
-    # mapped node must be a child of a call node
-    if mapped_node.get_parent().get_ts_node_type() != 'call':
-      return False
-    # mapped node must be the first child of a call node
-    if mapped_node.get_parent().children[0] != mapped_node:
-      return False
-    return True
-
-  def _is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
-    '''
-    Return true, if `mapped_node` is an attribute of a call node (identifier).
-    For example, `chars.remove(c)`
-                        ^^^^^^
-    '''
-    # mapped node must be an identifier
-    if mapped_node.get_ts_node_type() != 'identifier':
-      return False
-    # mapped node must be a child of an attribute node
-    attribute_node = mapped_node.get_parent()
-    if attribute_node.get_ts_node_type() != 'attribute':
-      return False
-    # mapped node must be the last node of the attribute node
-    if attribute_node.children[-1] != mapped_node:
-      return False
-    # attribute node must be a child of a call node
-    call_node = attribute_node.get_parent()
-    if call_node.get_ts_node_type() != 'call':
-      return False
-    return True
-
-  def _is_keyword_argument_of_call_PY(mapped_node: pds.DuoGlotNode) -> bool:
-    '''
-    Return true, if `mapped_node` is a keyword argument of a call node (identifier).
-    For example, `print(a, end='')`
-                           ^^^
-    '''
-    # mapped node must be an identifier
-    if mapped_node.get_ts_node_type() != 'identifier':
-      return False
-    # mapped node must be a child of a keyword_argument node
-    kwarg_node = mapped_node.get_parent()
-    if kwarg_node.get_ts_node_type() != 'keyword_argument':
-      return False
-    # mapped node must be the first child of a keyword_argument node
-    if kwarg_node.children[0] != mapped_node:
-      return False
-    # kwarg node must be a child of an argument_list node
-    arg_list_node = kwarg_node.get_parent()
-    if arg_list_node.get_ts_node_type() != 'argument_list':
-      return False
-    # arg_list node must be a child of a call node
-    call_node = arg_list_node.get_parent()
-    if call_node.get_ts_node_type() != 'call':
-      return False
-    return True
-
   def _gen_code_for_node_type(
     node_type: str,
     mapped_node: pds.DuoGlotNode,
@@ -569,13 +588,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str, st
       if node_type in spec_treatment_map:
         return spec_treatment_map[node_type]
 
-    if _is_fn_name_PY(mapped_node):
-      return mapped_node.children[0].node_type
-
-    if _is_call_attribute_PY(mapped_node):
-      return mapped_node.children[0].node_type
-
-    if _is_keyword_argument_of_call_PY(mapped_node):
+    if is_do_not_change_identifier_PY(mapped_node):
       return mapped_node.children[0].node_type
 
     ast = grammar.generate_simplest_ast(node_type)
