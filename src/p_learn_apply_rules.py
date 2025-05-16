@@ -378,15 +378,12 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
-def learn_and_application_phases_custom_mode(conf: dict) -> None:
+def learn_phase_custom_mode(conf: dict) -> None:
   '''
-  Run PiREL to learn and apply translation rules for any program.
-
-  NOTE Right now, this function does not support rule application.
-  Only the learning phase is completed.
+  Run PiREL to learn translation rules for any program.
   '''
 
-  logger.info('~~~ Starting `p_learn_apply_rules.learn_and_application_phases_custom_mode`')
+  logger.info('~~~ Starting `p_learn_apply_rules.learn_phase_custom_mode`')
 
   subject = p_subject.PirelSubject.from_file_config(p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
   lsubject = ptlog.Subject(subject.name)
@@ -423,7 +420,7 @@ def learn_and_application_phases_custom_mode(conf: dict) -> None:
 
 MODE_CALLBACKS = {
   'benchmark': learn_and_application_phases_benchmark_mode,
-  'custom': learn_and_application_phases_custom_mode,
+  'custom': learn_phase_custom_mode,
 }
 
 
