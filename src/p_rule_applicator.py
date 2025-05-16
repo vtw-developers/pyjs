@@ -14,6 +14,7 @@ logger = p_utils.setup_logger(__name__)
 
 
 class CompareTracesError(RuntimeError): pass
+class SrcTestScriptError(RuntimeError): pass
 
 
 # INTERNAL API
@@ -165,7 +166,7 @@ def _run_tests(
   RETURN `tar_error_dict` - None if no error when running tar test script,
   otherwise a dict containing error information.
 
-  RAISE `RuntimeError` if there is an error when running src test script.
+  RAISE `SrcTestScriptError` if there is an error when running src test script.
   '''
   p_utils.log_json_time(f'{subject.name}_args-run_tests.json', locals())
   logger.debug('Starting p_rule_applicator._run_tests')
@@ -177,7 +178,7 @@ def _run_tests(
   if src_stderr != '':
     msg = f'Error running src test script: {src_stderr}'
     logger.error(msg)
-    raise RuntimeError(msg)
+    raise SrcTestScriptError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_error_dict = p_code_runner.run_tar_test_script(
