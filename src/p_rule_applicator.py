@@ -15,6 +15,7 @@ logger = p_utils.setup_logger(__name__)
 
 class CompareTracesError(RuntimeError): pass
 class SrcTestScriptError(RuntimeError): pass
+class TraceMismatchError(RuntimeError): pass
 
 
 # INTERNAL API
@@ -195,7 +196,7 @@ def _run_tests(
   if are_traces_identical:
     return None
 
-  raise RuntimeError('No error in running src and tar test scripts, but traces are not identical!')
+  raise TraceMismatchError('No error in running src and tar test scripts, but traces are not identical!')
 
 
 def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
