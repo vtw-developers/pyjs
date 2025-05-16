@@ -96,6 +96,9 @@ def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict)
 def _compare_traces(src_trace: list, tar_trace: list) -> bool:
   '''
   Compare the traces from the source and target programs.
+  For more information, refer to
+  1. run_src_test_script and run_tar_test_script in p_code_runner.py.
+  2. myexactlog implementations for src and tar languages.
   '''
 
   # base case: lengths must be equal
