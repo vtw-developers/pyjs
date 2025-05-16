@@ -23,8 +23,7 @@ logger = p_utils.setup_logger(__name__)
 class PirelError(RuntimeError): pass
 
 
-# PARTIAL PROGRAM GENERATION
-def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> str:
+def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> str:
   '''
   A partial program (TODO is it a good name?) is a partially translated
   program in target language. Partial programs are used in LLM prompts
@@ -98,7 +97,7 @@ def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str
   # NOTE if the first translation was successful, it means we have all necessary translation rules.
   # If it wasn't successful, then we run a loop in which we introduce `problematic_node -> identifier` rules
   # until we translate the program. This way we generate a partial program.
-  logger.info(f'~~~ Starting p_pirel._get_partial_program')
+  logger.info(f'~~~ Starting p_pirel.get_partial_program')
 
   # 1 ADD HACKY RULES FOR THE MAIN PROBLEMATIC NODE
   prob_ntype_main = template_dict['problematic_node_type']
@@ -165,8 +164,7 @@ def _get_partial_program(subject: p_subject.PirelSubject, translation_rules: str
     loop_counter += 1
 
 
-# PIREL TRANSLATION RULE LEARNING MODULE
-def _learn_trans_rules_from_tsp(
+def learn_trans_rules_from_tsp(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
@@ -178,7 +176,7 @@ def _learn_trans_rules_from_tsp(
   RAISE Nothing. Pass all exceptions to the caller.
   '''
 
-  logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp')
+  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
 
   # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
@@ -201,7 +199,7 @@ def _learn_trans_rules_from_tsp(
   return checked_trules_list
 
 
-def _learn_trans_rules_from_tsp_with_retries(
+def learn_trans_rules_from_tsp_with_retries(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
@@ -213,7 +211,7 @@ def _learn_trans_rules_from_tsp_with_retries(
   NOTE may return zero translation rules
   '''
 
-  logger.debug(f'Starting p.pirel._learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
+  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
 
   trules_list = []
   attempt_idx = 1
@@ -231,7 +229,7 @@ def _learn_trans_rules_from_tsp_with_retries(
     # we can attempt to learn rules from a TSP again.
     # TODO how about regenerating a TSP?
     try:
-      trules_list = _learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules, ltrule_learn_attempt)
+      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules, ltrule_learn_attempt)
       if len(trules_list) > 0:
         logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
         ltrule_learn_attempt.num_trules = len(trules_list)
@@ -264,7 +262,6 @@ def _learn_trans_rules_from_tsp_with_retries(
   return trules_list
 
 
-# FUNCTION THAT GLUES TOGETHER ALL DIFFERENT PIREL COMPONENTS
 def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   translation_rules: str,
@@ -496,7 +493,7 @@ def learn_trans_rules_for_prob_node(
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
     # prepare partial program
-    partial_program = _get_partial_program(subject, translation_rules, template_dict)
+    partial_program = get_partial_program(subject, translation_rules, template_dict)
     template_dict['partial_program'] = partial_program
     p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
 
@@ -560,9 +557,9 @@ def learn_trans_rules_for_prob_node(
     ltsp = ptlog.TSP(tsp_idx, *tsp)
     lprob_node.tsps.append(ltsp)
 
-    # `_learn_trans_rules_from_tsp` is responsible for translation rule validation
-    # it is called in `_learn_trans_rules_from_tsp_with_retries`
-    trules_list = _learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules, ltsp)
+    # `learn_trans_rules_from_tsp` is responsible for translation rule validation
+    # it is called in `learn_trans_rules_from_tsp_with_retries`
+    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules, ltsp)
 
     # go to the next TSP if no translation rules were learned
     if len(trules_list) == 0:
@@ -591,7 +588,6 @@ def learn_trans_rules_for_prob_node(
   raise PirelError(msg)
 
 
-# ENTRY POINT FOR DUOGLOT TRANSLATION
 def duoglot_translate_wrapper(
   src_code: str,
   src_lang: str,
