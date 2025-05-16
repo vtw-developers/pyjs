@@ -13,6 +13,9 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
+class CompareTracesError(RuntimeError): pass
+
+
 # INTERNAL API
 def _postprocess_src_program(translated_code: str, src_code: str, src_ann: dict) -> str:
   '''
@@ -150,7 +153,7 @@ def _compare_traces(src_trace: list, tar_trace: list) -> bool:
     str1, str2 = src_trace[2], tar_trace[2]
     return len1 == len2 and str1 == str2
 
-  raise RuntimeError(f'Unknown type in _compare_traces: {type1}')
+  raise CompareTracesError(f'Unknown type in _compare_traces: "{type1}"')
 
 
 def _run_tests(
