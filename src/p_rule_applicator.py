@@ -16,6 +16,7 @@ logger = p_utils.setup_logger(__name__)
 class UnknownTypeInTracesError(RuntimeError): pass
 class SrcTestScriptError(RuntimeError): pass
 class TraceMismatchError(RuntimeError): pass
+class TRuleNotFoundError(RuntimeError): pass
 
 
 # INTERNAL API
@@ -454,7 +455,7 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
     templates_dict = exc.get_templates_dict()
     logger.warning(f'Caught TranslationRuleNotFoundException: {exc}')
     logger.warning(f'templates_dict: {json.dumps(templates_dict, indent=2)}')
-    raise
+    raise TRuleNotFoundError('There is a problematic node in src_main_code')
 
   tar_main_code = duoglot_translate_result['tar_code']
   map_to_exid = duoglot_translate_result['map_to_exid']
