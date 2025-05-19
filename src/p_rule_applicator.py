@@ -17,6 +17,7 @@ class UnknownTypeInTracesError(RuntimeError): pass
 class SrcTestScriptError(RuntimeError): pass
 class TraceMismatchError(RuntimeError): pass
 class TRuleNotFoundError(RuntimeError): pass
+class NoUniqueChoicesError(RuntimeError): pass
 
 
 # INTERNAL API
@@ -685,7 +686,7 @@ def _get_proposed_choices(
           if not ___choices_any_duplicate(new_choices, choices_history):
             return new_choices
 
-    raise RuntimeError('No unique choices found')
+    raise NoUniqueChoicesError('No unique choices found')
 
   logger.debug('Starting p_rule_applicator._get_proposed_choices')
 
