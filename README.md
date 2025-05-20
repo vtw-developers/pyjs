@@ -33,7 +33,7 @@ python -m unittest p_visitor_py_test.py
 ### Control flow
 1. `cleanup`
 
-2. `learn_phase_on_subject`
+2. `learn_phase_on_subject`  **MAIN**
    1. **while true**
       1. *p_pirel.*`duoglot_translate_wrapper`
       2. *p_pirel.*`learn_trans_rules_for_prob_node`
