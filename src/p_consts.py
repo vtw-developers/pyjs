@@ -109,7 +109,7 @@ LLM_VAL_TS_MAX_DEPTH = 4
 LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
 
 # Maximum number of TSPs from which some rules are learned
-MAX_NUM_USEFUL_TSPS = 2
+MAX_NUM_USEFUL_TSPS = 1
 
 
 ################################################################################################
