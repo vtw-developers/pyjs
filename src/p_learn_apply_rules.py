@@ -53,6 +53,7 @@ def learn_phase_on_subject(
     # PiREL attempts to translate the code. If there is a node that PiREL
     # cannot translate (a.k.a. problematic node), it will generate a
     # translation rule that translates the problematic node.
+    templates_dict = None
     try:
       logger.debug(f'Attempting to translate "{subject.name}" with the current ruleset')
       logger.debug(f'Number of translation rules in the ruleset: {translation_rules.count("match_expand")}')
@@ -67,41 +68,42 @@ def learn_phase_on_subject(
         subject_name=subject.name,
       )
 
+      logger.info('SUCCESS. Translation is successful.')
       ltrans_iteration.success = True
-
-      logger.info('SUCCESS. Translation is successful. Returning the target program.')
       return translation_rules, duoglot_result_dict['tar_code']
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
-      logger.warning('FAIL. Translation failed. Attempting to learn translation rules for the problematic node.')
       templates_dict = exc.get_templates_dict()
 
-      lprob_node = ptlog.ProbNode(templates_dict['problematic_node_id'], templates_dict['problematic_node_type'])
-      ltrans_iteration.success = False
-      ltrans_iteration.reason = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
-      ltrans_iteration.problematic_node = lprob_node
+    assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
+    msg = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
+    logger.warning(msg)
+    lprob_node = ptlog.ProbNode(templates_dict['problematic_node_id'], templates_dict['problematic_node_type'])
+    ltrans_iteration.success = False
+    ltrans_iteration.reason = msg
+    ltrans_iteration.problematic_node = lprob_node
 
-      # ~~~ entering PiREL learning phase
-      # NOTE all raised errors are sent to the caller. If there are no exceptions,
-      # it means that there are translation rules to address the problematic node.
-      trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
+    # ~~~ entering PiREL learning phase
+    # NOTE all raised errors are sent to the caller. If there were no exceptions,
+    # it means that PiREL has learned some rule(s) to translate the problematic node.
+    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
 
-      logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
-      logger.debug(f'Number of translation rules: {len(trules_list)}')
-      logger.debug(f'Prepending newly inferred translation rules to the existing ruleset')
+    logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
+    logger.debug(f'Number of translation rules: {len(trules_list)}')
+    logger.debug(f'Prepending newly inferred translation rules to the existing ruleset')
 
-      ltrans_iteration.success = True
-      ltrans_iteration.reason = None
+    ltrans_iteration.success = True
+    ltrans_iteration.reason = None
 
-      # TODO do not add duplicate rules
-      comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
-      for idx, translation_rule in enumerate(trules_list, start=1):
-        translation_rules = f'{comment} (rule {idx})\n{translation_rule}\n\n\n' + translation_rules
-        logger.debug(f'NEW RULE {idx}:\n{translation_rule}')
+    # TODO do not add duplicate rules
+    comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
+    for idx, translation_rule in enumerate(trules_list, start=1):
+      translation_rules = f'{comment} (rule {idx})\n{translation_rule}\n\n\n' + translation_rules
+      logger.debug(f'NEW RULE {idx}:\n{translation_rule}')
 
-      p_utils.log_file_time(f'{subject.name}_updated-ruleset.snart', translation_rules)
-      logger.debug(f'Ruleset has been updated with {len(trules_list)} translation rules.\n\n')
-      iteration += 1
+    p_utils.log_file_time(f'{subject.name}_updated-ruleset.snart', translation_rules)
+    logger.debug(f'Ruleset has been updated with {len(trules_list)} translation rules.\n\n')
+    iteration += 1
 
 
 def learn_and_application_phases_on_subject(
