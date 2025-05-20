@@ -398,10 +398,14 @@ def email_safely(subject: str, message:str='intentionally left empty') -> bool:
 
 
 # MISC
-def exception_to_str(exc: Exception, include_traceback : bool = True) -> str:
+def exception_to_str(
+  exc: Exception,
+  include_str: bool = False,
+  include_traceback : bool = True
+) -> str:
   msg = (
-    f'type(exc) = "{type(exc)}"\n'
-    f'str(exc):\n{str(exc)}'
+    f'type(exc) = "{type(exc)}"'
+    f'\nstr(exc):\n{str(exc)}' if include_str else ''
     f'\ntraceback:\n{traceback.format_exc()}' if include_traceback else ''
   )
   return msg
