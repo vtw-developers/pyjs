@@ -265,8 +265,7 @@ def learn_trans_rules_from_tsp_with_retries(
 def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   translation_rules: str,
-  templates_dict: dict,
-  lprob_node: ptlog.ProbNode
+  templates_dict: dict
 ) -> list:
   '''
   Run PiREL translation rule learning module for a problematic node.
@@ -525,18 +524,13 @@ def learn_trans_rules_for_prob_node(
     p_utils.log_json_time(f'{subject.name}_TSPs-generated.json', tsps)
     return tsps
 
-  msg = (
-    f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"\n'
-    f'problematic_node.node_id = {lprob_node.node_id}, problematic_node.node_type = {lprob_node.node_type}\n'
-  )
+  msg = f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"'
   logger.debug(msg)
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
   template_dict = _init_template_dict(subject, translation_rules, templates_dict)
   tsps = _init_tsps(subject, template_dict)
-
-  lprob_node.template_origin = template_dict['template_origin']
 
   # ~~~ iterate over TSPs (from abstract to concrete)
   # NOTE since we are using an updated TSP generation algorithm,
@@ -555,7 +549,6 @@ def learn_trans_rules_for_prob_node(
     print(msg)
 
     ltsp = ptlog.TSP(tsp_idx, *tsp)
-    lprob_node.tsps.append(ltsp)
 
     # `learn_trans_rules_from_tsp` is responsible for translation rule validation
     # it is called in `learn_trans_rules_from_tsp_with_retries`
@@ -573,7 +566,6 @@ def learn_trans_rules_for_prob_node(
       break
 
   if len(all_trules_list) > 0:
-    lprob_node.success = True
     return all_trules_list
 
   msg = (
@@ -583,8 +575,6 @@ def learn_trans_rules_for_prob_node(
     f'len(tsps) = {len(tsps)}\n'
   )
   logger.critical(msg)
-  lprob_node.success = False
-  lprob_node.reason = msg
   raise PirelError(msg)
 
 
@@ -650,8 +640,7 @@ def _test_learn_trans_rules_for_prob_node():
   def learn_trans_rules_for_prob_node(
     subject: p_subject.PirelSubject,
     translation_rules: str,
-    templates_dict: dict,
-    lprob_node: ptlog.ProbNode
+    templates_dict: dict
   ) -> list:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_learn_trans_rules_for_prob_node_config.yaml'
@@ -661,9 +650,8 @@ def _test_learn_trans_rules_for_prob_node():
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   translation_rules = args_dict['translation_rules']
   templates_dict = args_dict['templates_dict']
-  lprob_node = ptlog.ProbNode(0, 'some_type')
 
-  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
+  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
   print('\n\n'.join(result))
 
 

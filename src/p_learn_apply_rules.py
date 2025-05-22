@@ -71,12 +71,11 @@ def learn_phase_on_subject(
     assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
     msg = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
     logger.warning(msg)
-    lprob_node = ptlog.ProbNode(templates_dict['problematic_node_id'], templates_dict['problematic_node_type'])
 
     # ~~~ entering PiREL learning phase
     # NOTE all raised errors are sent to the caller. If there were no exceptions,
     # it means that PiREL has learned some rule(s) to translate the problematic node.
-    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict, lprob_node)
+    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
 
     logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
     logger.debug(f'Number of translation rules: {len(trules_list)}')
