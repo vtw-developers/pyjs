@@ -122,7 +122,7 @@ def get_pre_context_local(subject: p_subject.PirelSubject, templates_dict: dict)
 
 def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
 
-  def __rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> dict:
+  def _rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> dict:
     '''
     Why do we need this function?
     We need this function to update certain values in `template_dict`:
@@ -165,7 +165,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = __rerun_translation_for_context(subject, translation_rules, template_dict)
+  template_dict = _rerun_translation_for_context(subject, translation_rules, template_dict)
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
   # simplify the context
@@ -180,7 +180,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = __rerun_translation_for_context(subject, translation_rules, template_dict)
+  template_dict = _rerun_translation_for_context(subject, translation_rules, template_dict)
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
   # prepare partial program
