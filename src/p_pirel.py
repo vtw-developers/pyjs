@@ -162,7 +162,7 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict)
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
   # simplify the context
@@ -177,7 +177,7 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict)
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
   # prepare partial program
