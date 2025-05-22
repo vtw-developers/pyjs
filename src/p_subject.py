@@ -254,6 +254,7 @@ class PirelSubject:
     pirel_subject.choices = conf.get('choices', {'type': 'ASTNODE', 'choices_list': []})
 
     # translation_rules_main_code
+    _trmc = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
     if 'translation_rules_main_code' in conf:
       assert isinstance(conf['translation_rules_main_code'], str), \
         'translation_rules_main_code must be a string'
@@ -264,11 +265,6 @@ class PirelSubject:
       _trmcp = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
       assert _trmcp.exists(), f'Translation rules main code file does not exist: {_trmcp}'
       _trmc = p_utils.read_text(_trmcp)
-    else:
-      _trmc = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
-    assert _trmc is not None, 'translation_rules_main_code is None'
-    assert isinstance(_trmc, str), f'translation_rules_main_code must be a string: {_trmc}'
-    assert _trmc != '', 'translation_rules_main_code is empty'
     pirel_subject.translation_rules_main_code = _trmc
 
     # translation_rules_test_code
@@ -285,17 +281,17 @@ class PirelSubject:
       _trtc = p_utils.read_text(_trtcp)
     pirel_subject.translation_rules_test_code = _trtc
 
-    translation_rules_instr_src_fpath = conf.get('translation_rules_instr_src_fpath', None)
-    pirel_subject.translation_rules_instr_src = None if translation_rules_instr_src_fpath is None else \
-      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_instr_src_fpath)
+    _trisp = conf.get('translation_rules_instr_src_fpath', None)
+    pirel_subject.translation_rules_instr_src = None if _trisp is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / _trisp)
 
-    translation_rules_instr_tar_fpath = conf.get('translation_rules_instr_tar_fpath', None)
-    pirel_subject.translation_rules_instr_tar = None if translation_rules_instr_tar_fpath is None else \
-      p_utils.read_text_or_none(p_consts.ROOT_DIR / translation_rules_instr_tar_fpath)
+    _tritp = conf.get('translation_rules_instr_tar_fpath', None)
+    pirel_subject.translation_rules_instr_tar = None if _tritp is None else \
+      p_utils.read_text_or_none(p_consts.ROOT_DIR / _tritp)
 
-    pirel_subject.is_three_split = conf.get('is_three_split', True)
-    pirel_subject.is_mylog_inserted = conf.get('is_mylog_inserted', True)
-    pirel_subject.needs_instrumentation = conf.get('needs_instrumentation', True)
+    pirel_subject.is_three_split = conf.get('is_three_split', False)
+    pirel_subject.is_mylog_inserted = conf.get('is_mylog_inserted', False)
+    pirel_subject.needs_instrumentation = conf.get('needs_instrumentation', False)
 
     # attributes that are computed based on previous attributes
     pirel_subject.is_long_requires_processing = pirel_subject._get_is_long_requires_processing()
