@@ -25,72 +25,6 @@ def cleanup():
   p_translators._TRANSLATORS_CACHE.clear()
 
 
-def learn_phase_on_subject(
-  subject: p_subject.PirelSubject,
-  starting_ruleset: str
-) -> str:
-  '''
-  RETURN Learned translation rules.
-  RAISE All errors propagate to the caller.
-  '''
-
-  logger.info(f'Starting translation of "{subject.name}"')
-  current_ruleset = starting_ruleset
-  p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset)
-
-  # This loop stops iff translation is successful or an error is raised.
-  # Each iteration handles one problematic node at a time.
-  iteration = 1
-  while True:
-    logger.info(f'~~~~ translation_iteration.id = {iteration}')
-
-    # PiREL attempts to translate the code. If there is a node that PiREL
-    # cannot translate (a.k.a. problematic node), it will generate a
-    # translation rule that translates the problematic node.
-    templates_dict = None
-    try:
-      logger.debug(f'Attempting to translate "{subject.name}" with the current ruleset')
-      logger.debug(f'Number of translation rules in the ruleset: {current_ruleset.count("match_expand")}')
-
-      duoglot_result_dict = p_pirel.duoglot_translate_wrapper(
-        subject.src_main_code,
-        subject.src_lang,
-        subject.tar_lang,
-        current_ruleset,
-        subject.auto_backward,
-        subject.choices,
-        subject_name=subject.name,
-      )
-
-      logger.info('SUCCESS. Translation is successful.')
-      return current_ruleset
-
-    except d_grammar_expand.TranslationRuleNotFoundException as exc:
-      templates_dict = exc.get_templates_dict()
-
-    assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
-    logger.warning(f'No translation rule for "{templates_dict["problematic_node_type"]}"')
-
-    # ~~~ entering PiREL learning phase
-    # NOTE all raised errors are sent to the caller. If there were no exceptions,
-    # it means that PiREL has learned some rule(s) to translate the problematic node.
-    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict)
-
-    logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
-    logger.debug(f'Number of translation rules: {len(trules_list)}')
-    logger.debug(f'Prepending newly inferred translation rules to the existing ruleset')
-
-    # TODO do not add duplicate rules
-    comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
-    for idx, translation_rule in enumerate(trules_list, start=1):
-      current_ruleset = f'{comment} (rule {idx})\n{translation_rule}\n\n\n' + current_ruleset
-      logger.debug(f'NEW RULE {idx}:\n{translation_rule}')
-
-    p_utils.log_file_time(f'{subject.name}_updated-ruleset.snart', current_ruleset)
-    logger.debug(f'Ruleset has been updated with {len(trules_list)} translation rules.\n\n')
-    iteration += 1
-
-
 def learn_and_application_phases_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
@@ -111,7 +45,7 @@ def learn_and_application_phases_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = learn_phase_on_subject(subject, starting_ruleset)
+    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -378,7 +312,7 @@ def learn_phase_custom_mode(conf: dict) -> None:
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = learn_phase_on_subject(subject, subject.translation_rules_main_code)
+    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, subject.translation_rules_main_code)
 
     lrule_learn_phase.success = True
     lsubject.success = True
