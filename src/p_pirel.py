@@ -389,33 +389,17 @@ def learn_trans_rules_from_tsp_with_retries(
 
   logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
 
-  trules_list = []
-  attempt_idx = 1
-  while attempt_idx <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    msg = f'Attempt at learning translation rules from a TSP #{attempt_idx}'
-    logger.debug(msg)
-
-    # catch only non-critical exceptions, after which
-    # we can attempt to learn rules from a TSP again.
-    # TODO how about regenerating a TSP?
+  attempt_idx = 0
+  while attempt_idx < p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
+    attempt_idx += 1
+    logger.debug(f'Attempting to learn some translation rules from a TSP #{attempt_idx}')
     try:
       trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules)
-      if len(trules_list) > 0:
-        logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
-        return trules_list
-      else:
-        logger.debug(f'No translation rules were learned from TSP.')
-
+      return trules_list
     except p_llm_gen.NoTransPairsFromTSPError as err:
-      msg = (
-        f'Error: {str(err)}\n'
-        f'PiREL could not generate any translation pairs from a TSP:\n'
-        f'{json.dumps(tsp, indent=2)}\n'
-        f'This was attempt number {attempt_idx}/{p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS}'
-      )
-      logger.warning(msg)
-
-    attempt_idx += 1
+      logger.warning('Attempt to learn translation rules from TSP failed')
+    except NoTransRulesFromTSPError as err:
+      logger.warning('Attempt to learn translation rules from TSP failed')
 
   msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
   logger.warning(msg)
