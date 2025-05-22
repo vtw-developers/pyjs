@@ -42,9 +42,7 @@ def learn_phase_on_subject(
   # Each iteration handles one problematic node at a time.
   iteration = 1
   while True:
-    msg = f'~~~~ translation_iteration.id = {iteration}'
-    logger.info(msg)
-    print(msg)
+    logger.info(f'~~~~ translation_iteration.id = {iteration}')
 
     ltrans_iteration = ptlog.TransIteration(iteration)
 
