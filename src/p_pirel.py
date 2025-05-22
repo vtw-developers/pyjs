@@ -220,7 +220,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
      This way we get a partially translated program.
   '''
 
-  def __append_hacky_rules(translation_rules: str, problematic_node_type: str, secret_identifier: str) -> str:
+  def _append_hacky_rules(translation_rules: str, problematic_node_type: str, secret_identifier: str) -> str:
     '''
     Update `trans_rules` by appending all possible hacky rules
     to get a partial program.
@@ -277,7 +277,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
 
   # 1 ADD HACKY RULES FOR THE MAIN PROBLEMATIC NODE
   prob_ntype_main = template_dict['problematic_node_type']
-  new_trans_rules = __append_hacky_rules(translation_rules, prob_ntype_main, p_consts.PAR_PROG_PROB_NODE_REPLACE)
+  new_trans_rules = _append_hacky_rules(translation_rules, prob_ntype_main, p_consts.PAR_PROG_PROB_NODE_REPLACE)
   new_src_code = template_dict['template_origin']
 
   logger.debug(f'problematic_node_type_main = "{prob_ntype_main}"')
@@ -311,7 +311,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
     logger.debug(f'Entering partial program generation loop #{loop_counter}')
     assert templates_dict is not None, 'should not happen: templates_dict is None'
     prob_ntype_remaining = templates_dict['problematic_node_type']
-    new_trans_rules = __append_hacky_rules(new_trans_rules, prob_ntype_remaining, p_consts.PAR_PROG_DUMMY_IDENTIFIER)
+    new_trans_rules = _append_hacky_rules(new_trans_rules, prob_ntype_remaining, p_consts.PAR_PROG_DUMMY_IDENTIFIER)
 
     logger.debug(f'prob_ntype_remaining = "{prob_ntype_remaining}"')
     logger.debug(f'Appended hacky rules to the ruleset')
