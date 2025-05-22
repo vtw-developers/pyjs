@@ -28,9 +28,9 @@ def cleanup():
 def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str
-) -> Tuple[str, str]:
+) -> str:
   '''
-  RETURN Tuple of learned translation rules and translated program.
+  RETURN Learned translation rules.
   RAISE All errors propagate to the caller.
   '''
 
@@ -63,7 +63,7 @@ def learn_phase_on_subject(
       )
 
       logger.info('SUCCESS. Translation is successful.')
-      return translation_rules, duoglot_result_dict['tar_code']
+      return translation_rules
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
       templates_dict = exc.get_templates_dict()
@@ -112,7 +112,7 @@ def learn_and_application_phases_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset)
+    learned_trans_rules = learn_phase_on_subject(subject, starting_ruleset)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -379,7 +379,7 @@ def learn_phase_custom_mode(conf: dict) -> None:
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code)
+    learned_trans_rules = learn_phase_on_subject(subject, subject.translation_rules_main_code)
 
     lrule_learn_phase.success = True
     lsubject.success = True
