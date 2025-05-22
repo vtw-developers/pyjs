@@ -865,8 +865,7 @@ def get_translation_pairs_from_tsp(
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
     msg = (
       f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
-      f'trans_sp2.id = {cand_idx}\n'
-    )
+      f'trans_sp2.id = {cand_idx}\n')
     logger.debug(msg)
 
     ltrans_sp2 = ptlog.TransSP2()
@@ -892,8 +891,7 @@ def get_translation_pairs_from_tsp(
       msg = (
         f'BAD: Reached a retry limit for SP2 translation:\n'
         f'{str(err)}\n'
-        f'Will try with the next TP1 cands ({len(sp1_tp1_cands)-cand_idx} left)'
-      )
+        f'Will try with the next TP1 cands ({len(sp1_tp1_cands)-cand_idx} left)')
       logger.warning(msg)
       ltrans_sp2.success = False
       ltrans_sp2.reason = msg
