@@ -44,8 +44,6 @@ def learn_phase_on_subject(
   while True:
     logger.info(f'~~~~ translation_iteration.id = {iteration}')
 
-    ltrans_iteration = ptlog.TransIteration(iteration)
-
     # PiREL attempts to translate the code. If there is a node that PiREL
     # cannot translate (a.k.a. problematic node), it will generate a
     # translation rule that translates the problematic node.
@@ -65,7 +63,6 @@ def learn_phase_on_subject(
       )
 
       logger.info('SUCCESS. Translation is successful.')
-      ltrans_iteration.success = True
       return translation_rules, duoglot_result_dict['tar_code']
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
@@ -75,9 +72,6 @@ def learn_phase_on_subject(
     msg = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
     logger.warning(msg)
     lprob_node = ptlog.ProbNode(templates_dict['problematic_node_id'], templates_dict['problematic_node_type'])
-    ltrans_iteration.success = False
-    ltrans_iteration.reason = msg
-    ltrans_iteration.problematic_node = lprob_node
 
     # ~~~ entering PiREL learning phase
     # NOTE all raised errors are sent to the caller. If there were no exceptions,
@@ -87,9 +81,6 @@ def learn_phase_on_subject(
     logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
     logger.debug(f'Number of translation rules: {len(trules_list)}')
     logger.debug(f'Prepending newly inferred translation rules to the existing ruleset')
-
-    ltrans_iteration.success = True
-    ltrans_iteration.reason = None
 
     # TODO do not add duplicate rules
     comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
