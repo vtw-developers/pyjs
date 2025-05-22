@@ -23,6 +23,103 @@ logger = p_utils.setup_logger(__name__)
 class PirelError(RuntimeError): pass
 
 
+def get_pre_context_global(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
+  '''
+  A pre-context is part of the code that appears before the context node
+  of the problematic node inside a function body.
+
+  The goal of this function is to extract pre-context for the snippet
+  that is used to validate the translation rule. The idea of extraction
+  algorithm is to find the enclosing `function_definition`s `block` node,
+  and remove all nodes that appear after the context node. What is left
+  is the pre-context that we need. After that, we replace the context
+  node with a special identifier, that is later string-replaced by the
+  actual snippet.
+  '''
+  tree = pvpy.Tree.from_str(subject.src_main_code)
+  context_node = tree.root_node.get_child_by_path(templates_dict['context_node_path'])
+
+  # 1. find the enclosing function_definition node's block
+  cursor_node = context_node
+  while cursor_node.get_parent() is not None:
+    # remove siblings to the right of cursor_node as we are moving up
+    next_sibling = cursor_node.next_sibling()
+    while next_sibling is not None:
+      # need to get the pointer to the next_sibling++
+      # before removing next_sibling itself
+      next_next_sibling = next_sibling.next_sibling()
+      next_sibling.get_parent().get_children().remove(next_sibling)
+      next_sibling.parent = None
+      next_sibling = next_next_sibling
+    # move up the tree
+    cursor_node = cursor_node.get_parent()
+    if isinstance(cursor_node, pvpy.BlockNode):
+      if isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode):
+        break
+
+  # 2. replace the context node with a special identifier
+  spec_id_stat = pvpy.ExpressionStatementNode.build(
+    pvpy.IdentifierNode.build(p_consts.PRE_CTX_SPEC_IDENT)
+  )
+  spec_id_stat.set_parent(context_node.get_parent())
+  context_node_idx_as_child = context_node.parent.children.index(context_node)
+  context_node.parent.children[context_node_idx_as_child] = spec_id_stat
+
+  # 3. pretty print the block
+  pp = pvpy.PrettyPrinter(indent_with='    ')
+  pp.visit(cursor_node)
+  pre_context = '\n'.join(pp.lines)
+  return pre_context
+
+
+def get_pre_context_local(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
+  '''
+  A pre-context is part of the code that appears before the context node
+  of the problematic node inside a function body.
+
+  The goal of this function is to extract local pre-context for the snippet
+  that is used to validate the translation rule. The idea of extraction
+  algorithm is to find the enclosing `block` node,
+  and remove all nodes that appear after the context node. What is left
+  is the pre-context that we need. After that, we replace the context
+  node with a special identifier, that is later string-replaced by the
+  actual snippet.
+  '''
+  tree = pvpy.Tree.from_str(subject.src_main_code)
+  context_node = tree.root_node.get_child_by_path(templates_dict['context_node_path'])
+
+  # 1. find the closest enclosing block
+  cursor_node = context_node
+  while cursor_node.get_parent() is not None:
+    # remove siblings to the right of cursor_node as we are moving up
+    next_sibling = cursor_node.next_sibling()
+    while next_sibling is not None:
+      # need to get the pointer to the next_sibling++
+      # before removing next_sibling itself
+      next_next_sibling = next_sibling.next_sibling()
+      next_sibling.get_parent().get_children().remove(next_sibling)
+      next_sibling.parent = None
+      next_sibling = next_next_sibling
+    # move up the tree
+    cursor_node = cursor_node.get_parent()
+    if isinstance(cursor_node, pvpy.BlockNode):
+      break
+
+  # 2. replace the context node with a special identifier
+  spec_id_stat = pvpy.ExpressionStatementNode.build(
+    pvpy.IdentifierNode.build(p_consts.PRE_CTX_SPEC_IDENT)
+  )
+  spec_id_stat.set_parent(context_node.get_parent())
+  context_node_idx_as_child = context_node.parent.children.index(context_node)
+  context_node.parent.children[context_node_idx_as_child] = spec_id_stat
+
+  # 3. pretty print the `block`
+  pp = pvpy.PrettyPrinter(indent_with='    ')
+  pp.visit(cursor_node)
+  pre_context = '\n'.join(pp.lines)
+  return pre_context
+
+
 def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
 
   def __rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> dict:
@@ -56,101 +153,6 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
       template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
       return template_dict
     raise RuntimeError('DuoGlot should fail to translate the context code')
-
-  def __get_pre_context_global(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
-    '''
-    A pre-context is part of the code that appears before the context node
-    of the problematic node inside a function body.
-
-    The goal of this function is to extract pre-context for the snippet
-    that is used to validate the translation rule. The idea of extraction
-    algorithm is to find the enclosing `function_definition`s `block` node,
-    and remove all nodes that appear after the context node. What is left
-    is the pre-context that we need. After that, we replace the context
-    node with a special identifier, that is later string-replaced by the
-    actual snippet.
-    '''
-    tree = pvpy.Tree.from_str(subject.src_main_code)
-    context_node = tree.root_node.get_child_by_path(templates_dict['context_node_path'])
-
-    # 1. find the enclosing function_definition node's block
-    cursor_node = context_node
-    while cursor_node.get_parent() is not None:
-      # remove siblings to the right of cursor_node as we are moving up
-      next_sibling = cursor_node.next_sibling()
-      while next_sibling is not None:
-        # need to get the pointer to the next_sibling++
-        # before removing next_sibling itself
-        next_next_sibling = next_sibling.next_sibling()
-        next_sibling.get_parent().get_children().remove(next_sibling)
-        next_sibling.parent = None
-        next_sibling = next_next_sibling
-      # move up the tree
-      cursor_node = cursor_node.get_parent()
-      if isinstance(cursor_node, pvpy.BlockNode):
-        if isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode):
-          break
-
-    # 2. replace the context node with a special identifier
-    spec_id_stat = pvpy.ExpressionStatementNode.build(
-      pvpy.IdentifierNode.build(p_consts.PRE_CTX_SPEC_IDENT)
-    )
-    spec_id_stat.set_parent(context_node.get_parent())
-    context_node_idx_as_child = context_node.parent.children.index(context_node)
-    context_node.parent.children[context_node_idx_as_child] = spec_id_stat
-
-    # 3. pretty print the block
-    pp = pvpy.PrettyPrinter(indent_with='    ')
-    pp.visit(cursor_node)
-    pre_context = '\n'.join(pp.lines)
-    return pre_context
-
-  def __get_pre_context_local(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
-    '''
-    A pre-context is part of the code that appears before the context node
-    of the problematic node inside a function body.
-
-    The goal of this function is to extract local pre-context for the snippet
-    that is used to validate the translation rule. The idea of extraction
-    algorithm is to find the enclosing `block` node,
-    and remove all nodes that appear after the context node. What is left
-    is the pre-context that we need. After that, we replace the context
-    node with a special identifier, that is later string-replaced by the
-    actual snippet.
-    '''
-    tree = pvpy.Tree.from_str(subject.src_main_code)
-    context_node = tree.root_node.get_child_by_path(templates_dict['context_node_path'])
-
-    # 1. find the closest enclosing block
-    cursor_node = context_node
-    while cursor_node.get_parent() is not None:
-      # remove siblings to the right of cursor_node as we are moving up
-      next_sibling = cursor_node.next_sibling()
-      while next_sibling is not None:
-        # need to get the pointer to the next_sibling++
-        # before removing next_sibling itself
-        next_next_sibling = next_sibling.next_sibling()
-        next_sibling.get_parent().get_children().remove(next_sibling)
-        next_sibling.parent = None
-        next_sibling = next_next_sibling
-      # move up the tree
-      cursor_node = cursor_node.get_parent()
-      if isinstance(cursor_node, pvpy.BlockNode):
-        break
-
-    # 2. replace the context node with a special identifier
-    spec_id_stat = pvpy.ExpressionStatementNode.build(
-      pvpy.IdentifierNode.build(p_consts.PRE_CTX_SPEC_IDENT)
-    )
-    spec_id_stat.set_parent(context_node.get_parent())
-    context_node_idx_as_child = context_node.parent.children.index(context_node)
-    context_node.parent.children[context_node_idx_as_child] = spec_id_stat
-
-    # 3. pretty print the `block`
-    pp = pvpy.PrettyPrinter(indent_with='    ')
-    pp.visit(cursor_node)
-    pre_context = '\n'.join(pp.lines)
-    return pre_context
 
   logger.debug('Starting template_dict initialization')
 
@@ -192,7 +194,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
 
   # prepare pre-context of the context node of the problematic node
   # NOTE pre-context is used in translation rule validation
-  pre_context = __get_pre_context_local(subject, templates_dict)
+  pre_context = get_pre_context_local(subject, templates_dict)
   template_dict['pre_context'] = pre_context
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_7_pre_context_FINAL.json', template_dict)
 
