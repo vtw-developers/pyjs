@@ -168,8 +168,7 @@ def learn_trans_rules_from_tsp(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str,
-  ltrule_learn_attempt: ptlog.TRuleLearnAttempt
+  translation_rules: str
 ) -> List[str]:
   '''
   RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
@@ -181,19 +180,15 @@ def learn_trans_rules_from_tsp(
 
   # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
   lpllm_gen_log = ptlog.PLLMGenLog()
-  ltrule_learn_attempt.p_llm_gen_log = lpllm_gen_log
-
   translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
   assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
 
   # INFER TRANSLATION RULES FROM TRANSLATION PAIRS
   lprule_inf_log = ptlog.PRuleInfLog()
-  ltrule_learn_attempt.p_rule_inferencer_log = lprule_inf_log
   trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs, lprule_inf_log)
 
   # CHECK TRANSLATION RULES
   lprule_val_log = ptlog.PRuleValLog()
-  ltrule_learn_attempt.p_rule_validator_log = lprule_val_log
   checked_trules_list = p_rule_validator.filter_translation_rules(
     trules_list, subject, translation_rules, tsp, template_dict, lprule_val_log)
   return checked_trules_list
@@ -218,22 +213,16 @@ def learn_trans_rules_from_tsp_with_retries(
     msg = f'Attempt at learning translation rules from a TSP #{attempt_idx}'
     logger.debug(msg)
 
-    ltrule_learn_attempt = ptlog.TRuleLearnAttempt(attempt_idx)
-
     # catch only non-critical exceptions, after which
     # we can attempt to learn rules from a TSP again.
     # TODO how about regenerating a TSP?
     try:
-      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules, ltrule_learn_attempt)
+      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules)
       if len(trules_list) > 0:
         logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
-        ltrule_learn_attempt.num_trules = len(trules_list)
-        ltrule_learn_attempt.success = True
         return trules_list
       else:
         logger.debug(f'No translation rules were learned from TSP.')
-        ltrule_learn_attempt.success = False
-        ltrule_learn_attempt.reason = 'No translation rules were learned from TSP.'
 
     except p_llm_gen.NoTransPairsFromTSPError as err:
       msg = (
@@ -242,8 +231,6 @@ def learn_trans_rules_from_tsp_with_retries(
         f'{json.dumps(tsp, indent=2)}\n'
         f'This was attempt number {attempt_idx}/{p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS}'
       )
-      ltrule_learn_attempt.success = False
-      ltrule_learn_attempt.reason = msg
       logger.warning(msg)
 
     attempt_idx += 1
