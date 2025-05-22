@@ -69,8 +69,7 @@ def learn_phase_on_subject(
       templates_dict = exc.get_templates_dict()
 
     assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
-    msg = f'''No translation rule for "{templates_dict['problematic_node_type']}"'''
-    logger.warning(msg)
+    logger.warning(f'No translation rule for "{templates_dict["problematic_node_type"]}"')
 
     # ~~~ entering PiREL learning phase
     # NOTE all raised errors are sent to the caller. If there were no exceptions,
