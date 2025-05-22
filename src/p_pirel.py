@@ -122,7 +122,7 @@ def get_pre_context_local(subject: p_subject.PirelSubject, templates_dict: dict)
 
 def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
 
-  def _rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> dict:
+  def _rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_origin: str) -> dict:
     '''
     Why do we need this function?
     We need this function to update certain values in `template_dict`:
@@ -134,7 +134,6 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
     TODO optimize: context extraction is needed only at this step
     RETURN updated `template_dict`
     '''
-    template_origin = template_dict['template_origin']
     try:
       _ = duoglot_translate_wrapper(
         template_origin,
@@ -147,12 +146,9 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
       )
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
       templates_dict = exc.get_templates_dict()
-
-      # in cases when templates_dict is loaded from str, keys are strings
-      _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
-      template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
-      return template_dict
-    raise RuntimeError('DuoGlot should fail to translate the context code')
+      template_idx = templates_dict['num_templates'] - 1
+      return templates_dict[template_idx]
+    raise RuntimeError('DuoGlot should have failed to translate the context code')
 
   logger.debug('Starting template_dict initialization')
 
