@@ -839,8 +839,7 @@ def get_translation_pairs_from_tsp(
       s += f'[{idx}] {hash}:\n{cand}\n'
     return s
 
-  # NOTE sp3 is used as a snippet to validate a translation rule
-  sp1, sp2, sp3 = tsp
+  sp1, sp2 = tsp
 
   # ~~~ TRANSLATE `SP1` TO PRODUCE SP1_TP1_CANDS (A.K.A. PROGRAM PAIRS)
   ltrans_sp1 = ptlog.TransSP1()
