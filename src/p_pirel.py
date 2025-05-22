@@ -21,6 +21,7 @@ logger = p_utils.setup_logger(__name__)
 
 
 class CannotLearnRulesForProblematicNode(RuntimeError): pass
+class NoTransRulesFromTSPError(RuntimeError): pass
 
 
 def get_pre_context_global(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
@@ -348,7 +349,7 @@ def learn_trans_rules_from_tsp(
 ) -> List[str]:
   '''
   RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
-  RAISE Nothing. Pass all exceptions to the caller.
+  RAISE `NoTransRulesFromTSPError` if no translation rules were learned from TSP.
   '''
 
   logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
@@ -367,6 +368,11 @@ def learn_trans_rules_from_tsp(
   lprule_val_log = ptlog.PRuleValLog()
   checked_trules_list = p_rule_validator.filter_translation_rules(
     trules_list, subject, translation_rules, tsp, template_dict, lprule_val_log)
+
+  if len(checked_trules_list) == 0:
+    logger.warning('No translation rules were learned from TSP.')
+    raise NoTransRulesFromTSPError('No translation rules were learned from TSP.')
+
   return checked_trules_list
 
 
