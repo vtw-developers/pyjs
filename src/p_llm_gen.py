@@ -55,7 +55,6 @@ logger = p_utils.setup_logger(__name__)
 class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
-class LLMResponseFormatError(RuntimeError): pass
 class GenTestFunctionRetryLimitError(RuntimeError): pass
 
 
