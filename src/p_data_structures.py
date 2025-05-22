@@ -746,6 +746,13 @@ class PirelTree:
     self._pre_order(node, _visit_collect_tokens)
     return tokens
 
+  @classmethod
+  def from_code_str(cls, code: str, lang: str) -> 'PirelTree':
+    ast_text, ast_ann = d_ast_parse.parse_text_dbg(code, lang, keep_text=True)
+    tree = PirelTree(ast_text, ast_ann)
+    tree._fix_indentation()
+    return tree
+
 
 class PirelNode():
   def __init__(self, node_type: str, parent_node: 'PirelNode', node_text: str) -> None:
