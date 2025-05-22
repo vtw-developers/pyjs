@@ -418,6 +418,21 @@ def learn_trans_rules_from_tsp_with_retries(
   return trules_list
 
 
+def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
+  '''
+  Generate TSPs using a new algorithm.
+  TODO consider built-in function names
+  '''
+  logger.debug(f'Starting TSP generation')
+
+  tsps = p_generator.generate_tsps_with_generator(template_dict)
+  assert len(tsps) > 0, 'Zero TSPs generated'
+
+  logger.debug(f'Finished TSP generation')
+  p_utils.log_json_time(f'{subject.name}_TSPs-generated.json', tsps)
+  return tsps
+
+
 def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   translation_rules: str,
@@ -431,27 +446,13 @@ def learn_trans_rules_for_prob_node(
   RAISE `PirelError` if cannot generate a translation rule. Our goal is to never raise this error
   '''
 
-  def _init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
-    '''
-    Generate TSPs using a new algorithm.
-    TODO consider built-in function names
-    '''
-    logger.debug(f'Starting TSP generation')
-
-    tsps = p_generator.generate_tsps_with_generator(template_dict)
-    assert len(tsps) > 0, 'Zero TSPs generated'
-
-    logger.debug(f'Finished TSP generation')
-    p_utils.log_json_time(f'{subject.name}_TSPs-generated.json', tsps)
-    return tsps
-
   msg = f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"'
   logger.debug(msg)
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
   template_dict = init_template_dict(subject, translation_rules, templates_dict)
-  tsps = _init_tsps(subject, template_dict)
+  tsps = init_tsps(subject, template_dict)
 
   # ~~~ iterate over TSPs (from abstract to concrete)
   # NOTE since we are using an updated TSP generation algorithm,
