@@ -203,8 +203,7 @@ def learn_trans_rules_from_tsp_with_retries(
   tsp: Tuple[str, str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str,
-  ltsp: ptlog.TSP
+  translation_rules: str
 ) -> List[str]:
   '''
   RETURN All possible translation rules inferred from all possible translations of `tsp`.
@@ -216,14 +215,10 @@ def learn_trans_rules_from_tsp_with_retries(
   trules_list = []
   attempt_idx = 1
   while attempt_idx <= p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    msg = (
-      f'Attempt at learning translation rules from a TSP #{attempt_idx}\n'
-      f'tsp.id = {ltsp.id}, trans_rule_learn_attempt.id = {attempt_idx}\n'
-    )
+    msg = f'Attempt at learning translation rules from a TSP #{attempt_idx}'
     logger.debug(msg)
 
     ltrule_learn_attempt = ptlog.TRuleLearnAttempt(attempt_idx)
-    ltsp.trans_rule_learn_attempts.append(ltrule_learn_attempt)
 
     # catch only non-critical exceptions, after which
     # we can attempt to learn rules from a TSP again.
@@ -234,8 +229,6 @@ def learn_trans_rules_from_tsp_with_retries(
         logger.debug(f'Learned {len(trules_list)} translation rules from TSP.')
         ltrule_learn_attempt.num_trules = len(trules_list)
         ltrule_learn_attempt.success = True
-        ltsp.success = True
-        ltsp.learned_translation_rules = [ptlog.TRule.from_str(trule) for trule in trules_list]
         return trules_list
       else:
         logger.debug(f'No translation rules were learned from TSP.')
@@ -257,8 +250,6 @@ def learn_trans_rules_from_tsp_with_retries(
 
   msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
   logger.warning(msg)
-  ltsp.success = False
-  ltsp.reason = msg
   return trules_list
 
 
@@ -490,11 +481,9 @@ def learn_trans_rules_for_prob_node(
     logger.info(msg)
     print(msg)
 
-    ltsp = ptlog.TSP(tsp_idx, *tsp)
-
     # `learn_trans_rules_from_tsp` is responsible for translation rule validation
     # it is called in `learn_trans_rules_from_tsp_with_retries`
-    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules, ltsp)
+    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules)
 
     # go to the next TSP if no translation rules were learned
     if len(trules_list) == 0:
