@@ -444,8 +444,7 @@ def learn_trans_rules_for_prob_node(
   RAISE `PirelError` if cannot generate a translation rule. Our goal is to never raise this error
   '''
 
-  msg = f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"'
-  logger.debug(msg)
+  logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"')
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
