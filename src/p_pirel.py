@@ -253,7 +253,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
       translation_rules = translation_rules + f'\n\n{hacky_rule}'
     return translation_rules
 
-  def __post_process_partial_program_remove_excess_replace_vars(partial_program: str) -> str:
+  def _post_process_partial_program_remove_excess_replace_vars(partial_program: str) -> str:
     '''
     Problem: if a problematic node appears multiple times consecutively in the AST,
     what ends up happening is that partial program contains several consecutive
@@ -298,7 +298,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
     )
     logger.debug(f'SUCCESS. Partial program generation is complete. num_loops=0')
     tar_code = duoglot_result_dict['tar_code']
-    partial_program = __post_process_partial_program_remove_excess_replace_vars(tar_code)
+    partial_program = _post_process_partial_program_remove_excess_replace_vars(tar_code)
     return partial_program
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
     templates_dict = exc.get_templates_dict()
@@ -329,7 +329,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
         skip_template_extraction=True
       )
       tar_code = duoglot_result_dict['tar_code']
-      partial_program = __post_process_partial_program_remove_excess_replace_vars(tar_code)
+      partial_program = _post_process_partial_program_remove_excess_replace_vars(tar_code)
       logger.debug(f'SUCCESS. Partial program generation is complete. num_loops={loop_counter}')
       logger.debug(f'Partial program is:\n{partial_program}')
       return partial_program
