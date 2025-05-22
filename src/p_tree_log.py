@@ -189,7 +189,6 @@ class TSP:
   id: int
   sp1: str
   sp2: str
-  sp3: str
   success: bool = False
   reason: Optional[str] = None
   trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)

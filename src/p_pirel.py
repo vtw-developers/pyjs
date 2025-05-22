@@ -342,7 +342,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
 
 
 def learn_trans_rules_from_tsp(
-  tsp: Tuple[str, str, str],
+  tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
   translation_rules: str
@@ -377,7 +377,7 @@ def learn_trans_rules_from_tsp(
 
 
 def learn_trans_rules_from_tsp_with_retries(
-  tsp: Tuple[str, str, str],
+  tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
   translation_rules: str
@@ -406,7 +406,7 @@ def learn_trans_rules_from_tsp_with_retries(
   return trules_list
 
 
-def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str, str]]:
+def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
   '''
   Generate TSPs using a new algorithm.
   TODO consider built-in function names

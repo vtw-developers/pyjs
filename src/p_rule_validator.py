@@ -441,7 +441,7 @@ def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   translation_rules: str,
-  tsp: Tuple[str, str, str],
+  tsp: Tuple[str, str],
   template_dict: dict,
   lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
@@ -466,7 +466,7 @@ def filter_translation_rules(
 
     is_semantics_valid = is_valid_translation_rule_test_based(
       subject,
-      tsp[2],
+      'REPLACE WITH SNIPPET UNDER TEST',  # TODO: replace with the actual snippet under test
       translation_rule,
       translation_rules,
       template_dict,
