@@ -367,7 +367,7 @@ def learn_trans_rules_from_tsp(
   # CHECK TRANSLATION RULES
   lprule_val_log = ptlog.PRuleValLog()
   checked_trules_list = p_rule_validator.filter_translation_rules(
-    trules_list, subject, translation_rules, tsp, template_dict, lprule_val_log)
+    trules_list, subject, translation_rules, template_dict, lprule_val_log)
 
   if len(checked_trules_list) == 0:
     logger.warning('No translation rules were learned from TSP.')

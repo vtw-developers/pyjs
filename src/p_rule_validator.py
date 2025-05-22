@@ -441,7 +441,6 @@ def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   translation_rules: str,
-  tsp: Tuple[str, str],
   template_dict: dict,
   lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
