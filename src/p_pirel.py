@@ -20,7 +20,7 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
-class PirelError(RuntimeError): pass
+class CannotLearnRulesForProblematicNode(RuntimeError): pass
 
 
 def get_pre_context_global(subject: p_subject.PirelSubject, templates_dict: dict) -> str:
@@ -438,10 +438,10 @@ def learn_trans_rules_for_prob_node(
 ) -> list:
   '''
   Run PiREL translation rule learning module for a problematic node.
-
   PRE There is a translation error.
   RETURN [translation_rules]
-  RAISE `PirelError` if cannot generate a translation rule. Our goal is to never raise this error
+  RAISE `CannotLearnRulesForProblematicNode` if cannot generate a translation rule.
+  Our goal is to never raise this error
   '''
 
   logger.debug(f'Starting p_pirel.learn_trans_rules_for_prob_node for "{subject.name}"')
@@ -452,29 +452,21 @@ def learn_trans_rules_for_prob_node(
   tsps = init_tsps(subject, template_dict)
 
   # ~~~ iterate over TSPs (from abstract to concrete)
-  # NOTE since we are using an updated TSP generation algorithm,
-  # we stop at the first TSP from which we have learned a translation rule(s).
-  # There is a high chance that such a TSP is the first one in `tsps` list
-  # according to our new algorithm.
   num_useful_tsps = 0
   all_trules_list = []
   for tsp_idx, tsp in enumerate(tsps, start=1):
     msg = (
       f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
       f'tsp.id = {tsp_idx}\n'
-      f'{json.dumps(tsp, indent=2)}\n'
-    )
+      f'{json.dumps(tsp, indent=2)}\n')
     logger.info(msg)
-    print(msg)
 
-    # `learn_trans_rules_from_tsp` is responsible for translation rule validation
-    # it is called in `learn_trans_rules_from_tsp_with_retries`
     trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules)
-
-    # go to the next TSP if no translation rules were learned
     if len(trules_list) == 0:
-      logger.debug(f'Skipping a TSP: no translation rules were learnt from it (tsp_idx={tsp_idx})')
-      logger.debug(f'TSP:\n{json.dumps(tsp, indent=2)}')
+      msg = (
+        f'Skipping a TSP: no translation rules were learnt from it (tsp.id = {tsp_idx}):\n'
+        f'{json.dumps(tsp, indent=2)}\n')
+      logger.debug(msg)
       continue
 
     num_useful_tsps += 1
@@ -486,13 +478,12 @@ def learn_trans_rules_for_prob_node(
     return all_trules_list
 
   msg = (
-    f'Could not learn valid translation rules to translate\n'
+    f'Could not learn any valid translation rules to translate\n'
     f'the problematic node with any of the {len(tsps)} TSPs.\n'
     f'problematic_node_type = "{template_dict["problematic_node_type"]}".\n'
-    f'len(tsps) = {len(tsps)}\n'
-  )
+    f'len(tsps) = {len(tsps)}\n')
   logger.critical(msg)
-  raise PirelError(msg)
+  raise CannotLearnRulesForProblematicNode(msg)
 
 
 def duoglot_translate_wrapper(
