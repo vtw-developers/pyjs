@@ -27,8 +27,7 @@ def cleanup():
 
 def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
-  starting_ruleset: str,
-  lrule_learn_phase: ptlog.RuleLearnPhase
+  starting_ruleset: str
 ) -> Tuple[str, str]:
   '''
   RETURN Tuple of learned translation rules and translated program.
@@ -48,7 +47,6 @@ def learn_phase_on_subject(
     print(msg)
 
     ltrans_iteration = ptlog.TransIteration(iteration)
-    lrule_learn_phase.translation_iterations.append(ltrans_iteration)
 
     # PiREL attempts to translate the code. If there is a node that PiREL
     # cannot translate (a.k.a. problematic node), it will generate a
@@ -126,7 +124,7 @@ def learn_and_application_phases_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset, lrule_learn_phase)
+    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, starting_ruleset)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -393,7 +391,7 @@ def learn_phase_custom_mode(conf: dict) -> None:
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code, lrule_learn_phase)
+    learned_trans_rules, tar_main_code = learn_phase_on_subject(subject, subject.translation_rules_main_code)
 
     lrule_learn_phase.success = True
     lsubject.success = True
