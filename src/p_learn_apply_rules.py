@@ -35,8 +35,8 @@ def learn_phase_on_subject(
   '''
 
   logger.info(f'Starting translation of "{subject.name}"')
-  translation_rules = starting_ruleset
-  p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', translation_rules)
+  current_ruleset = starting_ruleset
+  p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset)
 
   # This loop stops iff translation is successful or an error is raised.
   # Each iteration handles one problematic node at a time.
@@ -50,20 +50,20 @@ def learn_phase_on_subject(
     templates_dict = None
     try:
       logger.debug(f'Attempting to translate "{subject.name}" with the current ruleset')
-      logger.debug(f'Number of translation rules in the ruleset: {translation_rules.count("match_expand")}')
+      logger.debug(f'Number of translation rules in the ruleset: {current_ruleset.count("match_expand")}')
 
       duoglot_result_dict = p_pirel.duoglot_translate_wrapper(
         subject.src_main_code,
         subject.src_lang,
         subject.tar_lang,
-        translation_rules,
+        current_ruleset,
         subject.auto_backward,
         subject.choices,
         subject_name=subject.name,
       )
 
       logger.info('SUCCESS. Translation is successful.')
-      return translation_rules
+      return current_ruleset
 
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
       templates_dict = exc.get_templates_dict()
@@ -74,7 +74,7 @@ def learn_phase_on_subject(
     # ~~~ entering PiREL learning phase
     # NOTE all raised errors are sent to the caller. If there were no exceptions,
     # it means that PiREL has learned some rule(s) to translate the problematic node.
-    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
+    trules_list = p_pirel.learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict)
 
     logger.debug(f'PiREL has generated some translation rules to address the problematic node.')
     logger.debug(f'Number of translation rules: {len(trules_list)}')
@@ -83,10 +83,10 @@ def learn_phase_on_subject(
     # TODO do not add duplicate rules
     comment = f';;;; NEW RULE FROM PiREL (iteration {iteration}) (subject_name {subject.name})'
     for idx, translation_rule in enumerate(trules_list, start=1):
-      translation_rules = f'{comment} (rule {idx})\n{translation_rule}\n\n\n' + translation_rules
+      current_ruleset = f'{comment} (rule {idx})\n{translation_rule}\n\n\n' + current_ruleset
       logger.debug(f'NEW RULE {idx}:\n{translation_rule}')
 
-    p_utils.log_file_time(f'{subject.name}_updated-ruleset.snart', translation_rules)
+    p_utils.log_file_time(f'{subject.name}_updated-ruleset.snart', current_ruleset)
     logger.debug(f'Ruleset has been updated with {len(trules_list)} translation rules.\n\n')
     iteration += 1
 

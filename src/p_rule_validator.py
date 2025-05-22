@@ -21,7 +21,7 @@ logger = p_utils.setup_logger(__name__)
 def is_valid_translation_rule_syntactic(
   subject: p_subject.PirelSubject,
   translation_rule: str,
-  existing_ruleset: str,
+  current_ruleset: str,
   ltrule: ptlog.TRule
 ) -> bool:
   '''
@@ -47,7 +47,7 @@ def is_valid_translation_rule_syntactic(
     rule_ids_after: List[int],
     ltrule_syntax_val_res: ptlog.TRuleSyntaxValRes
   ) -> bool:
-    nonlocal existing_ruleset
+    nonlocal current_ruleset
     logger.debug('~~ checking rule under test based on the rule ids used')
     logger.debug(f'rule_ids_before: {rule_ids_before}')
     logger.debug(f'rule_ids_after: {rule_ids_after}')
@@ -88,7 +88,7 @@ def is_valid_translation_rule_syntactic(
     # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
     # as in the example above, `17` must be id of the rule under test
     logger.debug('~ checking if rule under test is used for the problematic node')
-    existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(existing_ruleset)
+    existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(current_ruleset)
     num_rules_in_before_ruleset = len(existing_rules_list)
     # this will be id of the rule under test
     rule_under_test_idx_in_after_ruleset = num_rules_in_before_ruleset
@@ -148,7 +148,7 @@ def is_valid_translation_rule_syntactic(
       subject.src_main_code,
       subject.src_lang,
       subject.tar_lang,
-      existing_ruleset,
+      current_ruleset,
       subject.auto_backward,
       subject.choices,
       subject_name=subject.name,
@@ -182,7 +182,7 @@ def is_valid_translation_rule_syntactic(
       subject.src_main_code,
       subject.src_lang,
       subject.tar_lang,
-      existing_ruleset + '\n\n' + translation_rule,
+      current_ruleset + '\n\n' + translation_rule,
       subject.auto_backward,
       subject.choices,
       subject_name=subject.name,
@@ -227,7 +227,7 @@ def is_valid_translation_rule_test_based(
   subject: p_subject.PirelSubject,
   snippet_under_test: str,
   trule_under_test: str,
-  existing_ruleset: str,
+  current_ruleset: str,
   template_dict: dict,
   ltrule: ptlog.TRule
 ) -> bool:
@@ -410,7 +410,7 @@ def is_valid_translation_rule_test_based(
     f'{trule_under_test}\n\n'
     f'{log_statement_rule}\n\n'
     f'{extra_ruleset}\n\n'
-    f'{existing_ruleset}'
+    f'{current_ruleset}'
   )
 
   pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
@@ -440,7 +440,7 @@ def is_valid_translation_rule_test_based(
 def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
-  translation_rules: str,
+  current_ruleset: str,
   template_dict: dict,
   lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
@@ -458,7 +458,7 @@ def filter_translation_rules(
     ltrule = ptlog.TRule.from_str(translation_rule)
     lprule_val_log.translation_rules.append(ltrule)
 
-    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, translation_rules, ltrule)
+    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, current_ruleset, ltrule)
     if not is_syntax_valid:
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
       continue
@@ -467,7 +467,7 @@ def filter_translation_rules(
       subject,
       'REPLACE WITH SNIPPET UNDER TEST',  # TODO: replace with the actual snippet under test
       translation_rule,
-      translation_rules,
+      current_ruleset,
       template_dict,
       ltrule
     )

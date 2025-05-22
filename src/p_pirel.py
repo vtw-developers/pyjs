@@ -121,9 +121,9 @@ def get_pre_context_local(subject: p_subject.PirelSubject, templates_dict: dict)
   return pre_context
 
 
-def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, templates_dict: dict) -> dict:
+def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, templates_dict: dict) -> dict:
 
-  def _rerun_translation_for_context(subject: p_subject.PirelSubject, translation_rules: str, template_origin: str) -> dict:
+  def _rerun_translation_for_context(subject: p_subject.PirelSubject, current_ruleset: str, template_origin: str) -> dict:
     '''
     Why do we need this function?
     We need this function to update certain values in `template_dict`:
@@ -140,7 +140,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
         template_origin,
         subject.src_lang,
         subject.tar_lang,
-        translation_rules,
+        current_ruleset,
         subject.auto_backward,
         subject.choices,
         subject_name=subject.name,
@@ -162,7 +162,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, translation_rules, template_dict)
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict)
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
   # simplify the context
@@ -177,11 +177,11 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, translation_rules, template_dict)
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict)
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
   # prepare partial program
-  partial_program = get_partial_program(subject, translation_rules, template_dict)
+  partial_program = get_partial_program(subject, current_ruleset, template_dict)
   template_dict['partial_program'] = partial_program
   p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
 
@@ -200,7 +200,7 @@ def init_template_dict(subject: p_subject.PirelSubject, translation_rules: str, 
   return template_dict
 
 
-def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str, template_dict: dict) -> str:
+def get_partial_program(subject: p_subject.PirelSubject, current_ruleset: str, template_dict: dict) -> str:
   '''
   A partial program (TODO is it a good name?) is a partially translated
   program in target language. Partial programs are used in LLM prompts
@@ -221,7 +221,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
      This way we get a partially translated program.
   '''
 
-  def _append_hacky_rules(translation_rules: str, problematic_node_type: str, secret_identifier: str) -> str:
+  def _append_hacky_rules(current_ruleset: str, problematic_node_type: str, secret_identifier: str) -> str:
     '''
     Update `trans_rules` by appending all possible hacky rules
     to get a partial program.
@@ -251,8 +251,8 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
     matcher = f'"py.{problematic_node_type}" "*"'
     for hacky_expansion in HACKY_EXPANSIONS_PY_JS.get(problematic_node_type, HACKY_EXPANSIONS_PY_JS['default']):
       hacky_rule = f'(match_expand (fragment ({matcher}) "*") (fragment {hacky_expansion} "*2"))'
-      translation_rules = translation_rules + f'\n\n{hacky_rule}'
-    return translation_rules
+      current_ruleset = current_ruleset + f'\n\n{hacky_rule}'
+    return current_ruleset
 
   def _post_process_partial_program_remove_excess_replace_vars(partial_program: str) -> str:
     '''
@@ -278,7 +278,7 @@ def get_partial_program(subject: p_subject.PirelSubject, translation_rules: str,
 
   # 1 ADD HACKY RULES FOR THE MAIN PROBLEMATIC NODE
   prob_ntype_main = template_dict['problematic_node_type']
-  new_trans_rules = _append_hacky_rules(translation_rules, prob_ntype_main, p_consts.PAR_PROG_PROB_NODE_REPLACE)
+  new_trans_rules = _append_hacky_rules(current_ruleset, prob_ntype_main, p_consts.PAR_PROG_PROB_NODE_REPLACE)
   new_src_code = template_dict['template_origin']
 
   logger.debug(f'problematic_node_type_main = "{prob_ntype_main}"')
@@ -345,7 +345,7 @@ def learn_trans_rules_from_tsp(
   tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str
+  current_ruleset: str
 ) -> List[str]:
   '''
   RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
@@ -367,7 +367,7 @@ def learn_trans_rules_from_tsp(
   # CHECK TRANSLATION RULES
   lprule_val_log = ptlog.PRuleValLog()
   checked_trules_list = p_rule_validator.filter_translation_rules(
-    trules_list, subject, translation_rules, template_dict, lprule_val_log)
+    trules_list, subject, current_ruleset, template_dict, lprule_val_log)
 
   if len(checked_trules_list) == 0:
     logger.warning('No translation rules were learned from TSP.')
@@ -380,7 +380,7 @@ def learn_trans_rules_from_tsp_with_retries(
   tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
-  translation_rules: str
+  current_ruleset: str
 ) -> List[str]:
   '''
   RETURN All possible translation rules inferred from all possible translations of `tsp`.
@@ -394,7 +394,7 @@ def learn_trans_rules_from_tsp_with_retries(
     attempt_idx += 1
     logger.debug(f'Attempting to learn some translation rules from a TSP #{attempt_idx}')
     try:
-      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, translation_rules)
+      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset)
       return trules_list
     except p_llm_gen.NoTransPairsFromTSPError as err:
       logger.warning('Attempt to learn translation rules from TSP failed')
@@ -423,7 +423,7 @@ def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tupl
 
 def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
-  translation_rules: str,
+  current_ruleset: str,
   templates_dict: dict
 ) -> list:
   '''
@@ -438,7 +438,7 @@ def learn_trans_rules_for_prob_node(
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
-  template_dict = init_template_dict(subject, translation_rules, templates_dict)
+  template_dict = init_template_dict(subject, current_ruleset, templates_dict)
   tsps = init_tsps(subject, template_dict)
 
   # ~~~ iterate over TSPs (from abstract to concrete)
@@ -451,7 +451,7 @@ def learn_trans_rules_for_prob_node(
       f'{json.dumps(tsp, indent=2)}\n')
     logger.info(msg)
 
-    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, translation_rules)
+    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, current_ruleset)
     if len(trules_list) == 0:
       msg = (
         f'Skipping a TSP: no translation rules were learnt from it (tsp.id = {tsp_idx}):\n'
@@ -537,7 +537,7 @@ def _test_learn_trans_rules_for_prob_node():
   '''
   def learn_trans_rules_for_prob_node(
     subject: p_subject.PirelSubject,
-    translation_rules: str,
+    current_ruleset: str,
     templates_dict: dict
   ) -> list:
   '''
@@ -546,10 +546,10 @@ def _test_learn_trans_rules_for_prob_node():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  translation_rules = args_dict['translation_rules']
+  current_ruleset = args_dict['current_ruleset']
   templates_dict = args_dict['templates_dict']
 
-  result = learn_trans_rules_for_prob_node(subject, translation_rules, templates_dict)
+  result = learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict)
   print('\n\n'.join(result))
 
 
