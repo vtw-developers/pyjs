@@ -245,7 +245,15 @@ class ParameterNode(pvis.AbstractNode): pass
 class ParametersNode(pvis.AbstractNode): pass
 class ParenthesizedExpressionNode(pvis.AbstractNode): pass
 class ParenthesizedListSplatNode(pvis.AbstractNode): pass
-class PassStatementNode(pvis.AbstractNode): pass
+class PassStatementNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls) -> PassStatementNode:
+    '''Build a pass statement node'''
+    node = cls('pass_statement')
+    tnode = pvis.TerminalNode('pass')
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class PatternNode(pvis.AbstractNode): pass
 class PatternListNode(pvis.AbstractNode): pass
 class PrimaryExpressionNode(pvis.AbstractNode): pass
