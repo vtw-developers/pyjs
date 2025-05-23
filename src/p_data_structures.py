@@ -971,7 +971,7 @@ class PirelNode():
     assert path is not None, 'should not happen'
     return path
 
-  def get_node_by_id(self, node_id: int) -> List[int]:
+  def get_node_by_id(self, node_id: int) -> 'PirelNode':
     '''
     get a reference to a node with id node_id
     that belongs to the same tree as self
