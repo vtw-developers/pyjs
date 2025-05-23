@@ -1,8 +1,10 @@
+from typing import List, Tuple
+
 import d_consts
 import d_utils
 
 
-def parse_analyze_rules(code_str, show_disable=False):
+def parse_analyze_rules(code_str, show_disable=False) -> Tuple[List[dict], dict]:
   # No longer using the old preprocessing code. Otherwise offset is wrong.
   # code_str = "\n".join([x for x in code_str.split("\n") if not x.strip().startswith(";") and not x.strip() == ""])
   expected_rule_count = len(("\n" + code_str).split("\n(match_expand")) + len(("\n" + code_str).split("\n(ext_match_expand")) - 2
