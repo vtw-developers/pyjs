@@ -2169,6 +2169,20 @@ class BreakStatementInserter(pvis.Visitor):
     break_statement.set_parent(node.body)
 
 
+class StatementNodeSimplifier(pvis.Visitor):
+  '''
+  This visitor simplifies the statement nodes.
+  If a statement node is a compound statement (involves BlockNode as a child),
+  then replace all children under its block with a PassStatementNode.
+  '''
+  # VISIT METHODS
+  def visit_BlockNode(self, node: BlockNode) -> None:
+    # replace all children with a pass statement
+    pass_statement_node = PassStatementNode.build()
+    node.children = [pass_statement_node]
+    pass_statement_node.set_parent(node)
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')
