@@ -66,3 +66,38 @@ def parse_analyze_rules(code_str, show_disable=False) -> Tuple[List[dict], dict]
   }
 
   return expansion_programs, dbg_info
+
+
+def pretty_s_expr(s_expr):
+  '''
+  `sExpr` has a very similar structure to DuoGlot style AST's.
+  This function returns a string version of it which is THE version
+  that is parsed by the DuoGlot transpiler.
+  Refer to p_rule_inferencer.py for more information.
+  '''
+  if isinstance(s_expr, list):
+    result = ['(']
+    for i in range(0, len(s_expr)):
+      result.append(pretty_s_expr(s_expr[i]))
+      if i < len(s_expr) - 1:
+        result.append(' ')
+    result.append(')')
+    return ''.join(result)
+  else:
+    return str(s_expr)
+
+
+def pretty_rule(rule):
+  '''
+  Pretty-prints a translation rule to the standard format.
+  Refer to p_rule_inferencer.py for more information.
+  PARAM rule - as parsed by parse_analyze_rules()
+  '''
+  rule_type = rule['type']
+  match = rule['match']
+  expand = rule['expand']
+  assert rule_type == 'match_expand', 'sanity check'
+  return \
+    f'({rule_type}\n' \
+    f'  {pretty_s_expr(match)}\n' \
+    f'  {pretty_s_expr(expand)}\n)'
