@@ -93,7 +93,7 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
   '''
 
   def __get_error_type(stderr: str) -> str:
-    # works in conjuction with `p_rule_chooser._get_proposed_choices()`
+    # works in conjuction with `p_rule_chooser.get_proposed_choices()`
     _SUPPORTED_ERROR_TYPES_JS = [
       'SyntaxError:',
       'ReferenceError:',

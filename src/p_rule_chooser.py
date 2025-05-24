@@ -9,7 +9,7 @@ logger = p_utils.setup_logger(__name__)
 class NoUniqueChoicesError(RuntimeError): pass
 
 
-def _get_proposed_choices(
+def get_proposed_choices(
   tar_program_instr: str,
   tar_main_code: str,
   tar_error_dict: dict,
@@ -178,7 +178,7 @@ def _get_proposed_choices(
           return False
       return True
 
-    logger.debug('Starting p_rule_chooser._get_proposed_choices.__find_next_unique_choices')
+    logger.debug('Starting p_rule_chooser.get_proposed_choices.__find_next_unique_choices')
 
     type_ = current_choices['type']
     choices_list : list = current_choices['choices_list']
@@ -214,7 +214,7 @@ def _get_proposed_choices(
 
     raise NoUniqueChoicesError('No unique choices found')
 
-  logger.debug('Starting p_rule_chooser._get_proposed_choices')
+  logger.debug('Starting p_rule_chooser.get_proposed_choices')
 
   error_msg = tar_error_dict['error_msg']  # e.g. 'SyntaxError: invalid syntax'
   error_type = tar_error_dict['error_type']  # e.g. 'SyntaxError'
