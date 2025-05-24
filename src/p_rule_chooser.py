@@ -9,6 +9,208 @@ logger = p_utils.setup_logger(__name__)
 class NoUniqueChoicesError(RuntimeError): pass
 
 
+def ___astnode_choices_list_compare(
+  choices_list1: list,
+  choices_list2: list
+):
+  choices1_dict = {}
+  for range_key, ch in choices_list1:
+    astid, start, end = range_key
+    range_key_str = f'{astid}-{start}-{end}'
+    if range_key_str in choices1_dict:
+      raise ValueError(f'_astnode_choices_list_compare invalid choices_list1: duplicated range_key: {choices1_dict}')
+    if ch != 0:
+      choices1_dict[range_key_str] = ch
+  for range_key, ch in choices_list2:
+    astid, start, end = range_key
+    range_key_str = f'{astid}-{start}-{end}'
+    if range_key_str in choices1_dict:
+      if choices1_dict[range_key_str] == ch:
+        choices1_dict[range_key_str] = -1
+        continue
+      else:
+        return False
+    else:
+      if ch == 0:
+        continue
+      else:
+        return False
+  for range_key_str in choices1_dict:
+    if choices1_dict[range_key_str] != -1:
+      return False
+  return True
+
+
+def ___step_choices_list_compare(
+  choices_list1: list,
+  choices_list2: list
+):
+  choices1_dict = {}
+  for step, ch in choices_list1:
+    assert step not in choices1_dict, f'___step_choices_list_compare invalid choices_list1: duplicated step: {choices1_dict}'
+    if ch != 0:
+      choices1_dict[step] = ch
+  for step, ch in choices_list2:
+    if step in choices1_dict:
+      if choices1_dict[step] == ch:
+        choices1_dict[step] = -1
+        continue
+      else:
+        return False
+    else:
+      if ch == 0:
+        continue
+      else:
+        return False
+  for step in choices1_dict:
+    if choices1_dict[step] != -1:
+      return False
+  return True
+
+
+def ___choices_any_duplicate(
+  choices: list,
+  choices_history: List[dict]
+):
+  type_ = choices['type']
+  choices_list = choices['choices_list']
+  for cmp_choices in choices_history:
+    cmp_type = cmp_choices['type']
+    assert cmp_type == type_, '___choices_any_duplicate boolean check FAILED. Choices are of different type.'
+    cmp_choices_list = cmp_choices['choices_list']
+    assert type_ in ['STEP', 'ASTNODE'], f'___choices_any_duplicate unknown type: {type_}'
+    if type_ == 'STEP':
+      if ___step_choices_list_compare(choices_list, cmp_choices_list):
+        return True
+    elif type_ == 'ASTNODE':
+      if ___astnode_choices_list_compare(choices_list, cmp_choices_list):
+        return True
+  return False
+
+
+def ___astnode_choices_list_update(
+  choices_list: list,
+  current_range_key: Tuple[int],
+  update_ch: int
+):
+  new_choices = []
+  is_set = False
+  c_astid, c_start, c_end = current_range_key
+  for choice in choices_list:
+    astid, start, end = choice[0]
+    if c_astid == astid and c_start == start and c_end == end:
+      is_set = True
+      if update_ch != 0:
+        new_choices.append([current_range_key, update_ch])
+    else:
+      new_choices.append(choice)
+  if not is_set and update_ch != 0:
+    new_choices.append([current_range_key, update_ch])
+  return new_choices
+
+
+def ___step_choices_list_update(
+  choices_list: list,
+  step: int,
+  update_ch: int
+):
+  new_choices = []
+  is_set = False
+  for choice in choices_list:
+    if choice[0] == step:
+      is_set = True
+      if update_ch != 0:
+        new_choices.append([step, update_ch])
+    else:
+      if choice[0] > step:
+        continue
+      else:
+        new_choices.append(choice)
+  if not is_set and update_ch != 0:
+    new_choices.append([step, update_ch])
+  return new_choices
+
+
+def __find_next_unique_choices(
+  related_alt_step_infos: Dict[int, tuple],
+  current_choices: dict,
+  choices_history: List[dict]
+):
+  logger.debug('Starting p_rule_chooser.get_proposed_choices.__find_next_unique_choices')
+
+  type_ = current_choices['type']
+  choices_list : list = current_choices['choices_list']
+  assert type_ in ['STEP', 'ASTNODE'], f'__find_next_unique_choices unknown type: {type_}'
+
+  if type_ == 'STEP':
+    for alt_step, info in related_alt_step_infos.items():
+      chcount, current_ch = info[:2]
+      for i in range(chcount):
+        if i == current_ch:
+          continue
+        updated_choices_list = ___step_choices_list_update(choices_list, int(alt_step), i)
+        new_choices = {
+          'type': 'STEP',
+          'choices_list': updated_choices_list
+        }
+        if not ___choices_any_duplicate(new_choices, choices_history):
+          return new_choices
+  elif type_ == 'ASTNODE':
+    for alt_step, info in related_alt_step_infos.items():
+      chcount, current_ch = info[:2]
+      current_range_key = info[5]
+      for i in range(chcount):
+        if i == current_ch:
+          continue
+        updated_choices_list = ___astnode_choices_list_update(choices_list, current_range_key, i)
+        new_choices = {
+          'type': 'ASTNODE',
+          'choices_list': updated_choices_list
+        }
+        if not ___choices_any_duplicate(new_choices, choices_history):
+          return new_choices
+
+  raise NoUniqueChoicesError('No unique choices found')
+
+
+def __get_char_pos_to_line_pos_map_lists(main_code_lines: List[str]) -> Tuple[List[int], List[int]]:
+  line_map = []
+  column_map = []
+  for i, line in enumerate(main_code_lines):
+    for j, _ in enumerate(line):
+      line_map.append(i)
+      column_map.append(j)
+    # the newline char
+    line_map.append(i)
+    column_map.append(-1)
+  return line_map, column_map
+
+
+def __get_err_line_idx_in_tar_main_code(
+  line_content: str,
+  err_line_tpi: int,
+  tar_program_instr: str,
+  tar_main_code: str
+) -> int:
+  '''
+  Get the index of the line in `tar_main_code` that corresponds to the error line.
+  '''
+  tpi_chunks = tar_program_instr.split(tar_main_code)
+  assert len(tpi_chunks) == 2, 'sanity check: tar_main_code should appear exactly once in wrapper'
+
+  pre_main_code = tpi_chunks[0]
+  pre_main_code_line_count = len(pre_main_code.split('\n'))
+
+  err_line_idx = err_line_tpi - pre_main_code_line_count
+  main_code_lines = tar_main_code.split('\n')
+  assert err_line_idx < len(main_code_lines), 'sanity check: err_line_idx should be within main_code_lines'
+
+  expected_line = main_code_lines[err_line_idx]
+  assert line_content in expected_line, "Expected line doesn't contain error line content."
+
+  return err_line_idx
+
+
 def get_proposed_choices(
   tar_program_instr: str,
   tar_main_code: str,
@@ -18,201 +220,6 @@ def get_proposed_choices(
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
 ) -> dict:
-
-  def __get_err_line_idx_in_tar_main_code(
-    line_content: str,
-    err_line_tpi: int,
-    tar_program_instr: str,
-    tar_main_code: str
-  ) -> int:
-    '''
-    Get the index of the line in `tar_main_code` that corresponds to the error line.
-    '''
-    tpi_chunks = tar_program_instr.split(tar_main_code)
-    assert len(tpi_chunks) == 2, 'sanity check: tar_main_code should appear exactly once in wrapper'
-
-    pre_main_code = tpi_chunks[0]
-    pre_main_code_line_count = len(pre_main_code.split('\n'))
-
-    err_line_idx = err_line_tpi - pre_main_code_line_count
-    main_code_lines = tar_main_code.split('\n')
-    assert err_line_idx < len(main_code_lines), 'sanity check: err_line_idx should be within main_code_lines'
-
-    expected_line = main_code_lines[err_line_idx]
-    assert line_content in expected_line, "Expected line doesn't contain error line content."
-
-    return err_line_idx
-
-  def __get_char_pos_to_line_pos_map_lists(main_code_lines: List[str]) -> Tuple[List[int], List[int]]:
-    line_map = []
-    column_map = []
-    for i, line in enumerate(main_code_lines):
-      for j, _ in enumerate(line):
-        line_map.append(i)
-        column_map.append(j)
-      # the newline char
-      line_map.append(i)
-      column_map.append(-1)
-    return line_map, column_map
-
-  def __find_next_unique_choices(
-    related_alt_step_infos: Dict[int, tuple],
-    current_choices: dict,
-    choices_history: List[dict]
-  ):
-
-    def ___step_choices_list_update(
-      choices_list: list,
-      step: int,
-      update_ch: int
-    ):
-      new_choices = []
-      is_set = False
-      for choice in choices_list:
-        if choice[0] == step:
-          is_set = True
-          if update_ch != 0:
-            new_choices.append([step, update_ch])
-        else:
-          if choice[0] > step:
-            continue
-          else:
-            new_choices.append(choice)
-      if not is_set and update_ch != 0:
-        new_choices.append([step, update_ch])
-      return new_choices
-
-    def ___astnode_choices_list_update(
-      choices_list: list,
-      current_range_key: Tuple[int],
-      update_ch: int
-    ):
-      new_choices = []
-      is_set = False
-      c_astid, c_start, c_end = current_range_key
-      for choice in choices_list:
-        astid, start, end = choice[0]
-        if c_astid == astid and c_start == start and c_end == end:
-          is_set = True
-          if update_ch != 0:
-            new_choices.append([current_range_key, update_ch])
-        else:
-          new_choices.append(choice)
-      if not is_set and update_ch != 0:
-        new_choices.append([current_range_key, update_ch])
-      return new_choices
-
-    def ___choices_any_duplicate(
-      choices: list,
-      choices_history: List[dict]
-    ):
-      type_ = choices['type']
-      choices_list = choices['choices_list']
-      for cmp_choices in choices_history:
-        cmp_type = cmp_choices['type']
-        assert cmp_type == type_, '___choices_any_duplicate boolean check FAILED. Choices are of different type.'
-        cmp_choices_list = cmp_choices['choices_list']
-        assert type_ in ['STEP', 'ASTNODE'], f'___choices_any_duplicate unknown type: {type_}'
-        if type_ == 'STEP':
-          if ___step_choices_list_compare(choices_list, cmp_choices_list):
-            return True
-        elif type_ == 'ASTNODE':
-          if ___astnode_choices_list_compare(choices_list, cmp_choices_list):
-            return True
-      return False
-
-    def ___step_choices_list_compare(
-      choices_list1: list,
-      choices_list2: list
-    ):
-      choices1_dict = {}
-      for step, ch in choices_list1:
-        assert step not in choices1_dict, f'___step_choices_list_compare invalid choices_list1: duplicated step: {choices1_dict}'
-        if ch != 0:
-          choices1_dict[step] = ch
-      for step, ch in choices_list2:
-        if step in choices1_dict:
-          if choices1_dict[step] == ch:
-            choices1_dict[step] = -1
-            continue
-          else:
-            return False
-        else:
-          if ch == 0:
-            continue
-          else:
-            return False
-      for step in choices1_dict:
-        if choices1_dict[step] != -1:
-          return False
-      return True
-
-    def ___astnode_choices_list_compare(
-      choices_list1: list,
-      choices_list2: list
-    ):
-      choices1_dict = {}
-      for range_key, ch in choices_list1:
-        astid, start, end = range_key
-        range_key_str = f'{astid}-{start}-{end}'
-        if range_key_str in choices1_dict:
-          raise ValueError(f'_astnode_choices_list_compare invalid choices_list1: duplicated range_key: {choices1_dict}')
-        if ch != 0:
-          choices1_dict[range_key_str] = ch
-      for range_key, ch in choices_list2:
-        astid, start, end = range_key
-        range_key_str = f'{astid}-{start}-{end}'
-        if range_key_str in choices1_dict:
-          if choices1_dict[range_key_str] == ch:
-            choices1_dict[range_key_str] = -1
-            continue
-          else:
-            return False
-        else:
-          if ch == 0:
-            continue
-          else:
-            return False
-      for range_key_str in choices1_dict:
-        if choices1_dict[range_key_str] != -1:
-          return False
-      return True
-
-    logger.debug('Starting p_rule_chooser.get_proposed_choices.__find_next_unique_choices')
-
-    type_ = current_choices['type']
-    choices_list : list = current_choices['choices_list']
-    assert type_ in ['STEP', 'ASTNODE'], f'__find_next_unique_choices unknown type: {type_}'
-
-    if type_ == 'STEP':
-      for alt_step, info in related_alt_step_infos.items():
-        chcount, current_ch = info[:2]
-        for i in range(chcount):
-          if i == current_ch:
-            continue
-          updated_choices_list = ___step_choices_list_update(choices_list, int(alt_step), i)
-          new_choices = {
-            'type': 'STEP',
-            'choices_list': updated_choices_list
-          }
-          if not ___choices_any_duplicate(new_choices, choices_history):
-            return new_choices
-    elif type_ == 'ASTNODE':
-      for alt_step, info in related_alt_step_infos.items():
-        chcount, current_ch = info[:2]
-        current_range_key = info[5]
-        for i in range(chcount):
-          if i == current_ch:
-            continue
-          updated_choices_list = ___astnode_choices_list_update(choices_list, current_range_key, i)
-          new_choices = {
-            'type': 'ASTNODE',
-            'choices_list': updated_choices_list
-          }
-          if not ___choices_any_duplicate(new_choices, choices_history):
-            return new_choices
-
-    raise NoUniqueChoicesError('No unique choices found')
 
   logger.debug('Starting p_rule_chooser.get_proposed_choices')
 
