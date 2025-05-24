@@ -323,7 +323,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
       break
     logger.debug('BAD: error in running tests')
 
-    proposed_choices = p_rule_chooser._get_proposed_choices(
+    proposed_choices = p_rule_chooser.get_proposed_choices(
       tar_program_instr,
       tar_main_code,
       tar_error_dict,
