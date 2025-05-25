@@ -186,8 +186,8 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n') if line.strip() != ''])
-    return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
+    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n')])
+    return commented_out + f'{_SPLITTER}' + rest
 
   if lang == 'js':
     splits = code.split(_SPLITTER)
@@ -195,8 +195,8 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
       return code
     assert len(splits) == 2
     to_comment_out, rest = splits
-    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n') if line.strip() != ''])
-    return commented_out + f'\n\n{_SPLITTER}\n\n' + rest
+    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n')])
+    return commented_out + f'{_SPLITTER}' + rest
 
 
 def run_src_test_script(
