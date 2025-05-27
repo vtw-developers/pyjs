@@ -254,7 +254,6 @@ class BasePirelTask(ABC):
     code_blocks = extract_code_blocks(raw_response)
     self._log_json(code_blocks, f'gen-code-blocks.json')
     logger.debug(f'generated code blocks:\n{json.dumps(code_blocks, indent=2)}')
-    logger.debug(f'partial program:\n  {repr(self.template_dict["partial_program"])}')
     return code_blocks
 
   def _validate_code_blocks(self) -> p_llm_val.BaseValidationResult:
