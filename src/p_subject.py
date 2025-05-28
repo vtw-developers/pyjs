@@ -256,13 +256,12 @@ class PirelSubject:
     # translation_rules_main_code
     _trmc = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
     if 'translation_rules_main_code' in conf:
-      assert isinstance(conf['translation_rules_main_code'], str), \
-        'translation_rules_main_code must be a string'
       _trmc = conf['translation_rules_main_code']
+      assert isinstance(_trmc, str), 'translation_rules_main_code must be a string'
     elif 'translation_rules_main_code_fpath' in conf:
-      assert isinstance(conf['translation_rules_main_code_fpath'], str), \
-        'translation_rules_main_code_fpath must be a string'
-      _trmcp = p_utils.make_abs(conf['translation_rules_main_code_fpath'], p_consts.ROOT_DIR)
+      _trmcps = conf['translation_rules_main_code_fpath']
+      assert isinstance(_trmcps, str), 'translation_rules_main_code_fpath must be a string'
+      _trmcp = p_utils.make_abs(_trmcps, p_consts.ROOT_DIR)
       assert _trmcp.exists(), f'Translation rules main code file does not exist: {_trmcp}'
       _trmc = p_utils.read_text(_trmcp)
     pirel_subject.translation_rules_main_code = _trmc
@@ -284,10 +283,12 @@ class PirelSubject:
     pirel_subject.translation_rules_test_code = _trtc
 
     _trisp = conf.get('translation_rules_instr_src_fpath', None)
+    assert _trisp is None or isinstance(_trisp, str), 'translation_rules_instr_src_fpath must be a string or None'
     pirel_subject.translation_rules_instr_src = None if _trisp is None else \
       p_utils.read_text_or_none(p_consts.ROOT_DIR / _trisp)
 
     _tritp = conf.get('translation_rules_instr_tar_fpath', None)
+    assert _tritp is None or isinstance(_tritp, str), 'translation_rules_instr_tar_fpath must be a string or None'
     pirel_subject.translation_rules_instr_tar = None if _tritp is None else \
       p_utils.read_text_or_none(p_consts.ROOT_DIR / _tritp)
 
