@@ -1524,6 +1524,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   1. simplify container nodes that do not have `problematic_node` as a child
   2. simplify container nodes that do have `problematic_node` as a child
   3. simplify remaining nodes individually
+  4. simplify by removing nodes
 
   NOTE when we are simplifying the program context,
   `problematic_node_id` and `problematic_node_path` must be preserved.  '''
@@ -1972,6 +1973,130 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
     return orig_text, upd_prob_nid
 
+  # STRATEGY 4
+  def _strategy_4(
+    problematic_node: p_data_structures.DuoGlotNode,
+    context_tree: p_data_structures.PirelTree,
+    orig_text: str,
+    individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+    template_dict: dict
+  ):
+    '''
+    Simplify by removing `elif_clause`, `else_clause` nodes.
+
+    NOTE In order to learn translation rules for if_statement, elif_clause, else_clause,
+    we need to simplify the nodes. Otherwise, we will have to learn a single translation
+    rule for a potentially very large if_statement combined with elif and else clauses.
+    For example, with a problematic_node of if_statement, the following snippets can
+    all be simplified to just an if_statement without any elif or else clauses:
+    ```python
+    if x > 0:
+      print("x is positive")
+    elif x < 0:  # simplified
+      print("x is negative")
+    else:  # simplified
+      print("x is zero")
+
+    if x > 0:
+      print("x is positive")
+    elif x < 0:  # simplified
+      print("x is negative")
+
+    if x > 0:
+      print("x is positive")
+    else:  # simplified
+      print("x is zero")
+    ```
+    This can be done, because according to grammar, an if_statement does not require
+    elif and else clauses to be present. Similarly, the following elif_snippet `elif x < 0:`
+    can be simplified such that it has only an if_statement before:
+    ```python
+    if x > 0:
+      print("x is positive")
+    elif x == 0:  # simplified
+      print("x is zero")
+    elif x < 0:
+      print("x is negative")
+    else:  # simplified
+      print("x is neither positive nor negative")
+    ```
+    if_statement must be kept, because elif_clause requires an if_statement to be present.
+    '''
+
+    logger.debug('Starting context simplification using strategy 4')
+
+    def __simplify_node(
+      orig_text: str,
+      node: p_data_structures.DuoGlotNode,
+      context_tree: p_data_structures.PirelTree,
+      individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+      template_dict: dict
+    ) -> Optional[Tuple[str, dict]]:
+      '''
+      RETURN None if
+      1. simplification produces SyntaxError
+
+      NOTE writes to `context_tree.annotation`
+      TODO this function uses bottom-up apprach, optimize it to use top-down approach
+      '''
+      # equivalent to removing the node
+      simplified_node_code = ''
+      start_point = context_tree.annotation[node.get_id()][0]
+      end_point = context_tree.annotation[node.get_id()][1]
+      simplified_code = orig_text[:start_point] + simplified_node_code + orig_text[end_point:]
+
+      # check for parse errors
+      has_parse_error = p_utils.does_have_parse_error(simplified_code, template_dict['src_lang'])
+      if has_parse_error:
+        return None
+
+      # NOTE annotations of ancestor nodes of `node` should be updated
+      # to reflect the changes in the code
+      annotation_copy = copy.deepcopy(context_tree.annotation)
+      for pot_ancestor in individually_simplifiable_nodes:
+        if pot_ancestor.get_id() == node.get_id():
+          continue
+        if pot_ancestor.is_ancestor(node):
+          anc_end_point = annotation_copy[pot_ancestor.get_id()][1]
+          node_text_size_before = end_point - start_point
+          node_text_size_after = len(simplified_node_code)
+          node_text_size_diff = node_text_size_before - node_text_size_after
+          anc_new_end_point = anc_end_point - node_text_size_diff
+          annotation_copy[pot_ancestor.get_id()][1] = anc_new_end_point
+
+      return simplified_code, annotation_copy
+
+    individually_simplifiable_nodes = list(
+      filter(lambda n: n.get_ts_node_type() in ['elif_clause', 'else_clause'], individually_simplifiable_nodes)
+    )
+    # sort in reverse so we do not mess up the annotation marks
+    individually_simplifiable_nodes.sort(key=lambda node: node.get_id(), reverse=True)
+    upd_prob_nid = problematic_node.get_id()
+
+    for node in individually_simplifiable_nodes:
+      node_simpl_res = __simplify_node(orig_text, node, context_tree, individually_simplifiable_nodes, template_dict)
+
+      # skip `node` which we can't simplify
+      if node_simpl_res is None:
+        logger.debug(f'Context simplification using strategy 3 not possible for (syntax error): {node}')
+        continue
+
+      simplified_code, annotation_copy = node_simpl_res
+
+      # `node` appears before the `problematic_node`
+      # need to adjust the `problematic_node_id`
+      if node.get_id() < problematic_node.get_id():
+        # the difference in the number of non-terminal nodes tells us
+        # how much node id of the problematic node has shifted
+        num_nt_nodes_before = _get_num_nt_nodes(orig_text, template_dict['src_lang'])
+        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, template_dict['src_lang'])
+        upd_prob_nid -= (num_nt_nodes_before - num_nt_nodes_after)
+
+      orig_text = simplified_code
+      context_tree.annotation = annotation_copy
+
+    return orig_text, upd_prob_nid
+
   logger.debug('~~~ Starting p_grammar.simplify_template')
 
   template_origin = template_dict['template_origin']
@@ -2065,16 +2190,46 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   logger.debug(f'before simplification using strategy 3:\n{upd_text_strat2}')
   logger.debug(f'after simplification using strategy 3:\n{upd_text_strat3}')
 
-  # ~~~ prepare artifacts for strategy 4 (if any)
+  # ~~~ prepare artifacts for strategy 4
   ctx_node_strat4, prob_node_strat4, ctx_tree_strat4 = _get_context_problematic_nodes_context_tree(
     upd_text_strat3, src_lang, problematic_node_id=upd_prob_nid_strat3
   )
   assert prob_node_strat3.get_type() == prob_node_strat4.get_type(), 'sanity check'
 
+  pot_simplifiable_nodes_strat4, nodes_can_be_simplified_dict_strat4 = _get_simplification_metadata(
+    ctx_node_strat4,
+    prob_node_strat4,
+    template_dict,
+    grammar
+  )
+  p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat4.json', nodes_can_be_simplified_dict_strat4)
+
+  # ~~~ simplify using strategy 4
+  individually_simplifiable_nodes = _get_individually_simplifiable_nodes(
+    prob_node_strat4.get_id(),
+    nodes_can_be_simplified_dict_strat4,
+    pot_simplifiable_nodes_strat4
+  )
+  upd_text_strat4, upd_prob_nid_strat4 = _strategy_4(
+    prob_node_strat4,
+    ctx_tree_strat4,
+    upd_text_strat3,
+    individually_simplifiable_nodes,
+    template_dict
+  )
+  logger.debug(f'before simplification using strategy 4:\n{upd_text_strat3}')
+  logger.debug(f'after simplification using strategy 4:\n{upd_text_strat4}')
+
+  # ~~~ prepare artifacts for strategy 5 (if any)
+  ctx_node_strat5, prob_node_strat5, ctx_tree_strat5 = _get_context_problematic_nodes_context_tree(
+    upd_text_strat4, src_lang, problematic_node_id=upd_prob_nid_strat4
+  )
+  assert prob_node_strat4.get_type() == prob_node_strat5.get_type(), 'sanity check'
+
   template_dict['template_origin_before_simplification'] = template_dict['template_origin']
-  template_dict['template_origin'] = upd_text_strat3
-  template_dict['problematic_node_id'] = upd_prob_nid_strat3
-  template_dict['problematic_node_path'] = ctx_node_strat4.get_path_to_child(prob_node_strat4)
+  template_dict['template_origin'] = upd_text_strat4
+  template_dict['problematic_node_id'] = upd_prob_nid_strat4
+  template_dict['problematic_node_path'] = ctx_node_strat5.get_path_to_child(prob_node_strat5)
 
   return template_dict
 
@@ -2109,7 +2264,7 @@ def _get_potential_simplifiable_nodes(
       # TODO what is the difference between `block`, `list`, `dict`
       # from the perspective of "body" or "blocky" or "container" node types?
       # if node.get_ts_node_type() in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
-      if node.get_ts_node_type() in ['block']:
+      if node.get_ts_node_type() in ['block', 'else_clause', 'elif_clause']:
         return True
       return False
     return True
