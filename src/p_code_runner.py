@@ -204,7 +204,7 @@ def run_src_test_script(
   logger.debug('Starting p_code_runner.run_src_test_script')
 
   mylog_impl = get_mylog_impl(subject.src_lang)
-  src_program_run = mylog_impl + '\n' + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
+  src_program_run = mylog_impl + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
