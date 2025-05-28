@@ -270,15 +270,17 @@ class PirelSubject:
     # translation_rules_test_code
     _trtc = None
     if 'translation_rules_test_code' in conf:
-      assert isinstance(conf['translation_rules_test_code'], str), \
-        'translation_rules_test_code must be a string'
       _trtc = conf['translation_rules_test_code']
+      assert isinstance(_trtc, str) or _trtc is None, 'translation_rules_test_code must be a string or None'
     elif 'translation_rules_test_code_fpath' in conf:
-      assert isinstance(conf['translation_rules_test_code_fpath'], str), \
-        'translation_rules_test_code_fpath must be a string'
-      _trtcp = p_utils.make_abs(conf['translation_rules_test_code_fpath'], p_consts.ROOT_DIR)
-      assert _trtcp.exists(), f'Translation rules test code file does not exist: {_trtcp}'
-      _trtc = p_utils.read_text(_trtcp)
+      _trtcps = conf['translation_rules_test_code_fpath']
+      assert isinstance(_trtcps, str) or _trtcps is None, 'translation_rules_test_code_fpath must be a string or None'
+      if _trtcps is None:
+        _trtc = None
+      else:
+        _trtcp = p_utils.make_abs(_trtcps, p_consts.ROOT_DIR)
+        assert _trtcp.exists(), f'Translation rules test code file does not exist: {_trtcp}'
+        _trtc = p_utils.read_text(_trtcp)
     pirel_subject.translation_rules_test_code = _trtc
 
     _trisp = conf.get('translation_rules_instr_src_fpath', None)

@@ -23,9 +23,9 @@
 #   - translation_rules_main_code: str
 #   - translation_rules_main_code_fpath: str
 #
-# - [OR] (when provided, replaces the default: null)
-#   - translation_rules_test_code: str
-#   - translation_rules_test_code_fpath: str
+# - [OR]
+#   - translation_rules_test_code: str | null (default: null)
+#   - translation_rules_test_code_fpath: str | null (default: null)
 #
 # - [translation_rules_instr_src_fpath]: str | null (default: null)
 # - [translation_rules_instr_tar_fpath]: str | null (default: null)
