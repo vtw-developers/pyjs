@@ -179,24 +179,18 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
 
   _SPLITTER = '"+++++++++++++++++"'
+  _LINE_COMMENT_FOR = {
+    'py': '# ',
+    'js': '// '
+  }
 
-  if lang == 'py':
-    splits = code.split(_SPLITTER)
-    if len(splits) == 1:
-      return code
-    assert len(splits) == 2
-    to_comment_out, rest = splits
-    commented_out = '\n'.join(['# ' + line for line in to_comment_out.split('\n')])
-    return commented_out + f'{_SPLITTER}' + rest
-
-  if lang == 'js':
-    splits = code.split(_SPLITTER)
-    if len(splits) == 1:
-      return code
-    assert len(splits) == 2
-    to_comment_out, rest = splits
-    commented_out = '\n'.join(['// ' + line for line in to_comment_out.split('\n')])
-    return commented_out + f'{_SPLITTER}' + rest
+  splits = code.split(_SPLITTER)
+  if len(splits) == 1:
+    return code
+  assert len(splits) == 2
+  to_comment_out, rest = splits
+  commented_out = '\n'.join([_LINE_COMMENT_FOR[lang] + line for line in to_comment_out.split('\n')])
+  return commented_out + f'{_SPLITTER}' + rest
 
 
 def run_src_test_script(
