@@ -50,7 +50,7 @@ def _command_execute(command: str, timeout=10) -> None:
     raise exc
 
 
-def _extract_log_list_from_stdout(stdout: str) -> list:
+def _extract_trace_from_stdout(stdout: str) -> list:
   '''
   Parses whatever was produced by the `mylog` function
 
@@ -214,7 +214,7 @@ def run_src_test_script(
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = _run_code(src_program_run, subject.src_lang)
-  src_trace = _extract_log_list_from_stdout(stdout)
+  src_trace = _extract_trace_from_stdout(stdout)
 
   return src_trace, stderr
 
@@ -235,7 +235,7 @@ def run_tar_test_script(
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
-  tar_trace = _extract_log_list_from_stdout(stdout)
+  tar_trace = _extract_trace_from_stdout(stdout)
 
   return tar_trace, stderr
 
