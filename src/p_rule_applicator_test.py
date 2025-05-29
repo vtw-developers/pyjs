@@ -95,6 +95,11 @@ class TestCompareTraces(unittest.TestCase):
     result = p_rule_applicator._compare_traces(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
+  def test_016_indexed_log_statements(self):
+    src_trace, tar_trace = self.get_fixtures('016')
+    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    self.assertFalse(result, 'Expected traces not to match')
+
 
 if __name__ == '__main__':
   unittest.main()
