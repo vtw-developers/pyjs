@@ -67,7 +67,7 @@ def _extract_log_list_from_stdout(stdout: str) -> list:
   return ['list', len(trace), trace]
 
 
-def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
+def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
   '''
   Parse the error message from the stderr of the JS code.
 
@@ -121,16 +121,21 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
   error_type = __get_error_type(stderr)
   splits = stderr.split(error_type)
   assert len(splits) == 2, f'Unexpected error format in stderr: {stderr}'
-
   error_loc_lines = splits[0].strip().split('\n')
+
   if error_loc_lines[0].startswith(str(TMP_DIR)):
+
     fpath_and_line_num = error_loc_lines[0].split(':')
-    assert len(fpath_and_line_num) == 2
-    line_num = [fpath_and_line_num[0], int(fpath_and_line_num[1])]
     line_content = error_loc_lines[1].strip()
+    assert len(fpath_and_line_num) == 2
+    file_path = fpath_and_line_num[0]
+    line_num = int(fpath_and_line_num[1])
+
+    mylog_impl = get_mylog_impl(lang)
+    line_num_shift = len(mylog_impl.split('\n')) - 1
+    line_num = int(fpath_and_line_num[1]) - line_num_shift
+
   else:
-    line_num = [error_loc_lines[0], -1] # not accurate
-    line_content = 'NOT_IMPLEMENTED_DONT_KNOW'
     raise RuntimeError('Error location not found in stderr')
 
   error_lines = splits[1].strip().split('\n')
@@ -138,6 +143,7 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> Optional[dict]:
   return {
     'error_type': error_type,
     'error_msg': error_msg,
+    'file_path': file_path,
     'line_num': line_num,
     'line_content': line_content
   }
@@ -216,7 +222,7 @@ def run_src_test_script(
 def run_tar_test_script(
   tar_program_instr: str,
   subject: p_subject.PirelSubject,
-) -> Tuple[list, Optional[dict]]:
+) -> Tuple[list, str]:
   '''
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
@@ -229,17 +235,9 @@ def run_tar_test_script(
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
   stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
-
   tar_trace = _extract_log_list_from_stdout(stdout)
-  tar_error_dict = None
-  if stderr != '':
-    tar_error_dict = _extract_err_from_stderr_JS(stderr, subject.tar_lang)
-    assert tar_error_dict is not None
-    assert 'line_num' in tar_error_dict
-    prepart_linecount = len(mylog_impl.split('\n')) - 1
-    tar_error_dict['line_num'][1] -= prepart_linecount
 
-  return tar_trace, tar_error_dict
+  return tar_trace, stderr
 
 
 # TEST HARNESSES

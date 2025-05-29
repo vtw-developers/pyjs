@@ -362,8 +362,8 @@ def get_proposed_choices(
   error_msg = tar_error_dict['error_msg']  # e.g. 'SyntaxError: invalid syntax'
   error_type = tar_error_dict['error_type']  # e.g. 'SyntaxError'
   line_content = tar_error_dict['line_content']  # code snippet at the line of error in `tar_program_instr`
-  err_file_tpi = tar_error_dict['line_num'][0]  # absolute path to the file where the error occurred
-  err_line_tpi = tar_error_dict['line_num'][1]  # line number in the file where the error occurred
+  file_path = tar_error_dict['file_path']  # absolute path to the file where the error occurred
+  err_line_tpi = tar_error_dict['line_num']  # line number in the file where the error occurred (0 indexed)
 
   '''
   Current implementation of `get_proposed_choices()` can propose choices
