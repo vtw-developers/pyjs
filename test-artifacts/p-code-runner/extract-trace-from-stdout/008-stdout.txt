@@ -1,0 +1,4 @@
+["MYLOGEX:", ["list", 0, []]]
+["MYLOGEX:", ["list", 1, [["number", 1]]]]
+["MYLOGEX:", ["list", 3, [["number", 1], ["number", 2], ["number", 3]]]]
+["MYLOGEX:", ["list", 3, [["number", 1], ["number", 2], ["number", 3]]]]

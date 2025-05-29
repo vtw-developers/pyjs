@@ -1,0 +1,6 @@
+["MYLOGEX:", ["number", 0]]
+["MYLOGEX_PRINT:", ["list", 2, [["string", 2, "hi"], ["string", 5, "there"]]]]
+hi there
+["MYLOGEX:", ["number", 1]]
+["MYLOGEX:", ["number", 0]]
+["MYLOGEX:", ["number", 2]]

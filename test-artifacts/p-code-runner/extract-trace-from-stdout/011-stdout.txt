@@ -1,0 +1,2 @@
+["MYLOGEX:", ["number", 0]]
+["MYLOGEX:", ["list", 2, [["string", 1, "A"], ["string", 1, "W"]]]]
