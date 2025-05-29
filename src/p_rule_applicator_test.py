@@ -14,8 +14,8 @@ class TestCompareTraces(unittest.TestCase):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'compare-traces'
 
   def get_fixtures(self, fixture_id: str) -> Tuple[list, list]:
-    src_stdout = (self.fixture_dir_path / f'src-stdout-{fixture_id}.txt').read_text()
-    tar_stdout = (self.fixture_dir_path / f'tar-stdout-{fixture_id}.txt').read_text()
+    src_stdout = (self.fixture_dir_path / f'stdout-{fixture_id}-src.txt').read_text()
+    tar_stdout = (self.fixture_dir_path / f'stdout-{fixture_id}-tar.txt').read_text()
     src_trace = p_code_runner._extract_trace_from_stdout(src_stdout)
     tar_trace = p_code_runner._extract_trace_from_stdout(tar_stdout)
     return src_trace, tar_trace

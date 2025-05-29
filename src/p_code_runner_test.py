@@ -15,8 +15,8 @@ class TestExtractTraceFromStdout(unittest.TestCase):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-code-runner' / 'extract-trace-from-stdout'
 
   def get_fixtures(self, fixture_id: str) -> Tuple[str, list]:
-    stdout = (self.fixture_dir_path / f'stdout-{fixture_id}.txt').read_text()
-    trace = p_utils.read_json(self.fixture_dir_path / f'trace-{fixture_id}.json')
+    stdout = (self.fixture_dir_path / f'{fixture_id}-stdout.txt').read_text()
+    trace = p_utils.read_json(self.fixture_dir_path / f'{fixture_id}-trace.json')
     return stdout, trace
 
   def test_001(self):
