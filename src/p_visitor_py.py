@@ -2064,6 +2064,90 @@ class LogStatementInserter(pvis.Visitor):
     return code.strip()
 
 
+class LogStatementsIndexer(pvis.Visitor):
+  '''
+  Index all invocations of myexactlog() and print()
+  by adding an index as a first argument to the function call.
+  This is used for precisely locating statements that are
+  responsible for semantic errors.
+  '''
+  def __init__(self, function_name: str):
+    super().__init__()
+
+    # name of the function that contains the functions that we need
+    # this function must appear at the top level of the script
+    self.function_name = function_name
+
+    # log statements counter
+    self.counter = 1
+
+  # NODE BUILDER METHODS
+  def build_IntegerNode(self, val: Union[str, int]) -> IntegerNode:
+    assert isinstance(val, (str, int)), 'val must be a string or an integer'
+    integer = IntegerNode('integer')
+    terminal = pvis.TerminalNode(val if isinstance(val, str) else str(val))
+    integer.add_child(terminal)
+    terminal.set_parent(integer)
+    return integer
+
+  # VISIT METHODS
+  def visit_ArgumentListNode(self, node: ArgumentListNode) -> None:
+    '''
+    Visit the argument list and add an index as the first argument.
+    '''
+    # parent must be CallNode
+    parent = node.get_parent()
+    if not isinstance(parent, CallNode):
+      return
+
+    # function name must be IdentifierNode
+    function_name = parent.function
+    if not isinstance(function_name, IdentifierNode):
+      return
+
+    # function name must be one of ['myexactlog', 'print']
+    fname_ter = function_name.get_children()[0].node_type
+    if fname_ter not in ['myexactlog', 'print']:
+      return
+
+    # build the index argument
+    index_arg = self.build_IntegerNode(self.counter)
+    self.counter += 1
+
+    # insert the index argument at the beginning of the list
+    # NOTE actually, also need to insert a comma,
+    # but the PrettyPrinter can handle this.
+    node.children.insert(1, index_arg)
+    index_arg.set_parent(node)
+
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    '''
+    Given a top-level `module` node, find the function definition
+    with the name `self.function_name` and visit it.
+    '''
+    function_definitions = [child for child in node.children if isinstance(child, FunctionDefinitionNode)]
+    assert len(function_definitions), 'no function definitions found'
+    fgold_fns = [fn for fn in function_definitions if fn.name.val() == self.function_name]
+    assert len(fgold_fns) > 0, 'broken precondition: f_gold function not found'
+    assert len(fgold_fns) == 1, 'broken precondition: multiple f_gold functions found'
+    fgold_fn = fgold_fns[0]
+    self.visit(fgold_fn)
+
+  @classmethod
+  def index_log_statements(cls, test_script_str: str) -> str:
+    '''
+    Index log statements in the test script.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(test_script_str, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    indexer = cls(function_name='f_gold')
+    indexer.visit(tree.root_node)
+    pretty_printer = PrettyPrinter(indent_with='    ')
+    code = pretty_printer.visit(tree.root_node)
+    return code.strip()
+
+
 class AssignedIdentifierExtractor(pvis.Visitor):
   '''
   Given the left hand side of an assignment statement, this visitor
