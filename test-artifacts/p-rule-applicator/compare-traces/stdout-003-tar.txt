@@ -1,0 +1,1 @@
+["MYLOGEX:",["string",7,"id_rukt"]]

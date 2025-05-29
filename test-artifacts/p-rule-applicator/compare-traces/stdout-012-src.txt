@@ -1,0 +1,3 @@
+["MYLOGEX:", ["number", 0.0]]
+["MYLOGEX:", ["number", 1.0]]
+["MYLOGEX:", ["number", 1.25]]
