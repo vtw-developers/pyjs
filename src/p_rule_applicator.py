@@ -16,6 +16,12 @@ logger = p_utils.setup_logger(__name__)
 
 class UnknownTypeInTracesError(RuntimeError): pass
 class SrcTestScriptError(RuntimeError): pass
+class TarTestScriptError(RuntimeError):
+  def __init__(self, tar_error_dict: dict):
+    super().__init__('Error running tar test script')
+    self.tar_error_dict = tar_error_dict
+  def __str__(self):
+    return f'TarTestScriptError: {json.dumps(self.tar_error_dict, indent=2)}'
 class TraceMismatchError(RuntimeError): pass
 class TRuleNotFoundError(RuntimeError): pass
 
@@ -164,12 +170,11 @@ def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
   subject: p_subject.PirelSubject
-) -> Optional[dict]:
+) -> None:
   '''
-  RETURN `tar_error_dict` - None if no error when running tar test script,
-  otherwise a dict containing error information.
-
   RAISE `SrcTestScriptError` if there is an error when running src test script.
+  RAISE `TarTestScriptError` if there is an error when running tar test script.
+  RAISE `TraceMismatchError` if there is a trace mismatch between src and tar test scripts.
   '''
   p_utils.log_json_time(f'{subject.name}_args-run_tests.json', locals())
   logger.debug('Starting p_rule_applicator._run_tests')
@@ -184,21 +189,18 @@ def _run_tests(
     raise SrcTestScriptError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
-  tar_trace, tar_error_dict = p_code_runner.run_tar_test_script(
-    tar_program_instr,
-    subject
-  )
+  tar_trace, tar_std_error = p_code_runner.run_tar_test_script(tar_program_instr, subject)
 
   # there is an error in running tar test script
-  if tar_error_dict is not None:
-    return tar_error_dict
+  if tar_std_error != '':
+    logger.error(f'Error running tar test script: {tar_std_error}')
+    tar_error_dict = p_code_runner._extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
+    raise TarTestScriptError(tar_error_dict)
 
   # 3. compare traces
   are_traces_identical = _compare_traces(src_trace, tar_trace)
-  if are_traces_identical:
-    return None
-
-  raise TraceMismatchError('No error in running src and tar test scripts, but traces are not identical!')
+  if not are_traces_identical:
+    raise TraceMismatchError('No error in running src and tar test scripts, but traces are not identical!')
 
 
 def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
@@ -279,7 +281,11 @@ def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
 
 
 def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
-  ''''''
+  '''
+  This function is responsible for obtaining a plausible translation of
+  `src_program_instr` with `subject.translation_rules_main_code`.
+  '''
+
   logger.debug('Starting p_rule_applicator._get_instrumented_tar_program_plausible')
 
   # 1 split `src_program_instr` into test, main, test call code snippets
@@ -301,44 +307,55 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
   tar_test_call_code = _get_tar_test_call_code(src_test_call_code)
 
   # 3 loop to get exhaustive translation of main code
-  choices_history = []
-  current_choices = subject.choices
-  iteration = 1
-
   logger.debug(
     'Starting a loop to exhaustively translate `src_program_instr` '
-    'with different combinations of translation rules'
-  )
+    'with different combinations of translation rules')
 
+  choices_history = []
+  current_choices = subject.choices
+  iteration = 0
   while True:
     logger.debug(f'_get_instrumented_tar_program_plausible.iteration {iteration}')
     iteration += 1
 
+    # May raise
+    # 1. TRuleNotFoundError
     tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
     tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
-    tar_error_dict = _run_tests(src_program_instr, tar_program_instr, subject)
 
-    if tar_error_dict is None:
-      logger.debug('GOOD: no error in running tests')
-      break
-    logger.debug('BAD: error in running tests')
+    try:
+      _run_tests(src_program_instr, tar_program_instr, subject)
+      return tar_program_instr
 
-    proposed_choices = p_rule_chooser.get_proposed_choices(
-      tar_program_instr,
-      tar_main_code,
-      tar_error_dict,
-      current_choices,
-      choices_history,
-      map_to_exid,
-      translate_dbg_history
-    )
+    except SrcTestScriptError as err:
+      logger.critical('There is an error in running src test script. This normally should not happen')
+      raise
 
-    logger.debug(f'proposed choices: {json.dumps(proposed_choices, indent=2)}')
+    except TarTestScriptError as err:
+      logger.warning(
+        'There is an error in running tar test script.\n'
+        'Depending on the location of the error, will attempt to find a new '
+        'translation rules combination.')
+      tar_error_dict = err.tar_error_dict
 
-    choices_history.append(proposed_choices)
-    current_choices = proposed_choices
+      # May raise
+      # 1. NoUniqueChoicesError
+      proposed_choices = p_rule_chooser.get_proposed_choices(
+        tar_program_instr,
+        tar_main_code,
+        tar_error_dict,
+        current_choices,
+        choices_history,
+        map_to_exid,
+        translate_dbg_history
+      )
 
-  return tar_program_instr
+      choices_history.append(proposed_choices)
+      current_choices = proposed_choices
+
+    except TraceMismatchError as err:
+      logger.critical('There is a trace mismatch between src and tar test scripts.')
+      raise
 
 
 def _get_deinstrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
