@@ -10779,6 +10779,32 @@ class TestLogStatementInserter(unittest.TestCase):
     self.assertEqual(pp_code, gold_code)
 
 
+class TestLogStatementsIndexer(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-py' / 'log-statements-indexer'
+    self.maxDiff = None
+
+  def get_fixtures(self, fixture_id: str) -> None:
+    prog_in = self.fixtures_dir_path / f'{fixture_id}-in.py'
+    prog_out = self.fixtures_dir_path / f'{fixture_id}-out.py'
+    return p_utils.read_text(prog_in), p_utils.read_text(prog_out)
+
+  def test_L0001(self):
+    prog_in, prog_out_gold = self.get_fixtures('001')
+    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    self.assertEqual(prog_out, prog_out_gold)
+
+  def test_L0002(self):
+    prog_in, prog_out_gold = self.get_fixtures('002')
+    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    self.assertEqual(prog_out, prog_out_gold)
+
+  def test_L0003(self):
+    prog_in, prog_out_gold = self.get_fixtures('003')
+    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    self.assertEqual(prog_out, prog_out_gold)
+
+
 class TestAssignedIdentifierExtractor(unittest.TestCase):
   def setUp(self):
     self.src_lang = 'py'
