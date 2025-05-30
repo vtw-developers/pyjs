@@ -274,7 +274,7 @@ def get_err_line_idx_in_tar_main_code(
   return err_line_idx
 
 
-def get_proposed_choices(
+def get_proposed_choices_compile_error(
   tar_program_instr: str,
   tar_main_code: str,
   tar_error_dict: dict,
@@ -356,7 +356,7 @@ def get_proposed_choices(
   aliases(choices_list, updated_choices_list, new_choices_list)
   '''
 
-  logger.debug('Starting p_rule_chooser.get_proposed_choices')
+  logger.debug('Starting p_rule_chooser.get_proposed_choices_compile_error')
 
   # Unpack `tar_error_dict`. "tpi" stands for "tar_program_instr"
   error_msg = tar_error_dict['error_msg']  # e.g. 'SyntaxError: invalid syntax'
@@ -366,7 +366,7 @@ def get_proposed_choices(
   err_line_tpi = tar_error_dict['line_num']  # line number in the file where the error occurred (0 indexed)
 
   '''
-  Current implementation of `get_proposed_choices()` can propose choices
+  Current implementation of `get_proposed_choices_compile_error()` can propose choices
   only on the basis of errors in "tar_program_run.js". And the following
   are the errors that are supported.
   '''
