@@ -1,3 +1,4 @@
+import json
 import unittest
 from typing import Tuple
 
@@ -99,6 +100,47 @@ class TestCompareTraces(unittest.TestCase):
     src_trace, tar_trace = self.get_fixtures('016')
     result = p_rule_applicator._compare_traces(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
+
+
+class TestGetErrorLines(unittest.TestCase):
+  '''
+  Test cases for the _get_error_lines function in p_rule_applicator.
+  '''
+  def setUp(self):
+    self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'get-error-lines'
+
+  def get_fixture(self, fixture_id: str) -> str:
+    return (self.fixture_dir_path / f'tar_program_instr_{fixture_id}.js').read_text()
+
+  def are_dicts_equal(self, result: dict, gold: dict):
+    result_str = json.dumps(result, sort_keys=True)
+    gold_str = json.dumps(gold, sort_keys=True)
+    print('result_str', result_str)
+    print('gold_str  ', gold_str)
+    return result_str == gold_str
+
+  def test_001(self):
+    tar_program_instr = self.get_fixture('001')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 1)
+    gold = {5: '    let n = 0;'}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 2)
+    gold = {}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts must be empty')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 3)
+    gold = {8: '    n = 1;'}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 4)
+    gold = {10: '    while (n < 10) {'}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 5)
+    gold = {12: "        n += 'n';"}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
 
 if __name__ == '__main__':
