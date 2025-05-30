@@ -1980,7 +1980,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     orig_text: str,
     individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
     template_dict: dict
-  ):
+  ) -> Tuple[str, int]:
     '''
     Simplify by removing `elif_clause`, `else_clause` nodes.
 
@@ -2072,6 +2072,9 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     # sort in reverse so we do not mess up the annotation marks
     individually_simplifiable_nodes.sort(key=lambda node: node.get_id(), reverse=True)
     upd_prob_nid = problematic_node.get_id()
+
+    # do not simplify for now
+    return orig_text, upd_prob_nid
 
     for node in individually_simplifiable_nodes:
       node_simpl_res = __simplify_node(orig_text, node, context_tree, individually_simplifiable_nodes, template_dict)
