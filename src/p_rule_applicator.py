@@ -541,7 +541,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
       # May raise
       # 1. NoUniqueChoicesError
-      proposed_choices = p_rule_chooser.get_proposed_choices(
+      proposed_choices = p_rule_chooser.get_proposed_choices_compile_error(
         tar_program_instr,
         tar_main_code,
         tar_error_dict,
