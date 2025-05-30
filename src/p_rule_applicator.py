@@ -22,7 +22,12 @@ class TarTestScriptError(RuntimeError):
     self.tar_error_dict = tar_error_dict
   def __str__(self):
     return f'TarTestScriptError: {json.dumps(self.tar_error_dict, indent=2)}'
-class TraceMismatchError(RuntimeError): pass
+class TraceMismatchError(RuntimeError):
+  def __init__(self, error_lines: dict):
+    super().__init__('Trace mismatch between src and tar test scripts')
+    self.error_lines = error_lines
+  def __str__(self):
+    return f'TraceMismatchError: {json.dumps(self.error_lines, indent=2)}'
 class TRuleNotFoundError(RuntimeError): pass
 
 
@@ -166,6 +171,200 @@ def _compare_traces(src_trace: list, tar_trace: list) -> bool:
   raise UnknownTypeInTracesError(f'Unknown type in _compare_traces: "{type1}"')
 
 
+def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
+  '''
+  Given two traces, find the first index where they differ.
+  If they are identical, return None.
+  PRE: traces are not identical.
+  RAISE: RuntimeError if traces are identical.
+  '''
+  src_trace_type = src_trace[0]
+  tar_trace_type = tar_trace[0]
+  assert src_trace_type == 'list' and tar_trace_type == 'list', 'traces must be lists'
+
+  src_trace_len = src_trace[1]
+  tar_trace_len = tar_trace[1]
+  assert src_trace_len == tar_trace_len, 'traces of different lengths are not supported'
+
+  src_trace_entries = src_trace[2]
+  tar_trace_entries = tar_trace[2]
+
+  for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
+    src_te_type = src_te[0]
+    tar_te_type = tar_te[0]
+    assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
+
+    '''
+    Each entry in the traces must be a list of at least 2 elements.
+    Why? In order to extract location of a semantic error (it causes
+    a trace mismatch), each log statement (myexactlog, print) must
+    have been indexed by being inserted its index as a first argument.
+    That's why the trace entries must be at least 2 elements long.
+    '''
+    src_te_len = src_te[1]
+    tar_te_len = tar_te[1]
+    assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+    trace_entries_identical = _compare_traces(src_te, tar_te)
+    if not trace_entries_identical:
+      return idx
+
+  # if we reach here, it means that all entries are identical
+  raise RuntimeError('Traces must be different')
+
+
+def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> int:
+  '''
+  Given two traces and a trace index, find the log statement index under that trace index.
+  Log statement indices are 1-based.
+
+  Sample trace:
+  ["list", 1,
+    [
+      [
+        "list", 2, [
+          ["number", 5],
+          ["number", 2]
+        ]
+      ]
+    ]
+  ]
+
+  NOTE both src_trace and tar_trace are used to cross-check the log statement index.
+  '''
+
+  src_trace_entries = src_trace[2]
+  tar_trace_entries = tar_trace[2]
+
+  assert len(src_trace_entries) == len(tar_trace_entries), 'trace entries must be of the same length'
+  assert trace_idx < len(src_trace_entries), 'trace index must be less than trace entries length'
+  assert trace_idx < len(tar_trace_entries), 'trace index must be less than trace entries length'
+
+  src_trace_entry = src_trace_entries[trace_idx]
+  tar_trace_entry = tar_trace_entries[trace_idx]
+
+  src_trace_entry_type = src_trace_entry[0]
+  tar_trace_entry_type = tar_trace_entry[0]
+  assert src_trace_entry_type == 'list' and tar_trace_entry_type == 'list', 'trace entries must be lists'
+
+  src_trace_arg_len = src_trace_entry[1]
+  tar_trace_arg_len = tar_trace_entry[1]
+  assert src_trace_arg_len >= 2 and tar_trace_arg_len >= 2, 'trace entries must have at least 2 arguments logged'
+
+  src_trace_args = src_trace_entry[2]
+  tar_trace_args = tar_trace_entry[2]
+  src_trace_arg1 = src_trace_args[0]
+  tar_trace_arg1 = tar_trace_args[0]
+  src_trace_arg1_type = src_trace_arg1[0]
+  tar_trace_arg1_type = tar_trace_arg1[0]
+  assert src_trace_arg1_type == 'number' and tar_trace_arg1_type == 'number', 'trace entry first argument must be a number'
+
+  src_trace_arg1_value = src_trace_arg1[1]
+  tar_trace_arg1_value = tar_trace_arg1[1]
+  assert isinstance(src_trace_arg1_value, int) and isinstance(tar_trace_arg1_value, int), 'trace entry first argument must be an int'
+  assert src_trace_arg1_value == tar_trace_arg1_value, 'trace entry first argument must be equal in both traces'
+
+  # doesn't matter which trace we use, they are the same
+  return src_trace_arg1_value
+
+
+def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Dict[int, str]:
+  '''
+  Given a tar_program_instr (instrumented tar program) and a mismatched log statement index,
+  return the line numbers right before the mismatched log statement.
+  RETURN a dictionary with line numbers as keys and lines as values:
+  {
+    12: "        n += 'n';"
+  }
+  NOTE line numbers are 0-based.
+  '''
+
+  def __find_text(stripped_lines: List[str], text: str) -> int:
+    '''
+    RETURN -1 if not found.
+    '''
+    for idx, line in enumerate(stripped_lines):
+      if line.startswith(text):
+        return idx
+    return -1
+
+  def __find(stripped_lines: List[str], log_stat_idx: int) -> int:
+    '''
+    Return a 0-based index
+    '''
+    assert log_stat_idx >= 0, 'log_stat_idx must be >= 0'
+    assert log_stat_idx < len(stripped_lines), 'log_stat_idx must be less than the number of stripped lines'
+
+    # since log statement indices are 1-based, and requested
+    # `log_stat_idx == 0`, we need to return the index of `function f_gold`
+    if log_stat_idx == 0:
+      fgold_def_idx = __find_text(stripped_lines, 'function f_gold')
+      assert fgold_def_idx != -1, 'function f_gold definition must be present'
+      return fgold_def_idx
+
+    # either `console.log({log_stat_idx}` or `myexactlog({log_stat_idx}` must be searched
+    myexactlog_idx = __find_text(stripped_lines, f'myexactlog({log_stat_idx}')
+    print_idx = __find_text(stripped_lines, f'console.log({log_stat_idx}')
+    if myexactlog_idx == -1 and print_idx == -1:
+      return -1
+    return myexactlog_idx if myexactlog_idx != -1 else print_idx
+
+  assert mismatched_log_stat_idx >= 1, 'mismatched_log_stat_idx must be >= 1'
+
+  # split into stripped lines
+  lines = tar_program_instr.split('\n')
+  stripped_lines = [line.strip() for line in lines]
+
+  '''
+  In order to find buggy lines not only we need the mismatched log statement index,
+  but also the log statement right before it (the one at which there was no mismatch).
+  Buggy lines would lie in between them two.
+  '''
+  mismatch_line_idx = __find(stripped_lines, mismatched_log_stat_idx)
+  mismatch_line_idx_before = __find(stripped_lines, mismatched_log_stat_idx - 1)
+  assert mismatch_line_idx != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx} not found in stripped lines'
+  assert mismatch_line_idx_before != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx - 1} not found in stripped lines'
+
+  error_line_idxs = list(range(mismatch_line_idx_before + 1, mismatch_line_idx))
+  error_lines = {line_idx: lines[line_idx] for line_idx in error_line_idxs}
+
+  return error_lines
+
+
+def _extract_err_lines_from_trace_mismatch(
+  src_trace: list,
+  tar_program_instr: str,
+  tar_trace: list
+) -> dict:
+  '''
+  This function assumes that there is a trace mismatch betwenn
+  src and tar test scripts. Trace mismatch points to a semantic error
+  in the tar test script since we assume that src test script is correct.
+  This function returns line numbers (0-based) and line contents
+  at which a semantic error might have occured. By having this information,
+  we can choose alternative translation rules to fix the semantic error.
+  '''
+
+  '''
+  A trace mismatch index is an index in the traces where the entries differ.
+  Using this index, we can find which log statement caused the trace mismatch.
+  '''
+  trace_mismatch_idx = _get_trace_mismatch_idx(src_trace, tar_trace)
+
+  '''
+  A mismatched log statement index is an index of the log statement that caused
+  the trace mismatch. Log statement indices are 1-based.
+  '''
+  mismatched_log_stat_idx = _get_log_statement_idx(src_trace, tar_trace, trace_mismatch_idx)
+
+  '''
+  Error lines is a dictionary where keys are line numbers (0-based) and values
+  are the lines of the tar program that caused the trace mismatch.
+  '''
+  error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idx)
+
+  return error_lines
+
+
 def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
@@ -200,7 +399,9 @@ def _run_tests(
   # 3. compare traces
   are_traces_identical = _compare_traces(src_trace, tar_trace)
   if not are_traces_identical:
-    raise TraceMismatchError('No error in running src and tar test scripts, but traces are not identical!')
+    logger.error('Traces are not identical. There is a semantic error in translation.')
+    error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
+    raise TraceMismatchError(error_lines)
 
 
 def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
