@@ -129,11 +129,12 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
     line_content = error_loc_lines[1].strip()
     assert len(fpath_and_line_num) == 2
     file_path = fpath_and_line_num[0]
+    # line number in stderr is 1-based
     line_num = int(fpath_and_line_num[1])
 
     mylog_impl = get_mylog_impl(lang)
     line_num_shift = len(mylog_impl.split('\n')) - 1
-    line_num = int(fpath_and_line_num[1]) - line_num_shift
+    line_num = line_num - line_num_shift
 
   else:
     raise RuntimeError('Error location not found in stderr')
