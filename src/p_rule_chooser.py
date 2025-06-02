@@ -257,6 +257,10 @@ def get_err_line_idx_in_tar_main_code(
 ) -> int:
   '''
   Get the index of the line in `tar_main_code` that corresponds to the error line.
+  PARAM tar_program_instr: instrumented target program (test, main, test call)
+  PARAM tar_main_code: main code of the target program (main)
+  PARAM err_line_tpi: line number in `tar_program_instr` where the error occurred (1 indexed)
+  PARAM line_content: content of the line where the error occurred in `tar_program_instr`
   '''
   tpi_chunks = tar_program_instr.split(tar_main_code)
   assert len(tpi_chunks) == 2, 'sanity check: tar_main_code should appear exactly once in wrapper'
@@ -377,6 +381,7 @@ def get_proposed_choices_compile_error(
   The following function returns the error line number in tar_main_code.
   We need to do this because the `err_line_tpi` points to the line number
   in "tar_program_run.js", which is the wrapper code that runs the main code.
+  err_line_idx is 0-based.
   '''
   err_line_idx = get_err_line_idx_in_tar_main_code(line_content, err_line_tpi, tar_program_instr, tar_main_code)
 
