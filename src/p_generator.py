@@ -920,15 +920,37 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
     problematic_node = context_node.get_child_by_path(problematic_node_path)
     return context_node, problematic_node
 
-  def _rec_collect_simplifiable_nodes(node: pds.DuoGlotNode, template_node: pds.DuoGlotNode, src_lang: str) -> List[pds.DuoGlotNode]:
+  def _rec_collect_simplifiable_nodes(
+    node: pds.DuoGlotNode,
+    template_node: pds.DuoGlotNode,
+    src_lang: str,
+    is_simplify_nodes_before_prob_node: bool = False
+  ) -> List[pds.DuoGlotNode]:
     '''
     Collect nodes that can be simplified.
     We need to collect all nodes that are not `problematic_node` itself,
     but are still children of `problematic_node`.
+
+    PARAM is_simplify_nodes_before_prob_node - controls whether or not nodes
+    that appear before the problematic node are simplifieid. Why is it important to
+    set this flag to `False`? For example, let's say we are learned a rule for
+    if_statement: `if r >= l:\n    pass\nelse:\n    pass`
+    ```
+    (match_expand
+      (fragment ("py.if_statement" (str "if") ("py.comparison_operator" ("py.identifier" "_val_") (str ">=") ("py.identifier" "_val_")) (str ":") "*") "*")
+      (fragment ("js.if_statement" (str "if") ("js.parenthesized_expression" (str "(") ("js.binary_expression" ("js.identifier" "_val1_") (str ">=") ("js.identifier" "_val2_")) (str ")")) "*1") "*2")
+    )
+    ```
+    The next problematic node is `else_clause`. If we simplify `r >= l` to `id_xyz`,
+    `if id_xyz:\n    pass\nelse:\n    pass`, then the previous rule will not match.
+    That's why we should not simplify nodes that appear before the problematic node.
     '''
     # base case
     if node == template_node:
       return []
+    if not is_simplify_nodes_before_prob_node:
+      if node.get_id() < template_node.get_id():
+        return []
     simplifiable_nodes = []
     if node.is_ancestor_or_itself(template_node):
       for child in node.get_nt_children():
@@ -1098,7 +1120,12 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
     subject.src_lang,
     template_dict['problematic_node_path']
   )
-  simplifiable_nodes = _rec_collect_simplifiable_nodes(context_node, problematic_node, subject.src_lang)
+  simplifiable_nodes = _rec_collect_simplifiable_nodes(
+    context_node,
+    problematic_node,
+    subject.src_lang,
+    is_simplify_nodes_before_prob_node=False
+  )
   simplifiable_parents = _get_simplifiable_parents(simplifiable_nodes)
 
   all_alt_starting_nodes : List[Tuple[pds.DuoGlotNode, List[str]]] = []
