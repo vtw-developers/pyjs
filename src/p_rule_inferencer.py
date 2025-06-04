@@ -832,27 +832,24 @@ def infer_translation_rules(
 
 
 # TEST HARNESS FUNCTIONS
-# TODO paths should be updated (p_consts.CWD)
-def _test_infer_translation_rules():
-  import p_consts
-  config_fpath = p_consts.CWD / 'temporary_test_infer_translation_rules_config.json'
-  config = p_utils.read_json(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  template_dict = args_dict['template_dict']
-  translation_pairs = args_dict['translation_pairs']
-  kwargs = args_dict['kwargs']
-
-  trules_list = infer_translation_rules(template_dict, translation_pairs, **kwargs)
-  p_utils.write_text('temporary_test_infer_translation_rules.snart', '\n\n\n'.join(trules_list))
-
-# TODO paths should be updated (p_consts.CWD)
 def _test_infer_translation_rule_wrapper():
-  import p_consts
-  config_fpath = p_consts.CWD / 'temporary_test_infer_translation_rule_wrapper_config.json'
-  config = p_utils.read_json(config_fpath)
+  '''
+  def infer_translation_rule_wrapper(
+    subject: p_subject.PirelSubject,
+    translation_pair: dict,
+    src_lang: str,
+    tar_lang: str,
+    context: dict,
+    is_insert_secret_fn: bool,
+    choose_largest_node: bool,
+    is_ignore_semicolon: bool
+  ) -> str:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_infer_translation_rule_wrapper_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   translation_pair = args_dict['translation_pair']
   src_lang = args_dict['src_lang']
   tar_lang = args_dict['tar_lang']
@@ -860,21 +857,20 @@ def _test_infer_translation_rule_wrapper():
   is_insert_secret_fn = args_dict['is_insert_secret_fn']
   choose_largest_node = args_dict['choose_largest_node']
   is_ignore_semicolon = args_dict['is_ignore_semicolon']
-  kwargs = args_dict['kwargs']
 
-  translation_rule = infer_translation_rule_wrapper(
+  trule = infer_translation_rule_wrapper(
+    subject,
     translation_pair,
     src_lang,
     tar_lang,
     context,
     is_insert_secret_fn,
     choose_largest_node,
-    is_ignore_semicolon,
-    **kwargs
+    is_ignore_semicolon
   )
-  p_utils.write_text('temporary_test_infer_translation_rule_wrapper.snart', translation_rule)
+
+  print(trule)
 
 
 if __name__ == '__main__':
-  # _test_infer_translation_rules()
   _test_infer_translation_rule_wrapper()
