@@ -659,6 +659,9 @@ def _test_duoglot_translate_wrapper():
     templates_dict = exc.get_templates_dict()
     print(f'Error: {exc}')
     print(f'Templates dict:\n{json.dumps(templates_dict, indent=2)}')
+  except Exception as exc:
+    p_utils.write_tmp_json('dbg_history.json', exc.dbg_history)
+    print(f'Unexpected error: {exc}')
 
 
 def _test_get_pre_context():
