@@ -39,7 +39,28 @@ class _SimpleStatementsNode(pvis.AbstractNode): pass
 class _StatementNode(pvis.AbstractNode): pass
 class _SuiteNode(pvis.AbstractNode): pass
 class AliasedImportNode(pvis.AbstractNode): pass
-class ArgumentListNode(pvis.AbstractNode): pass
+class ArgumentListNode(pvis.AbstractNode):
+  @classmethod
+  def build(self, arguments: List[pvis.AbstractNode]) -> ArgumentListNode:
+    '''
+    Build an argument list node from a list of arguments
+    NOTE developer is responsible for ensuring grammatical correctness
+    '''
+    node = ArgumentListNode('argument_list')
+    left_par = pvis.TerminalNode('(')
+    node.add_child(left_par)
+    left_par.set_parent(node)
+    for idx, arg in enumerate(arguments):
+      node.add_child(arg)
+      arg.set_parent(node)
+      if idx < len(arguments) - 1:
+        comma = pvis.TerminalNode(',')
+        node.add_child(comma)
+        comma.set_parent(node)
+    right_par = pvis.TerminalNode(')')
+    node.add_child(right_par)
+    right_par.set_parent(node)
+    return node
 class AssertStatementNode(pvis.AbstractNode): pass
 class AssignmentNode(pvis.AbstractNode):
   def __init__(self, node_type: str):
