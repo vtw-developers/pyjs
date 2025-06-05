@@ -10875,5 +10875,26 @@ class TestDefinedFunctionNameExtractor(unittest.TestCase):
     self.assertCountEqual(def_fn_names, ['func_one', 'func_two'])
 
 
+class TestFunctionInvocationReplacer(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-py' / 'function-invocation-replacer'
+    self.maxDiff = None
+
+  def get_snippets(self, snippet_id: str) -> Tuple[str, str]:
+    snippet = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_in.py')
+    gold = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_out.py')
+    return snippet, gold
+
+  def test_001(self):
+    snippet, gold_snippet = self.get_snippets('001')
+    replaced = p_visitor_py.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
+    self.assertEqual(replaced, gold_snippet)
+
+  def test_002(self):
+    snippet, gold_snippet = self.get_snippets('002')
+    replaced = p_visitor_py.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
+    self.assertEqual(replaced, gold_snippet)
+
+
 if __name__ == '__main__':
   unittest.main()
