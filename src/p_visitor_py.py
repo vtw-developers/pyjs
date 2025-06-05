@@ -99,6 +99,22 @@ class CallNode(pvis.AbstractNode):
     super().__init__(node_type)
     self.function : pvis.AbstractNode = None
     self.arguments : pvis.AbstractNode = None
+  @classmethod
+  def build(self, function: IdentifierNode, arguments: ArgumentListNode) -> CallNode:
+    '''
+    Build a call node from a function and an argument list
+    NOTE developer is responsible for ensuring grammatical correctness
+    '''
+    assert isinstance(function, IdentifierNode), 'function must be an IdentifierNode'
+    assert isinstance(arguments, ArgumentListNode), 'arguments must be an ArgumentListNode'
+    node = CallNode('call')
+    node.function = function
+    node.arguments = arguments
+    node.add_child(function)
+    function.set_parent(node)
+    node.add_child(arguments)
+    arguments.set_parent(node)
+    return node
 class ChevronNode(pvis.AbstractNode): pass
 class ClassDefinitionNode(pvis.AbstractNode): pass
 class CommentNode(pvis.AbstractNode): pass
