@@ -2267,6 +2267,46 @@ class StatementNodeSimplifier(pvis.Visitor):
     pass_statement_node.set_parent(node)
 
 
+class DefinedFunctionNameExtractor(pvis.Visitor):
+  '''
+  Given a Python script, extracts all names of the functions
+  that are defined in it.
+  '''
+  def __init__(self):
+    super().__init__()
+    self.defined_fn_names : List[str] = []
+
+  def add_function_name(self, name: str) -> None:
+    '''
+    Add a function name to the list of defined function names.
+    '''
+    if name not in self.defined_fn_names:
+      self.defined_fn_names.append(name)
+
+  # VISIT METHODS
+  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
+    '''
+    Extract the name of the function definition.
+    '''
+    assert isinstance(node.name, IdentifierNode), 'function name must be an IdentifierNode'
+    self.add_function_name(node.name.val())
+    for child in node.children:
+      self.visit(child)
+
+  @classmethod
+  def get_defined_function_names(cls, snippet: str) -> List[str]:
+    '''
+    Get all defined function names from the given snippet.
+    The snippet is expected to be a body of a Python script.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(snippet, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    extractor = cls()
+    extractor.visit(tree.root_node)
+    return extractor.defined_fn_names
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')
