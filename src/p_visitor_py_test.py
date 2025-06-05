@@ -10842,5 +10842,38 @@ class TestAssignedIdentifierExtractor(unittest.TestCase):
     self.assertCountEqual(assigned_identifiers, ['arr'])
 
 
+class TestDefinedFunctionNameExtractor(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-py' / 'defined-function-name-extractor'
+
+  def get_snippet(self, fname: str) -> str:
+    return p_utils.read_text(self.fixtures_dir_path / fname)
+
+  def test_simple_001(self):
+    snippet = 'def my_function():\n    pass'
+    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    self.assertCountEqual(def_fn_names, ['my_function'])
+
+  def test_simple_002(self):
+    snippet = self.get_snippet('simple_002.py')
+    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    self.assertCountEqual(def_fn_names, ['f_gold'])
+
+  def test_nested_001(self):
+    snippet = 'def outer_function():\n    def inner_function():\n        pass'
+    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    self.assertCountEqual(def_fn_names, ['outer_function', 'inner_function'])
+
+  def test_multiple_001(self):
+    snippet = 'def func_one():\n    pass\n\ndef func_two():\n    pass'
+    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    self.assertCountEqual(def_fn_names, ['func_one', 'func_two'])
+
+  def test_redefined_001(self):
+    snippet = 'def func_one():\n    pass\n\ndef func_two():\n    pass\n\ndef func_two():\n    pass'
+    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    self.assertCountEqual(def_fn_names, ['func_one', 'func_two'])
+
+
 if __name__ == '__main__':
   unittest.main()
