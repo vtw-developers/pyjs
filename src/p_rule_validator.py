@@ -1,5 +1,5 @@
 import json
-from typing import List, Tuple, Union
+from typing import List, Optional, Union
 
 import d_grammar_expand
 import d_grammar_rules
@@ -9,6 +9,7 @@ import p_pirel
 import p_pynguin
 import p_rule_applicator as prapp
 import p_rule_postprocessor as prpp
+import p_ruleset
 import p_subject
 import p_tree_log as ptlog
 import p_utils
@@ -223,7 +224,7 @@ def is_valid_translation_rule_syntactic(
   return _process_used_rules(rule_ids_before, rule_ids_after, ltrule_syntax_val_res)
 
 
-def is_valid_translation_rule_test_based(
+def is_valid_translation_rule_test_based_deprecated(
   subject: p_subject.PirelSubject,
   snippet_under_test: str,
   trule_under_test: str,
@@ -342,7 +343,7 @@ def is_valid_translation_rule_test_based(
     logger.debug(f'generated test function:\n{test_fn_str}')
     return test_fn_str
 
-  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
+  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based_deprecated.json', locals())
 
   msg = (
     f'~~ Checking if translation rule is valid based on tests:\n'
@@ -437,11 +438,170 @@ def is_valid_translation_rule_test_based(
   return True
 
 
+def is_valid_translation_rule_test_based(
+  snippet_under_test: str,
+  pre_context: str,
+  current_ruleset_obj: p_ruleset.Ruleset,
+  subject: p_subject.PirelSubject,
+  template_dict: dict
+) -> bool:
+
+  def _combine_pre_context_and_sut(pre_context: str, snippet_under_test: str) -> str:
+    logger.debug('~ combining pre_context and snippet_under_test')
+    assert pre_context.count(p_consts.PRE_CTX_SPEC_IDENT) == 1, \
+      'should not happen: pre_context must contain exactly one line with special identifier'
+    prectx_lines = pre_context.split('\n')
+    spec_id_line_idx = -1
+    for i, line in enumerate(prectx_lines):
+      if p_consts.PRE_CTX_SPEC_IDENT in line:
+        spec_id_line_idx = i
+        break
+    spec_id_indentation = p_utils.count_leading_spaces(prectx_lines[spec_id_line_idx])
+    indented_sut = p_utils.indent(snippet_under_test, spec_id_indentation)
+    indented_sut_lines = indented_sut.split('\n')
+    prectx_lines = prectx_lines[:spec_id_line_idx] + indented_sut_lines + prectx_lines[spec_id_line_idx + 1:]
+    prectx_w_sut = '\n'.join(prectx_lines)
+    logger.debug(f'~ combined pre_context and snippet_under_test:\n{prectx_w_sut}')
+    return prectx_w_sut
+
+  def _get_f_gold_fn_str(paramable_ids: List[str], pcsut: str) -> str:
+    logger.debug('~ preparing f_gold() function')
+    _params = ', '.join(paramable_ids)
+
+    # 1. prepare f_gold() function
+    _indented_snippet_block = p_utils.indent(pcsut, 4)
+    f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+
+    # 2. insert break statements in loops
+    # this is needed to avoid infinite loops
+    # NOTE: this is a workaround for Pynguin
+    if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
+      tree = pvpy.Tree.from_str(f_gold_fn_str)
+      break_inserter = pvpy.BreakStatementInserter()
+      break_inserter.visit(tree.root_node)
+      f_gold_fn_str = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
+
+    # 3. replace possible recursive calls with a dummy function
+    # this is needed to avoid infinite recursion or type errors
+    # e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
+    defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(f_gold_fn_str)
+    f_gold_fn_str = pvpy.FunctionInvocationReplacer.replace_function_invocations(f_gold_fn_str, defined_fns)
+
+    logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
+    return f_gold_fn_str
+
+  def _get_test_fn_str_llm(
+    paramable_ids: List[str],
+    f_gold_fn_str: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict
+  ) -> Optional[str]:
+    '''
+    RETURN test function or None if no test function was generated.
+    '''
+    # cases such as `helper = {}` (L0001)
+    # in such cases, the test function just invokes the f_gold() function
+    if len(paramable_ids) == 0:
+      msg = (
+        'No parametrizable identifiers found.\n'
+        'Will not generate Pynguin tests for this snippet.\n'
+        'Will run the snippet directly after inserting the log statements.')
+      logger.debug(msg)
+      return '''def test():\n    f_gold()'''
+
+    test_fn_str = p_llm_gen.gen_test_function(f_gold_fn_str, subject, template_dict)
+    if test_fn_str is None:
+      return None
+
+    logger.debug(f'generated test function:\n{test_fn_str}')
+    return test_fn_str
+
+  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
+
+  msg = (
+    f'~~ Checking if translation rules are valid based on tests:\n'
+    f'Snippet to test translation rule:\n'
+    f'{snippet_under_test}\n'
+    f'Pre-context:\n'
+    f'{pre_context}\n'
+  )
+  logger.debug(msg)
+
+  # 1. combine pre_context and snippet_under_test
+  prectx_sut = _combine_pre_context_and_sut(pre_context, snippet_under_test)
+
+  # 2. extract parametrizable identifiers from pre_context + snippet_under_test
+  # these identifiers are used as parameters of f_gold() function
+  paramable_ids = pvpy.ParametrizableVariablesCollector.get_paramable_ids(prectx_sut)
+  logger.debug(f'~ parametrizable identifiers: {paramable_ids}')
+
+  # 3. prepare f_gold() function
+  # f_gold() function is a wrapper function that contains the snippet under test
+  f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, prectx_sut)
+
+  # 4. generate tests for f_gold() function using LLM
+  _result = _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
+  if _result is None:
+    return False
+  test_fn_str = _result
+
+  # 5. insert log statements into the test script
+  # log statements are inserted into the test script
+  # log statements print the values of assigned variables to produce a trace
+  f_gold_fn_str = pvpy.LogStatementInserter.insert_log_statements(f_gold_fn_str)
+  logger.debug(f'~ instrumented the f_gold with log statements:\n{f_gold_fn_str}')
+
+  # 6. index log statements in the test script
+  # log statements are indexed in the test script
+  f_gold_fn_str = pvpy.LogStatementsIndexer.index_log_statements(f_gold_fn_str)
+  logger.debug(f'~ indexed log statements in f_gold:\n{f_gold_fn_str}')
+
+  # 7. combine into a test script without log statements
+  # a test script contains a test() function, f_gold() function
+  # and test function invocation
+  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+    test_fn_str=test_fn_str,
+    f_gold_fn_str=f_gold_fn_str,
+    test_call_str='test()'
+  )
+  logger.debug(f'combined test function and f_gold() into a test script:\n{test_script_str}')
+
+  # 8. translate the test script into the target language
+  # the test script is translated into the target language
+  # to compare its trace to the traces generated by test script in src language
+  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
+  extra_ruleset = p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
+  translation_rules_main_code = (
+    f'{log_statement_rule}\n\n'
+    f'{extra_ruleset}\n\n'
+    f'{current_ruleset_obj.to_string()}'
+  )
+
+  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
+  pirel_subject_snippet_conf['src_program'] = test_script_str
+  pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
+  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+
+  logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
+  try:
+    tar_program_plausible = prapp.apply_translation_rules(pirel_subject)
+  except Exception as err:
+    msg = (
+      f'Failed to obtain a plausible translation of the test script:\n'
+      f'{p_utils.exception_to_str(err)}\n'
+    )
+    logger.warning(msg)
+    return False
+
+  logger.debug('successfully obtained the translation of the test script')
+  logger.debug('translation rule is valid based on tests')
+  return True
+
+
 def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   current_ruleset: str,
-  template_dict: dict,
   lprule_val_log: ptlog.PRuleValLog
 ) -> List[str]:
   '''
@@ -461,18 +621,6 @@ def filter_translation_rules(
     is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, current_ruleset, ltrule)
     if not is_syntax_valid:
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
-      continue
-
-    is_semantics_valid = is_valid_translation_rule_test_based(
-      subject,
-      'REPLACE WITH SNIPPET UNDER TEST',  # TODO: replace with the actual snippet under test
-      translation_rule,
-      current_ruleset,
-      template_dict,
-      ltrule
-    )
-    if not is_semantics_valid:
-      logger.warning(f'Translation rule is not semantically valid:\n{translation_rule}')
       continue
 
     checked_trules_list.append(translation_rule)
@@ -566,9 +714,9 @@ def _test_is_valid_translation_rule_syntactic():
   print(is_valid)
 
 
-def _test_is_valid_translation_rule_test_based():
+def _test_is_valid_translation_rule_test_based_deprecated():
   '''
-  def is_valid_translation_rule_test_based(
+  def is_valid_translation_rule_test_based_deprecated(
     subject: p_subject.PirelSubject,
     snippet_under_test: str,
     trule_under_test: str,
@@ -577,7 +725,7 @@ def _test_is_valid_translation_rule_test_based():
     ltrule: ptlog.TRule
   ) -> bool:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_test_based_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_test_based_deprecated_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
@@ -588,7 +736,7 @@ def _test_is_valid_translation_rule_test_based():
   template_dict = args_dict['template_dict']
   ltrule = ptlog.TRule.from_str(trule_under_test)
 
-  is_valid = is_valid_translation_rule_test_based(
+  is_valid = is_valid_translation_rule_test_based_deprecated(
     subject,
     snippet_under_test,
     trule_under_test,
@@ -602,4 +750,4 @@ def _test_is_valid_translation_rule_test_based():
 if __name__ == '__main__':
   # _validate_translation_rule_usage()
   # _test_is_valid_translation_rule_syntactic()
-  _test_is_valid_translation_rule_test_based()
+  _test_is_valid_translation_rule_test_based_deprecated()
