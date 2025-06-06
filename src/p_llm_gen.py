@@ -918,8 +918,7 @@ def get_translation_pairs_from_tsp(
 def gen_test_function(
   f_gold_function: str,
   subject: p_subject.PirelSubject,
-  template_dict: dict,
-  ltrule_test_based_val_res: ptlog.TRuleTestBasedValRes
+  template_dict: dict
 ) -> Optional[str]:
   '''
   Generate a test function for validating a translation rule.
@@ -927,7 +926,6 @@ def gen_test_function(
   '''
   lgen_test_function = ptlog.GenTestFunction()
   lgen_test_function.f_gold_function = f_gold_function
-  ltrule_test_based_val_res.gen_test_function = lgen_test_function
 
   gen_task = GenTestFunction(
     task_name='gen_test_function',
