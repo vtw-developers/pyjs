@@ -556,7 +556,22 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
 
     except TraceMismatchError as err:
       logger.critical('There is a trace mismatch between src and tar test scripts.')
-      raise
+      error_lines = err.error_lines
+
+      # May raise
+      # 1. NoUniqueChoicesError
+      proposed_choices = p_rule_chooser.get_proposed_choices_semantic_error(
+        tar_program_instr,
+        tar_main_code,
+        error_lines,
+        current_choices,
+        choices_history,
+        map_to_exid,
+        translate_dbg_history
+      )
+
+      choices_history.append(proposed_choices)
+      current_choices = proposed_choices
 
 
 def _get_deinstrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
