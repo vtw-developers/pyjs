@@ -24,7 +24,7 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
-class CannotLearnRulesForProblematicNode(RuntimeError): pass
+class ProbNode_NoTRule_AllTSPsExhaustedError(RuntimeError): pass
 class NoTransRulesFromTSPError(RuntimeError): pass
 
 
@@ -589,7 +589,7 @@ def learn_trans_rules_for_prob_node(
   Run PiREL translation rule learning module for a problematic node.
   PRE There is a translation error.
   RETURN [translation_rules]
-  RAISE `CannotLearnRulesForProblematicNode` if cannot generate a translation rule.
+  RAISE `ProbNode_NoTRule_AllTSPsExhaustedError` if cannot generate a translation rule.
   Our goal is to never raise this error
   '''
 
@@ -632,7 +632,7 @@ def learn_trans_rules_for_prob_node(
     f'problematic_node_type = "{template_dict["problematic_node_type"]}".\n'
     f'len(tsps) = {len(tsps)}\n')
   logger.critical(msg)
-  raise CannotLearnRulesForProblematicNode(msg)
+  raise ProbNode_NoTRule_AllTSPsExhaustedError(msg)
 
 
 def duoglot_translate_wrapper(
