@@ -205,83 +205,159 @@ def get_pre_context_local_deprecated(src_main_code: str, context_node_path: List
   return pre_context
 
 
-def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, templates_dict: dict) -> dict:
+def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
+  '''
+  Get pre-context for the statement node.
+  The pre-context is the code that appears before the statement node
+  in the source code up to the closest enclosing function definition.
+  '''
+  p_utils.log_json_time(f'args-get_pre_context.json', locals())
 
-  def _rerun_translation_for_context(subject: p_subject.PirelSubject, current_ruleset: str, template_origin: str) -> dict:
+  tree = pds.PirelTree.from_code_str(src_main_code, lang)
+  statement_node = tree.get_root_node().get_node_by_id(statement_nid)
+  statement_npath = tree.get_root_node().get_path_to_child(statement_node)
+  pre_context = get_pre_context_global(src_main_code, statement_npath)
+  return pre_context
+
+
+def validate_translation_rules_for_statement_node(
+  subject: p_subject.PirelSubject,
+  statement_subject: p_subject.PirelSubject,
+  current_ruleset_obj: p_ruleset.Ruleset,
+  statement_nid: int,
+  enable_error_recovery: bool = True,
+) -> p_ruleset.Ruleset:
+  '''
+  RETURN the validated ruleset.
+  '''
+
+  statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
+  simple_ntext = simplify_statement_node_text(statement_node)
+  pre_context = get_pre_context(subject.src_main_code, subject.src_lang, statement_nid)
+
+  '''
+  template_dict is required by `p_llm_gen.gen_test_function`
+  which is invoked by `p_rule_validator.is_valid_translation_rule_test_based`.
+  However, due to the updated control flow of the program, we do not have
+  a template_dict corresponding to the group of nodes from which
+  we have obtained the translation rules. To solve this problem,
+  we "fabricate" a template_dict that contains the necessary information
+  to run the validation. To see what information is needed,
+  refer to `p_llm_gen.gen_test_function`.
+  '''
+  template_dict = {
+    'src_lang': subject.src_lang,
+  }
+
+  while True:
     '''
-    Why do we need this function?
-    We need this function to update certain values in `template_dict`:
-    1. context_node_id
-    2. problematic_node_id
-    3. contexts (mainly)
-
-    NOTE returns a new `template_dict`
-    TODO optimize: context extraction is needed only at this step
-    RETURN updated `template_dict`
+    Run test-based rule validation to validate the learned translation rules
+    that translate the statement node. This invocation has a call to
+    p_rule_applicator.apply_translation_rules() that checks all possible
+    translation rule combinations that result in a plausible translation
+    of the source test script using the learned translation rules.
     '''
     try:
-      _ = duoglot_translate_wrapper(
-        template_origin,
-        subject.src_lang,
-        subject.tar_lang,
-        current_ruleset,
-        subject.auto_backward,
-        subject.choices,
-        subject_name=subject.name,
+      is_valid = p_rule_validator.is_valid_translation_rule_test_based(
+        simple_ntext,
+        pre_context,
+        current_ruleset_obj,
+        statement_subject,
+        template_dict
       )
-    except d_grammar_expand.TranslationRuleNotFoundException as exc:
-      templates_dict = exc.get_templates_dict()
-      template_idx = templates_dict['num_templates'] - 1
-      return templates_dict[template_idx]
-    raise RuntimeError('DuoGlot should have failed to translate the context code')
 
-  logger.debug('Starting template_dict initialization')
+      # ideal case: translation rules are valid
+      assert is_valid, 'consider this case'
+      return current_ruleset_obj
 
-  # in cases when templates_dict is loaded from str, keys are strings
-  _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
-  template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_0_init.json', template_dict)
+    except p_rule_applicator.TRuleNotFoundError as err:
+      raise
+    except p_rule_chooser.NoUniqueChoicesError as err:
+      raise
+    except p_rule_applicator.TraceMismatchError as err:
+      raise
 
-  # Rerun DuoGlot translation to obtain `template_dict`
-  # for the context code snippet, not the entire program.
-  # This is done to get the updated values for
-  # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
+    break
 
-  # simplify the context
-  template_dict = p_grammar.simplify_template(subject, template_dict)
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify_1.json', template_dict)
 
-  # simplify the template using the generator
-  template_dict = p_generator.simplify_template_with_generator(subject, template_dict)
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_simplify_2.json', template_dict)
+def learn_trans_rules_from_tsp(
+  tsp: Tuple[str, str],
+  template_dict: dict,
+  subject: p_subject.PirelSubject,
+  current_ruleset: str
+) -> List[str]:
+  '''
+  RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
+  RAISE `NoTransRulesFromTSPError` if no translation rules were learned from TSP.
+  '''
 
-  # Rerun DuoGlot translation to obtain `template_dict`
-  # for the context code snippet, not the entire program.
-  # This is done to get the updated values for
-  # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
-  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
+  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
+  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
 
-  # prepare partial program
-  partial_program = get_partial_program(subject, current_ruleset, template_dict)
-  template_dict['partial_program'] = partial_program
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
+  # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
+  lpllm_gen_log = ptlog.PLLMGenLog()
+  translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
+  assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
 
-  # `src_program` is needed for a prompt that uses it as a reference
-  template_dict['src_program'] = subject.src_main_code
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_6_src_program.json', template_dict)
+  # INFER TRANSLATION RULES FROM TRANSLATION PAIRS
+  lprule_inf_log = ptlog.PRuleInfLog()
+  trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs, lprule_inf_log)
 
-  # prepare pre-context of the context node of the problematic node
-  # NOTE pre-context is used in translation rule validation
-  # pre_context = get_pre_context_global(subject, templates_dict)
-  # template_dict['pre_context'] = pre_context
-  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_7_pre_context_FINAL.json', template_dict)
+  # CHECK TRANSLATION RULES
+  lprule_val_log = ptlog.PRuleValLog()
+  checked_trules_list = p_rule_validator.filter_translation_rules(
+    trules_list, subject, current_ruleset, lprule_val_log)
 
-  logger.debug('Finished template_dict initialization')
-  logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
-  return template_dict
+  if len(checked_trules_list) == 0:
+    logger.warning('No translation rules were learned from TSP.')
+    raise NoTransRulesFromTSPError('No translation rules were learned from TSP.')
+
+  return checked_trules_list
+
+
+def learn_trans_rules_from_tsp_with_retries(
+  tsp: Tuple[str, str],
+  template_dict: dict,
+  subject: p_subject.PirelSubject,
+  current_ruleset: str
+) -> List[str]:
+  '''
+  RETURN All possible translation rules inferred from all possible translations of `tsp`.
+  NOTE may return zero translation rules
+  '''
+
+  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
+
+  attempt_idx = 0
+  while attempt_idx < p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
+    attempt_idx += 1
+    logger.debug(f'Attempting to learn some translation rules from a TSP #{attempt_idx}')
+    try:
+      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset)
+      return trules_list
+    except p_llm_gen.NoTransPairsFromTSPError as err:
+      logger.warning('Attempt to learn translation rules from TSP failed')
+    except NoTransRulesFromTSPError as err:
+      logger.warning('Attempt to learn translation rules from TSP failed')
+
+  msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
+  logger.warning(msg)
+  return []
+
+
+def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
+  '''
+  Generate TSPs using a new algorithm.
+  TODO consider built-in function names
+  '''
+  logger.debug(f'Starting TSP generation')
+
+  tsps = p_generator.generate_tsps_with_generator(template_dict)
+  assert len(tsps) > 0, 'Zero TSPs generated'
+
+  logger.debug(f'Finished TSP generation')
+  p_utils.log_json_time(f'{subject.name}_TSPs-generated.json', tsps)
+  return tsps
 
 
 def get_partial_program(subject: p_subject.PirelSubject, current_ruleset: str, template_dict: dict) -> str:
@@ -425,84 +501,83 @@ def get_partial_program(subject: p_subject.PirelSubject, current_ruleset: str, t
     loop_counter += 1
 
 
-def learn_trans_rules_from_tsp(
-  tsp: Tuple[str, str],
-  template_dict: dict,
-  subject: p_subject.PirelSubject,
-  current_ruleset: str
-) -> List[str]:
-  '''
-  RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
-  RAISE `NoTransRulesFromTSPError` if no translation rules were learned from TSP.
-  '''
+def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, templates_dict: dict) -> dict:
 
-  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
-  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
+  def _rerun_translation_for_context(subject: p_subject.PirelSubject, current_ruleset: str, template_origin: str) -> dict:
+    '''
+    Why do we need this function?
+    We need this function to update certain values in `template_dict`:
+    1. context_node_id
+    2. problematic_node_id
+    3. contexts (mainly)
 
-  # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
-  lpllm_gen_log = ptlog.PLLMGenLog()
-  translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
-  assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
-
-  # INFER TRANSLATION RULES FROM TRANSLATION PAIRS
-  lprule_inf_log = ptlog.PRuleInfLog()
-  trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs, lprule_inf_log)
-
-  # CHECK TRANSLATION RULES
-  lprule_val_log = ptlog.PRuleValLog()
-  checked_trules_list = p_rule_validator.filter_translation_rules(
-    trules_list, subject, current_ruleset, lprule_val_log)
-
-  if len(checked_trules_list) == 0:
-    logger.warning('No translation rules were learned from TSP.')
-    raise NoTransRulesFromTSPError('No translation rules were learned from TSP.')
-
-  return checked_trules_list
-
-
-def learn_trans_rules_from_tsp_with_retries(
-  tsp: Tuple[str, str],
-  template_dict: dict,
-  subject: p_subject.PirelSubject,
-  current_ruleset: str
-) -> List[str]:
-  '''
-  RETURN All possible translation rules inferred from all possible translations of `tsp`.
-  NOTE may return zero translation rules
-  '''
-
-  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
-
-  attempt_idx = 0
-  while attempt_idx < p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
-    attempt_idx += 1
-    logger.debug(f'Attempting to learn some translation rules from a TSP #{attempt_idx}')
+    NOTE returns a new `template_dict`
+    TODO optimize: context extraction is needed only at this step
+    RETURN updated `template_dict`
+    '''
     try:
-      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset)
-      return trules_list
-    except p_llm_gen.NoTransPairsFromTSPError as err:
-      logger.warning('Attempt to learn translation rules from TSP failed')
-    except NoTransRulesFromTSPError as err:
-      logger.warning('Attempt to learn translation rules from TSP failed')
+      _ = duoglot_translate_wrapper(
+        template_origin,
+        subject.src_lang,
+        subject.tar_lang,
+        current_ruleset,
+        subject.auto_backward,
+        subject.choices,
+        subject_name=subject.name,
+      )
+    except d_grammar_expand.TranslationRuleNotFoundException as exc:
+      templates_dict = exc.get_templates_dict()
+      template_idx = templates_dict['num_templates'] - 1
+      return templates_dict[template_idx]
+    raise RuntimeError('DuoGlot should have failed to translate the context code')
 
-  msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
-  logger.warning(msg)
-  return []
+  logger.debug('Starting template_dict initialization')
 
+  # in cases when templates_dict is loaded from str, keys are strings
+  _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
+  template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_0_init.json', template_dict)
 
-def init_tsps(subject: p_subject.PirelSubject, template_dict: dict) -> List[Tuple[str, str]]:
-  '''
-  Generate TSPs using a new algorithm.
-  TODO consider built-in function names
-  '''
-  logger.debug(f'Starting TSP generation')
+  # Rerun DuoGlot translation to obtain `template_dict`
+  # for the context code snippet, not the entire program.
+  # This is done to get the updated values for
+  # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
-  tsps = p_generator.generate_tsps_with_generator(template_dict)
-  assert len(tsps) > 0, 'Zero TSPs generated'
+  # simplify the context
+  template_dict = p_grammar.simplify_template(subject, template_dict)
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify_1.json', template_dict)
 
-  logger.debug(f'Finished TSP generation')
-  p_utils.log_json_time(f'{subject.name}_TSPs-generated.json', tsps)
-  return tsps
+  # simplify the template using the generator
+  template_dict = p_generator.simplify_template_with_generator(subject, template_dict)
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_simplify_2.json', template_dict)
+
+  # Rerun DuoGlot translation to obtain `template_dict`
+  # for the context code snippet, not the entire program.
+  # This is done to get the updated values for
+  # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
+  template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
+
+  # prepare partial program
+  partial_program = get_partial_program(subject, current_ruleset, template_dict)
+  template_dict['partial_program'] = partial_program
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
+
+  # `src_program` is needed for a prompt that uses it as a reference
+  template_dict['src_program'] = subject.src_main_code
+  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_6_src_program.json', template_dict)
+
+  # prepare pre-context of the context node of the problematic node
+  # NOTE pre-context is used in translation rule validation
+  # pre_context = get_pre_context_global(subject, templates_dict)
+  # template_dict['pre_context'] = pre_context
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_7_pre_context_FINAL.json', template_dict)
+
+  logger.debug('Finished template_dict initialization')
+  logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
+  return template_dict
 
 
 def learn_trans_rules_for_prob_node(
@@ -560,52 +635,60 @@ def learn_trans_rules_for_prob_node(
   raise CannotLearnRulesForProblematicNode(msg)
 
 
-def can_be_context_node(node: pds.PirelNode, lang: str) -> bool:
+def duoglot_translate_wrapper(
+  src_code: str,
+  src_lang: str,
+  tar_lang: str,
+  trans_rules: str,
+  auto_backward: bool,
+  choices: dict,
+  **kwargs
+) -> dict:
   '''
-  A node is a context node if AST of its text,
-  when parsed on its own, is isomorphic to itself.
-  Refer to p_templates._validate_template() for more information.
+  Wrapper around DuoGlot's `grammar_expand.TransSession.get_translation()`.
+  RAISE Propagate all exceptions to the caller.
+  RETURN a dict containing all the relevant information about the target program.
+
+  KWARGS
+  - subject_name: str
+  - skip_template_extraction: bool (optional)
   '''
-  # must be non-terminal
-  if node.is_terminal():
-    return False
-  # node text must not have errors when parsed as it is
-  if p_utils.does_have_parse_error(node.get_text(), lang):
-    return False
-  # parse the node text as a program on its own
-  ast_text, ast_ann = d_ast_parse.parse_text_dbg(node.get_text(), lang, keep_text=True)
-  tree = pds.PirelTree(ast_text, ast_ann)
-  # there should be exactly one context node
-  if len(tree.get_root_node().get_children()) != 1:
-    return False
-  context_node = tree.get_root_node().get_children()[0]
-  # context node must be isomorphic to the original node
-  if not node.is_type_isomorphic_to(context_node):
-    return False
-  return True
 
+  assert 'subject_name' in kwargs, 'subject_name is missing'
 
-def get_statement_nodes_PY(source_program: str, lang: str) -> List[pds.PirelNode]:
-  '''
-  Statement nodes are primary units of code in the source code.
-  In other words, a source code is a sequence of statement nodes.
-  '''
-  def _rec_pre_order(node: pds.PirelNode, lang: str) -> None:
-    nonlocal nodes
-    if can_be_context_node(node, lang):
-      nodes.append(node)
-    for child in node.get_children():
-      _rec_pre_order(child, lang)
+  # since this function may be invoked many times, log locals() only for debugging
+  p_utils.log_json_time(f'{kwargs["subject_name"]}_args-duoglot_translate_wrapper.json', locals())
 
-  tree = pds.PirelTree.from_code_str(source_program, lang)
-  nodes : List[pds.PirelNode] = []
+  subject_name = kwargs['subject_name']
+  logger.info(f'Starting p_pirel.duoglot_translate_wrapper (subject_name={subject_name})')
 
-  _rec_pre_order(tree.get_root_node(), lang)
+  assert src_code.isascii()
+  assert choices['type'] in ['STEP', 'ASTNODE'], 'Unknown choices type'
+  slot_dedup_enabled = choices['type'] == 'ASTNODE'
 
-  # hacky: remove function definitions as we have rules to translate their headers
-  nodes = [n for n in nodes if n.get_ts_node_type() != 'function_definition']
+  translator = p_translators.get_translator_cached(
+    src_code,
+    src_lang,
+    tar_lang,
+    trans_rules,
+    slot_dedup_enabled
+  )
 
-  return nodes
+  # NOTE raises all sorts of exceptions (check docs)
+  # If there are no raised exceptions, it means that the translation was successful.
+  tar_ast, dbg_history = translator.get_translation(choices, auto_backward, **kwargs)
+
+  logger.info(f'SUCCESS DuoGlot translation is successful!')
+  tar_code, map_to_exid = d_ast_pretty.ast_to_code(tar_ast, tar_lang)
+  return {
+    'src_ast': translator.source_ast,
+    'src_ann': translator.source_ann,
+    'tar_ast': tar_ast,
+    'tar_code': tar_code,
+    'map_to_exid': map_to_exid,
+    'dbg_history': dbg_history,
+    'translator_dbg_info': translator.get_session_dbg_info()
+  }
 
 
 def get_statement_node_text(node: pds.PirelNode) -> str:
@@ -637,81 +720,6 @@ def get_statement_node_by_id(src_main_code: str, lang: str, node_id: int) -> pds
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
   node = tree.get_root_node().get_node_by_id(node_id)
   return node
-
-
-def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
-  '''
-  Get pre-context for the statement node.
-  The pre-context is the code that appears before the statement node
-  in the source code up to the closest enclosing function definition.
-  '''
-  p_utils.log_json_time(f'args-get_pre_context.json', locals())
-
-  tree = pds.PirelTree.from_code_str(src_main_code, lang)
-  statement_node = tree.get_root_node().get_node_by_id(statement_nid)
-  statement_npath = tree.get_root_node().get_path_to_child(statement_node)
-  pre_context = get_pre_context_global(src_main_code, statement_npath)
-  return pre_context
-
-
-def validate_translation_rules_for_statement_node(
-  subject: p_subject.PirelSubject,
-  statement_subject: p_subject.PirelSubject,
-  current_ruleset_obj: p_ruleset.Ruleset,
-  statement_nid: int,
-  enable_error_recovery: bool = True,
-) -> p_ruleset.Ruleset:
-  '''
-  RETURN the validated ruleset.
-  '''
-
-  statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
-  simple_ntext = simplify_statement_node_text(statement_node)
-  pre_context = get_pre_context(subject.src_main_code, subject.src_lang, statement_nid)
-
-  '''
-  template_dict is required by `p_llm_gen.gen_test_function`
-  which is invoked by `p_rule_validator.is_valid_translation_rule_test_based`.
-  However, due to the updated control flow of the program, we do not have
-  a template_dict corresponding to the group of nodes from which
-  we have obtained the translation rules. To solve this problem,
-  we "fabricate" a template_dict that contains the necessary information
-  to run the validation. To see what information is needed,
-  refer to `p_llm_gen.gen_test_function`.
-  '''
-  template_dict = {
-    'src_lang': subject.src_lang,
-  }
-
-  while True:
-    '''
-    Run test-based rule validation to validate the learned translation rules
-    that translate the statement node. This invocation has a call to
-    p_rule_applicator.apply_translation_rules() that checks all possible
-    translation rule combinations that result in a plausible translation
-    of the source test script using the learned translation rules.
-    '''
-    try:
-      is_valid = p_rule_validator.is_valid_translation_rule_test_based(
-        simple_ntext,
-        pre_context,
-        current_ruleset_obj,
-        statement_subject,
-        template_dict
-      )
-
-      # ideal case: translation rules are valid
-      assert is_valid, 'consider this case'
-      return current_ruleset_obj
-
-    except p_rule_applicator.TRuleNotFoundError as err:
-      raise
-    except p_rule_chooser.NoUniqueChoicesError as err:
-      raise
-    except p_rule_applicator.TraceMismatchError as err:
-      raise
-
-    break
 
 
 def learn_trans_rules_for_statement_node(
@@ -806,6 +814,54 @@ def learn_trans_rules_for_statement_node(
   current_ruleset_obj = validated_ruleset_obj
 
 
+def can_be_context_node(node: pds.PirelNode, lang: str) -> bool:
+  '''
+  A node is a context node if AST of its text,
+  when parsed on its own, is isomorphic to itself.
+  Refer to p_templates._validate_template() for more information.
+  '''
+  # must be non-terminal
+  if node.is_terminal():
+    return False
+  # node text must not have errors when parsed as it is
+  if p_utils.does_have_parse_error(node.get_text(), lang):
+    return False
+  # parse the node text as a program on its own
+  ast_text, ast_ann = d_ast_parse.parse_text_dbg(node.get_text(), lang, keep_text=True)
+  tree = pds.PirelTree(ast_text, ast_ann)
+  # there should be exactly one context node
+  if len(tree.get_root_node().get_children()) != 1:
+    return False
+  context_node = tree.get_root_node().get_children()[0]
+  # context node must be isomorphic to the original node
+  if not node.is_type_isomorphic_to(context_node):
+    return False
+  return True
+
+
+def get_statement_nodes_PY(source_program: str, lang: str) -> List[pds.PirelNode]:
+  '''
+  Statement nodes are primary units of code in the source code.
+  In other words, a source code is a sequence of statement nodes.
+  '''
+  def _rec_pre_order(node: pds.PirelNode, lang: str) -> None:
+    nonlocal nodes
+    if can_be_context_node(node, lang):
+      nodes.append(node)
+    for child in node.get_children():
+      _rec_pre_order(child, lang)
+
+  tree = pds.PirelTree.from_code_str(source_program, lang)
+  nodes : List[pds.PirelNode] = []
+
+  _rec_pre_order(tree.get_root_node(), lang)
+
+  # hacky: remove function definitions as we have rules to translate their headers
+  nodes = [n for n in nodes if n.get_ts_node_type() != 'function_definition']
+
+  return nodes
+
+
 def learn_trans_rules_for_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str
@@ -835,62 +891,6 @@ def learn_trans_rules_for_subject(
     learn_trans_rules_for_statement_node(subject, current_ruleset_obj, statement_node.get_id())
 
   return current_ruleset_obj.to_string()
-
-
-def duoglot_translate_wrapper(
-  src_code: str,
-  src_lang: str,
-  tar_lang: str,
-  trans_rules: str,
-  auto_backward: bool,
-  choices: dict,
-  **kwargs
-) -> dict:
-  '''
-  Wrapper around DuoGlot's `grammar_expand.TransSession.get_translation()`.
-  RAISE Propagate all exceptions to the caller.
-  RETURN a dict containing all the relevant information about the target program.
-
-  KWARGS
-  - subject_name: str
-  - skip_template_extraction: bool (optional)
-  '''
-
-  assert 'subject_name' in kwargs, 'subject_name is missing'
-
-  # since this function may be invoked many times, log locals() only for debugging
-  p_utils.log_json_time(f'{kwargs["subject_name"]}_args-duoglot_translate_wrapper.json', locals())
-
-  subject_name = kwargs['subject_name']
-  logger.info(f'Starting p_pirel.duoglot_translate_wrapper (subject_name={subject_name})')
-
-  assert src_code.isascii()
-  assert choices['type'] in ['STEP', 'ASTNODE'], 'Unknown choices type'
-  slot_dedup_enabled = choices['type'] == 'ASTNODE'
-
-  translator = p_translators.get_translator_cached(
-    src_code,
-    src_lang,
-    tar_lang,
-    trans_rules,
-    slot_dedup_enabled
-  )
-
-  # NOTE raises all sorts of exceptions (check docs)
-  # If there are no raised exceptions, it means that the translation was successful.
-  tar_ast, dbg_history = translator.get_translation(choices, auto_backward, **kwargs)
-
-  logger.info(f'SUCCESS DuoGlot translation is successful!')
-  tar_code, map_to_exid = d_ast_pretty.ast_to_code(tar_ast, tar_lang)
-  return {
-    'src_ast': translator.source_ast,
-    'src_ann': translator.source_ann,
-    'tar_ast': tar_ast,
-    'tar_code': tar_code,
-    'map_to_exid': map_to_exid,
-    'dbg_history': dbg_history,
-    'translator_dbg_info': translator.get_session_dbg_info()
-  }
 
 
 # TEST HARNESSES
