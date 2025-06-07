@@ -25,7 +25,7 @@ logger = p_utils.setup_logger(__name__)
 
 
 class ProbNode_NoTRule_AllTSPsExhaustedError(RuntimeError): pass
-class NoTransRulesFromTSPError(RuntimeError): pass
+class TSP_NoTRuleLearnedError(RuntimeError): pass
 
 
 def get_pre_context_global(src_main_code: str, stat_npath: List[int]) -> str:
@@ -288,7 +288,7 @@ def learn_trans_rules_from_tsp(
 ) -> List[str]:
   '''
   RETURN All possible valid translation rules inferred from all possible translations of `tsp`.
-  RAISE `NoTransRulesFromTSPError` if no translation rules were learned from TSP.
+  RAISE `TSP_NoTRuleLearnedError` if no translation rules were learned from TSP.
   '''
 
   logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
@@ -310,7 +310,7 @@ def learn_trans_rules_from_tsp(
 
   if len(checked_trules_list) == 0:
     logger.warning('No translation rules were learned from TSP.')
-    raise NoTransRulesFromTSPError('No translation rules were learned from TSP.')
+    raise TSP_NoTRuleLearnedError('No translation rules were learned from TSP.')
 
   return checked_trules_list
 
@@ -337,7 +337,7 @@ def learn_trans_rules_from_tsp_with_retries(
       return trules_list
     except p_llm_gen.NoTransPairsFromTSPError as err:
       logger.warning('Attempt to learn translation rules from TSP failed')
-    except NoTransRulesFromTSPError as err:
+    except TSP_NoTRuleLearnedError as err:
       logger.warning('Attempt to learn translation rules from TSP failed')
 
   msg = f'Spent {p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS} attempts and did not learn any translation rules from TSP.'
