@@ -4,7 +4,6 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-import d_grammar_expand
 import p_consts
 import p_pirel
 import p_rule_applicator
