@@ -20,7 +20,6 @@ class TRule:
   hash: str
   rule: str
   syntax_val_res: Optional['TRuleSyntaxValRes'] = None
-  test_based_val_res: Optional['TRuleTestBasedValRes'] = None
   @classmethod
   def from_str(cls, rule: str) -> 'TRule':
     hash = d_utils.string_sha256(rule)
@@ -64,22 +63,6 @@ class Sp1Tp1Cand:
 class TRuleSyntaxValRes:
   is_valid: Optional[bool] = None
   reason: Optional[str] = None
-
-@dataclass
-class TRuleTestBasedValRes:
-  snippet_under_test: Optional[str] = None
-  paramable_ids: Optional[List[str]] = None
-  f_gold_fn_str: Optional[str] = None
-  is_valid: Optional[bool] = None
-  reason: Optional[str] = None
-  test_script: Optional[str] = None
-  # the following fields are used when generating with LLM
-  gen_test_function: Optional['GenTestFunction'] = None
-  # the following fields are used when generating with Pynguin
-  num_generated_tests: Optional[int] = None
-  num_pynguin_attempts: Optional[int] = None
-  pynguin_generated_tests: List[str] = field(default_factory=list)
-  generated_test_that_is_used: Optional[str] = None
 
 @dataclass
 class PRuleValLog:
@@ -175,52 +158,57 @@ class PLLMGenLog:
 ##################################################################
 
 @dataclass
-class TRuleLearnAttempt:
-  id: int
-  num_trules: Optional[int] = None
-  success: bool = False
-  reason: Optional[str] = None
-  p_llm_gen_log: Optional[PLLMGenLog] = None  # get_translation_pairs_from_tsp()
-  p_rule_inferencer_log: Optional[PRuleInfLog] = None  # infer_translation_rules()
-  p_rule_validator_log: Optional[PRuleValLog] = None  # filter_translation_rules()
-
-@dataclass
-class TSP:
-  id: int
-  sp1: str
-  sp2: str
-  success: bool = False
-  reason: Optional[str] = None
-  trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
-  learned_translation_rules: List[TRule] = field(default_factory=list)
-
-@dataclass
-class ProbNode:
-  node_id: int
-  node_type: str
-  template_origin: Optional[str] = None
-  success: bool = False
-  reason: Optional[str] = None
-  tsps: List[TSP] = field(default_factory=list)
-
-@dataclass
-class TransIteration:
-  id: int
-  success: bool = False
-  reason: Optional[str] = None
-  problematic_node: Optional[ProbNode] = None
-
-@dataclass
-class RuleLearnPhase:
-  translation_iterations: List[TransIteration] = field(default_factory=list)
+class RuleApplicationPhase:
+  plausible_target_program: Optional[str] = None
   start_time: Optional[int] = None
   end_time: Optional[int] = None
   success: bool = False
   reason: Optional[str] = None
 
 @dataclass
-class RuleApplicationPhase:
-  plausible_target_program: Optional[str] = None
+class RulesValidationRecovery:
+  a = None
+
+@dataclass
+class TRuleLearnAttempt:
+  id: int
+  p_llm_gen_log: Optional[PLLMGenLog] = None  # get_translation_pairs_from_tsp()
+  p_rule_inferencer_log: Optional[PRuleInfLog] = None  # infer_translation_rules()
+  p_rule_validator_log: Optional[PRuleValLog] = None  # filter_translation_rules()
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
+class TSP:
+  id: int
+  sp1: str
+  sp2: str
+  trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
+class NodeTransIteration:
+  id: int
+  node_id: Optional[int] = None
+  node_type: Optional[str] = None
+  template_origin: Optional[str] = None
+  tsps: List[TSP] = field(default_factory=list)
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
+class StatementNode:
+  id: int
+  node_id: Optional[int] = None
+  node_text: Optional[str] = None
+  simplified_node_text: Optional[str] = None
+  node_trans_iterations: List[NodeTransIteration] = field(default_factory=list)
+  validation_and_recovery: Optional[RulesValidationRecovery] = None
+
+@dataclass
+class RuleLearnPhase:
+  statement_nodes: List[StatementNode] = field(default_factory=list)
   start_time: Optional[int] = None
   end_time: Optional[int] = None
   success: bool = False

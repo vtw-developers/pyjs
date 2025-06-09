@@ -44,7 +44,7 @@ def learn_and_application_phases_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset)
+    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset, lrule_learn_phase)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -311,7 +311,11 @@ def learn_phase_custom_mode(conf: dict) -> None:
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, subject.translation_rules_main_code)
+    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(
+      subject,
+      subject.translation_rules_main_code,
+      lrule_learn_phase
+    )
 
     lrule_learn_phase.success = True
     lsubject.success = True
