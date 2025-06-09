@@ -516,16 +516,13 @@ def is_valid_translation_rule_test_based(
     logger.debug(f'generated test function:\n{test_fn_str}')
     return test_fn_str
 
+  logger.debug('~~~ Starting p_rule_validator.is_valid_translation_rule_test_based')
   p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
 
-  msg = (
+  logger.debug(
     f'~~ Checking if translation rules are valid based on tests:\n'
-    f'Snippet to test translation rule:\n'
-    f'{snippet_under_test}\n'
-    f'Pre-context:\n'
-    f'{pre_context}\n'
-  )
-  logger.debug(msg)
+    f'Snippet to test translation rule:\n{snippet_under_test}\n'
+    f'Pre-context:\n{pre_context}\n')
 
   # 1. combine pre_context and snippet_under_test
   prectx_sut = _combine_pre_context_and_sut(pre_context, snippet_under_test)
