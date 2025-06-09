@@ -230,10 +230,15 @@ def validate_translation_rules_for_statement_node(
   '''
   RETURN the validated ruleset.
   '''
+  logger.debug('~~~ Starting p_pirel.validate_translation_rules_for_statement_node')
 
   statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
   simple_ntext = simplify_statement_node_text(statement_node)
   pre_context = get_pre_context(subject.src_main_code, subject.src_lang, statement_nid)
+
+  logger.debug(
+    f'Simplified statement node text:\n{simple_ntext}\n'
+    f'Pre-context:\n{pre_context}\n')
 
   '''
   template_dict is required by `p_llm_gen.gen_test_function`
@@ -731,6 +736,10 @@ def learn_trans_rules_for_statement_node(
   NOTE adds new translation rules to the current_ruleset_obj.
   '''
 
+  logger.debug(
+    f'Starting p_pirel.learn_trans_rules_for_statement_node\n'
+    f'subject.name = {subject.name}, statement_nid = {statement_nid}')
+
   '''
   We have a loop that iterates over the nodes in the AST of a statement node.
   Learning rules to translate the statement node and obtain some candidate translation
@@ -742,6 +751,9 @@ def learn_trans_rules_for_statement_node(
   '''
   statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
   simple_ntext = simplify_statement_node_text(statement_node)
+  logger.debug(
+    f'node text:\n{statement_node.get_text()}\n'
+    f'simplified node text:\n{simple_ntext}\n')
 
   '''
   At this point, we may have:
@@ -761,9 +773,13 @@ def learn_trans_rules_for_statement_node(
   statement_subject_dict_config['src_program'] = simple_ntext
   statement_subject = p_subject.PirelSubject.from_dict_config(statement_subject_dict_config)
 
+  logger.debug(
+    'Starting translation iterations to learn translation '
+    'rules for nodes under the statement node.')
   iteration = 0
   while True:
     iteration += 1
+    logger.debug(f'Iteration #{iteration} for learning translation rules for statement node')
 
     '''
     Attempt to translate the statement code using the current ruleset.
@@ -784,8 +800,10 @@ def learn_trans_rules_for_statement_node(
         statement_subject.choices,
         subject_name=statement_subject.name,
       )
+      logger.debug(f'SUCCESS. Translation of the statement node is successful.')
       break
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
+      logger.debug(f'There is a problematic node in the statement node')
       templates_dict = exc.get_templates_dict()
 
     '''
@@ -804,6 +822,9 @@ def learn_trans_rules_for_statement_node(
   if necessary launch an error correction module to fix the problematic rules.
   Fixing is done by replacing the problematic rules with the new ones.
   '''
+  logger.debug(
+    f'SUCCESS. Learned all translation rules to translate nodes under the statement node.\n'
+    f'Will not start validation of the translation rules.\n')
   validated_ruleset_obj = validate_translation_rules_for_statement_node(
     subject,
     statement_subject,
@@ -871,7 +892,8 @@ def learn_trans_rules_for_subject(
   RAISE All errors propagate to the caller.
   '''
 
-  logger.info(f'Starting translation of "{subject.name}"')
+  logger.debug(f'~~~ Starting p_pirel.learn_trans_rules_for_subject (subject={subject.name})')
+
   current_ruleset_obj = p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset)
   p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset_obj.to_string())
 
@@ -882,14 +904,20 @@ def learn_trans_rules_for_subject(
   we will make a list of such nodes.
   '''
   statement_nodes = get_statement_nodes_PY(subject.src_main_code, subject.src_lang)
+  logger.debug(f'Found {len(statement_nodes)} statement nodes in the source code')
+
   for sn_idx, statement_node in enumerate(statement_nodes, start=1):
 
     '''
     The following function call mutates the `current_ruleset_obj`
     by adding the learned translation rules.
     '''
+    logger.debug(
+      f'Learning translation rules for statement node {sn_idx}/{len(statement_nodes)}:\n'
+      f'{statement_node.get_id()} ({statement_node.get_ts_node_type()})')
     learn_trans_rules_for_statement_node(subject, current_ruleset_obj, statement_node.get_id())
 
+  logger.debug(f'Finished learning translation rules for all {len(statement_nodes)} statement nodes')
   return current_ruleset_obj.to_string()
 
 
