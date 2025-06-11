@@ -273,7 +273,7 @@ def validate_translation_rules_for_statement_node(
       )
 
       # ideal case: translation rules are valid
-      assert is_valid, 'consider this case'
+      assert is_valid, 'Validation of translation rules for statement node failed. Consider this case.'
       return current_ruleset_obj
 
     except p_rule_applicator.TRuleNotFoundError as err:
@@ -973,6 +973,7 @@ def learn_trans_rules_for_subject(
     )
 
   logger.debug(f'Finished learning translation rules for all {len(statement_nodes)} statement nodes')
+  p_utils.llog_text_time(f'{subject.name}_learned_rules.json', current_ruleset_obj.to_json())
   return current_ruleset_obj.to_string()
 
 
