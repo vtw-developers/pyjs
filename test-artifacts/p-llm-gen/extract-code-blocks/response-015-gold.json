@@ -1,0 +1,4 @@
+[
+  "if (id_kpxv === id_hop) {\n    secret_fun_4071();\n}",
+  "if (id_kpxv == id_hop) {\n    secret_fun_4071();\n}"
+]
