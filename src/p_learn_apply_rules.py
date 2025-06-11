@@ -269,6 +269,7 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
     )
 
     lsubject = ptlog.Subject(subject.name)
+    lsubject.code_text = subject.src_main_code
     lsubject.id = subject_idx
     lbenchmark.subjects.append(lsubject)
 
@@ -307,6 +308,7 @@ def learn_phase_custom_mode(conf: dict) -> None:
 
   subject = p_subject.PirelSubject.from_file_config(p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
   lsubject = ptlog.Subject(subject.name)
+  lsubject.code_text = subject.src_main_code
   lrule_learn_phase = ptlog.RuleLearnPhase()
   lsubject.rule_learn_phase = lrule_learn_phase
 

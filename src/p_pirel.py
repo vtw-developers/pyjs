@@ -275,10 +275,13 @@ def validate_translation_rules_for_statement_node(
 
       if is_valid:
         logger.debug('Translation rules are valid for the statement node')
+        lvalidation_and_recovery.success = True
         return current_ruleset_obj
       else:
         msg = 'Validation of translation rules for statement node failed. Consider this case.'
         logger.critical(msg)
+        lvalidation_and_recovery.success = False
+        lvalidation_and_recovery.reason = msg
         raise RuntimeError(msg)
 
     except p_rule_chooser.NoUniqueChoicesError as err:
@@ -314,10 +317,10 @@ def learn_trans_rules_from_tsp(
   trules_list = p_rule_inferencer.infer_translation_rules(subject, template_dict, translation_pairs, lprule_inf_log)
 
   # CHECK TRANSLATION RULES
-  lprule_val_log = ptlog.PRuleValLog()
-  ltrule_learn_attempt.p_rule_validator_log = lprule_val_log
+  lprule_filter_log = ptlog.PRuleFilterLog()
+  ltrule_learn_attempt.p_rule_filter_log = lprule_filter_log
   checked_trules_list = p_rule_validator.filter_translation_rules(
-    trules_list, subject, current_ruleset, lprule_val_log)
+    trules_list, subject, current_ruleset, lprule_filter_log)
 
   if len(checked_trules_list) == 0:
     logger.warning('No translation rules were learned from TSP.')
@@ -838,6 +841,7 @@ def learn_trans_rules_for_statement_node(
         subject_name=statement_subject.name,
       )
       logger.debug(f'SUCCESS. Translation of the statement node is successful.')
+      lnode_trans_iteration.success = True
       break
     except d_grammar_expand.TranslationRuleNotFoundException as exc:
       logger.debug(f'There is a problematic node in the statement node')
@@ -858,6 +862,8 @@ def learn_trans_rules_for_statement_node(
     problematic_node_id = templates_dict['problematic_node_id']
     for trule in trules_list:
       current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, problematic_node_id, statement_nid))
+      lnode_trans_iteration.unchecked_trules.append(ptlog.TRule.from_str(trule))
+      lstatement_node.unchecked_trules.append(ptlog.TRule.from_str(trule))
 
   '''
   At this point, we have enough rules to obtain some translation of the
