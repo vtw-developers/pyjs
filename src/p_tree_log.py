@@ -65,7 +65,7 @@ class TRuleSyntaxValRes:
   reason: Optional[str] = None
 
 @dataclass
-class PRuleValLog:
+class PRuleFilterLog:
   translation_rules: List[TRule] = field(default_factory=list)
 
 ##################################################################
@@ -167,14 +167,15 @@ class RuleApplicationPhase:
 
 @dataclass
 class RulesValidationRecovery:
-  a = None
+  success: bool = False
+  reason: Optional[str] = None
 
 @dataclass
 class TRuleLearnAttempt:
   id: int
   p_llm_gen_log: Optional[PLLMGenLog] = None  # get_translation_pairs_from_tsp()
   p_rule_inferencer_log: Optional[PRuleInfLog] = None  # infer_translation_rules()
-  p_rule_validator_log: Optional[PRuleValLog] = None  # filter_translation_rules()
+  p_rule_filter_log: Optional[PRuleFilterLog] = None  # filter_translation_rules()
   success: bool = False
   reason: Optional[str] = None
 
@@ -194,6 +195,7 @@ class NodeTransIteration:
   node_type: Optional[str] = None
   template_origin: Optional[str] = None
   tsps: List[TSP] = field(default_factory=list)
+  unchecked_trules: List[TRule] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
 
@@ -204,6 +206,7 @@ class StatementNode:
   node_text: Optional[str] = None
   simplified_node_text: Optional[str] = None
   node_trans_iterations: List[NodeTransIteration] = field(default_factory=list)
+  unchecked_trules: List[TRule] = field(default_factory=list)
   validation_and_recovery: Optional[RulesValidationRecovery] = None
 
 @dataclass
@@ -217,6 +220,7 @@ class RuleLearnPhase:
 @dataclass
 class Subject:
   subject_name: str
+  code_text: Optional[str] = None
   id: Optional[int] = None
   rule_learn_phase: Optional[RuleLearnPhase] = None
   rule_application_phase: Optional[RuleApplicationPhase] = None

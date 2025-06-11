@@ -476,7 +476,7 @@ def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   current_ruleset: str,
-  lprule_val_log: ptlog.PRuleValLog
+  lprule_filter_log: ptlog.PRuleFilterLog
 ) -> List[str]:
   '''
   Filter out translation rules that are not valid.
@@ -490,7 +490,7 @@ def filter_translation_rules(
     logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
 
     ltrule = ptlog.TRule.from_str(translation_rule)
-    lprule_val_log.translation_rules.append(ltrule)
+    lprule_filter_log.translation_rules.append(ltrule)
 
     is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, current_ruleset, ltrule)
     if not is_syntax_valid:
