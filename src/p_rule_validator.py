@@ -19,6 +19,58 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
+def diff_history_used_rule_ids_deprecated(elem1: List[int], elem2: List[int]) -> List[dict]:
+  '''
+  Compare two used rule ids history elements and return the differences.
+  Returns a list of dictionaries with the following structure:
+  [
+    {
+      'idx': int,  # index of the rule that was changed
+      'old_rule_id': int,  # old rule id
+      'new_rule_id': int,  # new rule id
+    }
+  ]
+  '''
+  assert len(elem1) == len(elem2), 'elements must have the same length'
+  diff = []
+  for i in range(len(elem1)):
+    if elem1[i] != elem2[i]:
+      diff.append({
+        'idx': i,
+        'old_rule_id': elem1[i],
+        'new_rule_id': elem2[i]
+      })
+  return diff
+
+
+def process_used_rule_ids_history_deprecated(
+  used_rule_ids_history: List[List[int]]
+) -> List[List[dict]]:
+  '''
+  Produce a sequence of changes between each history element as a
+  list of old and new rule ids that were used.
+  Sample input:
+  used_rule_ids_history = [
+    [9, 10, 11, 12, 13, 6, 14, 1, 14, 11],
+    [9, 10, 11, 12, 13, 7, 14, 1, 14, 11]
+  ]
+  '''
+  # sanity check
+  assert len(used_rule_ids_history) >= 1, 'at least one history element is expected'
+  num_rules = len(used_rule_ids_history[0])
+  for history_elem in used_rule_ids_history:
+    assert len(history_elem) == num_rules, 'all history elements must have the same length'
+
+  # process the history
+  processed_history = []
+  for i in range(len(used_rule_ids_history) - 1):
+    elem1 = used_rule_ids_history[i]
+    elem2 = used_rule_ids_history[i + 1]
+    diff = diff_history_used_rule_ids_deprecated(elem1, elem2)
+    processed_history.append(diff)
+  return processed_history
+
+
 def update_ruleset_obj(
   current_ruleset_obj: p_ruleset.Ruleset,
   used_rule_ids_history: List[List[int]]
