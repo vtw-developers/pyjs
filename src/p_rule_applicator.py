@@ -453,8 +453,10 @@ def _run_tests(
   # 3. compare traces
   are_traces_identical = _compare_traces(src_trace, tar_trace)
   if not are_traces_identical:
-    logger.error('Traces are not identical. There is a semantic error in translation.')
     error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
+    logger.error(
+      f'Traces are not identical. There is a semantic error in translation.\n'
+      f'error_lines:\n{json.dumps(error_lines, indent=2)}')
     raise TraceMismatchError(error_lines)
 
 

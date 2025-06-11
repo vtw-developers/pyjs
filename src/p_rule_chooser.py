@@ -489,10 +489,9 @@ def get_proposed_choices_compile_error(
   '''
   err_line_idx = get_err_line_idx_in_tar_main_code(line_content, err_line_tpi, tar_program_instr, tar_main_code)
 
-  msg = (
+  logger.debug(
     f'there was an error running `tar_program_instr`\n'
     f'{error_type} "{error_msg}" on line {err_line_idx + 1} of "{line_content}"\n')
-  logger.debug(msg)
 
   new_choices = get_proposed_choices_based_on_line_idx(
     tar_main_code,
@@ -537,6 +536,10 @@ def get_proposed_choices_semantic_error(
   tar_program_instr, we need to get the 0-based line index in tar_main_code.
   '''
   err_line_idx = get_err_line_idx_in_tar_main_code(error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
+
+  logger.debug(
+    f'there was a semantic error running `tar_program_instr` (trace mismatch):\n'
+    f'line {err_line_idx + 1} of "{error_line_content}"\n')
 
   new_choices = get_proposed_choices_based_on_line_idx(
     tar_main_code,

@@ -771,7 +771,8 @@ def learn_trans_rules_for_statement_node(
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_statement_node.json', locals())
   logger.debug(
     f'Starting p_pirel.learn_trans_rules_for_statement_node\n'
-    f'subject.name = {subject.name}, statement_nid = {statement_nid}')
+    f'subject.name = {subject.name}, statement_nid = {statement_nid}\n'
+    f'statement_node.id = {lstatement_node.id}')
 
   '''
   We have a loop that iterates over the nodes in the AST of a statement node.
@@ -816,7 +817,9 @@ def learn_trans_rules_for_statement_node(
   iteration = 0
   while True:
     iteration += 1
-    logger.debug(f'Iteration #{iteration} for learning translation rules for statement node')
+    logger.debug(
+      f'Iteration #{iteration} for learning translation rules for statement node'
+      f'node_trans_iteration.id = {iteration}')
 
     lnode_trans_iteration = ptlog.NodeTransIteration(iteration)
     lstatement_node.node_trans_iterations.append(lnode_trans_iteration)
