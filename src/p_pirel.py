@@ -273,15 +273,15 @@ def validate_translation_rules_for_statement_node(
         template_dict
       )
 
-      # ideal case: translation rules are valid
-      assert is_valid, 'Validation of translation rules for statement node failed. Consider this case.'
-      return current_ruleset_obj
+      if is_valid:
+        logger.debug('Translation rules are valid for the statement node')
+        return current_ruleset_obj
+      else:
+        msg = 'Validation of translation rules for statement node failed. Consider this case.'
+        logger.critical(msg)
+        raise RuntimeError(msg)
 
-    except p_rule_applicator.TRuleNotFoundError as err:
-      raise
     except p_rule_chooser.NoUniqueChoicesError as err:
-      raise
-    except p_rule_applicator.TraceMismatchError as err:
       raise
 
     break
