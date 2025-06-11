@@ -481,11 +481,26 @@ def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
   return src_program_instr
 
 
-def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
+def _get_instrumented_tar_program_plausible(
+  src_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, List[List[int]]]:
   '''
   This function is responsible for obtaining a plausible translation of
   `src_program_instr` with `subject.translation_rules_main_code`.
+  RETURN a tuple of:
+  - `tar_program_instr` - the instrumented target program
+  - `used_rule_ids_history` - a list of lists of used translation rule IDs
   '''
+
+  def _get_used_translation_rule_ids(dbg_history: List[dict]) -> List[int]:
+    used_rule_ids : List[int] = []
+    for history_elem in dbg_history:
+      dbg_info : dict = history_elem['dbg_info']
+      notes : dict = dbg_info['notes']
+      rule_id = notes['rule_id']
+      used_rule_ids.append(rule_id)
+    return used_rule_ids
 
   logger.debug('Starting p_rule_applicator._get_instrumented_tar_program_plausible')
 
@@ -512,6 +527,7 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
     'Starting a loop to exhaustively translate `src_program_instr` '
     'with different combinations of translation rules')
 
+  used_rule_ids_history = []
   choices_history = []
   current_choices = subject.choices
   iteration = 0
@@ -522,11 +538,14 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
     # May raise
     # 1. TRuleNotFoundError
     tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
+    used_rule_ids = _get_used_translation_rule_ids(translate_dbg_history)
+    used_rule_ids_history.append(used_rule_ids)
+
     tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
 
     try:
       _run_tests(src_program_instr, tar_program_instr, subject)
-      return tar_program_instr
+      return tar_program_instr, used_rule_ids_history
 
     except SrcTestScriptError as err:
       logger.critical('There is an error in running src test script. This normally should not happen')
@@ -574,21 +593,25 @@ def _get_instrumented_tar_program_plausible(src_program_instr: str, subject: p_s
       current_choices = proposed_choices
 
 
-def _get_deinstrumented_tar_program_plausible(src_program_instr: str, subject: p_subject.PirelSubject) -> str:
+def _get_deinstrumented_tar_program_plausible(
+  src_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, List[List[int]]]:
+
   logger.debug('Starting p_rule_applicator._get_deinstrumented_tar_program')
-  tar_program_plausible_instr = _get_instrumented_tar_program_plausible(src_program_instr, subject)
+  tar_program_plausible_instr, used_rule_ids_history = _get_instrumented_tar_program_plausible(src_program_instr, subject)
 
   if not subject.needs_instrumentation:
     logger.debug('program does not need deinstrumentation')
     assert subject.translation_rules_instr_src is None, 'sanity check'
     assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return tar_program_plausible_instr
+    return tar_program_plausible_instr, used_rule_ids_history
 
   if subject.is_mylog_inserted:
     logger.debug('program needs instrumentation, but it already is instrumented')
     assert subject.translation_rules_instr_src is None, 'sanity check'
     assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return tar_program_plausible_instr
+    return tar_program_plausible_instr, used_rule_ids_history
 
   assert subject.translation_rules_instr_src is not None, 'sanity check'
   assert subject.translation_rules_instr_tar is not None, 'sanity check'
@@ -617,7 +640,7 @@ def _get_deinstrumented_tar_program_plausible(src_program_instr: str, subject: p
       tar_program_plausible_instr_ann
     )
 
-  return tar_program_plausible_deinstr
+  return tar_program_plausible_deinstr, used_rule_ids_history
 
 
 def _get_instrumented_tar_test_code(src_test_code_instr: Optional[str], subject: p_subject.PirelSubject) -> Optional[str]:
@@ -717,7 +740,7 @@ def _concatenate_tar_snippets(
 
 
 # API
-def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
+def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[List[int]]]:
   '''
   Apply the translation rules to the source program.
   Equivalent to index_bench.js::runBenchmarkHandler
@@ -728,15 +751,15 @@ def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
   logger.info('Starting p_rule_applicator.apply_translation_rules (a la DuoGlot)')
 
   src_program_instr = _get_instrumented_src_program(subject)
-  tar_program_deinstr = _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
+  tar_program_deinstr, used_rule_ids_history = _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
 
-  return tar_program_deinstr
+  return tar_program_deinstr, used_rule_ids_history
 
 
 # USAGE
 def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible = apply_translation_rules(subject_config)
+  tar_program_plausible, used_rule_ids_history = apply_translation_rules(subject_config)
   logger.info(f'Plausible target program:\n{tar_program_plausible}')
 
 
@@ -750,8 +773,11 @@ def _test_apply_translation_rules():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  tar_program_deinstr = apply_translation_rules(subject)
+  tar_program_deinstr, used_rule_ids_history = apply_translation_rules(subject)
   print(f'Plausible target program:\n{tar_program_deinstr}')
+  print('Used rule IDs history:')
+  for used_rule_ids in used_rule_ids_history:
+    print(used_rule_ids)
 
 
 def _test_run_tests():

@@ -105,7 +105,7 @@ def learn_and_application_phases_on_subject(
 
   try:
     subject.translation_rules_main_code = learned_trans_rules
-    tar_program = p_rule_applicator.apply_translation_rules(subject)
+    tar_program, used_rule_ids_history = p_rule_applicator.apply_translation_rules(subject)
     tar_test_code, tar_main_code, tar_test_call_code = tar_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
     logger.debug(f'Rule application phase for "{subject.name}" is successful.')
