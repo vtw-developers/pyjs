@@ -160,7 +160,7 @@ class Ruleset:
     self.rules : List[TRuleBase] = []
 
   def __str__(self):
-    return '\n\n'.join([str(rule) for rule in self.rules])
+    return self.to_json()
 
   def exists(self, rule_id: int) -> bool:
     '''
@@ -194,7 +194,7 @@ class Ruleset:
     self.rules[rule_id] = rule
 
   def to_string(self) -> str:
-    return str(self)
+    return '\n\n'.join([str(rule) for rule in self.rules])
 
   def to_json(self) -> str:
     '''
