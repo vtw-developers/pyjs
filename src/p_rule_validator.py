@@ -19,6 +19,37 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
+def update_ruleset_obj(
+  current_ruleset_obj: p_ruleset.Ruleset,
+  used_rule_ids_history: List[List[int]]
+) -> None:
+  '''
+  Given a history of used rule ids, update the current ruleset object
+  by converting unchecked rules to checked rules.
+  This function modifies the current ruleset object in place.
+  '''
+  logger.debug('~ Starting p_rule_validator.update_ruleset_obj')
+  for used_rule_ids in used_rule_ids_history:
+    for used_rule_id in used_rule_ids:
+      '''
+      The rule is either a:
+      1. log statement rule
+      2. extra rules for validation
+      Check translation_rules_main_code in is_valid_translation_rule_test_based()
+      '''
+      if not current_ruleset_obj.exists(used_rule_id):
+        continue
+
+      rule = current_ruleset_obj.get_rule(used_rule_id)
+
+      # rule must be an unchecked rule
+      if not isinstance(rule, p_ruleset.UncheckedRule):
+        continue
+
+      checked_rule = p_ruleset.CheckedRule.from_unchecked_rule(rule)
+      current_ruleset_obj.set_rule(used_rule_id, checked_rule)
+
+
 def is_valid_translation_rule_syntactic(
   subject: p_subject.PirelSubject,
   translation_rule: str,
@@ -355,9 +386,9 @@ def is_valid_translation_rule_test_based(
   log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
   extra_ruleset = p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
   translation_rules_main_code = (
+    f'{current_ruleset_obj.to_string()}\n\n'
     f'{log_statement_rule}\n\n'
     f'{extra_ruleset}\n\n'
-    f'{current_ruleset_obj.to_string()}'
   )
 
   pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
@@ -366,18 +397,26 @@ def is_valid_translation_rule_test_based(
   pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
 
   logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
+  used_rule_ids_history = None
   try:
-    tar_program_plausible = prapp.apply_translation_rules(pirel_subject)
+    tar_program_plausible, used_rule_ids_history = prapp.apply_translation_rules(pirel_subject)
+    logger.debug('successfully obtained the translation of the test script')
+    logger.debug('translation rule is valid based on tests')
   except Exception as err:
-    msg = (
+    logger.warning(
       f'Failed to obtain a plausible translation of the test script:\n'
-      f'{p_utils.exception_to_str(err)}\n'
-    )
-    logger.warning(msg)
+      f'{p_utils.exception_to_str(err)}\n')
     return False
 
-  logger.debug('successfully obtained the translation of the test script')
-  logger.debug('translation rule is valid based on tests')
+  '''
+  used_rule_ids_history is a history of list of rule ids used to obtain a
+  plausible translation of the source program. Using this structure, we can
+  know which rules were used and were invalid, and which rules were used and
+  were valid.
+  '''
+  assert used_rule_ids_history is not None, 'used_rule_ids_history must not be None'
+  update_ruleset_obj(current_ruleset_obj, used_rule_ids_history)
+
   return True
 
 
@@ -461,7 +500,7 @@ def _validate_translation_rule_usage():
   pirel_subject_snippet_conf['src_program'] = test_script_str
   pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
   pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-  tar_program_plausible = prapp.apply_translation_rules(pirel_subject)
+  tar_program_plausible, used_rule_ids_history = prapp.apply_translation_rules(pirel_subject)
 
   p_utils.write_tmp_text('test_script.py', test_script_str)
   p_utils.write_tmp_text('tar_program_plausible.js', tar_program_plausible)
