@@ -981,7 +981,7 @@ def learn_trans_rules_for_subject(
     )
 
   logger.debug(f'Finished learning translation rules for all {len(statement_nodes)} statement nodes')
-  p_utils.llog_text_time(f'{subject.name}_learned_rules.json', current_ruleset_obj.to_json())
+  p_utils.llog_text(f'{subject.name}_learned_rules.json', current_ruleset_obj.to_json())
   return current_ruleset_obj.to_string()
 
 
