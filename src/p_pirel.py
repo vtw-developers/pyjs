@@ -231,6 +231,7 @@ def validate_translation_rules_for_statement_node(
   '''
   RETURN the validated ruleset.
   '''
+  p_utils.log_json_time(f'{subject.name}_args-validate_translation_rules_for_statement_node.json', locals())
   logger.debug('~~~ Starting p_pirel.validate_translation_rules_for_statement_node')
 
   statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
@@ -764,6 +765,7 @@ def learn_trans_rules_for_statement_node(
   NOTE adds new translation rules to the current_ruleset_obj.
   '''
 
+  p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_statement_node.json', locals())
   logger.debug(
     f'Starting p_pirel.learn_trans_rules_for_statement_node\n'
     f'subject.name = {subject.name}, statement_nid = {statement_nid}')
