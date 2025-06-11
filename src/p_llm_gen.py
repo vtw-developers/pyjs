@@ -729,11 +729,19 @@ def extract_code_blocks(raw_response: str) -> List[str]:
     return '\n'.join(lines)
 
   raw_response = _pre_process_raw_response(raw_response)
+
   code_block_re = re.compile(r'^```(\w+)?\n(.*?)```$', re.DOTALL | re.MULTILINE)
   matches = re.finditer(code_block_re, raw_response)
   code_blocks = [m.group(2).strip() for m in matches]
-  logger.debug(f'Extracted {len(code_blocks)} code blocks from raw LLM response')
-  return code_blocks
+
+  code_block_single_line_re = re.compile(r'^```(.*?)```$', re.MULTILINE)
+  matches_single_line = re.finditer(code_block_single_line_re, raw_response)
+  code_blocks_single_line = [m.group(1).strip() for m in matches_single_line]
+
+  all_code_blocks = code_blocks + code_blocks_single_line
+
+  logger.debug(f'Extracted {len(all_code_blocks)} code blocks from raw LLM response')
+  return all_code_blocks
 
 
 def langchain_msgs_to_md(messages: List[BaseMessage]) -> str:
