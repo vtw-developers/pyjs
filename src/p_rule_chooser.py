@@ -278,6 +278,109 @@ def get_err_line_idx_in_tar_main_code(
   return err_line_idx
 
 
+def get_proposed_choices_based_on_line_idx(
+  tar_main_code: str,
+  err_line_idx: int,
+  current_choices: dict,
+  choices_history: List[dict],
+  map_to_exid: Dict[int, List[dict]],
+  translate_dbg_history: List[dict],
+):
+  '''
+  PARAM tar_main_code: main code (f_gold) of the target program.
+  PARAM err_line_idx: 0-based index of the line in `tar_main_code` where the error occurred.
+  '''
+
+  '''
+  The following function returns the line indices of every character
+  in tar_main_code.
+  '''
+  main_code_lines = tar_main_code.split('\n')
+  line_idxs, col_idxs = get_char_line_col_idxs(main_code_lines)
+
+  '''
+  The following loop creates `line_idx_to_exids` - a mapping of
+  line indices to expansion ids that are present at the line.
+  '''
+  line_idx_to_exids : Dict[int, Set[int]] = {}
+  for exid, tokens_by_ex in map_to_exid.items():
+    for token_by_ex in tokens_by_ex:
+      # token in tar_main_code and its range
+      token = token_by_ex['str']
+      token_range = token_by_ex['range']
+      _si, _ei = token_range  # start and end indices of the token in tar_main_code
+      assert tar_main_code[_si:_ei] == token, f'sanity check: discrepancy in token range'
+      line_si : int = line_idxs[_si]
+      line_ei : int = line_idxs[_ei]
+      assert line_si == line_ei, 'sanity check: token spans multiple lines'
+      assert token in main_code_lines[line_si], f'sanity check: token not found in tar_main_code'
+      line_idx_to_exids.setdefault(line_si, set()).add(exid)
+
+  '''
+  Create two objects:
+  1. mod_dbg_history - a modified version of `translate_dbg_history` that contains
+     only the necessary information for the rule chooser.
+  2. exid_to_mod_dbg_history_elem - a mapping of expansion ids to the corresponding
+     elements in `mod_dbg_history`.
+  This is used to quickly access the debug history element for a given expansion id.
+  '''
+  mod_dbg_history : Dict[int, dict] = {}
+  exid_to_mod_dbg_history_elem : Dict[int, dict] = {}
+  for elem in translate_dbg_history:
+    alt_step = elem['alt_step']
+    exid = elem['dbg_info']['ex_id']
+    # the assertion below ensures that the dbg_history elements
+    # come in the order of alt_step starting from 1.
+    assert alt_step - 1 == len(mod_dbg_history), 'sanity check: dbg history elems should come in order'
+    mod_dbg_history_elem = {
+      'alt_step': alt_step,
+      'next_choices_count': elem['next_choices_status']['count'],
+      'next_choices_all_known': elem['next_choices_status']['done'],
+      'ex_id': exid,
+      'current_choose_idx': elem['dbg_info']['notes']['choose_idx'],
+      'current_rule_id': elem['dbg_info']['notes']['rule_id'],
+      'current_range_info': elem['range_info']
+    }
+    mod_dbg_history[alt_step] = mod_dbg_history_elem
+    exid_to_mod_dbg_history_elem[exid] = mod_dbg_history_elem
+
+  '''
+  INVARIANT: `alt_step` starts from 1
+  Iterate over expansions on the error line, and for each expansion:
+  1. Get the `mod_dbg_history_elem` for the expansion (alt object).
+  2. For the given alt object, get the previous `_RELATED_WINDOW_SIZE` elements
+  3. From the selected alt objects, keep only those that have more than
+     one rule that can be applied at that alt object.
+  '''
+  _RELATED_WINDOW_SIZE = 1
+  exids_err_line : List[int] = list(sorted(line_idx_to_exids[err_line_idx]))
+  rel_alt_step_infos : Dict[int, dict] = {}
+
+  for exid_err_line in exids_err_line:
+    mod_dbg_history_elem = exid_to_mod_dbg_history_elem[exid_err_line]
+    alt_step : int = mod_dbg_history_elem['alt_step']
+
+    # previous _RELATED_WINDOW_SIZE elements + alt_step itself
+    rel_alt_steps = list(range(alt_step - _RELATED_WINDOW_SIZE, alt_step + 1))
+    for rel_alt_step in rel_alt_steps:
+      # because we use `rel_alt_step - 1` below
+      if rel_alt_step - 1 < 1:
+        continue
+      # keep only if number of rules at that step is greater than 1
+      if mod_dbg_history[rel_alt_step - 1]['next_choices_count'] <= 1:
+        continue
+      rel_alt_step_infos[rel_alt_step] = {
+        'next_choices_count': mod_dbg_history[rel_alt_step - 1]['next_choices_count'],
+        'current_choose_idx': mod_dbg_history[rel_alt_step]['current_choose_idx'],
+        'ex_id': mod_dbg_history[rel_alt_step]['ex_id'],
+        'current_rule_id': mod_dbg_history[rel_alt_step]['current_rule_id'],
+        'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
+      }
+
+  new_choices = get_next_unique_choices(rel_alt_step_infos, current_choices, choices_history)
+  return new_choices
+
+
 def get_proposed_choices_compile_error(
   tar_program_instr: str,
   tar_main_code: str,
@@ -391,93 +494,14 @@ def get_proposed_choices_compile_error(
     f'{error_type} "{error_msg}" on line {err_line_idx + 1} of "{line_content}"\n')
   logger.debug(msg)
 
-  '''
-  The following function returns the line indices of every character
-  in tar_main_code.
-  '''
-  main_code_lines = tar_main_code.split('\n')
-  line_idxs, col_idxs = get_char_line_col_idxs(main_code_lines)
-
-  '''
-  The following loop creates `line_idx_to_exids` - a mapping of
-  line indices to expansion ids that are present at the line.
-  '''
-  line_idx_to_exids : Dict[int, Set[int]] = {}
-  for exid, tokens_by_ex in map_to_exid.items():
-    for token_by_ex in tokens_by_ex:
-      # token in tar_main_code and its range
-      token = token_by_ex['str']
-      token_range = token_by_ex['range']
-      _si, _ei = token_range  # start and end indices of the token in tar_main_code
-      assert tar_main_code[_si:_ei] == token, f'sanity check: discrepancy in token range'
-      line_si : int = line_idxs[_si]
-      line_ei : int = line_idxs[_ei]
-      assert line_si == line_ei, 'sanity check: token spans multiple lines'
-      assert token in main_code_lines[line_si], f'sanity check: token not found in tar_main_code'
-      line_idx_to_exids.setdefault(line_si, set()).add(exid)
-
-  '''
-  Create two objects:
-  1. mod_dbg_history - a modified version of `translate_dbg_history` that contains
-     only the necessary information for the rule chooser.
-  2. exid_to_mod_dbg_history_elem - a mapping of expansion ids to the corresponding
-     elements in `mod_dbg_history`.
-  This is used to quickly access the debug history element for a given expansion id.
-  '''
-  mod_dbg_history : Dict[int, dict] = {}
-  exid_to_mod_dbg_history_elem : Dict[int, dict] = {}
-  for elem in translate_dbg_history:
-    alt_step = elem['alt_step']
-    exid = elem['dbg_info']['ex_id']
-    # the assertion below ensures that the dbg_history elements
-    # come in the order of alt_step starting from 1.
-    assert alt_step - 1 == len(mod_dbg_history), 'sanity check: dbg history elems should come in order'
-    mod_dbg_history_elem = {
-      'alt_step': alt_step,
-      'next_choices_count': elem['next_choices_status']['count'],
-      'next_choices_all_known': elem['next_choices_status']['done'],
-      'ex_id': exid,
-      'current_choose_idx': elem['dbg_info']['notes']['choose_idx'],
-      'current_rule_id': elem['dbg_info']['notes']['rule_id'],
-      'current_range_info': elem['range_info']
-    }
-    mod_dbg_history[alt_step] = mod_dbg_history_elem
-    exid_to_mod_dbg_history_elem[exid] = mod_dbg_history_elem
-
-  '''
-  INVARIANT: `alt_step` starts from 1
-  Iterate over expansions on the error line, and for each expansion:
-  1. Get the `mod_dbg_history_elem` for the expansion (alt object).
-  2. For the given alt object, get the previous `_RELATED_WINDOW_SIZE` elements
-  3. From the selected alt objects, keep only those that have more than
-     one rule that can be applied at that alt object.
-  '''
-  _RELATED_WINDOW_SIZE = 1
-  exids_err_line : List[int] = list(sorted(line_idx_to_exids[err_line_idx]))
-  rel_alt_step_infos : Dict[int, dict] = {}
-
-  for exid_err_line in exids_err_line:
-    mod_dbg_history_elem = exid_to_mod_dbg_history_elem[exid_err_line]
-    alt_step : int = mod_dbg_history_elem['alt_step']
-
-    # previous _RELATED_WINDOW_SIZE elements + alt_step itself
-    rel_alt_steps = list(range(alt_step - _RELATED_WINDOW_SIZE, alt_step + 1))
-    for rel_alt_step in rel_alt_steps:
-      # because we use `rel_alt_step - 1` below
-      if rel_alt_step - 1 < 1:
-        continue
-      # keep only if number of rules at that step is greater than 1
-      if mod_dbg_history[rel_alt_step - 1]['next_choices_count'] <= 1:
-        continue
-      rel_alt_step_infos[rel_alt_step] = {
-        'next_choices_count': mod_dbg_history[rel_alt_step - 1]['next_choices_count'],
-        'current_choose_idx': mod_dbg_history[rel_alt_step]['current_choose_idx'],
-        'ex_id': mod_dbg_history[rel_alt_step]['ex_id'],
-        'current_rule_id': mod_dbg_history[rel_alt_step]['current_rule_id'],
-        'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
-      }
-
-  new_choices = get_next_unique_choices(rel_alt_step_infos, current_choices, choices_history)
+  new_choices = get_proposed_choices_based_on_line_idx(
+    tar_main_code,
+    err_line_idx,
+    current_choices,
+    choices_history,
+    map_to_exid,
+    translate_dbg_history
+  )
   return new_choices
 
 
@@ -514,91 +538,12 @@ def get_proposed_choices_semantic_error(
   '''
   err_line_idx = get_err_line_idx_in_tar_main_code(error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
 
-  '''
-  The following function returns the line indices of every character
-  in tar_main_code.
-  '''
-  main_code_lines = tar_main_code.split('\n')
-  line_idxs, col_idxs = get_char_line_col_idxs(main_code_lines)
-
-  '''
-  The following loop creates `line_idx_to_exids` - a mapping of
-  line indices to expansion ids that are present at the line.
-  '''
-  line_idx_to_exids : Dict[int, Set[int]] = {}
-  for exid, tokens_by_ex in map_to_exid.items():
-    for token_by_ex in tokens_by_ex:
-      # token in tar_main_code and its range
-      token = token_by_ex['str']
-      token_range = token_by_ex['range']
-      _si, _ei = token_range  # start and end indices of the token in tar_main_code
-      assert tar_main_code[_si:_ei] == token, f'sanity check: discrepancy in token range'
-      line_si : int = line_idxs[_si]
-      line_ei : int = line_idxs[_ei]
-      assert line_si == line_ei, 'sanity check: token spans multiple lines'
-      assert token in main_code_lines[line_si], f'sanity check: token not found in tar_main_code'
-      line_idx_to_exids.setdefault(line_si, set()).add(exid)
-
-  '''
-  Create two objects:
-  1. mod_dbg_history - a modified version of `translate_dbg_history` that contains
-     only the necessary information for the rule chooser.
-  2. exid_to_mod_dbg_history_elem - a mapping of expansion ids to the corresponding
-     elements in `mod_dbg_history`.
-  This is used to quickly access the debug history element for a given expansion id.
-  '''
-  mod_dbg_history : Dict[int, dict] = {}
-  exid_to_mod_dbg_history_elem : Dict[int, dict] = {}
-  for elem in translate_dbg_history:
-    alt_step = elem['alt_step']
-    exid = elem['dbg_info']['ex_id']
-    # the assertion below ensures that the dbg_history elements
-    # come in the order of alt_step starting from 1.
-    assert alt_step - 1 == len(mod_dbg_history), 'sanity check: dbg history elems should come in order'
-    mod_dbg_history_elem = {
-      'alt_step': alt_step,
-      'next_choices_count': elem['next_choices_status']['count'],
-      'next_choices_all_known': elem['next_choices_status']['done'],
-      'ex_id': exid,
-      'current_choose_idx': elem['dbg_info']['notes']['choose_idx'],
-      'current_rule_id': elem['dbg_info']['notes']['rule_id'],
-      'current_range_info': elem['range_info']
-    }
-    mod_dbg_history[alt_step] = mod_dbg_history_elem
-    exid_to_mod_dbg_history_elem[exid] = mod_dbg_history_elem
-
-  '''
-  INVARIANT: `alt_step` starts from 1
-  Iterate over expansions on the error line, and for each expansion:
-  1. Get the `mod_dbg_history_elem` for the expansion (alt object).
-  2. For the given alt object, get the previous `_RELATED_WINDOW_SIZE` elements
-  3. From the selected alt objects, keep only those that have more than
-     one rule that can be applied at that alt object.
-  '''
-  _RELATED_WINDOW_SIZE = 1
-  exids_err_line : List[int] = list(sorted(line_idx_to_exids[err_line_idx]))
-  rel_alt_step_infos : Dict[int, dict] = {}
-
-  for exid_err_line in exids_err_line:
-    mod_dbg_history_elem = exid_to_mod_dbg_history_elem[exid_err_line]
-    alt_step : int = mod_dbg_history_elem['alt_step']
-
-    # previous _RELATED_WINDOW_SIZE elements + alt_step itself
-    rel_alt_steps = list(range(alt_step - _RELATED_WINDOW_SIZE, alt_step + 1))
-    for rel_alt_step in rel_alt_steps:
-      # because we use `rel_alt_step - 1` below
-      if rel_alt_step - 1 < 1:
-        continue
-      # keep only if number of rules at that step is greater than 1
-      if mod_dbg_history[rel_alt_step - 1]['next_choices_count'] <= 1:
-        continue
-      rel_alt_step_infos[rel_alt_step] = {
-        'next_choices_count': mod_dbg_history[rel_alt_step - 1]['next_choices_count'],
-        'current_choose_idx': mod_dbg_history[rel_alt_step]['current_choose_idx'],
-        'ex_id': mod_dbg_history[rel_alt_step]['ex_id'],
-        'current_rule_id': mod_dbg_history[rel_alt_step]['current_rule_id'],
-        'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
-      }
-
-  new_choices = get_next_unique_choices(rel_alt_step_infos, current_choices, choices_history)
+  new_choices = get_proposed_choices_based_on_line_idx(
+    tar_main_code,
+    err_line_idx,
+    current_choices,
+    choices_history,
+    map_to_exid,
+    translate_dbg_history
+  )
   return new_choices
