@@ -516,20 +516,50 @@ def get_proposed_choices_semantic_error(
   '''
   Propose new choices based on a semantic error. A semantic error occurs
   when traces of src and tar test scripts do not match.
+
+  PARAM error_lines: a dictionary where keys are line numbers (0-based) and values
+  are the content of the lines that caused the semantic error. Sample:
+  {
+    12: "    while (x && m) {"
+  }
   '''
 
   p_utils.log_json_time(f'args-get_proposed_choices_semantic_error.json', locals())
   logger.debug('Starting p_rule_chooser.get_proposed_choices_compile_error')
 
-  '''
-  error_line_num:
-  1. 0-based
-  2. the line number in `tar_program_instr` where the semantic error occurred.
-  '''
-  assert len(error_lines) == 1, 'currently support only one semantic error line'
+  assert len(error_lines) > 0, 'there must be at least one semantic error line'
   error_line_nums = list(error_lines.keys())
   error_line_num = error_line_nums[0]
   error_line_content = error_lines[error_line_num]
+
+  '''
+  Depending on the locations of log statements (myexactlog), we may end up
+  in a situation where there are multiple lines in `error_lines`. For example:
+  {
+    21: "        break;",
+    22: "    }",
+    23: "    var x = (x && !m) || (!x && m);"
+  }
+  taken from:
+  ```js
+          // ...
+          myexactlog(4, m);
+          break;
+      }
+      var x = (x && !m) || (!x && m);
+      myexactlog(5, x);  // trace mismatch occurs here
+      // ...
+  ```
+  In this case, we consider a line right before the log statement
+  that produces a trace mismatch.
+  '''
+  if len(error_lines) > 1:
+    error_line_num = max(list(error_lines.keys()))
+    error_line_content = error_lines[error_line_num]
+    logger.warning(
+      f'Found multiple semantic error lines: {json.dumps(error_lines, indent=2)}\n'
+      f'Using the last one: {error_line_num}\n'
+      f'This solution may not work for all cases.')
 
   '''
   error_line_num is 0-based line index of a trace mismatch in
