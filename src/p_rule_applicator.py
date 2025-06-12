@@ -178,38 +178,87 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
   PRE: traces are not identical.
   RAISE: RuntimeError if traces are identical.
   '''
+  def __get_trace_mismatch_idx_len_equal(src_trace_entries: list, tar_trace_entries: list) -> int:
+    '''
+    This function is used when the source trace and target trace are of the same length.
+    '''
+    for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
+      src_te_type = src_te[0]
+      tar_te_type = tar_te[0]
+      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
+
+      '''
+      Each entry in the traces must be a list of at least 2 elements.
+      Why? In order to extract location of a semantic error (it causes
+      a trace mismatch), each log statement (myexactlog, print) must
+      have been indexed by being inserted its index as a first argument.
+      That's why the trace entries must be at least 2 elements long.
+      '''
+      src_te_len = src_te[1]
+      tar_te_len = tar_te[1]
+      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      trace_entries_identical = _compare_traces(src_te, tar_te)
+      if not trace_entries_identical:
+        return idx
+
+    # if we reach here, it means that all entries are identical
+    raise RuntimeError('Traces must be different')
+
+  def __get_trace_mismatch_idx_tar_trace_larger(src_trace_entries: list, tar_trace_entries: list) -> int:
+    '''
+    This function is used when the source trace is shorter than the target trace.
+    '''
+    for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
+      src_te_type = src_te[0]
+      tar_te_type = tar_te[0]
+      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
+      src_te_len = src_te[1]
+      tar_te_len = tar_te[1]
+      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      trace_entries_identical = _compare_traces(src_te, tar_te)
+      if not trace_entries_identical:
+        return idx
+
+    # if we reach here, it means that all entries are identical
+    raise RuntimeError('Source trace is subsumed by target trace. Target trace has more iterations?')
+
+  def __get_trace_mismatch_idx_src_trace_larger(src_trace_entries: list, tar_trace_entries: list) -> int:
+    '''
+    This function is used when the source trace is longer than the target trace.
+    '''
+    for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
+      src_te_type = src_te[0]
+      tar_te_type = tar_te[0]
+      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
+      src_te_len = src_te[1]
+      tar_te_len = tar_te[1]
+      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      trace_entries_identical = _compare_traces(src_te, tar_te)
+      if not trace_entries_identical:
+        return idx
+
+    # if we reach here, it means that all entries are identical
+    raise RuntimeError('Target trace is subsumed by source trace. Target trace needs more iterations?')
+
   src_trace_type = src_trace[0]
   tar_trace_type = tar_trace[0]
   assert src_trace_type == 'list' and tar_trace_type == 'list', 'traces must be lists'
-
   src_trace_len = src_trace[1]
   tar_trace_len = tar_trace[1]
-  assert src_trace_len == tar_trace_len, 'traces of different lengths are not supported'
-
   src_trace_entries = src_trace[2]
   tar_trace_entries = tar_trace[2]
 
-  for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
-    src_te_type = src_te[0]
-    tar_te_type = tar_te[0]
-    assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
+  # both traces are of the same length
+  if src_trace_len == tar_trace_len:
+    return __get_trace_mismatch_idx_len_equal(src_trace_entries, tar_trace_entries)
 
-    '''
-    Each entry in the traces must be a list of at least 2 elements.
-    Why? In order to extract location of a semantic error (it causes
-    a trace mismatch), each log statement (myexactlog, print) must
-    have been indexed by being inserted its index as a first argument.
-    That's why the trace entries must be at least 2 elements long.
-    '''
-    src_te_len = src_te[1]
-    tar_te_len = tar_te[1]
-    assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
-    trace_entries_identical = _compare_traces(src_te, tar_te)
-    if not trace_entries_identical:
-      return idx
+  # source trace is shorter than target trace
+  elif src_trace_len < tar_trace_len:
+    return __get_trace_mismatch_idx_tar_trace_larger(src_trace_entries, tar_trace_entries)
 
-  # if we reach here, it means that all entries are identical
-  raise RuntimeError('Traces must be different')
+  # source trace is longer than target trace
+  else:
+    return __get_trace_mismatch_idx_src_trace_larger(src_trace_entries, tar_trace_entries)
 
 
 def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> int:
@@ -235,9 +284,8 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   src_trace_entries = src_trace[2]
   tar_trace_entries = tar_trace[2]
 
-  assert len(src_trace_entries) == len(tar_trace_entries), 'trace entries must be of the same length'
-  assert trace_idx < len(src_trace_entries), 'trace index must be less than trace entries length'
-  assert trace_idx < len(tar_trace_entries), 'trace index must be less than trace entries length'
+  assert trace_idx < len(src_trace_entries), 'trace index must be less than src trace entries length'
+  assert trace_idx < len(tar_trace_entries), 'trace index must be less than tar trace entries length'
 
   src_trace_entry = src_trace_entries[trace_idx]
   tar_trace_entry = tar_trace_entries[trace_idx]
@@ -261,10 +309,16 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   src_trace_arg1_value = src_trace_arg1[1]
   tar_trace_arg1_value = tar_trace_arg1[1]
   assert isinstance(src_trace_arg1_value, int) and isinstance(tar_trace_arg1_value, int), 'trace entry first argument must be an int'
-  assert src_trace_arg1_value == tar_trace_arg1_value, 'trace entry first argument must be equal in both traces'
 
-  # doesn't matter which trace we use, they are the same
-  return src_trace_arg1_value
+  src_trace_arg2 = src_trace_args[1]
+  tar_trace_arg2 = tar_trace_args[1]
+
+  if src_trace_arg1_value != tar_trace_arg1_value:
+    logger.warning(f'Expected log statement #{src_trace_arg1_value}, got #{tar_trace_arg1_value}')
+  else:
+    logger.warning(f'Expected "{src_trace_arg2}" at log statement #{src_trace_arg1_value}, got "{tar_trace_arg2}"')
+
+  return tar_trace_arg1_value
 
 
 def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Dict[int, str]:
