@@ -174,7 +174,7 @@ def _compare_traces(src_trace: list, tar_trace: list) -> bool:
 def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
   '''
   Given two traces, find the first index where they differ.
-  If they are identical, return None.
+  If they are identical, return None. Index is 0-based.
   PRE: traces are not identical.
   RAISE: RuntimeError if traces are identical.
   '''
@@ -264,7 +264,7 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
 def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> int:
   '''
   Given two traces and a trace index, find the log statement index under that trace index.
-  Log statement indices are 1-based.
+  Log statement indices are 1-based. trace_idx is 0-based.
 
   Sample trace:
   ["list", 1,
@@ -399,7 +399,7 @@ def _extract_err_lines_from_trace_mismatch(
   '''
 
   '''
-  A trace mismatch index is an index in the traces where the entries differ.
+  A trace mismatch index is a 0-based index in the traces where the entries differ.
   Using this index, we can find which log statement caused the trace mismatch.
   '''
   trace_mismatch_idx = _get_trace_mismatch_idx(src_trace, tar_trace)
@@ -407,6 +407,7 @@ def _extract_err_lines_from_trace_mismatch(
   '''
   A mismatched log statement index is an index of the log statement that caused
   the trace mismatch. Log statement indices are 1-based.
+  trace_mismatch_idx is 0-based.
   '''
   mismatched_log_stat_idx = _get_log_statement_idx(src_trace, tar_trace, trace_mismatch_idx)
 
