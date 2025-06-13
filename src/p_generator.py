@@ -66,8 +66,19 @@ def is_invalid_pattern_detected_PY(
     logger.warning(f'Invalid pattern detected: generating argument_list for "{fnname}"')
     return True
 
+  def _pattern_3_keyword_argument(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as `print(a, id_xyz='')`, to avoid
+    generating a keyword argument with an invalid key.
+    '''
+    # mapped_node must be a keyword_argument
+    if mapped_node.get_ts_node_type() != 'keyword_argument':
+      return False
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_block_without_secret_fn_turned_on(mapped_node, template_dict),
+    lambda: _pattern_3_keyword_argument(mapped_node),
   ]
   for ntype in p_consts.FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST[template_dict['src_lang']]:
     pattern_callbacks.append(lambda ntype=ntype: _pattern_2_argument_list_for_fn(mapped_node, ntype))
