@@ -37,11 +37,6 @@
   "pre_context": "if midVal1 < midVal2:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return findKth( )",
-      "return findKth( )",
-      "return findKth( )"
-    ],
-    [
       "return findKth(id_ibvu, id_lnga, id_ryt)",
       "return findKth(3827, id_adky, 7492)",
       "return findKth(id_wtu, id_ezl, id_htra)"

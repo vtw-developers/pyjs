@@ -30,11 +30,6 @@
   "pre_context": "while c in chars:\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_htl( )",
-      "id_gos( )",
-      "id_omw( )"
-    ],
-    [
       "id_mfgl.remove(id_hxb)",
       "id_igmz.remove(7428)",
       "id_hxnd.remove(id_syx)"

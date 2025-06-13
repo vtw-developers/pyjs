@@ -546,6 +546,14 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
           nodes.append(node)
       return nodes
 
+    def __remove_special_nodes(group: List[pds.DuoGlotNode], template_dict: dict) -> List[pds.DuoGlotNode]:
+      '''
+      Remove special nodes from fuzz node groups.
+      '''
+      keep = lambda node: node.get_ts_node_type() not in \
+        p_consts.REMOVE_FROM_FUZZ_NODE_GROUPS_NODE_TYPES[template_dict['src_lang']]
+      return [node for node in group if keep(node)]
+
     _MAX_SPAN = 2
     # all combinations
     groups = __rec_descend(problematic_node, template_dict)
@@ -555,6 +563,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     groups = [__remove_terminals(group) for group in groups]
     # remove nodes that have a single child which is a non-terminal
     groups = [__remove_nts_with_single_nt_child(group, template_dict) for group in groups]
+    # remove special nodes from fuzz node groups
+    groups = [__remove_special_nodes(group, template_dict) for group in groups]
     # remove empty groups
     groups = [group for group in groups if len(group) > 0]
     # remove subgroups
