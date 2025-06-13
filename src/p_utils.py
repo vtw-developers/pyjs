@@ -28,7 +28,7 @@ def setup_logger(name: str) -> logging.Logger:
   '''
   _LOG_FPATH = p_consts.LOGS_DIR / 'pirel.log'
   _LOG_FMODE = 'a'
-  _LOG_FORMAT = '%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s'
+  _LOG_FORMAT = '%(asctime)s,%(msecs)d %(levelname)s %(module)s.%(funcName)s:%(lineno)d %(message)s'
   _LOG_DATE_FORMAT = '%H:%M:%S'
   _LOG_LEVEL_FILE = logging.DEBUG  # report everything to file
   _LOG_LEVEL_CONSOLE = logging.INFO  # report only INFO and above to console
