@@ -172,6 +172,41 @@ def are_traces_equal_rec(src_trace: list, tar_trace: list) -> bool:
   raise UnknownTypeInTracesError(f'Unknown type in are_traces_equal_rec: "{type1}"')
 
 
+def is_valid_trace(trace: list) -> bool:
+  '''
+  Check if the trace is valid.
+  A valid trace is a list with exactly 3 elements:
+  - type of the trace is a string "list"
+  - length of the trace
+  - list of trace entries
+  '''
+  if not isinstance(trace, list):
+    return False
+  if len(trace) != 3:
+    return False
+
+  trace_type = trace[0]
+  trace_size = trace[1]
+  trace_entries = trace[2]
+
+  if not isinstance(trace_type, str):
+    return False
+  if trace_type != 'list':
+    return False
+
+  if not isinstance(trace_size, int):
+    return False
+  if trace_size < 0:
+    return False
+
+  if not isinstance(trace_entries, list):
+    return False
+  if len(trace_entries) != trace_size:
+    return False
+
+  return True
+
+
 def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
   '''
   Given two traces, find the first index where they differ.
@@ -436,6 +471,7 @@ def _run_tests(
 
   # 1. run `src_program_instr` and collect output trace
   src_trace, src_stderr = p_code_runner.run_src_test_script(src_program_instr, subject)
+  assert is_valid_trace(src_trace), 'src_trace must be a valid trace'
 
   # there is an error in running src test script
   if src_stderr != '':
@@ -445,6 +481,7 @@ def _run_tests(
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_std_error = p_code_runner.run_tar_test_script(tar_program_instr, subject)
+  assert is_valid_trace(tar_trace), 'tar_trace must be a valid trace'
 
   # there is an error in running tar test script
   if tar_std_error != '':
