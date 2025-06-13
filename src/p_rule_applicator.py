@@ -247,6 +247,44 @@ def is_valid_trace_entry(trace_entry: list) -> bool:
   return True
 
 
+def is_trace_subsumed(shorter_trace: list, longer_trace: list) -> bool:
+  '''
+  Check if the longer trace subsumes the shorter trace.
+  '''
+  assert is_valid_trace(shorter_trace), 'shorter_trace must be a valid trace'
+  assert is_valid_trace(longer_trace), 'longer_trace must be a valid trace'
+
+  shorter_tes = shorter_trace[2]
+  longer_tes = longer_trace[2]
+  assert len(longer_tes) > len(shorter_tes), 'longer_trace must be strictly longer than shorter_trace'
+
+  # zip truncates the longer trace to the length of the shorter trace
+  for idx, (shorter_te, longer_te) in enumerate(zip(shorter_tes, longer_tes)):
+    assert is_valid_trace_entry(shorter_te), 'shorter_trace entry must be valid'
+    assert is_valid_trace_entry(longer_te), 'longer_trace entry must be valid'
+    trace_entries_identical = are_traces_equal_rec(shorter_te, longer_te)
+    if not trace_entries_identical:
+      return False
+
+  return True
+
+
+def does_trace_subsume_another(trace1: list, trace2: list) -> bool:
+  '''
+  Check if one trace subsumes the second trace.
+  '''
+  assert is_valid_trace(trace1), 'trace1 must be a valid trace'
+  assert is_valid_trace(trace2), 'trace2 must be a valid trace'
+  trace1_len = trace1[1]
+  trace2_len = trace2[1]
+  if trace1_len < trace2_len:
+    return is_trace_subsumed(trace1, trace2)
+  elif trace2_len < trace1_len:
+    return is_trace_subsumed(trace2, trace1)
+  else:
+    return are_traces_equal_rec(trace1, trace2)
+
+
 def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
   '''
   Given two traces, find the first index where they differ.
@@ -450,6 +488,8 @@ def _extract_err_lines_from_trace_mismatch(
   at which a semantic error might have occured. By having this information,
   we can choose alternative translation rules to fix the semantic error.
   '''
+  assert not does_trace_subsume_another(src_trace, tar_trace), \
+    'Not supported: traces must not subsume one another'
 
   '''
   A trace mismatch index is a 0-based index in the traces where the entries differ.
@@ -492,23 +532,91 @@ def _run_tests(
 
   # there is an error in running src test script
   if src_stderr != '':
-    msg = f'Error running src test script: {src_stderr}'
-    logger.error(msg)
+    msg = f'SHOULD NOT HAPPEN! Error running src test script: {src_stderr}'
+    logger.critical(msg)
     raise SrcTestScriptError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_std_error = p_code_runner.run_tar_test_script(tar_program_instr, subject)
   assert is_valid_trace(tar_trace), 'tar_trace must be a valid trace'
 
+  '''
+  At this point, we have all the necessary data to decide whether to
+  1. finish running tests without any errors
+  2. raise TraceMismatchError if there is a trace mismatch
+  3. raise TarTestScriptError if there is an error in running tar test script
+
+  NOTE Trace categories (relative to each other)
+  src and tar traces may fall into one of the following 6 categories:
+  1. len(src_trace) < len(tar_trace) - src trace is shorter than tar trace
+     a. is_trace_subsumed(src_trace, tar_trace)
+        - there is a semantic error in tar test script due to
+          possibly extra loop iterations
+     b. not is_trace_subsumed(src_trace, tar_trace)
+        - there is a semantic error due to trace mismatch
+  2. len(src_trace) > len(tar_trace) - src trace is longer than tar trace
+     a. is_trace_subsumed(tar_trace, src_trace)
+        - there is a semantic error in tar test script due to
+          possibly missing loop iterations
+     b. not is_trace_subsumed(tar_trace, src_trace)
+        - there is a semantic error due to trace mismatch
+  3. len(src_trace) == len(tar_trace) - src trace and tar trace are of the same length
+     a. are_traces_equal_rec(src_trace, tar_trace)
+        - there is no semantic error
+     b. not are_traces_equal_rec(src_trace, tar_trace)
+        - there is a semantic error due to trace mismatch
+
+  NOTE Error categories
+  Regarding what error to raise:
+  1. raise TarTestScriptError iff
+     a. (tar_std_error != '') and is_trace_subsumed(tar_trace, src_trace)
+        - case 2a
+        - cases 1a, 3a are not supported yet
+  2. raise TraceMismatchError iff
+     a. (tar_std_error == '') and does_trace_subsume_another(src_trace, tar_trace)
+        - cases 1b, 2b, 3b
+        - cases 1a, 2a, 3a are not supported yet
+     b. (tar_std_error != '') and does_trace_subsume_another(src_trace, tar_trace)
+        - cases 1b, 2b, 3b
+        - cases 1a, 2a, 3a are not supported yet
+  '''
+
   # there is an error in running tar test script
   if tar_std_error != '':
-    logger.error(f'Error running tar test script: {tar_std_error}')
+    logger.error(f'Error running tar test script: "{tar_std_error}"')
+    '''
+    Sometimes, it might be the case that at the time an error occurs in tar test script,
+    there already is a trace mismatch between src and tar traces. This suggests that the
+    tar test script error occured due to an invalid rule chosen earlier. In this case,
+    we should ensure that at the time of tar test script error, the src and tar traces
+    are identical by choosing the correct translation rule.
+    '''
+    if not does_trace_subsume_another(src_trace, tar_trace):
+      logger.error('Trace mismatch between src and tar traces at the time of tar test script error.')
+      error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
+      logger.error(f'Trace mismatch error lines:\n{json.dumps(error_lines, indent=2)}')
+      raise TraceMismatchError(error_lines)
+
+    '''
+    At this point, we know that one of the traces subsumes the other.
+    If the src trace subsumes the tar trace, it is ok, because up to the point of
+    tar test script error, the src and tar traces match.
+    If the tar trace subsumes the src trace, it is not ok, because this case is not
+    considered yet.
+    '''
+    src_trace_size = src_trace[1]
+    tar_trace_size = tar_trace[1]
+    assert src_trace_size > tar_trace_size, \
+      'NOT SUPPORTED: src_trace must be strictly longer than tar_trace'
+
     tar_error_dict = p_code_runner._extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
     raise TarTestScriptError(tar_error_dict)
 
   # 3. compare traces
   are_traces_identical = are_traces_equal_rec(src_trace, tar_trace)
   if not are_traces_identical:
+    assert not does_trace_subsume_another(src_trace, tar_trace), \
+      'NOT SUPPORTED: traces must not subsume one another'
     error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
     logger.error(
       f'Traces are not identical. There is a semantic error in translation.\n'
