@@ -110,6 +110,13 @@ class TestExtractTraceFromStdout(unittest.TestCase):
     trace_str = json.dumps(trace)
     self.assertEqual(trace_gold_str, trace_str, 'Expected traces to match')
 
+  def test_empty_stdout(self):
+    stdout = ''
+    trace = p_code_runner._extract_trace_from_stdout(stdout)
+    trace_gold_str = json.dumps(['list', 0, []])
+    trace_str = json.dumps(trace)
+    self.assertEqual(trace_gold_str, trace_str, 'Expected empty trace for empty stdout')
+
 
 if __name__ == '__main__':
   unittest.main()
