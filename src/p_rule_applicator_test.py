@@ -9,7 +9,7 @@ import p_rule_applicator
 
 class TestCompareTraces(unittest.TestCase):
   '''
-  Test cases for the _compare_traces function in p_rule_applicator.
+  Test cases for the are_traces_equal_rec function in p_rule_applicator.
   '''
   def setUp(self):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'compare-traces'
@@ -23,82 +23,82 @@ class TestCompareTraces(unittest.TestCase):
 
   def test_001(self):
     src_trace, tar_trace = self.get_fixtures('001')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_002(self):
     src_trace, tar_trace = self.get_fixtures('002')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_003(self):
     src_trace, tar_trace = self.get_fixtures('003')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_004(self):
     src_trace, tar_trace = self.get_fixtures('004')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_005(self):
     src_trace, tar_trace = self.get_fixtures('005')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_006_very_large(self):
     src_trace, tar_trace = self.get_fixtures('006')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_007(self):
     src_trace, tar_trace = self.get_fixtures('007')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_008(self):
     src_trace, tar_trace = self.get_fixtures('008')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_009_with_print_output(self):
     src_trace, tar_trace = self.get_fixtures('009')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_010(self):
     src_trace, tar_trace = self.get_fixtures('010')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_011_float_val(self):
     src_trace, tar_trace = self.get_fixtures('011')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_012(self):
     src_trace, tar_trace = self.get_fixtures('012')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_013(self):
     src_trace, tar_trace = self.get_fixtures('013')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_014(self):
     src_trace, tar_trace = self.get_fixtures('014')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_015(self):
     src_trace, tar_trace = self.get_fixtures('015')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_016_indexed_log_statements(self):
     src_trace, tar_trace = self.get_fixtures('016')
-    result = p_rule_applicator._compare_traces(src_trace, tar_trace)
+    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
 
