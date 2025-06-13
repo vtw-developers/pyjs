@@ -2,7 +2,7 @@
   "template_id": 0,
   "src_lang": "py",
   "tar_lang": "js",
-  "template_origin": "print(arr[j], end=\" \")",
+  "template_origin": "print(arr[j], end='', sep='')",
   "context_node_type": "expression_statement",
   "context_node_id": 1,
   "problematic_node_type": "expression_statement",
@@ -25,15 +25,23 @@
     }
   ],
   "partial_program": "pirel_replace_var;",
-  "src_program": "print(arr[j], end=\" \")",
+  "src_program": "print(arr[j], end='', sep='')",
   "tsps": [
     [
-      "print(id_wnq[id_ceq], end=id_mbi)",
-      "print(id_zmi[id_gic], end=511)"
+      "print(id_sefy[id_itzl], end=id_lfw, sep=id_jgn)",
+      "print(id_hxbp[id_uqir], end=8580, sep=4102)"
     ],
     [
-      "print(id_cox[id_hqd], end=\" \")",
-      "print(id_adnp[id_ytxi], end=\" \")"
+      "print(id_iwz[id_ysob], end=id_faje, sep='')",
+      "print(id_amp[id_hza], end=3442, sep='')"
+    ],
+    [
+      "print(id_lwc[id_xlo], end='', sep=id_xqwd)",
+      "print(id_zkxh[id_gzh], end='', sep=1516)"
+    ],
+    [
+      "print(id_hur[id_ydxo], end='', sep='')",
+      "print(id_doz[id_eotg], end='', sep='')"
     ]
   ]
 }

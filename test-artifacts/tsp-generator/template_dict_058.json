@@ -2,7 +2,7 @@
   "template_id": 0,
   "src_lang": "py",
   "tar_lang": "js",
-  "template_origin": "print(arr[j], end=\" \")",
+  "template_origin": "foo(end='')",
   "context_node_type": "expression_statement",
   "context_node_id": 1,
   "problematic_node_type": "expression_statement",
@@ -25,15 +25,15 @@
     }
   ],
   "partial_program": "pirel_replace_var;",
-  "src_program": "print(arr[j], end=\" \")",
+  "src_program": "foo(end='')",
   "tsps": [
     [
-      "print(id_wnq[id_ceq], end=id_mbi)",
-      "print(id_zmi[id_gic], end=511)"
+      "foo(end=id_lfw)",
+      "foo(end=8580)"
     ],
     [
-      "print(id_cox[id_hqd], end=\" \")",
-      "print(id_adnp[id_ytxi], end=\" \")"
+      "foo(end='')",
+      "foo(end='')"
     ]
   ]
 }
