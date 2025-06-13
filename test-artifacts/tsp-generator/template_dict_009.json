@@ -29,11 +29,6 @@
   "pre_context": "while idx < len(s):\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_fqg( )",
-      "id_hko( )",
-      "id_hfb( )"
-    ],
-    [
       "id_siuj.append(id_zlk)",
       "id_qkx.append(1160)",
       "id_dpi.append(id_gzob)"

@@ -37,11 +37,6 @@
   "pre_context": "if numRows == 1:\n    return s\ngroup = 2 * numRows - 2\nans = []\nfor i in range(1, numRows + 1):\n    interval = group if i == numRows else 2 * numRows - 2 * i\n    idx = i - 1\n    while idx < len(s):\n        ans.append(s[idx])\n        idx += interval\n        interval = group - interval\n        if interval == 0:\n            interval = group\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "return id_qujs( )",
-      "return id_mhj( )",
-      "return id_ofu( )"
-    ],
-    [
       "return ''.join(id_zbfl)",
       "return ''.join(id_gpe)",
       "return ''.join(id_sngm)"
