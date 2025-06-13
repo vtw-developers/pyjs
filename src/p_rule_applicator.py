@@ -111,9 +111,10 @@ def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict)
   return restored_code
 
 
-def _compare_traces(src_trace: list, tar_trace: list) -> bool:
+def are_traces_equal_rec(src_trace: list, tar_trace: list) -> bool:
   '''
   Compare the traces from the source and target programs.
+  This is a recursive function.
   For more information, refer to
   1. run_src_test_script and run_tar_test_script in p_code_runner.py.
   2. myexactlog implementations for src and tar languages.
@@ -157,18 +158,18 @@ def _compare_traces(src_trace: list, tar_trace: list) -> bool:
       return False
     list1, list2 = src_trace[2], tar_trace[2]
     for ch1, ch2 in zip(list1, list2):
-      child_res = _compare_traces(ch1, ch2)
+      child_res = are_traces_equal_rec(ch1, ch2)
       if not child_res:
         return False
     return True
 
   if type1 == 'unknown':
-    logger.warning('_compare_traces: unknown type')
+    logger.warning('are_traces_equal_rec: unknown type')
     len1, len2 = src_trace[1], tar_trace[1]
     str1, str2 = src_trace[2], tar_trace[2]
     return len1 == len2 and str1 == str2
 
-  raise UnknownTypeInTracesError(f'Unknown type in _compare_traces: "{type1}"')
+  raise UnknownTypeInTracesError(f'Unknown type in are_traces_equal_rec: "{type1}"')
 
 
 def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
@@ -197,7 +198,7 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
       src_te_len = src_te[1]
       tar_te_len = tar_te[1]
       assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
-      trace_entries_identical = _compare_traces(src_te, tar_te)
+      trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
 
@@ -215,7 +216,7 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
       src_te_len = src_te[1]
       tar_te_len = tar_te[1]
       assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
-      trace_entries_identical = _compare_traces(src_te, tar_te)
+      trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
 
@@ -233,7 +234,7 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
       src_te_len = src_te[1]
       tar_te_len = tar_te[1]
       assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
-      trace_entries_identical = _compare_traces(src_te, tar_te)
+      trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
 
@@ -452,7 +453,7 @@ def _run_tests(
     raise TarTestScriptError(tar_error_dict)
 
   # 3. compare traces
-  are_traces_identical = _compare_traces(src_trace, tar_trace)
+  are_traces_identical = are_traces_equal_rec(src_trace, tar_trace)
   if not are_traces_identical:
     error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
     logger.error(
