@@ -862,7 +862,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
   # p_utils.write_tmp_json('1fuzz_node_groups.json', fuzz_node_groups)  # NOTE for debugging only
 
-  for group_idx, fuzz_node_group in enumerate(fuzz_node_groups, start=1):
+  for group_idx, fuzz_node_group in enumerate(fuzz_node_groups):
     # NOTE EXPERIMENTAL resetting a flag in `template_dict`
     # it is set to `True` in `_is_valid_fuzz_node`
     template_dict['is_insert_secret_fn'] = False
