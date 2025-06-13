@@ -207,6 +207,46 @@ def is_valid_trace(trace: list) -> bool:
   return True
 
 
+def is_valid_trace_entry(trace_entry: list) -> bool:
+  '''
+  Check if the trace entry is valid.
+  A valid trace entry is a list with exactly 3 elements:
+  - type of the trace entry is a string "list"
+  - length of the trace entry (corresponds to the number of arguments)
+  - list of trace entry arguments
+  '''
+  if not isinstance(trace_entry, list):
+    return False
+  if len(trace_entry) != 3:
+    return False
+
+  te_type = trace_entry[0]
+  te_size = trace_entry[1]
+  te_args = trace_entry[2]
+
+  if not isinstance(te_type, str):
+    return False
+  if te_type != 'list':
+    return False
+
+  '''
+  Size of the trace entry must be at least 2:
+  1. the first argument is the index of the log statement
+  2. the second and subsequent arguments are the actual logged values
+  '''
+  if not isinstance(te_size, int):
+    return False
+  if te_size < 2:
+    return False
+
+  if not isinstance(te_args, list):
+    return False
+  if len(te_args) != te_size:
+    return False
+
+  return True
+
+
 def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
   '''
   Given two traces, find the first index where they differ.
@@ -219,24 +259,11 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
     This function is used when the source trace and target trace are of the same length.
     '''
     for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
-      src_te_type = src_te[0]
-      tar_te_type = tar_te[0]
-      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
-
-      '''
-      Each entry in the traces must be a list of at least 2 elements.
-      Why? In order to extract location of a semantic error (it causes
-      a trace mismatch), each log statement (myexactlog, print) must
-      have been indexed by being inserted its index as a first argument.
-      That's why the trace entries must be at least 2 elements long.
-      '''
-      src_te_len = src_te[1]
-      tar_te_len = tar_te[1]
-      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      assert is_valid_trace_entry(src_te), 'source trace entry must be valid'
+      assert is_valid_trace_entry(tar_te), 'target trace entry must be valid'
       trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
-
     # if we reach here, it means that all entries are identical
     raise RuntimeError('Traces must be different')
 
@@ -245,17 +272,12 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
     This function is used when the source trace is shorter than the target trace.
     '''
     for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
-      src_te_type = src_te[0]
-      tar_te_type = tar_te[0]
-      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
-      src_te_len = src_te[1]
-      tar_te_len = tar_te[1]
-      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      assert is_valid_trace_entry(src_te), 'source trace entry must be valid'
+      assert is_valid_trace_entry(tar_te), 'target trace entry must be valid'
       trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
-
-    # if we reach here, it means that all entries are identical
+    # if we reach here, it means that src trace is subsumed by target trace
     raise RuntimeError('Source trace is subsumed by target trace. Target trace has more iterations?')
 
   def __get_trace_mismatch_idx_src_trace_larger(src_trace_entries: list, tar_trace_entries: list) -> int:
@@ -263,17 +285,12 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
     This function is used when the source trace is longer than the target trace.
     '''
     for idx, (src_te, tar_te) in enumerate(zip(src_trace_entries, tar_trace_entries)):
-      src_te_type = src_te[0]
-      tar_te_type = tar_te[0]
-      assert src_te_type == 'list' and tar_te_type == 'list', 'trace entries must be lists'
-      src_te_len = src_te[1]
-      tar_te_len = tar_te[1]
-      assert src_te_len >= 2 and tar_te_len >= 2, 'trace entries must have at least 2 elements'
+      assert is_valid_trace_entry(src_te), 'source trace entry must be valid'
+      assert is_valid_trace_entry(tar_te), 'target trace entry must be valid'
       trace_entries_identical = are_traces_equal_rec(src_te, tar_te)
       if not trace_entries_identical:
         return idx
-
-    # if we reach here, it means that all entries are identical
+    # if we reach here, it means that tar trace is subsumed by src trace
     raise RuntimeError('Target trace is subsumed by source trace. Target trace needs more iterations?')
 
   src_trace_type = src_trace[0]
