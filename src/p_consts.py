@@ -150,7 +150,7 @@ FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST = {
 }
 
 REMOVE_FROM_FUZZ_NODE_GROUPS_NODE_TYPES = {
-  'py': ['call'],
+  'py': ['call', 'keyword_argument'],
 }
 
 # For the following node types we include (`template_origin`, `template_origin`)

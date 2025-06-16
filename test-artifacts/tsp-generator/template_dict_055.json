@@ -28,10 +28,6 @@
   "src_program": "print(arr[j], end=\" \")",
   "tsps": [
     [
-      "print(id_wnq[id_ceq], end=id_mbi)",
-      "print(id_zmi[id_gic], end=511)"
-    ],
-    [
       "print(id_cox[id_hqd], end=\" \")",
       "print(id_adnp[id_ytxi], end=\" \")"
     ]
