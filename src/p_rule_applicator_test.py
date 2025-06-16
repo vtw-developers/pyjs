@@ -142,6 +142,13 @@ class TestGetErrorLines(unittest.TestCase):
     gold = {12: "        n += 'n';"}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
+  def test_log_stat_before_return_stat(self):
+    tar_program_instr = self.get_fixture('002')
+
+    result = p_rule_applicator._get_error_lines(tar_program_instr, 1)
+    gold = {14: '  return 2 / 2;'}
+    self.assertTrue(self.are_dicts_equal(result, gold), 'the error line is 3 with return statement')
+
 
 if __name__ == '__main__':
   unittest.main()

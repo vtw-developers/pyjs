@@ -453,6 +453,19 @@ def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Di
       return -1
     return myexactlog_idx if myexactlog_idx != -1 else print_idx
 
+  def __is_log_stat_before_return_stat(stripped_lines: List[str], mismatched_log_stat_idx: int):
+    '''
+    The idea is to find the line that starts with `myexactlog(mismatched_log_stat_idx)`
+    and check if the next line starts with `return `.
+    '''
+    assert mismatched_log_stat_idx >= 1, 'mismatched_log_stat_idx must be >= 1'
+    myexactlog_idx = __find_text(stripped_lines, f'myexactlog({mismatched_log_stat_idx}')
+    next_idx = myexactlog_idx + 1
+    if stripped_lines[next_idx].startswith('return '):
+      logger.debug(f'Log statement {mismatched_log_stat_idx} appears right before return statement.')
+      return True
+    return False
+
   assert mismatched_log_stat_idx >= 1, 'mismatched_log_stat_idx must be >= 1'
 
   # split into stripped lines
@@ -466,6 +479,18 @@ def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Di
   '''
   mismatch_line_idx = __find(stripped_lines, mismatched_log_stat_idx)
   mismatch_line_idx_before = __find(stripped_lines, mismatched_log_stat_idx - 1)
+
+  '''
+  We need to check whether log statement with index mismatch_line_idx_before
+  appears right before the return statement. If it does, then the error line
+  is at the return statement, and we need to overwrite the values of
+  mismatch_line_idx and mismatch_line_idx_before.
+  '''
+  if __is_log_stat_before_return_stat(stripped_lines, mismatched_log_stat_idx):
+    # return statement is in between these two lines
+    mismatch_line_idx_before = mismatch_line_idx
+    mismatch_line_idx = mismatch_line_idx + 2
+
   assert mismatch_line_idx != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx} not found in stripped lines'
   assert mismatch_line_idx_before != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx - 1} not found in stripped lines'
 
