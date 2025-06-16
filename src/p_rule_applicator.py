@@ -420,7 +420,7 @@ def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Di
   {
     12: "        n += 'n';"
   }
-  NOTE line numbers are 0-based.
+  NOTE line numbers are 0-based indices of lines in `tar_program_instr`.
   '''
 
   def __find_text(stripped_lines: List[str], text: str) -> int:
