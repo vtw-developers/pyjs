@@ -2262,7 +2262,11 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     self.add_assigned_identifier(node.val())
 
   def visit_SubscriptNode(self, node: SubscriptNode) -> None:
-    self.add_assigned_identifier(node.value.val())
+    # base case: if the subscript is an identifier
+    if isinstance(node.value, IdentifierNode):
+      self.add_assigned_identifier(node.value.val())
+      return
+    self.visit(node.value)
 
 
 class BreakStatementInserter(pvis.Visitor):

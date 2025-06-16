@@ -10778,6 +10778,14 @@ class TestLogStatementInserter(unittest.TestCase):
     gold_code = p_utils.read_text(self.snippets_dir / 'L0001_output.py')
     self.assertEqual(pp_code, gold_code)
 
+  def test_double_subscript_assignment(self):
+    tree = self.to_tree(p_utils.read_text(self.snippets_dir / 'double_subscript_input.py'))
+    inserter = p_visitor_py.LogStatementInserter(function_name='f_gold')
+    inserter.visit(tree.root_node)
+    pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
+    gold_code = p_utils.read_text(self.snippets_dir / 'double_subscript_output.py')
+    self.assertEqual(pp_code, gold_code)
+
 
 class TestLogStatementsIndexer(unittest.TestCase):
   def setUp(self):
