@@ -596,6 +596,7 @@ class GenTestFunction:
       '   All other code snippets or explanations should use single backticks (`) where necessary.\n'
       '3. **No comments**:\n'
       '   Replace `__generated__arguments__` with only the inputs you generated. No comments are required explaining the inputs.\n'
+      '   I repeat. Do not include comments in the final `test()` function.\n'
       '4. **No need to test different data types**\n'
       '   If you can achieve full coverage with one data type, you do not need to test other data types. Always prefer simpler data types.\n'
     )
