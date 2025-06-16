@@ -599,6 +599,8 @@ class GenTestFunction:
       '   I repeat. Do not include comments in the final `test()` function.\n'
       '4. **No need to test different data types**\n'
       '   If you can achieve full coverage with one data type, you do not need to test other data types. Always prefer simpler data types.\n'
+      '5. **Assume functions defined**\n'
+      '   If `f_gold()` uses some functions, assume that they are already defined. You do not need to define or overwrite them.\n'
     )
 
   class Prompt:
