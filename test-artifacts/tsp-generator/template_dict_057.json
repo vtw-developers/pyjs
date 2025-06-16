@@ -28,18 +28,6 @@
   "src_program": "print(arr[j], end='', sep='')",
   "tsps": [
     [
-      "print(id_sefy[id_itzl], end=id_lfw, sep=id_jgn)",
-      "print(id_hxbp[id_uqir], end=8580, sep=4102)"
-    ],
-    [
-      "print(id_iwz[id_ysob], end=id_faje, sep='')",
-      "print(id_amp[id_hza], end=3442, sep='')"
-    ],
-    [
-      "print(id_lwc[id_xlo], end='', sep=id_xqwd)",
-      "print(id_zkxh[id_gzh], end='', sep=1516)"
-    ],
-    [
       "print(id_hur[id_ydxo], end='', sep='')",
       "print(id_doz[id_eotg], end='', sep='')"
     ]

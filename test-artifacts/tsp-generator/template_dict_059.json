@@ -2,7 +2,7 @@
   "template_id": 0,
   "src_lang": "py",
   "tar_lang": "js",
-  "template_origin": "foo(end='')",
+  "template_origin": "some_func(kw1=1, kw2=1.1, kw3='somestr', kw4=True, kw5=None, kw6=some_id)",
   "context_node_type": "expression_statement",
   "context_node_id": 1,
   "problematic_node_type": "expression_statement",
@@ -25,11 +25,11 @@
     }
   ],
   "partial_program": "pirel_replace_var;",
-  "src_program": "foo(end='')",
+  "src_program": "some_func(kw1=1, kw2=1.1, kw3='somestr', kw4=True, kw5=None, kw6=some_id)",
   "tsps": [
     [
-      "foo(end='')",
-      "foo(end='')"
+      "some_func(kw1=1, kw2=1.1, kw3='somestr', kw4=True, kw5=None, kw6=some_id)",
+      "some_func(kw1=1, kw2=1.1, kw3='somestr', kw4=True, kw5=None, kw6=some_id)"
     ]
   ]
 }
