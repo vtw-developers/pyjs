@@ -169,8 +169,8 @@ def read_yaml(fpath: Union[Path, str]) -> Any:
 def write_text(fpath: Union[Path, str], content: str) -> None:
   write_file(fpath, content, include_timestamp=False)
 
-def write_json(fpath: Union[Path, str], obj: Any) -> None:
-  write_file(fpath, json.dumps(obj, default=str), include_timestamp=False)
+def write_json(fpath: Union[Path, str], obj: Any, include_timestamp=False) -> None:
+  write_file(fpath, json.dumps(obj, default=str), include_timestamp=include_timestamp)
 
 def write_yaml(fpath: Union[Path, str], obj: Any) -> None:
   yaml_str = yaml.dump(obj, default_flow_style=False, indent=2, canonical=False, width=1000000)
