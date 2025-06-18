@@ -772,9 +772,29 @@ def _get_instrumented_tar_program_plausible(
     'Starting a loop to exhaustively translate `src_program_instr` '
     'with different combinations of translation rules')
 
+  '''
+  This is a history of list of used translation rules that were used
+  to obtain a plausible translation of `src_program_instr`.
+  It is used outside this function. Here it is just for collecting.
+  '''
   used_rule_ids_history = []
-  choices_history = []
+
+  '''
+  This is a stack of choice options for each error line.
+  '''
+  choices_list_stack = []
+
+  '''
+  This is an object that is passed to the translator that tells it
+  which rules to choose at given AST nodes.
+  '''
   current_choices = subject.choices
+  assert current_choices['type'] == 'ASTNODE', f'unsupported choices type "{current_choices["type"]}"'
+
+  '''
+  This loop exhaustively tries all possible combinations of translation rules
+  to obtain a plausible translation of `src_program_instr`.
+  '''
   iteration = 0
   while True:
     logger.debug(f'_get_instrumented_tar_program_plausible.iteration {iteration}')
@@ -804,18 +824,16 @@ def _get_instrumented_tar_program_plausible(
       tar_error_dict = err.tar_error_dict
 
       # May raise
-      # 1. NoUniqueChoicesError
+      # 1. RuleCombinationsExhaustedError
       proposed_choices = p_rule_chooser.get_proposed_choices_compile_error(
         tar_program_instr,
         tar_main_code,
         tar_error_dict,
-        current_choices,
-        choices_history,
+        choices_list_stack,
         map_to_exid,
         translate_dbg_history
       )
 
-      choices_history.append(proposed_choices)
       current_choices = proposed_choices
 
     except TraceMismatchError as err:
@@ -823,18 +841,16 @@ def _get_instrumented_tar_program_plausible(
       error_lines = err.error_lines
 
       # May raise
-      # 1. NoUniqueChoicesError
+      # 1. RuleCombinationsExhaustedError
       proposed_choices = p_rule_chooser.get_proposed_choices_semantic_error(
         tar_program_instr,
         tar_main_code,
         error_lines,
-        current_choices,
-        choices_history,
+        choices_list_stack,
         map_to_exid,
         translate_dbg_history
       )
 
-      choices_history.append(proposed_choices)
       current_choices = proposed_choices
 
 

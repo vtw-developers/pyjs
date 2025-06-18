@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Optional, Set, Tuple
 
 import p_utils
 
@@ -7,10 +7,11 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-class NoUniqueChoicesError(RuntimeError): pass
+class NoUniqueChoicesError_deprecated(RuntimeError): pass
+class RuleCombinationsExhaustedError(RuntimeError): pass
 
 
-def are_choices_lists_equal_astnode(
+def are_choices_lists_equal_astnode_deprecated(
   choices_list: List[tuple],
   choices_list_hist_elem: List[tuple]
 ) -> bool:
@@ -55,7 +56,7 @@ def are_choices_lists_equal_astnode(
   return True
 
 
-def are_choices_list_equal_step(
+def are_choices_list_equal_step_deprecated(
   choices_list: List[Tuple[int, int]],
   choices_list_hist_elem: List[Tuple[int, int]]
 ) -> bool:
@@ -90,7 +91,7 @@ def are_choices_list_equal_step(
   return True
 
 
-def has_been_chosen_before(
+def has_been_chosen_before_deprecated(
   new_choices: dict,
   choices_history: List[dict]
 ):
@@ -109,17 +110,17 @@ def has_been_chosen_before(
     assert choice_type in ['STEP', 'ASTNODE'], f'unknown choice type: "{choice_type}"'
 
     if choice_type == 'STEP':
-      if are_choices_list_equal_step(choices_list, choices_list_hist_elem):
+      if are_choices_list_equal_step_deprecated(choices_list, choices_list_hist_elem):
         return True
 
     elif choice_type == 'ASTNODE':
-      if are_choices_lists_equal_astnode(choices_list, choices_list_hist_elem):
+      if are_choices_lists_equal_astnode_deprecated(choices_list, choices_list_hist_elem):
         return True
 
   return False
 
 
-def get_updated_choices_list_astnode(
+def get_updated_choices_list_astnode_deprecated(
   current_choices_list: List[Tuple[Tuple[int], int]],
   rel_current_range_info: Tuple[int],
   new_choice_idx: int
@@ -151,7 +152,7 @@ def get_updated_choices_list_astnode(
   return new_choices_list
 
 
-def get_updated_choices_list_step(
+def get_updated_choices_list_step_deprecated(
   current_choices_list: List[Tuple[int, int]],
   rel_alt_step: int,
   new_choice_idx: int
@@ -181,7 +182,7 @@ def get_updated_choices_list_step(
   return new_choices_list
 
 
-def get_next_unique_choices(
+def get_next_unique_choices_deprecated(
   rel_alt_step_infos: Dict[int, dict],
   current_choices: dict,
   choices_history: List[dict]
@@ -201,15 +202,15 @@ def get_next_unique_choices(
       for new_choice_idx in new_choice_idxs:
         if new_choice_idx == rel_current_choice_idx:
           continue
-        updated_choices_list = get_updated_choices_list_step(current_choices_list, rel_alt_step, new_choice_idx)
+        updated_choices_list = get_updated_choices_list_step_deprecated(current_choices_list, rel_alt_step, new_choice_idx)
         new_choices = {
           'type': 'STEP',
           'choices_list': updated_choices_list
         }
-        is_in_history = has_been_chosen_before(new_choices, choices_history)
+        is_in_history = has_been_chosen_before_deprecated(new_choices, choices_history)
         if not is_in_history:
           return new_choices
-    raise NoUniqueChoicesError('No unique choices found')
+    raise NoUniqueChoicesError_deprecated('No unique choices found')
 
   elif choice_type == 'ASTNODE':
     for info_dict in rel_alt_step_infos.values():
@@ -221,15 +222,155 @@ def get_next_unique_choices(
       for new_choice_idx in new_choice_idxs:
         if new_choice_idx == rel_current_choice_idx:
           continue
-        updated_choices_list = get_updated_choices_list_astnode(current_choices_list, rel_current_range_info, new_choice_idx)
+        updated_choices_list = get_updated_choices_list_astnode_deprecated(current_choices_list, rel_current_range_info, new_choice_idx)
         new_choices = {
           'type': 'ASTNODE',
           'choices_list': updated_choices_list
         }
-        is_in_history = has_been_chosen_before(new_choices, choices_history)
+        is_in_history = has_been_chosen_before_deprecated(new_choices, choices_history)
         if not is_in_history:
           return new_choices
-    raise NoUniqueChoicesError('No unique choices found')
+    raise NoUniqueChoicesError_deprecated('No unique choices found')
+
+
+def are_choices_lists_equal(
+  gen_choices_list: List[tuple],
+  actual_choices_list: List[tuple]
+) -> bool:
+  '''
+  An actual choices list may be longer, because a new choice may
+  create new choice nodes down the line. For example,
+  [
+    ((11, 3, 5), 0),
+    ((19, 4, 5), 1)
+  ]
+  we choose "1" in (19, 4, 5), and this is the actual choices after applying it:
+  [
+    ((11, 3, 5), 0),
+    ((19, 4, 5), 1),
+    ((23, 2, 3), 0),
+    ((24, 3, 4), 0)
+  ]
+  As you see, (23, 2, 3) and (24, 3, 4) are new nodes at which we can make new choices.
+  '''
+  assert len(actual_choices_list) >= len(gen_choices_list), \
+    'sanity check: actual choices list must be longer or equal to generated choices list'
+
+  if len(actual_choices_list) > len(gen_choices_list):
+    for choice in actual_choices_list[len(gen_choices_list):]:
+      range_info, choice_idx = choice
+      assert choice_idx == 0, 'sanity check: actual choices list must contain only 0 choice_idx for new nodes'
+
+  '''
+  In case actuall list is longer, the new nodes are not considered.
+  '''
+  for choice_a, choice_b in zip(gen_choices_list, actual_choices_list):
+    range_info_a, choice_idx_a = choice_a
+    range_info_b, choice_idx_b = choice_b
+    if range_info_a != range_info_b:
+      return False
+    if choice_idx_a != choice_idx_b:
+      return False
+  return True
+
+
+def choices_stack_list_to_choices_list(
+  choices_list_stack: List[List[Tuple[Tuple[int], int]]]
+) -> List[Tuple[Tuple[int], int]]:
+  '''
+  Convert a stack of choices lists to a single choices list.
+  The stack is a list of lists, where each inner list is a choices list.
+  The function returns a single choices list that contains all the choices
+  from the stack, preserving the order of choices.
+  '''
+  choices_list = []
+  for choices in choices_list_stack:
+    for choice in choices:
+      assert choice not in choices_list, f'duplicate choice found: {choice}'
+      choices_list.append(choice)
+  return choices_list
+
+
+def get_next_unique_choices(
+  rel_alt_step_infos: Dict[int, dict],
+  choices_list_stack: list
+) -> dict:
+  '''
+  Updated and fixed version. Exhaustively checks all possible choices.
+  '''
+
+  '''
+  `rel_alt_step_infos` contains information about all the possible
+  translation rules that can be applied to obtain a different translation.
+  '''
+  rasis_values = list(rel_alt_step_infos.values())
+
+  '''
+  `choices_list` contains current choices of rules at certain AST nodes.
+  The fact that we are inside this function tells that these choices
+  were invalid and must be replaced.
+  '''
+  choices_list = [
+    (info['current_range_info'], info['current_choose_idx'])
+    for info in rasis_values
+  ]
+
+  '''
+  This is done only once (to bootstrap the stack).
+  '''
+  if len(choices_list_stack) == 0:
+    choices_list_stack.append(choices_list)
+
+  '''
+  This makes sure that we pop the invalid choices_list from the stack.
+  '''
+  if are_choices_lists_equal(choices_list_stack[-1], choices_list):
+    choices_list_stack.pop()
+
+  new_choices_list = _get_new_choices_list_rec(rasis_values)
+  if new_choices_list is None:
+    raise RuleCombinationsExhaustedError('Exhaustively checked all possible choices')
+  choices_list_stack.append(new_choices_list)
+
+  all_choices_list = choices_stack_list_to_choices_list(choices_list_stack)
+  return {'type': 'ASTNODE', 'choices_list': all_choices_list}
+
+
+def _get_new_choices_list_rec(rasis_values: List[dict]) -> Optional[list]:
+  '''
+  PARAM rasis_values: a list of dictionaries, each dictionary contains:
+    - 'next_choices_count': number of rules that can be applied
+    - 'current_choose_idx': index of the chosen rule
+    - 'current_range_info': range_info of the current alt object
+  '''
+
+  '''
+  The idea is to choose the next combination at the lower level.
+  If there are no more choices at the lower level, choose the next
+  combination one level up.
+  '''
+  rasis_value = rasis_values[0]
+  next_choices_count = rasis_value['next_choices_count']
+  current_choose_idx = rasis_value['current_choose_idx']
+  current_range_info = rasis_value['current_range_info']
+
+  # base case
+  if len(rasis_values) == 1:
+    if current_choose_idx + 1 == next_choices_count:
+      return None
+    node_choice = (current_range_info, current_choose_idx + 1)
+    return [node_choice]
+
+  # recursive call
+  choices_down_the_line = _get_new_choices_list_rec(rasis_values[1:])
+  if choices_down_the_line is None:
+    if current_choose_idx + 1 == next_choices_count:
+      return None
+    node_choice = (current_range_info, current_choose_idx + 1)
+    return [node_choice]
+  else:
+    node_choice = (current_range_info, current_choose_idx)
+    return [node_choice] + choices_down_the_line
 
 
 def get_char_line_col_idxs(main_code_lines: List[str]) -> Tuple[List[int], List[int]]:
@@ -281,8 +422,7 @@ def get_err_line_idx_in_tar_main_code(
 def get_proposed_choices_based_on_line_idx(
   tar_main_code: str,
   err_line_idx: int,
-  current_choices: dict,
-  choices_history: List[dict],
+  choices_list_stack: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
 ):
@@ -377,7 +517,7 @@ def get_proposed_choices_based_on_line_idx(
         'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
       }
 
-  new_choices = get_next_unique_choices(rel_alt_step_infos, current_choices, choices_history)
+  new_choices = get_next_unique_choices(rel_alt_step_infos, choices_list_stack)
   return new_choices
 
 
@@ -385,8 +525,7 @@ def get_proposed_choices_compile_error(
   tar_program_instr: str,
   tar_main_code: str,
   tar_error_dict: dict,
-  current_choices: dict,
-  choices_history: List[dict],
+  choices_list_stack: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
 ) -> dict:
@@ -438,29 +577,6 @@ def get_proposed_choices_compile_error(
   <dbg_info> is a dictionary that is created by
   `d_grammar_dlmparser.DelimitedParser.add_expansion_parse_until_stuck()`,
   which in turn is called by `d_grammar_expand.TransSession._ensure_parser_result()`.
-
-  NOTE
-  <choices_history> -> List[<choices>]
-  <choices> -> {
-    'type': {"STEP", "ASTNODE"},
-    'choices_list': <choices_list>
-  }
-  <choices_list> -> List[<choice_elem>]
-  <choices_list>: (list of mappings of AST nodes to rules to translate them)
-  <choice_elem> -> Tuple(
-    <node_identifier>,
-    <choice_idx>
-  )
-  <node_identifier> -> OR(<range_info>, <alt_step>)
-  <range_info> -> Tuple(
-    (AST node id),
-    (start index of AST range),
-    (end index of AST range)
-  )
-  <alt_step>: (id of alt object that was created for expansion)
-  <choice_idx>: (index of a rule to choose at that node)
-  aliases(choices, current_choices, proposed_choices, subject.choices, new_choices)
-  aliases(choices_list, updated_choices_list, new_choices_list)
   '''
 
   p_utils.log_json_time(f'args-get_proposed_choices_compile_error.json', locals())
@@ -496,8 +612,7 @@ def get_proposed_choices_compile_error(
   new_choices = get_proposed_choices_based_on_line_idx(
     tar_main_code,
     err_line_idx,
-    current_choices,
-    choices_history,
+    choices_list_stack,
     map_to_exid,
     translate_dbg_history
   )
@@ -508,8 +623,7 @@ def get_proposed_choices_semantic_error(
   tar_program_instr: str,
   tar_main_code: str,
   error_lines: dict,
-  current_choices: dict,
-  choices_history: List[dict],
+  choices_list_stack: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
 ) -> dict:
@@ -574,8 +688,7 @@ def get_proposed_choices_semantic_error(
   new_choices = get_proposed_choices_based_on_line_idx(
     tar_main_code,
     err_line_idx,
-    current_choices,
-    choices_history,
+    choices_list_stack,
     map_to_exid,
     translate_dbg_history
   )
