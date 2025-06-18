@@ -372,8 +372,8 @@ def get_proposed_choices_based_on_line_idx(
       rel_alt_step_infos[rel_alt_step] = {
         'next_choices_count': mod_dbg_history[rel_alt_step - 1]['next_choices_count'],
         'current_choose_idx': mod_dbg_history[rel_alt_step]['current_choose_idx'],
-        'ex_id': mod_dbg_history[rel_alt_step]['ex_id'],
-        'current_rule_id': mod_dbg_history[rel_alt_step]['current_rule_id'],
+        # 'ex_id': mod_dbg_history[rel_alt_step]['ex_id'],  # not used
+        # 'current_rule_id': mod_dbg_history[rel_alt_step]['current_rule_id'],  # not used
         'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
       }
 
