@@ -419,16 +419,17 @@ def get_err_line_idx_in_tar_main_code(
   return err_line_idx
 
 
-def get_proposed_choices_based_on_line_idx(
+def get_proposed_choices_based_on_line_idxs(
   tar_main_code: str,
-  err_line_idx: int,
+  err_line_idxs: List[int],
   choices_list_stack: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
 ):
   '''
   PARAM tar_main_code: main code (f_gold) of the target program.
-  PARAM err_line_idx: 0-based index of the line in `tar_main_code` where the error occurred.
+  PARAM err_line_idxs: a list of 0-based indices of the lines in
+  `tar_main_code` where the error occurred.
   '''
 
   '''
@@ -493,7 +494,9 @@ def get_proposed_choices_based_on_line_idx(
      one rule that can be applied at that alt object.
   '''
   _RELATED_WINDOW_SIZE = 0
-  exids_err_line : List[int] = list(sorted(line_idx_to_exids[err_line_idx]))
+  exids_err_line : List[int] = list(sorted(set(
+    [exid for err_line_idx in err_line_idxs for exid in line_idx_to_exids[err_line_idx]]
+  )))
   rel_alt_step_infos : Dict[int, dict] = {}
 
   for exid_err_line in exids_err_line:
@@ -609,9 +612,9 @@ def get_proposed_choices_compile_error(
     f'there was an error running `tar_program_instr`\n'
     f'{error_type} "{error_msg}" on line {err_line_idx + 1} of "{line_content}"\n')
 
-  new_choices = get_proposed_choices_based_on_line_idx(
+  new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
-    err_line_idx,
+    [err_line_idx],
     choices_list_stack,
     map_to_exid,
     translate_dbg_history
@@ -640,11 +643,20 @@ def get_proposed_choices_semantic_error(
 
   p_utils.log_json_time(f'args-get_proposed_choices_semantic_error.json', locals())
   logger.debug('Starting p_rule_chooser.get_proposed_choices_compile_error')
+  logger.debug(
+    f'There are {len(error_lines)} error lines in the semantic error\n'
+    f'{json.dumps(error_lines, indent=2)}\n')
 
   assert len(error_lines) > 0, 'there must be at least one semantic error line'
   error_line_nums = list(error_lines.keys())
   error_line_num = error_line_nums[0]
   error_line_content = error_lines[error_line_num]
+
+  '''
+  error_line_num is 0-based line index of a trace mismatch in
+  tar_program_instr, we need to get the 0-based line index in tar_main_code.
+  '''
+  err_line_idx = get_err_line_idx_in_tar_main_code(error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
 
   '''
   Depending on the locations of log statements (myexactlog), we may end up
@@ -664,30 +676,13 @@ def get_proposed_choices_semantic_error(
       myexactlog(5, x);  // trace mismatch occurs here
       // ...
   ```
-  In this case, we consider a line right before the log statement
-  that produces a trace mismatch.
+  In this case, we pass all error lines to get_proposed_choices_based_on_line_idxs.
   '''
-  if len(error_lines) > 1:
-    error_line_num = max(list(error_lines.keys()))
-    error_line_content = error_lines[error_line_num]
-    logger.warning(
-      f'Found multiple semantic error lines: {json.dumps(error_lines, indent=2)}\n'
-      f'Using the last one: {error_line_num}\n'
-      f'This solution may not work for all cases.')
+  err_line_idxs = list(range(err_line_idx, err_line_idx + len(error_lines)))
 
-  '''
-  error_line_num is 0-based line index of a trace mismatch in
-  tar_program_instr, we need to get the 0-based line index in tar_main_code.
-  '''
-  err_line_idx = get_err_line_idx_in_tar_main_code(error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
-
-  logger.debug(
-    f'there was a semantic error running `tar_program_instr` (trace mismatch):\n'
-    f'line {err_line_idx + 1} of "{error_line_content}"\n')
-
-  new_choices = get_proposed_choices_based_on_line_idx(
+  new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
-    err_line_idx,
+    err_line_idxs,
     choices_list_stack,
     map_to_exid,
     translate_dbg_history
