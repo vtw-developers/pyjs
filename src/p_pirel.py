@@ -284,7 +284,7 @@ def validate_translation_rules_for_statement_node(
         lvalidation_and_recovery.reason = msg
         raise RuntimeError(msg)
 
-    except p_rule_chooser.NoUniqueChoicesError as err:
+    except p_rule_chooser.RuleCombinationsExhaustedError as err:
       raise
 
     break
