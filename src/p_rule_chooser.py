@@ -352,7 +352,7 @@ def get_proposed_choices_based_on_line_idx(
   3. From the selected alt objects, keep only those that have more than
      one rule that can be applied at that alt object.
   '''
-  _RELATED_WINDOW_SIZE = 1
+  _RELATED_WINDOW_SIZE = 0
   exids_err_line : List[int] = list(sorted(line_idx_to_exids[err_line_idx]))
   rel_alt_step_infos : Dict[int, dict] = {}
 
