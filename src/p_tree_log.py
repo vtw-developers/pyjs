@@ -49,7 +49,7 @@ class Sp1Tp1Cand:
   sp1: str
   tp1_cand: str
   @classmethod
-  def from_dict(cls, sp1_tp1_cand: Dict[str, str]) -> 'Sp1Tp1Cand':
+  def from_gen_cands(cls, sp1_tp1_cand: Dict[str, str]) -> 'Sp1Tp1Cand':
     sp1 = sp1_tp1_cand['source']
     tp1_cand = sp1_tp1_cand['target']
     hash = d_utils.string_sha256(f'{sp1}{tp1_cand}')
