@@ -857,7 +857,7 @@ def get_translation_pairs_from_tsp(
   try:
     sp1_tp1_cands = trans_sp1.run()
     ltrans_sp1.success = True
-    ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_dict(_c) for _c in sp1_tp1_cands]
+    ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_gen_cands(_c) for _c in sp1_tp1_cands]
   except SP1TranslationRetryLimitError as err:
     msg = f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}'
     logger.warning(msg)
@@ -877,7 +877,7 @@ def get_translation_pairs_from_tsp(
 
     ltrans_sp2 = ptlog.TransSP2()
     ltrans_sp2.id = cand_idx
-    ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_dict(sp1_tp1_cand)
+    ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_gen_cands(sp1_tp1_cand)
     ltrans_sp2.sp2 = sp2
     lpllm_gen_log.trans_sp2s.append(ltrans_sp2)
 
