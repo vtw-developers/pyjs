@@ -351,6 +351,11 @@ class RuleApplicationPhase:
   success: bool = False
   reason: Optional[str] = None
 
+  def get_root_reason(self) -> str:
+    assert self.success is False, 'Cannot get reason if success is True'
+    assert self.reason is not None, 'Reason must be set if success is False'
+    return self.reason
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleApplicationPhase':
     plausible_target_program = obj.get('plausible_target_program', None)
@@ -366,6 +371,10 @@ class RuleApplicationPhase:
 class RulesValidationRecovery:
   success: bool = False
   reason: Optional[str] = None
+
+  def get_root_reason(self) -> str:
+    assert not self.success, 'Cannot get reason if success is True'
+    return self.reason
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RulesValidationRecovery':
@@ -435,6 +444,9 @@ class NodeTransIteration:
   success: bool = False
   reason: Optional[str] = None
 
+  def get_root_reason(self) -> str:
+    return self.reason
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'NodeTransIteration':
     id_ = obj['id']
@@ -464,6 +476,26 @@ class StatementNode:
   node_trans_iterations: List[NodeTransIteration] = field(default_factory=list)
   unchecked_trules: List[TRule] = field(default_factory=list)
   validation_and_recovery: Optional[RulesValidationRecovery] = None
+
+  def is_successful(self) -> bool:
+    '''
+    Returns True if the statement node is successful, i.e. all nodes under it
+    can be translated successfully and all translation rules are valid.
+    '''
+    for nti in self.node_trans_iterations:
+      if not nti.success:
+        return False
+    if not self.validation_and_recovery.success:
+      return False
+    return True
+
+  def get_root_reason(self) -> str:
+    for nti in self.node_trans_iterations:
+      if not nti.success:
+        return nti.get_root_reason()
+    if not self.validation_and_recovery.success:
+      return self.validation_and_recovery.get_root_reason()
+    raise RuntimeError('expected something to be unsuccessful')
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'StatementNode':
@@ -496,6 +528,13 @@ class RuleLearnPhase:
   success: bool = False
   reason: Optional[str] = None
 
+  def get_root_reason(self) -> str:
+    assert self.success is False, 'Cannot get reason if success is True'
+    for st_node in self.statement_nodes:
+      if not st_node.is_successful():
+        return st_node.get_root_reason()
+    raise RuntimeError('expected one unsuccessful statement node')
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleLearnPhase':
     statement_nodes = []
@@ -518,6 +557,26 @@ class Subject:
   rule_application_phase: Optional[RuleApplicationPhase] = None
   success: bool = False
   reason: Optional[str] = None
+
+  def get_general_stats(self) -> dict:
+    '''
+    subject_name
+    success
+    reason
+    '''
+    stats = {
+      'subject_name': self.subject_name,
+      'success': self.success,
+    }
+    assert self.rule_learn_phase is not None, 'Rule learn phase must be set'
+    if not self.rule_learn_phase.success:
+      stats['reason'] = self.rule_learn_phase.get_root_reason()
+      return stats
+    assert self.rule_application_phase is not None, 'Rule application phase must be set'
+    if not self.rule_application_phase.success:
+      stats['reason'] = self.rule_application_phase.get_root_reason()
+      return stats
+    return stats
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Subject':
@@ -561,6 +620,12 @@ class Benchmark:
   benchmark_name: str
   sample_size: Optional[int] = None
   subjects: List[Subject] = field(default_factory=list)
+
+  def get_general_stats(self) -> List[dict]:
+    stats = []
+    for subject in self.subjects:
+      stats.append(subject.get_general_stats())
+    return stats
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Benchmark':
