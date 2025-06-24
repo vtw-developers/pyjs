@@ -69,7 +69,7 @@ function myexactlog(...args) {
 }
 
 function mylog(...args) {
-  myexactlog(args);
+  myexactlog(...args);
 }
 
 console.log = function () {

@@ -61,7 +61,7 @@ def myexactlog(*args):
   _default_print(json.dumps(info_list))
 
 def mylog(*args):
-  myexactlog(args)
+  myexactlog(*args)
 
 def print(*args, **kwargs):
   myexactlog(args)
