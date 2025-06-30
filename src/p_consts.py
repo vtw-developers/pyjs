@@ -303,6 +303,19 @@ BENCHMARK_CONFIGS = {
     'is_mylog_inserted': False,
     'needs_instrumentation': True
   },
+  # this is a new configuration which is used during rule application phase.
+  # we do not instrument the test code, but rather the main code, the same way
+  # as during the rule validation phase.
+  'gfg2': {
+    'benchmark_dir': GFG_BENCHMARK_DIR,
+    'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
+    'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
+    'translation_rules_instr_src_fpath': None,
+    'translation_rules_instr_tar_fpath': None,
+    'is_three_split': True,
+    'is_mylog_inserted': True,
+    'needs_instrumentation': True
+  },
   'ctci': {
     'benchmark_dir': CTCI_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': CTCI_TRULES_MAIN_FPATH,
