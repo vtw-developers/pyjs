@@ -24,21 +24,16 @@ def cleanup():
   p_translators._TRANSLATORS_CACHE.clear()
 
 
-def learn_and_application_phases_on_subject(
+def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
   lsubject: ptlog.Subject,
 ) -> Optional[str]:
   '''
-  Run PiREL to learn and apply translation rules for a given subject.
-  Save source program, learned translation rules, and a plausible target program.
-  RAISE Nothing. Take care of all exceptions.
-  RETURN None if rule learning phase or rule application phase fails, if both phases
-  are successful, return the learned translation rules.
+  Run PiREL to learn translation rules for a given subject.
   '''
-
-  # ~~~ RULE LEARNING PHASE
   logger.debug(f'~~~ Starting rule learning phase for "{subject.name}"')
+
   lrule_learn_phase = ptlog.RuleLearnPhase()
   lrule_learn_phase.start_time = p_utils.current_time_sec()
   lsubject.rule_learn_phase = lrule_learn_phase
@@ -48,37 +43,47 @@ def learn_and_application_phases_on_subject(
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
-    logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
+
+    logger.info(f'SUCCESS Successfully learned translation rules for "{subject.name}".')
     logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
+
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', learned_trans_rules)
     p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
+    p_utils.llog_yaml_time(f'tree-log-learn-phase-success-{subject.name}.yaml', asdict(lsubject))
+
+    return learned_trans_rules
 
   except Exception as exc:
-    msg = f'FAIL Failed to translate "{subject.name}"\n'
+    msg = f'FAIL Failed to learn translation rules for "{subject.name}" due to exception:\n'
     msg += p_utils.exception_to_str(exc)
     logger.error(msg)
 
     lrule_learn_phase.success = False
     lrule_learn_phase.end_time = p_utils.current_time_sec()
     lrule_learn_phase.reason = str(exc)
+
     lsubject.success = False
     lsubject.reason = 'Translation rule learning phase failed'
 
-    p_utils.llog_yaml_time(
-      f'tree-log-01-learn-phase-exception-{subject.name}.yaml',
-      asdict(lsubject),
-      strs_as_lines=True,
-      remove_null_vals=True,
-      remove_empty_lists=True
-    )
+    p_utils.llog_yaml_time(f'tree-log-learn-phase-fail-{subject.name}.yaml', asdict(lsubject))
 
-    logger.debug(f'Rule learning phase was not successful. Skipping rule application phase for "{subject.name}"')
     return None
 
-  logger.debug(f'Rule learning phase for "{subject.name}" is complete')
 
-  # ~~~ RULE APPLICATION PHASE
-  '''NOTE runs only if 'learn rules' phase is successful
+def application_phase_on_subject(
+  subject: p_subject.PirelSubject,
+  learned_trans_rules: str,
+  lsubject: ptlog.Subject,
+) -> Optional[str]:
+  '''
+  Run PiREL to apply translation rules for a given subject.
+  '''
+
+  p_utils.log_json_time(f'{subject.name}_args-application_phase_on_subject.json', locals())
+  logger.debug(f'~~~ Starting rule application phase for "{subject.name}"')
+
+  '''
+  NOTE should run only if 'learn rules' phase was successful
   NOTE Rule application phase is run on the learned translation rules
   NOTE Rule Application Phase assumes that we have just enough
   translation rules to obtain "some" translation of the source code,
@@ -98,7 +103,6 @@ def learn_and_application_phases_on_subject(
       errors, i.e. the target code does not produce the expected output.
   '''
 
-  logger.debug(f'Rule learning phase was successful. Starting rule application phase for "{subject.name}"')
   lrule_application_phase = ptlog.RuleApplicationPhase()
   lrule_application_phase.start_time = p_utils.current_time_sec()
   lsubject.rule_application_phase = lrule_application_phase
@@ -108,7 +112,7 @@ def learn_and_application_phases_on_subject(
     tar_program, used_rule_ids_history = p_rule_applicator.apply_translation_rules(subject)
     tar_test_code, tar_main_code, tar_test_call_code = tar_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
-    logger.debug(f'Rule application phase for "{subject.name}" is successful.')
+    logger.debug(f'SUCCESS Rule application phase for "{subject.name}" is successful.')
     logger.debug(f'Here is the source program:\n{subject.src_main_code}')
     logger.debug(f'Here is the target program:\n{tar_main_code}')
 
@@ -120,18 +124,11 @@ def learn_and_application_phases_on_subject(
     lrule_application_phase.plausible_target_program = tar_main_code
     lsubject.success = True
 
-    p_utils.llog_yaml_time(
-      f'tree-log-03-rule-learn-and-apply-{subject.name}.yaml',
-      asdict(lsubject),
-      strs_as_lines=True,
-      remove_null_vals=True,
-      remove_empty_lists=True
-    )
-    logger.debug(f'Rule application phase for "{subject.name}" is complete')
+    p_utils.llog_yaml_time(f'tree-log-apply-phase-success-{subject.name}.yaml', asdict(lsubject))
     return learned_trans_rules
 
   except Exception as exc:
-    msg = f'FAIL Failed to apply "{subject.name}"\n'
+    msg = f'FAIL Failed to apply learned translation rules for "{subject.name}" due to exception:\n'
     msg += p_utils.exception_to_str(exc)
     logger.error(msg)
 
@@ -141,15 +138,7 @@ def learn_and_application_phases_on_subject(
     lsubject.success = False
     lsubject.reason = 'Translation rule application phase failed'
 
-    p_utils.llog_yaml_time(
-      f'tree-log-02-apply-phase-exception-{subject.name}.yaml',
-      asdict(lsubject),
-      strs_as_lines=True,
-      remove_null_vals=True,
-      remove_empty_lists=True
-    )
-
-    logger.debug(f'Rule learning phase was not successful.')
+    p_utils.llog_yaml_time(f'tree-log-apply-phase-fail-{subject.name}.yaml', asdict(lsubject))
     return None
 
 
@@ -273,8 +262,14 @@ def mode_benchmark(conf: dict) -> None:
     lsubject.id = subject_idx
     lbenchmark.subjects.append(lsubject)
 
-    # ~~~ entry point for a single subject
-    trans_rules = learn_and_application_phases_on_subject(subject, starting_ruleset, lsubject)
+    # ~~~ rule learning phase
+    trans_rules = learn_phase_on_subject(subject, starting_ruleset, lsubject)
+    if trans_rules is None:
+      logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
+      continue
+
+    # ~~~ rule application phase
+    trans_rules = application_phase_on_subject(subject, trans_rules, lsubject)
 
     # update the starting ruleset for the next subject
     # by adding the learned rules if specified in the config
@@ -289,13 +284,7 @@ def mode_benchmark(conf: dict) -> None:
     logger.debug(p_utils.footer(subject_name))
     cleanup()
 
-  p_utils.llog_yaml_time(
-    f'tree-log-{conf["benchmark_name"]}.yaml',
-    asdict(lbenchmark),
-    strs_as_lines=True,
-    remove_null_vals=True,
-    remove_empty_lists=True
-  )
+  p_utils.llog_yaml_time(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
