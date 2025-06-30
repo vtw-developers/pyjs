@@ -159,7 +159,7 @@ def mode_benchmark(conf: dict) -> None:
       return list(filter(lambda x: x[0] not in exclude_list, sample))
 
     benchmark_name = conf['benchmark_name']
-    assert benchmark_name in ['leetcode', 'gfg'], f'benchmark "{benchmark_name}" not supported'
+    assert benchmark_name in ['leetcode', 'gfg', 'gfg2'], f'benchmark "{benchmark_name}" not supported'
 
     benchmark_conf = p_consts.BENCHMARK_CONFIGS[benchmark_name]
     benchmark_dir = benchmark_conf['benchmark_dir']
