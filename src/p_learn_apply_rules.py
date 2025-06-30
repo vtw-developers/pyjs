@@ -153,7 +153,7 @@ def learn_and_application_phases_on_subject(
     return None
 
 
-def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
+def mode_benchmark(conf: dict) -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
@@ -246,7 +246,7 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
       return p_utils.read_text(overriding_ruleset_fpath)
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
-  logger.info('~~~ Starting `p_learn_apply_rules.learn_and_application_phases_benchmark_mode`')
+  logger.info('~~~ Starting `p_learn_apply_rules.mode_benchmark`')
 
   starting_ruleset = _load_starting_ruleset(conf)
   benchmark_sample = _load_benchmark_sample(conf)
@@ -299,12 +299,12 @@ def learn_and_application_phases_benchmark_mode(conf: dict) -> None:
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
-def learn_phase_custom_mode(conf: dict) -> None:
+def mode_custom(conf: dict) -> None:
   '''
   Run PiREL to learn translation rules for any program.
   '''
 
-  logger.info('~~~ Starting `p_learn_apply_rules.learn_phase_custom_mode`')
+  logger.info('~~~ Starting `p_learn_apply_rules.mode_custom`')
 
   subject = p_subject.PirelSubject.from_file_config(p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
   lsubject = ptlog.Subject(subject.name)
@@ -345,8 +345,8 @@ def learn_phase_custom_mode(conf: dict) -> None:
 
 
 MODE_CALLBACKS = {
-  'benchmark': learn_and_application_phases_benchmark_mode,
-  'custom': learn_phase_custom_mode,
+  'benchmark': mode_benchmark,
+  'custom': mode_custom,
 }
 
 
