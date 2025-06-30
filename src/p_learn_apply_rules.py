@@ -339,7 +339,7 @@ MODE_CALLBACKS = {
 }
 
 
-if __name__ == '__main__':
+def main():
   argparser = argparse.ArgumentParser()
   argparser.add_argument('conf_fname', type=str, help='Name of the configuration file')
   args = argparser.parse_args()
@@ -359,3 +359,7 @@ if __name__ == '__main__':
   except Exception as exc:
     p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise
+
+
+if __name__ == '__main__':
+  main()
