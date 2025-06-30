@@ -6,6 +6,7 @@ from typing import Optional
 
 import p_consts
 import p_utils
+import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
@@ -200,6 +201,33 @@ class PirelSubject:
     self.translation_rules_instr_src = self.translation_rules_instr_src.replace(p_consts.PARAM_HACK_FLAG, '')
     self.translation_rules_test_code = self.translation_rules_test_code.replace(p_consts.PARAM_HACK_FLAG, '')
     self.translation_rules_instr_tar = self.translation_rules_instr_tar.replace(p_consts.PARAM_HACK_FLAG, '')
+
+  def prepare_for_rule_application(self, learned_trans_rules: str) -> None:
+    '''
+    Prepare the subject for rule application phase.
+    '''
+    # 1. insert log statements into the main code
+    # log statements are inserted into the main code
+    # log statements print the values of assigned variables to produce a trace
+    self.src_main_code = pvpy.LogStatementInserter.insert_log_statements(self.src_main_code)
+
+    # 2. index log statements in the main code
+    # log statements are indexed in the main code
+    self.src_main_code = pvpy.LogStatementsIndexer.index_log_statements(self.src_main_code)
+
+    if self.is_three_split:
+      self.src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([self.src_test_code, self.src_main_code, self.src_test_call_code])
+    else:
+      self.src_program = self.src_main_code
+
+    # 3. add extra rules to the learned translation rules
+    log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
+    extra_ruleset = p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
+    self.translation_rules_main_code = (
+      f'{learned_trans_rules}\n\n'
+      f'{log_statement_rule}\n\n'
+      f'{extra_ruleset}\n\n'
+    )
 
   @classmethod
   def from_file_config(cls, conf_fpath: Path) -> PirelSubject:
