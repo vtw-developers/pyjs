@@ -108,10 +108,12 @@ def application_phase_on_subject(
   lrule_application_phase.start_time = p_utils.current_time_sec()
   lsubject.rule_application_phase = lrule_application_phase
 
+  # prepare the subject for rule application phase
+  subject.prepare_for_rule_application(learned_trans_rules)
+
   try:
-    subject.translation_rules_main_code = learned_trans_rules
-    tar_program, used_rule_ids_history = p_rule_applicator.apply_translation_rules(subject)
-    tar_test_code, tar_main_code, tar_test_call_code = tar_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+    tar_program_plausible, used_rule_ids_history = p_rule_applicator.apply_translation_rules(subject)
+    tar_test_code, tar_main_code, tar_test_call_code = tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
     logger.debug(f'SUCCESS Rule application phase for "{subject.name}" is successful.')
     logger.debug(f'Here is the source program:\n{subject.src_main_code}')
