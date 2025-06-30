@@ -174,7 +174,7 @@ class TransSession():
     - ...
     '''
 
-    logger.info(f'Starting TransSession.get_translation()')
+    logger.debug(f'Starting TransSession.get_translation()')
 
     choice_type = choices['type']
     if choice_type == 'STEP':
@@ -412,7 +412,7 @@ class TransSession():
     '''
 
     subject_name = kwargs['subject_name']
-    logger.info(f'Starting PiREL template extraction.')
+    logger.debug(f'Starting PiREL template extraction.')
     p_utils.log_file_time(f'{subject_name}_program_to_translate.{self.source_language_name}', self.source_code)
     p_utils.log_file_time(f'{subject_name}_translation_rules.snart', self.translation_rules_str)
 

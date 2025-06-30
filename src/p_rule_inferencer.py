@@ -823,7 +823,7 @@ def infer_translation_rules(
           except Exception as exc:
             msg = 'Error during rule inference. Skip this one\n'
             msg += p_utils.exception_to_str(exc)
-            logger.error(msg)
+            logger.warning(msg)
             lrule_inf_comb.reason = msg
 
           logger.debug(f'the number of translation rules so far is {len(trules_list)}')

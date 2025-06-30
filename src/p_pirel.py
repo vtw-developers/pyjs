@@ -462,7 +462,7 @@ def get_partial_program(subject: p_subject.PirelSubject, current_ruleset: str, t
   # NOTE if the first translation was successful, it means we have all necessary translation rules.
   # If it wasn't successful, then we run a loop in which we introduce `problematic_node -> identifier` rules
   # until we translate the program. This way we generate a partial program.
-  logger.info(f'~~~ Starting p_pirel.get_partial_program')
+  logger.debug(f'~~~ Starting p_pirel.get_partial_program')
 
   # 1 ADD HACKY RULES FOR THE MAIN PROBLEMATIC NODE
   prob_ntype_main = template_dict['problematic_node_type']
@@ -696,7 +696,7 @@ def duoglot_translate_wrapper(
   p_utils.log_json_time(f'{kwargs["subject_name"]}_args-duoglot_translate_wrapper.json', locals())
 
   subject_name = kwargs['subject_name']
-  logger.info(f'Starting p_pirel.duoglot_translate_wrapper (subject_name={subject_name})')
+  logger.debug(f'Starting p_pirel.duoglot_translate_wrapper (subject_name={subject_name})')
 
   assert src_code.isascii()
   assert choices['type'] in ['STEP', 'ASTNODE'], 'Unknown choices type'
@@ -714,7 +714,7 @@ def duoglot_translate_wrapper(
   # If there are no raised exceptions, it means that the translation was successful.
   tar_ast, dbg_history = translator.get_translation(choices, auto_backward, **kwargs)
 
-  logger.info(f'SUCCESS DuoGlot translation is successful!')
+  logger.debug(f'SUCCESS DuoGlot translation is successful!')
   tar_code, map_to_exid = d_ast_pretty.ast_to_code(tar_ast, tar_lang)
   return {
     'src_ast': translator.source_ast,
@@ -770,9 +770,8 @@ def learn_trans_rules_for_statement_node(
 
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_for_statement_node.json', locals())
   logger.debug(
-    f'Starting p_pirel.learn_trans_rules_for_statement_node\n'
-    f'subject.name = {subject.name}, statement_nid = {statement_nid}\n'
-    f'statement_node.id = {lstatement_node.id}')
+    f'~~~ Starting to learn translation rules for statement node\n'
+    f'subject.name = {subject.name}, statement_node.id = {lstatement_node.id}\n')
 
   '''
   We have a loop that iterates over the nodes in the AST of a statement node.
@@ -949,7 +948,7 @@ def learn_trans_rules_for_subject(
   RAISE All errors propagate to the caller.
   '''
 
-  logger.debug(f'~~~ Starting p_pirel.learn_trans_rules_for_subject (subject={subject.name})')
+  logger.debug(f'~~~ Starting to learn translation rules for subject (subject={subject.name})')
 
   current_ruleset_obj = p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset)
   p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset_obj.to_string())
@@ -974,7 +973,7 @@ def learn_trans_rules_for_subject(
     '''
     logger.debug(
       f'Learning translation rules for statement node {sn_idx}/{len(statement_nodes)}:\n'
-      f'{statement_node.get_id()} ({statement_node.get_ts_node_type()})')
+      f'node_id={statement_node.get_id()} node_type="{statement_node.get_ts_node_type()}"')
 
     learn_trans_rules_for_statement_node(
       subject,
