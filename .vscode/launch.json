@@ -60,6 +60,15 @@
       "justMyCode": true
     },
     {
+      "name": "p_learn_apply_rules.py (w/o args)",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_learn_apply_rules.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "p_llm_gen.py",
       "type": "debugpy",
       "request": "launch",
