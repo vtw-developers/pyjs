@@ -1,4 +1,5 @@
 import argparse
+import json
 import random
 from dataclasses import asdict
 from pathlib import Path
@@ -361,5 +362,27 @@ def main():
     raise
 
 
+# TEST HARNESSES
+def _test_application_phase_on_subject():
+  '''
+  def application_phase_on_subject(
+    subject: p_subject.PirelSubject,
+    learned_trans_rules: str,
+    lsubject: ptlog.Subject,
+  ) -> Optional[str]:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_test_application_phase_on_subject_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  learned_trans_rules = args_dict['learned_trans_rules']
+  lsubject = ptlog.Subject('test')
+
+  result = application_phase_on_subject(subject, learned_trans_rules, lsubject)
+  print(result)
+
+
 if __name__ == '__main__':
   main()
+  # _test_application_phase_on_subject()
