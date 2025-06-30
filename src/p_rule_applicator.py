@@ -1021,7 +1021,7 @@ def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[
 def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
   tar_program_plausible, used_rule_ids_history = apply_translation_rules(subject_config)
-  logger.info(f'Plausible target program:\n{tar_program_plausible}')
+  logger.debug(f'Plausible target program:\n{tar_program_plausible}')
 
 
 # TEST HARNESSES

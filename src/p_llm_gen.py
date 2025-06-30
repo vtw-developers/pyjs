@@ -709,8 +709,9 @@ def query_llm(messages: List[BaseMessage], **kwargs) -> str:
     for param, val in kwargs['model_params'].items():
       model_params[param] = val
 
-  logger.info(f'Making a query to LLM')
-  logger.debug(f'Model parameters:\n{json.dumps(model_params, indent=2)}')
+  logger.debug(
+    f'Making a query to LLM with parameters:\n'
+    f'{json.dumps(model_params, indent=2)}')
 
   chatgpt = ChatOpenAI(openai_api_key=api_key, openai_organization=org_id, **model_params)
   chat_result = chatgpt.invoke(messages)

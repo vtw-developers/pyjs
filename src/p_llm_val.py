@@ -415,7 +415,7 @@ def val_tp1_candidates(tp1_cands: List[str], sp1: str, template_dict: dict, **kw
   RETURN program pairs that satisfy criteria
   '''
   p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_tp1_candidates.json', locals())
-  logger.info(f'~~~ Starting validation of {len(tp1_cands)} TP1 candidates')
+  logger.debug(f'~~~ Starting validation of {len(tp1_cands)} TP1 candidates')
 
   tp1_cands_uniq = p_utils.deduplicate(tp1_cands)
   if len(tp1_cands_uniq) != len(tp1_cands):
@@ -520,7 +520,7 @@ def val_tp2_candidates(tp2_cands: List[str], sp1: str, sp2: str, tp1_cand: str, 
   All candidate translations that satisfy criteria
   '''
   p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_tp2_candidates.json', locals())
-  logger.info(f'~~~ Starting validation of {len(tp2_cands)} TP2 candidates')
+  logger.debug(f'~~~ Starting validation of {len(tp2_cands)} TP2 candidates')
 
   return_dict = {}
   return_dict['tp2_cands'] = tp2_cands
@@ -715,7 +715,7 @@ def val_gen_test_function_candidates(
   1. generated test function candidates have no parse errors
   '''
   p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_gen_test_function_candidates.json', locals())
-  logger.info(f'~~~ Starting validation of {len(gen_test_fn_cands)} generated test function candidates')
+  logger.debug(f'~~~ Starting validation of {len(gen_test_fn_cands)} generated test function candidates')
 
   return_dict = {}
   return_dict['gen_test_fn_cands'] = gen_test_fn_cands
