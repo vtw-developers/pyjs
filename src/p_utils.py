@@ -211,9 +211,9 @@ def llog_json_time(fname: str, obj: Any) -> None:
 def llog_yaml_time(
   fname: str,
   obj: Any,
-  strs_as_lines: bool = False,
-  remove_null_vals: bool = False,
-  remove_empty_lists: bool = False,
+  strs_as_lines: bool = True,
+  remove_null_vals: bool = True,
+  remove_empty_lists: bool = True,
 ) -> None:
   '''
   PARAM strs_as_lines: If True, convert multiline strings into lists of lines.
@@ -221,8 +221,7 @@ def llog_yaml_time(
   PARAM remove_empty_lists: If True, remove key-value pairs from dicts where value is an empty list.
   '''
   def _rec_process(obj: Any) -> Any:
-    nonlocal strs_as_lines
-    nonlocal remove_null_vals
+    nonlocal strs_as_lines, remove_null_vals, remove_empty_lists
     if isinstance(obj, str):
       if '\n' in obj and strs_as_lines: return obj.splitlines()
       return obj
