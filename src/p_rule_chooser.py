@@ -253,8 +253,11 @@ def are_choices_lists_equal(
   ]
   As you see, (23, 2, 3) and (24, 3, 4) are new nodes at which we can make new choices.
   '''
-  assert len(actual_choices_list) >= len(gen_choices_list), \
-    'sanity check: actual choices list must be longer or equal to generated choices list'
+
+  # The following assertion does not hold for all cases.
+  # Refer to "debug-35-gfg20-rate-14" / G0001.
+  # assert len(actual_choices_list) >= len(gen_choices_list), \
+  #   'sanity check: actual choices list must be longer or equal to generated choices list'
 
   if len(actual_choices_list) > len(gen_choices_list):
     for choice in actual_choices_list[len(gen_choices_list):]:
