@@ -269,6 +269,8 @@ def mode_benchmark(conf: dict) -> None:
     trans_rules = learn_phase_on_subject(subject, starting_ruleset, lsubject)
     if trans_rules is None:
       logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
+      if conf['is_email_report']:
+        _email_report(lsubject, lbenchmark)
       continue
 
     # ~~~ rule application phase
@@ -276,11 +278,9 @@ def mode_benchmark(conf: dict) -> None:
 
     # update the starting ruleset for the next subject
     # by adding the learned rules if specified in the config
-    if trans_rules is not None:
-      assert isinstance(trans_rules, str), 'learned translation rules must be a string'
-      if conf.get('is_reuse_trans_rules_across_subjects', False):
-        starting_ruleset += trans_rules
-        logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
+    if trans_rules is not None and conf.get('is_reuse_trans_rules_across_subjects', False):
+      starting_ruleset += trans_rules
+      logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
 
     if conf['is_email_report']:
       _email_report(lsubject, lbenchmark)
