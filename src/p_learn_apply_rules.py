@@ -1,6 +1,7 @@
 import argparse
 import json
 import random
+from asyncio import TaskGroup, run
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -13,8 +14,14 @@ import p_translators
 import p_tree_log as ptlog
 import p_utils
 
-
 logger = p_utils.setup_logger(__name__)
+
+
+# TaskGroup would cancel the remaining tasks in case one fails.
+# With workaround <https://stackoverflow.com/questions/75250788>,
+# SIGINT (Ctrl-C) has to be sent twice to stop the program though.
+class ForgivingTaskGroup(TaskGroup):
+    _abort = lambda self: None
 
 
 def cleanup():
@@ -25,7 +32,7 @@ def cleanup():
   p_translators._TRANSLATORS_CACHE.clear()
 
 
-def learn_phase_on_subject(
+async def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
   lsubject: ptlog.Subject,
@@ -40,7 +47,7 @@ def learn_phase_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset, lrule_learn_phase)
+    learned_trans_rules = await p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset, lrule_learn_phase)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -145,7 +152,7 @@ def application_phase_on_subject(
     return None
 
 
-def mode_benchmark(conf: dict) -> None:
+async def mode_benchmark(conf: dict) -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
@@ -247,35 +254,41 @@ def mode_benchmark(conf: dict) -> None:
   lbenchmark = ptlog.Benchmark(conf['benchmark_name'])
   lbenchmark.sample_size = len(benchmark_sample)
 
-  for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
-    msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
-    logger.debug(p_utils.header(subject_name) + msg)
-    print(msg)
+  learn_tasks = [] # ~~~ rule learning phase
+  async with ForgivingTaskGroup() as tg:
+    for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
+      msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
+      logger.debug(p_utils.header(subject_name) + msg)
+      print(msg)
 
-    subject = p_subject.PirelSubject(
-      benchmark_name=conf['benchmark_name'],
-      name=subject_name,
-      src_program=src_program,
-      src_lang=conf['src_lang'],
-      tar_lang=conf['tar_lang'],
-    )
+      subject = p_subject.PirelSubject(
+        benchmark_name=conf['benchmark_name'],
+        name=subject_name,
+        src_program=src_program,
+        src_lang=conf['src_lang'],
+        tar_lang=conf['tar_lang'],
+      )
 
-    lsubject = ptlog.Subject(subject.name)
-    lsubject.code_text = subject.src_main_code
-    lsubject.id = subject_idx
-    lbenchmark.subjects.append(lsubject)
+      lsubject = ptlog.Subject(subject.name)
+      lsubject.code_text = subject.src_main_code
+      lsubject.id = subject_idx
+      lbenchmark.subjects.append(lsubject)
 
-    # ~~~ rule learning phase
-    trans_rules = learn_phase_on_subject(subject, starting_ruleset, lsubject)
-    if trans_rules is None:
+      coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject)
+      learn_tasks.append(tg.create_task(coroutine, name=subject_name))
+
+  # FIXME: logs here no longer have task name
+  for task in learn_tasks:
+    if task.exception() is not None or task.result() is None:
       logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
     else:
       # ~~~ rule application phase
-      trans_rules = application_phase_on_subject(subject, trans_rules, lsubject)
+      trans_rules = application_phase_on_subject(subject, task.result(), lsubject)
 
       # update the starting ruleset for the next subject
       # by adding the learned rules if specified in the config
       if trans_rules is not None and conf.get('is_reuse_trans_rules_across_subjects', False):
+        # FIXME: subjects should share the ruleset instead.
         starting_ruleset += trans_rules
         logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
 
@@ -288,7 +301,7 @@ def mode_benchmark(conf: dict) -> None:
   logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
-def mode_custom(conf: dict) -> None:
+async def mode_custom(conf: dict) -> None:
   '''
   Run PiREL to learn translation rules for any program.
   '''
@@ -302,7 +315,7 @@ def mode_custom(conf: dict) -> None:
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = p_pirel.learn_trans_rules_for_subject(
+    learned_trans_rules = await p_pirel.learn_trans_rules_for_subject(
       subject,
       subject.translation_rules_main_code,
       lrule_learn_phase
@@ -355,7 +368,7 @@ def main():
   mode_conf = conf[f'mode_{mode}']
 
   try:
-    MODE_CALLBACKS[mode](mode_conf)
+    run(MODE_CALLBACKS[mode](mode_conf))
   except Exception as exc:
     p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise

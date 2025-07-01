@@ -28,13 +28,15 @@ import copy
 import json
 import re
 from abc import ABC, abstractmethod
+from asyncio import run
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.base import BaseMessage
 from langchain_core.messages.human import HumanMessage
 from langchain_core.messages.system import SystemMessage
 from langchain_core.prompts.chat import HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain_openai import ChatOpenAI
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 import d_ast_parse
 import d_utils
@@ -108,7 +110,7 @@ class BasePirelTask(ABC):
     return self.__class__.__name__
 
   # TASK LOOP
-  def run(self) -> Any:
+  async def run(self) -> Any:
     '''
     Entry point. Not intended to be overridden.
     '''
@@ -125,7 +127,7 @@ class BasePirelTask(ABC):
 
       try:
         self._log(f'BasePirelTask.run: task loop (iteration #{self.task_iteration_counter})')
-        data = self._run_task_once(ltask_iteration)
+        data = await self._run_task_once(ltask_iteration)
 
         self._log(f'BasePirelTask.run: SUCCESS task run successful. Ending.')
         self.ltask_loop.success = True
@@ -154,7 +156,7 @@ class BasePirelTask(ABC):
     '''Invoken when the task fails. Can be overridden by subclasses'''
 
   # TASK ITERATION
-  def _run_task_once(self, ltask_iteration: ptlog.TaskIteration) -> Any:
+  async def _run_task_once(self, ltask_iteration: ptlog.TaskIteration) -> Any:
     '''
     A single iteration of a task.
     RETURN refer to `BaseValidationResult` and its subclasses.
@@ -175,7 +177,7 @@ class BasePirelTask(ABC):
     self._log(f'_run_task_once: starting prompt and response')
     starting_messages = self._create_starting_messages()
     self.chat_history.extend(starting_messages)
-    starting_raw_response = self._query_llm()
+    starting_raw_response = await self._query_llm()
     self.chat_history.append(AIMessage(starting_raw_response))
     starting_code_blocks = self._extract_code_blocks(starting_raw_response)
     ltask_iteration.starting_code_blocks = starting_code_blocks
@@ -202,7 +204,7 @@ class BasePirelTask(ABC):
       self._log('_run_task_once: generating a feedback message')
       feedback_message = self.get_feedback_message(validation_result)
       self.chat_history.append(feedback_message)
-      feedback_raw_response = self._query_llm()
+      feedback_raw_response = await self._query_llm()
       self.chat_history.append(AIMessage(feedback_raw_response))
       feedback_code_blocks = self._extract_code_blocks(feedback_raw_response)
       lfeedback.code_blocks = feedback_code_blocks
@@ -243,10 +245,10 @@ class BasePirelTask(ABC):
     starting_messages.append(self.get_starting_prompt_message())
     return starting_messages
 
-  def _query_llm(self) -> str:
+  async def _query_llm(self) -> str:
     assert self.chat_history[-1].type == 'human', 'chat history must end with a human prompt'
     self._log_file(langchain_msgs_to_md(self.chat_history), f'llm-messages.md')
-    raw_response = query_llm(self.chat_history, **self.model_params)
+    raw_response = await query_llm(self.chat_history, **self.model_params)
     self._log_file(raw_response, f'llm-raw-response.md')
     return raw_response
 
@@ -700,7 +702,7 @@ def get_openai_credentials() -> Tuple[str, str]:
     raise RuntimeError(msg) from err
 
 
-def query_llm(messages: List[BaseMessage], **kwargs) -> str:
+async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
   api_key, org_id = get_openai_credentials()
 
   model_params = copy.deepcopy(p_consts.DEFAULT_MODEL_PARAMS)
@@ -714,7 +716,7 @@ def query_llm(messages: List[BaseMessage], **kwargs) -> str:
     f'{json.dumps(model_params, indent=2)}')
 
   chatgpt = ChatOpenAI(openai_api_key=api_key, openai_organization=org_id, **model_params)
-  chat_result = chatgpt.invoke(messages)
+  chat_result = await chatgpt.ainvoke(messages)
 
   return chat_result.content
 
@@ -801,7 +803,7 @@ def _is_context_empty(template_dict: dict) -> bool:
 
 
 # API
-def get_translation_pairs_from_tsp(
+async def get_translation_pairs_from_tsp(
   subject: p_subject.PirelSubject,
   tsp: Tuple[str, str, str],
   template_dict: dict,
@@ -856,7 +858,7 @@ def get_translation_pairs_from_tsp(
   trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1, ltrans_sp1)
 
   try:
-    sp1_tp1_cands = trans_sp1.run()
+    sp1_tp1_cands = await trans_sp1.run()
     ltrans_sp1.success = True
     ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_gen_cands(_c) for _c in sp1_tp1_cands]
   except SP1TranslationRetryLimitError as err:
@@ -894,7 +896,7 @@ def get_translation_pairs_from_tsp(
     trans_sp2 = BaseTranslateSP2Task.dispatch(subject, template_dict, sp1_tp1_cand, sp2, ltrans_sp2)
 
     try:
-      translation_pair_cands = trans_sp2.run()
+      translation_pair_cands = await trans_sp2.run()
     except SP2TranslationRetryLimitError as err:
       msg = (
         f'BAD: Reached a retry limit for SP2 translation:\n'
@@ -924,7 +926,7 @@ def get_translation_pairs_from_tsp(
   return all_translation_pairs
 
 
-def gen_test_function(
+async def gen_test_function(
   f_gold_function: str,
   subject: p_subject.PirelSubject,
   template_dict: dict
@@ -945,7 +947,7 @@ def gen_test_function(
   )
 
   try:
-    test_functions = gen_task.run()
+    test_functions = await gen_task.run()
   except GenTestFunctionRetryLimitError as err:
     logger.warning(str(err))
     lgen_test_function.success = False
@@ -966,7 +968,7 @@ def gen_test_function(
 
 
 # TEST HARNESSES
-def _test_query_llm():
+async def _test_query_llm():
   '''
   SCHEMA:
   messages:
@@ -981,17 +983,17 @@ def _test_query_llm():
     HumanMessage(content=config['messages']['human'])
   ]
   model_params = config['model_params']
-  raw_response = query_llm(messages, model_params=model_params)
+  raw_response = await query_llm(messages, model_params=model_params)
 
   print('--- raw_response ---')
   print(raw_response)
 
 
-def _test_translate_sp1():
+async def _test_translate_sp1():
   template_dict = p_utils.read_json('/code/repo-duoglot/backend/duoglotcore-server/pirel-logs/debug-11-broken-split/L0009/11-12-09-24-06.754595-L0009_SIMPLIFIED-TEMPLATE-p_llm_gen.json')
   sp1 = 'if id_puox:\n    secret_fun_4071()'
   trans_sp1 = BaseTranslateSP1Task('translate-sp1-basic', template_dict, sp1)
-  j_program_pairs = trans_sp1.run()
+  j_program_pairs = await trans_sp1.run()
   p_utils.write_json('temporary_test_translate_sp1.json', j_program_pairs)
 
 
@@ -999,11 +1001,11 @@ def _test_translate_sp2():
   pass
 
 
-def _test_get_translation_pairs_from_tsp():
+async def _test_get_translation_pairs_from_tsp():
   tsp = ("if id_puox:\n    secret_fun_4071()", "if 8860:\n    secret_fun_4071()")
   template_dict = p_utils.read_json('/code/repo-duoglot/backend/duoglotcore-server/pirel-logs/debug-11-broken-split/L0009/11-12-09-24-06.754595-L0009_SIMPLIFIED-TEMPLATE-p_llm_gen.json')
 
-  translation_pairs = get_translation_pairs_from_tsp(tsp, template_dict)
+  translation_pairs = await get_translation_pairs_from_tsp(tsp, template_dict)
   p_utils.write_json('temporary_test_get_translation_pairs_from_tsp.json', translation_pairs)
 
 
@@ -1036,21 +1038,21 @@ def _test_get_feedback_message_trans_sp2_partial():
   feedback_message.pretty_print()
 
 
-def _test_gen_test_function():
+async def _test_gen_test_function():
   '''
   def gen_test_function(f_gold_function: str):
   '''
   f_gold_fpath = p_consts.TMP_DIR / 'f_gold.py'
   f_gold_function = p_utils.read_text(f_gold_fpath)
-  test_function = gen_test_function(f_gold_function)
+  test_function = await gen_test_function(f_gold_function)
   print(test_function)
 
 
 if __name__ == '__main__':
-  # _test_query_llm()
-  _test_gen_test_function()
-  # _test_translate_sp1()
+  # run(_test_query_llm())
+  run(_test_gen_test_function())
+  # run(_test_translate_sp1())
   # _test_translate_sp2()
-  # _test_get_translation_pairs_from_tsp()
+  # run(_test_get_translation_pairs_from_tsp())
   # _test_get_feedback_message_trans_sp1_partial()
   # _test_get_feedback_message_trans_sp2_partial()
