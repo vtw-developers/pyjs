@@ -307,7 +307,7 @@ def is_valid_translation_rule_syntactic(
   return _process_used_rules(rule_ids_before, rule_ids_after, ltrule_syntax_val_res)
 
 
-def is_valid_translation_rule_test_based(
+async def is_valid_translation_rule_test_based(
   snippet_under_test: str,
   pre_context: str,
   current_ruleset_obj: p_ruleset.Ruleset,
@@ -360,7 +360,7 @@ def is_valid_translation_rule_test_based(
     logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
     return f_gold_fn_str
 
-  def _get_test_fn_str_llm(
+  async def _get_test_fn_str_llm(
     paramable_ids: List[str],
     f_gold_fn_str: str,
     subject: p_subject.PirelSubject,
@@ -379,7 +379,7 @@ def is_valid_translation_rule_test_based(
       logger.debug(msg)
       return '''def test():\n    f_gold()'''
 
-    test_fn_str = p_llm_gen.gen_test_function(f_gold_fn_str, subject, template_dict)
+    test_fn_str = await p_llm_gen.gen_test_function(f_gold_fn_str, subject, template_dict)
     if test_fn_str is None:
       return None
 
@@ -407,7 +407,7 @@ def is_valid_translation_rule_test_based(
   f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, prectx_sut)
 
   # 4. generate tests for f_gold() function using LLM
-  _result = _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
+  _result = await _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
   if _result is None:
     lvalidation_and_recovery.success = False
     lvalidation_and_recovery.reason = 'Failed to generate test function using LLM.'

@@ -1,4 +1,5 @@
 import json
+from asyncio import run
 from typing import List, Tuple
 
 import d_ast_parse
@@ -220,7 +221,7 @@ def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
   return pre_context
 
 
-def validate_translation_rules_for_statement_node(
+async def validate_translation_rules_for_statement_node(
   subject: p_subject.PirelSubject,
   statement_subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
@@ -265,7 +266,7 @@ def validate_translation_rules_for_statement_node(
     of the source test script using the learned translation rules.
     '''
     try:
-      is_valid = p_rule_validator.is_valid_translation_rule_test_based(
+      is_valid = await p_rule_validator.is_valid_translation_rule_test_based(
         simple_ntext,
         pre_context,
         current_ruleset_obj,
@@ -290,7 +291,7 @@ def validate_translation_rules_for_statement_node(
     break
 
 
-def learn_trans_rules_from_tsp(
+async def learn_trans_rules_from_tsp(
   tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
@@ -308,7 +309,7 @@ def learn_trans_rules_from_tsp(
   # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
   lpllm_gen_log = ptlog.PLLMGenLog()
   ltrule_learn_attempt.p_llm_gen_log = lpllm_gen_log
-  translation_pairs = p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
+  translation_pairs = await p_llm_gen.get_translation_pairs_from_tsp(subject, tsp, template_dict, lpllm_gen_log)
   assert len(translation_pairs) > 0, 'sanity check: translation_pairs must not be empty'
 
   # INFER TRANSLATION RULES FROM TRANSLATION PAIRS
@@ -329,7 +330,7 @@ def learn_trans_rules_from_tsp(
   return checked_trules_list
 
 
-def learn_trans_rules_from_tsp_with_retries(
+async def learn_trans_rules_from_tsp_with_retries(
   tsp: Tuple[str, str],
   template_dict: dict,
   subject: p_subject.PirelSubject,
@@ -351,7 +352,7 @@ def learn_trans_rules_from_tsp_with_retries(
     ltsp.trans_rule_learn_attempts.append(ltrule_learn_attempt)
 
     try:
-      trules_list = learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset, ltrule_learn_attempt)
+      trules_list = await learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset, ltrule_learn_attempt)
       ltrule_learn_attempt.success = True
       ltsp.success = True
       return trules_list
@@ -608,7 +609,7 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
   return template_dict
 
 
-def learn_trans_rules_for_prob_node(
+async def learn_trans_rules_for_prob_node(
   subject: p_subject.PirelSubject,
   current_ruleset: str,
   templates_dict: dict,
@@ -644,7 +645,7 @@ def learn_trans_rules_for_prob_node(
     ltsp = ptlog.TSP(tsp_idx, *tsp)
     lnode_trans_iteration.tsps.append(ltsp)
 
-    trules_list = learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, current_ruleset, ltsp)
+    trules_list = await learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, current_ruleset, ltsp)
     if len(trules_list) == 0:
       logger.debug(
         f'Skipping a TSP: no translation rules were learnt from it (tsp.id = {tsp_idx}):\n'
@@ -868,7 +869,7 @@ def adapt_rule_choices(
   return new_code_choices
 
 
-def learn_trans_rules_for_statement_node(
+async def learn_trans_rules_for_statement_node(
   subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
   statement_nid: int,
@@ -982,7 +983,7 @@ def learn_trans_rules_for_statement_node(
       We need to learn translation rules for this node.
       '''
       assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
-      trules_list = learn_trans_rules_for_prob_node(
+      trules_list = await learn_trans_rules_for_prob_node(
         statement_subject,
         current_ruleset_obj.to_string(),
         templates_dict,
@@ -1011,7 +1012,7 @@ def learn_trans_rules_for_statement_node(
       f'Will not start validation of the translation rules.\n')
 
     try:
-      validated_ruleset_obj = validate_translation_rules_for_statement_node(
+      validated_ruleset_obj = await validate_translation_rules_for_statement_node(
         subject,
         statement_subject,
         current_ruleset_obj,
@@ -1080,7 +1081,7 @@ def get_statement_nodes_PY(source_program: str, lang: str) -> List[pds.PirelNode
   return nodes
 
 
-def learn_trans_rules_for_subject(
+async def learn_trans_rules_for_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
   lrule_learn_phase: ptlog.RuleLearnPhase
@@ -1117,7 +1118,7 @@ def learn_trans_rules_for_subject(
       f'Learning translation rules for statement node {sn_idx}/{len(statement_nodes)}:\n'
       f'node_id={statement_node.get_id()} node_type="{statement_node.get_ts_node_type()}"')
 
-    learn_trans_rules_for_statement_node(
+    await learn_trans_rules_for_statement_node(
       subject,
       current_ruleset_obj,
       statement_node.get_id(),
@@ -1130,9 +1131,9 @@ def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
-def _test_learn_trans_rules_for_statement_node():
+async def _test_learn_trans_rules_for_statement_node():
   '''
-  def learn_trans_rules_for_statement_node(
+  async def learn_trans_rules_for_statement_node(
     subject: p_subject.PirelSubject,
     current_ruleset_obj: p_ruleset.Ruleset,
     statement_nid: int,
@@ -1148,7 +1149,7 @@ def _test_learn_trans_rules_for_statement_node():
   statement_nid = args_dict['statement_nid']
   lstatement_node = ptlog.StatementNode(-1)
 
-  learn_trans_rules_for_statement_node(
+  await learn_trans_rules_for_statement_node(
     subject,
     current_ruleset_obj,
     statement_nid,
@@ -1156,9 +1157,9 @@ def _test_learn_trans_rules_for_statement_node():
   )
 
 
-def _test_learn_trans_rules_for_prob_node():
+async def _test_learn_trans_rules_for_prob_node():
   '''
-  def learn_trans_rules_for_prob_node(
+  async def learn_trans_rules_for_prob_node(
     subject: p_subject.PirelSubject,
     current_ruleset: str,
     templates_dict: dict,
@@ -1174,7 +1175,7 @@ def _test_learn_trans_rules_for_prob_node():
   templates_dict = args_dict['templates_dict']
   lnode_trans_iteration = ptlog.NodeTransIteration(-1)
 
-  result = learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict, lnode_trans_iteration)
+  result = await learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict, lnode_trans_iteration)
   print('\n\n'.join(result))
 
 
@@ -1240,7 +1241,7 @@ def _test_get_pre_context():
 
 
 if __name__ == '__main__':
-  # _test_learn_trans_rules_for_statement_node()
-  _test_learn_trans_rules_for_prob_node()
+  # run(_test_learn_trans_rules_for_statement_node())
+  run(_test_learn_trans_rules_for_prob_node())
   # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()
