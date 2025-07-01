@@ -412,6 +412,69 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   return tar_trace_arg1_value
 
 
+def _get_log_statement_idx_subsumed(src_trace: list, tar_trace: list) -> int:
+  '''
+  Return a log statement index that caused the trace mismatch
+  given that one trace is subsumed by another.
+  '''
+  assert does_trace_subsume_another(src_trace, tar_trace), 'one trace must subsume another'
+  assert is_valid_trace(src_trace), 'src_trace must be a valid trace'
+  assert is_valid_trace(tar_trace), 'tar_trace must be a valid trace'
+
+  src_trace_entries = src_trace[2]
+  tar_trace_entries = tar_trace[2]
+
+  assert len(src_trace_entries) != len(tar_trace_entries), 'traces must be of different lengths'
+  shorter_trace_len = min(len(src_trace_entries), len(tar_trace_entries))
+  longer_trace_entries = tar_trace_entries if len(tar_trace_entries) > len(src_trace_entries) else src_trace_entries
+
+  trace_entry = longer_trace_entries[shorter_trace_len]
+  assert is_valid_trace_entry(trace_entry), 'trace entry must be valid'
+
+  trace_entry_type = trace_entry[0]
+  assert trace_entry_type == 'list', 'trace entry must be a list'
+
+  trace_entry_len = trace_entry[1]
+  assert trace_entry_len >= 2, 'trace entry must have at least 2 arguments logged'
+
+  trace_entry_args = trace_entry[2]
+  trace_arg1 = trace_entry_args[0]
+  trace_arg1_type = trace_arg1[0]
+  assert trace_arg1_type == 'number', 'trace entry first argument must be a number'
+
+  trace_arg1_value = trace_arg1[1]
+  assert isinstance(trace_arg1_value, int), 'trace entry first argument must be an int'
+
+  logger.warning(f'Looks like an extra or missing loop iteration caused by log statement #{trace_arg1_value}')
+  return trace_arg1_value
+
+
+def _get_mismatched_log_statement_idx(src_trace: list, tar_trace: list) -> int:
+
+  if not does_trace_subsume_another(src_trace, tar_trace):
+    '''
+    A trace mismatch index is a 0-based index in the traces where the entries differ.
+    Using this index, we can find which log statement caused the trace mismatch.
+    '''
+    trace_mismatch_idx = _get_trace_mismatch_idx(src_trace, tar_trace)
+
+    '''
+    A mismatched log statement index is an index of the log statement that caused
+    the trace mismatch. Log statement indices are 1-based.
+    trace_mismatch_idx is 0-based.
+    '''
+    mismatched_log_stat_idx = _get_log_statement_idx(src_trace, tar_trace, trace_mismatch_idx)
+
+    return mismatched_log_stat_idx
+
+  else:
+    '''
+    If one trace subsumes another, it means that there is a missing or extra loop iteration.
+    '''
+    mismatched_log_stat_idx = _get_log_statement_idx_subsumed(src_trace, tar_trace)
+    return mismatched_log_stat_idx
+
+
 def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Dict[int, str]:
   '''
   Given a tar_program_instr (instrumented tar program) and a mismatched log statement index,
@@ -513,26 +576,12 @@ def _extract_err_lines_from_trace_mismatch(
   at which a semantic error might have occured. By having this information,
   we can choose alternative translation rules to fix the semantic error.
   '''
-  assert not does_trace_subsume_another(src_trace, tar_trace), \
-    'Not supported: traces must not subsume one another'
-
-  '''
-  A trace mismatch index is a 0-based index in the traces where the entries differ.
-  Using this index, we can find which log statement caused the trace mismatch.
-  '''
-  trace_mismatch_idx = _get_trace_mismatch_idx(src_trace, tar_trace)
-
-  '''
-  A mismatched log statement index is an index of the log statement that caused
-  the trace mismatch. Log statement indices are 1-based.
-  trace_mismatch_idx is 0-based.
-  '''
-  mismatched_log_stat_idx = _get_log_statement_idx(src_trace, tar_trace, trace_mismatch_idx)
 
   '''
   Error lines is a dictionary where keys are line numbers (0-based) and values
   are the lines of the tar program that caused the trace mismatch.
   '''
+  mismatched_log_stat_idx = _get_mismatched_log_statement_idx(src_trace, tar_trace)
   error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idx)
 
   return error_lines
@@ -640,8 +689,6 @@ def _run_tests(
   # 3. compare traces
   are_traces_identical = are_traces_equal_rec(src_trace, tar_trace)
   if not are_traces_identical:
-    assert not does_trace_subsume_another(src_trace, tar_trace), \
-      'NOT SUPPORTED: traces must not subsume one another'
     error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
     logger.error(
       f'Traces are not identical. There is a semantic error in translation.\n'
