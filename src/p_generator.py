@@ -243,7 +243,7 @@ def generate_tsps_manually_PY(
 
 
 def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
-  '''
+  r'''
   We have `template_origin`, `problematic_node`, `context_node`.
   `context_node` is the only child of a `root_node` of `template_origin`s AST.
   In the case, where the context is null, `context_node` == `problematic_node`.
@@ -341,7 +341,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     return True
 
   def _gen_seq_fuzz_node_groups(problematic_node: pds.DuoGlotNode, template_dict: dict) -> List[List[pds.DuoGlotNode]]:
-    '''
+    r'''
     Given an initial `problematic_node`, generate a sequence of node groups
     which will be later passed to `p_grammar.get_alternative_starting_node_types`.
 
