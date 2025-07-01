@@ -216,13 +216,13 @@ def mode_benchmark(conf: dict) -> None:
     if lrule_learn_phase.success is True:
       assert lrule_application_phase.success in [True, False], 'Rule application phase must run if learn rules phase is successful'
       if lrule_application_phase.success is True:
-        subject = subject + f'LEARN +, APPLY +'
+        subject = subject + f'LEARN-YES, APPLY-YES'
         message = message + lrule_application_phase.plausible_target_program
       else:
-        subject = subject + f'LEARN +, APPLY -'
+        subject = subject + f'LEARN-YES, APPLY-NO'
         message = message + lrule_application_phase.reason
     else:
-      subject = subject + f'LEARN -'
+      subject = subject + f'LEARN-NO'
       message = message + lrule_learn_phase.reason
 
     p_utils.email_safely(subject=subject, message=message)
