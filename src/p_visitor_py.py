@@ -933,6 +933,12 @@ class PrettyPrinter(pvis.Visitor):
   def visit_DecoratorNode(self, node: DecoratorNode) -> str:
     return f'@{self.visit(node.children[1])}'
 
+  def visit_DefaultParameterNode(self, node: DefaultParameterNode) -> str:
+    assert len(node.get_nt_children()) == 2, 'per grammar: there must be exactly two non-terminal children'
+    name = self.visit(node.get_nt_children()[0])
+    default_value = self.visit(node.get_nt_children()[1])
+    return f'{name}={default_value}'
+
   def visit_DeleteStatementNode(self, node: DeleteStatementNode) -> None:
     targets = ', '.join([self.visit(child) for child in node.get_nt_children()])
     self.write_line(f'del {targets}')
@@ -968,6 +974,16 @@ class PrettyPrinter(pvis.Visitor):
     self.write_line('else:')
     self.level += 1
     self.visit(node.body)
+    self.level -= 1
+
+  def visit_ExceptClauseNode(self, node: ExceptClauseNode) -> str:
+    except_str = 'except'
+    for child in node.children[1: -2]:
+      except_str += f' {self.visit(child)}'
+    except_str += ':'
+    self.write_line(except_str)
+    self.level += 1
+    self.visit(node.children[-1])  # body
     self.level -= 1
 
   def visit_ExpressionListNode(self, node: ExpressionListNode) -> str:
@@ -1030,6 +1046,10 @@ class PrettyPrinter(pvis.Visitor):
     assert nt_children[0] is node.body, 'per grammar: first non-terminal child is the body'
     clauses = ' '.join([self.visit(child) for child in nt_children[1:]])
     return f'({body} {clauses})'
+
+  def visit_GlobalStatementNode(self, node: GlobalStatementNode) -> None:
+    names = ', '.join([self.visit(child) for child in node.get_nt_children()])
+    self.write_line(f'global {names}')
 
   def visit_IdentifierNode(self, node: IdentifierNode) -> str:
     return node.val()
@@ -1239,6 +1259,21 @@ class PrettyPrinter(pvis.Visitor):
 
   def visit_TrueNode(self, node: TrueNode) -> str:
     return 'True'
+
+  def visit_TryStatementNode(self, node: TryStatementNode) -> None:
+    self.write_line('try:')
+    self.level += 1
+    self.visit(node.children[2])
+    self.level -= 1
+
+    # visit all non-terminal children after node.body
+    # these are `except` clauses, `else` clause and `finally` clause
+    body_idx = 2
+    remaining_nt_children = node.children[body_idx + 1:]
+    assert len(remaining_nt_children) > 0, 'per grammar: there must be at least one remaining non-terminal child'
+
+    for nt_child in remaining_nt_children:
+      self.visit(nt_child)
 
   def visit_TupleNode(self, node: TupleNode) -> str:
     # tuple with one element
