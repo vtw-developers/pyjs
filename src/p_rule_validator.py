@@ -454,7 +454,7 @@ async def is_valid_translation_rule_test_based(
   logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
   used_rule_ids_history = None
   try:
-    tar_program_plausible, used_rule_ids_history = prapp.apply_translation_rules(pirel_subject)
+    tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
     logger.debug('successfully obtained the translation of the test script')
     logger.debug('translation rule is valid based on tests')
   except prapp.TRuleNotFoundSrcMainCodeError as err:
@@ -512,7 +512,7 @@ def filter_translation_rules(
 
 
 # INDIVIDUAL RULE VALIDATION USAGE
-def _validate_translation_rule_usage():
+async def _validate_translation_rule_usage():
   # we will check the translation of this snippet
   snippet_under_test = 'c = d'
   trule_under_test = p_utils.read_text(p_consts.ROOT_DIR / 'individual-trule-validation' / 'rule-validation-module-artifacts' / 'rule1-lex-decl.snart')
@@ -560,7 +560,7 @@ def _validate_translation_rule_usage():
   pirel_subject_snippet_conf['src_program'] = test_script_str
   pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
   pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-  tar_program_plausible, used_rule_ids_history = prapp.apply_translation_rules(pirel_subject)
+  tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
 
   p_utils.write_tmp_text('test_script.py', test_script_str)
   p_utils.write_tmp_text('tar_program_plausible.js', tar_program_plausible)
@@ -596,9 +596,9 @@ def _test_is_valid_translation_rule_syntactic():
   print(is_valid)
 
 
-def _test_is_valid_translation_rule_test_based():
+async def _test_is_valid_translation_rule_test_based():
   '''
-  def is_valid_translation_rule_test_based(
+  async def is_valid_translation_rule_test_based(
     snippet_under_test: str,
     pre_context: str,
     current_ruleset_obj: p_ruleset.Ruleset,
@@ -618,7 +618,7 @@ def _test_is_valid_translation_rule_test_based():
   template_dict = args_dict['template_dict']
   lvalidation_and_recovery = ptlog.RulesValidationRecovery()
 
-  is_valid = is_valid_translation_rule_test_based(
+  is_valid = await is_valid_translation_rule_test_based(
     snippet_under_test,
     pre_context,
     current_ruleset_obj,
@@ -630,6 +630,6 @@ def _test_is_valid_translation_rule_test_based():
 
 
 if __name__ == '__main__':
-  # _validate_translation_rule_usage()
+  # run(_validate_translation_rule_usage()
   # _test_is_valid_translation_rule_syntactic()
-  _test_is_valid_translation_rule_test_based()
+  run(_test_is_valid_translation_rule_test_based())
