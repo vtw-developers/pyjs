@@ -1941,15 +1941,24 @@ class LogStatementInserter(pvis.Visitor):
           'arg'
     '''
     _SUPPORTED_TYPES = [
+      AttributeNode,
       BinaryOperatorNode,
+      BooleanOperatorNode,
       CallNode,
+      ComparisonOperatorNode,
+      ConditionalExpressionNode,
       ExpressionListNode,
+      FalseNode,
       FloatNode,
       IdentifierNode,
       IntegerNode,
       ListNode,
+      NotOperatorNode,
+      ParenthesizedExpressionNode,
       StringNode,
       SubscriptNode,
+      TrueNode,
+      TupleNode,
       UnaryOperatorNode,
     ]
 
