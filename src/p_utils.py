@@ -17,6 +17,22 @@ import p_consts
 import requests
 
 
+class MultilineLogFormatter(logging.Formatter):
+  """Formatter for logging that prefixes every line for grepability."""
+
+  def format(self, record: logging.LogRecord):
+    assert not record.args, "printf-style log formatting is not supported"
+    msg = record.getMessage()
+    try:
+      lines = []
+      for msg_line in msg.splitlines(keepends=True):
+        record.msg = msg_line
+        lines.append(super().format(record))
+      return ''.join(lines)
+    finally:
+      record.msg = msg
+
+
 # LOGGING
 def setup_logger(name: str) -> logging.Logger:
   '''
@@ -51,7 +67,7 @@ def setup_logger(name: str) -> logging.Logger:
     console_handler.setLevel(_LOG_LEVEL_CONSOLE)
 
     # Formatter applied to both handlers
-    formatter = logging.Formatter(fmt=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT)
+    formatter = MultilineLogFormatter(fmt=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT)
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
