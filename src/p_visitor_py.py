@@ -1927,18 +1927,19 @@ class LogStatementInserter(pvis.Visitor):
     return true
 
   # LOG STATEMENT BUILDER METHOD
-  def build_ArgLogStatement(self, arg: pvis.AbstractNode) -> ExpressionStatementNode:
+  def build_ArgLogStatement(self, args: List[pvis.AbstractNode]) -> ExpressionStatementNode:
     '''
-    Build a print statement with the given argument where `arg`
-    can be any `AbstractNode` instance (as long as it respects grammar).
+    Build a print statement with the given arguments where `args` is a list of
+    any `AbstractNode` instance (as long as it respects grammar).
 
-    PIREL_LOG_OBJ_FN_NAME(arg)
+    PIREL_LOG_OBJ_FN_NAME(arg1, arg2, ...)
 
     expression_statement
       call
         function: identifier 'PIREL_LOG_OBJ_FN_NAME'
         arguments: argument_list
-          'arg'
+          'arg1'
+          'arg2'
     '''
     _SUPPORTED_TYPES = [
       AttributeNode,
@@ -1961,11 +1962,11 @@ class LogStatementInserter(pvis.Visitor):
       TupleNode,
       UnaryOperatorNode,
     ]
-
-    assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'Unsupported argument type: {type(arg)}'
+    for arg in args:
+      assert isinstance(arg, tuple(_SUPPORTED_TYPES)), f'Unsupported argument type: {type(arg)}'
 
     # build bottom-up
-    argument_list = self.build_ArgumentListNode([arg])
+    argument_list = self.build_ArgumentListNode(args)
     call = self.build_CallNode(self.build_IdentifierNode(p_consts.PIREL_LOG_OBJ_FN_NAME), argument_list)
 
     expression_statement = ExpressionStatementNode('expression_statement')
@@ -1978,7 +1979,7 @@ class LogStatementInserter(pvis.Visitor):
   def visit_BlockNode(self, node: BlockNode) -> None:
     '''
     Insert log statements after assignment statements.
-    Assignment appear only under block nodes.
+    Assignment statements appear only under block nodes.
     '''
     idx = 0
     while idx < len(node.children):
@@ -2008,7 +2009,7 @@ class LogStatementInserter(pvis.Visitor):
         # NOTE ideally make a deepcopy of return_val
         # but since pretty printer just needs references to children,
         # we can just use the reference
-        log_statement = self.build_ArgLogStatement(return_val)
+        log_statement = self.build_ArgLogStatement([return_val])
         node.children.insert(idx, log_statement)
 
         # since we are not doing a deepcopy, setting the parent
@@ -2028,20 +2029,29 @@ class LogStatementInserter(pvis.Visitor):
       aie = AssignedIdentifierExtractor()
       aie.visit(child)
       assigned_identifiers = aie.get_assigned_identifiers()
-      assert len(assigned_identifiers) <= 1, 'currently support only one assigned identifier'
 
       if len(assigned_identifiers) == 0:
         idx += 1
         continue
 
-      ai = assigned_identifiers[0]
-
       # build and insert log statement
-      arg = self.build_IdentifierNode(ai)
-      log_statement = self.build_ArgLogStatement(arg)
-      node.children.insert(idx + 1, log_statement)
-      log_statement.set_parent(node)
-      idx += 1
+      if len(assigned_identifiers) == 1:
+        ai = assigned_identifiers[0]
+        arg = self.build_IdentifierNode(ai)
+        log_statement = self.build_ArgLogStatement([arg])
+        node.children.insert(idx + 1, log_statement)
+        log_statement.set_parent(node)
+        idx += 1
+        continue
+
+      elif len(assigned_identifiers) > 1:
+        # most likely a pattern_list assignment such as `a, b, c = 1, 2, 0` in G0291
+        args = [self.build_IdentifierNode(ai) for ai in assigned_identifiers]
+        log_statement = self.build_ArgLogStatement(args)
+        node.children.insert(idx + 1, log_statement)
+        log_statement.set_parent(node)
+        idx += 1
+        continue
 
   def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
     '''
@@ -2049,7 +2059,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.elif_counter))
+    log_statement = self.build_ArgLogStatement([self.build_IntegerNode(self.elif_counter)])
     self.elif_counter += 1
     node.consequence.children.insert(0, log_statement)
 
@@ -2059,7 +2069,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.else_counter))
+    log_statement = self.build_ArgLogStatement([self.build_IntegerNode(self.else_counter)])
     self.else_counter += 1
     node.body.children.insert(0, log_statement)
 
@@ -2069,7 +2079,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.for_counter))
+    log_statement = self.build_ArgLogStatement([self.build_IntegerNode(self.for_counter)])
     self.for_counter += 1
     node.body.children.insert(0, log_statement)
 
@@ -2086,7 +2096,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.if_counter))
+    log_statement = self.build_ArgLogStatement([self.build_IntegerNode(self.if_counter)])
     self.if_counter += 1
     node.consequence.children.insert(0, log_statement)
 
@@ -2109,7 +2119,7 @@ class LogStatementInserter(pvis.Visitor):
     '''
     for child in node.get_nt_children():
       self.visit(child)
-    log_statement = self.build_ArgLogStatement(self.build_IntegerNode(self.while_counter))
+    log_statement = self.build_ArgLogStatement([self.build_IntegerNode(self.while_counter)])
     self.while_counter += 1
     node.body.children.insert(0, log_statement)
 
