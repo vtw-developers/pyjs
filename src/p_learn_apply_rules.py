@@ -78,7 +78,7 @@ async def learn_phase_on_subject(
     return None
 
 
-def application_phase_on_subject(
+async def application_phase_on_subject(
   subject: p_subject.PirelSubject,
   learned_trans_rules: str,
   lsubject: ptlog.Subject,
@@ -119,7 +119,7 @@ def application_phase_on_subject(
   subject.prepare_for_rule_application(learned_trans_rules)
 
   try:
-    tar_program_plausible, used_rule_ids_history = p_rule_applicator.apply_translation_rules(subject)
+    tar_program_plausible, used_rule_ids_history = await p_rule_applicator.apply_translation_rules(subject)
     tar_test_code, tar_main_code, tar_test_call_code = tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
     logger.debug(f'SUCCESS Rule application phase for "{subject.name}" is successful.')
@@ -277,24 +277,29 @@ async def mode_benchmark(conf: dict) -> None:
       coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject)
       learn_tasks.append(tg.create_task(coroutine, name=subject_name))
 
-  # FIXME: logs here no longer have task name
-  for task in learn_tasks:
-    if task.exception() is not None or task.result() is None:
-      logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
-    else:
-      # ~~~ rule application phase
-      trans_rules = application_phase_on_subject(subject, task.result(), lsubject)
+  apply_tasks = [] # ~~~ rule application phase
+  async with ForgivingTaskGroup() as tg:
+    for task in learn_tasks:
+      if task.exception() is not None or task.result() is None:
+        logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
+      else:
+        coroutine = application_phase_on_subject(subject, task.result(), lsubject)
+        apply_tasks.append(tg.create_task(coroutine, name=subject_name))
 
-      # update the starting ruleset for the next subject
-      # by adding the learned rules if specified in the config
-      if trans_rules is not None and conf.get('is_reuse_trans_rules_across_subjects', False):
-        # FIXME: subjects should share the ruleset instead.
-        starting_ruleset += trans_rules
-        logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
+  for task in apply_tasks:
+    # update the starting ruleset for the next subject
+    # by adding the learned rules if specified in the config
+    if (task.exception() is None
+        and task.result() is not None
+        and conf.get('is_reuse_trans_rules_across_subjects', False)):
+      # FIXME: subjects should share the ruleset instead.
+      starting_ruleset += task.result()
+      logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
 
     if conf['is_email_report']:
       _email_report(lsubject, lbenchmark)
     logger.debug(p_utils.footer(subject_name))
+    # FIXME: clean cache regularly
     cleanup()
 
   p_utils.llog_yaml_time(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))

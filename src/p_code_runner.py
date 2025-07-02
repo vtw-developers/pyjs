@@ -1,7 +1,9 @@
 import json
 import os
 import signal
-import subprocess
+import sys
+from asyncio import create_subprocess_exec, run, timeout
+from asyncio.subprocess import PIPE
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -14,10 +16,8 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-CODE_RUN_COMMANDS = {
-  'py': 'python {filename}',
-  'js': 'node {filename}'
-}
+CODE_RUN_COMMANDS = {'py': sys.executable, 'js': 'node'}
+assert all(map(CODE_RUN_COMMANDS.__contains__, p_consts.LANG_DICT))
 
 TMP_DIR = Path('/tmp/pirel_code_runner')
 TMP_DIR.mkdir(exist_ok=True)
@@ -36,18 +36,6 @@ def get_mylog_impl(lang: str) -> str:
 def _get_temp_filename(text: str, lang: str) -> str:
   hexhash = d_utils.string_sha256(text)[:8]
   return TMP_DIR / f'{hexhash}.{lang}'
-
-
-def _command_execute(command: str, timeout=10) -> None:
-  try:
-    logger.debug(f'Executing command: {command}')
-    proc = subprocess.Popen(command, cwd=os.path.dirname(__file__), shell=True, preexec_fn=os.setsid)
-    proc.wait(timeout)
-  except Exception as exc:
-    logger.debug(f'Error executing command: {command}')
-    logger.debug(f'Error: {exc}')
-    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-    raise exc
 
 
 def _extract_trace_from_stdout(stdout: str) -> list:
@@ -150,28 +138,30 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
   }
 
 
-def _run_code(code: str, lang: str) -> Tuple[str, str]:
+async def _run_code(code: str, lang: str,
+                    timeout_sec: None | int | float = 10) -> tuple[str, str]:
   '''
   Run the code and return stdout and stderr
   '''
-  logger.debug('Starting p_code_runner._run_code')
-
   assert lang in p_consts.LANG_DICT, f'Unsupported language: {lang}'
+  command = CODE_RUN_COMMANDS[lang]
   temp_filename = _get_temp_filename(code, lang)
   p_utils.write_text(temp_filename, code)
 
-  runner_command = CODE_RUN_COMMANDS[lang].format(filename=temp_filename)
-  redirect_suffix = f' >{temp_filename}.stdout 2>{temp_filename}.stderr'
-  _command_execute(runner_command + redirect_suffix)
-
-  stdout = p_utils.read_text(f'{temp_filename}.stdout')
-  stderr = p_utils.read_text(f'{temp_filename}.stderr')
-
-  p_utils.log_file_time(f'{lang}-stdout.txt', stdout)
-  logger.debug(f'{lang} stderr: "\n{stderr.strip()}\n"')
-  logger.debug('Finished p_code_runner._run_code')
-
-  return stdout, stderr
+  try:
+    async with timeout(timeout_sec):
+      logger.debug(f'Executing command: {command} {temp_filename}')
+      proc = await create_subprocess_exec(command, temp_filename,
+                                          stdout=PIPE, stderr=PIPE)
+      stdout, stderr = map(bytes.decode, await proc.communicate())
+  except Exception as exc:
+    logger.debug(f'Error executing "{command} {temp_filename}": {exc}')
+    proc.kill()
+    raise
+  else:
+    p_utils.log_file_time(f'{lang}-stdout.txt', stdout)
+    logger.debug(f'{lang} stderr: "\n{stderr.strip()}\n"')
+    return stdout, stderr
 
 
 def comment_out_default_mylog_impls(code: str, lang: str) -> str:
@@ -200,7 +190,7 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
   return commented_out + f'{_SPLITTER}' + rest
 
 
-def run_src_test_script(
+async def run_src_test_script(
   src_program_instr: str,
   subject: p_subject.PirelSubject
 ) -> Tuple[list, str]:
@@ -214,13 +204,13 @@ def run_src_test_script(
   src_program_run = mylog_impl + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
-  stdout, stderr = _run_code(src_program_run, subject.src_lang)
+  stdout, stderr = await _run_code(src_program_run, subject.src_lang)
   src_trace = _extract_trace_from_stdout(stdout)
 
   return src_trace, stderr
 
 
-def run_tar_test_script(
+async def run_tar_test_script(
   tar_program_instr: str,
   subject: p_subject.PirelSubject,
 ) -> Tuple[list, str]:
@@ -235,16 +225,16 @@ def run_tar_test_script(
   tar_program_run = mylog_impl + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
 
   p_utils.log_file_time(f'{subject.name}_tar_program_run.{subject.tar_lang}', tar_program_run)
-  stdout, stderr = _run_code(tar_program_run, subject.tar_lang)
+  stdout, stderr = await _run_code(tar_program_run, subject.tar_lang)
   tar_trace = _extract_trace_from_stdout(stdout)
 
   return tar_trace, stderr
 
 
 # TEST HARNESSES
-def _test_run_src_test_script():
+async def _test_run_src_test_script():
   '''
-  def run_src_test_script(
+  async def run_src_test_script(
     src_program_instr: str,
     subject: p_subject.PirelSubject
   ) -> Tuple[list, Optional[dict]]:
@@ -256,13 +246,13 @@ def _test_run_src_test_script():
   src_program_instr = args_dict['src_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
 
-  result = run_src_test_script(src_program_instr, subject)
+  result = await run_src_test_script(src_program_instr, subject)
   print(json.dumps(result, indent=2))
 
 
-def _test_run_tar_test_script():
+async def _test_run_tar_test_script():
   '''
-  def run_tar_program_until_mylog_mismatch(
+  async def run_tar_program_until_mylog_mismatch(
     tar_program_instr: str,
     subject: p_subject.PirelSubject,
   ) -> Tuple[str, list, Optional[dict]]:
@@ -274,10 +264,10 @@ def _test_run_tar_test_script():
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
 
-  result = run_tar_test_script(tar_program_instr, subject)
+  result = await run_tar_test_script(tar_program_instr, subject)
   print(json.dumps(result, indent=2))
 
 
 if __name__ == '__main__':
-  _test_run_src_test_script()
-  # _test_run_tar_test_script()
+  run(_test_run_src_test_script())
+  # run(_test_run_tar_test_script())

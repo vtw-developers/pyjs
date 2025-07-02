@@ -1,5 +1,6 @@
 import json
 import re
+from asyncio import run
 from typing import Dict, List, Optional, Tuple
 
 import d_grammar_expand
@@ -606,7 +607,7 @@ def _extract_err_lines_from_trace_mismatch(
   return error_lines
 
 
-def _run_tests(
+async def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
   subject: p_subject.PirelSubject
@@ -620,7 +621,7 @@ def _run_tests(
   logger.debug('Starting p_rule_applicator._run_tests')
 
   # 1. run `src_program_instr` and collect output trace
-  src_trace, src_stderr = p_code_runner.run_src_test_script(src_program_instr, subject)
+  src_trace, src_stderr = await p_code_runner.run_src_test_script(src_program_instr, subject)
   assert is_valid_trace(src_trace), 'src_trace must be a valid trace'
 
   # there is an error in running src test script
@@ -630,7 +631,7 @@ def _run_tests(
     raise SrcTestScriptError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
-  tar_trace, tar_std_error = p_code_runner.run_tar_test_script(tar_program_instr, subject)
+  tar_trace, tar_std_error = await p_code_runner.run_tar_test_script(tar_program_instr, subject)
   assert is_valid_trace(tar_trace), 'tar_trace must be a valid trace'
 
   '''
@@ -792,7 +793,7 @@ def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
   return src_program_instr
 
 
-def _get_instrumented_tar_program_plausible(
+async def _get_instrumented_tar_program_plausible(
   src_program_instr: str,
   subject: p_subject.PirelSubject
 ) -> Tuple[str, List[List[int]]]:
@@ -875,7 +876,7 @@ def _get_instrumented_tar_program_plausible(
     tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
 
     try:
-      _run_tests(src_program_instr, tar_program_instr, subject)
+      await _run_tests(src_program_instr, tar_program_instr, subject)
       return tar_program_instr, used_rule_ids_history
 
     except SrcTestScriptError as err:
@@ -920,13 +921,13 @@ def _get_instrumented_tar_program_plausible(
       current_choices = proposed_choices
 
 
-def _get_deinstrumented_tar_program_plausible(
+async def _get_deinstrumented_tar_program_plausible(
   src_program_instr: str,
   subject: p_subject.PirelSubject
 ) -> Tuple[str, List[List[int]]]:
 
   logger.debug('Starting p_rule_applicator._get_deinstrumented_tar_program')
-  tar_program_plausible_instr, used_rule_ids_history = _get_instrumented_tar_program_plausible(src_program_instr, subject)
+  tar_program_plausible_instr, used_rule_ids_history = await _get_instrumented_tar_program_plausible(src_program_instr, subject)
 
   if not subject.needs_instrumentation:
     logger.debug('program does not need deinstrumentation')
@@ -1076,7 +1077,7 @@ def _concatenate_tar_snippets(
 
 
 # API
-def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[List[int]]]:
+async def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[List[int]]]:
   '''
   Apply the translation rules to the source program.
   Equivalent to index_bench.js::runBenchmarkHandler
@@ -1087,38 +1088,38 @@ def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[
   logger.info('Starting p_rule_applicator.apply_translation_rules (a la DuoGlot)')
 
   src_program_instr = _get_instrumented_src_program(subject)
-  tar_program_deinstr, used_rule_ids_history = _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
+  tar_program_deinstr, used_rule_ids_history = await _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
 
   return tar_program_deinstr, used_rule_ids_history
 
 
 # USAGE
-def usage_apply_translation_rules():
+async def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible, used_rule_ids_history = apply_translation_rules(subject_config)
+  tar_program_plausible, used_rule_ids_history = await apply_translation_rules(subject_config)
   logger.debug(f'Plausible target program:\n{tar_program_plausible}')
 
 
 # TEST HARNESSES
-def _test_apply_translation_rules():
+async def _test_apply_translation_rules():
   '''
-  def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
+  async def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_apply_translation_rules_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  tar_program_deinstr, used_rule_ids_history = apply_translation_rules(subject)
+  tar_program_deinstr, used_rule_ids_history = await apply_translation_rules(subject)
   print(f'Plausible target program:\n{tar_program_deinstr}')
   print('Used rule IDs history:')
   for used_rule_ids in used_rule_ids_history:
     print(used_rule_ids)
 
 
-def _test_run_tests():
+async def _test_run_tests():
   '''
-  def _run_tests(
+  async def _run_tests(
     src_program_instr: str,
     tar_program_instr: str,
     subject: p_subject.PirelSubject
@@ -1132,8 +1133,7 @@ def _test_run_tests():
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
 
-  result = _run_tests(src_program_instr, tar_program_instr, subject)
-  print(json.dumps(result, indent=2))
+  await _run_tests(src_program_instr, tar_program_instr, subject)
 
 
 def _test_postprocess_src_program():
@@ -1149,5 +1149,5 @@ def _test_postprocess_src_program():
 if __name__ == '__main__':
   # usage_apply_translation_rules()
   _test_apply_translation_rules()
-  # _test_run_tests()
+  # run(_test_run_tests())
   # _test_postprocess_src_program()
