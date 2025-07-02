@@ -2243,9 +2243,14 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     '''
     chars.remove(s[i])
     ^^^^^
+    mat[i].sort()  # G0236
+    ^^^
     '''
-    assert isinstance(node.object, IdentifierNode), 'sanity check'
-    self.add_assigned_identifier(node.object.val())
+    assert isinstance(node.object, (IdentifierNode, SubscriptNode)), 'sanity check'
+    if isinstance(node.object, IdentifierNode):
+      self.add_assigned_identifier(node.object.val())
+    elif isinstance(node.object, SubscriptNode):
+      self.visit(node.object)
 
   def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
     '''
