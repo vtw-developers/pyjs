@@ -2295,6 +2295,15 @@ class AssignedIdentifierExtractor(pvis.Visitor):
   def visit_IdentifierNode(self, node: IdentifierNode) -> None:
     self.add_assigned_identifier(node.val())
 
+  def visit_PatternListNode(self, node: PatternListNode) -> None:
+    '''
+    According to grammar, pattern_list is a comma separated
+    list of some non-terminal nodes.
+    Example: `a, b, c = 1, 2, 0` as in G0291.
+    '''
+    for nt_child in node.get_nt_children():
+      self.visit(nt_child)
+
   def visit_SubscriptNode(self, node: SubscriptNode) -> None:
     # base case: if the subscript is an identifier
     if isinstance(node.value, IdentifierNode):
