@@ -1723,22 +1723,6 @@ class LogStatementInserter(pvis.Visitor):
       *
     '''
 
-    _SUPPORTED_ARG_TYPES = [
-      BinaryOperatorNode,
-      CallNode,
-      ExpressionListNode,
-      FloatNode,
-      IdentifierNode,
-      IntegerNode,
-      KeywordArgumentNode,
-      ListNode,
-      StringNode,
-      SubscriptNode,
-      UnaryOperatorNode,
-    ]
-    for arg in args:
-      assert isinstance(arg, tuple(_SUPPORTED_ARG_TYPES)), f'Unsupported argument type: {type(arg)}'
-
     # level 0
     argument_list = ArgumentListNode('argument_list')
 
