@@ -354,7 +354,8 @@ class RuleApplicationPhase:
   def get_root_reason(self) -> str:
     assert self.success is False, 'Cannot get reason if success is True'
     assert self.reason is not None, 'Reason must be set if success is False'
-    return self.reason
+    reason = f'(RuleApplicationPhase) {self.reason}'
+    return reason
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleApplicationPhase':
@@ -530,9 +531,11 @@ class RuleLearnPhase:
 
   def get_root_reason(self) -> str:
     assert self.success is False, 'Cannot get reason if success is True'
+    reason = f'(RuleLearnPhase) {self.reason}'
     for st_node in self.statement_nodes:
       if not st_node.is_successful():
-        return st_node.get_root_reason()
+        reason += f' ~~~ {st_node.get_root_reason()}'
+        return reason
     raise RuntimeError('expected one unsuccessful statement node')
 
   @classmethod
@@ -577,6 +580,25 @@ class Subject:
       stats['reason'] = self.rule_application_phase.get_root_reason()
       return stats
     return stats
+
+  def write_gsheet_stats(self, file_out) -> None:
+    '''
+    Learn Phase Success, Apply Phase Success, Reason
+    NOTE print statements conform the structure of Google Sheets "GFG"
+    '''
+    lps = self.rule_learn_phase.success
+    if lps is False:
+      reason = self.rule_learn_phase.get_root_reason()
+      print(str(lps).upper(), '', reason, sep='\t', file=file_out)
+      return
+
+    aps = self.rule_application_phase.success
+    if aps is False:
+      reason = self.rule_application_phase.get_root_reason()
+      print(str(lps).upper(), str(aps).upper(), reason, sep='\t', file=file_out)
+      return
+
+    print(str(lps).upper(), str(aps).upper(), sep='\t', file=file_out)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Subject':
