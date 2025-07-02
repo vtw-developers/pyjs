@@ -2223,7 +2223,8 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     self.assigned_identifiers : List[str] = []
 
   def add_assigned_identifier(self, lit: str) -> None:
-    self.assigned_identifiers.append(lit)
+    if lit not in self.assigned_identifiers:
+      self.assigned_identifiers.append(lit)
 
   def get_assigned_identifiers(self) -> List[str]:
     return self.assigned_identifiers
