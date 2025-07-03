@@ -6,6 +6,10 @@ conda activate pirel_env
 
 # dependencies
 pip install -r requirements.txt
+
+# install NodeJS with NVM https://github.com/nvm-sh/nvm
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+nvm install 21.5.0
 ```
 
 # Running unit tests for files in `src`
