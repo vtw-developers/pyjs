@@ -405,9 +405,17 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   tar_trace_arg2 = tar_trace_args[1]
 
   if src_trace_arg1_value != tar_trace_arg1_value:
-    logger.warning(f'Expected log statement #{src_trace_arg1_value}, got #{tar_trace_arg1_value}')
+    logger.warning(
+      f'Expected log statement #{src_trace_arg1_value}, got #{tar_trace_arg1_value}.\n'
+      f'src_trace_entry: {src_trace_entry}\n'
+      f'tar_trace_entry: {tar_trace_entry}\n'
+      f'trace_idx: {trace_idx}')
   else:
-    logger.warning(f'Expected "{src_trace_arg2}" at log statement #{src_trace_arg1_value}, got "{tar_trace_arg2}"')
+    logger.warning(
+      f'Expected "{src_trace_arg2}" at log statement #{src_trace_arg1_value}, got "{tar_trace_arg2}".\n'
+      f'src_trace_entry: {src_trace_entry}\n'
+      f'tar_trace_entry: {tar_trace_entry}\n'
+      f'trace_idx: {trace_idx}')
 
   return tar_trace_arg1_value
 

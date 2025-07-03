@@ -523,6 +523,9 @@ def get_proposed_choices_based_on_line_idxs(
         'current_range_info': mod_dbg_history[rel_alt_step]['current_range_info']
       }
 
+  if len(rel_alt_step_infos) == 0:
+    raise RuleCombinationsExhaustedError('No alternative rules found for the error line')
+
   new_choices = get_next_unique_choices(rel_alt_step_infos, choices_list_stack)
   return new_choices
 
