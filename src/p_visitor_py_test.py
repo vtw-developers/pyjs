@@ -10813,10 +10813,11 @@ class TestLogStatementsIndexer(unittest.TestCase):
     self.assertEqual(prog_out, prog_out_gold)
 
 
-class TestAssignedIdentifierExtractor(unittest.TestCase):
+class TestLoggableValueExtractor(unittest.TestCase):
   def setUp(self):
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
+    self.pp = p_visitor_py.PrettyPrinter(indent_with='    ')
     self.maxDiff = None
 
   def get_ast(self, snippet) -> pvis.AbstractNode:
@@ -10827,27 +10828,54 @@ class TestAssignedIdentifierExtractor(unittest.TestCase):
     assert len(tree.root_node.children) == 1, 'snippet must contain a single statement'
     return tree.root_node.children[0]
 
-  def extract_assigned_identifiers(self, snippet):
+  def extract_loggable_values(self, snippet):
     ast = self.get_ast(snippet)
-    extractor = p_visitor_py.AssignedIdentifierExtractor()
+    extractor = p_visitor_py.LoggableValueExtractor()
     extractor.visit(ast)
-    return extractor.get_assigned_identifiers()
+    loggable_nodes = extractor.get_loggable_nodes()
+    loggable_values = [self.pp.visit(node).strip() for node in loggable_nodes]
+    return loggable_values
 
   def test_single_assignment(self):
     # Test a simple assignment
     snippet = 'x = 10'
-    assigned_identifiers = self.extract_assigned_identifiers(snippet)
-    self.assertCountEqual(assigned_identifiers, ['x'])
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['x'])
 
     snippet = 'num = 10'
-    assigned_identifiers = self.extract_assigned_identifiers(snippet)
-    self.assertCountEqual(assigned_identifiers, ['num'])
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['num'])
+
+  def test_duplicate_value(self):
+    # Test a simple assignment
+    snippet = 'x, x = 10, 11'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['x'])
 
   def test_subscript_assignment(self):
     # Test subscript assignment
     snippet = 'arr[0] = 10'
-    assigned_identifiers = self.extract_assigned_identifiers(snippet)
-    self.assertCountEqual(assigned_identifiers, ['arr'])
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['arr[0]'])
+
+  def test_pattern_list_assignment(self):
+    snippet = 'a, b, c = 1, 2, 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a', 'b', 'c'])
+
+  def test_method_call(self):
+    snippet = 'chars.remove(s[i])'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['chars'])
+
+  def test_method_call_on_subscript(self):
+    snippet = 'matrix[i].remove(num)'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['matrix[i]'])
+
+    snippet = 'matrix[i][j].remove(num)'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['matrix[i][j]'])
 
 
 class TestDefinedFunctionNameExtractor(unittest.TestCase):
