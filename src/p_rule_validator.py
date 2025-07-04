@@ -312,7 +312,8 @@ def is_valid_translation_rule_test_based(
   pre_context: str,
   current_ruleset_obj: p_ruleset.Ruleset,
   subject: p_subject.PirelSubject,
-  template_dict: dict
+  template_dict: dict,
+  lvalidation_and_recovery: ptlog.RulesValidationRecovery
 ) -> bool:
 
   def _combine_pre_context_and_sut(pre_context: str, snippet_under_test: str) -> str:
@@ -408,6 +409,8 @@ def is_valid_translation_rule_test_based(
   # 4. generate tests for f_gold() function using LLM
   _result = _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
   if _result is None:
+    lvalidation_and_recovery.success = False
+    lvalidation_and_recovery.reason = 'Failed to generate test function using LLM.'
     return False
   test_fn_str = _result
 
@@ -458,6 +461,8 @@ def is_valid_translation_rule_test_based(
     logger.warning(
       f'Failed to obtain a plausible translation of the test script:\n'
       f'{p_utils.exception_to_str(err)}\n')
+    lvalidation_and_recovery.success = False
+    lvalidation_and_recovery.reason = f'Failed to translate the source test script due to:\n"{str(err)}"'
     return False
 
   '''
@@ -469,6 +474,7 @@ def is_valid_translation_rule_test_based(
   assert used_rule_ids_history is not None, 'used_rule_ids_history must not be None'
   update_ruleset_obj(current_ruleset_obj, used_rule_ids_history)
 
+  lvalidation_and_recovery.success = True
   return True
 
 

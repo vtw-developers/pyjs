@@ -270,21 +270,21 @@ def validate_translation_rules_for_statement_node(
         pre_context,
         current_ruleset_obj,
         statement_subject,
-        template_dict
+        template_dict,
+        lvalidation_and_recovery
       )
 
       if is_valid:
         logger.debug('Translation rules are valid for the statement node')
-        lvalidation_and_recovery.success = True
         return current_ruleset_obj
       else:
         msg = 'Validation of translation rules for statement node failed. Consider this case.'
         logger.critical(msg)
-        lvalidation_and_recovery.success = False
-        lvalidation_and_recovery.reason = msg
         raise RuntimeError(msg)
 
     except p_rule_chooser.RuleCombinationsExhaustedError as err:
+      lvalidation_and_recovery.success = False
+      lvalidation_and_recovery.reason = f'Error recovery must be started here due to: "{str(err)}"'
       raise
 
     break
