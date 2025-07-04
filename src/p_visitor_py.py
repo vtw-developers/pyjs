@@ -16,6 +16,7 @@ Constants:
 
 from __future__ import annotations
 
+import copy
 import tree_sitter
 from typing import Dict, List, Union
 
@@ -2026,28 +2027,26 @@ class LogStatementInserter(pvis.Visitor):
         idx += 1
         continue
 
-      aie = AssignedIdentifierExtractor()
-      aie.visit(child)
-      assigned_identifiers = aie.get_assigned_identifiers()
+      lve = LoggableValueExtractor()
+      lve.visit(child)
+      loggable_values = lve.get_loggable_nodes()
 
-      if len(assigned_identifiers) == 0:
+      if len(loggable_values) == 0:
         idx += 1
         continue
 
       # build and insert log statement
-      if len(assigned_identifiers) == 1:
-        ai = assigned_identifiers[0]
-        arg = self.build_IdentifierNode(ai)
-        log_statement = self.build_ArgLogStatement([arg])
+      if len(loggable_values) == 1:
+        lv = loggable_values[0]
+        log_statement = self.build_ArgLogStatement([lv])
         node.children.insert(idx + 1, log_statement)
         log_statement.set_parent(node)
         idx += 1
         continue
 
-      elif len(assigned_identifiers) > 1:
+      elif len(loggable_values) > 1:
         # most likely a pattern_list assignment such as `a, b, c = 1, 2, 0` in G0291
-        args = [self.build_IdentifierNode(ai) for ai in assigned_identifiers]
-        log_statement = self.build_ArgLogStatement(args)
+        log_statement = self.build_ArgLogStatement(loggable_values)
         node.children.insert(idx + 1, log_statement)
         log_statement.set_parent(node)
         idx += 1
@@ -2223,21 +2222,29 @@ class LogStatementsIndexer(pvis.Visitor):
     return code.strip()
 
 
-class AssignedIdentifierExtractor(pvis.Visitor):
+class LoggableValueExtractor(pvis.Visitor):
   '''
-  Given the left hand side of an assignment statement, this visitor
-  extracts the identifiers that were assigned a value.
+  Given an expression statement, this visitor extracts
+  all variables/values that must be logged.
   '''
   def __init__(self):
     super().__init__()
-    self.assigned_identifiers : List[str] = []
+    self.loggable_nodes : List[pvis.AbstractNode] = []
+    # checking for duplicates
+    self.loggable_nodes_strs : List[str] = []
+    self.pp = PrettyPrinter(indent_with='    ')
 
-  def add_assigned_identifier(self, lit: str) -> None:
-    if lit not in self.assigned_identifiers:
-      self.assigned_identifiers.append(lit)
+  def add_loggable_node(self, lhs: pvis.AbstractNode) -> None:
+    # check if we have already seen this node
+    lhs_str = self.pp.visit(lhs).strip()
+    if lhs_str in self.loggable_nodes_strs:
+      return
+    self.loggable_nodes_strs.append(lhs_str)
+    lhs_copy = copy.deepcopy(lhs)
+    self.loggable_nodes.append(lhs_copy)
 
-  def get_assigned_identifiers(self) -> List[str]:
-    return self.assigned_identifiers
+  def get_loggable_nodes(self) -> List[pvis.AbstractNode]:
+    return self.loggable_nodes
 
   # VISIT METHODS
   def default_visit(self, node):
@@ -2247,26 +2254,31 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     '''
     We care only about the left hand side.
     '''
-    self.visit(node.left)
+    # for pattern list, we visit all identifiers in the pattern list
+    if isinstance(node.left, PatternListNode):
+      self.visit(node.left)
+    else:
+      self.add_loggable_node(node.left)
 
   def visit_AttributeNode(self, node: AttributeNode) -> None:
     '''
     chars.remove(s[i])
     ^^^^^
     mat[i].sort()  # G0236
-    ^^^
+    ^^^^^^
     '''
     assert isinstance(node.object, (IdentifierNode, SubscriptNode)), 'sanity check'
-    if isinstance(node.object, IdentifierNode):
-      self.add_assigned_identifier(node.object.val())
-    elif isinstance(node.object, SubscriptNode):
-      self.visit(node.object)
+    self.add_loggable_node(node.object)
 
   def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
     '''
     We care only about the left hand side.
     '''
-    self.visit(node.left)
+    # for pattern list, we visit all identifiers in the pattern list
+    if isinstance(node.left, PatternListNode):
+      self.visit(node.left)
+    else:
+      self.add_loggable_node(node.left)
 
   def visit_CallNode(self, node: CallNode) -> None:
     '''
@@ -2303,7 +2315,7 @@ class AssignedIdentifierExtractor(pvis.Visitor):
       self.visit(child)
 
   def visit_IdentifierNode(self, node: IdentifierNode) -> None:
-    self.add_assigned_identifier(node.val())
+    self.add_loggable_node(node)
 
   def visit_PatternListNode(self, node: PatternListNode) -> None:
     '''
@@ -2313,13 +2325,6 @@ class AssignedIdentifierExtractor(pvis.Visitor):
     '''
     for nt_child in node.get_nt_children():
       self.visit(nt_child)
-
-  def visit_SubscriptNode(self, node: SubscriptNode) -> None:
-    # base case: if the subscript is an identifier
-    if isinstance(node.value, IdentifierNode):
-      self.add_assigned_identifier(node.value.val())
-      return
-    self.visit(node.value)
 
 
 class BreakStatementInserter(pvis.Visitor):

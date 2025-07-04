@@ -17,6 +17,6 @@ def f_gold(nums: List[int], target: int) -> List[int]:
             myexactlog([helper[num], i])
             return [helper[num], i]
         helper[v] = i
-        myexactlog(helper)
+        myexactlog(helper[v])
 "-----------------"
 test()
