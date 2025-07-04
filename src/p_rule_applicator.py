@@ -1028,7 +1028,10 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
     templates_dict = exc.get_templates_dict()
     logger.warning(f'Caught TranslationRuleNotFoundException: {exc}')
     logger.warning(f'templates_dict: {json.dumps(templates_dict, indent=2)}')
-    raise TRuleNotFoundError('There is a problematic node in src_main_code')
+    raise TRuleNotFoundError(
+      f'There is a problematic node in src_main_code:\n'
+      f'problematic_node_type = {templates_dict["problematic_node_type"]}, '
+      f'problematic_node_id = {templates_dict["problematic_node_id"]}')
 
   tar_main_code = duoglot_translate_result['tar_code']
   map_to_exid = duoglot_translate_result['map_to_exid']
