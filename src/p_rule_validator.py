@@ -594,6 +594,40 @@ def _test_is_valid_translation_rule_syntactic():
   print(is_valid)
 
 
+def _test_is_valid_translation_rule_test_based():
+  '''
+  def is_valid_translation_rule_test_based(
+    snippet_under_test: str,
+    pre_context: str,
+    current_ruleset_obj: p_ruleset.Ruleset,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    lvalidation_and_recovery: ptlog.RulesValidationRecovery
+  ) -> bool:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_test_based_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  snippet_under_test = args_dict['snippet_under_test']
+  pre_context = args_dict['pre_context']
+  current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  template_dict = args_dict['template_dict']
+  lvalidation_and_recovery = ptlog.RulesValidationRecovery()
+
+  is_valid = is_valid_translation_rule_test_based(
+    snippet_under_test,
+    pre_context,
+    current_ruleset_obj,
+    subject,
+    template_dict,
+    lvalidation_and_recovery
+  )
+  print(is_valid)
+
+
 if __name__ == '__main__':
   # _validate_translation_rule_usage()
-  _test_is_valid_translation_rule_syntactic()
+  # _test_is_valid_translation_rule_syntactic()
+  _test_is_valid_translation_rule_test_based()
