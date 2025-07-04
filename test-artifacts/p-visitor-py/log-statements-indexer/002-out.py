@@ -3,13 +3,13 @@ def test():
 "-----------------"
 def f_gold():
     myexactlog(1, 3, 2, 1)
-    print(2, 4, 3, 2)
-    myexactlog(3, a, b, c)
-    print(4)
-    myexactlog(5, 'a', 'b', 'c')
-    print(6, 4, 3, 2)
-    myexactlog(7, a=1, b=2)
-    print(8, 4, 3, 2)
-    myexactlog(9)
+    print(4, 3, 2)
+    myexactlog(2, a, b, c)
+    print()
+    myexactlog(3, 'a', 'b', 'c')
+    print(4, 3, 2)
+    myexactlog(4, a=1, b=2)
+    print(4, 3, 2)
+    myexactlog(5)
 "-----------------"
 test()
