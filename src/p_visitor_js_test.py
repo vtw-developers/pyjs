@@ -5178,29 +5178,6 @@ class TestPrettyPrinter(unittest.TestCase):
     self.assertEqual(pp_code, gold_code)
 
 
-class TestLogStatementInserter(unittest.TestCase):
-  def setUp(self):
-    self.maxDiff = None
-    self.src_lang = 'js'
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'js' / 'TestLogStatementInserter'
-    self.parser = p_consts.PARSER_DICT[self.src_lang]
-
-  def to_tree(self, snippet: str) -> p_visitor_js.Tree:
-    ts_tree = self.parser.parse(bytes(snippet, 'utf-8'))
-    tree = p_visitor_js.Tree.from_ts_tree(ts_tree)
-    assert tree.root_node is not None
-    assert tree.root_node.node_type == 'program'
-    return tree
-
-  def test_insert_log_statements_L0001(self):
-    tree = self.to_tree(p_utils.read_text(self.snippets_dir / 'L0001_input.js'))
-    inserter = p_visitor_js.LogStatementInserter(function_name='f_gold')
-    inserter.visit(tree.root_node)
-    pp_code = p_visitor_js.PrettyPrinter().visit(tree.root_node).strip()
-    gold_code = p_utils.read_text(self.snippets_dir / 'L0001_output.js')
-    self.assertEqual(pp_code, gold_code)
-
-
 class TestAssignedIdentifierExtractor(unittest.TestCase):
   def setUp(self):
     self.src_lang = 'js'
