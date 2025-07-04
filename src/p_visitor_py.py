@@ -2179,9 +2179,9 @@ class LogStatementsIndexer(pvis.Visitor):
     if not isinstance(function_name, IdentifierNode):
       return
 
-    # function name must be one of ['myexactlog', 'print']
+    # function name must be one of ['myexactlog']
     fname_ter = function_name.get_children()[0].node_type
-    if fname_ter not in ['myexactlog', 'print']:
+    if fname_ter not in ['myexactlog']:
       return
 
     # build the index argument

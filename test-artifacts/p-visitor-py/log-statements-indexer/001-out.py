@@ -4,13 +4,13 @@ def test():
 def f_gold():
     n = 0
     myexactlog(1, n)
-    print(2, n)
+    print(n)
     n = 1
-    myexactlog(3, n)
+    myexactlog(2, n)
     while n < 10:
-        myexactlog(4, 0)
+        myexactlog(3, 0)
         n += 1
-        myexactlog(5, n)
+        myexactlog(4, n)
         break
 "-----------------"
 test()
