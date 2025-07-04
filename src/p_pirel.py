@@ -995,6 +995,32 @@ def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
+def _test_learn_trans_rules_for_statement_node():
+  '''
+  def learn_trans_rules_for_statement_node(
+    subject: p_subject.PirelSubject,
+    current_ruleset_obj: p_ruleset.Ruleset,
+    statement_nid: int,
+    lstatement_node: ptlog.StatementNode
+  ) -> None:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_learn_trans_rules_for_statement_node_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
+  statement_nid = args_dict['statement_nid']
+  lstatement_node = ptlog.StatementNode(-1)
+
+  learn_trans_rules_for_statement_node(
+    subject,
+    current_ruleset_obj,
+    statement_nid,
+    lstatement_node
+  )
+
+
 def _test_learn_trans_rules_for_prob_node():
   '''
   def learn_trans_rules_for_prob_node(
@@ -1079,6 +1105,7 @@ def _test_get_pre_context():
 
 
 if __name__ == '__main__':
+  # _test_learn_trans_rules_for_statement_node()
   _test_learn_trans_rules_for_prob_node()
   # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()
