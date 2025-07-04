@@ -842,6 +842,13 @@ def learn_trans_rules_for_statement_node(
         statement_subject.choices,
         subject_name=statement_subject.name,
       )
+      '''
+      If translation succeeds, it does not necessarily mean that the rules are valid.
+      It may so be the case that some rules are like this:
+      `(.) --> (1 / 2)`
+      where parenthesized_expression with any node inside is translate to (1 / 2),
+      which is obviously incorrect.
+      '''
       logger.debug(f'SUCCESS. Translation of the statement node is successful.')
       lnode_trans_iteration.success = True
       break
