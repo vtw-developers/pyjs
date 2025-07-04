@@ -64,8 +64,9 @@ def mylog(*args):
   myexactlog(*args)
 
 def print(*args, **kwargs):
-  myexactlog(args)
-  return _default_print(*args, **kwargs)
+  # myexactlog(args)
+  # return _default_print(*args, **kwargs)
+  pass
 
 # this function is inserted into body node types' `block`
 def secret_fun_4071():

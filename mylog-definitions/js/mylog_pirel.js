@@ -73,8 +73,8 @@ function mylog(...args) {
 }
 
 console.log = function () {
-  myexactlog([...arguments]);
-  _default_console_log(...arguments);
+  // myexactlog([...arguments]);
+  // _default_console_log(...arguments);
 };
 
 // this function is inserted into body node types' `block`
