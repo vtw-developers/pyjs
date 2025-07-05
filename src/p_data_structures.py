@@ -245,6 +245,50 @@ class DuoGlotTree:
     self._pre_order(self.root_node, visit_fn)
     return tree_as_str
 
+  def find_all_similar_nodes(self, node: 'DuoGlotNode') -> List['DuoGlotNode']:
+    '''
+    Find all nodes in the tree that are similar in structure to `node`.
+    Similar nodes have the same AST structure with only difference
+    being the node_id.
+    '''
+    def _is_myexactlog_call_PY(node: 'DuoGlotNode') -> bool:
+      '''
+      check if the node is a call to myexactlog in Python.
+      '''
+      if node.get_type() != 'py.expression_statement':
+        return False
+      children = node.get_children()
+      if len(children) != 1:
+        return False
+      child = children[0]
+      if child.get_type() != 'py.call':
+        return False
+      call_children = child.get_children()
+      if len(call_children) != 2:
+        return False
+      first_child = call_children[0]
+      if first_child.get_type() != 'py.identifier':
+        return False
+      terminal = first_child.get_children()[0]
+      if terminal.get_type() != 'myexactlog':
+        return False
+      return True
+
+    def _rec_pre_order(node_in_self: 'DuoGlotNode'):
+      nonlocal similar_nodes, node
+      # base case: do not search under `myexactlog` call in Python
+      if _is_myexactlog_call_PY(node_in_self):
+        return
+      if node_in_self.is_similar_to_rec(node):
+        similar_nodes.append(node_in_self)
+      for child in node_in_self.get_children():
+        _rec_pre_order(child)
+
+    assert node.is_nonterminal(), 'node must be non-terminal'
+    similar_nodes = []
+    _rec_pre_order(self.root_node)
+    return similar_nodes
+
   @classmethod
   def from_code_str(cls, code_str: str, code_lang: str) -> 'DuoGlotTree':
     '''code_lang in ['py', 'js', ...]'''
