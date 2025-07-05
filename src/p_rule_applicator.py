@@ -28,7 +28,18 @@ class TraceMismatchError(RuntimeError):
     self.error_lines = error_lines
   def __str__(self):
     return f'TraceMismatchError: {json.dumps(self.error_lines, indent=2)}'
-class TRuleNotFoundError(RuntimeError): pass
+class TRuleNotFoundSrcMainCodeError(RuntimeError):
+  '''
+  This error is raised when there is a translation error
+  when translating src_main_code.
+  '''
+  def __init__(self, *args):
+    super().__init__(*args)
+    self.src_main_code : Optional[str] = None
+    self.choices : Optional[dict] = None
+    self.translation_rules_main_code : Optional[str] = None
+    self.problematic_node_id : Optional[int] = None
+    self.problematic_node_type : Optional[str] = None
 
 
 # INTERNAL API
@@ -856,7 +867,7 @@ def _get_instrumented_tar_program_plausible(
     iteration += 1
 
     # May raise
-    # 1. TRuleNotFoundError
+    # 1. TRuleNotFoundSrcMainCodeError
     tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
     used_rule_ids = _get_used_translation_rule_ids(translate_dbg_history)
     used_rule_ids_history.append(used_rule_ids)
@@ -1026,12 +1037,18 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
     )
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
     templates_dict = exc.get_templates_dict()
-    logger.warning(f'Caught TranslationRuleNotFoundException: {exc}')
+    logger.warning(f'Caught TranslationRuleNotFoundException when translating src_main_code: {exc}')
     logger.warning(f'templates_dict: {json.dumps(templates_dict, indent=2)}')
-    raise TRuleNotFoundError(
+    err_obj = TRuleNotFoundSrcMainCodeError(
       f'There is a problematic node in src_main_code:\n'
       f'problematic_node_type = {templates_dict["problematic_node_type"]}, '
       f'problematic_node_id = {templates_dict["problematic_node_id"]}')
+    err_obj.src_main_code = src_main_code
+    err_obj.choices = choices
+    err_obj.translation_rules_main_code = subject.translation_rules_main_code
+    err_obj.problematic_node_id = templates_dict['problematic_node_id']
+    err_obj.problematic_node_type = templates_dict['problematic_node_type']
+    raise err_obj
 
   tar_main_code = duoglot_translate_result['tar_code']
   map_to_exid = duoglot_translate_result['map_to_exid']

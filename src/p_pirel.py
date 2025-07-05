@@ -758,6 +758,116 @@ def get_statement_node_by_id(src_main_code: str, lang: str, node_id: int) -> pds
   return node
 
 
+def adapt_rule_choices_assert_result(
+  code: str,
+  code_choices: dict,
+  new_code: str,
+  new_code_choices: dict,
+  src_lang: str,
+  tar_lang: str,
+  translation_rules: str,
+) -> None:
+  '''
+  Check if the adapted rule choices are valid.
+  This function can be disabled if needed.
+  '''
+  try:
+    result = duoglot_translate_wrapper(
+      code,
+      src_lang,
+      tar_lang,
+      translation_rules,
+      True,
+      code_choices,
+      subject_name='test_adapt',
+      skip_template_extraction=True
+    )
+  except d_grammar_expand.TranslationRuleNotFoundException as exc:
+    logger.debug(f'TranslationRuleNotFoundException is expected')
+    templates_dict_before = exc.get_templates_dict()
+    pntype_before = templates_dict_before['problematic_node_type']
+
+  try:
+    result = duoglot_translate_wrapper(
+      new_code,
+      src_lang,
+      tar_lang,
+      translation_rules,
+      True,
+      new_code_choices,
+      subject_name='test_adapt',
+      skip_template_extraction=True
+    )
+  except d_grammar_expand.TranslationRuleNotFoundException as exc:
+    logger.debug(f'TranslationRuleNotFoundException is expected')
+    templates_dict_after = exc.get_templates_dict()
+    pntype_after = templates_dict_before['problematic_node_type']
+
+  assert pntype_before == pntype_after, 'Problematic node type must not change after adaptation'
+
+
+def adapt_rule_choices_get_new_nid(
+  tree: pds.DuoGlotTree,
+  node_id: list,
+  new_tree: pds.DuoGlotTree
+) -> int:
+  '''
+  choices_list_elem contains an id of the node in the tree,
+  we need to locate a node with the same structure in the new_tree.
+  '''
+  ref_node = tree.get_node_with_id(node_id)
+  assert ref_node is not None, f'Node with id {node_id} not found in the tree'
+
+  similar_nodes_tree = tree.find_all_similar_nodes(ref_node)
+  assert len(similar_nodes_tree) > 0, f'must at least find ref_node itself in the tree'
+  assert len(similar_nodes_tree) == 1, 'support only one similar node in the tree'
+
+  similar_nodes_new_tree = new_tree.find_all_similar_nodes(ref_node)
+  assert len(similar_nodes_new_tree) > 0, f'sanity check: ref_node must be in the new_tree'
+  assert len(similar_nodes_new_tree) == 1, 'support only one similar node in the new_tree'
+  new_node = similar_nodes_new_tree[0]
+  return new_node.get_id()
+
+
+def adapt_rule_choices(
+  code: str,
+  code_choices: dict,
+  new_code: str
+) -> dict:
+  '''
+  PARAM code: instrumented version of new_code (during rule validation)
+  PARAM code_choices: choices for the code
+
+  Since choices uses AST node ids, and code & new_code are different,
+  code_choices must be adapted to new_code.
+  '''
+  logger.debug(
+    'Adapting rule choices that trigger a translation error in src_main_code\n'
+    'to trigger a translation error in simplified statement code.')
+
+  choices_type = code_choices['type']
+  assert choices_type == 'ASTNODE', 'Only ASTNODE choices are supported'
+
+  choices_list = code_choices['choices_list']
+  new_choices_list = []
+
+  tree = pds.DuoGlotTree.from_code_str(code, 'py')
+  new_tree = pds.DuoGlotTree.from_code_str(new_code, 'py')
+
+  for choices_list_elem in choices_list:
+    range_info, choice_idx = choices_list_elem
+    assert len(range_info) == 3, 'range_info must have 3 elements: [node_id, start, end]'
+    node_id, start, end = range_info
+    new_node_id = adapt_rule_choices_get_new_nid(tree, node_id, new_tree)
+    new_choices_list.append([[new_node_id, start, end], choice_idx])
+
+  new_code_choices = {
+    'type': choices_type,
+    'choices_list': new_choices_list
+  }
+  return new_code_choices
+
+
 def learn_trans_rules_for_statement_node(
   subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
@@ -813,88 +923,113 @@ def learn_trans_rules_for_statement_node(
   logger.debug(
     'Starting translation iterations to learn translation '
     'rules for nodes under the statement node.')
+
+  flag_validation_done = False
   iteration = 0
-  while True:
-    iteration += 1
-    logger.debug(
-      f'Iteration #{iteration} for learning translation rules for statement node'
-      f'node_trans_iteration.id = {iteration}')
 
-    lnode_trans_iteration = ptlog.NodeTransIteration(iteration)
-    lstatement_node.node_trans_iterations.append(lnode_trans_iteration)
+  '''
+  This loop will run again if TRuleNotFoundSrcMainCodeError is raised.
+  '''
+  while not flag_validation_done:
 
     '''
-    Attempt to translate the statement code using the current ruleset.
-    If it succeeds, then we break out of the loop.
-    If it fails with TranslationRuleNotFoundException, then we learn rules
-    to address the problematic node.
-    If it fails with some other exception, then this error is bubbled up
-    to the caller.
+    This loop iterates over the nodes under the statement node.
     '''
-    templates_dict = None
-    try:
-      duoglot_result_dict = duoglot_translate_wrapper(
-        simple_ntext,
-        statement_subject.src_lang,
-        statement_subject.tar_lang,
+    while True:
+      iteration += 1
+      logger.debug(
+        f'Iteration #{iteration} for learning translation rules for statement node '
+        f'node_trans_iteration.id = {iteration}')
+
+      lnode_trans_iteration = ptlog.NodeTransIteration(iteration)
+      lstatement_node.node_trans_iterations.append(lnode_trans_iteration)
+
+      '''
+      Attempt to translate the statement code using `current_ruleset_obj`.
+      If it succeeds, then we break out of the loop.
+      If it fails with TranslationRuleNotFoundException, then we learn rules
+      to address the problematic node.
+      If it fails with some other exception, then this error is bubbled up
+      to the caller.
+      '''
+      templates_dict = None
+      try:
+        duoglot_result_dict = duoglot_translate_wrapper(
+          simple_ntext,
+          statement_subject.src_lang,
+          statement_subject.tar_lang,
+          current_ruleset_obj.to_string(),
+          statement_subject.auto_backward,
+          statement_subject.choices,
+          subject_name=statement_subject.name,
+        )
+        '''
+        If translation succeeds, it does not necessarily mean that the rules are valid.
+        It may so be the case that some rules are like this:
+        `(.) --> (1 / 2)`
+        where parenthesized_expression with any node inside is translate to (1 / 2),
+        which is obviously incorrect.
+        '''
+        logger.debug(f'SUCCESS. Translation of the statement node is successful.')
+        lnode_trans_iteration.success = True
+        break
+      except d_grammar_expand.TranslationRuleNotFoundException as exc:
+        logger.debug(f'There is a problematic node in the statement node')
+        templates_dict = exc.get_templates_dict()
+
+      '''
+      At this point we have a problematic node that we cannot translate.
+      We need to learn translation rules for this node.
+      '''
+      assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
+      trules_list = learn_trans_rules_for_prob_node(
+        statement_subject,
         current_ruleset_obj.to_string(),
-        statement_subject.auto_backward,
-        statement_subject.choices,
-        subject_name=statement_subject.name,
+        templates_dict,
+        lnode_trans_iteration
       )
-      '''
-      If translation succeeds, it does not necessarily mean that the rules are valid.
-      It may so be the case that some rules are like this:
-      `(.) --> (1 / 2)`
-      where parenthesized_expression with any node inside is translate to (1 / 2),
-      which is obviously incorrect.
-      '''
-      logger.debug(f'SUCCESS. Translation of the statement node is successful.')
-      lnode_trans_iteration.success = True
-      break
-    except d_grammar_expand.TranslationRuleNotFoundException as exc:
-      logger.debug(f'There is a problematic node in the statement node')
-      templates_dict = exc.get_templates_dict()
+
+      problematic_node_id = templates_dict['problematic_node_id']
+      for trule in trules_list:
+        current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, problematic_node_id, statement_nid))
+        lnode_trans_iteration.unchecked_trules.append(ptlog.TRule.from_str(trule))
+        lstatement_node.unchecked_trules.append(ptlog.TRule.from_str(trule))
 
     '''
-    At this point we have a problematic node that we cannot translate.
-    We need to learn translation rules for this node.
+    At this point, we have enough rules to obtain some translation of the
+    statement node. Now it's time to validate the translation rules, and
+    if necessary launch an error correction module to fix the problematic rules.
+    Fixing is done by replacing the problematic rules with the new ones.
+
+    Look for TRuleNotFoundSrcMainCodeError, when caught, it means that
+    there is a problematic node when using some combination of choices.
     '''
-    assert templates_dict is not None, 'TranslationRuleNotFoundException must have templates_dict'
-    trules_list = learn_trans_rules_for_prob_node(
-      statement_subject,
-      current_ruleset_obj.to_string(),
-      templates_dict,
-      lnode_trans_iteration
-    )
+    lvalidation_and_recovery = ptlog.RulesValidationRecovery()
+    lstatement_node.validation_and_recovery = lvalidation_and_recovery
+    logger.debug(
+      f'SUCCESS. Learned all translation rules to translate nodes under the statement node.\n'
+      f'Will not start validation of the translation rules.\n')
 
-    problematic_node_id = templates_dict['problematic_node_id']
-    for trule in trules_list:
-      current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, problematic_node_id, statement_nid))
-      lnode_trans_iteration.unchecked_trules.append(ptlog.TRule.from_str(trule))
-      lstatement_node.unchecked_trules.append(ptlog.TRule.from_str(trule))
-
-  '''
-  At this point, we have enough rules to obtain some translation of the
-  statement node. Now it's time to validate the translation rules, and
-  if necessary launch an error correction module to fix the problematic rules.
-  Fixing is done by replacing the problematic rules with the new ones.
-  '''
-  lvalidation_and_recovery = ptlog.RulesValidationRecovery()
-  lstatement_node.validation_and_recovery = lvalidation_and_recovery
-  logger.debug(
-    f'SUCCESS. Learned all translation rules to translate nodes under the statement node.\n'
-    f'Will not start validation of the translation rules.\n')
-
-  validated_ruleset_obj = validate_translation_rules_for_statement_node(
-    subject,
-    statement_subject,
-    current_ruleset_obj,
-    statement_nid,
-    lvalidation_and_recovery,
-    enable_error_recovery=True
-  )
-  current_ruleset_obj = validated_ruleset_obj
+    try:
+      validated_ruleset_obj = validate_translation_rules_for_statement_node(
+        subject,
+        statement_subject,
+        current_ruleset_obj,
+        statement_nid,
+        lvalidation_and_recovery,
+        enable_error_recovery=True
+      )
+      current_ruleset_obj = validated_ruleset_obj
+      flag_validation_done = True
+    except p_rule_applicator.TRuleNotFoundSrcMainCodeError as err:
+      logger.warning(
+        f'When validating translation rules for a statement node, stumbled '
+        f'upon a problematic node, for which there is no translation rule.\n'
+        f'Will learn translation rules for this node.')
+      adapted_choices = adapt_rule_choices(err.src_main_code, err.choices, simple_ntext)
+      adapt_rule_choices_assert_result(err.src_main_code, err.choices, simple_ntext, adapted_choices,
+                                       subject.src_lang, subject.tar_lang, current_ruleset_obj.to_string())
+      statement_subject.choices = adapted_choices
 
 
 def can_be_context_node(node: pds.PirelNode, lang: str) -> bool:

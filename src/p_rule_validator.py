@@ -457,6 +457,8 @@ def is_valid_translation_rule_test_based(
     tar_program_plausible, used_rule_ids_history = prapp.apply_translation_rules(pirel_subject)
     logger.debug('successfully obtained the translation of the test script')
     logger.debug('translation rule is valid based on tests')
+  except prapp.TRuleNotFoundSrcMainCodeError as err:
+    raise
   except Exception as err:
     logger.warning(
       f'Failed to obtain a plausible translation of the test script:\n'
