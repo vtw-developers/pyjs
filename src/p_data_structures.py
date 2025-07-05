@@ -499,6 +499,44 @@ class DuoGlotNode():
     assert self.is_nonterminal()
     return self.node_type.split('.')[1]
 
+  def is_similar_to_rec(self, other_node: 'DuoGlotNode') -> bool:
+    '''
+    Return True if `self` and `other_node` have the same structure.
+    This means that they have the same node_type and the same number of children.
+    Similarity is defined as having the same AST structure
+    without considering node_id.
+    `self` and `other_node` can belong to different trees.
+    This is a recursive method.
+    '''
+    # base case 1: different terminalities
+    if self.is_terminal() and other_node.is_nonterminal():
+      return False
+    if self.is_nonterminal() and other_node.is_terminal():
+      return False
+
+    # base case 2: both are terminal nodes
+    if self.is_terminal() and other_node.is_terminal():
+      return self.get_type() == other_node.get_type()
+
+    assert self.is_nonterminal(), 'scope invariant: self must be non-terminal'
+    assert other_node.is_nonterminal(), 'scope invariant: other_node must be non-terminal'
+
+    # base case 3: different node types
+    if self.get_type() != other_node.get_type():
+      return False
+
+    # base case 4: different number of children
+    if len(self.get_children()) != len(other_node.get_children()):
+      return False
+
+    # recursive case: check children
+    for self_child, other_child in zip(self.get_children(), other_node.get_children()):
+      if not self_child.is_similar_to_rec(other_child):
+        return False
+
+    # if we reach here, all checks passed
+    return True
+
   # abstract methods
   def is_terminal(self) -> bool:
     raise NotImplementedError
