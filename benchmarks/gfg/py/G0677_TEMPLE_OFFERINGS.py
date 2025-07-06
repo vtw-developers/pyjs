@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n, templeHeight):
-    sum = 0
+    sum_0 = 0
     for i in range(n):
         left = 0
         right = 0
@@ -20,7 +20,7 @@ def f_gold(n, templeHeight):
                 right += 1
             else:
                 break
-        sum += max(right, left) + 1
-    return sum
+        sum_0 += max(right, left) + 1
+    return sum_0
 "-----------------"
 test()

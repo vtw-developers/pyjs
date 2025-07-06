@@ -6,15 +6,15 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n, m):
-    max = 0
-    min = 0
+    max_0 = 0
+    min_0 = 0
     arr.sort()
     j = n - 1
     for i in range(m):
-        min += arr[i]
-        max += arr[j]
+        min_0 += arr[i]
+        max_0 += arr[j]
         j = j - 1
-    retval_0 = max - min
+    retval_0 = max_0 - min_0
     return retval_0
 "-----------------"
 test()

@@ -6,9 +6,9 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    sum = 0
+    sum_0 = 0
     for row in range(n):
-        sum = sum + (1 << row)
-    return sum
+        sum_0 = sum_0 + (1 << row)
+    return sum_0
 "-----------------"
 test()

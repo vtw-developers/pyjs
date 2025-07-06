@@ -5,14 +5,14 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     result = ""
     v = True
-    for i in range(len(str)):
-        if str[i] == " ":
+    for i in range(len(str_0)):
+        if str_0[i] == " ":
             v = True
-        elif str[i] != " " and v == True:
-            result += str[i]
+        elif str_0[i] != " " and v == True:
+            result += str_0[i]
             v = False
     return result
 "-----------------"

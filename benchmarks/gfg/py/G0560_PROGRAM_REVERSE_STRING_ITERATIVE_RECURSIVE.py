@@ -6,11 +6,11 @@ def test():
     f_gold(* parameters_set)
     result = parameters_set
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     stack = []
-    for i in range(len(str)):
-        stack.append(str[i])
-    for i in range(len(str)):
-        str[i] = stack.pop()
+    for i in range(len(str_0)):
+        stack.append(str_0[i])
+    for i in range(len(str_0)):
+        str_0[i] = stack.pop()
 "-----------------"
 test()

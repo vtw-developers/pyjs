@@ -5,29 +5,29 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(string, l):
-    string = list(string)
+def f_gold(string_0, l):
+    string_0 = list(string_0)
     i = -1
     j = l
     while i < j:
         i += 1
         j -= 1
-        if string[i] == string[j] and string[i] != "*":
+        if string_0[i] == string_0[j] and string_0[i] != "*":
             continue
-        elif string[i] == string[j] and string[i] == "*":
-            string[i] = "a"
-            string[j] = "a"
+        elif string_0[i] == string_0[j] and string_0[i] == "*":
+            string_0[i] = "a"
+            string_0[j] = "a"
             continue
-        elif string[i] == "*":
-            string[i] = string[j]
+        elif string_0[i] == "*":
+            string_0[i] = string_0[j]
             continue
-        elif string[j] == "*":
-            string[j] = string[i]
+        elif string_0[j] == "*":
+            string_0[j] = string_0[i]
             continue
         print("Not Possible")
         retval_0 = ""
         return retval_0
-    retval_1 = "".join(string)
+    retval_1 = "".join(string_0)
     return retval_1
 "-----------------"
 test()

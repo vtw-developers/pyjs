@@ -5,13 +5,13 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(a1, a2, a3, n1, n2, n3, sum):
+def f_gold(a1, a2, a3, n1, n2, n3, sum_0):
     s = set()
     for i in range(n1):
         s.add(a1[i])
     for i in range(n2):
         for j in range(n3):
-            if sum - a2[i] - a3[j] in s:
+            if sum_0 - a2[i] - a3[j] in s:
                 retval_0 = True
                 return retval_0
     retval_1 = False

@@ -11,8 +11,8 @@ def f_gold(s, t, n, k):
     cnt = 0
     new_last = 0
     size = 0
-    string = "zyxwvutsrqponmlkjihgfedcba"
-    for ch in string:
+    string_0 = "zyxwvutsrqponmlkjihgfedcba"
+    for ch in string_0:
         cnt = 0
         for i in range(last, n):
             if s[i] == ch:

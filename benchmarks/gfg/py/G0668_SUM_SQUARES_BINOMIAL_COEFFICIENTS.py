@@ -13,9 +13,9 @@ def f_gold(n):
                 C[i][j] = 1
             else:
                 C[i][j] = C[i - 1][j - 1] + C[i - 1][j]
-    sum = 0
+    sum_0 = 0
     for i in range(0, n + 1):
-        sum = sum + (C[n][i] * C[n][i])
-    return sum
+        sum_0 = sum_0 + (C[n][i] * C[n][i])
+    return sum_0
 "-----------------"
 test()

@@ -5,22 +5,22 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
-    i = len(str) - 1
+def f_gold(str_0):
+    i = len(str_0) - 1
     start = end = i + 1
     result = ""
     while i >= 0:
-        if str[i] == " ":
+        if str_0[i] == " ":
             start = i + 1
             while start != end:
-                result += str[start]
+                result += str_0[start]
                 start += 1
             result += " "
             end = i
         i -= 1
     start = 0
     while start != end:
-        result += str[start]
+        result += str_0[start]
         start += 1
     return result
 "-----------------"

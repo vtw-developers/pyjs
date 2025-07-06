@@ -5,26 +5,26 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(bin):
-    n = len(bin)
-    if bin[n - 1] == "1":
+def f_gold(bin_0):
+    n = len(bin_0)
+    if bin_0[n - 1] == "1":
         retval_0 = False
         return retval_0
-    sum = 0
+    sum_0 = 0
     i = n - 2
     while i >= 0:
-        if bin[i] == "1":
+        if bin_0[i] == "1":
             posFromRight = n - i - 1
             if posFromRight % 4 == 1:
-                sum = sum + 2
+                sum_0 = sum_0 + 2
             elif posFromRight % 4 == 2:
-                sum = sum + 4
+                sum_0 = sum_0 + 4
             elif posFromRight % 4 == 3:
-                sum = sum + 8
+                sum_0 = sum_0 + 8
             elif posFromRight % 4 == 0:
-                sum = sum + 6
+                sum_0 = sum_0 + 6
         i = i - 1
-    if sum % 10 == 0:
+    if sum_0 % 10 == 0:
         retval_1 = True
         return retval_1
     retval_2 = False

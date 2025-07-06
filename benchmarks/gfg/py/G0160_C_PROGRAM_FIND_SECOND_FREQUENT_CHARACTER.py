@@ -5,11 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     NO_OF_CHARS = 256
     count = [0] * NO_OF_CHARS
-    for i in range(len(str)):
-        count[ord(str[i])] += 1
+    for i in range(len(str_0)):
+        count[ord(str_0[i])] += 1
     first, second = 0, 0
     for i in range(NO_OF_CHARS):
         if count[i] > count[first]:

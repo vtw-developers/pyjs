@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x, y, n):
-    sum = 0
+    sum_0 = 0
     for i in range(n):
         for j in range(i + 1, n):
-            sum += abs(x[i] - x[j]) + abs(y[i] - y[j])
-    return sum
+            sum_0 += abs(x[i] - x[j]) + abs(y[i] - y[j])
+    return sum_0
 "-----------------"
 test()

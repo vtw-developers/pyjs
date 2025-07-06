@@ -5,8 +5,8 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(string):
-    string = string[::-1]
-    return string
+def f_gold(string_0):
+    string_0 = string_0[::-1]
+    return string_0
 "-----------------"
 test()

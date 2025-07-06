@@ -10,23 +10,23 @@ def f_gold(str1, str2):
         t = str1
         str1 = str2
         str2 = t
-    str = ""
+    str_0 = ""
     n1 = len(str1)
     n2 = len(str2)
     str1 = str1[::-1]
     str2 = str2[::-1]
     carry = 0
     for i in range(n1):
-        sum = (ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)
-        str += chr(sum % 10 + 48)
-        carry = int(sum / 10)
+        sum_0 = (ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)
+        str_0 += chr(sum_0 % 10 + 48)
+        carry = int(sum_0 / 10)
     for i in range(n1, n2):
-        sum = (ord(str2[i]) - 48) + carry
-        str += chr(sum % 10 + 48)
-        carry = (int)(sum / 10)
+        sum_0 = (ord(str2[i]) - 48) + carry
+        str_0 += chr(sum_0 % 10 + 48)
+        carry = (int)(sum_0 / 10)
     if carry:
-        str += chr(carry + 48)
-    str = str[::-1]
-    return str
+        str_0 += chr(carry + 48)
+    str_0 = str_0[::-1]
+    return str_0
 "-----------------"
 test()

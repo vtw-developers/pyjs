@@ -5,8 +5,8 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
-    n = len(str)
+def f_gold(str_0):
+    n = len(str_0)
     C = [[0 for i in range(n)] for i in range(n)]
     P = [[False for i in range(n)] for i in range(n)]
     j = 0
@@ -19,9 +19,9 @@ def f_gold(str):
         for i in range(n - L + 1):
             j = i + L - 1
             if L == 2:
-                P[i][j] = str[i] == str[j]
+                P[i][j] = str_0[i] == str_0[j]
             else:
-                P[i][j] = (str[i] == str[j]) and P[i + 1][j - 1]
+                P[i][j] = (str_0[i] == str_0[j]) and P[i + 1][j - 1]
             if P[i][j] == True:
                 C[i][j] = 0
             else:

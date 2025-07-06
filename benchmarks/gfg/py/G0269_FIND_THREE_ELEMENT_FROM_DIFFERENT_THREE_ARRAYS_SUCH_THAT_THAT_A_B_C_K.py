@@ -5,11 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(a1, a2, a3, n1, n2, n3, sum):
+def f_gold(a1, a2, a3, n1, n2, n3, sum_0):
     for i in range(0, n1):
         for j in range(0, n2):
             for k in range(0, n3):
-                if a1[i] + a2[j] + a3[k] == sum:
+                if a1[i] + a2[j] + a3[k] == sum_0:
                     retval_0 = True
                     return retval_0
     retval_1 = False

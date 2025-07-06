@@ -7,11 +7,11 @@ def test():
 "-----------------"
 def f_gold(k):
     cur = int((k * (k - 1)) + 1)
-    sum = 0
+    sum_0 = 0
     while k:
-        sum += cur
+        sum_0 += cur
         cur += 2
         k = k - 1
-    return sum
+    return sum_0
 "-----------------"
 test()

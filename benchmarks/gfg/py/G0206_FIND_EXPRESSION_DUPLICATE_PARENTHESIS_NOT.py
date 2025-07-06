@@ -5,9 +5,9 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(string):
+def f_gold(string_0):
     Stack = []
-    for ch in string:
+    for ch in string_0:
         if ch == ")":
             top = Stack.pop()
             elementsInside = 0

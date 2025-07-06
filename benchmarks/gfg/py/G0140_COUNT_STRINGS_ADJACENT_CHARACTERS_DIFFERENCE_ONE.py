@@ -15,9 +15,9 @@ def f_gold(n):
                 dp[i][j] = dp[i - 1][j + 1]
             else:
                 dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j + 1]
-    sum = 0
+    sum_0 = 0
     for i in range(0, 26):
-        sum = sum + dp[n][i]
-    return sum
+        sum_0 = sum_0 + dp[n][i]
+    return sum_0
 "-----------------"
 test()

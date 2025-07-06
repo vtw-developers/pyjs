@@ -7,8 +7,8 @@ def test():
 "-----------------"
 import math
 def f_gold(r, R, r1, x1, y1):
-    dis = int(math.sqrt(x1 * x1 + y1 * y1))
-    retval_0 = dis - r1 >= R and dis + r1 <= r
+    dis_0 = int(math.sqrt(x1 * x1 + y1 * y1))
+    retval_0 = dis_0 - r1 >= R and dis_0 + r1 <= r
     return retval_0
 "-----------------"
 test()

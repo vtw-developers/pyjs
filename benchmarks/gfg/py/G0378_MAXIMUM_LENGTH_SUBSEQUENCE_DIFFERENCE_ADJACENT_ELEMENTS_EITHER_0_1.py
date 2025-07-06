@@ -7,7 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     mls = []
-    max = 0
+    max_0 = 0
     for i in range(n):
         mls.append(1)
     for i in range(n):
@@ -15,8 +15,8 @@ def f_gold(arr, n):
             if abs(arr[i] - arr[j]) <= 1 and mls[i] < mls[j] + 1:
                 mls[i] = mls[j] + 1
     for i in range(n):
-        if max < mls[i]:
-            max = mls[i]
-    return max
+        if max_0 < mls[i]:
+            max_0 = mls[i]
+    return max_0
 "-----------------"
 test()

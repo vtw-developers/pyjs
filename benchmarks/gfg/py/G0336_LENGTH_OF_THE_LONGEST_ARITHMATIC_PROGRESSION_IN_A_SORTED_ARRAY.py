@@ -5,7 +5,7 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(set, n):
+def f_gold(set_0, n):
     if n <= 2:
         return n
     L = [[0 for x in range(n)] for y in range(n)]
@@ -16,9 +16,9 @@ def f_gold(set, n):
         i = j - 1
         k = j + 1
         while i >= 0 and k <= n - 1:
-            if set[i] + set[k] < 2 * set[j]:
+            if set_0[i] + set_0[k] < 2 * set_0[j]:
                 k += 1
-            elif set[i] + set[k] > 2 * set[j]:
+            elif set_0[i] + set_0[k] > 2 * set_0[j]:
                 L[i][j] = 2
                 i -= 1
             else:

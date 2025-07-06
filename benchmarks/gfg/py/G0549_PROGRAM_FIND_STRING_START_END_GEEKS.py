@@ -5,13 +5,13 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str, corner):
-    n = len(str)
+def f_gold(str_0, corner):
+    n = len(str_0)
     cl = len(corner)
     if n < cl:
         retval_0 = False
         return retval_0
-    retval_1 = (str[:cl] == corner) and (str[n - cl:] == corner)
+    retval_1 = (str_0[:cl] == corner) and (str_0[n - cl:] == corner)
     return retval_1
 "-----------------"
 test()

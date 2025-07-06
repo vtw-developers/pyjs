@@ -5,14 +5,14 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str, k):
-    l = len(str)
+def f_gold(str_0, k):
+    l = len(str_0)
     if k >= l:
         retval_0 = 0
         return retval_0
     frequency = [0] * MAX_CHAR
     for i in range(0, l):
-        frequency[ord(str[i]) - 97] += 1
+        frequency[ord(str_0[i]) - 97] += 1
     q = PriorityQueue()
     for i in range(0, MAX_CHAR):
         q.put(-frequency[i])

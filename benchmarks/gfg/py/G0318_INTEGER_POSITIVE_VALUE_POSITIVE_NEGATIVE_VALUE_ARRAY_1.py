@@ -8,14 +8,14 @@ def test():
 def f_gold(arr, n):
     neg = 0
     pos = 0
-    sum = 0
+    sum_0 = 0
     for i in range(0, n):
-        sum += arr[i]
+        sum_0 += arr[i]
         if arr[i] < 0:
             neg += 1
         else:
             pos += 1
-    retval_0 = sum / abs(neg - pos)
+    retval_0 = sum_0 / abs(neg - pos)
     return retval_0
 "-----------------"
 test()

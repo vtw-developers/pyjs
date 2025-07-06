@@ -6,11 +6,11 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n):
-    sum = 0
+    sum_0 = 0
     arr.sort()
     for i in range(0, int(n / 2)):
-        sum -= 2 * arr[i]
-        sum += 2 * arr[n - i - 1]
-    return sum
+        sum_0 -= 2 * arr[i]
+        sum_0 += 2 * arr[n - i - 1]
+    return sum_0
 "-----------------"
 test()

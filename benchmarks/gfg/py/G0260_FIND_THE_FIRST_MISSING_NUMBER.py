@@ -5,17 +5,17 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(array, start, end):
+def f_gold(array_0, start, end):
     if start > end:
         retval_0 = end + 1
         return retval_0
-    if start != array[start]:
+    if start != array_0[start]:
         return start
     mid = int((start + end) / 2)
-    if array[mid] == mid:
-        retval_1 = f_gold(array, mid + 1, end)
+    if array_0[mid] == mid:
+        retval_1 = f_gold(array_0, mid + 1, end)
         return retval_1
-    retval_2 = f_gold(array, start, mid)
+    retval_2 = f_gold(array_0, start, mid)
     return retval_2
 "-----------------"
 test()

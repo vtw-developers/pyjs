@@ -5,10 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(A, arr_size, sum):
+def f_gold(A, arr_size, sum_0):
     for i in range(0, arr_size - 1):
         s = set()
-        curr_sum = sum - A[i]
+        curr_sum = sum_0 - A[i]
         for j in range(i + 1, arr_size):
             if (curr_sum - A[j]) in s:
                 print("Triplet is", A[i], ", ", A[j], ", ", curr_sum - A[j])

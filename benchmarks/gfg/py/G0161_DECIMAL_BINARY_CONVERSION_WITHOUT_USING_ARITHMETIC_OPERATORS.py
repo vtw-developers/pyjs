@@ -9,13 +9,13 @@ def f_gold(n):
     if n == 0:
         retval_0 = "0"
         return retval_0
-    bin = ""
+    bin_0 = ""
     while n > 0:
         if n & 1 == 0:
-            bin = "0" + bin
+            bin_0 = "0" + bin_0
         else:
-            bin = "1" + bin
+            bin_0 = "1" + bin_0
         n = n >> 1
-    return bin
+    return bin_0
 "-----------------"
 test()

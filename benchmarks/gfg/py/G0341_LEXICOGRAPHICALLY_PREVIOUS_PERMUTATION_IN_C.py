@@ -5,24 +5,24 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
-    n = len(str) - 1
+def f_gold(str_0):
+    n = len(str_0) - 1
     i = n
-    while i > 0 and str[i - 1] <= str[i]:
+    while i > 0 and str_0[i - 1] <= str_0[i]:
         i -= 1
     if i <= 0:
         retval_0 = False
         return retval_0
     j = i - 1
-    while j + 1 <= n and str[j + 1] <= str[i - 1]:
+    while j + 1 <= n and str_0[j + 1] <= str_0[i - 1]:
         j += 1
-    str = list(str)
-    temp = str[i - 1]
-    str[i - 1] = str[j]
-    str[j] = temp
-    str = "".join(str)
-    str[::-1]
-    retval_1 = True, str
+    str_0 = list(str_0)
+    temp = str_0[i - 1]
+    str_0[i - 1] = str_0[j]
+    str_0[j] = temp
+    str_0 = "".join(str_0)
+    str_0[::-1]
+    retval_1 = True, str_0
     return retval_1
 "-----------------"
 test()
