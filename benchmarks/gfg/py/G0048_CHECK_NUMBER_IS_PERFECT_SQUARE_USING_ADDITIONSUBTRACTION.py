@@ -11,8 +11,10 @@ def f_gold(n):
     while the_sum < n:
         the_sum += i
         if the_sum == n:
-            return True
+            retval_0 = True
+            return retval_0
         i += 2
-    return False
+    retval_1 = False
+    return retval_1
 "-----------------"
 test()

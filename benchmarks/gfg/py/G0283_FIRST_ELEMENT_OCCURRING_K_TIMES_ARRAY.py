@@ -15,8 +15,10 @@ def f_gold(arr, n, k):
         i += 1
     for i in range(0, n):
         if count_map[arr[i]] == k:
-            return arr[i]
+            retval_0 = arr[i]
+            return retval_0
         i += 1
-    return -1
+    retval_1 = -1
+    return retval_1
 "-----------------"
 test()

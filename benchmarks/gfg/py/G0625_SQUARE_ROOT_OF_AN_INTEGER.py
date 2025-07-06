@@ -13,6 +13,7 @@ def f_gold(x):
     while result <= x:
         i += 1
         result = i * i
-    return i - 1
+    retval_0 = i - 1
+    return retval_0
 "-----------------"
 test()

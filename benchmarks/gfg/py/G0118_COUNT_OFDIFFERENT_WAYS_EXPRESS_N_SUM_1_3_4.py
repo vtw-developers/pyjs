@@ -11,6 +11,7 @@ def f_gold(n):
     DP[3] = 2
     for i in range(4, n + 1):
         DP[i] = DP[i - 1] + DP[i - 3] + DP[i - 4]
-    return DP[n]
+    retval_0 = DP[n]
+    return retval_0
 "-----------------"
 test()

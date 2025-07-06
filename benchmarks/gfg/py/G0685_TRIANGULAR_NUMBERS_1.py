@@ -8,18 +8,23 @@ def test():
 import math
 def f_gold(num):
     if num < 0:
-        return False
+        retval_0 = False
+        return retval_0
     c = -2 * num
     b, a = 1, 1
     d = (b * b) - (4 * a * c)
     if d < 0:
-        return False
+        retval_1 = False
+        return retval_1
     root1 = (-b + math.sqrt(d)) / (2 * a)
     root2 = (-b - math.sqrt(d)) / (2 * a)
     if root1 > 0 and math.floor(root1) == root1:
-        return True
+        retval_2 = True
+        return retval_2
     if root2 > 0 and math.floor(root2) == root2:
-        return True
-    return False
+        retval_3 = True
+        return retval_3
+    retval_4 = False
+    return retval_4
 "-----------------"
 test()

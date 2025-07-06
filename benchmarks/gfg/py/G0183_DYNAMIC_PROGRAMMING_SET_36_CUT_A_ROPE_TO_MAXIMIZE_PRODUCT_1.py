@@ -7,11 +7,13 @@ def test():
 "-----------------"
 def f_gold(n):
     if n == 2 or n == 3:
-        return n - 1
+        retval_0 = n - 1
+        return retval_0
     res = 1
     while n > 4:
         n -= 3
         res *= 3
-    return n * res
+    retval_1 = n * res
+    return retval_1
 "-----------------"
 test()

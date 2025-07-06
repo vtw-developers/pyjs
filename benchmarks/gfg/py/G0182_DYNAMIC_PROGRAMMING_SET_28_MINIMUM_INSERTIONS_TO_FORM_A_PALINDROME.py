@@ -8,14 +8,19 @@ def test():
 import sys
 def f_gold(str, l, h):
     if l > h:
-        return sys.maxsize
+        retval_0 = sys.maxsize
+        return retval_0
     if l == h:
-        return 0
+        retval_1 = 0
+        return retval_1
     if l == h - 1:
-        return 0 if (str[l] == str[h]) else 1
+        retval_2 = 0 if (str[l] == str[h]) else 1
+        return retval_2
     if str[l] == str[h]:
-        return f_gold(str, l + 1, h - 1)
+        retval_3 = f_gold(str, l + 1, h - 1)
+        return retval_3
     else:
-        return min(f_gold(str, l, h - 1), f_gold(str, l + 1, h)) + 1
+        retval_4 = min(f_gold(str, l, h - 1), f_gold(str, l + 1, h)) + 1
+        return retval_4
 "-----------------"
 test()

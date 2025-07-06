@@ -7,14 +7,18 @@ def test():
 "-----------------"
 def f_gold(x, y):
     if y == 0:
-        return 1
+        retval_0 = 1
+        return retval_0
     temp = f_gold(x, int(y / 2))
     if y % 2 == 0:
-        return temp * temp
+        retval_1 = temp * temp
+        return retval_1
     else:
         if y > 0:
-            return x * temp * temp
+            retval_2 = x * temp * temp
+            return retval_2
         else:
-            return (temp * temp) / x
+            retval_3 = (temp * temp) / x
+            return retval_3
 "-----------------"
 test()

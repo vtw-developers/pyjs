@@ -17,11 +17,14 @@ def f_gold(arr, n):
         if temp[back] != arr[back]:
             break
     if front >= back:
-        return True
+        retval_0 = True
+        return retval_0
     while front != back:
         front += 1
         if arr[front - 1] < arr[front]:
-            return False
-    return True
+            retval_1 = False
+            return retval_1
+    retval_2 = True
+    return retval_2
 "-----------------"
 test()

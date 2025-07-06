@@ -7,6 +7,7 @@ def test():
 "-----------------"
 import math
 def f_gold(base, area):
-    return math.ceil((2 * area) / base)
+    retval_0 = math.ceil((2 * area) / base)
+    return retval_0
 "-----------------"
 test()

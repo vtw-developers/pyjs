@@ -13,6 +13,7 @@ def f_gold(f, d, s):
             mem[i][j] = mem[i][j - 1] + mem[i - 1][j - 1]
             if j - f - 1 >= 0:
                 mem[i][j] -= mem[i - 1][j - f - 1]
-    return mem[d][s]
+    retval_0 = mem[d][s]
+    return retval_0
 "-----------------"
 test()

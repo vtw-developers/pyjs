@@ -13,6 +13,7 @@ def f_gold(arr, n):
         for j in range(i):
             if arr[i] > arr[j] and mpis[i] < (mpis[j] * arr[i]):
                 mpis[i] = mpis[j] * arr[i]
-    return max(mpis)
+    retval_0 = max(mpis)
+    return retval_0
 "-----------------"
 test()

@@ -9,7 +9,8 @@ def f_gold(S, T):
     m = len(T)
     n = len(S)
     if m > n:
-        return 0
+        retval_0 = 0
+        return retval_0
     mat = [[0 for _ in range(n + 1)] for __ in range(m + 1)]
     for i in range(1, m + 1):
         mat[i][0] = 0
@@ -21,6 +22,7 @@ def f_gold(S, T):
                 mat[i][j] = mat[i][j - 1]
             else:
                 mat[i][j] = mat[i][j - 1] + mat[i - 1][j - 1]
-    return mat[m][n]
+    retval_1 = mat[m][n]
+    return retval_1
 "-----------------"
 test()

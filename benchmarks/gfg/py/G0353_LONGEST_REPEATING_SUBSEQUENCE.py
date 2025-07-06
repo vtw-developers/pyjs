@@ -14,6 +14,7 @@ def f_gold(str):
                 dp[i][j] = 1 + dp[i - 1][j - 1]
             else:
                 dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])
-    return dp[n][n]
+    retval_0 = dp[n][n]
+    return retval_0
 "-----------------"
 test()

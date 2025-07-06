@@ -18,13 +18,17 @@ def test():
 "-----------------"
 def f_gold(X, Y, l, r, k, dp):
     if k == 0:
-        return 0
+        retval_0 = 0
+        return retval_0
     if l < 0 or r < 0:
-        return 1000000000
+        retval_1 = 1000000000
+        return retval_1
     if dp[l][r][k] != -1:
-        return dp[l][r][k]
+        retval_2 = dp[l][r][k]
+        return retval_2
     cost = (ord(X[l]) - ord("a")) ^ (ord(Y[r]) - ord("a"))
     dp[l][r][k] = min([cost + f_gold(X, Y, l - 1, r - 1, k - 1, dp), f_gold(X, Y, l - 1, r, k, dp), f_gold(X, Y, l, r - 1, k, dp)])
-    return dp[l][r][k]
+    retval_3 = dp[l][r][k]
+    return retval_3
 "-----------------"
 test()

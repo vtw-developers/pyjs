@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(str1, str2, k):
     if (len(str1) + len(str2)) < k:
-        return True
+        retval_0 = True
+        return retval_0
     commonLength = 0
     for i in range(0, min(len(str1), len(str2)), 1):
         if str1[i] == str2[i]:
@@ -15,7 +16,9 @@ def f_gold(str1, str2, k):
         else:
             break
     if (k - len(str1) - len(str2) + 2 * commonLength) % 2 == 0:
-        return True
-    return False
+        retval_1 = True
+        return retval_1
+    retval_2 = False
+    return retval_2
 "-----------------"
 test()

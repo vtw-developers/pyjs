@@ -7,19 +7,26 @@ def test():
 "-----------------"
 def f_gold(n):
     if n < 4:
-        return -1
+        retval_0 = -1
+        return retval_0
     rem = n % 4
     if rem == 0:
-        return n // 4
+        retval_1 = n // 4
+        return retval_1
     if rem == 1:
         if n < 9:
-            return -1
-        return (n - 9) // 4 + 1
+            retval_2 = -1
+            return retval_2
+        retval_3 = (n - 9) // 4 + 1
+        return retval_3
     if rem == 2:
-        return (n - 6) // 4 + 1
+        retval_4 = (n - 6) // 4 + 1
+        return retval_4
     if rem == 3:
         if n < 15:
-            return -1
-        return (n - 15) // 4 + 2
+            retval_5 = -1
+            return retval_5
+        retval_6 = (n - 15) // 4 + 2
+        return retval_6
 "-----------------"
 test()

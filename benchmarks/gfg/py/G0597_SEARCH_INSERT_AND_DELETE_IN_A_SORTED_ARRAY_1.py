@@ -13,6 +13,7 @@ def f_gold(arr, n, key, capacity):
         arr[i + 1] = arr[i]
         i -= 1
     arr[i + 1] = key
-    return n + 1
+    retval_0 = n + 1
+    return retval_0
 "-----------------"
 test()

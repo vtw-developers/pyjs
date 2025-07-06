@@ -13,11 +13,13 @@ def f_gold(arr, n, x):
     r = i
     while l != r:
         if arr[l] + arr[r] == x:
-            return True
+            retval_0 = True
+            return retval_0
         if arr[l] + arr[r] < x:
             l = (l + 1) % n
         else:
             r = (n + r - 1) % n
-    return False
+    retval_1 = False
+    return retval_1
 "-----------------"
 test()

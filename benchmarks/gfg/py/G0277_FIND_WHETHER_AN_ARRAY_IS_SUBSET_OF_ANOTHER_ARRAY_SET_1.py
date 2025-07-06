@@ -13,7 +13,9 @@ def f_gold(arr1, arr2, m, n):
             if arr2[i] == arr1[j]:
                 break
         if j == m:
-            return 0
-    return 1
+            retval_0 = 0
+            return retval_0
+    retval_1 = 1
+    return retval_1
 "-----------------"
 test()

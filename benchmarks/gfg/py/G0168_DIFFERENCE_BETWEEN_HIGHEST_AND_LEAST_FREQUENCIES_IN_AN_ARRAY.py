@@ -18,6 +18,7 @@ def f_gold(arr, n):
             max_count = max(max_count, count)
             min_count = min(min_count, count)
             count = 0
-    return max_count - min_count
+    retval_0 = max_count - min_count
+    return retval_0
 "-----------------"
 test()

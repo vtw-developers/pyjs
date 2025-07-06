@@ -8,7 +8,9 @@ def test():
 def f_gold(str, n):
     l = len(str)
     if l >= n:
-        return True
-    return False
+        retval_0 = True
+        return retval_0
+    retval_1 = False
+    return retval_1
 "-----------------"
 test()

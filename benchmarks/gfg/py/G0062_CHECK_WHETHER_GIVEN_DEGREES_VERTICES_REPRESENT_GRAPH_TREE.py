@@ -8,8 +8,10 @@ def test():
 def f_gold(degree, n):
     deg_sum = sum(degree)
     if 2 * (n - 1) == deg_sum:
-        return True
+        retval_0 = True
+        return retval_0
     else:
-        return False
+        retval_1 = False
+        return retval_1
 "-----------------"
 test()

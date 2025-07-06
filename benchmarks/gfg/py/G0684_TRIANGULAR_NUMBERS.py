@@ -7,13 +7,16 @@ def test():
 "-----------------"
 def f_gold(num):
     if num < 0:
-        return False
+        retval_0 = False
+        return retval_0
     sum, n = 0, 1
     while sum <= num:
         sum = sum + n
         if sum == num:
-            return True
+            retval_1 = True
+            return retval_1
         n += 1
-    return False
+    retval_2 = False
+    return retval_2
 "-----------------"
 test()

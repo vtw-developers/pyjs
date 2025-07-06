@@ -11,10 +11,13 @@ def f_gold(str):
         if str[i] != "a":
             break
     if i * 2 != n:
-        return False
+        retval_0 = False
+        return retval_0
     for j in range(i, n):
         if str[j] != "b":
-            return False
-    return True
+            retval_1 = False
+            return retval_1
+    retval_2 = True
+    return retval_2
 "-----------------"
 test()

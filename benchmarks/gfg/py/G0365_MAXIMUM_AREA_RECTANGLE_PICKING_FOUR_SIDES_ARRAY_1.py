@@ -18,6 +18,7 @@ def f_gold(arr, n):
             first = arr[i]
         elif arr[i] > second:
             second = arr[i]
-    return first * second
+    retval_0 = first * second
+    return retval_0
 "-----------------"
 test()

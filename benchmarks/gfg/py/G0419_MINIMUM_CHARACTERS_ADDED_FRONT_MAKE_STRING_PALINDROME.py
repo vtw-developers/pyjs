@@ -11,9 +11,11 @@ def f_gold(s):
     j = l - 1
     while i <= j:
         if s[i] != s[j]:
-            return False
+            retval_0 = False
+            return retval_0
         i += 1
         j -= 1
-    return True
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

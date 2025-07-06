@@ -7,12 +7,15 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     if n == 1:
-        return True
+        retval_0 = True
+        return retval_0
     arr.sort()
     d = arr[1] - arr[0]
     for i in range(2, n):
         if arr[i] - arr[i - 1] != d:
-            return False
-    return True
+            retval_1 = False
+            return retval_1
+    retval_2 = True
+    return retval_2
 "-----------------"
 test()

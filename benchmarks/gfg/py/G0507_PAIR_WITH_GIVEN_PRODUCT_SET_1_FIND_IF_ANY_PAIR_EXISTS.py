@@ -9,7 +9,9 @@ def f_gold(arr, n, x):
     for i in arr:
         for j in arr:
             if i * j == x:
-                return True
-    return False
+                retval_0 = True
+                return retval_0
+    retval_1 = False
+    return retval_1
 "-----------------"
 test()

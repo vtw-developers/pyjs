@@ -8,9 +8,12 @@ def test():
 def f_gold(arr, n):
     for i in range(int((n - 2) / 2) + 1):
         if arr[2 * i + 1] > arr[i]:
-            return False
+            retval_0 = False
+            return retval_0
         if 2 * i + 2 < n and arr[2 * i + 2] > arr[i]:
-            return False
-    return True
+            retval_1 = False
+            return retval_1
+    retval_2 = True
+    return retval_2
 "-----------------"
 test()

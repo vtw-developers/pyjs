@@ -8,7 +8,8 @@ def test():
 def f_gold(str, k):
     l = len(str)
     if k >= l:
-        return 0
+        retval_0 = 0
+        return retval_0
     frequency = [0] * MAX_CHAR
     for i in range(0, l):
         frequency[ord(str[i]) - 97] += 1

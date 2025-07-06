@@ -16,6 +16,7 @@ def f_gold(a, n):
         j -= 1
     mini = min(s)
     maxi = max(s)
-    return abs(maxi - mini)
+    retval_0 = abs(maxi - mini)
+    return retval_0
 "-----------------"
 test()

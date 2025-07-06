@@ -9,7 +9,9 @@ def f_gold(s):
     n = len(s)
     for i in range(1, n):
         if s[i] != s[0]:
-            return False
-    return True
+            retval_0 = False
+            return retval_0
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

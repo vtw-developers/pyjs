@@ -6,6 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(r):
-    return 2 * r * r
+    retval_0 = 2 * r * r
+    return retval_0
 "-----------------"
 test()

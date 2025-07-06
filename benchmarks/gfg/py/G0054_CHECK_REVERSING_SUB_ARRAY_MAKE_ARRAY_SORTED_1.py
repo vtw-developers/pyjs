@@ -7,26 +7,33 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     if n == 1:
-        return True
+        retval_0 = True
+        return retval_0
     i = 1
     for i in range(1, n):
         if arr[i - 1] < arr[i]:
             if i == n:
-                return True
+                retval_1 = True
+                return retval_1
     j = i
     while arr[j] < arr[j - 1]:
         if i > 1 and arr[j] < arr[i - 2]:
-            return False
+            retval_2 = False
+            return retval_2
         j += 1
     if j == n:
-        return True
+        retval_3 = True
+        return retval_3
     k = j
     if arr[k] < arr[i - 1]:
-        return False
+        retval_4 = False
+        return retval_4
     while k > 1 and k < n:
         if arr[k] < arr[k - 1]:
-            return False
+            retval_5 = False
+            return retval_5
         k += 1
-    return True
+    retval_6 = True
+    return retval_6
 "-----------------"
 test()

@@ -13,12 +13,14 @@ def f_gold(arr, n, sum):
             if curr_sum == sum:
                 print("Sum found between")
                 print("indexes %d and %d" % (i, j - 1))
-                return 1
+                retval_0 = 1
+                return retval_0
             if curr_sum > sum or j == n:
                 break
             curr_sum = curr_sum + arr[j]
             j += 1
     print("No subarray found")
-    return 0
+    retval_1 = 0
+    return retval_1
 "-----------------"
 test()

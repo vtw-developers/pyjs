@@ -7,6 +7,7 @@ def test():
 "-----------------"
 import math
 def f_gold(m, n):
-    return math.factorial(min(m, n))
+    retval_0 = math.factorial(min(m, n))
+    return retval_0
 "-----------------"
 test()

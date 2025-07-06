@@ -15,6 +15,7 @@ def f_gold(arr, n):
             if arr[i] > arr[j] and (i - j) <= (arr[i] - arr[j]):
                 LIS[i] = max(LIS[i], LIS[j] + 1)
         len = max(len, LIS[i])
-    return n - len
+    retval_0 = n - len
+    return retval_0
 "-----------------"
 test()

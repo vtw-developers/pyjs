@@ -12,6 +12,7 @@ def f_gold(str_):
     for i in range(n):
         arr[i] = concat[i:n + i]
     arr.sort()
-    return arr[0]
+    retval_0 = arr[0]
+    return retval_0
 "-----------------"
 test()

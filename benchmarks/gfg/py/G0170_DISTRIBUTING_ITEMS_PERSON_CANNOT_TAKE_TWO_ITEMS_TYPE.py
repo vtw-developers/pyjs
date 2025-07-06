@@ -12,7 +12,9 @@ def f_gold(arr, n, k):
             if arr[j] == arr[i]:
                 count += 1
             if count > 2 * k:
-                return False
-    return True
+                retval_0 = False
+                return retval_0
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

@@ -16,6 +16,7 @@ def f_gold(arr, n):
             j += 1
             i += 1
         i += 1
-    return dimension[0] * dimension[1]
+    retval_0 = dimension[0] * dimension[1]
+    return retval_0
 "-----------------"
 test()

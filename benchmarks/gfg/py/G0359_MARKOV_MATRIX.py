@@ -22,7 +22,9 @@ def f_gold(m):
         for j in range(0, len(m[i])):
             sm = sm + m[i][j]
         if sm != 1:
-            return False
-    return True
+            retval_0 = False
+            return retval_0
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

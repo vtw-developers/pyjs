@@ -7,10 +7,12 @@ def test():
 "-----------------"
 def f_gold(x, y):
     if x == 1:
-        return y == 1
+        retval_0 = y == 1
+        return retval_0
     pow = 1
     while pow < y:
         pow = pow * x
-    return pow == y
+    retval_1 = pow == y
+    return retval_1
 "-----------------"
 test()

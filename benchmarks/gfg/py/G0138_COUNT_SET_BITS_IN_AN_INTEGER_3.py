@@ -7,8 +7,10 @@ def test():
 "-----------------"
 def f_gold(n):
     if n == 0:
-        return 0
+        retval_0 = 0
+        return retval_0
     else:
-        return 1 + f_gold(n & (n - 1))
+        retval_1 = 1 + f_gold(n & (n - 1))
+        return retval_1
 "-----------------"
 test()

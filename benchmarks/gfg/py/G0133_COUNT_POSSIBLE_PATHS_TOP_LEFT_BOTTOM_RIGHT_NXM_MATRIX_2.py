@@ -10,6 +10,7 @@ def f_gold(p, q):
     for i in range(p - 1):
         for j in range(1, q):
             dp[j] += dp[j - 1]
-    return dp[q - 1]
+    retval_0 = dp[q - 1]
+    return retval_0
 "-----------------"
 test()

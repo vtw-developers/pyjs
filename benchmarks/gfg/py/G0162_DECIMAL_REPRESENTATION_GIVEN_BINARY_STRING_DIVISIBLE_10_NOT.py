@@ -8,7 +8,8 @@ def test():
 def f_gold(bin):
     n = len(bin)
     if bin[n - 1] == "1":
-        return False
+        retval_0 = False
+        return retval_0
     sum = 0
     i = n - 2
     while i >= 0:
@@ -24,7 +25,9 @@ def f_gold(bin):
                 sum = sum + 6
         i = i - 1
     if sum % 10 == 0:
-        return True
-    return False
+        retval_1 = True
+        return retval_1
+    retval_2 = False
+    return retval_2
 "-----------------"
 test()
