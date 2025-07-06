@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(n):
     ans = 0
     for length in range(1, int(math.sqrt(n)) + 1):

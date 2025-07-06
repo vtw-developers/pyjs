@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(arr, n):
     arr.sort()
     minXor = int(sys.float_info.max)

@@ -6,10 +6,8 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(side):
-    volume = side**3 / (6 * math.sqrt(2))
+    volume = side ** 3 / (6 * math.sqrt(2))
     return round(volume, 2)
 "-----------------"
 test()

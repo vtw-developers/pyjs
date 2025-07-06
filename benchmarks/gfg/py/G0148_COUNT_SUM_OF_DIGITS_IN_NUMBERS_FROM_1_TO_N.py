@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(n):
     if n < 10:
         return n * (n + 1) / 2
@@ -19,8 +17,6 @@ def f_gold(n):
         a[i] = a[i - 1] * 10 + 45 * (int)(math.ceil(math.pow(10, i - 1)))
     p = (int)(math.ceil(math.pow(10, d)))
     msd = n // p
-    return (int)(
-        msd * a[d] + (msd * (msd - 1) // 2) * p + msd * (1 + n % p) + f_gold(n % p)
-    )
+    return (int)(msd * a[d] + (msd * (msd - 1) // 2) * p + msd * (1 + n % p) + f_gold(n % p))
 "-----------------"
 test()

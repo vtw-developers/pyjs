@@ -14,7 +14,7 @@ def f_gold(ar, n):
     sum[2] = ar[2]
     sum[3] = ar[3]
     for i in range(4, n):
-        sum[i] = ar[i] + min(sum[i - 4 : i])
-    return min(sum[n - 4 : n])
+        sum[i] = ar[i] + min(sum[i - 4:i])
+    return min(sum[n - 4:n])
 "-----------------"
 test()

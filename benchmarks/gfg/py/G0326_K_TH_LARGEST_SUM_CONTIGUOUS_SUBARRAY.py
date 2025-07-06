@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import heapq
-
-
 def f_gold(arr, n, k):
     sum = []
     sum.append(0)

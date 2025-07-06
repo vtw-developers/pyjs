@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(arr, n):
     min_prefix_sum = 0
     res = -math.inf

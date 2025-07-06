@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import itertools
-
-
 def f_gold(n):
     count = 0
     for curr in itertools.count():

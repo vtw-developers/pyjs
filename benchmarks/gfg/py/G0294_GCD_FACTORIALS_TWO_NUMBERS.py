@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(m, n):
     return math.factorial(min(m, n))
 "-----------------"

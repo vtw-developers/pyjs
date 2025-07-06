@@ -7,8 +7,6 @@ def test():
     result = parameters_set
 "-----------------"
 import sys
-
-
 def f_gold(arr, arr_size):
     if arr_size < 3:
         print(" Invalid Input ")

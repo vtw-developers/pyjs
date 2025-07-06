@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(str1):
     n = len(str1)
     C = [0] * (n + 1)

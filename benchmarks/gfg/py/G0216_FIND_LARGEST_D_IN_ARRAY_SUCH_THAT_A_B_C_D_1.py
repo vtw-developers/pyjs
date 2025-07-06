@@ -10,7 +10,7 @@ def f_gold(arr, n):
     for i in range(n - 1):
         for j in range(i + 1, n):
             mp[arr[i] + arr[j]] = (i, j)
-    d = -(10**9)
+    d = -(10 ** 9)
     for i in range(n - 1):
         for j in range(i + 1, n):
             abs_diff = abs(arr[i] - arr[j])

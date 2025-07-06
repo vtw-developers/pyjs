@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(a, b):
     AM = (a + b) / 2
     GM = math.sqrt(a * b)
