@@ -417,7 +417,10 @@ def get_err_line_idx_in_tar_main_code(
   assert err_line_idx < len(main_code_lines), 'sanity check: err_line_idx should be within main_code_lines'
 
   expected_line = main_code_lines[err_line_idx]
-  assert line_content in expected_line, "Expected line doesn't contain error line content."
+  assert line_content in expected_line, \
+    (f'Expected line does not contain error line content.\n'
+     f'Expected: "{expected_line}"\n'
+     f'Actual: "{line_content}"\n')
 
   return err_line_idx
 
