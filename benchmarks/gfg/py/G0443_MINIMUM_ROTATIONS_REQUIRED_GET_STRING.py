@@ -5,12 +5,12 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
-    tmp = str + str
-    n = len(str)
+def f_gold(str_0):
+    tmp = str_0 + str_0
+    n = len(str_0)
     for i in range(1, n + 1):
         substring = tmp[i:n]
-        if str == substring:
+        if str_0 == substring:
             return i
     return n
 "-----------------"

@@ -10,11 +10,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(array, m, n):
+def f_gold(array_0, m, n):
     counter = 0
     for i in range(0, m):
         for j in range(0, n):
-            if array[i][j] == 0:
+            if array_0[i][j] == 0:
                 counter = counter + 1
     retval_0 = counter > ((m * n) // 2)
     return retval_0

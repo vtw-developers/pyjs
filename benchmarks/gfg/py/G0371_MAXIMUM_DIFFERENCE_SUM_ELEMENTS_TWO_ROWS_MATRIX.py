@@ -29,10 +29,10 @@ def test():
 def f_gold(mat, m, n):
     rowSum = [0] * m
     for i in range(0, m):
-        sum = 0
+        sum_0 = 0
         for j in range(0, n):
-            sum += mat[i][j]
-        rowSum[i] = sum
+            sum_0 += mat[i][j]
+        rowSum[i] = sum_0
     max_diff = rowSum[1] - rowSum[0]
     min_element = rowSum[0]
     for i in range(1, m):

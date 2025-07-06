@@ -6,18 +6,18 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n):
-    hash = dict()
+    hash_0 = dict()
     maximum = 0
     for i in arr:
         if i < 0:
-            if abs(i) not in hash.keys():
-                hash[abs(i)] = -1
+            if abs(i) not in hash_0.keys():
+                hash_0[abs(i)] = -1
             else:
-                hash[abs(i)] -= 1
+                hash_0[abs(i)] -= 1
         else:
-            hash[i] = hash.get(i, 0) + 1
+            hash_0[i] = hash_0.get(i, 0) + 1
     for i in arr:
-        if i in hash.keys() and hash[i] > 0:
+        if i in hash_0.keys() and hash_0[i] > 0:
             return i
     retval_0 = -1
     return retval_0

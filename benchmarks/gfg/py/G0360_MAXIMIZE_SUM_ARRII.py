@@ -7,9 +7,9 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     arr.sort()
-    sum = 0
+    sum_0 = 0
     for i in range(n):
-        sum += arr[i] * i
-    return sum
+        sum_0 += arr[i] * i
+    return sum_0
 "-----------------"
 test()

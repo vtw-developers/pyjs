@@ -5,10 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     mx = ""
-    for i in range(len(str)):
-        mx = max(mx, str[i:])
+    for i in range(len(str_0)):
+        mx = max(mx, str_0[i:])
     return mx
 "-----------------"
 test()

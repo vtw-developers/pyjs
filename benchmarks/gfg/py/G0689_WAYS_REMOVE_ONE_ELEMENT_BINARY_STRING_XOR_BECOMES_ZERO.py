@@ -5,12 +5,12 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     one_count = 0
     zero_count = 0
-    n = len(str)
+    n = len(str_0)
     for i in range(0, n, 1):
-        if str[i] == "1":
+        if str_0[i] == "1":
             one_count += 1
         else:
             zero_count += 1

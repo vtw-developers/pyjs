@@ -6,8 +6,8 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(a, b, c, d):
-    sum = a * a + b * b + c * c
-    if d * d == sum:
+    sum_0 = a * a + b * b + c * c
+    if d * d == sum_0:
         retval_0 = True
         return retval_0
     else:

@@ -6,7 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-def f_gold(str, l, h):
+def f_gold(str_0, l, h):
     if l > h:
         retval_0 = sys.maxsize
         return retval_0
@@ -14,13 +14,13 @@ def f_gold(str, l, h):
         retval_1 = 0
         return retval_1
     if l == h - 1:
-        retval_2 = 0 if (str[l] == str[h]) else 1
+        retval_2 = 0 if (str_0[l] == str_0[h]) else 1
         return retval_2
-    if str[l] == str[h]:
-        retval_3 = f_gold(str, l + 1, h - 1)
+    if str_0[l] == str_0[h]:
+        retval_3 = f_gold(str_0, l + 1, h - 1)
         return retval_3
     else:
-        retval_4 = min(f_gold(str, l, h - 1), f_gold(str, l + 1, h)) + 1
+        retval_4 = min(f_gold(str_0, l, h - 1), f_gold(str_0, l + 1, h)) + 1
         return retval_4
 "-----------------"
 test()

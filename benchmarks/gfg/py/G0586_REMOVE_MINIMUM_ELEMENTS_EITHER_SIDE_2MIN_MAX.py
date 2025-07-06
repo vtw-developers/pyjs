@@ -10,15 +10,15 @@ def f_gold(arr, n):
     longest_start = -1
     longest_end = 0
     for start in range(n):
-        min = sys.maxsize
-        max = -sys.maxsize
+        min_0 = sys.maxsize
+        max_0 = -sys.maxsize
         for end in range(start, n):
             val = arr[end]
-            if val < min:
-                min = val
-            if val > max:
-                max = val
-            if 2 * min <= max:
+            if val < min_0:
+                min_0 = val
+            if val > max_0:
+                max_0 = val
+            if 2 * min_0 <= max_0:
                 break
             if end - start > longest_end - longest_start or longest_start == -1:
                 longest_start = start

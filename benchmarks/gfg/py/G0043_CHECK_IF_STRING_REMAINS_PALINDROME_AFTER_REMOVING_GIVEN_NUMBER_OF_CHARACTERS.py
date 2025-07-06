@@ -5,8 +5,8 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str, n):
-    l = len(str)
+def f_gold(str_0, n):
+    l = len(str_0)
     if l >= n:
         retval_0 = True
         return retval_0

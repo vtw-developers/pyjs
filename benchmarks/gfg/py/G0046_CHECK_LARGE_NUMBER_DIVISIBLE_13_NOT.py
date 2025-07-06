@@ -16,7 +16,7 @@ def f_gold(num):
     elif length % 3 == 2:
         num = str(num) + "0"
         length += 1
-    sum = 0
+    sum_0 = 0
     p = 1
     for i in range(length - 1, -1, -1):
         group = 0
@@ -25,10 +25,10 @@ def f_gold(num):
         group += (ord(num[i]) - ord("0")) * 10
         i -= 1
         group += (ord(num[i]) - ord("0")) * 100
-        sum = sum + group * p
+        sum_0 = sum_0 + group * p
         p *= -1
-    sum = abs(sum)
-    retval_1 = sum % 13 == 0
+    sum_0 = abs(sum_0)
+    retval_1 = sum_0 % 13 == 0
     return retval_1
 "-----------------"
 test()

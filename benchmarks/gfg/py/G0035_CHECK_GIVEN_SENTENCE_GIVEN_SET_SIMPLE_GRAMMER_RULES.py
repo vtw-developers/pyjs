@@ -5,25 +5,25 @@ def test():
     idx = i
     result = f_gold(parameters_set)
 "-----------------"
-def f_gold(string):
-    length = len(string)
-    if string[0] < "A" or string[0] > "Z":
+def f_gold(string_0):
+    length = len(string_0)
+    if string_0[0] < "A" or string_0[0] > "Z":
         retval_0 = False
         return retval_0
-    if string[length - 1] != ".":
+    if string_0[length - 1] != ".":
         retval_1 = False
         return retval_1
     prev_state = 0
     curr_state = 0
     index = 1
-    while string[index]:
-        if string[index] >= "A" and string[index] <= "Z":
+    while string_0[index]:
+        if string_0[index] >= "A" and string_0[index] <= "Z":
             curr_state = 0
-        elif string[index] == " ":
+        elif string_0[index] == " ":
             curr_state = 1
-        elif string[index] >= "a" and string[index] <= "z":
+        elif string_0[index] >= "a" and string_0[index] <= "z":
             curr_state = 2
-        elif string[index] == ".":
+        elif string_0[index] == ".":
             curr_state = 3
         if prev_state == curr_state and curr_state != 2:
             retval_2 = False

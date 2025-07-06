@@ -5,11 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     zeros = 0
     ones = 0
-    for i in range(0, len(str)):
-        ch = str[i]
+    for i in range(0, len(str_0)):
+        ch = str_0[i]
         if ch == "0":
             zeros = zeros + 1
         else:

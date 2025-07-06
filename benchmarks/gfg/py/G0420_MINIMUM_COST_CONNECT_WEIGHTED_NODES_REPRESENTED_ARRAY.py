@@ -8,11 +8,11 @@ def test():
 import sys
 def f_gold(a, n):
     mn = sys.maxsize
-    sum = 0
+    sum_0 = 0
     for i in range(n):
         mn = min(a[i], mn)
-        sum += a[i]
-    retval_0 = mn * (sum - mn)
+        sum_0 += a[i]
+    retval_0 = mn * (sum_0 - mn)
     return retval_0
 "-----------------"
 test()

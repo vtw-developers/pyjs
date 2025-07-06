@@ -7,12 +7,12 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     s = set()
-    sum = 0
+    sum_0 = 0
     for i in range(n):
         if arr[i] not in s:
             s.add(arr[i])
     for i in s:
-        sum = sum + i
-    return sum
+        sum_0 = sum_0 + i
+    return sum_0
 "-----------------"
 test()

@@ -6,14 +6,14 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(num):
-    sum = 0
+    sum_0 = 0
     i = 2
     while i * i <= num:
         while num % i == 0:
-            sum += i
+            sum_0 += i
             num /= i
         i += 1
-    sum += num
-    return sum
+    sum_0 += num
+    return sum_0
 "-----------------"
 test()

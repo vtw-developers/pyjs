@@ -5,10 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     result = 0
-    for i in range(len(str)):
-        if (i == ord(str[i]) - ord("a")) or (i == ord(str[i]) - ord("A")):
+    for i in range(len(str_0)):
+        if (i == ord(str_0[i]) - ord("a")) or (i == ord(str_0[i]) - ord("A")):
             result += 1
     return result
 "-----------------"

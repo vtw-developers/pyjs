@@ -9,11 +9,11 @@ def f_gold(p):
     first = 1
     second = 1
     number = 2
-    next = 1
-    while next:
-        next = (first + second) % p
+    next_0 = 1
+    while next_0:
+        next_0 = (first + second) % p
         first = second
-        second = next
+        second = next_0
         number = number + 1
     return number
 "-----------------"

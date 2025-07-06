@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    sum = 0
+    sum_0 = 0
     for i in range(n):
-        sum += i * (n - i)
-    retval_0 = 2 * sum
+        sum_0 += i * (n - i)
+    retval_0 = 2 * sum_0
     return retval_0
 "-----------------"
 test()

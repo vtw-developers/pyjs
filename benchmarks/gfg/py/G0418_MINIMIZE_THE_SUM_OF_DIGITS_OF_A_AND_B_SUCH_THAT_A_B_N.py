@@ -6,13 +6,13 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    sum = 0
+    sum_0 = 0
     while n > 0:
-        sum += n % 10
+        sum_0 += n % 10
         n //= 10
-    if sum == 1:
+    if sum_0 == 1:
         retval_0 = 10
         return retval_0
-    return sum
+    return sum_0
 "-----------------"
 test()

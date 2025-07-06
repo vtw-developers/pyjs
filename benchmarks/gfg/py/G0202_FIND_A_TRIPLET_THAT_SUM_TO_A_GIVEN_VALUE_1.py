@@ -5,17 +5,17 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(A, arr_size, sum):
+def f_gold(A, arr_size, sum_0):
     A.sort()
     for i in range(0, arr_size - 2):
         l = i + 1
         r = arr_size - 1
         while l < r:
-            if A[i] + A[l] + A[r] == sum:
+            if A[i] + A[l] + A[r] == sum_0:
                 print("Triplet is", A[i], ", ", A[l], ", ", A[r])
                 retval_0 = True
                 return retval_0
-            elif A[i] + A[l] + A[r] < sum:
+            elif A[i] + A[l] + A[r] < sum_0:
                 l += 1
             else:
                 r -= 1

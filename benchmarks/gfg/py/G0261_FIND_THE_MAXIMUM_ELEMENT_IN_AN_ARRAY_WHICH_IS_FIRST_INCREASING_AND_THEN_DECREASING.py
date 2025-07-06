@@ -6,11 +6,11 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, low, high):
-    max = arr[low]
+    max_0 = arr[low]
     i = low
     for i in range(high + 1):
-        if arr[i] > max:
-            max = arr[i]
-    return max
+        if arr[i] > max_0:
+            max_0 = arr[i]
+    return max_0
 "-----------------"
 test()

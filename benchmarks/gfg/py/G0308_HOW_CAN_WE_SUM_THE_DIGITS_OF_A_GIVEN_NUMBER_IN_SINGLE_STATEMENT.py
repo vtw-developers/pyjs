@@ -6,10 +6,10 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    sum = 0
+    sum_0 = 0
     while n != 0:
-        sum = sum + int(n % 10)
+        sum_0 = sum_0 + int(n % 10)
         n = int(n / 10)
-    return sum
+    return sum_0
 "-----------------"
 test()

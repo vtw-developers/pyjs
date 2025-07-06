@@ -12,7 +12,7 @@ def f_gold(A, K):
     for i in range(n):
         pre_sum[i + 1] = pre_sum[i] + A[i]
     dp = [0] * n
-    sum = 0
+    sum_0 = 0
     for i in range(n):
         dp[i] = (pre_sum[n] - pre_sum[i]) / (n - i)
     for k in range(K - 1):

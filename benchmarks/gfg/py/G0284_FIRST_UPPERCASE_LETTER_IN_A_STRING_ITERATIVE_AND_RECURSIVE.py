@@ -5,10 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
-    for i in range(0, len(str)):
-        if str[i].istitle():
-            retval_0 = str[i]
+def f_gold(str_0):
+    for i in range(0, len(str_0)):
+        if str_0[i].istitle():
+            retval_0 = str_0[i]
             return retval_0
     retval_1 = 0
     return retval_1

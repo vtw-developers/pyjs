@@ -9,14 +9,14 @@ def f_gold(ar, n):
     if n <= 4:
         retval_0 = min(ar)
         return retval_0
-    sum = [0 for i in range(n)]
-    sum[0] = ar[0]
-    sum[1] = ar[1]
-    sum[2] = ar[2]
-    sum[3] = ar[3]
+    sum_0 = [0 for i in range(n)]
+    sum_0[0] = ar[0]
+    sum_0[1] = ar[1]
+    sum_0[2] = ar[2]
+    sum_0[3] = ar[3]
     for i in range(4, n):
-        sum[i] = ar[i] + min(sum[i - 4:i])
-    retval_1 = min(sum[n - 4:n])
+        sum_0[i] = ar[i] + min(sum_0[i - 4:i])
+    retval_1 = min(sum_0[n - 4:n])
     return retval_1
 "-----------------"
 test()

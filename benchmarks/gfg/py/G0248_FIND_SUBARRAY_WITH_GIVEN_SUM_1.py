@@ -5,15 +5,15 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(arr, n, sum):
+def f_gold(arr, n, sum_0):
     curr_sum = arr[0]
     start = 0
     i = 1
     while i <= n:
-        while curr_sum > sum and start < i - 1:
+        while curr_sum > sum_0 and start < i - 1:
             curr_sum = curr_sum - arr[start]
             start += 1
-        if curr_sum == sum:
+        if curr_sum == sum_0:
             print("Sum found between indexes")
             print("%d and %d" % (start, i - 1))
             retval_0 = 1

@@ -6,15 +6,15 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, size, KthIndex):
-    dict = {}
+    dict_0 = {}
     vect = []
     for i in range(size):
-        if arr[i] in dict:
-            dict[arr[i]] = dict[arr[i]] + 1
+        if arr[i] in dict_0:
+            dict_0[arr[i]] = dict_0[arr[i]] + 1
         else:
-            dict[arr[i]] = 1
+            dict_0[arr[i]] = 1
     for i in range(size):
-        if dict[arr[i]] > 1:
+        if dict_0[arr[i]] > 1:
             continue
         else:
             KthIndex = KthIndex - 1

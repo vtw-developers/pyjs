@@ -5,11 +5,11 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-def f_gold(str):
+def f_gold(str_0):
     i = 0
-    j = len(str) - 1
+    j = len(str_0) - 1
     while i < j:
-        if str[i] != str[j]:
+        if str_0[i] != str_0[j]:
             retval_0 = False
             return retval_0
         i += 1
