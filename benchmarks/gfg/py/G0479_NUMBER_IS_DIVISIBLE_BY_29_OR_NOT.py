@@ -10,6 +10,7 @@ def f_gold(n):
         last_digit = int(n % 10)
         n = int(n / 10)
         n += last_digit * 3
-    return n % 29 == 0
+    retval_0 = n % 29 == 0
+    return retval_0
 "-----------------"
 test()

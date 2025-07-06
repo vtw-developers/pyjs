@@ -7,11 +7,13 @@ def test():
 "-----------------"
 def f_gold(arr, n, m):
     if n > m:
-        return True
+        retval_0 = True
+        return retval_0
     DP = [False for i in range(m)]
     for i in range(n):
         if DP[0]:
-            return True
+            retval_1 = True
+            return retval_1
         temp = [False for i in range(m)]
         for j in range(m):
             if DP[j] == True:
@@ -21,6 +23,7 @@ def f_gold(arr, n, m):
             if temp[j]:
                 DP[j] = True
         DP[arr[i] % m] = True
-    return DP[0]
+    retval_2 = DP[0]
+    return retval_2
 "-----------------"
 test()

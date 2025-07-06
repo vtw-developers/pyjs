@@ -8,8 +8,10 @@ def test():
 def f_gold(a, b, c, d):
     sum = a * a + b * b + c * c
     if d * d == sum:
-        return True
+        retval_0 = True
+        return retval_0
     else:
-        return False
+        retval_1 = False
+        return retval_1
 "-----------------"
 test()

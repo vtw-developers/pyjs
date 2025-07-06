@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(limit):
     if limit < 2:
-        return 0
+        retval_0 = 0
+        return retval_0
     ef1 = 0
     ef2 = 2
     sm = ef1 + ef2

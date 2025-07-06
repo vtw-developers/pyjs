@@ -7,18 +7,22 @@ def test():
 "-----------------"
 def f_gold(arr, n, x):
     if n < 2:
-        return False
+        retval_0 = False
+        return retval_0
     s = set()
     for i in range(0, n):
         if arr[i] == 0:
             if x == 0:
-                return True
+                retval_1 = True
+                return retval_1
             else:
                 continue
         if x % arr[i] == 0:
             if x // arr[i] in s:
-                return True
+                retval_2 = True
+                return retval_2
             s.add(arr[i])
-    return False
+    retval_3 = False
+    return retval_3
 "-----------------"
 test()

@@ -10,6 +10,7 @@ def f_gold(s):
     s -= length
     breadth = s / 2
     height = s - breadth
-    return int(length * breadth * height)
+    retval_0 = int(length * breadth * height)
+    return retval_0
 "-----------------"
 test()

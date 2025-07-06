@@ -9,7 +9,8 @@ def f_gold(a, b):
     count = 0
     p = abs(a * b)
     if p == 0:
-        return 1
+        retval_0 = 1
+        return retval_0
     while p > 0:
         count = count + 1
         p = p // 10

@@ -7,6 +7,7 @@ def test():
 "-----------------"
 import math
 def f_gold(n):
-    return math.pow(n, 2)
+    retval_0 = math.pow(n, 2)
+    return retval_0
 "-----------------"
 test()

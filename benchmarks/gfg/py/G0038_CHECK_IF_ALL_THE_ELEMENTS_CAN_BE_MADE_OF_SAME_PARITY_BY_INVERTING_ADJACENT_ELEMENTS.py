@@ -14,8 +14,10 @@ def f_gold(a, n):
         else:
             count_even += 1
     if count_odd % 2 and count_even % 2:
-        return False
+        retval_0 = False
+        return retval_0
     else:
-        return True
+        retval_1 = True
+        return retval_1
 "-----------------"
 test()

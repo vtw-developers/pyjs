@@ -21,6 +21,7 @@ def f_gold(mat, n):
             diag2_right += mat[j][i]
         i += 1
         j -= 1
-    return (diag1_left == diag2_right and diag2_right == diag2_left and diag1_right == diag2_left and diag2_right == mat[n // 2][n // 2])
+    retval_0 = (diag1_left == diag2_right and diag2_right == diag2_left and diag1_right == diag2_left and diag2_right == mat[n // 2][n // 2])
+    return retval_0
 "-----------------"
 test()

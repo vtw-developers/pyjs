@@ -11,6 +11,7 @@ def f_gold(n, p):
     while temp <= n:
         ans += n / temp
         temp = temp * p
-    return int(ans)
+    retval_0 = int(ans)
+    return retval_0
 "-----------------"
 test()

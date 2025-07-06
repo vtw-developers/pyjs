@@ -7,10 +7,13 @@ def test():
 "-----------------"
 def f_gold(x, y):
     if y == 0:
-        return 0
+        retval_0 = 0
+        return retval_0
     if y > 0:
-        return x + f_gold(x, y - 1)
+        retval_1 = x + f_gold(x, y - 1)
+        return retval_1
     if y < 0:
-        return -f_gold(x, -y)
+        retval_2 = -f_gold(x, -y)
+        return retval_2
 "-----------------"
 test()

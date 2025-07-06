@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(N):
     if N == 1:
-        return 4
+        retval_0 = 4
+        return retval_0
     countB = 1
     countS = 1
     for i in range(2, N + 1):
@@ -16,6 +17,7 @@ def f_gold(N):
         countS = prev_countB + prev_countS
         countB = prev_countS
     result = countS + countB
-    return result * result
+    retval_1 = result * result
+    return retval_1
 "-----------------"
 test()

@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(s):
     if len(s) >= 10:
-        return True
+        retval_0 = True
+        return retval_0
     for i in range(1, len(s)):
         for j in range(i + 1, len(s)):
             for k in range(j + 1, len(s)):
@@ -16,7 +17,9 @@ def f_gold(s):
                 s3 = s[j:k - j]
                 s4 = s[k:len(s) - k]
                 if (s1 != s2 and s1 != s3 and s1 != s4 and s2 != s3 and s2 != s4 and s3 != s4):
-                    return True
-    return False
+                    retval_1 = True
+                    return retval_1
+    retval_2 = False
+    return retval_2
 "-----------------"
 test()

@@ -13,7 +13,9 @@ def f_gold(arr, low, high, x):
         if arr[i] == x:
             return i
         if arr[i] < x and arr[i + 1] >= x:
-            return i + 1
-    return -1
+            retval_0 = i + 1
+            return retval_0
+    retval_1 = -1
+    return retval_1
 "-----------------"
 test()

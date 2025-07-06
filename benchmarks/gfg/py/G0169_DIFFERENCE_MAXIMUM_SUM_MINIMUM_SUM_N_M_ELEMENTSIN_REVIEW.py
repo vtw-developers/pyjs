@@ -14,6 +14,7 @@ def f_gold(arr, n, m):
         min += arr[i]
         max += arr[j]
         j = j - 1
-    return max - min
+    retval_0 = max - min
+    return retval_0
 "-----------------"
 test()

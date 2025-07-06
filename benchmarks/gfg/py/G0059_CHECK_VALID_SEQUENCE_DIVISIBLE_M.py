@@ -20,10 +20,13 @@ def f_gold(n, index, Sum, M, arr, dp):
     global MAX
     if index == n:
         if (Sum % M) == 0:
-            return True
-        return False
+            retval_0 = True
+            return retval_0
+        retval_1 = False
+        return retval_1
     if dp[index][Sum] != -1:
-        return dp[index][Sum]
+        retval_2 = dp[index][Sum]
+        return retval_2
     placeAdd = f_gold(n, index + 1, Sum + arr[index], M, arr, dp)
     placeMinus = f_gold(n, index + 1, Sum - arr[index], M, arr, dp)
     res = placeAdd or placeMinus

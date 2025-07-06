@@ -8,12 +8,15 @@ def test():
 def f_gold(A, B):
     variable = 1
     if A == B:
-        return 1
+        retval_0 = 1
+        return retval_0
     elif (B - A) >= 5:
-        return 0
+        retval_1 = 0
+        return retval_1
     else:
         for i in range(A + 1, B + 1):
             variable = (variable * (i % 10)) % 10
-        return variable % 10
+        retval_2 = variable % 10
+        return retval_2
 "-----------------"
 test()

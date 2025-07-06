@@ -12,6 +12,7 @@ def f_gold(n):
         bell[i][0] = bell[i - 1][i - 1]
         for j in range(1, i + 1):
             bell[i][j] = bell[i - 1][j - 1] + bell[i][j - 1]
-    return bell[n][0]
+    retval_0 = bell[n][0]
+    return retval_0
 "-----------------"
 test()

@@ -11,7 +11,9 @@ def f_gold(arr, n):
             if arr[i] - arr[i + 1] == 1:
                 arr[i], arr[i + 1] = arr[i + 1], arr[i]
             else:
-                return False
-    return True
+                retval_0 = False
+                return retval_0
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

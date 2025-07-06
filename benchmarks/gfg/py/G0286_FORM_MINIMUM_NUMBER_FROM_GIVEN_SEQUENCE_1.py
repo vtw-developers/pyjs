@@ -8,7 +8,8 @@ def test():
 def f_gold(seq):
     n = len(seq)
     if n >= 9:
-        return "-1"
+        retval_0 = "-1"
+        return retval_0
     result = [None] * (n + 1)
     count = 1
     for i in range(n + 1):

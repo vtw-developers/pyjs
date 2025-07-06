@@ -20,6 +20,7 @@ def f_gold(arr, n):
             count += (um[itr] * int(um[itr] - 1)) / 2
     if um.get(0):
         count += um[0]
-    return int(count)
+    retval_0 = int(count)
+    return retval_0
 "-----------------"
 test()

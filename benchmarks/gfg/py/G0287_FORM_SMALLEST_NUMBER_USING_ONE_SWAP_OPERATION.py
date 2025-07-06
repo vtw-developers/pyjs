@@ -33,6 +33,7 @@ def f_gold(num):
             if rightMin[i] != -1:
                 num[i], num[rightMin[i]] = num[rightMin[i]], num[i]
                 break
-    return "".join(num)
+    retval_0 = "".join(num)
+    return retval_0
 "-----------------"
 test()

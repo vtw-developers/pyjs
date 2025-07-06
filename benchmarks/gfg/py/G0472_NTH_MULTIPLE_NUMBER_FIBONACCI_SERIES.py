@@ -14,7 +14,8 @@ def f_gold(k, n):
         f1 = f2
         f2 = f3
         if f2 % k == 0:
-            return n * i
+            retval_0 = n * i
+            return retval_0
         i += 1
     return
 "-----------------"

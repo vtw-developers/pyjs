@@ -11,6 +11,7 @@ def f_gold(l):
     sumLastLevel = 0
     sumLastLevel = (leafNodeCount * (leafNodeCount + 1)) / 2
     sum = sumLastLevel * l
-    return int(sum)
+    retval_0 = int(sum)
+    return retval_0
 "-----------------"
 test()

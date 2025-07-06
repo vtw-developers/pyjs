@@ -8,6 +8,7 @@ def test():
 def f_gold(n):
     sum = 0
     sum = 1 << n
-    return sum - 1
+    retval_0 = sum - 1
+    return retval_0
 "-----------------"
 test()

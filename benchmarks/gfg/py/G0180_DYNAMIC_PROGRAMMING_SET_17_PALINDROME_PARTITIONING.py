@@ -28,6 +28,7 @@ def f_gold(str):
                 C[i][j] = 100000000
                 for k in range(i, j):
                     C[i][j] = min(C[i][j], C[i][k] + C[k + 1][j] + 1)
-    return C[0][n - 1]
+    retval_0 = C[0][n - 1]
+    return retval_0
 "-----------------"
 test()

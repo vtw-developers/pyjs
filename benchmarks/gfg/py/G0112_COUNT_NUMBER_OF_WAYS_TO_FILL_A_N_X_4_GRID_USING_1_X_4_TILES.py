@@ -14,6 +14,7 @@ def f_gold(n):
             dp[i] = 2
         else:
             dp[i] = dp[i - 1] + dp[i - 4]
-    return dp[n]
+    retval_0 = dp[n]
+    return retval_0
 "-----------------"
 test()

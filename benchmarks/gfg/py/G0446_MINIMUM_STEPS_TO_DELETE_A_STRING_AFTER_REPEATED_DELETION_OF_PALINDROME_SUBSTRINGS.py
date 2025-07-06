@@ -23,6 +23,7 @@ def f_gold(str):
                         dp[i][j] = min(dp[i + 1][K - 1] + dp[K + 1][j], dp[i][j])
             i += 1
             j += 1
-    return dp[0][N - 1]
+    retval_0 = dp[0][N - 1]
+    return retval_0
 "-----------------"
 test()

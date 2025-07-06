@@ -8,6 +8,7 @@ def test():
 def f_gold(a, b):
     if a == 0:
         return b
-    return f_gold(b % a, a)
+    retval_0 = f_gold(b % a, a)
+    return retval_0
 "-----------------"
 test()

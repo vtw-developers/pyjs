@@ -7,8 +7,10 @@ def test():
 "-----------------"
 def f_gold(n, k):
     if n + 1 >= k:
-        return k - 1
+        retval_0 = k - 1
+        return retval_0
     else:
-        return 2 * n + 1 - k
+        retval_1 = 2 * n + 1 - k
+        return retval_1
 "-----------------"
 test()

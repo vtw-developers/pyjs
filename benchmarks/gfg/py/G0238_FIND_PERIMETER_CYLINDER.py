@@ -6,6 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(diameter, height):
-    return 2 * (diameter + height)
+    retval_0 = 2 * (diameter + height)
+    return retval_0
 "-----------------"
 test()

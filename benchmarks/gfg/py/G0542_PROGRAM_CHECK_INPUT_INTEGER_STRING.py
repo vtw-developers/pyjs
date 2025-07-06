@@ -8,7 +8,9 @@ def test():
 def f_gold(s):
     for i in range(len(s)):
         if s[i].isdigit() != True:
-            return False
-    return True
+            retval_0 = False
+            return retval_0
+    retval_1 = True
+    return retval_1
 "-----------------"
 test()

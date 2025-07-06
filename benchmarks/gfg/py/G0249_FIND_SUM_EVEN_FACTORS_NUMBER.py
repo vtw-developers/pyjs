@@ -8,7 +8,8 @@ def test():
 import math
 def f_gold(n):
     if n % 2 != 0:
-        return 0
+        retval_0 = 0
+        return retval_0
     res = 1
     for i in range(2, (int)(math.sqrt(n)) + 1):
         count = 0

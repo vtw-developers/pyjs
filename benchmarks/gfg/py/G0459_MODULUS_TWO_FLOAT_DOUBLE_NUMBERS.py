@@ -14,7 +14,8 @@ def f_gold(a, b):
     while mod >= b:
         mod = mod - b
     if a < 0:
-        return -mod
+        retval_0 = -mod
+        return retval_0
     return mod
 "-----------------"
 test()

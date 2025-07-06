@@ -12,6 +12,7 @@ def f_gold(n):
     while n != 0:
         n >>= 1
         count += 1
-    return 1 << count
+    retval_0 = 1 << count
+    return retval_0
 "-----------------"
 test()

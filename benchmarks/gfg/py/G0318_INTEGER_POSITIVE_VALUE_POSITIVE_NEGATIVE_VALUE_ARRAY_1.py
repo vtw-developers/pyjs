@@ -15,6 +15,7 @@ def f_gold(arr, n):
             neg += 1
         else:
             pos += 1
-    return sum / abs(neg - pos)
+    retval_0 = sum / abs(neg - pos)
+    return retval_0
 "-----------------"
 test()

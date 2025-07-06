@@ -7,6 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     arr.sort()
-    return arr[n - 1] + arr[n - 2] + arr[n - 3]
+    retval_0 = arr[n - 1] + arr[n - 2] + arr[n - 3]
+    return retval_0
 "-----------------"
 test()

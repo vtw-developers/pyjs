@@ -7,12 +7,15 @@ def test():
 "-----------------"
 def f_gold(array, start, end):
     if start > end:
-        return end + 1
+        retval_0 = end + 1
+        return retval_0
     if start != array[start]:
         return start
     mid = int((start + end) / 2)
     if array[mid] == mid:
-        return f_gold(array, mid + 1, end)
-    return f_gold(array, start, mid)
+        retval_1 = f_gold(array, mid + 1, end)
+        return retval_1
+    retval_2 = f_gold(array, start, mid)
+    return retval_2
 "-----------------"
 test()

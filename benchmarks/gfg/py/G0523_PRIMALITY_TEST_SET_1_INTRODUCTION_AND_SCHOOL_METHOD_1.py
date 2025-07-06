@@ -7,16 +7,21 @@ def test():
 "-----------------"
 def f_gold(n):
     if n <= 1:
-        return False
+        retval_0 = False
+        return retval_0
     if n <= 3:
-        return True
+        retval_1 = True
+        return retval_1
     if n % 2 == 0 or n % 3 == 0:
-        return False
+        retval_2 = False
+        return retval_2
     i = 5
     while i * i <= n:
         if n % i == 0 or n % (i + 2) == 0:
-            return False
+            retval_3 = False
+            return retval_3
         i = i + 6
-    return True
+    retval_4 = True
+    return retval_4
 "-----------------"
 test()

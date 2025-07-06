@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(n):
     if n == 0:
-        return "0"
+        retval_0 = "0"
+        return retval_0
     bin = ""
     while n > 0:
         if n & 1 == 0:

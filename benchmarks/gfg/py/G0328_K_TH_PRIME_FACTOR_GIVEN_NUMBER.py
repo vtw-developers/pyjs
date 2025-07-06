@@ -11,7 +11,8 @@ def f_gold(n, k):
         k = k - 1
         n = n / 2
         if k == 0:
-            return 2
+            retval_0 = 2
+            return retval_0
     i = 3
     while i <= math.sqrt(n):
         while n % i == 0:
@@ -22,6 +23,7 @@ def f_gold(n, k):
         i = i + 2
     if n > 2 and k == 1:
         return n
-    return -1
+    retval_1 = -1
+    return retval_1
 "-----------------"
 test()

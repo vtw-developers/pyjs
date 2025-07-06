@@ -11,15 +11,18 @@ def f_gold(n):
     if n < 0:
         n = -n
     if n == 0:
-        return 1
+        retval_0 = 1
+        return retval_0
     if n == 1:
-        return 0
+        retval_1 = 0
+        return retval_1
     while n:
         if n & 1:
             odd_count += 1
         if n & 2:
             even_count += 1
         n = n >> 2
-    return f_gold(abs(odd_count - even_count))
+    retval_2 = f_gold(abs(odd_count - even_count))
+    return retval_2
 "-----------------"
 test()

@@ -20,6 +20,7 @@ def f_gold(m, x, revenue, n, t):
                 nxtbb += 1
         else:
             maxRev[i] = maxRev[i - 1]
-    return maxRev[m]
+    retval_0 = maxRev[m]
+    return retval_0
 "-----------------"
 test()

@@ -19,6 +19,7 @@ def f_gold(A, K):
         for i in range(n):
             for j in range(i + 1, n):
                 dp[i] = max(dp[i], (pre_sum[j] - pre_sum[i]) / (j - i) + dp[j])
-    return int(dp[0])
+    retval_0 = int(dp[0])
+    return retval_0
 "-----------------"
 test()

@@ -7,9 +7,12 @@ def test():
 "-----------------"
 def f_gold(n):
     if n == 0 or n == 9:
-        return True
+        retval_0 = True
+        return retval_0
     if n < 9:
-        return False
-    return f_gold((int)(n >> 3) - (int)(n & 7))
+        retval_1 = False
+        return retval_1
+    retval_2 = f_gold((int)(n >> 3) - (int)(n & 7))
+    return retval_2
 "-----------------"
 test()

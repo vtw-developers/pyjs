@@ -8,7 +8,8 @@ def test():
 import sys
 def f_gold(arr, n):
     if n < 3:
-        return -1
+        retval_0 = -1
+        return retval_0
     max_product = -(sys.maxsize - 1)
     for i in range(0, n - 2):
         for j in range(i + 1, n - 1):

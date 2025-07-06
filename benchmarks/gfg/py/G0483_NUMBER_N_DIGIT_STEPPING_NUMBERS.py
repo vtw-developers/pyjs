@@ -8,7 +8,8 @@ def test():
 def f_gold(n):
     dp = [[0 for x in range(10)] for y in range(n + 1)]
     if n == 1:
-        return 10
+        retval_0 = 10
+        return retval_0
     for j in range(10):
         dp[1][j] = 1
     for i in range(2, n + 1):

@@ -23,6 +23,7 @@ def f_gold(grid, n):
         excl_new = max(excl, incl)
         incl = excl + max(grid[0][i], grid[1][i])
         excl = excl_new
-    return max(excl, incl)
+    retval_0 = max(excl, incl)
+    return retval_0
 "-----------------"
 test()

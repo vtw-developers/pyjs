@@ -20,10 +20,13 @@ def f_gold(n, index, modulo, M, arr, dp):
     modulo = ((modulo % M) + M) % M
     if index == n:
         if modulo == 0:
-            return 1
-        return 0
+            retval_0 = 1
+            return retval_0
+        retval_1 = 0
+        return retval_1
     if dp[index][modulo] != -1:
-        return dp[index][modulo]
+        retval_2 = dp[index][modulo]
+        return retval_2
     placeAdd = f_gold(n, index + 1, modulo + arr[index], M, arr, dp)
     placeMinus = f_gold(n, index + 1, modulo - arr[index], M, arr, dp)
     res = bool(placeAdd or placeMinus)

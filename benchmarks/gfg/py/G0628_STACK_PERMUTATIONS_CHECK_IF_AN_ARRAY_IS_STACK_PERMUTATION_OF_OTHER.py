@@ -27,6 +27,7 @@ def f_gold(ip, op, n):
                     break
         else:
             tempStack.append(ele)
-    return Input.empty() and len(tempStack) == 0
+    retval_0 = Input.empty() and len(tempStack) == 0
+    return retval_0
 "-----------------"
 test()

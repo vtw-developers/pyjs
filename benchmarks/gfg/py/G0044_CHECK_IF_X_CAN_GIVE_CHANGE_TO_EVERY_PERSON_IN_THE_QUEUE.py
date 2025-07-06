@@ -16,7 +16,8 @@ def f_gold(notes, n):
                 fiveCount -= 1
                 tenCount += 1
             else:
-                return 0
+                retval_0 = 0
+                return retval_0
         else:
             if fiveCount > 0 and tenCount > 0:
                 fiveCount -= 1
@@ -24,7 +25,9 @@ def f_gold(notes, n):
             elif fiveCount >= 3:
                 fiveCount -= 3
             else:
-                return 0
-    return 1
+                retval_1 = 0
+                return retval_1
+    retval_2 = 1
+    return retval_2
 "-----------------"
 test()

@@ -7,14 +7,17 @@ def test():
 "-----------------"
 def f_gold(a, b):
     if a == 0 or b == 0:
-        return False
+        retval_0 = False
+        return retval_0
     result = a * b
     if result >= 9223372036854775807 or result <= -9223372036854775808:
         result = 0
     if a == (result // b):
         print(result // b)
-        return False
+        retval_1 = False
+        return retval_1
     else:
-        return True
+        retval_2 = True
+        return retval_2
 "-----------------"
 test()

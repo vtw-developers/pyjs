@@ -14,7 +14,9 @@ def f_gold(a, b, k, n1, n2):
         if a[i] not in s:
             missing += 1
         if missing == k:
-            return a[i]
-    return -1
+            retval_0 = a[i]
+            return retval_0
+    retval_1 = -1
+    return retval_1
 "-----------------"
 test()

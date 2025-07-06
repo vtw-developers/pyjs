@@ -15,6 +15,7 @@ def f_gold(n):
         curr = prevPrev + prev
         n = n - (curr - prev - 1)
     n = n + (curr - prev - 1)
-    return prev + n
+    retval_0 = prev + n
+    return retval_0
 "-----------------"
 test()

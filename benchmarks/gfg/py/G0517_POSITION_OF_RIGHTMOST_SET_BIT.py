@@ -7,6 +7,7 @@ def test():
 "-----------------"
 import math
 def f_gold(n):
-    return math.log2(n & -n) + 1
+    retval_0 = math.log2(n & -n) + 1
+    return retval_0
 "-----------------"
 test()

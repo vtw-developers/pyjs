@@ -7,10 +7,12 @@ def test():
 "-----------------"
 def f_gold(arr, N):
     if N < 3:
-        return False
+        retval_0 = False
+        return retval_0
     arr.sort()
     for i in range(N - 2):
         if arr[i] + arr[i + 1] > arr[i + 2]:
-            return True
+            retval_1 = True
+            return retval_1
 "-----------------"
 test()

@@ -8,7 +8,8 @@ def test():
 def f_gold(num):
     length = len(num)
     if length == 1 and num[0] == "0":
-        return True
+        retval_0 = True
+        return retval_0
     if length % 3 == 1:
         num = str(num) + "00"
         length += 2
@@ -27,6 +28,7 @@ def f_gold(num):
         sum = sum + group * p
         p *= -1
     sum = abs(sum)
-    return sum % 13 == 0
+    retval_1 = sum % 13 == 0
+    return retval_1
 "-----------------"
 test()

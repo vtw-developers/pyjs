@@ -12,6 +12,7 @@ def f_gold(price, n, k):
         for j in range(1, n):
             prevDiff = max(prevDiff, profit[i - 1][j - 1] - price[j - 1])
             profit[i][j] = max(profit[i][j - 1], price[j] + prevDiff)
-    return profit[k][n - 1]
+    retval_0 = profit[k][n - 1]
+    return retval_0
 "-----------------"
 test()

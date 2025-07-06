@@ -9,12 +9,15 @@ def f_gold(str1, str2):
     n1 = len(str1)
     n2 = len(str2)
     if n1 != n2:
-        return 0
+        retval_0 = 0
+        return retval_0
     str1 = sorted(str1)
     str2 = sorted(str2)
     for i in range(0, n1):
         if str1[i] != str2[i]:
-            return 0
-    return 1
+            retval_1 = 0
+            return retval_1
+    retval_2 = 1
+    return retval_2
 "-----------------"
 test()

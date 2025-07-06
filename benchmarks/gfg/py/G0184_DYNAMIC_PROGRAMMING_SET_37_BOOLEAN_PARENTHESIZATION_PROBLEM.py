@@ -35,6 +35,7 @@ def f_gold(symb, oper, n):
                     T[i][j] += F[i][k] * T[k + 1][j] + T[i][k] * F[k + 1][j]
                     F[i][j] += T[i][k] * T[k + 1][j] + F[i][k] * F[k + 1][j]
             i += 1
-    return T[0][n - 1]
+    retval_0 = T[0][n - 1]
+    return retval_0
 "-----------------"
 test()

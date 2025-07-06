@@ -9,7 +9,9 @@ def f_gold(str, corner):
     n = len(str)
     cl = len(corner)
     if n < cl:
-        return False
-    return (str[:cl] == corner) and (str[n - cl:] == corner)
+        retval_0 = False
+        return retval_0
+    retval_1 = (str[:cl] == corner) and (str[n - cl:] == corner)
+    return retval_1
 "-----------------"
 test()

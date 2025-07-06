@@ -23,7 +23,8 @@ def f_gold(s):
                 i = i + 1
     res = lps[n - 1]
     if res > n / 2:
-        return n // 2
+        retval_0 = n // 2
+        return retval_0
     else:
         return res
 "-----------------"

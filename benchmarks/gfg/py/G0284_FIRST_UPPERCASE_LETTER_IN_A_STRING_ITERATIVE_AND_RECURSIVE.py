@@ -8,7 +8,9 @@ def test():
 def f_gold(str):
     for i in range(0, len(str)):
         if str[i].istitle():
-            return str[i]
-    return 0
+            retval_0 = str[i]
+            return retval_0
+    retval_1 = 0
+    return retval_1
 "-----------------"
 test()
