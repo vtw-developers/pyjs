@@ -168,5 +168,14 @@
       "console": "integratedTerminal",
       "justMyCode": true
     },
+    {
+      "name": "tar_program_run.js (Node.js)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/tmp/",
+      "program": "tar_program_run.js",
+      "console": "integratedTerminal",
+      "runtimeExecutable": "/root/.nvm/versions/node/v20.19.3/bin/node",
+    }
   ]
 }
