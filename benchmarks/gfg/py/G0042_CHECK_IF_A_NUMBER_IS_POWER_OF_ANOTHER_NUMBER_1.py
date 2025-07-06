@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(x, y):
     res1 = math.log(y) / math.log(x)
     res2 = math.log(y) / math.log(x)

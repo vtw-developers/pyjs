@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import collections
-
-
 def f_gold(arr, n):
     q = collections.deque([])
     arr.sort()

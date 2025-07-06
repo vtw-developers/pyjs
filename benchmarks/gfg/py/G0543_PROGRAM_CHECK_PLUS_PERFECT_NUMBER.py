@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(x):
     temp = x
     n = 0

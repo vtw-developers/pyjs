@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(str, l, h):
     if l > h:
         return sys.maxsize

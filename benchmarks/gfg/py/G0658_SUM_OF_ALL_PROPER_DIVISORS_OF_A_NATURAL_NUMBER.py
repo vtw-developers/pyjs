@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(num):
     result = 0
     i = 2

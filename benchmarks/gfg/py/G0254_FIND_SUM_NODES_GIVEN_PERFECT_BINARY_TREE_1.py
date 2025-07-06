@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import math
-
-
 def f_gold(l):
     leafNodeCount = math.pow(2, l - 1)
     sumLastLevel = 0

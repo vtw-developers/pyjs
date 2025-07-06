@@ -18,7 +18,7 @@ def test():
 "-----------------"
 def f_gold(dp, arr1, n, arr2, m, k):
     if k < 0:
-        return -(10**7)
+        return -(10 ** 7)
     if n < 0 or m < 0:
         return 0
     ans = dp[n][m][k]

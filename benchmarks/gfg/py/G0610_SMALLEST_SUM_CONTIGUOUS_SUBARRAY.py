@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(arr, n):
     min_ending_here = sys.maxsize
     min_so_far = sys.maxsize

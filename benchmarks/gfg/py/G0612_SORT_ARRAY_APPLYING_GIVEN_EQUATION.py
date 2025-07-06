@@ -7,8 +7,6 @@ def test():
     result = parameters_set
 "-----------------"
 import sys
-
-
 def f_gold(arr, n, A, B, C):
     for i in range(n):
         arr[i] = A * arr[i] * arr[i] + B * arr[i] + C

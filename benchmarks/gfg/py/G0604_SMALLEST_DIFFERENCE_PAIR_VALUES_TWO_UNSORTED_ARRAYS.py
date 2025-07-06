@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(A, B, m, n):
     A.sort()
     B.sort()

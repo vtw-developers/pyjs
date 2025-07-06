@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 from queue import Queue
-
-
 def f_gold(ip, op, n):
     Input = Queue()
     for i in range(n):

@@ -6,8 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 import sys
-
-
 def f_gold(arr, n):
     if n < 3:
         return -1

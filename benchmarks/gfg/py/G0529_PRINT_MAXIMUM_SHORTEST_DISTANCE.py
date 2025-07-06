@@ -14,7 +14,7 @@ def f_gold(a, n, k):
             b[x] = d
         else:
             b[x] = min(d, b[x])
-    ans = 10**9
+    ans = 10 ** 9
     for i in range(n):
         x = a[i]
         if x != (k - x) and (k - x) in b.keys():
