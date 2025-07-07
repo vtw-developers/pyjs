@@ -18,6 +18,8 @@ function serializeNum(arg) {
     return serializeString("inf");
   if (arg === -Infinity)
     return serializeString("-inf");
+  if (Number.isNaN(arg))
+    return serializeString("nan");
   return ["number", arg];
 }
 

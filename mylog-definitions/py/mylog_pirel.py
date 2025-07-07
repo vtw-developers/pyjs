@@ -18,6 +18,8 @@ def serialize_num(arg: Union[int, float]):
     return serialize_str("inf")
   if arg == -float('inf'):
     return serialize_str("-inf")
+  if math.isnan(arg):
+    return serialize_str("nan")
   return ["number", arg]
 
 def serialize_list(arg: Union[list, tuple]):
