@@ -500,6 +500,7 @@ class TransSession():
 
     # 1 get slot ids that are problematic and have the same node type and node id
     problematic_slot_ids = self.pirel_expand_unexpanded_slots_get_problematic_slot_ids(problematic_slot_id)
+    problematic_slot_ids = list(set(problematic_slot_ids))  # remove duplicates
 
     # 2 collect unique contexts
     unique_contexts_dict = {}
