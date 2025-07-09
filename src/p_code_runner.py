@@ -148,12 +148,18 @@ async def _run_code(code: str, lang: str,
   temp_filename = _get_temp_filename(code, lang)
   p_utils.write_text(temp_filename, code)
 
+  logger.debug(f'Executing command: {command} {temp_filename}')
   try:
+    proc = await create_subprocess_exec(command, temp_filename,
+                                        stdout=PIPE, stderr=PIPE)
     async with timeout(timeout_sec):
-      logger.debug(f'Executing command: {command} {temp_filename}')
-      proc = await create_subprocess_exec(command, temp_filename,
-                                          stdout=PIPE, stderr=PIPE)
-      stdout, stderr = map(bytes.decode, await proc.communicate())
+      # await proc.communicate() sometimes create a zombie process,
+      # which probably has something to do with improper pipe cleanup
+      # at in asyncio.gather.  See also
+      # https://github.com/python/cpython/issues/103847
+      # and relevant issues mentioned in that thread.
+      stdout = (await proc._read_stream(1)).decode()
+      stderr = (await proc._read_stream(2)).decode()
   except Exception as exc:
     logger.debug(f'Error executing "{command} {temp_filename}": {exc}')
     proc.kill()
