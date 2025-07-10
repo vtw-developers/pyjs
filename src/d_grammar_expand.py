@@ -214,8 +214,10 @@ class TransSession():
       return next_alt_node_dict
 
     def _get_nth_parent_inner_fun(alt_node, n):
-      if alt_node is None: return None
-      if n == 0: return alt_node
+      if alt_node is None:
+        return None
+      if n == 0:
+        return alt_node
       return _get_nth_parent_inner_fun(self._alt_tree_dict[alt_node['prev_alt_id']], n - 1)
 
     _allowed_backward_alt_step = 0
