@@ -307,14 +307,6 @@ class TransSession():
       raise
 
   def _get_or_create_alt_node(self, prev_alt_node, slot_expan_idx, **kwargs):
-    '''
-    call stack (most recent on top):
-    _get_or_create_alt_node()       <- this
-    _get_or_create_next_alt_inner_fun()
-    get_translation()               # inside an expand loop
-    '''
-
-    if DEBUG_VERBOSE > -10: print(f"_get_or_create_alt_node (prev_id:{prev_alt_node['alt_id']}) (se_idx:{slot_expan_idx}) ...")
     assert len(prev_alt_node["todo_slot_ids"]) > 0
 
     prev_alt_node_id = prev_alt_node["alt_id"]
@@ -325,13 +317,11 @@ class TransSession():
     if slot_expan_idx not in prev_alt_node["next_alt_choose_dict"]:
 
       # 2 ~~~ get expansion
-      # TODO: discriminate No expansion and bad selection. Or should this be handled by frontend?
       expansion = self._get_expansion_for_slot(new_node_corres_slot_id, slot_expan_idx)
 
       # 3 ~~~~~ PiREL template extraction entrypoint
       if expansion is None:
         logger.warning(f'No expansion found for slot_id: {new_node_corres_slot_id} (idx: {slot_expan_idx})')
-        logger.debug('There is no translation rule for this node. PiREL template extraction will be performed.')
 
         skip_template_extraction = kwargs.get('skip_template_extraction', False)
         if skip_template_extraction:
@@ -340,7 +330,7 @@ class TransSession():
           templates_dict = {'problematic_node_type': prob_ntype, 'problematic_node_id': prob_nid}
           raise TranslationRuleNotFoundException(templates_dict)
 
-        logger.debug('Performing template extraction.')
+        logger.debug('There is no translation rule for this node. PiREL template extraction will be performed.')
         templates_dict: dict = self.pirel_get_templates(new_node_corres_slot_id, slot_expan_idx, **kwargs)
         raise TranslationRuleNotFoundException(templates_dict)
 
