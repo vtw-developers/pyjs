@@ -222,32 +222,34 @@ class TransSession():
 
     _allowed_backward_alt_step = 0
     def _backward_alt_next_choice_inner_func(alt_node, child_choose_idx):
-      nonlocal _allowed_backward_alt_step
-      if auto_backward == False:
+      nonlocal _allowed_backward_alt_step, auto_backward, choice_type
+
+      if not auto_backward:
         raise NormalException('Rejection occurred and automatic backwarding is disabled.')
+
       _allowed_backward_alt_step = max(_allowed_backward_alt_step, alt_node['alt_step'] - self._BACKWARD_MAX_STEP)
       if alt_node['alt_step'] < _allowed_backward_alt_step:
         raise NormalException('Automatic backwarding failed to find alternative choices. (back limit)')
+
+      # checked all possible choices for this node
       next_choices_status = alt_node['next_choices_status']
       if child_choose_idx + 1 >= next_choices_status['count'] and next_choices_status['done']:
         prev_alt_id = alt_node['prev_alt_id']
         if prev_alt_id is None:
           raise NormalException('Automatic backwarding failed to find alternative choices. (back to root)')
         return _backward_alt_next_choice_inner_func(self._alt_tree_dict[prev_alt_id], alt_node['choose_idx'])
-      else:
-        new_ch_idx = child_choose_idx + 1
-        if choice_type == 'STEP':
-          next_step = alt_node['alt_step'] + 1
-          if DEBUG_VERBOSE > -11: print(f"++++++ _backward_alt_func set to: (alt_id:{alt_node['alt_id']}) (next_step:{next_step}) (new_ch_idx:{new_ch_idx})")
-          return alt_node, next_step, new_ch_idx
-        elif choice_type == 'ASTNODE':
-          slot_id = alt_node['todo_slot_ids'][0]
-          slot_range_cursor = self._slot_dict[slot_id].range_cursor
-          next_range_key = (slot_range_cursor[0][1], slot_range_cursor[1], slot_range_cursor[2])
-          if DEBUG_VERBOSE > -11: print(f"++++++ _backward_alt_func set to: (alt_id:{alt_node['alt_id']}) (next_range_key:{next_range_key}) (new_ch_idx:{new_ch_idx})")
-          return alt_node, next_range_key, new_ch_idx
-        else:
-          assert 'Unsupported choice_type' == 0
+
+      assert choice_type in ['STEP', 'ASTNODE'], 'choice_type must be STEP or ASTNODE'
+      new_ch_idx = child_choose_idx + 1
+      if choice_type == 'STEP':
+        next_step = alt_node['alt_step'] + 1
+        return alt_node, next_step, new_ch_idx
+
+      elif choice_type == 'ASTNODE':
+        slot_id = alt_node['todo_slot_ids'][0]
+        slot_range_cursor = self._slot_dict[slot_id].range_cursor
+        next_range_key = (slot_range_cursor[0][1], slot_range_cursor[1], slot_range_cursor[2])
+        return alt_node, next_range_key, new_ch_idx
 
     def _get_alt_parser_result_inner_fun(alt_node):
       try:
