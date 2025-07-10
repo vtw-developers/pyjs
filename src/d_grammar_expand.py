@@ -273,8 +273,6 @@ class TransSession():
 
         # ~~~ this is an important invocation (contains invocation of PiREL)
         next_alt_node_dict = _get_or_create_next_alt_inner_fun(current_alt_node_dict, **kwargs)
-        assert next_alt_node_dict is not None, 'How_to_deal_with_this_case'
-
         par_alt_node_dict = current_alt_node_dict
         current_alt_node_dict = next_alt_node_dict
 
@@ -282,9 +280,6 @@ class TransSession():
         is_acceptable, stucking_slot_id, is_done = _get_alt_parser_result_inner_fun(current_alt_node_dict)
 
         if not is_acceptable:
-          expansion = current_alt_node_dict['expansion']
-          if DEBUG_VERBOSE > -11: print(f'!!!!!!!!!! _expand_loop apply_expand_func FAILED on exid:{expansion.ex_id} (corres_slot_id:{expansion.corres_slot_id}). Backward...\n\n')
-          # optimization block
           if par_alt_node_dict['alt_step'] - last_checkpoint_step > self._BACKWARD_MAX_STEP:
             nth_parent = _get_nth_parent_inner_fun(par_alt_node_dict, self._BACKWARD_MAX_STEP)
             if nth_parent is not None:
@@ -302,8 +297,6 @@ class TransSession():
           if par_alt_node_dict['alt_step'] - last_checkpoint_step > self._SNAPSHOT_INTERVAL:
             self._update_alt_node_as_checkpoint(par_alt_node_dict['alt_id'])
             last_checkpoint_step = par_alt_node_dict['alt_step']
-          expansion = current_alt_node_dict['expansion']
-          if DEBUG_VERBOSE > -11: print(f'************** _expand_loop {loop_count} apply_expand_func SUCCEED on exid:{expansion.ex_id} (corres_slot_id:{expansion.corres_slot_id})\n\n')
 
       tar_ast = self._get_alt_partial_ast(current_alt_node_dict)
       return tar_ast, self._get_alt_debug_history(current_alt_node_dict)
