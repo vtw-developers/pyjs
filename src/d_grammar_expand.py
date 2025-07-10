@@ -254,7 +254,6 @@ class TransSession():
     def _get_alt_parser_result_inner_fun(alt_node):
       try:
         parser_result = self._ensure_parser_result(alt_node)
-        if DEBUG_VERBOSE > -10: print('# _get_or_create_next_alt_inner_fun PARSE is_acceptable:', parser_result['is_acceptable'], ' is_done:', parser_result['is_done'])
         return parser_result['is_acceptable'], parser_result['stuck_slot_id'], parser_result['is_done']
       except Exception as err:
         error_alt_parser_result = self._alt_parser_result_dict[alt_node['alt_id']]
