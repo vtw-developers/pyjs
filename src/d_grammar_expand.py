@@ -183,13 +183,20 @@ class TransSession():
       choices_dict = {tuple(x):y for x, y in choices['choices_list']}
 
     def _get_or_create_next_alt_inner_fun(alt_node, **kwargs):
-      if DEBUG_VERBOSE > -10: print('# _get_or_create_next_alt_inner_fun. current_alt_node_dict:', alt_node)
+      '''
+      Read choices object to update which alt_node to get or create next.
+      '''
+      nonlocal choice_type, choices_dict
+
+      assert choice_type in ['STEP', 'ASTNODE'], 'choice_type must be STEP or ASTNODE'
       assert len(alt_node['todo_slot_ids']) > 0
-      slot_expan_idx = 0
+
+      slot_expan_idx = 0  # by default, choose the first matched rule (thus, expansion)
       new_step = alt_node['alt_step'] + 1
-      if choice_type == 'STEP':
-        if new_step in choices_dict:
-          slot_expan_idx = choices_dict[new_step]
+
+      if choice_type == 'STEP' and new_step in choices_dict:
+        slot_expan_idx = choices_dict[new_step]
+
       elif choice_type == 'ASTNODE':
         todo_slot_id = alt_node['todo_slot_ids'][0]
         todo_slot = self._slot_dict[todo_slot_id]
@@ -197,20 +204,12 @@ class TransSession():
         if new_step == 1:
           assert len(ast_node) == 1
         else:
-          # if (len(ast_node) < 2):
-          #   print('Unexpected ast_node: ', ast_node, file=sys.stderr)
-          #   assert 'unexpected ast_node length.' == 0
           ast_id = ast_node[1]
-          if not isinstance(ast_id, int):
-            print('Unexpected ast_id: ', ast_id, file=sys.stderr)
-            assert 'unexpected ast_id' == 0
+          assert isinstance(ast_id, int), 'ast_id must be an integer'
           key = (ast_id, start_idx, end_idx)
           if key in choices_dict:
             slot_expan_idx = choices_dict[key]
-      else:
-        assert 'Unknown choice_type' == 0
 
-      # ~~~ this is an important invocation: get_translation() -> _get_or_create_next_alt_inner_fun -> _get_or_create_alt_node()
       next_alt_node_dict = self._get_or_create_alt_node(alt_node, slot_expan_idx, **kwargs)
       return next_alt_node_dict
 
