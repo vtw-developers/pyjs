@@ -456,6 +456,109 @@ class TranslationRule:
     self.Tfiltered_str = list(filter(lambda x: isinstance(x, TargetStrPhNode), self.T))
     self.Tfiltered_dotstar = list(filter(lambda x: isinstance(x, TargetDotStarPhNode), self.T))
 
+  def _get_placeholders(self, start_node: AbstractNode) -> List[PhNode]:
+    '''return a list of placeholder nodes under `start_node`'''
+    ph_nodes = []
+    def visit(node: AbstractNode):
+      nonlocal ph_nodes
+      if isinstance(node, PhNode):
+        ph_nodes.append(node)
+    self._pre_order(visit, start_node)
+    return ph_nodes
+
+  def _get_placeholder_mappings(self):
+    '''
+    return a mapping of placeholders SOURCE->TARGET and TARGET->SOURCE
+
+    S - set of placeholders in source pattern
+    T - set of placeholders in target pattern
+    STmap_val, STmap_str, STmap_dotstar - mapping of placeholders from S to T (1 -> 0,1,2,...)
+    TSmap_val, TSmap_str, TSmap_dotstar - mapping of placeholders from T to S (1 -> 1)
+    '''
+    def _get_S_i_from_T_i(T_i: TargetPhNode, S: List[SourcePhNode]):
+      for S_i in S:
+        # for any placeholder type (val, str, dotstar) in T, there should be a
+        # matching placeholder in S with the same placeholder id
+        if T_i.get_phid() != S_i.get_phid():
+          continue
+
+        if isinstance(T_i, TargetValPhNode):
+          assert isinstance(S_i, SourceValPhNode), 'sanity check failed: S_i should be a SourceValPhNode'
+          return S_i
+
+        if isinstance(T_i, TargetStrPhNode):
+          assert isinstance(S_i, SourceStrPhNode), 'sanity check failed: S_i should be a SourceStrPhNode'
+          return S_i
+
+        if isinstance(T_i, TargetDotStarPhNode):
+          assert isinstance(S_i, SourceDotStarPhNode), 'sanity check failed: S_i should be a SourceDotStarPhNode'
+          # instead of returning S_i directly, we check their match regarding `.` and `*`
+          tar_dot_star_match = self._re_tar_dot_star_ph.match(T_i.node_type)
+          src_dot_star_match = self._re_src_dot_star_ph.match(S_i.node_type)
+          assert tar_dot_star_match is not None, 'should not happen: regex did not match'
+          assert src_dot_star_match is not None, 'should not happen: regex did not match'
+          T_i_dotstar_type = tar_dot_star_match.group(1)
+          S_i_dotstar_type = src_dot_star_match.group(1)
+          if T_i_dotstar_type != S_i_dotstar_type:
+            raise RuleMappingError('Placeholder id-s match, but `.` or `*` types do not')
+          return S_i
+
+      raise RuleMappingError('There has to be a matching placeholder in S for every placeholder in T.')
+
+    STmap_val = dict()
+    TSmap_val = dict()
+    STmap_str = dict()
+    TSmap_str = dict()
+    STmap_dotstar = dict()
+    TSmap_dotstar = dict()
+
+    # iterate T, and find its pair in S
+    for T_i in self.T:
+      assert isinstance(T_i, (TargetPhNode)), 'self.T must have only placeholder nodes'
+      T_i_id = T_i.get_phid()
+
+      if isinstance(T_i, TargetValPhNode):
+        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_val)
+        TSmap_val[T_i_id] = S_i
+        STmap_val.setdefault(S_i.get_phid(), []).append(T_i)
+
+      elif isinstance(T_i, TargetStrPhNode):
+        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_str)
+        TSmap_str[T_i_id] = S_i
+        STmap_str.setdefault(S_i.get_phid(), []).append(T_i)
+
+      elif isinstance(T_i, TargetDotStarPhNode):
+        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_dotstar)
+        TSmap_dotstar[T_i_id] = S_i
+        STmap_dotstar.setdefault(S_i.get_phid(), []).append(T_i)
+
+      else:
+        raise RuntimeError('should not happen')
+
+    return STmap_val, TSmap_val, STmap_str, TSmap_str, STmap_dotstar, TSmap_dotstar
+
+  def _get_mapping_of(self, node: PhNode) -> Union[List[PhNode], PhNode]:
+    '''given ANY PhNode, whether source or target, returns its mapping'''
+    assert isinstance(node, PhNode)
+
+    if isinstance(node, SourceValPhNode):
+      return self.STmap_val.get(node.get_phid(), [])
+    elif isinstance(node, SourceStrPhNode):
+      return self.STmap_str.get(node.get_phid(), [])
+    elif isinstance(node, SourceDotStarPhNode):
+      return self.STmap_dotstar.get(node.get_phid(), [])
+    elif isinstance(node, TargetValPhNode):
+      assert node.get_phid() in self.TSmap_val
+      return self.TSmap_val[node.get_phid()]
+    elif isinstance(node, TargetStrPhNode):
+      assert node.get_phid() in self.TSmap_str
+      return self.TSmap_str[node.get_phid()]
+    elif isinstance(node, TargetDotStarPhNode):
+      assert node.get_phid() in self.TSmap_dotstar
+      return self.TSmap_dotstar[node.get_phid()]
+
+    raise RuntimeError('Sanity check: Should not reach this. Debugging needed.')
+
   def src_as_s_expression(self) -> List:
     '''
     Construct s-expression from self.src_root_node (reverse of __init__())
@@ -621,109 +724,6 @@ class TranslationRule:
       if child_res is not None:
         return child_res
     return None
-
-  def _get_placeholders(self, start_node: AbstractNode) -> List[PhNode]:
-    '''return a list of placeholder nodes under `start_node`'''
-    ph_nodes = []
-    def visit(node: AbstractNode):
-      nonlocal ph_nodes
-      if isinstance(node, PhNode):
-        ph_nodes.append(node)
-    self._pre_order(visit, start_node)
-    return ph_nodes
-
-  def _get_placeholder_mappings(self):
-    '''
-    return a mapping of placeholders SOURCE->TARGET and TARGET->SOURCE
-
-    S - set of placeholders in source pattern
-    T - set of placeholders in target pattern
-    STmap_val, STmap_str, STmap_dotstar - mapping of placeholders from S to T (1 -> 0,1,2,...)
-    TSmap_val, TSmap_str, TSmap_dotstar - mapping of placeholders from T to S (1 -> 1)
-    '''
-    def _get_S_i_from_T_i(T_i: TargetPhNode, S: List[SourcePhNode]):
-      for S_i in S:
-        # for any placeholder type (val, str, dotstar) in T, there should be a
-        # matching placeholder in S with the same placeholder id
-        if T_i.get_phid() != S_i.get_phid():
-          continue
-
-        if isinstance(T_i, TargetValPhNode):
-          assert isinstance(S_i, SourceValPhNode), 'sanity check failed: S_i should be a SourceValPhNode'
-          return S_i
-
-        if isinstance(T_i, TargetStrPhNode):
-          assert isinstance(S_i, SourceStrPhNode), 'sanity check failed: S_i should be a SourceStrPhNode'
-          return S_i
-
-        if isinstance(T_i, TargetDotStarPhNode):
-          assert isinstance(S_i, SourceDotStarPhNode), 'sanity check failed: S_i should be a SourceDotStarPhNode'
-          # instead of returning S_i directly, we check their match regarding `.` and `*`
-          tar_dot_star_match = self._re_tar_dot_star_ph.match(T_i.node_type)
-          src_dot_star_match = self._re_src_dot_star_ph.match(S_i.node_type)
-          assert tar_dot_star_match is not None, 'should not happen: regex did not match'
-          assert src_dot_star_match is not None, 'should not happen: regex did not match'
-          T_i_dotstar_type = tar_dot_star_match.group(1)
-          S_i_dotstar_type = src_dot_star_match.group(1)
-          if T_i_dotstar_type != S_i_dotstar_type:
-            raise RuleMappingError('Placeholder id-s match, but `.` or `*` types do not')
-          return S_i
-
-      raise RuleMappingError('There has to be a matching placeholder in S for every placeholder in T.')
-
-    STmap_val = dict()
-    TSmap_val = dict()
-    STmap_str = dict()
-    TSmap_str = dict()
-    STmap_dotstar = dict()
-    TSmap_dotstar = dict()
-
-    # iterate T, and find its pair in S
-    for T_i in self.T:
-      assert isinstance(T_i, (TargetPhNode)), 'self.T must have only placeholder nodes'
-      T_i_id = T_i.get_phid()
-
-      if isinstance(T_i, TargetValPhNode):
-        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_val)
-        TSmap_val[T_i_id] = S_i
-        STmap_val.setdefault(S_i.get_phid(), []).append(T_i)
-
-      elif isinstance(T_i, TargetStrPhNode):
-        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_str)
-        TSmap_str[T_i_id] = S_i
-        STmap_str.setdefault(S_i.get_phid(), []).append(T_i)
-
-      elif isinstance(T_i, TargetDotStarPhNode):
-        S_i = _get_S_i_from_T_i(T_i, self.Sfiltered_dotstar)
-        TSmap_dotstar[T_i_id] = S_i
-        STmap_dotstar.setdefault(S_i.get_phid(), []).append(T_i)
-
-      else:
-        raise RuntimeError('should not happen')
-
-    return STmap_val, TSmap_val, STmap_str, TSmap_str, STmap_dotstar, TSmap_dotstar
-
-  def _get_mapping_of(self, node: PhNode) -> Union[List[PhNode], PhNode]:
-    '''given ANY PhNode, whether source or target, returns its mapping'''
-    assert isinstance(node, PhNode)
-
-    if isinstance(node, SourceValPhNode):
-      return self.STmap_val.get(node.get_phid(), [])
-    elif isinstance(node, SourceStrPhNode):
-      return self.STmap_str.get(node.get_phid(), [])
-    elif isinstance(node, SourceDotStarPhNode):
-      return self.STmap_dotstar.get(node.get_phid(), [])
-    elif isinstance(node, TargetValPhNode):
-      assert node.get_phid() in self.TSmap_val
-      return self.TSmap_val[node.get_phid()]
-    elif isinstance(node, TargetStrPhNode):
-      assert node.get_phid() in self.TSmap_str
-      return self.TSmap_str[node.get_phid()]
-    elif isinstance(node, TargetDotStarPhNode):
-      assert node.get_phid() in self.TSmap_dotstar
-      return self.TSmap_dotstar[node.get_phid()]
-
-    raise RuntimeError('Sanity check: Should not reach this. Debugging needed.')
 
   def _recalculate_phids_and_remap(self, SP: List[SourcePhNode], TP: List[TargetPhNode]) -> None:
     '''
