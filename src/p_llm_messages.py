@@ -310,7 +310,12 @@ class SP2_PartialProgramF(BaseTranslateSP2Factory):
 
 # GENERATE TEST FUNCTION
 class GenTestFunctionF(BaseMessageFactory):
-  def __init__(self, template_dict: dict, subject: p_subject.PirelSubject, val: p_llm_val.GenTestFunctionValidationResult):
+  def __init__(
+    self,
+    template_dict: dict,
+    subject: p_subject.PirelSubject,
+    val: p_llm_val.GenTestFunctionValidationResult
+  ):
     super().__init__(template_dict, subject)
     self.val = val
 
