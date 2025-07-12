@@ -21,6 +21,16 @@ Class diagram
       SP1_DirectTransG            SP1_PartialProgramG            SP2_DirectTransG        SP2_PartialProgramG
 
 *SimplifyTemplateG - deprecated and removed
+
+NOTE on adding a new task class:
+1. Create a main task class inheriting from `BasePirelTask`
+   - add your own attributes alongside attributes of superclass
+   - implement all abstract methods
+2. Create prompt templates in `p_llm_templates` module
+3. Create a validation result class in `p_llm_val` module.
+   - create a subclass of `BaseValidationResult`
+4. Create validation functions in `p_llm_val` module.
+5. Create a feedback message factory in `p_llm_messages` module.
 '''
 
 
@@ -95,12 +105,13 @@ class BasePirelTask(ABC):
     lbase_task: ptlog.BaseTask
   ):
     self.task_name : str = task_name
+    self.subject = subject
+    self.template_dict = template_dict
+
     self.chat_history : List[BaseMessage] = []
     self.code_blocks_history : List[List[str]] = []
     self.feedback_iteration_counter = 1
     self.task_iteration_counter = 1
-    self.template_dict = template_dict
-    self.subject = subject
     self.model_params = {}
     self._log(f'creating an in instance of "{task_name}"')
 
@@ -153,9 +164,6 @@ class BasePirelTask(ABC):
 
   def run_init(self) -> None:
     '''Invoked before starting the task. Can be overridden by subclasses'''
-
-  def run_failed(self) -> None:
-    '''Invoken when the task fails. Can be overridden by subclasses'''
 
   # TASK ITERATION
   async def _run_task_once(self, ltask_iteration: ptlog.TaskIteration) -> Any:
@@ -216,6 +224,7 @@ class BasePirelTask(ABC):
       validation_result = self._validate_code_blocks()
       if validation_result.is_successful():
         self._log('_run_task_once: SUCCESS validation is successful. Returning the validation result')
+        ltask_iteration.success = True
         lfeedback.success = True
         return validation_result.get_data()
 
@@ -287,6 +296,10 @@ class BasePirelTask(ABC):
     self._log_json(kwargs, fname)
 
   # ABSTRACT METHODS
+  @abstractmethod
+  def run_failed(self) -> None:
+    '''Invoken when the task fails'''
+
   @abstractmethod
   def get_system_message(self) -> BaseMessage:
     '''Return system message for a task'''

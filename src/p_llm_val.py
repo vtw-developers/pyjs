@@ -225,7 +225,7 @@ class TranslateSP2ValidationResult(BaseValidationResult):
 
 
 class GenTestFunctionValidationResult(BaseValidationResult):
-  def __init__(self, validation_result):
+  def __init__(self, validation_result: dict):
     super().__init__(validation_result)
     self.gen_test_fn_cands : List[str] = validation_result['gen_test_fn_cands']
     self.test_functions : List[str] = validation_result['test_functions']
@@ -743,7 +743,7 @@ def val_gen_test_function_candidates(
 
   return_dict['success'] = True
   return_dict['test_functions'] = test_functions
-  logger.debug(f'GOOD End of generated test function candidates validation.')
+  logger.debug(f'GOOD: End of generated test function candidates validation.')
   logger.debug(f'The number of good test functions is {len(test_functions)}/{len(gen_test_fn_cands)}')
   return GenTestFunctionValidationResult(return_dict)
 
