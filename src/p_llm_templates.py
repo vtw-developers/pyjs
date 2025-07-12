@@ -611,3 +611,54 @@ class GenTestFunction:
       '{f_gold_function}\n'
       '```\n'
     )
+
+class GetReferenceTranslation:
+  class System:
+    GENERIC = (
+      'You are a world-class software engineer.\n'
+      '\n'
+      'Your task is to correctly translate programs from one programming language to another.\n'
+      '\n'
+      'You must precisely follow the provided instructions while completing the translation task.\n'
+      '\n'
+    )
+
+  class Prompt:
+    GENERIC = (
+      'Translate the following {src_language} program into a semantically equivalent {tar_language} program:\n'
+      '```{src_language}\n'
+      '{program_to_translate}\n'
+      '```\n'
+      '\n'
+      'Your output should be as follows:\n'
+      '1. **Step-by-Step Explanation**:\n'
+      '   Provide a detailed reasoning process for the translation, explaining key decisions and mappings.\n'
+      '2. **The translated {tar_language} program**:\n'
+      '   The final {tar_language} translation should be syntactically and semantically valid.\n'
+      '3. **Output format**\n'
+      '   Each {tar_language} translation should be placed in a separate code block surrounded by ```triple backticks```.\n'
+      '   ```triple backticks``` must be used for final translations only. Use `single backtick` in all other cases if necessary.\n'
+      '   Put explanation or comments outside of ```triple backticks``` code block.\n'
+      '4. **Clean code blocks**\n'
+      '   Code blocks with {tar_language} translations must contain only code and no comments.\n'
+      '\n'
+      'Constraints:\n'
+      '1. If the {src_language} program is a single statement or expression, the {tar_language} translation should also be a single statement or expression.\n'
+      '2. When translating assignment expression or assignment statement to JavaScript, provide exactly two translations:\n'
+      '   i. Variable declaration with `var` (e.g. `a = 1` -> `var a = 1;`)\n'
+      '   ii. Assignment expression without `var` (e.g. `a = 1` -> `a = 1;`)\n'
+      '\n'
+    )
+
+    # TODO complete
+    NEGATIVE_EXAMPLES = ('')
+
+  class Feedback:
+
+    # TODO complete
+    class ParseError:
+      CAND_DESC = ('')
+
+    # TODO complete
+    class NegSampleMatched:
+      CAND_DESC = ('')

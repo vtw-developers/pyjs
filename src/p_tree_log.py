@@ -243,6 +243,13 @@ class BaseTask:  # abstract class
   task_loop: Optional[TaskLoop] = None
 
 @dataclass
+class GetRefTrans(BaseTask):
+  snippet: Optional[str] = None
+  ref_translations: List[str] = field(default_factory=list)
+  success: bool = False
+  reason: Optional[str] = None
+
+@dataclass
 class GenTestFunction(BaseTask):
   f_gold_function: Optional[str] = None
   test_function: Optional[str] = None

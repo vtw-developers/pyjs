@@ -70,6 +70,7 @@ class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
 class GenTestFunctionRetryLimitError(RuntimeError): pass
 class OpenAIErrors(ExceptionGroup): pass
+class GetRefTransRetryLimitError(RuntimeError): pass
 
 
 class BasePirelTask(ABC):
@@ -703,6 +704,75 @@ class GenTestFunction(BasePirelTask):
     raise GenTestFunctionRetryLimitError(msg)
 
 
+# GET REFERENCE TRANSLATION
+class GetReferenceTranslation(BasePirelTask):
+  '''
+  Get a reference translation for a statement node
+  '''
+  def __init__(
+    self,
+    task_name: str,
+    snippet: str,
+    subject: p_subject.PirelSubject,
+    template_dict: dict,
+    lbase_task: ptlog.BaseTask
+  ):
+    super().__init__(task_name, subject, template_dict, lbase_task)
+    self.snippet = snippet
+    self.log_args_as_json(
+      'args_init.json',
+      task_name=task_name,
+      snippet=snippet,
+      subject=subject,
+      template_dict=template_dict,
+      lbase_task=lbase_task
+    )
+
+  def get_system_message(self) -> BaseMessage:
+    system_message = SystemMessage(p_llm_templates.GetReferenceTranslation.System.GENERIC)
+    return system_message
+
+  def get_few_shot_messages(self) -> List[BaseMessage]:
+    return []
+
+  def get_starting_prompt_message(self) -> HumanMessage:
+    starting_prompt = HumanMessagePromptTemplate.from_template(
+      p_llm_templates.GetReferenceTranslation.Prompt.GENERIC
+    ).format(
+      src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
+      tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+      program_to_translate = self.snippet,
+    )
+    return starting_prompt
+
+  def get_feedback_message(self, validation_result: p_llm_val.GetRefTransValidationResult) -> HumanMessage:
+    self._log('initiating a feedback message factory')
+    factory = p_llm_messages.GetRefTransF(self.template_dict, self.subject, validation_result)
+    feedback_message = factory.get_feedback_message()
+    return feedback_message
+
+  def validate_code_blocks(self) -> p_llm_val.GetRefTransValidationResult:
+    self._log('starting reference translations validation')
+    all_ref_trans_cands_stats = self.get_all_gen_code_blocks()
+    val_result_obj = p_llm_val.val_get_ref_trans_candidates(
+      all_ref_trans_cands_stats,
+      self.template_dict,
+      subject_name=self.subject.name
+    )
+    return val_result_obj
+
+  def does_require_feedback_iteration(self) -> bool:
+    return self.feedback_iteration_counter <= p_consts.GET_REF_TRANS_LLM_FEEDBACKS
+
+  def does_require_task_iteration(self):
+    return self.task_iteration_counter <= p_consts.GET_REF_TRANS_LLM_NUM_ATTEMPTS
+
+  def run_failed(self) -> None:
+    msg = f'Could not get a reference translation. Reached retry limit. Check the logs.'
+    self._log(f'ERROR {msg}')
+    raise GetRefTransRetryLimitError(msg)
+
+
 # HELPER FUNCTIONS
 def get_openai_credentials() -> Tuple[str, str]:
   assert p_consts.ENV_FILE.exists(), f'Create a "{p_consts.ENV_FILE.name}" file with necessary environment variables'
@@ -990,6 +1060,40 @@ async def gen_test_function(
   lgen_test_function.success = True
   lgen_test_function.test_function = test_function
   return test_function
+
+
+async def get_reference_translations(
+  snippet: str,
+  subject: p_subject.PirelSubject,
+  template_dict: dict
+) -> List[str]:
+  '''
+  Get a reference translation for a snippet.
+  RETURN: reference translations or empty list if failed
+  '''
+  lget_ref_trans = ptlog.GetRefTrans()
+  lget_ref_trans.snippet = snippet
+
+  get_ref_trans_task = GetReferenceTranslation(
+    task_name='get_ref_trans',
+    snippet=snippet,
+    subject=subject,
+    template_dict=template_dict,
+    lbase_task=lget_ref_trans
+  )
+
+  try:
+    ref_translations = await get_ref_trans_task.run()
+  except GetRefTransRetryLimitError as err:
+    logger.warning(str(err))
+    lget_ref_trans.success = False
+    lget_ref_trans.reason = str(err)
+    return []
+
+  assert len(ref_translations) > 0, 'sanity check'
+  lget_ref_trans.success = True
+  lget_ref_trans.ref_translations = ref_translations
+  return ref_translations
 
 
 # TEST HARNESSES
