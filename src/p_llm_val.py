@@ -262,6 +262,37 @@ class GenTestFunctionValidationResult(BaseValidationResult):
     return self.test_functions
 
 
+class GetRefTransValidationResult(BaseValidationResult):
+  def __init__(self, validation_result: dict):
+    super().__init__(validation_result)
+    self.ref_trans_cands : List[str] = validation_result['ref_trans_cands']
+    self.ref_translations : List[str] = validation_result['ref_translations']
+    self.success : bool = validation_result['success']
+    self.ref_trans_cands_stats : List[dict] = validation_result['ref_trans_cands_stats']
+
+  # BOOLEAN METHODS
+  def has_no_ref_trans_cands(self) -> bool:
+    return len(self.ref_trans_cands) == 0
+
+  def all_have_parse_error(self) -> bool:
+    flags = list(map(self.ad_has_parse_error, self.ref_trans_cands_stats))
+    return all(flags)
+
+  # ADAPTER METHODS TO `ref_trans_cands_stats` (have `ad` prefix)
+  def ad_ref_trans_cand(self, ref_trans_cand_stat: dict) -> str:
+    return ref_trans_cand_stat['ref_trans_cand']
+
+  def ad_success(self, ref_trans_cand_stat: dict) -> bool:
+    return ref_trans_cand_stat['success'] is True
+
+  def ad_has_parse_error(self, ref_trans_cand_stat: dict) -> bool:
+    return ref_trans_cand_stat['has_parse_error'] is True
+
+  # ABSTRACT METHOD IMPLEMENTATIONS
+  def get_data(self) -> List[str]:
+    return self.ref_translations
+
+
 # VALIDATE SIMPLIFIED TEMPLATE CANDIDATES
 def val_simplified_template_candidates(st_cands: List[str], template_dict: dict, **kwargs) -> SimplifyTemplateValidationResult:
   '''
@@ -797,6 +828,81 @@ def _gen_test_fn_cand_gather_stats(gen_test_fn_cand: str, f_gold_function: str, 
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
   return_dict['has_single_fn_def_test'] = True
+  return return_dict
+
+
+# VALIDATE REFERENCE TRANSLATION
+def val_get_ref_trans_candidates(
+  ref_trans_cands: List[str],
+  template_dict: dict,
+  **kwargs
+):
+  '''
+  This function is invoked to check if the reference translation candidates
+  are valid or not.
+
+  CRITERIA:
+  1. reference translation candidates have no parse errors
+  '''
+  p_utils.log_json_time(f'{kwargs["subject_name"]}_args-val_get_ref_trans_candidates.json', locals())
+  logger.debug(f'~~~ Starting validation of {len(ref_trans_cands)} reference translation candidates')
+
+  return_dict = {}
+  return_dict['ref_trans_cands'] = ref_trans_cands
+  return_dict['ref_translations'] = []
+  return_dict['success'] = False
+  return_dict['ref_trans_cands_stats'] = []
+
+  ref_translations = []
+  for idx, ref_trans_cand in enumerate(ref_trans_cands, start=1):
+    logger.debug(f'Checking if reference translation candidate ({idx}/{len(ref_trans_cands)}) satisfies our criteria')
+    ref_trans_cand_stats = _get_ref_trans_cand_gather_stats(ref_trans_cand, template_dict)
+    return_dict['ref_trans_cands_stats'].append(ref_trans_cand_stats)
+    success = ref_trans_cand_stats['success']
+
+    if success:
+      ref_translations.append(ref_trans_cand)
+
+    logger.debug(f'Reference translation candidate satisfies our criteria => ({success})')
+    logger.debug(f'The number of reference translations so far is {len(ref_translations)}/{len(ref_trans_cands)}')
+
+  if len(ref_translations) == 0:
+    _ = {'ref_trans_cands': ref_trans_cands}
+    logger.warning(
+      f'BAD: no reference translations were formed with {len(ref_trans_cands)} '
+      f'reference translation candidates:\n{json.dumps(_, indent=2)}')
+    return GetRefTransValidationResult(return_dict)
+
+  return_dict['success'] = True
+  return_dict['ref_translations'] = ref_translations
+  logger.debug(f'GOOD: End of reference translation candidates validation.')
+  logger.debug(f'The number of good reference translations is {len(ref_translations)}/{len(ref_trans_cands)}')
+  return GetRefTransValidationResult(return_dict)
+
+
+def _get_ref_trans_cand_gather_stats(
+  ref_trans_cand: str,
+  template_dict: dict
+):
+  return_dict = {
+    'ref_trans_cand': ref_trans_cand,
+    'success': None,
+    'has_parse_error': None,
+  }
+
+  logger.debug(f'Checking if generated reference translation candidate satisfies our criteria')
+  logger.debug(f'\nref_trans_cand:\n{repr(ref_trans_cand)}')
+
+  # criteria 1
+  if p_utils.does_have_parse_error(ref_trans_cand, template_dict['tar_lang']):
+    logger.debug(f'BAD: generated reference translation candidate has a parse error')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = True
+    return return_dict
+
+  logger.debug(f'GOOD: generated reference translation candidate passed the validation step.')
+  return_dict['success'] = True
+  return_dict['has_parse_error'] = False
   return return_dict
 
 

@@ -363,6 +363,42 @@ class GenTestFunctionF(BaseMessageFactory):
     raise NotImplementedError('new feedback case identified in GenTestFunctionF')
 
 
+# GET REFERENCE TRANSLATION
+class GetRefTransF(BaseMessageFactory):
+  def __init__(
+    self,
+    template_dict: dict,
+    subject: p_subject.PirelSubject,
+    val: p_llm_val.GetRefTransValidationResult
+  ):
+    super().__init__(template_dict, subject)
+    self.val = val
+
+  def get_feedback_message(self) -> HumanMessage:
+    self._log(f'the number of generated reference translations is {len(self.val.ref_trans_cands)}')
+    self._log(f'here is the stats for them:\n{json.dumps(self.val.ref_trans_cands_stats, indent=2)}')
+
+    # case 1: checking for the presence of code blocks
+    self._log('case 1: checking for the presence of code blocks')
+    if self.val.has_no_ref_trans_cands():
+      self._log('no ref_trans_cands found')
+      self._log('returning the feedback message')
+      feedback_message = self.get_message_no_code_blocks()
+      return feedback_message
+    self._log('case 1: ref_trans_cands found')
+
+    # case 2: checking if all ref_trans_cands have parse error
+    self._log('case 2: checking if all ref_trans_cands have parse error')
+    if self.val.all_have_parse_error():
+      self._log('all ref_trans_cands have parse error')
+      self._log('returning the feedback message')
+      feedback_message = self.get_message_have_parse_error(self.val.ref_trans_cands)
+      return feedback_message
+    self._log('case 2: some/all ref_trans_cands do not have parse error')
+
+    raise NotImplementedError('new feedback case identified in GetRefTransF')
+
+
 # HELPER FUNCTIONS
 def get_partial_program_affix(partial_program: str) -> Tuple[str, str]:
   '''

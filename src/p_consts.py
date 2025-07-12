@@ -357,6 +357,9 @@ PYNGUIN_NUM_ATTEMPTS = 5
 GEN_TEST_FN_LLM_NUM_ATTEMPTS = 3
 GEN_TEST_FN_LLM_FEEDBACKS = 3
 
+GET_REF_TRANS_LLM_NUM_ATTEMPTS = 3
+GET_REF_TRANS_LLM_FEEDBACKS = 3
+
 
 ################################################################################################
 #################################### GENERAL CONFIGS ###########################################
