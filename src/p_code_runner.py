@@ -139,7 +139,7 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
 
 
 async def _run_code(code: str, lang: str,
-                    timeout_sec: None | int | float = 10) -> tuple[str, str]:
+                    timeout_sec: None | int | float = 100) -> tuple[str, str]:
   '''
   Run the code and return stdout and stderr
   '''
