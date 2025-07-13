@@ -28,7 +28,7 @@ import copy
 import json
 import re
 from abc import ABC, abstractmethod
-from asyncio import run
+from asyncio import run, sleep
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from langchain_core.messages.ai import AIMessage
@@ -37,6 +37,7 @@ from langchain_core.messages.human import HumanMessage
 from langchain_core.messages.system import SystemMessage
 from langchain_core.prompts.chat import HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain_openai import ChatOpenAI
+from openai import APIError as OpenAIAPIError
 
 import d_ast_parse
 import d_utils
@@ -58,6 +59,7 @@ class SP1TranslationRetryLimitError(RuntimeError): pass
 class SP2TranslationRetryLimitError(RuntimeError): pass
 class NoTransPairsFromTSPError(RuntimeError): pass
 class GenTestFunctionRetryLimitError(RuntimeError): pass
+class OpenAIErrors(ExceptionGroup): pass
 
 
 class BasePirelTask(ABC):
@@ -716,8 +718,18 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
     f'{json.dumps(model_params, indent=2)}')
 
   chatgpt = ChatOpenAI(openai_api_key=api_key, openai_organization=org_id, **model_params)
-  chat_result = await chatgpt.ainvoke(messages)
-
+  excs = []
+  for i in range(7):
+    try:
+      chat_result = await chatgpt.ainvoke(messages)
+    except OpenAIAPIError as e:  # probably hitting rate limit
+      logger.warning(e)
+      excs.append(e)
+      await sleep(2**i)  # 1 to 64 seconds
+    else:
+      break
+  else:
+    raise OpenAIErrors('Repeated API failures', excs)
   return chat_result.content
 
 
