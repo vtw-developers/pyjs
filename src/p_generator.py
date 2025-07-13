@@ -1,5 +1,7 @@
 import itertools
 import json
+from functools import reduce
+from random import sample
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
@@ -453,10 +455,16 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       # add start_node itself, and then add cartesian product of children
       all_generations = [[start_node]]
 
-      for cart_prod in itertools.product(*children_generations):
+      image_norm = reduce(int.__mul__, map(len, children_generations))
+      if image_norm > p_consts.MAX_FUZZ_GROUP_LEN:
+        indices = sample(range(image_norm), p_consts.MAX_FUZZ_GROUP_LEN)
+      else:
+        indices = range(image_norm)
+      for d in indices:
         generation = []
-        for child_generation in cart_prod:
-          generation.extend(child_generation)
+        for dimension in children_generations:
+          d, m = divmod(d, len(dimension))
+          generation.extend(dimension[m])
         all_generations.append(generation)
 
       return all_generations
