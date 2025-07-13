@@ -111,6 +111,9 @@ LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
 # Maximum number of TSPs from which some rules are learned
 MAX_NUM_USEFUL_TSPS = 1
 
+# Maximum number of AST node groups fuzzed for TSP generation
+MAX_FUZZ_GROUP_LEN = 1000
+
 # Subject configuration file for statement node
 STAT_NODE_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'statement-node.yaml'
 
