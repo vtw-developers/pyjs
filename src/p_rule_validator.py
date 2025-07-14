@@ -1,5 +1,6 @@
 import json
-from typing import List, Optional, Union
+from asyncio import run
+from typing import List, Optional
 
 import d_grammar_expand
 import d_grammar_rules
