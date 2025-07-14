@@ -1075,6 +1075,7 @@ def _test_val_simplified_template_candidates():
   val_result_dict = val_simplified_template_candidates(src_lang, template_origin, templatized_node_ids_context, st_cands, **kwargs)
   p_utils.write_json('temporary_test_val_simplified_template_candidates.json', val_result_dict)
 
+
 def _test_val_tp1_candidates():
   test_harness_config:dict = p_utils.read_json('temporary_test_val_tp1_candidates_config.json')
   args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
@@ -1087,6 +1088,7 @@ def _test_val_tp1_candidates():
   val_result_dict = val_tp1_candidates(tp1_cands, sp1, template_dict, **kwargs)
   print(json.dumps(val_result_dict, indent=2, default=str))
   p_utils.write_json(f'temporary_test_val_tp1_candidates.json', val_result_dict)
+
 
 def _test_val_translation_pair_candidates():
   test_harness_config:dict = p_utils.read_json('temporary_test_val_translation_pair_candidates_config.json')
@@ -1102,6 +1104,33 @@ def _test_val_translation_pair_candidates():
   val_result_dict = val_tp2_candidates(tp2_cands, sp1, sp2, tp1_cand, template_dict, **kwargs)
   p_utils.write_json('temporary_test_val_translation_pair_candidates.json', val_result_dict)
 
+
+def _test_val_get_ref_trans_candidates():
+  '''
+  def val_get_ref_trans_candidates(
+    ref_trans_cands: List[str],
+    template_dict: dict,
+    **kwargs
+  ):
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_val_get_ref_trans_candidates_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  ref_trans_cands = args_dict['ref_trans_cands']
+  template_dict = args_dict['template_dict']
+  kwargs = args_dict['kwargs']
+
+  val_result = val_get_ref_trans_candidates(
+    ref_trans_cands,
+    template_dict,
+    **kwargs
+  )
+
+  print(json.dumps(val_result.get_val_result(), indent=2, default=str))
+
+
 if __name__ == '__main__':
   # _test_val_translation_pair_candidates()
-  _test_val_tp1_candidates()
+  # _test_val_tp1_candidates()
+  _test_val_get_ref_trans_candidates()
