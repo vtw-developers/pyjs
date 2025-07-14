@@ -551,7 +551,7 @@ def _is_context_empty(context: dict) -> bool:
 
 # API
 def infer_translation_rule(
-  translation_pair: dict,
+  translation_pair: list,
   src_lang: str,
   tar_lang: str,
   context: dict,
@@ -561,28 +561,15 @@ def infer_translation_rule(
   pretty_print_tree_like: bool
 ):
   '''
-  program_pairs: [{"source": str, "target": str}, ...]
-
   Given a list of source-target program pairs, infer a translation rule.
 
-  PARAMS
-  programPairs
-  [{source: str, target: str}, {source: str, target: str}, ...]
-
-  srcLang - 'py'
-  tarLang - 'js'
-
-  pyBlockReplaced
-  whether or not the program pairs contain a secret
-  function call which replaces a block node (py.block, js.statement_block)
-
-  TODO this parameter might be unnecessary after introduction of context info
-  isChooseLargestContainingNode
-  whether or not to choose a largest node that has
-  the same boundaries as srcMarks or tarMarks
-
-  ppTreeLike
-  return rule pretty-printed as a tree (for visual)
+  PARAM translation_pair: [{"source": str, "target": str}, ...]
+  PARAM srcLang - 'py'
+  PARAM tarLang - 'js'
+  PARAM context: [{'source_context': [['py.expression_statement]], 'target_context': [['unknown']]}]
+  PARAM choose_largest_node: whether or not to choose a largest node that has
+        the same boundaries as srcMarks or tarMarks
+  PARAM pretty_print_tree_like: return rule pretty-printed as a tree (for visual)
   '''
 
   # 1 split program_pairs into source and target lists
