@@ -1132,6 +1132,38 @@ async def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
+async def _test_validate_translation_rules_for_statement_node():
+  '''
+  async def validate_translation_rules_for_statement_node(
+    subject: p_subject.PirelSubject,
+    statement_subject: p_subject.PirelSubject,
+    current_ruleset_obj: p_ruleset.Ruleset,
+    statement_nid: int,
+    lvalidation_and_recovery: ptlog.RulesValidationRecovery,
+    enable_error_recovery: bool = True,
+  ) -> p_ruleset.Ruleset:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_validate_translation_rules_for_statement_node_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  statement_subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['statement_subject']))
+  current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
+  statement_nid = args_dict['statement_nid']
+  lvalidation_and_recovery = ptlog.RulesValidationRecovery()
+  enable_error_recovery = args_dict['enable_error_recovery']
+
+  validated_ruleset_obj = await validate_translation_rules_for_statement_node(
+    subject,
+    statement_subject,
+    current_ruleset_obj,
+    statement_nid,
+    lvalidation_and_recovery,
+    enable_error_recovery
+  )
+
+
 async def _test_learn_trans_rules_for_statement_node():
   '''
   async def learn_trans_rules_for_statement_node(
@@ -1242,6 +1274,7 @@ def _test_get_pre_context():
 
 
 if __name__ == '__main__':
+  # run(_test_validate_translation_rules_for_statement_node())
   # run(_test_learn_trans_rules_for_statement_node())
   run(_test_learn_trans_rules_for_prob_node())
   # _test_duoglot_translate_wrapper()
