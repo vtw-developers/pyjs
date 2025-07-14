@@ -549,6 +549,29 @@ def _is_context_empty(context: dict) -> bool:
   return True
 
 
+def remove_starting_rules_from_query_results(query_results: list, lang: str) -> None:
+  '''
+  PRE1 Just a single starting rule per language per grammar.
+  NOTE This function is language specific. It should be reimplemented
+  if a language has multiple top-level rules, or multi-level top-level rule.
+  '''
+  # we expect a single snippet per language -> single marks -> single query result
+  assert len(query_results) == 1, 'query_results should contain a single element'
+  assert lang in p_consts.LANG_DICT, f'lang {lang} is not supported'
+
+  query_result = query_results[0]
+  mark, ast_nodes = query_result
+
+  for idx, (node_id, ast, _) in enumerate(ast_nodes[:]):
+    # remove a node with id 0 (module for python, program for javascript)
+    if node_id == 0:
+      if lang == 'py':
+        assert ast[0] == 'py.module', 'expected py.module as a starting rule'
+      elif lang == 'js':
+        assert ast[0] == 'js.program', 'expected js.program as a starting rule'
+      del ast_nodes[idx]
+
+
 # API
 def infer_translation_rule(
   translation_pair: list,
@@ -587,6 +610,13 @@ def infer_translation_rule(
   # 4 query range
   src_query_results = query_range(src_ann, src_ast, src_marks)
   tar_query_results = query_range(tar_ann, tar_ast, tar_marks)
+
+  # in case when just a single program pair is provided,
+  # remove starting rules for each language (e.g. `py.module` and `js.program`)
+  # from each query result.
+  if len(src_segments) == 1 and len(tar_segments) == 1:
+    remove_starting_rules_from_query_results(src_query_results, src_lang)
+    remove_starting_rules_from_query_results(tar_query_results, tar_lang)
 
   # 5
   src_phs = []
