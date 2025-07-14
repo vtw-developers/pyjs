@@ -1148,6 +1148,6 @@ def _test_postprocess_src_program():
 
 if __name__ == '__main__':
   # usage_apply_translation_rules()
-  _test_apply_translation_rules()
+  run(_test_apply_translation_rules())
   # run(_test_run_tests())
   # _test_postprocess_src_program()
