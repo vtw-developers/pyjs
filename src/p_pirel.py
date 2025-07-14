@@ -27,6 +27,7 @@ logger = p_utils.setup_logger(__name__)
 
 class ProbNode_NoTRule_AllTSPsExhaustedError(RuntimeError): pass
 class TSP_NoTRuleLearnedError(RuntimeError): pass
+class CouldNotGenRefTranslationsError(RuntimeError): pass
 
 
 def get_pre_context_global(src_main_code: str, stat_npath: List[int]) -> str:
@@ -222,6 +223,62 @@ def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
   return pre_context
 
 
+async def recover_from_statement_node_internal_validation_failure(
+  subject: p_subject.PirelSubject,
+  statement_subject: p_subject.PirelSubject,
+  current_ruleset_obj: p_ruleset.Ruleset,
+  simple_ntext: str,
+):
+  '''
+  Learn an overfitted rule to translate the statement node as a
+  measure to recover from the internal validation failure.
+  '''
+  p_utils.log_json_time(f'{subject.name}_args-recover_from_statement_node_internal_validation_failure.json', locals())
+
+  def _synthesize_context() -> dict:
+    nonlocal simple_ntext, subject
+    tree = pds.DuoGlotTree.from_code_str(simple_ntext, subject.src_lang)
+    root_node = tree.get_root_node()
+    assert len(root_node.get_children()) == 1, 'root node should have a single child'
+    context_node = root_node.get_children()[0]
+    return {
+      'source_context': [[context_node.get_type()]],
+      'target_context': [['unknown']]
+    }
+
+  def _synthesize_template_dict() -> dict:
+    nonlocal subject
+    return {
+      'src_lang': subject.src_lang,
+      'tar_lang': subject.tar_lang,
+    }
+
+  template_dict = _synthesize_template_dict()
+  context = _synthesize_context()
+
+  reference_translations = await p_llm_gen.get_reference_translations(
+    simple_ntext,
+    statement_subject,
+    template_dict
+  )
+  if len(reference_translations) == 0:
+    raise CouldNotGenRefTranslationsError('Could not generate reference translations for the statement node')
+
+  for ref_trans in reference_translations:
+    trule = p_rule_inferencer.infer_translation_rule_wrapper(
+      subject=subject,
+      translation_pair=[{'source': simple_ntext, 'target': ref_trans}],
+      src_lang='py',
+      tar_lang='js',
+      context=context,
+      is_insert_secret_fn=False,
+      choose_largest_node=True,
+      is_ignore_semicolon=False
+    )
+    # TODO need to pass src_node_id?
+    current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, -1, -1))
+
+
 async def validate_translation_rules_for_statement_node(
   subject: p_subject.PirelSubject,
   statement_subject: p_subject.PirelSubject,
@@ -276,20 +333,21 @@ async def validate_translation_rules_for_statement_node(
         lvalidation_and_recovery
       )
 
-      if is_valid:
-        logger.debug('Translation rules are valid for the statement node')
-        return current_ruleset_obj
-      else:
-        msg = 'Validation of translation rules for statement node failed. Consider this case.'
-        logger.critical(msg)
-        raise RuntimeError(msg)
+      assert is_valid, 'is_valid must be True at this point'
+      logger.debug('Translation rules are valid for the statement node')
+      return current_ruleset_obj
 
     except p_rule_chooser.RuleCombinationsExhaustedError as err:
-      lvalidation_and_recovery.success = False
-      lvalidation_and_recovery.reason = f'Error recovery must be started here due to: "{str(err)}"'
-      raise
-
-    break
+      '''
+      As of now, no prompt ingredients are passed to the LLM
+      from error object.
+      '''
+      await recover_from_statement_node_internal_validation_failure(
+        subject,
+        statement_subject,
+        current_ruleset_obj,
+        simple_ntext
+      )
 
 
 async def learn_trans_rules_from_tsp(
