@@ -20,6 +20,9 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
+class TestFunctionGenerationError(RuntimeError): pass
+
+
 def diff_history_used_rule_ids_deprecated(elem1: List[int], elem2: List[int]) -> List[dict]:
   '''
   Compare two used rule ids history elements and return the differences.
@@ -316,6 +319,9 @@ async def is_valid_translation_rule_test_based(
   template_dict: dict,
   lvalidation_and_recovery: ptlog.RulesValidationRecovery
 ) -> bool:
+  '''
+  RETURN True if valid, or raise relevant exceptions if not.
+  '''
 
   def _combine_pre_context_and_sut(pre_context: str, snippet_under_test: str) -> str:
     logger.debug('~ combining pre_context and snippet_under_test')
@@ -410,9 +416,11 @@ async def is_valid_translation_rule_test_based(
   # 4. generate tests for f_gold() function using LLM
   _result = await _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
   if _result is None:
+    msg = 'Failed to generate test function using LLM.'
+    logger.error(msg)
     lvalidation_and_recovery.success = False
-    lvalidation_and_recovery.reason = 'Failed to generate test function using LLM.'
-    return False
+    lvalidation_and_recovery.reason = msg
+    raise TestFunctionGenerationError(msg)
   test_fn_str = _result
 
   # 5. insert log statements into the test script
@@ -466,7 +474,7 @@ async def is_valid_translation_rule_test_based(
       f'{p_utils.exception_to_str(err)}\n')
     lvalidation_and_recovery.success = False
     lvalidation_and_recovery.reason = f'Failed to translate the source test script due to:\n"{str(err)}"'
-    return False
+    raise
 
   '''
   used_rule_ids_history is a history of list of rule ids used to obtain a
