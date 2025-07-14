@@ -1,7 +1,7 @@
 # Environment setup
 ```bash
 # conda env
-conda create --name pirel_env python>=3.12
+conda create --name test_env "python>=3.12"
 conda activate pirel_env
 
 # dependencies
