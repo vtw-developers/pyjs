@@ -18,6 +18,15 @@ nvm install 21.5.0
 python -m unittest p_visitor_py_test.py
 ```
 
+# Running a memory profiler
+```bash
+# from https://github.com/bloomberg/memray
+pip install memray
+
+python -m memray run p_learn_apply_rules.py <conf-name>
+memray flamegraph p_learn_apply_rules.<some-id>.bin
+```
+
 
 # Understanding the codebase and control flow
 
