@@ -8,7 +8,7 @@ clean:
 
 	find learn-rules/ -type f ! -name '.gitignore' -print -delete
 	find pirel/ -type f ! -name '.gitignore' -print -delete
-	rm -fv pirel.log
+	rm -fv *.log
 
 # make backup_zip name=debug-03
 # zips files into a single archive
@@ -24,7 +24,7 @@ backup_zip:
 
 	cp -rv learn-rules $(name)
 	cp -rv pirel $(name)
-	cp pirel.log $(name)
+	cp *.log $(name)
 
 	rm $(name)/learn-rules/.gitignore
 	rm $(name)/pirel/.gitignore
@@ -48,7 +48,7 @@ backup:
 
 	cp -rv learn-rules $(name)
 	cp -rv pirel $(name)
-	cp pirel.log $(name)
+	cp *.log $(name)
 
 	rm $(name)/learn-rules/.gitignore
 	rm $(name)/pirel/.gitignore
