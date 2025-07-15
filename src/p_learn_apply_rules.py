@@ -1,7 +1,7 @@
 import argparse
 import json
 import random
-from asyncio import TaskGroup, run
+from asyncio import TaskGroup, run, Semaphore
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -36,6 +36,7 @@ async def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
   lsubject: ptlog.Subject,
+  semaphore: Semaphore
 ) -> Optional[str]:
   '''
   Run PiREL to learn translation rules for a given subject.
@@ -47,7 +48,8 @@ async def learn_phase_on_subject(
   lsubject.rule_learn_phase = lrule_learn_phase
 
   try:
-    learned_trans_rules = await p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset, lrule_learn_phase)
+    async with semaphore:
+      learned_trans_rules = await p_pirel.learn_trans_rules_for_subject(subject, starting_ruleset, lrule_learn_phase)
 
     lrule_learn_phase.success = True
     lrule_learn_phase.end_time = p_utils.current_time_sec()
@@ -256,6 +258,11 @@ async def mode_benchmark(conf: dict) -> None:
 
   learn_tasks = [] # ~~~ rule learning phase
   async with ForgivingTaskGroup() as tg:
+
+    num_concurrent_subjects = min(len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
+    logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
+    semaphore = Semaphore(num_concurrent_subjects)
+
     for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
       msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
       logger.debug(p_utils.header(subject_name) + msg)
@@ -274,7 +281,7 @@ async def mode_benchmark(conf: dict) -> None:
       lsubject.id = subject_idx
       lbenchmark.subjects.append(lsubject)
 
-      coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject)
+      coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
       learn_tasks.append(tg.create_task(coroutine, name=subject_name))
 
   apply_tasks = [] # ~~~ rule application phase

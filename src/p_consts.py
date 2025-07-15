@@ -117,6 +117,9 @@ MAX_FUZZ_GROUP_LEN = 1000
 # Subject configuration file for statement node
 STAT_NODE_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'statement-node.yaml'
 
+# Maximum number of concurrent subjects to learn rules for
+MAX_CONCURRENT_SUBJECTS = 1000
+
 
 ################################################################################################
 ############################# TSP GENERATION ###################################################
