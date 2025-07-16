@@ -154,10 +154,33 @@ async def application_phase_on_subject(
     return None
 
 
-async def mode_benchmark(conf: dict) -> None:
-  '''
-  Run PiREL to learn and apply translation rules for a given benchmark.
-  '''
+def mode_benchmark_email_report(lsubject: ptlog.Subject, lbenchmark: ptlog.Benchmark) -> None:
+  lrule_learn_phase = lsubject.rule_learn_phase
+  lrule_application_phase = lsubject.rule_application_phase
+
+  # `L0001 1/20 7m11s: `
+  subject = f'{lsubject.subject_name} {lsubject.id}/{lbenchmark.sample_size} '
+  subject += f'{lsubject.get_total_time()}: '
+  message = f'{lsubject.subject_name}:\n\n'
+
+  if lrule_learn_phase.success is True:
+    assert lrule_application_phase.success in [True, False], 'Rule application phase must run if learn rules phase is successful'
+    if lrule_application_phase.success is True:
+      subject = subject + f'LEARN-YES, APPLY-YES'
+      message = message + lrule_application_phase.plausible_target_program
+    else:
+      subject = subject + f'LEARN-YES, APPLY-NO'
+      message = message + lrule_application_phase.reason
+  else:
+    subject = subject + f'LEARN-NO'
+    message = message + lrule_learn_phase.reason
+
+  p_utils.email_safely(subject=subject, message=message)
+
+
+def mode_benchmark_init(
+  conf: dict
+) -> Tuple[str, List[Tuple[str, str]], ptlog.Benchmark, List[p_subject.PirelSubject], List[ptlog.Subject]]:
 
   def _load_benchmark_sample(conf: dict) -> List[Tuple[str, str]]:
     '''
@@ -213,29 +236,6 @@ async def mode_benchmark(conf: dict) -> None:
     sample = dataset[start_idx:end_idx]
     return _exclude(sample, conf['sample']['exclude'])
 
-  def _email_report(lsubject: ptlog.Subject, lbenchmark: ptlog.Benchmark) -> None:
-    lrule_learn_phase = lsubject.rule_learn_phase
-    lrule_application_phase = lsubject.rule_application_phase
-
-    # `L0001 1/20 7m11s: `
-    subject = f'{lsubject.subject_name} {lsubject.id}/{lbenchmark.sample_size} '
-    subject += f'{lsubject.get_total_time()}: '
-    message = f'{lsubject.subject_name}:\n\n'
-
-    if lrule_learn_phase.success is True:
-      assert lrule_application_phase.success in [True, False], 'Rule application phase must run if learn rules phase is successful'
-      if lrule_application_phase.success is True:
-        subject = subject + f'LEARN-YES, APPLY-YES'
-        message = message + lrule_application_phase.plausible_target_program
-      else:
-        subject = subject + f'LEARN-YES, APPLY-NO'
-        message = message + lrule_application_phase.reason
-    else:
-      subject = subject + f'LEARN-NO'
-      message = message + lrule_learn_phase.reason
-
-    p_utils.email_safely(subject=subject, message=message)
-
   def _load_starting_ruleset(conf: dict) -> str:
     '''
     RETURN the starting ruleset for the learning phase from
@@ -247,8 +247,6 @@ async def mode_benchmark(conf: dict) -> None:
       return p_utils.read_text(overriding_ruleset_fpath)
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
-  logger.info('~~~ Starting mode_benchmark()')
-
   starting_ruleset = _load_starting_ruleset(conf)
   benchmark_sample = _load_benchmark_sample(conf)
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
@@ -256,61 +254,74 @@ async def mode_benchmark(conf: dict) -> None:
   lbenchmark = ptlog.Benchmark(conf['benchmark_name'])
   lbenchmark.sample_size = len(benchmark_sample)
 
-  learn_tasks = [] # ~~~ rule learning phase
+  subject_list = []
+  lsubject_list = []
+  for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
+
+    subject = p_subject.PirelSubject(
+      benchmark_name=conf['benchmark_name'],
+      name=subject_name,
+      src_program=src_program,
+      src_lang=conf['src_lang'],
+      tar_lang=conf['tar_lang'],
+    )
+    subject_list.append(subject)
+
+    lsubject = ptlog.Subject(subject.name)
+    lsubject.code_text = subject.src_main_code
+    lsubject.id = subject_idx
+
+    lbenchmark.subjects.append(lsubject)
+    lsubject_list.append(lsubject)
+
+  return starting_ruleset, benchmark_sample, lbenchmark, subject_list, lsubject_list
+
+
+async def mode_benchmark(conf: dict) -> None:
+  '''
+  Run PiREL to learn and apply translation rules for a given benchmark.
+  '''
+  starting_ruleset, benchmark_sample, lbenchmark, subject_list, lsubject_list = \
+    mode_benchmark_init(conf)
+  assert len(subject_list) == len(lsubject_list), 'sanity check'
+
+  num_concurrent_subjects = min(len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
+  logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
+  semaphore = asyncio.Semaphore(num_concurrent_subjects)
+
+  # ~~~ rule learning phase
+  learn_tasks = []
   async with ForgivingTaskGroup() as tg:
-
-    num_concurrent_subjects = min(len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
-    logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
-    semaphore = asyncio.Semaphore(num_concurrent_subjects)
-
-    for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
-      msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
-      logger.debug(p_utils.header(subject_name) + msg)
-      print(msg)
-
-      subject = p_subject.PirelSubject(
-        benchmark_name=conf['benchmark_name'],
-        name=subject_name,
-        src_program=src_program,
-        src_lang=conf['src_lang'],
-        tar_lang=conf['tar_lang'],
-      )
-
-      lsubject = ptlog.Subject(subject.name)
-      lsubject.code_text = subject.src_main_code
-      lsubject.id = subject_idx
-      lbenchmark.subjects.append(lsubject)
-
+    for subject, lsubject in zip(subject_list, lsubject_list):
       coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
-      learn_tasks.append(tg.create_task(coroutine, name=subject_name))
+      learn_tasks.append(tg.create_task(coroutine, name=subject.name))
 
-  apply_tasks = [] # ~~~ rule application phase
+  assert len(learn_tasks) == len(subject_list), 'sanity check'
+
+  # ~~~ rule application phase
+  apply_tasks = []
   async with ForgivingTaskGroup() as tg:
-    for task in learn_tasks:
-      if task.exception() is not None or task.result() is None:
-        logger.debug(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
-      else:
-        coroutine = application_phase_on_subject(subject, task.result(), lsubject)
-        apply_tasks.append(tg.create_task(coroutine, name=subject_name))
+    for learn_task, subject, lsubject in zip(learn_tasks, subject_list, lsubject_list):
+      if learn_task.exception() is not None or learn_task.result() is None:
+        logger.warning(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
+        continue
+      coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject)
+      apply_tasks.append(tg.create_task(coroutine, name=subject.name))
 
-  for task in apply_tasks:
+  for apply_task in apply_tasks:
     # update the starting ruleset for the next subject
     # by adding the learned rules if specified in the config
-    if (task.exception() is None
-        and task.result() is not None
+    if (apply_task.exception() is None
+        and apply_task.result() is not None
         and conf.get('is_reuse_trans_rules_across_subjects', False)):
       # FIXME: subjects should share the ruleset instead.
-      starting_ruleset += task.result()
+      starting_ruleset += apply_task.result()
       logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
 
     if conf['is_email_report']:
-      _email_report(lsubject, lbenchmark)
-    logger.debug(p_utils.footer(subject_name))
-    # FIXME: clean cache regularly
-    cleanup()
+      mode_benchmark_email_report(lsubject, lbenchmark)
 
   p_utils.llog_yaml_time(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
-  logger.info(f'~~~ Learning phase for all subjects is complete.')
 
 
 async def mode_custom(conf: dict) -> None:
