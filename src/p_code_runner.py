@@ -1,10 +1,8 @@
 import asyncio
 import json
-import os
-import signal
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 import d_utils
 import p_consts
