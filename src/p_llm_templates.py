@@ -601,6 +601,9 @@ class GenTestFunction:
       '   If you can achieve full coverage with one data type, you do not need to test other data types. Always prefer simpler data types.\n'
       '5. **Assume functions defined**\n'
       '   If `f_gold()` uses some functions, assume that they are already defined. You do not need to define or overwrite them.\n'
+      '6. **No list comprehensions**\n'
+      '   Do not use list comprehensions in the `test()` function.\n'
+      '   Instead, provide the fully expanded list or matrix as a literal, equivalent to the list comprehension.\n'
     )
 
   class Prompt:
