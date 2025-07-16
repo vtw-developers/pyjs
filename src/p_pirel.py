@@ -1338,9 +1338,30 @@ def _test_get_pre_context():
   print(f'Pre-context for statement node {statement_nid}:\n{pre_context}')
 
 
+def _test_adapt_rule_choices():
+  '''
+  def adapt_rule_choices(
+    code: str,
+    code_choices: dict,
+    new_code: str
+  ) -> dict:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_adapt_rule_choices_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  code = args_dict['code']
+  code_choices = args_dict['code_choices']
+  new_code = args_dict['new_code']
+
+  new_code_choices = adapt_rule_choices(code, code_choices, new_code)
+  print(f'New code choices:\n{json.dumps(new_code_choices, indent=2)}')
+
+
 if __name__ == '__main__':
   # asyncio.run(_test_validate_translation_rules_for_statement_node())
   # asyncio.run(_test_learn_trans_rules_for_statement_node())
   asyncio.run(_test_learn_trans_rules_for_prob_node())
   # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()
+  # _test_adapt_rule_choices()
