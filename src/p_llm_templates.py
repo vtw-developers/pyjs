@@ -637,7 +637,7 @@ class GetReferenceTranslation:
       '   The final {tar_language} translation should be syntactically and semantically valid.\n'
       '3. **Output format**\n'
       '   Each {tar_language} translation should be placed in a separate code block surrounded by ```triple backticks```.\n'
-      '   ```triple backticks``` must be used for final translations only. Use `single backtick` in all other cases if necessary.\n'
+      '   ```triple backt icks``` must be used for final translations only. Use `single backtick` in all other cases if necessary.\n'
       '   Put explanation or comments outside of ```triple backticks``` code block.\n'
       '4. **Clean code blocks**\n'
       '   Code blocks with {tar_language} translations must contain only code and no comments.\n'
