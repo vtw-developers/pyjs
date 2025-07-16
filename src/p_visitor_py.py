@@ -2324,7 +2324,7 @@ class LoggableValueExtractor(pvis.Visitor):
     Example: `a, b, c = 1, 2, 0` as in G0291.
     '''
     for nt_child in node.get_nt_children():
-      self.visit(nt_child)
+      self.add_loggable_node(nt_child)
 
 
 class BreakStatementInserter(pvis.Visitor):

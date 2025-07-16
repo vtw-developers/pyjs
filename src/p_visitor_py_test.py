@@ -14358,6 +14358,11 @@ class TestLoggableValueExtractor(unittest.TestCase):
     loggable_values = self.extract_loggable_values(snippet)
     self.assertCountEqual(loggable_values, ['a', 'b', 'c'])
 
+  def test_pattern_list_subscript_assignment(self):
+    snippet = 'a[lo], a[mid] = a[mid], a[lo]'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a[lo]', 'a[mid]'])
+
   def test_method_call(self):
     snippet = 'chars.remove(s[i])'
     loggable_values = self.extract_loggable_values(snippet)
