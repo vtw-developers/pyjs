@@ -1,5 +1,5 @@
+import asyncio
 import json
-from asyncio import run
 from typing import List, Tuple
 
 import d_ast_parse
@@ -1332,8 +1332,8 @@ def _test_get_pre_context():
 
 
 if __name__ == '__main__':
-  # run(_test_validate_translation_rules_for_statement_node())
-  # run(_test_learn_trans_rules_for_statement_node())
-  run(_test_learn_trans_rules_for_prob_node())
+  # asyncio.run(_test_validate_translation_rules_for_statement_node())
+  # asyncio.run(_test_learn_trans_rules_for_statement_node())
+  asyncio.run(_test_learn_trans_rules_for_prob_node())
   # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()

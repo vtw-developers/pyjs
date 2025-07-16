@@ -1,6 +1,6 @@
+import asyncio
 import json
 import re
-from asyncio import run
 from typing import Dict, List, Optional, Tuple
 
 import d_grammar_expand
@@ -1148,6 +1148,6 @@ def _test_postprocess_src_program():
 
 if __name__ == '__main__':
   # usage_apply_translation_rules()
-  run(_test_apply_translation_rules())
-  # run(_test_run_tests())
+  asyncio.run(_test_apply_translation_rules())
+  # asyncio.run(_test_run_tests())
   # _test_postprocess_src_program()
