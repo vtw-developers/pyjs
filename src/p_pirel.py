@@ -831,6 +831,8 @@ def adapt_rule_choices_assert_result(
   Check if the adapted rule choices are valid.
   This function can be disabled if needed.
   '''
+  p_utils.log_json_time(f'args-adapt_rule_choices_assert_result.json', locals())
+
   pntype_before = None
   try:
     result = duoglot_translate_wrapper(
@@ -904,6 +906,8 @@ def adapt_rule_choices(
   Since choices uses AST node ids, and code & new_code are different,
   code_choices must be adapted to new_code.
   '''
+  p_utils.log_json_time(f'args-adapt_rule_choices.json', locals())
+
   logger.debug(
     'Adapting rule choices that trigger a translation error in src_main_code\n'
     'to trigger a translation error in simplified statement code.')
