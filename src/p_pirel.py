@@ -831,6 +831,7 @@ def adapt_rule_choices_assert_result(
   Check if the adapted rule choices are valid.
   This function can be disabled if needed.
   '''
+  pntype_before = None
   try:
     result = duoglot_translate_wrapper(
       code,
@@ -846,7 +847,9 @@ def adapt_rule_choices_assert_result(
     logger.debug(f'TranslationRuleNotFoundException is expected')
     templates_dict_before = exc.get_templates_dict()
     pntype_before = templates_dict_before['problematic_node_type']
+  assert pntype_before is not None, 'expected TranslationRuleNotFoundException when translating code'
 
+  pntype_after = None
   try:
     result = duoglot_translate_wrapper(
       new_code,
@@ -861,8 +864,8 @@ def adapt_rule_choices_assert_result(
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
     logger.debug(f'TranslationRuleNotFoundException is expected')
     templates_dict_after = exc.get_templates_dict()
-    pntype_after = templates_dict_before['problematic_node_type']
-
+    pntype_after = templates_dict_after['problematic_node_type']
+  assert pntype_after is not None, 'expected TranslationRuleNotFoundException when translating new_code'
   assert pntype_before == pntype_after, 'Problematic node type must not change after adaptation'
 
 
