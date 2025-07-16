@@ -84,6 +84,7 @@ async def application_phase_on_subject(
   subject: p_subject.PirelSubject,
   learned_trans_rules: str,
   lsubject: ptlog.Subject,
+  semaphore: asyncio.Semaphore
 ) -> Optional[str]:
   '''
   Run PiREL to apply translation rules for a given subject.
@@ -121,7 +122,8 @@ async def application_phase_on_subject(
   subject.prepare_for_rule_application(learned_trans_rules)
 
   try:
-    tar_program_plausible, used_rule_ids_history = await p_rule_applicator.apply_translation_rules(subject)
+    async with semaphore:
+      tar_program_plausible, used_rule_ids_history = await p_rule_applicator.apply_translation_rules(subject)
     tar_test_code, tar_main_code, tar_test_call_code = tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)
 
     logger.debug(f'SUCCESS Rule application phase for "{subject.name}" is successful.')
@@ -305,7 +307,7 @@ async def mode_benchmark(conf: dict) -> None:
       if learn_task.exception() is not None or learn_task.result() is None:
         logger.warning(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
         continue
-      coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject)
+      coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject, semaphore)
       apply_tasks.append(tg.create_task(coroutine, name=subject.name))
 
   for apply_task in apply_tasks:
