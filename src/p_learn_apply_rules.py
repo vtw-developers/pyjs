@@ -21,7 +21,7 @@ logger = p_utils.setup_logger(__name__)
 # With workaround <https://stackoverflow.com/questions/75250788>,
 # SIGINT (Ctrl-C) has to be sent twice to stop the program though.
 class ForgivingTaskGroup(asyncio.TaskGroup):
-    _abort = lambda self: None
+  _abort = lambda self: None
 
 
 def cleanup():
