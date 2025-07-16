@@ -1358,6 +1358,41 @@ def _test_adapt_rule_choices():
   print(f'New code choices:\n{json.dumps(new_code_choices, indent=2)}')
 
 
+def _test_adapt_rule_choices_assert_result():
+  '''
+  def adapt_rule_choices_assert_result(
+    code: str,
+    code_choices: dict,
+    new_code: str,
+    new_code_choices: dict,
+    src_lang: str,
+    tar_lang: str,
+    translation_rules: str,
+  ) -> None:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_adapt_rule_choices_assert_result_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  code = args_dict['code']
+  code_choices = args_dict['code_choices']
+  new_code = args_dict['new_code']
+  new_code_choices = args_dict['new_code_choices']
+  src_lang = args_dict['src_lang']
+  tar_lang = args_dict['tar_lang']
+  translation_rules = args_dict['translation_rules']
+
+  adapt_rule_choices_assert_result(
+    code,
+    code_choices,
+    new_code,
+    new_code_choices,
+    src_lang,
+    tar_lang,
+    translation_rules
+  )
+
+
 if __name__ == '__main__':
   # asyncio.run(_test_validate_translation_rules_for_statement_node())
   # asyncio.run(_test_learn_trans_rules_for_statement_node())
@@ -1365,3 +1400,4 @@ if __name__ == '__main__':
   # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()
   # _test_adapt_rule_choices()
+  # _test_adapt_rule_choices_assert_result()
