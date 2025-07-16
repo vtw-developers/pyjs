@@ -1,7 +1,7 @@
 import argparse
+import asyncio
 import json
 import random
-from asyncio import TaskGroup, run, Semaphore
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -20,7 +20,7 @@ logger = p_utils.setup_logger(__name__)
 # TaskGroup would cancel the remaining tasks in case one fails.
 # With workaround <https://stackoverflow.com/questions/75250788>,
 # SIGINT (Ctrl-C) has to be sent twice to stop the program though.
-class ForgivingTaskGroup(TaskGroup):
+class ForgivingTaskGroup(asyncio.TaskGroup):
     _abort = lambda self: None
 
 
@@ -36,7 +36,7 @@ async def learn_phase_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset: str,
   lsubject: ptlog.Subject,
-  semaphore: Semaphore
+  semaphore: asyncio.Semaphore
 ) -> Optional[str]:
   '''
   Run PiREL to learn translation rules for a given subject.
@@ -261,7 +261,7 @@ async def mode_benchmark(conf: dict) -> None:
 
     num_concurrent_subjects = min(len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
     logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
-    semaphore = Semaphore(num_concurrent_subjects)
+    semaphore = asyncio.Semaphore(num_concurrent_subjects)
 
     for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
       msg = f'Starting learning phase for {subject_idx}/{len(benchmark_sample)}-th program ({subject_name})'
@@ -380,7 +380,7 @@ def main():
   mode_conf = conf[f'mode_{mode}']
 
   try:
-    run(MODE_CALLBACKS[mode](mode_conf))
+    asyncio.run(MODE_CALLBACKS[mode](mode_conf))
   except Exception as exc:
     p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise

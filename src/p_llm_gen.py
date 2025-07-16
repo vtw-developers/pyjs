@@ -34,11 +34,11 @@ NOTE on adding a new task class:
 '''
 
 
+import asyncio
 import copy
 import json
 import re
 from abc import ABC, abstractmethod
-from asyncio import run, sleep
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from langchain_core.messages.ai import AIMessage
@@ -808,7 +808,7 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
     except OpenAIAPIError as e:  # probably hitting rate limit
       logger.warning(e)
       excs.append(e)
-      await sleep(2**i)  # 1 to 64 seconds
+      await asyncio.sleep(2**i)  # 1 to 64 seconds
     else:
       break
   else:
@@ -1178,10 +1178,10 @@ async def _test_gen_test_function():
 
 
 if __name__ == '__main__':
-  # run(_test_query_llm())
-  run(_test_gen_test_function())
-  # run(_test_translate_sp1())
+  # asyncio.run(_test_query_llm())
+  asyncio.run(_test_gen_test_function())
+  # asyncio.run(_test_translate_sp1())
   # _test_translate_sp2()
-  # run(_test_get_translation_pairs_from_tsp())
+  # asyncio.run(_test_get_translation_pairs_from_tsp())
   # _test_get_feedback_message_trans_sp1_partial()
   # _test_get_feedback_message_trans_sp2_partial()

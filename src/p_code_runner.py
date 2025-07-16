@@ -1,9 +1,8 @@
+import asyncio
 import json
 import os
 import signal
 import sys
-from asyncio import create_subprocess_exec, run, timeout
-from asyncio.subprocess import PIPE
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -150,9 +149,9 @@ async def _run_code(code: str, lang: str,
 
   logger.debug(f'Executing command: {command} {temp_filename}')
   try:
-    proc = await create_subprocess_exec(command, temp_filename,
-                                        stdout=PIPE, stderr=PIPE)
-    async with timeout(timeout_sec):
+    proc = await asyncio.create_subprocess_exec(
+      command, temp_filename, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    async with asyncio.timeout(timeout_sec):
       # await proc.communicate() sometimes create a zombie process,
       # which probably has something to do with improper pipe cleanup
       # at in asyncio.gather.  See also
@@ -275,5 +274,5 @@ async def _test_run_tar_test_script():
 
 
 if __name__ == '__main__':
-  run(_test_run_src_test_script())
-  # run(_test_run_tar_test_script())
+  asyncio.run(_test_run_src_test_script())
+  # asyncio.run(_test_run_tar_test_script())

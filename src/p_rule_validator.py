@@ -1,5 +1,5 @@
+import asyncio
 import json
-from asyncio import run
 from typing import List, Optional
 
 import d_grammar_expand
@@ -639,6 +639,6 @@ async def _test_is_valid_translation_rule_test_based():
 
 
 if __name__ == '__main__':
-  # run(_validate_translation_rule_usage()
+  # asyncio.run(_validate_translation_rule_usage()
   # _test_is_valid_translation_rule_syntactic()
-  run(_test_is_valid_translation_rule_test_based())
+  asyncio.run(_test_is_valid_translation_rule_test_based())
