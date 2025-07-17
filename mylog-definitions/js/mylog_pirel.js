@@ -1,4 +1,5 @@
 "use strict";
+const crypto = require("crypto");
 let _default_console_log = console.log;
 
 function serializeNull() {
@@ -25,7 +26,9 @@ function serializeNum(arg) {
 
 function serializeArray(arg) {
   const serializedVals = arg.map(val => serialize(val));
-  return ["list", arg.length, serializedVals];
+  const serializedValsStr = JSON.stringify(serializedVals);
+  const hashed = crypto.createHash("sha256").update(serializedValsStr).digest("hex");
+  return ["hash", hashed.length, hashed];
 }
 
 function serializeSet(arg) {
