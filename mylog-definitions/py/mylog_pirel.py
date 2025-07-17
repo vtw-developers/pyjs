@@ -1,3 +1,4 @@
+import hashlib
 import json
 import math
 from typing import Union
@@ -24,7 +25,9 @@ def serialize_num(arg: Union[int, float]):
 
 def serialize_list(arg: Union[list, tuple]):
   serialized_vals = [serialize(val) for val in arg]
-  return ["list", len(arg), serialized_vals]
+  serialized_vals_str = json.dumps(serialized_vals, separators=(',', ':'))
+  hashed = hashlib.sha256(serialized_vals_str.encode('utf-8')).hexdigest()
+  return ["hash", len(hashed), hashed]
 
 def serialize_set(arg: set):
   sorted_vals = sorted(arg)
