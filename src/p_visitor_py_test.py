@@ -14341,27 +14341,174 @@ class TestLoggableValueExtractor(unittest.TestCase):
     loggable_values = self.extract_loggable_values(snippet)
     self.assertCountEqual(loggable_values, ['num'])
 
-  def test_duplicate_value(self):
-    # Test a simple assignment
-    snippet = 'x, x = 10, 11'
+    snippet = 'lo = 0'
     loggable_values = self.extract_loggable_values(snippet)
-    self.assertCountEqual(loggable_values, ['x'])
+    self.assertCountEqual(loggable_values, ['lo'])
 
-  def test_subscript_assignment(self):
-    # Test subscript assignment
-    snippet = 'arr[0] = 10'
+  def test_list_01(self):
+    snippet = 't[size] = len(t)'
     loggable_values = self.extract_loggable_values(snippet)
-    self.assertCountEqual(loggable_values, ['arr[0]'])
+    self.assertCountEqual(loggable_values, ['t[size]'])
 
-  def test_pattern_list_assignment(self):
+  def test_list_02(self):
+    snippet = 'a[0] = 10'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a[0]'])
+
+  def test_list_03(self):
+    snippet = 'dp[i + a] = 10'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[i + a]'])
+
+  def test_list_04(self):
+    snippet = 'countA[a[i]] = countA[a[i]] + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['countA[a[i]]'])
+
+  def test_list_05(self):
+    snippet = 'hash_0[abs(i)] = hash_0.get(abs(i), 0) + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['hash_0[abs(i)]'])
+
+  def test_list_06(self):
+    snippet = 'table[i // 2] = table[i // 2] + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['table[i // 2]'])
+
+  def test_list_07(self):
+    snippet = 'visited[arr[i] - Min] = True'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['visited[arr[i] - Min]'])
+
+  def test_list_08(self):
+    snippet = 'temp[(j + arr[i]) % m] = temp[(j + arr[i]) % m] + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['temp[(j + arr[i]) % m]'])
+
+  def test_list_09(self):
+    snippet = 'frequency[ord(str_0[i]) - 97] = frequency.get(ord(str_0[i]) - 97, 0) + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['frequency[ord(str_0[i]) - 97]'])
+
+  def test_list_10(self):
+    snippet = 'count[ord(str_0[i])] = count.get(ord(str_0[i]), 0) + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['count[ord(str_0[i])]'])
+
+  def test_list_11(self):
+    snippet = 'mp[arr[i] + arr[j]] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['mp[arr[i] + arr[j]]'])
+
+  def test_list_12(self):
+    snippet = 'c[arr[i] % 3] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['c[arr[i] % 3]'])
+
+  def test_list_13(self):
+    snippet = 'hash_negative[-difference] = hash_negative.get(-difference, 0) + 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['hash_negative[-difference]'])
+
+  def test_list_14(self):
+    snippet = 'st[len(st) - 1] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['st[len(st) - 1]'])
+
+  def test_tuple_list_duplicate_01(self):
+    snippet = 'a[lo], a[mid] = 0, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a[lo]', 'a[mid]'])
+
+  def test_tuple_list_duplicate_02(self):
+    snippet = 'num[0], num[small] = 0, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['num[0]', 'num[small]'])
+
+  def test_tuple_list_duplicate_03(self):
+    snippet = 'num[i], num[rightMin[i]] = 0, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['num[i]', 'num[rightMin[i]]'])
+
+  def test_tuple_list_duplicate_04(self):
+    snippet = 'arr[i], arr[i + 1] = 0, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['arr[i]', 'arr[i + 1]'])
+
+  def test_tuple_list_01(self):
+    snippet = 'a[i], b[j] = 0, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a[i]', 'b[j]'])
+
+  def test_matrix_01(self):
+    snippet = 'LCSuff[i][j] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['LCSuff[i][j]'])
+
+  def test_matrix_02(self):
+    snippet = 'mat[i][0] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['mat[i][0]'])
+
+  def test_matrix_03(self):
+    snippet = 'mat[0][j] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['mat[0][j]'])
+
+  def test_matrix_04(self):
+    snippet = 'P[i][i + 1] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['P[i][i + 1]'])
+
+  def test_matrix_05(self):
+    snippet = 'dp[0][0] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[0][0]'])
+
+  def test_matrix_06(self):
+    snippet = 'dp[i + 1][j + 1] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[i + 1][j + 1]'])
+
+  def test_matrix_07(self):
+    snippet = 'dp[i + 1][j] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[i + 1][j]'])
+
+  def test_tuple_01(self):
     snippet = 'a, b, c = 1, 2, 0'
     loggable_values = self.extract_loggable_values(snippet)
     self.assertCountEqual(loggable_values, ['a', 'b', 'c'])
 
-  def test_pattern_list_subscript_assignment(self):
-    snippet = 'a[lo], a[mid] = a[mid], a[lo]'
+  def test_tuple_02(self):
+    snippet = 'pos, neg = 1, -1'
     loggable_values = self.extract_loggable_values(snippet)
-    self.assertCountEqual(loggable_values, ['a[lo]', 'a[mid]'])
+    self.assertCountEqual(loggable_values, ['pos', 'neg'])
+
+  def test_tuple_03(self):
+    snippet = 'pPrevPrev, pPrev, pCurr, pNext = 1, 1, 1, 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['pPrevPrev', 'pPrev', 'pCurr', 'pNext'])
+
+  def test_tuple_duplicate_01(self):
+    snippet = 'a, a = 1, 2'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['a'])
+
+  def test_3d_matrix_01(self):
+    snippet = 'dp[1][0][0] = 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[1][0][0]'])
+
+  def test_3d_matrix_02(self):
+    snippet = 'dp[i][j][0] = 1'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[i][j][0]'])
+
+  def test_3d_matrix_03(self):
+    snippet = 'dp[l][r][k] = 0'
+    loggable_values = self.extract_loggable_values(snippet)
+    self.assertCountEqual(loggable_values, ['dp[l][r][k]'])
 
   def test_method_call(self):
     snippet = 'chars.remove(s[i])'
