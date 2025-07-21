@@ -623,38 +623,38 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
   # in cases when templates_dict is loaded from str, keys are strings
   _valid_template_idx = p_utils.to_int(templates_dict['num_templates']) - 1
   template_dict = templates_dict.get(_valid_template_idx) or templates_dict.get(str(_valid_template_idx))
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_0_init.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_0_init.json', template_dict)
 
   # Rerun DuoGlot translation to obtain `template_dict`
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
   template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_1_context_1.json', template_dict)
 
   # simplify the context
   template_dict = p_grammar.simplify_template(subject, template_dict)
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify_1.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_2_simplify_1.json', template_dict)
 
   # simplify the template using the generator
   template_dict = p_generator.simplify_template_with_generator(subject, template_dict)
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_simplify_2.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_3_simplify_2.json', template_dict)
 
   # Rerun DuoGlot translation to obtain `template_dict`
   # for the context code snippet, not the entire program.
   # This is done to get the updated values for
   # `context_node_id`, `problematic_node_id`, and `problematic_node_path`
   template_dict = _rerun_translation_for_context(subject, current_ruleset, template_dict['template_origin'])
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_4_context_2.json', template_dict)
 
   # prepare partial program
   partial_program = get_partial_program(subject, current_ruleset, template_dict)
   template_dict['partial_program'] = partial_program
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_5_par_prog.json', template_dict)
 
   # `src_program` is needed for a prompt that uses it as a reference
   template_dict['src_program'] = subject.src_main_code
-  p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_6_src_program.json', template_dict)
+  # p_utils.log_json_time(f'{subject.name}_TEMPLATE_DICT_6_src_program.json', template_dict)
 
   # prepare pre-context of the context node of the problematic node
   # NOTE pre-context is used in translation rule validation
@@ -1159,7 +1159,7 @@ async def learn_trans_rules_for_subject(
   logger.debug(f'~~~ Starting to learn translation rules for subject (subject={subject.name})')
 
   current_ruleset_obj = p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset)
-  p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset_obj.to_string())
+  # p_utils.log_file_time(f'{subject.name}_starting-ruleset.snart', current_ruleset_obj.to_string())
 
   '''
   Iterate over statement nodes (simple statements, compound statements).

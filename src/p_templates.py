@@ -163,9 +163,9 @@ def extract_templates(
   '''
 
   subject_name = kwargs['subject_name']
-  p_utils.log_json_time(f'{subject_name}_problematic_ast.json', problematic_ast)
-  p_utils.log_json_time(f'{subject_name}_full_ast_text.json', full_ast_text)
-  p_utils.log_json_time(f'{subject_name}_full_ast.json', full_ast)
+  # p_utils.log_json_time(f'{subject_name}_problematic_ast.json', problematic_ast)
+  # p_utils.log_json_time(f'{subject_name}_full_ast_text.json', full_ast_text)
+  # p_utils.log_json_time(f'{subject_name}_full_ast.json', full_ast)
 
   # 1 instantiate a `TemplateTree` - data structure for creating templates
   problematic_node_id = problematic_ast[1]

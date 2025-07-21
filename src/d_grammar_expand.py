@@ -398,12 +398,12 @@ class TransSession():
 
     subject_name = kwargs['subject_name']
     logger.debug(f'Starting PiREL template extraction.')
-    p_utils.log_file_time(f'{subject_name}_program_to_translate.{self.source_language_name}', self.source_code)
-    p_utils.log_file_time(f'{subject_name}_translation_rules.snart', self.translation_rules_str)
+    # p_utils.log_file_time(f'{subject_name}_program_to_translate.{self.source_language_name}', self.source_code)
+    # p_utils.log_file_time(f'{subject_name}_translation_rules.snart', self.translation_rules_str)
 
     # translation rules used
     used_translation_rules = self.pirel_get_used_translation_rules()
-    p_utils.log_file_time(f'{subject_name}_used_translation_rules.snart', used_translation_rules)
+    # p_utils.log_file_time(f'{subject_name}_used_translation_rules.snart', used_translation_rules)
 
     # context information
     try:
@@ -411,7 +411,7 @@ class TransSession():
     except Exception as exc:
       logger.error(f'Error during context extraction: type="{type(exc)}", msg="{str(exc)}"')
       raise ContextExtractionException from exc
-    p_utils.log_json_time(f'{subject_name}_contexts_grammar_expand.json', contexts)
+    # p_utils.log_json_time(f'{subject_name}_contexts_grammar_expand.json', contexts)
 
     # slot is pertinent to the node that cannot be translated
     slot = self._slot_dict[slot_id]
@@ -444,7 +444,7 @@ class TransSession():
       **kwargs
     )
 
-    p_utils.log_json_time(f'{subject_name}_ALL-TEMPLATES-d_grammar_expand.json', templates_dict)
+    # p_utils.log_json_time(f'{subject_name}_ALL-TEMPLATES-d_grammar_expand.json', templates_dict)
     logger.debug(f'PiREL template extraction is complete.')
 
     return templates_dict

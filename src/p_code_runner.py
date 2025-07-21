@@ -200,7 +200,7 @@ async def run_src_test_script(
   '''
   This function runs the source program with mylog and returns the log list and error.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-run_src_test_script.json', locals())
+  # p_utils.log_json_time(f'{subject.name}_args-run_src_test_script.json', locals())
   logger.debug('Starting p_code_runner.run_src_test_script')
 
   mylog_impl = get_mylog_impl(subject.src_lang)
@@ -221,7 +221,7 @@ async def run_tar_test_script(
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-run_tar_test_script.json', locals())
+  # p_utils.log_json_time(f'{subject.name}_args-run_tar_test_script.json', locals())
   logger.debug('Starting p_code_runner.run_tar_test_script')
 
   mylog_impl = get_mylog_impl(subject.tar_lang)
