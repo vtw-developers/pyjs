@@ -664,6 +664,7 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
 
   logger.debug('Finished template_dict initialization')
   logger.debug(f'template_dict:\n{json.dumps(template_dict, indent=2)}')
+  p_utils.log_json_time(f'{subject.name}_template_dict.json', template_dict)
   return template_dict
 
 
