@@ -2327,6 +2327,107 @@ class LoggableValueExtractor(pvis.Visitor):
       self.add_loggable_node(nt_child)
 
 
+class LoggableIdentifierExtractor(pvis.Visitor):
+  '''
+  Given an expression statement, this visitor extracts
+  all identifiers that must be logged.
+  '''
+  def __init__(self):
+    super().__init__()
+    self.loggable_identifiers : List[str] = []
+
+  def add_loggable_node(self, lhs: IdentifierNode) -> None:
+    assert isinstance(lhs, IdentifierNode), 'lhs must be an IdentifierNode'
+    # check if we have already seen this node
+    if lhs.val() in self.loggable_identifiers:
+      return
+    self.loggable_identifiers.append(lhs.val())
+
+  def get_loggable_identifiers(self) -> List[str]:
+    return self.loggable_identifiers
+
+  # VISIT METHODS
+  def default_visit(self, node):
+    raise NotImplementedError(f'visit_{node.__class__.__name__} is not implemented')
+
+  def visit_AssignmentNode(self, node: AssignmentNode) -> None:
+    '''
+    We care only about the left hand side.
+    '''
+    self.visit(node.left)
+
+  def visit_AttributeNode(self, node: AttributeNode) -> None:
+    '''
+    chars.remove(s[i])
+    ^^^^^
+    mat[i].sort()  # G0236
+    ^^^
+    '''
+    assert isinstance(node.object, (IdentifierNode, SubscriptNode)), 'sanity check'
+    self.visit(node.object)
+
+  def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
+    '''
+    We care only about the left hand side.
+    '''
+    self.visit(node.left)
+
+  def visit_CallNode(self, node: CallNode) -> None:
+    '''
+    chars.remove(s[i])
+    ^^^^^
+    '''
+    if isinstance(node.function, AttributeNode):
+      self.visit(node.function)
+
+  def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> None:
+    '''
+    Extract the assigned identifiers from the expression statement node.
+
+    expression_statement: $ => choice(
+      $.expression,
+      seq(commaSep1($.expression), optional(',')),
+      $.assignment,
+      $.augmented_assignment,
+      $.yield
+    ),
+    '''
+    _ASSIGNMENT_RELATED_NODES = [
+      AssignmentNode,
+      AugmentedAssignmentNode,
+      CallNode,
+    ]
+
+    nt_children = node.get_nt_children()
+    assert len(nt_children) == 1, 'sanity check: expression statement has one child'
+    child = nt_children[0]
+
+    # visit only the following children of expression_statement
+    if isinstance(child, tuple(_ASSIGNMENT_RELATED_NODES)):
+      self.visit(child)
+
+  def visit_IdentifierNode(self, node: IdentifierNode) -> None:
+    self.add_loggable_node(node)
+
+  def visit_PatternListNode(self, node: PatternListNode) -> None:
+    '''
+    According to grammar, pattern_list is a comma separated
+    list of some non-terminal nodes.
+    Example: `a, b, c = 1, 2, 0` as in G0291.
+    '''
+    for nt_child in node.get_nt_children():
+      self.visit(nt_child)
+
+  def visit_SubscriptNode(self, node: SubscriptNode) -> None:
+    '''
+    Extract the identifier from the subscript node.
+    '''
+    if isinstance(node.value, IdentifierNode):
+      self.add_loggable_node(node.value)
+    else:
+      self.visit(node.value)
+
+
 class BreakStatementInserter(pvis.Visitor):
   '''
   Insert a break statement at the end of each loop.
