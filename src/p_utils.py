@@ -5,6 +5,7 @@ PiREL utils
 import io
 import json
 import logging
+import os
 import time
 import tokenize
 import traceback
@@ -192,17 +193,37 @@ def write_yaml(fpath: Union[Path, str], obj: Any) -> None:
   yaml_str = yaml.dump(obj, default_flow_style=False, indent=2, canonical=False, width=1000000)
   write_file(fpath, yaml_str, include_timestamp=False)
 
-def write_file(fpath: Union[Path, str], contents: str, include_timestamp=False) -> None:
-  ''''''
+def write_file(
+  fpath: Union[Path, str],
+  contents: str,
+  include_timestamp = False,
+  is_inline: bool = False
+) -> None:
+  '''
+  PARAM include_timestamp: If True, prepend the file name with a timestamp.
+  PARAM is_inline: If True, the timestamp is inline with the file name.
+  For example, if the file name is 'some.log.file', the timestamp will be
+  prepended as 'MM-DD-HH-MM-SS.microseconds-some.log.file'.
+  If False, the timestamp will be in a directory structure like
+  /MM/DD/HH/MM/SS/microseconds-some.log.file.
+  This is useful for organizing log files by date and time.
+  '''
   assert isinstance(fpath, (Path, str))
   if isinstance(fpath, str):
     fpath = Path(fpath)
 
   if include_timestamp:
     now_dt = datetime.fromtimestamp(time.time())
-    now_st = now_dt.strftime('%m-%d-%H-%M-%S.%f')
-    # now_st = now_st[:-3]  # millisecond precision is enough
-    fpath = fpath.parent / f'{now_st}-{fpath.name}'
+
+    if is_inline:
+      # Inline timestamp format: MM-DD-HH-MM-SS.microseconds
+      now_str = now_dt.strftime('%m-%d-%H-%M-%S.%f')
+      fpath = fpath.parent / f'{now_str}-{fpath.name}'
+    else:
+      # Directory structure: /MM/DD/HH/MM/SS/microseconds-filename
+      fpath = fpath.parent / str(now_dt.month) / str(now_dt.day) / str(now_dt.hour) / \
+        str(now_dt.minute) / str(now_dt.second) / f'{now_dt.microsecond}-{fpath.name}'
+      os.makedirs(fpath.parent, exist_ok=True)
 
   logger.debug(f'Writing a file to "{fpath}"')
   with open(fpath, 'w') as fout:
