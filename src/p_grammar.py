@@ -2120,7 +2120,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat1.json', nodes_can_be_simplified_dict_strat1)
+  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat1.json', nodes_can_be_simplified_dict_strat1)
 
   # ~~~ simplify using strategy 1
   upd_text_strat1, upd_prob_nid_strat1 = _strategy_1(
@@ -2147,7 +2147,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat2.json', nodes_can_be_simplified_dict_strat2)
+  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat2.json', nodes_can_be_simplified_dict_strat2)
 
   # ~~~ simplify using strategy 2
   upd_text_strat2, upd_prob_nid_strat2 = _strategy_2(
@@ -2172,7 +2172,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat3.json', nodes_can_be_simplified_dict_strat3)
+  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat3.json', nodes_can_be_simplified_dict_strat3)
 
   # ~~~ simplify using strategy 3
   individually_simplifiable_nodes = _get_individually_simplifiable_nodes(
@@ -2205,7 +2205,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat4.json', nodes_can_be_simplified_dict_strat4)
+  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat4.json', nodes_can_be_simplified_dict_strat4)
 
   # ~~~ simplify using strategy 4
   individually_simplifiable_nodes = _get_individually_simplifiable_nodes(
