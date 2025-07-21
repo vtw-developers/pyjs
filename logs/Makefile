@@ -6,8 +6,14 @@ new_directory := ./$(timestamp)
 clean:
 	@read -p "Are you sure you want to delete all files as specified? [y/N] " confirm && [ "$$confirm" = "y" ]
 
-	find learn-rules/ -type f ! -name '.gitignore' -print -delete
-	find pirel/ -type f ! -name '.gitignore' -print -delete
+	@mv learn-rules/.gitignore /tmp/.gitignore.learn-rules
+	rm -rfv learn-rules/*
+	@mv /tmp/.gitignore.learn-rules learn-rules/.gitignore
+
+	@mv pirel/.gitignore /tmp/.gitignore.pirel
+	rm -rfv pirel/*
+	@mv /tmp/.gitignore.pirel pirel/.gitignore
+
 	rm -fv *.log
 
 # make backup_zip name=debug-03
