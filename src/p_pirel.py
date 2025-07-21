@@ -92,10 +92,9 @@ def get_pre_context_global(src_main_code: str, stat_npath: List[int]) -> str:
 
     # move up the tree
     cursor_node = cursor_node.get_parent()
-    while (isinstance(cursor_node, pvpy.BlockNode)
-           and isinstance(cursor_node.get_parent(),
-                          pvpy.FunctionDefinitionNode)):
-      cursor_node = cursor_node.get_parent()
+    if isinstance(cursor_node, pvpy.BlockNode):
+      if isinstance(cursor_node.get_parent(), pvpy.FunctionDefinitionNode):
+        break
 
   # 2. replace the context node with a special identifier
   spec_id_stat = pvpy.ExpressionStatementNode.build(
