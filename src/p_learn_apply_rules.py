@@ -295,8 +295,8 @@ async def mode_benchmark(conf: dict) -> None:
   learn_tasks = []
   async with ForgivingTaskGroup() as tg:
     for subject, lsubject in zip(subject_list, lsubject_list):
-      coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
-      learn_tasks.append(tg.create_task(coroutine, name=subject.name))
+      learn_coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
+      learn_tasks.append(tg.create_task(learn_coroutine, name=subject.name))
 
   assert len(learn_tasks) == len(subject_list), 'sanity check'
 
@@ -307,10 +307,10 @@ async def mode_benchmark(conf: dict) -> None:
       if learn_task.exception() is not None or learn_task.result() is None:
         logger.warning(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
         continue
-      coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject, semaphore)
-      apply_tasks.append(tg.create_task(coroutine, name=subject.name))
+      apply_coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject, semaphore)
+      apply_tasks.append(tg.create_task(apply_coroutine, name=subject.name))
 
-  for apply_task in apply_tasks:
+  for apply_task, lsubject in zip(apply_tasks, lsubject_list):
     # update the starting ruleset for the next subject
     # by adding the learned rules if specified in the config
     if (apply_task.exception() is None
