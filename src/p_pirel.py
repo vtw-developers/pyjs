@@ -602,6 +602,7 @@ def init_template_dict(subject: p_subject.PirelSubject, current_ruleset: str, te
     TODO optimize: context extraction is needed only at this step
     RETURN updated `template_dict`
     '''
+    logger.debug(f'Rerunning translation for context')
     try:
       _ = duoglot_translate_wrapper(
         template_origin,
