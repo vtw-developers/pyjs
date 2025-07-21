@@ -2027,9 +2027,9 @@ class LogStatementInserter(pvis.Visitor):
         idx += 1
         continue
 
-      lve = LoggableValueExtractor()
-      lve.visit(child)
-      loggable_values = lve.get_loggable_nodes()
+      lie = LoggableIdentifierExtractor()
+      lie.visit(child)
+      loggable_values = lie.get_loggable_identifiers()
 
       if len(loggable_values) == 0:
         idx += 1
@@ -2038,7 +2038,7 @@ class LogStatementInserter(pvis.Visitor):
       # build and insert log statement
       if len(loggable_values) == 1:
         lv = loggable_values[0]
-        log_statement = self.build_ArgLogStatement([lv])
+        log_statement = self.build_ArgLogStatement([IdentifierNode.build(lv)])
         node.children.insert(idx + 1, log_statement)
         log_statement.set_parent(node)
         idx += 1
@@ -2046,7 +2046,7 @@ class LogStatementInserter(pvis.Visitor):
 
       elif len(loggable_values) > 1:
         # most likely a pattern_list assignment such as `a, b, c = 1, 2, 0` in G0291
-        log_statement = self.build_ArgLogStatement(loggable_values)
+        log_statement = self.build_ArgLogStatement([IdentifierNode.build(lv) for lv in loggable_values])
         node.children.insert(idx + 1, log_statement)
         log_statement.set_parent(node)
         idx += 1
