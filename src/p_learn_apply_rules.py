@@ -131,7 +131,7 @@ async def application_phase_on_subject(
     logger.debug(f'Here is the target program:\n{tar_main_code}')
 
     p_utils.llog_text(f'{subject.name}_source_program.{subject.src_lang}', subject.src_main_code)
-    p_utils.llog_text(f'{subject.name}_target_program.{subject.tar_lang}', tar_main_code)
+    p_utils.llog_text(f'{subject.name}_target_program_plausible.{subject.tar_lang}', tar_main_code)
 
     lrule_application_phase.success = True
     lrule_application_phase.end_time = p_utils.current_time_sec()
@@ -156,28 +156,78 @@ async def application_phase_on_subject(
     return None
 
 
-def mode_benchmark_email_report(lsubject: ptlog.Subject, lbenchmark: ptlog.Benchmark) -> None:
+async def learn_apply_phase_on_subject(
+  subject: p_subject.PirelSubject,
+  starting_ruleset: str,
+  lsubject: ptlog.Subject,
+  lbenchmark: ptlog.Benchmark,
+  semaphore: asyncio.Semaphore,
+  lock: asyncio.Lock,
+  shared_counter: List[int],
+  conf: dict
+) -> Optional[str]:
+  '''
+  Wrapper function to run both rule learning and application phases.
+  '''
+  # rule learning phase
+  learned_rules = await learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
+
+  if learned_rules is None:
+    logger.warning(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
+    await mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_counter, conf)
+    return None
+
+  logger.debug(f'Rule learning phase for "{subject.name}" was successful. Proceeding to rule application phase')
+
+  # rule application phase
+  validated_rules = await application_phase_on_subject(subject, learned_rules, lsubject, semaphore)
+
+  if validated_rules is None:
+    logger.warning(f'Rule application phase for "{subject.name}" was not successful.')
+    await mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_counter, conf)
+    return None
+
+  logger.debug(f'Both rule learning and application phases for "{subject.name}" were successful.')
+  await mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_counter, conf)
+  return validated_rules
+
+
+async def mode_benchmark_subject_finish(
+  lsubject: ptlog.Subject,
+  lbenchmark: ptlog.Benchmark,
+  lock: asyncio.Lock,
+  shared_counter: List[int],
+  conf: dict
+) -> None:
+  '''
+  Called when a task for a subject finishes.
+  '''
+
   lrule_learn_phase = lsubject.rule_learn_phase
   lrule_application_phase = lsubject.rule_application_phase
 
+  async with lock:
+    shared_counter[0] += 1
+
   # `L0001 1/20 7m11s: `
-  subject = f'{lsubject.subject_name} {lsubject.id}/{lbenchmark.sample_size} '
+  subject = f'{lsubject.subject_name} {shared_counter[0]}/{lbenchmark.sample_size} '
   subject += f'{lsubject.get_total_time()}: '
   message = f'{lsubject.subject_name}:\n\n'
 
   if lrule_learn_phase.success is True:
     assert lrule_application_phase.success in [True, False], 'Rule application phase must run if learn rules phase is successful'
     if lrule_application_phase.success is True:
-      subject = subject + f'LEARN-YES, APPLY-YES'
+      subject = subject + f'L-YES, A-YES'
       message = message + lrule_application_phase.plausible_target_program
     else:
-      subject = subject + f'LEARN-YES, APPLY-NO'
+      subject = subject + f'L-YES, A-NO'
       message = message + lrule_application_phase.reason
   else:
-    subject = subject + f'LEARN-NO'
+    subject = subject + f'L-NO'
     message = message + lrule_learn_phase.reason
 
-  p_utils.email_safely(subject=subject, message=message)
+  if conf.get('is_email_report', False):
+    p_utils.email_safely(subject=subject, message=message)
 
 
 def mode_benchmark_init(
@@ -287,41 +337,19 @@ async def mode_benchmark(conf: dict) -> None:
     mode_benchmark_init(conf)
   assert len(subject_list) == len(lsubject_list), 'sanity check'
 
-  num_concurrent_subjects = min(len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
+  num_concurrent_subjects = min(
+    len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
   logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
   semaphore = asyncio.Semaphore(num_concurrent_subjects)
 
-  # ~~~ rule learning phase
-  learn_tasks = []
+  lock = asyncio.Lock()
+  shared_counter = [0]
+
   async with ForgivingTaskGroup() as tg:
     for subject, lsubject in zip(subject_list, lsubject_list):
-      learn_coroutine = learn_phase_on_subject(subject, starting_ruleset, lsubject, semaphore)
-      learn_tasks.append(tg.create_task(learn_coroutine, name=subject.name))
-
-  assert len(learn_tasks) == len(subject_list), 'sanity check'
-
-  # ~~~ rule application phase
-  apply_tasks = []
-  async with ForgivingTaskGroup() as tg:
-    for learn_task, subject, lsubject in zip(learn_tasks, subject_list, lsubject_list):
-      if learn_task.exception() is not None or learn_task.result() is None:
-        logger.warning(f'Rule learning phase for "{subject.name}" was not successful. Skipping rule application phase')
-        continue
-      apply_coroutine = application_phase_on_subject(subject, learn_task.result(), lsubject, semaphore)
-      apply_tasks.append(tg.create_task(apply_coroutine, name=subject.name))
-
-  for apply_task, lsubject in zip(apply_tasks, lsubject_list):
-    # update the starting ruleset for the next subject
-    # by adding the learned rules if specified in the config
-    if (apply_task.exception() is None
-        and apply_task.result() is not None
-        and conf.get('is_reuse_trans_rules_across_subjects', False)):
-      # FIXME: subjects should share the ruleset instead.
-      starting_ruleset += apply_task.result()
-      logger.info(f'Updated starting ruleset for the next subject with "{subject.name}" ruleset')
-
-    if conf['is_email_report']:
-      mode_benchmark_email_report(lsubject, lbenchmark)
+      coroutine = learn_apply_phase_on_subject(
+        subject, starting_ruleset, lsubject, lbenchmark, semaphore, lock, shared_counter, conf)
+      tg.create_task(coroutine, name=subject.name)
 
   p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
 
