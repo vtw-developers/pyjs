@@ -59,7 +59,7 @@ async def learn_phase_on_subject(
 
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', learned_trans_rules)
     p_utils.llog_text(f'{subject.name}_source_program.py', subject.src_main_code)
-    p_utils.llog_yaml_time(f'tree-log-learn-phase-success-{subject.name}.yaml', asdict(lsubject))
+    p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_success.yaml', asdict(lsubject))
 
     return learned_trans_rules
 
@@ -75,7 +75,7 @@ async def learn_phase_on_subject(
     lsubject.success = False
     lsubject.reason = 'Translation rule learning phase failed'
 
-    p_utils.llog_yaml_time(f'tree-log-learn-phase-fail-{subject.name}.yaml', asdict(lsubject))
+    p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
 
     return None
 
@@ -138,7 +138,7 @@ async def application_phase_on_subject(
     lrule_application_phase.plausible_target_program = tar_main_code
     lsubject.success = True
 
-    p_utils.llog_yaml_time(f'tree-log-apply-phase-success-{subject.name}.yaml', asdict(lsubject))
+    p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_success.yaml', asdict(lsubject))
     return learned_trans_rules
 
   except Exception as exc:
@@ -152,7 +152,7 @@ async def application_phase_on_subject(
     lsubject.success = False
     lsubject.reason = 'Translation rule application phase failed'
 
-    p_utils.llog_yaml_time(f'tree-log-apply-phase-fail-{subject.name}.yaml', asdict(lsubject))
+    p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
     return None
 
 
@@ -323,7 +323,7 @@ async def mode_benchmark(conf: dict) -> None:
     if conf['is_email_report']:
       mode_benchmark_email_report(lsubject, lbenchmark)
 
-  p_utils.llog_yaml_time(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
+  p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
 
 
 async def mode_custom(conf: dict) -> None:
@@ -362,13 +362,7 @@ async def mode_custom(conf: dict) -> None:
     lsubject.reason = 'Translation rule learning phase failed'
     logger.error(msg)
 
-  p_utils.llog_yaml_time(
-    f'tree-log-custom-mode-{subject.name}.yaml',
-    asdict(lsubject),
-    strs_as_lines=True,
-    remove_null_vals=True,
-    remove_empty_lists=True
-  )
+  p_utils.llog_yaml(f'tree-log-custom-mode-{subject.name}.yaml', asdict(lsubject))
 
 
 MODE_CALLBACKS = {
