@@ -120,6 +120,9 @@ class BasePirelTask(ABC):
     self.ltask_loop = ptlog.TaskLoop(self.task_name)
     lbase_task.task_loop = self.ltask_loop
 
+    # stats
+    self.llm_query_stats: List[Dict[str, Any]] = []
+
   def __repr__(self) -> str:
     return self.__class__.__name__
 
@@ -260,7 +263,8 @@ class BasePirelTask(ABC):
   async def _query_llm(self) -> str:
     assert self.chat_history[-1].type == 'human', 'chat history must end with a human prompt'
     self._log_file(langchain_msgs_to_md(self.chat_history), f'llm-messages.md')
-    raw_response = await query_llm(self.chat_history, **self.model_params)
+    raw_response, query_stats = await query_llm(self.chat_history, **self.model_params)
+    self.llm_query_stats.append(query_stats)
     self._log_file(raw_response, f'llm-raw-response.md')
     return raw_response
 
@@ -787,7 +791,10 @@ def get_openai_credentials() -> Tuple[str, str]:
     raise RuntimeError(msg) from err
 
 
-async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
+async def query_llm(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
+  '''
+  RETURN a tuple of (raw_response, query_stats)
+  '''
   api_key, org_id = get_openai_credentials()
 
   model_params = copy.deepcopy(p_consts.DEFAULT_MODEL_PARAMS)
@@ -799,6 +806,9 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
   logger.debug(
     f'Making a query to LLM with parameters:\n'
     f'{json.dumps(model_params, indent=2)}')
+
+  query_stats = {}
+  query_stats['start_time_msec'] = p_utils.current_time_msec()
 
   chatgpt = ChatOpenAI(openai_api_key=api_key, openai_organization=org_id, **model_params)
   excs = []
@@ -813,7 +823,13 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> str:
       break
   else:
     raise OpenAIErrors('Repeated API failures', excs)
-  return chat_result.content
+
+  query_stats['end_time_msec'] = p_utils.current_time_msec()
+  query_stats['num_tokens_prompt'] = chat_result.response_metadata['token_usage']['prompt_tokens']
+  query_stats['num_tokens_completion'] = chat_result.response_metadata['token_usage']['completion_tokens']
+  query_stats['num_tokens_total'] = chat_result.response_metadata['token_usage']['total_tokens']
+
+  return chat_result.content, query_stats
 
 
 def extract_code_blocks(raw_response: str) -> List[str]:
@@ -1112,10 +1128,12 @@ async def _test_query_llm():
     HumanMessage(content=config['messages']['human'])
   ]
   model_params = config['model_params']
-  raw_response = await query_llm(messages, model_params=model_params)
+  raw_response, query_stats = await query_llm(messages, model_params=model_params)
 
   print('--- raw_response ---')
   print(raw_response)
+  print('--- query_stats ---')
+  print(json.dumps(query_stats, indent=2))
 
 
 async def _test_translate_sp1():
