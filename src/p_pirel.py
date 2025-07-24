@@ -278,7 +278,7 @@ async def recover_from_statement_node_internal_validation_failure(
     current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, -1, -1))
 
 
-async def validate_translation_rules_for_statement_node(
+async def validate_trules_for_statement_node_and_recover(
   subject: p_subject.PirelSubject,
   statement_subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
@@ -289,8 +289,8 @@ async def validate_translation_rules_for_statement_node(
   '''
   RETURN the validated ruleset.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-validate_translation_rules_for_statement_node.json', locals())
-  logger.debug('~~~ Starting p_pirel.validate_translation_rules_for_statement_node')
+  p_utils.log_json_time(f'{subject.name}_args-validate_trules_for_statement_node_and_recover.json', locals())
+  logger.debug('~~~ Starting p_pirel.validate_trules_for_statement_node_and_recover')
 
   statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
   simple_ntext = simplify_statement_node_text(statement_node)
@@ -1079,7 +1079,7 @@ async def learn_trans_rules_for_statement_node(
       f'Will not start validation of the translation rules.\n')
 
     try:
-      validated_ruleset_obj = await validate_translation_rules_for_statement_node(
+      validated_ruleset_obj = await validate_trules_for_statement_node_and_recover(
         subject,
         statement_subject,
         current_ruleset_obj,
@@ -1198,9 +1198,9 @@ async def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
-async def _test_validate_translation_rules_for_statement_node():
+async def _test_validate_trules_for_statement_node_and_recover():
   '''
-  async def validate_translation_rules_for_statement_node(
+  async def validate_trules_for_statement_node_and_recover(
     subject: p_subject.PirelSubject,
     statement_subject: p_subject.PirelSubject,
     current_ruleset_obj: p_ruleset.Ruleset,
@@ -1209,7 +1209,7 @@ async def _test_validate_translation_rules_for_statement_node():
     enable_error_recovery: bool = True,
   ) -> p_ruleset.Ruleset:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_validate_translation_rules_for_statement_node_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_validate_trules_for_statement_node_and_recover_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
@@ -1220,7 +1220,7 @@ async def _test_validate_translation_rules_for_statement_node():
   lvalidation_and_recovery = ptlog.RulesValidationRecovery()
   enable_error_recovery = args_dict['enable_error_recovery']
 
-  validated_ruleset_obj = await validate_translation_rules_for_statement_node(
+  validated_ruleset_obj = await validate_trules_for_statement_node_and_recover(
     subject,
     statement_subject,
     current_ruleset_obj,
@@ -1395,7 +1395,7 @@ def _test_adapt_rule_choices_assert_result():
 
 
 if __name__ == '__main__':
-  # asyncio.run(_test_validate_translation_rules_for_statement_node())
+  # asyncio.run(_test_validate_trules_for_statement_node_and_recover())
   # asyncio.run(_test_learn_trans_rules_for_statement_node())
   asyncio.run(_test_learn_trans_rules_for_prob_node())
   # _test_duoglot_translate_wrapper()
