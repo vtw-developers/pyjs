@@ -874,7 +874,7 @@ def adapt_rule_choices_assert_result(
 
 def adapt_rule_choices_get_new_nid(
   tree: pds.DuoGlotTree,
-  node_id: list,
+  node_id: int,
   new_tree: pds.DuoGlotTree
 ) -> int:
   '''
@@ -941,7 +941,7 @@ async def learn_trans_rules_for_statement_node(
   current_ruleset_obj: p_ruleset.Ruleset,
   statement_nid: int,
   lstatement_node: ptlog.StatementNode
-) -> None:
+):
   '''
   NOTE adds new translation rules to the current_ruleset_obj.
   '''
