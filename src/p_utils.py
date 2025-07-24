@@ -157,6 +157,12 @@ def current_time_sec() -> int:
   '''
   return int(time.time())
 
+def current_time_msec() -> int:
+  '''
+  RETURN current epoch time in milliseconds.
+  '''
+  return int(time.time() * 1000)
+
 def current_time() -> str:
   '''
   RETURN current date and time in this format:
