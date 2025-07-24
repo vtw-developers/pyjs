@@ -822,8 +822,9 @@ def infer_translation_rules(
             # do not store duplicate rules
             if translation_rule not in trules_list:
               trules_list.append(translation_rule)
-              logger.debug(f'Added newly inferred translation rule to the list.')
-              logger.debug(f'The number of translation rules so far is {len(trules_list)}')
+              logger.debug(
+                f'Added newly inferred translation rule to the list.\n'
+                f'The number of translation rules so far is {len(trules_list)}')
 
               ltrule = ptlog.TRule.from_str(translation_rule)
               lrule_inf_comb.translation_rule = ltrule

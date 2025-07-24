@@ -233,6 +233,7 @@ async def recover_from_statement_node_internal_validation_failure(
   measure to recover from the internal validation failure.
   '''
   p_utils.log_json_time(f'{subject.name}_args-recover_from_statement_node_internal_validation_failure.json', locals())
+  logger.debug('Starting a recovery from statement node internal validation failure')
 
   def _synthesize_context() -> dict:
     nonlocal simple_ntext, subject
@@ -274,6 +275,7 @@ async def recover_from_statement_node_internal_validation_failure(
       choose_largest_node=True,
       is_ignore_semicolon=False
     )
+    logger.debug(f'Error recovery: learned translation rule:\n{trule}')
     # TODO need to pass src_node_id?
     current_ruleset_obj.prepend_rule(p_ruleset.UncheckedRule.from_str(trule, -1, -1))
 
@@ -1076,7 +1078,7 @@ async def learn_trans_rules_for_statement_node(
     lstatement_node.validation_and_recovery = lvalidation_and_recovery
     logger.debug(
       f'SUCCESS. Learned all translation rules to translate nodes under the statement node.\n'
-      f'Will not start validation of the translation rules.\n')
+      f'Will now start validation of the translation rules.\n')
 
     try:
       validated_ruleset_obj = await validate_trules_for_statement_node_and_recover(
@@ -1098,6 +1100,8 @@ async def learn_trans_rules_for_statement_node(
       adapt_rule_choices_assert_result(err.src_main_code, err.choices, simple_ntext, adapted_choices,
                                        subject.src_lang, subject.tar_lang, current_ruleset_obj.to_string())
       statement_subject.choices = adapted_choices
+
+  logger.debug(f'Finished learning translation rules for statement node (node_id={statement_nid})')
 
 
 def can_be_context_node(node: pds.PirelNode, lang: str) -> bool:
