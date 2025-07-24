@@ -984,10 +984,9 @@ async def get_translation_pairs_from_tsp(
   # ~~~ FOR EACH `SP1_TP1_CAND` GENERATE ALL POSSIBLE `TRANSLATION_PAIR` CANDIDATES
   all_translation_pairs = []
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
-    msg = (
+    logger.debug(
       f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
       f'trans_sp2.id = {cand_idx}\n')
-    logger.debug(msg)
 
     ltrans_sp2 = ptlog.TransSP2()
     ltrans_sp2.id = cand_idx
@@ -1087,6 +1086,8 @@ async def get_reference_translations(
   Get a reference translation for a snippet.
   RETURN: reference translations or empty list if failed
   '''
+  logger.info(f'~~~ Starting API call to p_llm_gen.get_reference_translations')
+
   lget_ref_trans = ptlog.GetRefTrans()
   lget_ref_trans.snippet = snippet
 
