@@ -158,6 +158,12 @@ def are_traces_equal_rec(src_trace: list, tar_trace: list) -> bool:
     str1, str2 = src_trace[2], tar_trace[2]
     return len1 == len2 and str1 == str2
 
+  # base case: types are hash
+  if type1 == 'hash':
+    len1, len2 = src_trace[1], tar_trace[1]
+    hash1, hash2 = src_trace[2], tar_trace[2]
+    return len1 == len2 and hash1 == hash2
+
   # base case: types are num
   if type1 == 'number':
     val1, val2 = src_trace[1], tar_trace[1]
