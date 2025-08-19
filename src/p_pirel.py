@@ -11,7 +11,7 @@ import p_generator
 import p_grammar
 import p_llm_gen
 import p_rule_applicator
-import p_rule_chooser
+import p_ext_rule_chooser
 import p_rule_inferencer
 import p_rule_validator
 import p_ruleset
@@ -355,7 +355,7 @@ async def validate_trules_for_statement_node_and_recover(
       lrules_validation_recovery.end_time = p_utils.current_time_sec()
       return current_ruleset_obj
 
-    except p_rule_chooser.RuleCombinationsExhaustedError as err:
+    except p_ext_rule_chooser.RuleCombinationsExhaustedError as err:
       '''
       As of now, no prompt ingredients are passed to the LLM
       from error object.

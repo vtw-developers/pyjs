@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Tuple
 import d_grammar_expand
 import p_code_runner
 import p_consts
+import p_ext_rule_chooser
 import p_pirel
-import p_rule_chooser
 import p_subject
 import p_utils
 
@@ -863,6 +863,7 @@ async def _get_instrumented_tar_program_plausible(
   '''
   current_choices = subject.choices
   assert current_choices['type'] == 'ASTNODE', f'unsupported choices type "{current_choices["type"]}"'
+  readonly_choices_list = getattr(subject, 'readonly_choices_list', [])
 
   '''
   This loop exhaustively tries all possible combinations of translation rules
@@ -898,13 +899,14 @@ async def _get_instrumented_tar_program_plausible(
 
       # May raise
       # 1. RuleCombinationsExhaustedError
-      proposed_choices = p_rule_chooser.get_proposed_choices_compile_error(
+      proposed_choices = p_ext_rule_chooser.get_proposed_choices_compile_error(
         tar_program_instr,
         tar_main_code,
         tar_error_dict,
         choices_list_stack,
         map_to_exid,
-        translate_dbg_history
+        translate_dbg_history,
+        readonly_choices_list
       )
 
       current_choices = proposed_choices
@@ -915,13 +917,14 @@ async def _get_instrumented_tar_program_plausible(
 
       # May raise
       # 1. RuleCombinationsExhaustedError
-      proposed_choices = p_rule_chooser.get_proposed_choices_semantic_error(
+      proposed_choices = p_ext_rule_chooser.get_proposed_choices_semantic_error(
         tar_program_instr,
         tar_main_code,
         error_lines,
         choices_list_stack,
         map_to_exid,
-        translate_dbg_history
+        translate_dbg_history,
+        readonly_choices_list
       )
 
       current_choices = proposed_choices
