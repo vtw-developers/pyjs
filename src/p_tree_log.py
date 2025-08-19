@@ -89,6 +89,27 @@ class Sp1Tp1Cand:
     tp1_cand = obj['tp1_cand']
     return cls(hash=hash, sp1=sp1, tp1_cand=tp1_cand)
 
+@dataclass
+class LLMQueryStat:
+  start_time_msec: Optional[int] = None
+  end_time_msec: Optional[int] = None
+  num_tokens_prompt: Optional[int] = None
+  num_tokens_completion: Optional[int] = None
+  num_tokens_total: Optional[int] = None
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'LLMQueryStat':
+    start_time_msec = obj['start_time_msec']
+    end_time_msec = obj['end_time_msec']
+    num_tokens_prompt = obj['num_tokens_prompt']
+    num_tokens_completion = obj['num_tokens_completion']
+    num_tokens_total = obj['num_tokens_total']
+    return cls(start_time_msec=start_time_msec,
+               end_time_msec=end_time_msec,
+               num_tokens_prompt=num_tokens_prompt,
+               num_tokens_completion=num_tokens_completion,
+               num_tokens_total=num_tokens_total)
+
 ##################################################################
 ############### TRANSLATION RULE VALIDATION ######################
 ##################################################################
@@ -106,15 +127,16 @@ class TRuleSyntaxValRes:
 
 @dataclass
 class PRuleFilterLog:
-  translation_rules: List[TRule] = field(default_factory=list)
+  trules_all: List[TRule] = field(default_factory=list)
+  trules_syn_valid: List[TRule] = field(default_factory=list)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PRuleFilterLog':
-    translation_rules = []
-    for tr_dict in obj.get('translation_rules', []):
+    trules_all = []
+    for tr_dict in obj.get('trules_all', []):
       tr_obj = TRule.from_dict(tr_dict)
-      translation_rules.append(tr_obj)
-    return cls(translation_rules=translation_rules)
+      trules_all.append(tr_obj)
+    return cls(trules_all=trules_all)
 
 ##################################################################
 ################ TRANSLATION RULE INFERENCE ######################
@@ -166,6 +188,8 @@ class Context:
 class PRuleInfLog:
   translation_pairs: List[TransPair] = field(default_factory=list)
   num_inferred_rules: int = 0
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PRuleInfLog':
@@ -174,8 +198,11 @@ class PRuleInfLog:
       tp_obj = TransPair.from_dict(tp_dict)
       translation_pairs.append(tp_obj)
     num_inferred_rules = obj.get('num_inferred_rules', 0)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
     return cls(translation_pairs=translation_pairs,
-               num_inferred_rules=num_inferred_rules)
+               num_inferred_rules=num_inferred_rules,
+               start_time=start_time, end_time=end_time)
 
 ##################################################################
 ################## TRANSLATION PAIR GENERATION ###################
@@ -193,7 +220,7 @@ class Feedback:
     id_ = obj['id']
     code_blocks = obj.get('code_blocks', [])
     success = obj.get('success', False)
-    reason = obj.get('reason', False)
+    reason = obj.get('reason', None)
     return cls(id=id_, code_blocks=code_blocks,
                success=success, reason=reason)
 
@@ -214,7 +241,7 @@ class TaskIteration:
       fb_obj = Feedback.from_dict(fb_dict)
       feedbacks.append(fb_obj)
     success = obj.get('success', False)
-    reason = obj.get('reason', False)
+    reason = obj.get('reason', None)
     return cls(id=id_, starting_code_blocks=starting_code_blocks,
                feedbacks=feedbacks, success=success,
                reason=reason)
@@ -234,7 +261,7 @@ class TaskLoop:
       ti_obj = TaskIteration.from_dict(ti_dict)
       task_iterations.append(ti_obj)
     success = obj.get('success', False)
-    reason = obj.get('reason', False)
+    reason = obj.get('reason', None)
     return cls(task_name=task_name, task_iterations=task_iterations,
                success=success, reason=reason)
 
@@ -248,6 +275,25 @@ class GetRefTrans(BaseTask):
   ref_translations: List[str] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
+  llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'GetRefTrans':
+    # task_loop is from superclass
+    task_loop = None
+    if 'task_loop' in obj:
+      task_loop = TaskLoop.from_dict(obj['task_loop'])
+    snippet = obj.get('snippet', None)
+    ref_translations = obj.get('ref_translations', [])
+    success = obj.get('success', False)
+    reason = obj.get('reason', None)
+    llm_query_stats = []
+    for stats_dict in obj.get('llm_query_stats', []):
+      stats_obj = LLMQueryStat.from_dict(stats_dict)
+      llm_query_stats.append(stats_obj)
+    return cls(task_loop=task_loop, snippet=snippet,
+               ref_translations=ref_translations, success=success,
+               reason=reason, llm_query_stats=llm_query_stats)
 
 @dataclass
 class GenTestFunction(BaseTask):
@@ -255,6 +301,7 @@ class GenTestFunction(BaseTask):
   test_function: Optional[str] = None
   success: bool = False
   reason: Optional[str] = None
+  llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'GenTestFunction':
@@ -266,8 +313,13 @@ class GenTestFunction(BaseTask):
     test_function = obj.get('test_function', None)
     success = obj.get('success', False)
     reason = obj.get('reason', None)
+    llm_query_stats = []
+    for stats_dict in obj.get('llm_query_stats', []):
+      stats_obj = LLMQueryStat.from_dict(stats_dict)
+      llm_query_stats.append(stats_obj)
     return cls(task_loop=task_loop, f_gold_function=f_gold_function,
-               test_function=test_function, success=success, reason=reason)
+               test_function=test_function, success=success, reason=reason,
+               llm_query_stats=llm_query_stats)
 
 @dataclass
 class TransSP2(BaseTask):
@@ -278,6 +330,9 @@ class TransSP2(BaseTask):
   success: bool = False
   reason: Optional[str] = None
   translation_pairs: List[TransPair] = field(default_factory=list)
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
+  llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP2':
@@ -297,10 +352,18 @@ class TransSP2(BaseTask):
     for tp_dict in obj.get('translation_pairs', []):
       tp_obj = TransPair.from_dict(tp_dict)
       translation_pairs.append(tp_obj)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
+    llm_query_stats = []
+    for stats_dict in obj.get('llm_query_stats', []):
+      stats_obj = LLMQueryStat.from_dict(stats_dict)
+      llm_query_stats.append(stats_obj)
     return cls(task_loop=task_loop, id=id_, sp1_tp1_cand=sp1_tp1_cand,
                sp2=sp2, sp1_sp2_are_identical=sp1_sp2_are_identical,
                success=success, reason=reason,
-               translation_pairs=translation_pairs)
+               translation_pairs=translation_pairs,
+               start_time=start_time, end_time=end_time,
+               llm_query_stats=llm_query_stats)
 
 @dataclass
 class TransSP1(BaseTask):
@@ -308,6 +371,9 @@ class TransSP1(BaseTask):
   success: bool = False
   reason: Optional[str] = None
   sp1_tp1_cands: List[Sp1Tp1Cand] = field(default_factory=list)
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
+  llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP1':
@@ -322,8 +388,16 @@ class TransSP1(BaseTask):
     for sp1_tp1_cand_dict in obj.get('sp1_tp1_cands', []):
       sp1_tp1_cand_obj = Sp1Tp1Cand.from_dict(sp1_tp1_cand_dict)
       sp1_tp1_cands.append(sp1_tp1_cand_obj)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
+    llm_query_stats = []
+    for stats_dict in obj.get('llm_query_stats', []):
+      stats_obj = LLMQueryStat.from_dict(stats_dict)
+      llm_query_stats.append(stats_obj)
     return cls(task_loop=task_loop, sp1=sp1, success=success,
-               reason=reason, sp1_tp1_cands=sp1_tp1_cands)
+               reason=reason, sp1_tp1_cands=sp1_tp1_cands,
+               start_time=start_time, end_time=end_time,
+               llm_query_stats=llm_query_stats)
 
 @dataclass
 class PLLMGenLog:
@@ -331,6 +405,8 @@ class PLLMGenLog:
   trans_sp2s: List[TransSP2] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PLLMGenLog':
@@ -343,8 +419,11 @@ class PLLMGenLog:
       trans_sp2s.append(trans_sp2_obj)
     success = obj.get('success', False)
     reason = obj.get('reason', None)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
     return cls(trans_sp1=trans_sp1, trans_sp2s=trans_sp2s,
-               success=success, reason=reason)
+               success=success, reason=reason,
+               start_time=start_time, end_time=end_time)
 
 ##################################################################
 ################## PiREL RULE LEARNING PHASE #####################
@@ -376,9 +455,32 @@ class RuleApplicationPhase:
                success=success, reason=reason)
 
 @dataclass
-class RulesValidationRecovery:
+class RulesValidation:
   success: bool = False
   reason: Optional[str] = None
+  gen_test_function: Optional[GenTestFunction] = None
+
+@dataclass
+class RulesRecovery:
+  success: bool = False
+  reason: Optional[str] = None
+  simple_ntext: Optional[str] = None
+  get_ref_trans: Optional[GetRefTrans] = None
+
+@dataclass
+class RulesValRecIteration:
+  id: int
+  rules_validation: Optional[RulesValidation] = None
+  rules_recovery: Optional[RulesRecovery] = None
+
+@dataclass
+class RulesValidationRecovery:
+  id: int
+  val_rec_iterations: List[RulesValRecIteration] = field(default_factory=list)
+  success: bool = False
+  reason: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   def get_root_reason(self) -> str:
     assert not self.success, 'Cannot get reason if success is True'
@@ -386,9 +488,13 @@ class RulesValidationRecovery:
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RulesValidationRecovery':
+    id_ = obj['id']
     success = obj.get('success', False)
     reason = obj.get('reason', None)
-    return cls(success=success, reason=reason)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
+    return cls(id=id_, success=success, reason=reason,
+               start_time=start_time, end_time=end_time)
 
 @dataclass
 class TRuleLearnAttempt:
@@ -398,6 +504,8 @@ class TRuleLearnAttempt:
   p_rule_filter_log: Optional[PRuleFilterLog] = None  # filter_translation_rules()
   success: bool = False
   reason: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TRuleLearnAttempt':
@@ -413,10 +521,13 @@ class TRuleLearnAttempt:
       p_rule_filter_log = PRuleFilterLog.from_dict(obj['p_rule_filter_log'])
     success = obj.get('success', False)
     reason = obj.get('reason', None)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
     return cls(id=id_, p_llm_gen_log=p_llm_gen_log,
                p_rule_inferencer_log=p_rule_inferencer_log,
                p_rule_filter_log=p_rule_filter_log,
-               success=success, reason=reason)
+               success=success, reason=reason,
+               start_time=start_time, end_time=end_time)
 
 @dataclass
 class TSP:
@@ -426,6 +537,8 @@ class TSP:
   trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TSP':
@@ -433,17 +546,20 @@ class TSP:
     sp1 = obj['sp1']
     sp2 = obj['sp2']
     trans_rule_learn_attempts = []
-    for trla_dict in obj.get('trans_rule_learn_attempts', {}):
+    for trla_dict in obj.get('trans_rule_learn_attempts', []):
       trla_obj = TRuleLearnAttempt.from_dict(trla_dict)
       trans_rule_learn_attempts.append(trla_obj)
     success = obj.get('success', False)
     reason = obj.get('reason', None)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
     return cls(id=id_, sp1=sp1, sp2=sp2, trans_rule_learn_attempts=trans_rule_learn_attempts,
-               success=success, reason=reason)
+               success=success, reason=reason, start_time=start_time, end_time=end_time)
 
 @dataclass
 class NodeTransIteration:
   id: int
+  validation_id: int
   node_id: Optional[int] = None
   node_type: Optional[str] = None
   template_origin: Optional[str] = None
@@ -451,6 +567,8 @@ class NodeTransIteration:
   unchecked_trules: List[TRule] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   def get_root_reason(self) -> str:
     return self.reason
@@ -458,6 +576,7 @@ class NodeTransIteration:
   @classmethod
   def from_dict(cls, obj: dict) -> 'NodeTransIteration':
     id_ = obj['id']
+    validation_id = obj['validation_id']
     node_id = obj.get('node_id', None)
     node_type = obj.get('node_type', None)
     template_origin = obj.get('template_origin', None)
@@ -471,9 +590,12 @@ class NodeTransIteration:
       unchecked_trules.append(trule_obj)
     success = obj.get('success', False)
     reason = obj.get('reason', None)
-    return cls(id=id_, node_id=node_id, node_type=node_type,
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
+    return cls(id=id_, validation_id=validation_id, node_id=node_id, node_type=node_type,
                template_origin=template_origin, tsps=tsps,
-               unchecked_trules=unchecked_trules, success=success, reason=reason)
+               unchecked_trules=unchecked_trules, success=success, reason=reason,
+               start_time=start_time, end_time=end_time)
 
 @dataclass
 class StatementNode:
@@ -483,27 +605,19 @@ class StatementNode:
   simplified_node_text: Optional[str] = None
   node_trans_iterations: List[NodeTransIteration] = field(default_factory=list)
   unchecked_trules: List[TRule] = field(default_factory=list)
-  validation_and_recovery: Optional[RulesValidationRecovery] = None
+  val_rec_iterations: List[RulesValidationRecovery] = field(default_factory=list)
+  start_time: Optional[int] = None
+  end_time: Optional[int] = None
 
   def is_successful(self) -> bool:
     '''
     Returns True if the statement node is successful, i.e. all nodes under it
     can be translated successfully and all translation rules are valid.
     '''
-    for nti in self.node_trans_iterations:
-      if not nti.success:
-        return False
-    if not self.validation_and_recovery.success:
-      return False
-    return True
+    raise NotImplementedError()
 
   def get_root_reason(self) -> str:
-    for nti in self.node_trans_iterations:
-      if not nti.success:
-        return nti.get_root_reason()
-    if not self.validation_and_recovery.success:
-      return self.validation_and_recovery.get_root_reason()
-    raise RuntimeError('expected something to be unsuccessful')
+    raise NotImplementedError()
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'StatementNode':
@@ -519,14 +633,18 @@ class StatementNode:
     for trule_dict in obj.get('unchecked_trules', []):
       trule_obj = TRule.from_dict(trule_dict)
       unchecked_trules.append(trule_obj)
-    validation_and_recovery = None
-    if 'validation_and_recovery' in obj:
-      validation_and_recovery = RulesValidationRecovery.from_dict(obj['validation_and_recovery'])
+    val_rec_iterations = []
+    for vr_dict in obj.get('val_rec_iterations', []):
+      vr_obj = RulesValidationRecovery.from_dict(vr_dict)
+      val_rec_iterations.append(vr_obj)
+    start_time = obj.get('start_time', None)
+    end_time = obj.get('end_time', None)
     return cls(id=id_, node_id=node_id, node_text=node_text,
                simplified_node_text=simplified_node_text,
                node_trans_iterations=node_trans_iterations,
                unchecked_trules=unchecked_trules,
-               validation_and_recovery=validation_and_recovery)
+               val_rec_iterations=val_rec_iterations,
+               start_time=start_time, end_time=end_time)
 
 @dataclass
 class RuleLearnPhase:

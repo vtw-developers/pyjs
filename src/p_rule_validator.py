@@ -317,7 +317,7 @@ async def is_valid_translation_rule_test_based(
   current_ruleset_obj: p_ruleset.Ruleset,
   subject: p_subject.PirelSubject,
   template_dict: dict,
-  lvalidation_and_recovery: ptlog.RulesValidationRecovery
+  lrules_validation: ptlog.RulesValidation
 ) -> bool:
   '''
   RETURN True if valid, or raise relevant exceptions if not.
@@ -371,7 +371,8 @@ async def is_valid_translation_rule_test_based(
     paramable_ids: List[str],
     f_gold_fn_str: str,
     subject: p_subject.PirelSubject,
-    template_dict: dict
+    template_dict: dict,
+    lrules_validation: ptlog.RulesValidation
   ) -> Optional[str]:
     '''
     RETURN test function or None if no test function was generated.
@@ -386,7 +387,8 @@ async def is_valid_translation_rule_test_based(
       logger.debug(msg)
       return '''def test():\n    f_gold()'''
 
-    test_fn_str = await p_llm_gen.gen_test_function(f_gold_fn_str, subject, template_dict)
+    test_fn_str = await p_llm_gen.gen_test_function(
+      f_gold_fn_str, subject, template_dict, lrules_validation)
     if test_fn_str is None:
       return None
 
@@ -414,12 +416,13 @@ async def is_valid_translation_rule_test_based(
   f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, prectx_sut)
 
   # 4. generate tests for f_gold() function using LLM
-  _result = await _get_test_fn_str_llm(paramable_ids, f_gold_fn_str, subject, template_dict)
+  _result = await _get_test_fn_str_llm(
+    paramable_ids, f_gold_fn_str, subject, template_dict, lrules_validation)
   if _result is None:
     msg = 'Failed to generate test function using LLM.'
     logger.error(msg)
-    lvalidation_and_recovery.success = False
-    lvalidation_and_recovery.reason = msg
+    lrules_validation.success = False
+    lrules_validation.reason = msg
     raise TestFunctionGenerationError(msg)
   test_fn_str = _result
 
@@ -472,8 +475,8 @@ async def is_valid_translation_rule_test_based(
     logger.warning(
       f'Failed to obtain a plausible translation of the test script:\n'
       f'{p_utils.exception_to_str(err)}\n')
-    lvalidation_and_recovery.success = False
-    lvalidation_and_recovery.reason = f'Failed to translate the source test script due to:\n"{str(err)}"'
+    lrules_validation.success = False
+    lrules_validation.reason = f'Failed to translate the source test script due to:\n"{str(err)}"'
     raise
 
   '''
@@ -485,7 +488,7 @@ async def is_valid_translation_rule_test_based(
   assert used_rule_ids_history is not None, 'used_rule_ids_history must not be None'
   update_ruleset_obj(current_ruleset_obj, used_rule_ids_history)
 
-  lvalidation_and_recovery.success = True
+  lrules_validation.success = True
   return True
 
 
@@ -507,15 +510,16 @@ def filter_translation_rules(
     logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
 
     ltrule = ptlog.TRule.from_str(translation_rule)
-    lprule_filter_log.translation_rules.append(ltrule)
+    lprule_filter_log.trules_all.append(ltrule)
 
     is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, current_ruleset, ltrule)
     if not is_syntax_valid:
       logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
       continue
 
+    lprule_filter_log.trules_syn_valid.append(ltrule)
     checked_trules_list.append(translation_rule)
-    logger.debug(f'The number of correct translation rules so far is {len(checked_trules_list)}')
+    logger.debug(f'The number of syntactically valid translation rules so far is {len(checked_trules_list)}')
 
   return checked_trules_list
 
@@ -613,7 +617,7 @@ async def _test_is_valid_translation_rule_test_based():
     current_ruleset_obj: p_ruleset.Ruleset,
     subject: p_subject.PirelSubject,
     template_dict: dict,
-    lvalidation_and_recovery: ptlog.RulesValidationRecovery
+    lrules_validation: ptlog.RulesValidation
   ) -> bool:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_test_based_config.yaml'
@@ -625,7 +629,7 @@ async def _test_is_valid_translation_rule_test_based():
   current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   template_dict = args_dict['template_dict']
-  lvalidation_and_recovery = ptlog.RulesValidationRecovery()
+  lrules_validation = ptlog.RulesValidation()
 
   is_valid = await is_valid_translation_rule_test_based(
     snippet_under_test,
@@ -633,7 +637,7 @@ async def _test_is_valid_translation_rule_test_based():
     current_ruleset_obj,
     subject,
     template_dict,
-    lvalidation_and_recovery
+    lrules_validation
   )
   print(is_valid)
 
