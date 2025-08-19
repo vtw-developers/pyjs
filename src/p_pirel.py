@@ -227,6 +227,7 @@ async def recover_from_statement_node_internal_validation_failure(
   statement_subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
   simple_ntext: str,
+  lrules_recovery: ptlog.RulesRecovery
 ):
   '''
   Learn an overfitted rule to translate the statement node as a
@@ -253,16 +254,22 @@ async def recover_from_statement_node_internal_validation_failure(
       'tar_lang': subject.tar_lang,
     }
 
+  lrules_recovery.simple_ntext = simple_ntext
   template_dict = _synthesize_template_dict()
   context = _synthesize_context()
 
   reference_translations = await p_llm_gen.get_reference_translations(
     simple_ntext,
     statement_subject,
-    template_dict
+    template_dict,
+    lrules_recovery
   )
   if len(reference_translations) == 0:
-    raise CouldNotGenRefTranslationsError('Could not generate reference translations for the statement node')
+    msg = 'No reference translations were generated for the statement node'
+    logger.error(msg)
+    lrules_recovery.success = False
+    lrules_recovery.reason = msg
+    raise CouldNotGenRefTranslationsError(msg)
 
   for ref_trans in reference_translations:
     trule = p_rule_inferencer.infer_translation_rule_wrapper(
@@ -285,7 +292,7 @@ async def validate_trules_for_statement_node_and_recover(
   statement_subject: p_subject.PirelSubject,
   current_ruleset_obj: p_ruleset.Ruleset,
   statement_nid: int,
-  lvalidation_and_recovery: ptlog.RulesValidationRecovery,
+  lrules_validation_recovery: ptlog.RulesValidationRecovery,
   enable_error_recovery: bool = True,
 ) -> p_ruleset.Ruleset:
   '''
@@ -293,6 +300,7 @@ async def validate_trules_for_statement_node_and_recover(
   '''
   p_utils.log_json_time(f'{subject.name}_args-validate_trules_for_statement_node_and_recover.json', locals())
   logger.debug('~~~ Starting p_pirel.validate_trules_for_statement_node_and_recover')
+  lrules_validation_recovery.start_time = p_utils.current_time_sec()
 
   statement_node = get_statement_node_by_id(subject.src_main_code, subject.src_lang, statement_nid)
   simple_ntext = simplify_statement_node_text(statement_node)
@@ -316,7 +324,10 @@ async def validate_trules_for_statement_node_and_recover(
     'src_lang': subject.src_lang,
   }
 
+  cnt_iter_valrec = 0
   while True:
+    cnt_iter_valrec += 1
+
     '''
     Run test-based rule validation to validate the learned translation rules
     that translate the statement node. This invocation has a call to
@@ -324,18 +335,24 @@ async def validate_trules_for_statement_node_and_recover(
     translation rule combinations that result in a plausible translation
     of the source test script using the learned translation rules.
     '''
+    lrules_val_rec_iteration = ptlog.RulesValRecIteration(cnt_iter_valrec)
+    lrules_validation_recovery.val_rec_iterations.append(lrules_val_rec_iteration)
+
     try:
+      lrules_validation = ptlog.RulesValidation()
+      lrules_val_rec_iteration.rules_validation = lrules_validation
       is_valid = await p_rule_validator.is_valid_translation_rule_test_based(
         simple_ntext,
         pre_context,
         current_ruleset_obj,
         statement_subject,
         template_dict,
-        lvalidation_and_recovery
+        lrules_validation
       )
 
       assert is_valid, 'is_valid must be True at this point'
       logger.debug('Translation rules are valid for the statement node')
+      lrules_validation_recovery.end_time = p_utils.current_time_sec()
       return current_ruleset_obj
 
     except p_rule_chooser.RuleCombinationsExhaustedError as err:
@@ -343,11 +360,14 @@ async def validate_trules_for_statement_node_and_recover(
       As of now, no prompt ingredients are passed to the LLM
       from error object.
       '''
+      lrules_recovery = ptlog.RulesRecovery()
+      lrules_val_rec_iteration.rules_recovery = lrules_recovery
       await recover_from_statement_node_internal_validation_failure(
         subject,
         statement_subject,
         current_ruleset_obj,
-        simple_ntext
+        simple_ntext,
+        lrules_recovery
       )
 
 
@@ -365,6 +385,8 @@ async def learn_trans_rules_from_tsp(
 
   logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
   p_utils.log_json_time(f'{subject.name}_args-learn_trans_rules_from_tsp.json', locals())
+
+  ltrule_learn_attempt.start_time = p_utils.current_time_sec()
 
   # TRANSLATE TSP TO GET {SP1-TP1, SP2-TP2} (TRANSLATION PAIR)
   lpllm_gen_log = ptlog.PLLMGenLog()
@@ -385,8 +407,10 @@ async def learn_trans_rules_from_tsp(
 
   if len(checked_trules_list) == 0:
     logger.warning('No translation rules were learned from TSP.')
+    ltrule_learn_attempt.end_time = p_utils.current_time_sec()
     raise TSP_NoTRuleLearnedError('No translation rules were learned from TSP.')
 
+  ltrule_learn_attempt.end_time = p_utils.current_time_sec()
   return checked_trules_list
 
 
@@ -403,6 +427,7 @@ async def learn_trans_rules_from_tsp_with_retries(
   '''
 
   logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp_with_retries (num_attempts={p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS})')
+  ltsp.start_time = p_utils.current_time_sec()
 
   attempt_idx = 0
   while attempt_idx < p_consts.LEARN_RULES_FROM_TSP_NUM_ATTEMPTS:
@@ -415,6 +440,7 @@ async def learn_trans_rules_from_tsp_with_retries(
       trules_list = await learn_trans_rules_from_tsp(tsp, template_dict, subject, current_ruleset, ltrule_learn_attempt)
       ltrule_learn_attempt.success = True
       ltsp.success = True
+      ltsp.end_time = p_utils.current_time_sec()
       return trules_list
 
     except p_llm_gen.NoTransPairsFromTSPError as err:
@@ -431,6 +457,7 @@ async def learn_trans_rules_from_tsp_with_retries(
   logger.warning(msg)
   ltsp.success = False
   ltsp.reason = msg
+  ltsp.end_time = p_utils.current_time_sec()
   return []
 
 
@@ -695,6 +722,7 @@ async def learn_trans_rules_for_prob_node(
   lnode_trans_iteration.node_id = template_dict['problematic_node_id']
   lnode_trans_iteration.node_type = template_dict['problematic_node_type']
   lnode_trans_iteration.template_origin = template_dict['template_origin']
+  lnode_trans_iteration.start_time = p_utils.current_time_sec()
 
   # ~~~ iterate over TSPs (from abstract to concrete)
   num_useful_tsps = 0
@@ -721,6 +749,7 @@ async def learn_trans_rules_for_prob_node(
 
   if len(all_trules_list) > 0:
     lnode_trans_iteration.success = True
+    lnode_trans_iteration.end_time = p_utils.current_time_sec()
     return all_trules_list
 
   msg = (
@@ -731,6 +760,7 @@ async def learn_trans_rules_for_prob_node(
   logger.critical(msg)
   lnode_trans_iteration.success = False
   lnode_trans_iteration.reason = msg
+  lnode_trans_iteration.end_time = p_utils.current_time_sec()
   raise ProbNode_NoTRule_AllTSPsExhaustedError(msg)
 
 
@@ -971,6 +1001,7 @@ async def learn_trans_rules_for_statement_node(
   lstatement_node.node_id = statement_nid
   lstatement_node.node_text = statement_node.get_text()
   lstatement_node.simplified_node_text = simple_ntext
+  lstatement_node.start_time = p_utils.current_time_sec()
 
   '''
   At this point, we may have:
@@ -995,23 +1026,27 @@ async def learn_trans_rules_for_statement_node(
     'rules for nodes under the statement node.')
 
   flag_validation_done = False
-  iteration = 0
+  cnt_iter_validation = 0
 
   '''
   This loop will run again if TRuleNotFoundSrcMainCodeError is raised.
+  TODO set a max number of iterations to prevent infinite loop?
   '''
   while not flag_validation_done:
+    cnt_iter_validation += 1
 
     '''
     This loop iterates over the nodes under the statement node.
+    TODO set a max number of iterations to prevent infinite loop?
     '''
+    cnt_iter_node = 0
     while True:
-      iteration += 1
+      cnt_iter_node += 1
       logger.debug(
-        f'Iteration #{iteration} for learning translation rules for statement node '
-        f'node_trans_iteration.id = {iteration}')
+        f'Iteration #{cnt_iter_node} for learning translation rules for statement node '
+        f'node_trans_iteration.id = {cnt_iter_node}')
 
-      lnode_trans_iteration = ptlog.NodeTransIteration(iteration)
+      lnode_trans_iteration = ptlog.NodeTransIteration(cnt_iter_node, cnt_iter_validation)
       lstatement_node.node_trans_iterations.append(lnode_trans_iteration)
 
       '''
@@ -1074,8 +1109,8 @@ async def learn_trans_rules_for_statement_node(
     Look for TRuleNotFoundSrcMainCodeError, when caught, it means that
     there is a problematic node when using some combination of choices.
     '''
-    lvalidation_and_recovery = ptlog.RulesValidationRecovery()
-    lstatement_node.validation_and_recovery = lvalidation_and_recovery
+    lrules_validation_recovery = ptlog.RulesValidationRecovery(cnt_iter_validation)
+    lstatement_node.val_rec_iterations.append(lrules_validation_recovery)
     logger.debug(
       f'SUCCESS. Learned all translation rules to translate nodes under the statement node.\n'
       f'Will now start validation of the translation rules.\n')
@@ -1086,7 +1121,7 @@ async def learn_trans_rules_for_statement_node(
         statement_subject,
         current_ruleset_obj,
         statement_nid,
-        lvalidation_and_recovery,
+        lrules_validation_recovery,
         enable_error_recovery=True
       )
       current_ruleset_obj = validated_ruleset_obj
@@ -1101,6 +1136,7 @@ async def learn_trans_rules_for_statement_node(
                                        subject.src_lang, subject.tar_lang, current_ruleset_obj.to_string())
       statement_subject.choices = adapted_choices
 
+  lstatement_node.end_time = p_utils.current_time_sec()
   logger.debug(f'Finished learning translation rules for statement node (node_id={statement_nid})')
 
 
@@ -1209,7 +1245,7 @@ async def _test_validate_trules_for_statement_node_and_recover():
     statement_subject: p_subject.PirelSubject,
     current_ruleset_obj: p_ruleset.Ruleset,
     statement_nid: int,
-    lvalidation_and_recovery: ptlog.RulesValidationRecovery,
+    lrules_validation_recovery: ptlog.RulesValidationRecovery,
     enable_error_recovery: bool = True,
   ) -> p_ruleset.Ruleset:
   '''
@@ -1221,7 +1257,7 @@ async def _test_validate_trules_for_statement_node_and_recover():
   statement_subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['statement_subject']))
   current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
   statement_nid = args_dict['statement_nid']
-  lvalidation_and_recovery = ptlog.RulesValidationRecovery()
+  lrules_validation_recovery = ptlog.RulesValidationRecovery()
   enable_error_recovery = args_dict['enable_error_recovery']
 
   validated_ruleset_obj = await validate_trules_for_statement_node_and_recover(
@@ -1229,7 +1265,7 @@ async def _test_validate_trules_for_statement_node_and_recover():
     statement_subject,
     current_ruleset_obj,
     statement_nid,
-    lvalidation_and_recovery,
+    lrules_validation_recovery,
     enable_error_recovery
   )
 
@@ -1276,7 +1312,7 @@ async def _test_learn_trans_rules_for_prob_node():
   subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   current_ruleset = args_dict['current_ruleset']
   templates_dict = args_dict['templates_dict']
-  lnode_trans_iteration = ptlog.NodeTransIteration(-1)
+  lnode_trans_iteration = ptlog.NodeTransIteration(-1, -1)
 
   result = await learn_trans_rules_for_prob_node(subject, current_ruleset, templates_dict, lnode_trans_iteration)
   print('\n\n'.join(result))

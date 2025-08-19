@@ -772,6 +772,8 @@ def infer_translation_rules(
   '''
   p_utils.log_json_time(f'{subject.name}_args-infer_translation_rules.json', locals())
 
+  lprule_inf_log.start_time = p_utils.current_time_sec()
+
   contexts : List[Dict[str, List[List[str]]]] = template_dict['contexts']
   src_lang = template_dict['src_lang']
   tar_lang = template_dict['tar_lang']
@@ -846,6 +848,7 @@ def infer_translation_rules(
 
           logger.debug(f'the number of translation rules so far is {len(trules_list)}')
 
+  lprule_inf_log.end_time = p_utils.current_time_sec()
   return trules_list
 
 

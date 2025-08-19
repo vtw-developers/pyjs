@@ -211,7 +211,6 @@ async def mode_benchmark_subject_finish(
 
   # `L0001 1/20 7m11s: `
   subject = f'{lsubject.subject_name} {shared_counter[0]}/{lbenchmark.sample_size} '
-  subject += f'{lsubject.get_total_time()}: '
   message = f'{lsubject.subject_name}:\n\n'
 
   if lrule_learn_phase.success is True:
