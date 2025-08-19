@@ -32,6 +32,15 @@
       "justMyCode": true
     },
     {
+      "name": "p_ext_rule_chooser.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "p_ext_rule_chooser.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "p_generator.py",
       "type": "debugpy",
       "request": "launch",

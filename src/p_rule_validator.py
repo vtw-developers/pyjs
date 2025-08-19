@@ -5,6 +5,7 @@ from typing import List, Optional
 import d_grammar_expand
 import d_grammar_rules
 import p_consts
+import p_ext_rule_chooser
 import p_llm_gen
 import p_pirel
 import p_pynguin
@@ -462,6 +463,11 @@ async def is_valid_translation_rule_test_based(
   pirel_subject_snippet_conf['src_program'] = test_script_str
   pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
   pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+
+  # this may raise AllRulesInMatcherGroupImplausibleError
+  initial_choices_list = await p_ext_rule_chooser.get_initial_choices_list(pirel_subject.src_main_code, translation_rules_main_code)
+  # readonly_choices_list is retrieved by getattr
+  pirel_subject.readonly_choices_list = initial_choices_list
 
   logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
   used_rule_ids_history = None
