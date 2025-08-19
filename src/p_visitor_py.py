@@ -1556,6 +1556,9 @@ class ParametrizableVariablesCollector(pvis.Visitor):
     self.visit(node.body)
     self.ctx.pop()
 
+  def visit_GlobalStatementNode(self, node: GlobalStatementNode) -> None:
+    '''Do not visit anything'''
+
   def visit_ImportFromStatementNode(self, node: ImportFromStatementNode) -> None:
     '''Do not visit anything'''
 
