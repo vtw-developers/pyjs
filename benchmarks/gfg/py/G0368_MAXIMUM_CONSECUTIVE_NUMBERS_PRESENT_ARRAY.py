@@ -11,7 +11,7 @@ def f_gold(arr, n):
         S.add(arr[i])
     ans = 0
     for i in range(n):
-        if S.__contains__(arr[i]):
+        if arr[i] - 1 in S:
             j = arr[i]
             while S.__contains__(j):
                 j += 1

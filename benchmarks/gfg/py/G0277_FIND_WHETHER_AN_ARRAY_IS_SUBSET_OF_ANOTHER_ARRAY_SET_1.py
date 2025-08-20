@@ -12,7 +12,7 @@ def f_gold(arr1, arr2, m, n):
         for j in range(m):
             if arr2[i] == arr1[j]:
                 break
-        if j == m:
+        else:
             return 0
     return 1
 "-----------------"

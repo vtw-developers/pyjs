@@ -11,8 +11,8 @@ def f_gold(expr):
         return -1
     s = []
     for i in range(lenn):
-        if expr[i] == "" and len(s):
-            if s[0] == "":
+        if expr[i] == "}" and len(s):
+            if s[0] == "{":
                 s.pop(0)
             else:
                 s.insert(0, expr[i])
@@ -20,7 +20,7 @@ def f_gold(expr):
             s.insert(0, expr[i])
     red_len = len(s)
     n = 0
-    while len(s) and s[0] == "":
+    while len(s) and s[0] == "{":
         s.pop(0)
         n += 1
     return red_len // 2 + n % 2

@@ -6,11 +6,9 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(a, b):
-    if a < 0:
-        a = -a
+    mod = -a if a < 0 else a
     if b < 0:
         b = -b
-    mod = a
     while mod >= b:
         mod = mod - b
     if a < 0:

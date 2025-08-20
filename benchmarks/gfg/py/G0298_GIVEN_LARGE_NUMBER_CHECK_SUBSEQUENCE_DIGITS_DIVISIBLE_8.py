@@ -7,7 +7,7 @@ def test():
 "-----------------"
 def f_gold(st):
     l = len(st)
-    arr = [0] * l
+    arr = list(map(int, st))
     for i in range(0, l):
         for j in range(i, l):
             for k in range(j, l):
