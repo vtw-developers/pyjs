@@ -14,8 +14,6 @@ def f_gold(num):
         result += digit * series[series_index]
         series_index = (series_index + 1) % 6
         result %= 7
-    if result < 0:
-        result = (result + 7) % 7
     return result
 "-----------------"
 test()
