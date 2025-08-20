@@ -24,11 +24,11 @@ def f_gold(Str):
             if s[-1] == 1:
                 res[index] = "+"
                 index += 1
-            elif s[-1] == 0:
+            if s[-1] == 0:
                 res[index] = "-"
                 index += 1
-        elif Str[i] == "(" and i > 0:
-            if Str[i - 1] == "-":
+        elif Str[i] == "(":
+            if Str[i - 1] == "-" and i > 0:
                 x = 0 if (s[-1] == 1) else 1
                 s.append(x)
             elif Str[i - 1] == "+":

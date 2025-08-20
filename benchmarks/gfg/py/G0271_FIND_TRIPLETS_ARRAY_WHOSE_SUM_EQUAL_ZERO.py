@@ -7,7 +7,7 @@ def test():
     result = parameters_set
 "-----------------"
 def f_gold(arr, n):
-    found = True
+    found = False
     for i in range(0, n - 2):
         for j in range(i + 1, n - 1):
             for k in range(j + 1, n):

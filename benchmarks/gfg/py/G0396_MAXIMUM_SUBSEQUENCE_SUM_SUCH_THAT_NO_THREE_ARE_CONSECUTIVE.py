@@ -9,6 +9,8 @@ def f_gold(arr, n):
     sum_0 = [0 for k in range(n)]
     if n >= 1:
         sum_0[0] = arr[0]
+    else:
+        return 0
     if n >= 2:
         sum_0[1] = arr[0] + arr[1]
     if n > 2:

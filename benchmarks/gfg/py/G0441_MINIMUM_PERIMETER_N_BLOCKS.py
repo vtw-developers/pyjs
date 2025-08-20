@@ -7,7 +7,7 @@ def test():
 "-----------------"
 import math
 def f_gold(n):
-    l = math.sqrt(n)
+    l = math.floor(math.sqrt(n))
     sq = l * l
     if sq == n:
         return l * 4

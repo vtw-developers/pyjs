@@ -5,7 +5,9 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
+from queue import PriorityQueue
 def f_gold(str_0, k):
+    MAX_CHAR = 127
     l = len(str_0)
     if k >= l:
         return 0

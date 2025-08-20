@@ -9,12 +9,12 @@ def f_gold(arr, n):
     if n == 1:
         return True
     i = 1
-    for i in range(1, n):
-        if arr[i - 1] < arr[i]:
-            if i == n:
-                return True
+    while i < n and arr[i - 1] < arr[i]:
+        i += 1
+    if i == n:
+        return True
     j = i
-    while arr[j] < arr[j - 1]:
+    while j < n and arr[j] < arr[j - 1]:
         if i > 1 and arr[j] < arr[i - 2]:
             return False
         j += 1
