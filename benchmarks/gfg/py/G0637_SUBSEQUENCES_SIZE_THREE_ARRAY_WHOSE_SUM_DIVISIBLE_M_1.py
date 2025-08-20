@@ -20,12 +20,10 @@ def f_gold(A, N, M):
                 ans = ans + h[i] * (h[i] - 1) * (h[i] - 2) / 6
             elif i == j:
                 ans = ans + (h[i] * (h[i] - 1) * h[rem] / 2)
-            elif i == rem:
-                ans = ans + h[i] * (h[i] - 1) * h[j] / 2
             elif rem == j:
                 ans = ans + h[j] * (h[j] - 1) * h[i] / 2
             else:
                 ans = ans + h[i] * h[j] * h[rem]
-        return ans
+    return ans
 "-----------------"
 test()

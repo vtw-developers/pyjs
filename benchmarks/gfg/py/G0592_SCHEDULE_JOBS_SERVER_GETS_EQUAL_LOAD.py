@@ -40,9 +40,6 @@ def f_gold(a, b, n):
             b[i + 1] = 0
             continue
         return -1
-    for i in range(0, n):
-        if b[i] != 0:
-            return -1
     return x
 "-----------------"
 test()
