@@ -8,8 +8,8 @@ def test():
 def f_gold(str_0):
     tmp = str_0 + str_0
     n = len(str_0)
-    for i in range(1, n + 1):
-        substring = tmp[i:n]
+    for i in range(1, n):
+        substring = tmp[i:i+n]
         if str_0 == substring:
             return i
     return n
