@@ -2593,6 +2593,67 @@ class FunctionInvocationReplacer(pvis.Visitor):
     return code.strip()
 
 
+class ChoicableNodeExtractor(pvis.Visitor):
+  '''
+  Extract all choicable nodes from a given AST.
+  Choicable nodes are nodes for which we need to create
+  initial choices list.
+  Refer to p_ext_rule_chooser.get_initial_choices_list
+  for more details.
+  '''
+  def __init__(self):
+    super().__init__()
+    self.choicable_nodes : List[pvis.AbstractNode] = []
+
+  def add_choicable_node(self, node: pvis.AbstractNode) -> None:
+    self.choicable_nodes.append(node)
+
+  def get_choicable_nodes(self) -> List[pvis.AbstractNode]:
+    return self.choicable_nodes
+
+  # VISIT METHODS
+  def visit_AssignmentNode(self, node: AssignmentNode) -> None:
+    if isinstance(node.right, ExpressionListNode):
+      for expr in node.right.get_nt_children():
+        self.add_choicable_node(expr)
+    elif isinstance(node.right, AssignmentNode):
+      self.visit(node.right)
+    elif isinstance(node.right, AugmentedAssignmentNode):
+      self.visit(node.right)
+    else:
+      self.add_choicable_node(node.right)
+
+  def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
+    self.add_choicable_node(node.right)
+
+  def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
+    self.add_choicable_node(node.condition)
+    self.visit(node.consequence)
+
+  def visit_IfStatementNode(self, node: IfStatementNode) -> None:
+    self.add_choicable_node(node.condition)
+    self.visit(node.consequence)
+    for alternative in node.alternatives:
+      self.visit(alternative)
+
+  def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
+    self.add_choicable_node(node.condition)
+    self.visit(node.body)
+
+  @classmethod
+  def extract_choicable_nodes(cls, src_main_code: str) -> List[pvis.AbstractNode]:
+    '''
+    Extract choicable nodes from the given src_main_code.
+    The src_main_code is expected to be a body of a Python script.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(src_main_code, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    extractor = cls()
+    extractor.visit(tree.root_node)
+    return extractor.get_choicable_nodes()
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')
