@@ -957,6 +957,12 @@ class PrettyPrinter(pvis.Visitor):
     self.visit(node.body)
     self.level -= 1
 
+  def visit_EscapeSequenceNode(self, node: EscapeSequenceNode) -> str:
+    res = ''
+    for child in node.children:
+      res += child.node_type
+    return res
+
   def visit_ExceptClauseNode(self, node: ExceptClauseNode) -> str:
     except_str = 'except'
     for child in node.children[1: -2]:
@@ -1071,6 +1077,12 @@ class PrettyPrinter(pvis.Visitor):
   def visit_IntegerNode(self, node: IntegerNode) -> str:
     return node.val()
 
+  def visit_InterpolationNode(self, node: InterpolationNode) -> str:
+    res = ''
+    for child in node.children:
+      res += self.visit(child)
+    return res
+
   def visit_KeywordArgumentNode(self, node: KeywordArgumentNode) -> str:
     name = self.visit(node.name)
     value = self.visit(node.value)
@@ -1123,6 +1135,12 @@ class PrettyPrinter(pvis.Visitor):
 
   def visit_NoneNode(self, node: NoneNode) -> str:
     return 'None'
+
+  def visit_NotEscapeSequenceNode(self, node: NotEscapeSequenceNode) -> str:
+    res = ''
+    for child in node.children:
+      res += child.node_type
+    return res
 
   def visit_NonlocalStatementNode(self, node: NonlocalStatementNode) -> None:
     names = ', '.join([self.visit(child) for child in node.get_nt_children()])
@@ -1226,6 +1244,12 @@ class PrettyPrinter(pvis.Visitor):
       step = self.visit(node.children[second_colon_idx + 1])
 
     return f'{start}:{stop}:{step}'
+
+  def visit_StringContentNode(self, node: StringContentNode) -> str:
+    res = ''
+    for child in node.children:
+      res += self.visit(child)
+    return res
 
   def visit_StringNode(self, node: StringNode) -> str:
     res = ''
