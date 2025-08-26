@@ -2245,6 +2245,51 @@ class LogStatementsIndexer(pvis.Visitor):
     return code.strip()
 
 
+class LogStatementRemover(pvis.Visitor):
+  '''
+  Visitor that removes log statements from the code.
+  '''
+  def visit_log_stat_scope(self, node: pvis.AbstractNode) -> None:
+    for child in node.children[:]:
+      # visit all non-expression statement children
+      if not isinstance(child, ExpressionStatementNode):
+        self.visit(child)
+        continue
+      assert len(child.children) == 1, 'ExpressionStatementNode must have exactly one child'
+      grandchild = child.children[0]
+      # visit all non-call expression statements
+      if not isinstance(grandchild, CallNode):
+        self.visit(child)
+        continue
+      function_name = grandchild.function
+      # no need to visit call nodes further, as they won't contain log statements
+      if not isinstance(function_name, IdentifierNode):
+        continue
+      if function_name.val() == p_consts.PIREL_LOG_OBJ_FN_NAME:
+        node.children.remove(child)
+
+  # VISIT METHODS
+  def visit_BlockNode(self, node: BlockNode) -> None:
+    self.visit_log_stat_scope(node)
+
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    self.visit_log_stat_scope(node)
+
+  @classmethod
+  def remove_log_statements(cls, src_main_code: str) -> str:
+    '''
+    Remove log statements from the test script.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(src_main_code, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    remover = cls()
+    remover.visit(tree.root_node)
+    pretty_printer = PrettyPrinter(indent_with='    ')
+    code = pretty_printer.visit(tree.root_node)
+    return code.strip()
+
+
 class LoggableValueExtractor(pvis.Visitor):
   '''
   Given an expression statement, this visitor extracts
