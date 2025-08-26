@@ -14309,6 +14309,22 @@ class TestLogStatementsIndexer(unittest.TestCase):
     self.assertEqual(prog_out, prog_out_gold)
 
 
+class TestLogStatementRemover(unittest.TestCase):
+  def setUp(self):
+    self.subjects_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestPrettyPrinter'
+    self.maxDiff = None
+
+  def test_all_gfg(self):
+    for fpath in sorted(self.subjects_dir.glob('G*.py')):
+      subject_name = fpath.stem[:5]
+      subject_code = fpath.read_text()
+      with self.subTest(subject_name=subject_name):
+        w_log_stat = p_visitor_py.LogStatementInserter.insert_log_statements(subject_code)
+        w_log_stat = p_visitor_py.LogStatementsIndexer.index_log_statements(w_log_stat)
+        wo_log_stat = p_visitor_py.LogStatementRemover.remove_log_statements(w_log_stat)
+        self.assertEqual(subject_code, wo_log_stat)
+
+
 class TestLoggableValueExtractor(unittest.TestCase):
   def setUp(self):
     self.src_lang = 'py'
