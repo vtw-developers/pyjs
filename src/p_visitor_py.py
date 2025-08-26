@@ -305,12 +305,8 @@ class SetComprehensionNode(pvis.AbstractNode):
     super().__init__(node_type)
     self.body : pvis.AbstractNode = None
 class SliceNode(pvis.AbstractNode): pass
-class StringNode(pvis.AbstractNode):
-  '''NOTE may not support all types of quoted strings'''
-  def val(self) -> str:
-    assert len(self.children) == 1, 'sanity check'
-    assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
-    return self.children[0].node_type
+class StringNode(pvis.AbstractNode): pass
+class StringContentNode(pvis.AbstractNode): pass
 class SubscriptNode(pvis.AbstractNode):
   def __init__(self, node_type):
     super().__init__(node_type)
@@ -451,6 +447,7 @@ NODE_TYPES_CLASSES: Dict[str, pvis.AbstractNode] = {
   'set_comprehension': SetComprehensionNode,
   'slice': SliceNode,
   'string': StringNode,
+  'string_content': StringContentNode,
   'subscript': SubscriptNode,
   'true': TrueNode,
   'try_statement': TryStatementNode,
@@ -548,18 +545,6 @@ class Tree:
     These nodes have fields that we want to access as attributes.
     Check `_create_node_with_field` for more details.
     '''
-
-    def _create_StringNode(ts_node: tree_sitter.Node) -> StringNode:
-      '''
-      Special treatment for `string` nodes in tree-sitter trees.
-      We want `string` to be a literal node in our AST. However,
-      in tree-sitter trees, `string` nodes are not literal nodes.
-      '''
-      node = StringNode('string')
-      string_content_node = pvis.TerminalNode(ts_node.text.decode('utf-8'))
-      node.add_child(string_content_node)
-      string_content_node.set_parent(node)
-      return node
 
     def _create_IfStatementNode(ts_node: tree_sitter.Node) -> IfStatementNode:
       '''
@@ -683,7 +668,7 @@ class Tree:
         type_ : str = ts_node.type
 
         # terminal node
-        if type_ == text:
+        if type_ == text or type_ == '"':
           return pvis.TerminalNode(text)
 
         # literal node
@@ -693,11 +678,6 @@ class Tree:
         literal_node.add_child(tnode)
         tnode.set_parent(literal_node)
         return literal_node
-
-      # special case: string node
-      if ts_node.type == 'string':
-        string_node = _create_StringNode(ts_node)
-        return string_node
 
       # special case: if_statement node
       if ts_node.type == 'if_statement':
@@ -1248,7 +1228,10 @@ class PrettyPrinter(pvis.Visitor):
     return f'{start}:{stop}:{step}'
 
   def visit_StringNode(self, node: StringNode) -> str:
-    return node.val()
+    res = ''
+    for child in node.children:
+      res += self.visit(child)
+    return res
 
   def visit_SubscriptNode(self, node: SubscriptNode) -> str:
     value = self.visit(node.value)
@@ -1914,14 +1897,6 @@ class LogStatementInserter(pvis.Visitor):
     clos_br.set_parent(list_node)
 
     return list_node
-
-  def build_StringNode(self, val: str) -> StringNode:
-    assert isinstance(val, str), 'val must be a string'
-    string = StringNode('string')
-    terminal = pvis.TerminalNode(f"'{val}'")
-    string.add_child(terminal)
-    terminal.set_parent(string)
-    return string
 
   def build_TrueNode(self) -> TrueNode:
     true = TrueNode('true')
