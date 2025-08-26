@@ -1,6 +1,7 @@
 import unittest
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
+import d_ast_parse
 import p_consts
 import p_utils
 import p_visitor as pvis
@@ -14792,6 +14793,5645 @@ class TestFunctionInvocationReplacer(unittest.TestCase):
     snippet, gold_snippet = self.get_snippets('002')
     replaced = p_visitor_py.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
     self.assertEqual(replaced, gold_snippet)
+
+
+class TestTreeGetNidNodeMap(unittest.TestCase):
+  def setUp(self):
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestPrettyPrinter'
+    self.maxDiff = None
+
+  def load_subject_code(self, subject_name: str) -> str:
+    fpaths = list(self.snippets_dir.glob(f'{subject_name}_*.py'))
+    assert len(fpaths) == 1, f"Expected exactly one file for subject '{subject_name}', found {len(fpaths)}"
+    fpath = fpaths[0]
+    snippet_text = p_utils.read_text(fpath).strip()
+    return snippet_text
+
+  def get_duoglot_style_ast(self, code: str) -> list:
+    ast, _ = d_ast_parse.parse_text_dbg(code, 'py')
+    return ast
+
+  def get_tree(self, code: str) -> p_visitor_py.Tree:
+    tree = p_visitor_py.Tree.from_str(code)
+    return tree
+
+  def get_nid_node_map_duoglot_style(self, ast: list) -> Dict[int, str]:
+    nid_node_map = {}
+    def _traverse(node) -> None:
+      nonlocal nid_node_map
+      # base case: terminal node
+      if not isinstance(node, list):
+        return
+      assert len(node) >= 2, 'non-terminals are at least length 2'
+      # if the second element is an int, it's an ID
+      # unlike e.g. string nodes (check parsed ASTs to confirm)
+      if isinstance(node[1], int):
+        nid_node_map[node[1]] = node[0].split('.')[1]  # strip 'py.' prefix
+      for child in node[2:]:
+        _traverse(child)
+    _traverse(ast)
+    return nid_node_map
+
+  def compare_nid_node_maps(
+    self,
+    duoglot_map: Dict[int, str],
+    ours_map: Dict[int, pvis.AbstractNode]
+  ) -> None:
+    self.assertEqual(set(duoglot_map.keys()), set(ours_map.keys()), 'Node ID sets do not match')
+    for nid in duoglot_map.keys():
+      self.assertEqual(duoglot_map[nid], ours_map[nid].node_type, f'Node types do not match for node ID {nid}')
+
+  def test_G0001(self):
+    code = self.load_subject_code('G0001')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0002(self):
+    code = self.load_subject_code('G0002')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0003(self):
+    code = self.load_subject_code('G0003')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0004(self):
+    code = self.load_subject_code('G0004')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0005(self):
+    code = self.load_subject_code('G0005')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0006(self):
+    code = self.load_subject_code('G0006')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0007(self):
+    code = self.load_subject_code('G0007')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0008(self):
+    code = self.load_subject_code('G0008')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0009(self):
+    code = self.load_subject_code('G0009')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0010(self):
+    code = self.load_subject_code('G0010')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0011(self):
+    code = self.load_subject_code('G0011')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0012(self):
+    code = self.load_subject_code('G0012')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0013(self):
+    code = self.load_subject_code('G0013')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0014(self):
+    code = self.load_subject_code('G0014')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0015(self):
+    code = self.load_subject_code('G0015')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0016(self):
+    code = self.load_subject_code('G0016')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0017(self):
+    code = self.load_subject_code('G0017')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0018(self):
+    code = self.load_subject_code('G0018')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0019(self):
+    code = self.load_subject_code('G0019')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0020(self):
+    code = self.load_subject_code('G0020')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0021(self):
+    code = self.load_subject_code('G0021')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0022(self):
+    code = self.load_subject_code('G0022')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0023(self):
+    code = self.load_subject_code('G0023')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0024(self):
+    code = self.load_subject_code('G0024')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0025(self):
+    code = self.load_subject_code('G0025')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0026(self):
+    code = self.load_subject_code('G0026')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0027(self):
+    code = self.load_subject_code('G0027')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0028(self):
+    code = self.load_subject_code('G0028')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0029(self):
+    code = self.load_subject_code('G0029')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0030(self):
+    code = self.load_subject_code('G0030')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0031(self):
+    code = self.load_subject_code('G0031')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0032(self):
+    code = self.load_subject_code('G0032')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0033(self):
+    code = self.load_subject_code('G0033')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0034(self):
+    code = self.load_subject_code('G0034')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0035(self):
+    code = self.load_subject_code('G0035')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0036(self):
+    code = self.load_subject_code('G0036')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0037(self):
+    code = self.load_subject_code('G0037')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0038(self):
+    code = self.load_subject_code('G0038')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0039(self):
+    code = self.load_subject_code('G0039')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0040(self):
+    code = self.load_subject_code('G0040')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0041(self):
+    code = self.load_subject_code('G0041')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0042(self):
+    code = self.load_subject_code('G0042')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0043(self):
+    code = self.load_subject_code('G0043')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0044(self):
+    code = self.load_subject_code('G0044')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0045(self):
+    code = self.load_subject_code('G0045')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0046(self):
+    code = self.load_subject_code('G0046')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0047(self):
+    code = self.load_subject_code('G0047')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0048(self):
+    code = self.load_subject_code('G0048')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0049(self):
+    code = self.load_subject_code('G0049')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0050(self):
+    code = self.load_subject_code('G0050')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0051(self):
+    code = self.load_subject_code('G0051')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0052(self):
+    code = self.load_subject_code('G0052')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0053(self):
+    code = self.load_subject_code('G0053')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0054(self):
+    code = self.load_subject_code('G0054')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0055(self):
+    code = self.load_subject_code('G0055')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0056(self):
+    code = self.load_subject_code('G0056')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0057(self):
+    code = self.load_subject_code('G0057')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0058(self):
+    code = self.load_subject_code('G0058')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0059(self):
+    code = self.load_subject_code('G0059')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0060(self):
+    code = self.load_subject_code('G0060')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0061(self):
+    code = self.load_subject_code('G0061')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0062(self):
+    code = self.load_subject_code('G0062')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0063(self):
+    code = self.load_subject_code('G0063')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0064(self):
+    code = self.load_subject_code('G0064')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0065(self):
+    code = self.load_subject_code('G0065')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0066(self):
+    code = self.load_subject_code('G0066')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0067(self):
+    code = self.load_subject_code('G0067')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0068(self):
+    code = self.load_subject_code('G0068')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0069(self):
+    code = self.load_subject_code('G0069')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0070(self):
+    code = self.load_subject_code('G0070')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0071(self):
+    code = self.load_subject_code('G0071')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0072(self):
+    code = self.load_subject_code('G0072')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0073(self):
+    code = self.load_subject_code('G0073')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0074(self):
+    code = self.load_subject_code('G0074')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0075(self):
+    code = self.load_subject_code('G0075')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0076(self):
+    code = self.load_subject_code('G0076')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0077(self):
+    code = self.load_subject_code('G0077')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0078(self):
+    code = self.load_subject_code('G0078')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0079(self):
+    code = self.load_subject_code('G0079')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0080(self):
+    code = self.load_subject_code('G0080')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0081(self):
+    code = self.load_subject_code('G0081')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0082(self):
+    code = self.load_subject_code('G0082')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0083(self):
+    code = self.load_subject_code('G0083')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0084(self):
+    code = self.load_subject_code('G0084')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0085(self):
+    code = self.load_subject_code('G0085')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0086(self):
+    code = self.load_subject_code('G0086')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0087(self):
+    code = self.load_subject_code('G0087')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0088(self):
+    code = self.load_subject_code('G0088')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0089(self):
+    code = self.load_subject_code('G0089')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0090(self):
+    code = self.load_subject_code('G0090')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0091(self):
+    code = self.load_subject_code('G0091')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0092(self):
+    code = self.load_subject_code('G0092')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0093(self):
+    code = self.load_subject_code('G0093')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0094(self):
+    code = self.load_subject_code('G0094')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0095(self):
+    code = self.load_subject_code('G0095')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0096(self):
+    code = self.load_subject_code('G0096')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0097(self):
+    code = self.load_subject_code('G0097')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0098(self):
+    code = self.load_subject_code('G0098')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0099(self):
+    code = self.load_subject_code('G0099')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0100(self):
+    code = self.load_subject_code('G0100')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0101(self):
+    code = self.load_subject_code('G0101')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0102(self):
+    code = self.load_subject_code('G0102')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0103(self):
+    code = self.load_subject_code('G0103')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0104(self):
+    code = self.load_subject_code('G0104')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0105(self):
+    code = self.load_subject_code('G0105')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0106(self):
+    code = self.load_subject_code('G0106')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0107(self):
+    code = self.load_subject_code('G0107')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0108(self):
+    code = self.load_subject_code('G0108')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0109(self):
+    code = self.load_subject_code('G0109')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0110(self):
+    code = self.load_subject_code('G0110')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0111(self):
+    code = self.load_subject_code('G0111')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0112(self):
+    code = self.load_subject_code('G0112')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0113(self):
+    code = self.load_subject_code('G0113')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0114(self):
+    code = self.load_subject_code('G0114')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0115(self):
+    code = self.load_subject_code('G0115')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0116(self):
+    code = self.load_subject_code('G0116')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0117(self):
+    code = self.load_subject_code('G0117')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0118(self):
+    code = self.load_subject_code('G0118')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0119(self):
+    code = self.load_subject_code('G0119')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0120(self):
+    code = self.load_subject_code('G0120')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0121(self):
+    code = self.load_subject_code('G0121')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0122(self):
+    code = self.load_subject_code('G0122')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0123(self):
+    code = self.load_subject_code('G0123')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0124(self):
+    code = self.load_subject_code('G0124')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0125(self):
+    code = self.load_subject_code('G0125')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0126(self):
+    code = self.load_subject_code('G0126')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0127(self):
+    code = self.load_subject_code('G0127')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0128(self):
+    code = self.load_subject_code('G0128')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0129(self):
+    code = self.load_subject_code('G0129')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0130(self):
+    code = self.load_subject_code('G0130')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0131(self):
+    code = self.load_subject_code('G0131')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0132(self):
+    code = self.load_subject_code('G0132')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0133(self):
+    code = self.load_subject_code('G0133')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0134(self):
+    code = self.load_subject_code('G0134')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0135(self):
+    code = self.load_subject_code('G0135')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0136(self):
+    code = self.load_subject_code('G0136')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0137(self):
+    code = self.load_subject_code('G0137')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0138(self):
+    code = self.load_subject_code('G0138')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0139(self):
+    code = self.load_subject_code('G0139')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0140(self):
+    code = self.load_subject_code('G0140')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0141(self):
+    code = self.load_subject_code('G0141')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0142(self):
+    code = self.load_subject_code('G0142')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0143(self):
+    code = self.load_subject_code('G0143')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0144(self):
+    code = self.load_subject_code('G0144')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0145(self):
+    code = self.load_subject_code('G0145')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0146(self):
+    code = self.load_subject_code('G0146')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0147(self):
+    code = self.load_subject_code('G0147')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0148(self):
+    code = self.load_subject_code('G0148')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0149(self):
+    code = self.load_subject_code('G0149')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0150(self):
+    code = self.load_subject_code('G0150')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0151(self):
+    code = self.load_subject_code('G0151')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0152(self):
+    code = self.load_subject_code('G0152')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0153(self):
+    code = self.load_subject_code('G0153')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0154(self):
+    code = self.load_subject_code('G0154')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0155(self):
+    code = self.load_subject_code('G0155')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0156(self):
+    code = self.load_subject_code('G0156')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0157(self):
+    code = self.load_subject_code('G0157')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0158(self):
+    code = self.load_subject_code('G0158')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0159(self):
+    code = self.load_subject_code('G0159')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0160(self):
+    code = self.load_subject_code('G0160')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0161(self):
+    code = self.load_subject_code('G0161')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0162(self):
+    code = self.load_subject_code('G0162')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0163(self):
+    code = self.load_subject_code('G0163')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0164(self):
+    code = self.load_subject_code('G0164')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0165(self):
+    code = self.load_subject_code('G0165')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0166(self):
+    code = self.load_subject_code('G0166')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0167(self):
+    code = self.load_subject_code('G0167')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0168(self):
+    code = self.load_subject_code('G0168')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0169(self):
+    code = self.load_subject_code('G0169')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0170(self):
+    code = self.load_subject_code('G0170')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0171(self):
+    code = self.load_subject_code('G0171')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0172(self):
+    code = self.load_subject_code('G0172')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0173(self):
+    code = self.load_subject_code('G0173')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0174(self):
+    code = self.load_subject_code('G0174')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0175(self):
+    code = self.load_subject_code('G0175')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0176(self):
+    code = self.load_subject_code('G0176')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0177(self):
+    code = self.load_subject_code('G0177')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0178(self):
+    code = self.load_subject_code('G0178')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0179(self):
+    code = self.load_subject_code('G0179')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0180(self):
+    code = self.load_subject_code('G0180')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0181(self):
+    code = self.load_subject_code('G0181')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0182(self):
+    code = self.load_subject_code('G0182')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0183(self):
+    code = self.load_subject_code('G0183')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0184(self):
+    code = self.load_subject_code('G0184')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0185(self):
+    code = self.load_subject_code('G0185')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0186(self):
+    code = self.load_subject_code('G0186')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0187(self):
+    code = self.load_subject_code('G0187')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0188(self):
+    code = self.load_subject_code('G0188')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0189(self):
+    code = self.load_subject_code('G0189')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0190(self):
+    code = self.load_subject_code('G0190')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0191(self):
+    code = self.load_subject_code('G0191')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0192(self):
+    code = self.load_subject_code('G0192')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0193(self):
+    code = self.load_subject_code('G0193')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0194(self):
+    code = self.load_subject_code('G0194')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0195(self):
+    code = self.load_subject_code('G0195')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0196(self):
+    code = self.load_subject_code('G0196')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0197(self):
+    code = self.load_subject_code('G0197')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0198(self):
+    code = self.load_subject_code('G0198')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0199(self):
+    code = self.load_subject_code('G0199')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0200(self):
+    code = self.load_subject_code('G0200')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0201(self):
+    code = self.load_subject_code('G0201')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0202(self):
+    code = self.load_subject_code('G0202')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0203(self):
+    code = self.load_subject_code('G0203')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0204(self):
+    code = self.load_subject_code('G0204')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0205(self):
+    code = self.load_subject_code('G0205')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0206(self):
+    code = self.load_subject_code('G0206')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0207(self):
+    code = self.load_subject_code('G0207')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0208(self):
+    code = self.load_subject_code('G0208')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0209(self):
+    code = self.load_subject_code('G0209')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0210(self):
+    code = self.load_subject_code('G0210')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0211(self):
+    code = self.load_subject_code('G0211')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0212(self):
+    code = self.load_subject_code('G0212')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0213(self):
+    code = self.load_subject_code('G0213')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0214(self):
+    code = self.load_subject_code('G0214')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0215(self):
+    code = self.load_subject_code('G0215')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0216(self):
+    code = self.load_subject_code('G0216')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0217(self):
+    code = self.load_subject_code('G0217')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0218(self):
+    code = self.load_subject_code('G0218')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0219(self):
+    code = self.load_subject_code('G0219')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0220(self):
+    code = self.load_subject_code('G0220')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0221(self):
+    code = self.load_subject_code('G0221')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0222(self):
+    code = self.load_subject_code('G0222')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0223(self):
+    code = self.load_subject_code('G0223')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0224(self):
+    code = self.load_subject_code('G0224')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0225(self):
+    code = self.load_subject_code('G0225')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0226(self):
+    code = self.load_subject_code('G0226')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0227(self):
+    code = self.load_subject_code('G0227')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0228(self):
+    code = self.load_subject_code('G0228')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0229(self):
+    code = self.load_subject_code('G0229')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0230(self):
+    code = self.load_subject_code('G0230')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0231(self):
+    code = self.load_subject_code('G0231')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0232(self):
+    code = self.load_subject_code('G0232')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0233(self):
+    code = self.load_subject_code('G0233')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0234(self):
+    code = self.load_subject_code('G0234')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0235(self):
+    code = self.load_subject_code('G0235')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0236(self):
+    code = self.load_subject_code('G0236')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0237(self):
+    code = self.load_subject_code('G0237')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0238(self):
+    code = self.load_subject_code('G0238')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0239(self):
+    code = self.load_subject_code('G0239')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0240(self):
+    code = self.load_subject_code('G0240')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0241(self):
+    code = self.load_subject_code('G0241')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0242(self):
+    code = self.load_subject_code('G0242')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0243(self):
+    code = self.load_subject_code('G0243')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0244(self):
+    code = self.load_subject_code('G0244')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0245(self):
+    code = self.load_subject_code('G0245')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0246(self):
+    code = self.load_subject_code('G0246')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0247(self):
+    code = self.load_subject_code('G0247')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0248(self):
+    code = self.load_subject_code('G0248')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0249(self):
+    code = self.load_subject_code('G0249')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0250(self):
+    code = self.load_subject_code('G0250')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0251(self):
+    code = self.load_subject_code('G0251')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0252(self):
+    code = self.load_subject_code('G0252')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0253(self):
+    code = self.load_subject_code('G0253')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0254(self):
+    code = self.load_subject_code('G0254')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0255(self):
+    code = self.load_subject_code('G0255')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0256(self):
+    code = self.load_subject_code('G0256')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0257(self):
+    code = self.load_subject_code('G0257')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0258(self):
+    code = self.load_subject_code('G0258')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0259(self):
+    code = self.load_subject_code('G0259')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0260(self):
+    code = self.load_subject_code('G0260')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0261(self):
+    code = self.load_subject_code('G0261')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0262(self):
+    code = self.load_subject_code('G0262')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0263(self):
+    code = self.load_subject_code('G0263')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0264(self):
+    code = self.load_subject_code('G0264')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0265(self):
+    code = self.load_subject_code('G0265')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0266(self):
+    code = self.load_subject_code('G0266')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0267(self):
+    code = self.load_subject_code('G0267')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0268(self):
+    code = self.load_subject_code('G0268')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0269(self):
+    code = self.load_subject_code('G0269')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0270(self):
+    code = self.load_subject_code('G0270')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0271(self):
+    code = self.load_subject_code('G0271')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0272(self):
+    code = self.load_subject_code('G0272')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0273(self):
+    code = self.load_subject_code('G0273')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0274(self):
+    code = self.load_subject_code('G0274')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0275(self):
+    code = self.load_subject_code('G0275')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0276(self):
+    code = self.load_subject_code('G0276')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0277(self):
+    code = self.load_subject_code('G0277')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0278(self):
+    code = self.load_subject_code('G0278')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0279(self):
+    code = self.load_subject_code('G0279')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0280(self):
+    code = self.load_subject_code('G0280')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0281(self):
+    code = self.load_subject_code('G0281')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0282(self):
+    code = self.load_subject_code('G0282')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0283(self):
+    code = self.load_subject_code('G0283')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0284(self):
+    code = self.load_subject_code('G0284')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0285(self):
+    code = self.load_subject_code('G0285')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0286(self):
+    code = self.load_subject_code('G0286')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0287(self):
+    code = self.load_subject_code('G0287')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0288(self):
+    code = self.load_subject_code('G0288')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0289(self):
+    code = self.load_subject_code('G0289')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0290(self):
+    code = self.load_subject_code('G0290')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0291(self):
+    code = self.load_subject_code('G0291')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0292(self):
+    code = self.load_subject_code('G0292')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0293(self):
+    code = self.load_subject_code('G0293')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0294(self):
+    code = self.load_subject_code('G0294')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0295(self):
+    code = self.load_subject_code('G0295')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0296(self):
+    code = self.load_subject_code('G0296')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0297(self):
+    code = self.load_subject_code('G0297')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0298(self):
+    code = self.load_subject_code('G0298')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0299(self):
+    code = self.load_subject_code('G0299')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0300(self):
+    code = self.load_subject_code('G0300')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0301(self):
+    code = self.load_subject_code('G0301')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0302(self):
+    code = self.load_subject_code('G0302')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0303(self):
+    code = self.load_subject_code('G0303')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0304(self):
+    code = self.load_subject_code('G0304')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0305(self):
+    code = self.load_subject_code('G0305')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0306(self):
+    code = self.load_subject_code('G0306')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0307(self):
+    code = self.load_subject_code('G0307')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0308(self):
+    code = self.load_subject_code('G0308')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0309(self):
+    code = self.load_subject_code('G0309')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0310(self):
+    code = self.load_subject_code('G0310')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0311(self):
+    code = self.load_subject_code('G0311')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0312(self):
+    code = self.load_subject_code('G0312')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0313(self):
+    code = self.load_subject_code('G0313')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0314(self):
+    code = self.load_subject_code('G0314')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0315(self):
+    code = self.load_subject_code('G0315')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0316(self):
+    code = self.load_subject_code('G0316')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0317(self):
+    code = self.load_subject_code('G0317')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0318(self):
+    code = self.load_subject_code('G0318')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0319(self):
+    code = self.load_subject_code('G0319')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0320(self):
+    code = self.load_subject_code('G0320')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0321(self):
+    code = self.load_subject_code('G0321')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0322(self):
+    code = self.load_subject_code('G0322')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0323(self):
+    code = self.load_subject_code('G0323')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0324(self):
+    code = self.load_subject_code('G0324')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0325(self):
+    code = self.load_subject_code('G0325')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0326(self):
+    code = self.load_subject_code('G0326')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0327(self):
+    code = self.load_subject_code('G0327')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0328(self):
+    code = self.load_subject_code('G0328')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0329(self):
+    code = self.load_subject_code('G0329')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0330(self):
+    code = self.load_subject_code('G0330')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0331(self):
+    code = self.load_subject_code('G0331')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0332(self):
+    code = self.load_subject_code('G0332')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0333(self):
+    code = self.load_subject_code('G0333')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0334(self):
+    code = self.load_subject_code('G0334')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0335(self):
+    code = self.load_subject_code('G0335')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0336(self):
+    code = self.load_subject_code('G0336')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0337(self):
+    code = self.load_subject_code('G0337')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0338(self):
+    code = self.load_subject_code('G0338')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0339(self):
+    code = self.load_subject_code('G0339')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0340(self):
+    code = self.load_subject_code('G0340')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0341(self):
+    code = self.load_subject_code('G0341')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0342(self):
+    code = self.load_subject_code('G0342')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0343(self):
+    code = self.load_subject_code('G0343')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0344(self):
+    code = self.load_subject_code('G0344')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0345(self):
+    code = self.load_subject_code('G0345')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0346(self):
+    code = self.load_subject_code('G0346')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0347(self):
+    code = self.load_subject_code('G0347')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0348(self):
+    code = self.load_subject_code('G0348')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0349(self):
+    code = self.load_subject_code('G0349')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0350(self):
+    code = self.load_subject_code('G0350')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0351(self):
+    code = self.load_subject_code('G0351')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0352(self):
+    code = self.load_subject_code('G0352')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0353(self):
+    code = self.load_subject_code('G0353')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0354(self):
+    code = self.load_subject_code('G0354')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0355(self):
+    code = self.load_subject_code('G0355')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0356(self):
+    code = self.load_subject_code('G0356')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0357(self):
+    code = self.load_subject_code('G0357')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0358(self):
+    code = self.load_subject_code('G0358')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0359(self):
+    code = self.load_subject_code('G0359')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0360(self):
+    code = self.load_subject_code('G0360')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0361(self):
+    code = self.load_subject_code('G0361')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0362(self):
+    code = self.load_subject_code('G0362')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0363(self):
+    code = self.load_subject_code('G0363')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0364(self):
+    code = self.load_subject_code('G0364')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0365(self):
+    code = self.load_subject_code('G0365')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0366(self):
+    code = self.load_subject_code('G0366')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0367(self):
+    code = self.load_subject_code('G0367')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0368(self):
+    code = self.load_subject_code('G0368')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0369(self):
+    code = self.load_subject_code('G0369')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0370(self):
+    code = self.load_subject_code('G0370')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0371(self):
+    code = self.load_subject_code('G0371')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0372(self):
+    code = self.load_subject_code('G0372')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0373(self):
+    code = self.load_subject_code('G0373')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0374(self):
+    code = self.load_subject_code('G0374')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0375(self):
+    code = self.load_subject_code('G0375')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0376(self):
+    code = self.load_subject_code('G0376')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0377(self):
+    code = self.load_subject_code('G0377')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0378(self):
+    code = self.load_subject_code('G0378')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0379(self):
+    code = self.load_subject_code('G0379')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0380(self):
+    code = self.load_subject_code('G0380')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0381(self):
+    code = self.load_subject_code('G0381')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0382(self):
+    code = self.load_subject_code('G0382')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0383(self):
+    code = self.load_subject_code('G0383')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0384(self):
+    code = self.load_subject_code('G0384')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0385(self):
+    code = self.load_subject_code('G0385')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0386(self):
+    code = self.load_subject_code('G0386')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0387(self):
+    code = self.load_subject_code('G0387')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0388(self):
+    code = self.load_subject_code('G0388')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0389(self):
+    code = self.load_subject_code('G0389')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0390(self):
+    code = self.load_subject_code('G0390')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0391(self):
+    code = self.load_subject_code('G0391')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0392(self):
+    code = self.load_subject_code('G0392')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0393(self):
+    code = self.load_subject_code('G0393')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0394(self):
+    code = self.load_subject_code('G0394')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0395(self):
+    code = self.load_subject_code('G0395')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0396(self):
+    code = self.load_subject_code('G0396')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0397(self):
+    code = self.load_subject_code('G0397')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0398(self):
+    code = self.load_subject_code('G0398')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0399(self):
+    code = self.load_subject_code('G0399')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0400(self):
+    code = self.load_subject_code('G0400')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0401(self):
+    code = self.load_subject_code('G0401')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0402(self):
+    code = self.load_subject_code('G0402')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0403(self):
+    code = self.load_subject_code('G0403')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0404(self):
+    code = self.load_subject_code('G0404')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0405(self):
+    code = self.load_subject_code('G0405')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0406(self):
+    code = self.load_subject_code('G0406')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0407(self):
+    code = self.load_subject_code('G0407')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0408(self):
+    code = self.load_subject_code('G0408')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0409(self):
+    code = self.load_subject_code('G0409')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0410(self):
+    code = self.load_subject_code('G0410')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0411(self):
+    code = self.load_subject_code('G0411')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0412(self):
+    code = self.load_subject_code('G0412')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0413(self):
+    code = self.load_subject_code('G0413')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0414(self):
+    code = self.load_subject_code('G0414')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0415(self):
+    code = self.load_subject_code('G0415')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0416(self):
+    code = self.load_subject_code('G0416')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0417(self):
+    code = self.load_subject_code('G0417')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0418(self):
+    code = self.load_subject_code('G0418')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0419(self):
+    code = self.load_subject_code('G0419')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0420(self):
+    code = self.load_subject_code('G0420')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0421(self):
+    code = self.load_subject_code('G0421')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0422(self):
+    code = self.load_subject_code('G0422')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0423(self):
+    code = self.load_subject_code('G0423')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0424(self):
+    code = self.load_subject_code('G0424')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0425(self):
+    code = self.load_subject_code('G0425')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0426(self):
+    code = self.load_subject_code('G0426')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0427(self):
+    code = self.load_subject_code('G0427')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0428(self):
+    code = self.load_subject_code('G0428')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0429(self):
+    code = self.load_subject_code('G0429')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0430(self):
+    code = self.load_subject_code('G0430')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0431(self):
+    code = self.load_subject_code('G0431')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0432(self):
+    code = self.load_subject_code('G0432')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0433(self):
+    code = self.load_subject_code('G0433')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0434(self):
+    code = self.load_subject_code('G0434')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0435(self):
+    code = self.load_subject_code('G0435')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0436(self):
+    code = self.load_subject_code('G0436')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0437(self):
+    code = self.load_subject_code('G0437')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0438(self):
+    code = self.load_subject_code('G0438')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0439(self):
+    code = self.load_subject_code('G0439')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0440(self):
+    code = self.load_subject_code('G0440')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0441(self):
+    code = self.load_subject_code('G0441')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0442(self):
+    code = self.load_subject_code('G0442')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0443(self):
+    code = self.load_subject_code('G0443')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0444(self):
+    code = self.load_subject_code('G0444')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0445(self):
+    code = self.load_subject_code('G0445')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0446(self):
+    code = self.load_subject_code('G0446')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0447(self):
+    code = self.load_subject_code('G0447')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0448(self):
+    code = self.load_subject_code('G0448')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0449(self):
+    code = self.load_subject_code('G0449')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0450(self):
+    code = self.load_subject_code('G0450')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0451(self):
+    code = self.load_subject_code('G0451')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0452(self):
+    code = self.load_subject_code('G0452')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0453(self):
+    code = self.load_subject_code('G0453')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0454(self):
+    code = self.load_subject_code('G0454')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0455(self):
+    code = self.load_subject_code('G0455')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0456(self):
+    code = self.load_subject_code('G0456')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0457(self):
+    code = self.load_subject_code('G0457')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0458(self):
+    code = self.load_subject_code('G0458')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0459(self):
+    code = self.load_subject_code('G0459')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0460(self):
+    code = self.load_subject_code('G0460')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0461(self):
+    code = self.load_subject_code('G0461')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0462(self):
+    code = self.load_subject_code('G0462')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0463(self):
+    code = self.load_subject_code('G0463')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0464(self):
+    code = self.load_subject_code('G0464')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0465(self):
+    code = self.load_subject_code('G0465')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0466(self):
+    code = self.load_subject_code('G0466')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0467(self):
+    code = self.load_subject_code('G0467')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0468(self):
+    code = self.load_subject_code('G0468')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0469(self):
+    code = self.load_subject_code('G0469')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0470(self):
+    code = self.load_subject_code('G0470')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0471(self):
+    code = self.load_subject_code('G0471')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0472(self):
+    code = self.load_subject_code('G0472')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0473(self):
+    code = self.load_subject_code('G0473')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0474(self):
+    code = self.load_subject_code('G0474')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0475(self):
+    code = self.load_subject_code('G0475')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0476(self):
+    code = self.load_subject_code('G0476')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0477(self):
+    code = self.load_subject_code('G0477')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0478(self):
+    code = self.load_subject_code('G0478')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0479(self):
+    code = self.load_subject_code('G0479')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0480(self):
+    code = self.load_subject_code('G0480')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0481(self):
+    code = self.load_subject_code('G0481')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0482(self):
+    code = self.load_subject_code('G0482')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0483(self):
+    code = self.load_subject_code('G0483')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0484(self):
+    code = self.load_subject_code('G0484')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0485(self):
+    code = self.load_subject_code('G0485')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0486(self):
+    code = self.load_subject_code('G0486')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0487(self):
+    code = self.load_subject_code('G0487')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0488(self):
+    code = self.load_subject_code('G0488')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0489(self):
+    code = self.load_subject_code('G0489')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0490(self):
+    code = self.load_subject_code('G0490')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0491(self):
+    code = self.load_subject_code('G0491')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0492(self):
+    code = self.load_subject_code('G0492')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0493(self):
+    code = self.load_subject_code('G0493')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0494(self):
+    code = self.load_subject_code('G0494')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0495(self):
+    code = self.load_subject_code('G0495')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0496(self):
+    code = self.load_subject_code('G0496')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0497(self):
+    code = self.load_subject_code('G0497')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0498(self):
+    code = self.load_subject_code('G0498')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0499(self):
+    code = self.load_subject_code('G0499')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0500(self):
+    code = self.load_subject_code('G0500')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0501(self):
+    code = self.load_subject_code('G0501')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0502(self):
+    code = self.load_subject_code('G0502')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0503(self):
+    code = self.load_subject_code('G0503')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0504(self):
+    code = self.load_subject_code('G0504')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0505(self):
+    code = self.load_subject_code('G0505')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0506(self):
+    code = self.load_subject_code('G0506')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0507(self):
+    code = self.load_subject_code('G0507')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0508(self):
+    code = self.load_subject_code('G0508')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0509(self):
+    code = self.load_subject_code('G0509')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0510(self):
+    code = self.load_subject_code('G0510')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0511(self):
+    code = self.load_subject_code('G0511')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0512(self):
+    code = self.load_subject_code('G0512')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0513(self):
+    code = self.load_subject_code('G0513')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0514(self):
+    code = self.load_subject_code('G0514')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0515(self):
+    code = self.load_subject_code('G0515')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0516(self):
+    code = self.load_subject_code('G0516')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0517(self):
+    code = self.load_subject_code('G0517')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0518(self):
+    code = self.load_subject_code('G0518')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0519(self):
+    code = self.load_subject_code('G0519')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0520(self):
+    code = self.load_subject_code('G0520')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0521(self):
+    code = self.load_subject_code('G0521')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0522(self):
+    code = self.load_subject_code('G0522')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0523(self):
+    code = self.load_subject_code('G0523')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0524(self):
+    code = self.load_subject_code('G0524')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0525(self):
+    code = self.load_subject_code('G0525')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0526(self):
+    code = self.load_subject_code('G0526')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0527(self):
+    code = self.load_subject_code('G0527')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0528(self):
+    code = self.load_subject_code('G0528')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0529(self):
+    code = self.load_subject_code('G0529')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0530(self):
+    code = self.load_subject_code('G0530')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0531(self):
+    code = self.load_subject_code('G0531')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0532(self):
+    code = self.load_subject_code('G0532')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0533(self):
+    code = self.load_subject_code('G0533')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0534(self):
+    code = self.load_subject_code('G0534')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0535(self):
+    code = self.load_subject_code('G0535')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0536(self):
+    code = self.load_subject_code('G0536')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0537(self):
+    code = self.load_subject_code('G0537')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0538(self):
+    code = self.load_subject_code('G0538')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0539(self):
+    code = self.load_subject_code('G0539')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0540(self):
+    code = self.load_subject_code('G0540')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0541(self):
+    code = self.load_subject_code('G0541')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0542(self):
+    code = self.load_subject_code('G0542')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0543(self):
+    code = self.load_subject_code('G0543')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0544(self):
+    code = self.load_subject_code('G0544')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0545(self):
+    code = self.load_subject_code('G0545')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0546(self):
+    code = self.load_subject_code('G0546')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0547(self):
+    code = self.load_subject_code('G0547')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0548(self):
+    code = self.load_subject_code('G0548')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0549(self):
+    code = self.load_subject_code('G0549')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0550(self):
+    code = self.load_subject_code('G0550')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0551(self):
+    code = self.load_subject_code('G0551')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0552(self):
+    code = self.load_subject_code('G0552')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0553(self):
+    code = self.load_subject_code('G0553')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0554(self):
+    code = self.load_subject_code('G0554')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0555(self):
+    code = self.load_subject_code('G0555')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0556(self):
+    code = self.load_subject_code('G0556')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0557(self):
+    code = self.load_subject_code('G0557')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0558(self):
+    code = self.load_subject_code('G0558')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0559(self):
+    code = self.load_subject_code('G0559')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0560(self):
+    code = self.load_subject_code('G0560')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0561(self):
+    code = self.load_subject_code('G0561')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0562(self):
+    code = self.load_subject_code('G0562')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0563(self):
+    code = self.load_subject_code('G0563')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0564(self):
+    code = self.load_subject_code('G0564')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0565(self):
+    code = self.load_subject_code('G0565')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0566(self):
+    code = self.load_subject_code('G0566')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0567(self):
+    code = self.load_subject_code('G0567')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0568(self):
+    code = self.load_subject_code('G0568')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0569(self):
+    code = self.load_subject_code('G0569')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0570(self):
+    code = self.load_subject_code('G0570')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0571(self):
+    code = self.load_subject_code('G0571')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0572(self):
+    code = self.load_subject_code('G0572')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0573(self):
+    code = self.load_subject_code('G0573')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0574(self):
+    code = self.load_subject_code('G0574')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0575(self):
+    code = self.load_subject_code('G0575')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0576(self):
+    code = self.load_subject_code('G0576')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0577(self):
+    code = self.load_subject_code('G0577')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0578(self):
+    code = self.load_subject_code('G0578')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0579(self):
+    code = self.load_subject_code('G0579')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0580(self):
+    code = self.load_subject_code('G0580')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0581(self):
+    code = self.load_subject_code('G0581')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0582(self):
+    code = self.load_subject_code('G0582')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0583(self):
+    code = self.load_subject_code('G0583')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0584(self):
+    code = self.load_subject_code('G0584')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0585(self):
+    code = self.load_subject_code('G0585')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0586(self):
+    code = self.load_subject_code('G0586')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0587(self):
+    code = self.load_subject_code('G0587')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0588(self):
+    code = self.load_subject_code('G0588')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0589(self):
+    code = self.load_subject_code('G0589')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0590(self):
+    code = self.load_subject_code('G0590')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0591(self):
+    code = self.load_subject_code('G0591')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0592(self):
+    code = self.load_subject_code('G0592')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0593(self):
+    code = self.load_subject_code('G0593')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0594(self):
+    code = self.load_subject_code('G0594')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0595(self):
+    code = self.load_subject_code('G0595')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0596(self):
+    code = self.load_subject_code('G0596')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0597(self):
+    code = self.load_subject_code('G0597')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0598(self):
+    code = self.load_subject_code('G0598')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0599(self):
+    code = self.load_subject_code('G0599')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0600(self):
+    code = self.load_subject_code('G0600')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0601(self):
+    code = self.load_subject_code('G0601')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0602(self):
+    code = self.load_subject_code('G0602')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0603(self):
+    code = self.load_subject_code('G0603')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0604(self):
+    code = self.load_subject_code('G0604')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0605(self):
+    code = self.load_subject_code('G0605')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0606(self):
+    code = self.load_subject_code('G0606')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0607(self):
+    code = self.load_subject_code('G0607')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0608(self):
+    code = self.load_subject_code('G0608')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0609(self):
+    code = self.load_subject_code('G0609')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0610(self):
+    code = self.load_subject_code('G0610')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0611(self):
+    code = self.load_subject_code('G0611')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0612(self):
+    code = self.load_subject_code('G0612')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0613(self):
+    code = self.load_subject_code('G0613')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0614(self):
+    code = self.load_subject_code('G0614')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0615(self):
+    code = self.load_subject_code('G0615')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0616(self):
+    code = self.load_subject_code('G0616')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0617(self):
+    code = self.load_subject_code('G0617')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0618(self):
+    code = self.load_subject_code('G0618')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0619(self):
+    code = self.load_subject_code('G0619')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0620(self):
+    code = self.load_subject_code('G0620')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0621(self):
+    code = self.load_subject_code('G0621')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0622(self):
+    code = self.load_subject_code('G0622')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0623(self):
+    code = self.load_subject_code('G0623')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0624(self):
+    code = self.load_subject_code('G0624')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0625(self):
+    code = self.load_subject_code('G0625')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0626(self):
+    code = self.load_subject_code('G0626')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0627(self):
+    code = self.load_subject_code('G0627')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0628(self):
+    code = self.load_subject_code('G0628')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0629(self):
+    code = self.load_subject_code('G0629')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0630(self):
+    code = self.load_subject_code('G0630')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0631(self):
+    code = self.load_subject_code('G0631')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0632(self):
+    code = self.load_subject_code('G0632')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0633(self):
+    code = self.load_subject_code('G0633')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0634(self):
+    code = self.load_subject_code('G0634')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0635(self):
+    code = self.load_subject_code('G0635')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0636(self):
+    code = self.load_subject_code('G0636')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0637(self):
+    code = self.load_subject_code('G0637')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0638(self):
+    code = self.load_subject_code('G0638')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0639(self):
+    code = self.load_subject_code('G0639')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0640(self):
+    code = self.load_subject_code('G0640')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0641(self):
+    code = self.load_subject_code('G0641')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0642(self):
+    code = self.load_subject_code('G0642')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0643(self):
+    code = self.load_subject_code('G0643')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0644(self):
+    code = self.load_subject_code('G0644')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0645(self):
+    code = self.load_subject_code('G0645')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0646(self):
+    code = self.load_subject_code('G0646')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0647(self):
+    code = self.load_subject_code('G0647')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0648(self):
+    code = self.load_subject_code('G0648')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0649(self):
+    code = self.load_subject_code('G0649')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0650(self):
+    code = self.load_subject_code('G0650')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0651(self):
+    code = self.load_subject_code('G0651')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0652(self):
+    code = self.load_subject_code('G0652')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0653(self):
+    code = self.load_subject_code('G0653')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0654(self):
+    code = self.load_subject_code('G0654')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0655(self):
+    code = self.load_subject_code('G0655')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0656(self):
+    code = self.load_subject_code('G0656')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0657(self):
+    code = self.load_subject_code('G0657')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0658(self):
+    code = self.load_subject_code('G0658')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0659(self):
+    code = self.load_subject_code('G0659')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0660(self):
+    code = self.load_subject_code('G0660')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0661(self):
+    code = self.load_subject_code('G0661')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0662(self):
+    code = self.load_subject_code('G0662')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0663(self):
+    code = self.load_subject_code('G0663')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0664(self):
+    code = self.load_subject_code('G0664')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0665(self):
+    code = self.load_subject_code('G0665')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0666(self):
+    code = self.load_subject_code('G0666')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0667(self):
+    code = self.load_subject_code('G0667')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0668(self):
+    code = self.load_subject_code('G0668')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0669(self):
+    code = self.load_subject_code('G0669')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0670(self):
+    code = self.load_subject_code('G0670')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0671(self):
+    code = self.load_subject_code('G0671')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0672(self):
+    code = self.load_subject_code('G0672')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0673(self):
+    code = self.load_subject_code('G0673')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0674(self):
+    code = self.load_subject_code('G0674')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0675(self):
+    code = self.load_subject_code('G0675')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0676(self):
+    code = self.load_subject_code('G0676')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0677(self):
+    code = self.load_subject_code('G0677')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0678(self):
+    code = self.load_subject_code('G0678')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0679(self):
+    code = self.load_subject_code('G0679')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0680(self):
+    code = self.load_subject_code('G0680')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0681(self):
+    code = self.load_subject_code('G0681')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0682(self):
+    code = self.load_subject_code('G0682')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0683(self):
+    code = self.load_subject_code('G0683')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0684(self):
+    code = self.load_subject_code('G0684')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0685(self):
+    code = self.load_subject_code('G0685')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0686(self):
+    code = self.load_subject_code('G0686')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0687(self):
+    code = self.load_subject_code('G0687')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0688(self):
+    code = self.load_subject_code('G0688')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0689(self):
+    code = self.load_subject_code('G0689')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0690(self):
+    code = self.load_subject_code('G0690')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0691(self):
+    code = self.load_subject_code('G0691')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0692(self):
+    code = self.load_subject_code('G0692')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0693(self):
+    code = self.load_subject_code('G0693')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0694(self):
+    code = self.load_subject_code('G0694')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0695(self):
+    code = self.load_subject_code('G0695')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0696(self):
+    code = self.load_subject_code('G0696')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0697(self):
+    code = self.load_subject_code('G0697')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0698(self):
+    code = self.load_subject_code('G0698')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
+
+  def test_G0699(self):
+    code = self.load_subject_code('G0699')
+    ast = self.get_duoglot_style_ast(code)
+    tree = self.get_tree(code)
+    nid_map = tree.get_nid_node_map()
+    duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+    self.compare_nid_node_maps(duoglot_nid_map, nid_map)
 
 
 if __name__ == '__main__':
