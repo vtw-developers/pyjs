@@ -6031,7 +6031,7 @@ class TestTreeGetNidNodeMap(unittest.TestCase):
       with self.subTest(subject_name=subject_name):
         ast = self.get_duoglot_style_ast(subject_code)
         tree = self.get_tree(subject_code)
-        nid_map = tree.get_nid_node_map()
+        nid_map = tree.root_node.get_nid_node_map()
         duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
         self.compare_nid_node_maps(duoglot_nid_map, nid_map)
 

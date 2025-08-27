@@ -506,27 +506,6 @@ class Tree:
   def __repr__(self) -> str:
     return f'Tree({self.root_node.node_type})'
 
-  def get_nid_node_map(self) -> dict[int, pvis.AbstractNode]:
-    '''
-    Get a mapping from node IDs to AST nodes.
-    This function might be useful for connecting
-    DuoGlot-style ASTs with ASTs represented by this class.
-    '''
-    nid_node_map = {}
-    nid_counter = 0
-
-    def _traverse(node: pvis.AbstractNode) -> None:
-      nonlocal nid_counter
-      if node.is_terminal():
-        return
-      nid_node_map[nid_counter] = node
-      nid_counter += 1
-      for child in node.children:
-        _traverse(child)
-
-    _traverse(self.root_node)
-    return nid_node_map
-
   @classmethod
   def from_gen_ast(cls, ast: list) -> Tree:
     '''
