@@ -5998,23 +5998,6 @@ class TestTreeGetNidNodeMap(unittest.TestCase):
     tree = p_visitor_py.Tree.from_str(code)
     return tree
 
-  def get_nid_node_map_duoglot_style(self, ast: list) -> Dict[int, str]:
-    nid_node_map = {}
-    def _traverse(node) -> None:
-      nonlocal nid_node_map
-      # base case: terminal node
-      if not isinstance(node, list):
-        return
-      assert len(node) >= 2, 'non-terminals are at least length 2'
-      # if the second element is an int, it's an ID
-      # unlike e.g. string nodes (check parsed ASTs to confirm)
-      if isinstance(node[1], int):
-        nid_node_map[node[1]] = node[0].split('.')[1]  # strip 'py.' prefix
-      for child in node[2:]:
-        _traverse(child)
-    _traverse(ast)
-    return nid_node_map
-
   def compare_nid_node_maps(
     self,
     duoglot_map: Dict[int, str],
@@ -6032,7 +6015,7 @@ class TestTreeGetNidNodeMap(unittest.TestCase):
         ast = self.get_duoglot_style_ast(subject_code)
         tree = self.get_tree(subject_code)
         nid_map = tree.root_node.get_nid_node_map()
-        duoglot_nid_map = self.get_nid_node_map_duoglot_style(ast)
+        duoglot_nid_map = d_ast_parse.get_nid_ntype_map(ast)
         self.compare_nid_node_maps(duoglot_nid_map, nid_map)
 
 
