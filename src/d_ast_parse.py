@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import d_consts
 import p_consts
@@ -137,6 +137,42 @@ def get_nid_ntype_map(ast: list) -> Dict[int, str]:
       _traverse(child)
   _traverse(ast)
   return nid_ntype_map
+
+
+def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
+  '''
+  Given an DuoGlot-style AST and a node id, return the range cursor to the node.
+  Range cursor is a tuple of (list, start_idx, end_idx).
+  RAISE ValueError if the node id is not found.
+  '''
+  def __is_child_that_we_need(child, nid: int) -> bool:
+    # base case: child is terminal node
+    if not isinstance(child, list):
+      return False
+    assert len(child) >= 2, 'non-terminals are at least length 2'
+    # if the second element is an int, it's an ID
+    child_nid = child[1]
+    if not isinstance(child_nid, int):
+      return False
+    return child_nid == nid
+
+  def __traverse(node, nid: int) -> Optional[Tuple[list, int, int]]:
+    # base case: terminal node
+    if not isinstance(node, list):
+      return None
+    assert len(node) >= 2, 'non-terminals are at least length 2'
+    for idx, child in enumerate(node[2:], start=2):
+      if __is_child_that_we_need(child, nid):
+        return (node, idx, idx + 1)
+      result = __traverse(child, nid)
+      if result is not None:
+        return result
+    return None
+
+  result = __traverse(ast, nid)
+  if result is None:
+    raise ValueError(f'Node id {nid} not found')
+  return result
 
 
 def ast_to_dotgraph(
