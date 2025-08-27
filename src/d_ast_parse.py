@@ -1,5 +1,5 @@
 import json
-from typing import Tuple, Union
+from typing import Dict, Tuple, Union
 
 import d_consts
 import p_consts
@@ -115,6 +115,28 @@ def parse_text_dbg(text: str, lang: str, keep_text=False) -> Tuple[list, dict]:
   assert len(ast_scope_stack) == 1
   assert len(extra_root) == 1
   return extra_root[0], ann_info
+
+
+def get_nid_ntype_map(ast: list) -> Dict[int, str]:
+  '''
+  Get mapping of node IDs to their types of trees obtained
+  from parse_text_dbg.
+  '''
+  nid_ntype_map = {}
+  def _traverse(node) -> None:
+    nonlocal nid_ntype_map
+    # base case: terminal node
+    if not isinstance(node, list):
+      return
+    assert len(node) >= 2, 'non-terminals are at least length 2'
+    # if the second element is an int, it's an ID
+    # unlike e.g. string nodes (check parsed ASTs to confirm)
+    if isinstance(node[1], int):
+      nid_ntype_map[node[1]] = node[0].split('.')[1]  # strip 'py.' prefix
+    for child in node[2:]:
+      _traverse(child)
+  _traverse(ast)
+  return nid_ntype_map
 
 
 def ast_to_dotgraph(
