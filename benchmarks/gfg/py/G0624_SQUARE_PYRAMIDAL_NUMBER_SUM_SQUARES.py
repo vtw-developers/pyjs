@@ -14,7 +14,6 @@ def f_gold(s):
     n -= 1
     if _sum == s:
         return n
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

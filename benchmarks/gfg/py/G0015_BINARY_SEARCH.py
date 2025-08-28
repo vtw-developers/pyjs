@@ -11,13 +11,10 @@ def f_gold(arr, l, r, x):
         if arr[mid] == x:
             return mid
         elif arr[mid] > x:
-            retval_0 = f_gold(arr, l, mid - 1, x)
-            return retval_0
+            return f_gold(arr, l, mid - 1, x)
         else:
-            retval_1 = f_gold(arr, mid + 1, r, x)
-            return retval_1
+            return f_gold(arr, mid + 1, r, x)
     else:
-        retval_2 = -1
-        return retval_2
+        return -1
 "-----------------"
 test()

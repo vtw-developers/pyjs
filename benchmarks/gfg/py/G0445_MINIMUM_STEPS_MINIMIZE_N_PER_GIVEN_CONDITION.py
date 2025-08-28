@@ -14,7 +14,6 @@ def f_gold(n):
             table[i // 2] = min(table[i] + 1, table[i // 2])
         if not (i % 3):
             table[i // 3] = min(table[i] + 1, table[i // 3])
-    retval_0 = table[1]
-    return retval_0
+    return table[1]
 "-----------------"
 test()

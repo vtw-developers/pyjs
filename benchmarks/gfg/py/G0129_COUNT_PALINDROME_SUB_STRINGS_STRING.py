@@ -23,7 +23,6 @@ def f_gold(str_0, n):
                 dp[i][j] = dp[i][j - 1] + dp[i + 1][j] + 1 - dp[i + 1][j - 1]
             else:
                 dp[i][j] = dp[i][j - 1] + dp[i + 1][j] - dp[i + 1][j - 1]
-    retval_0 = dp[0][n - 1]
-    return retval_0
+    return dp[0][n - 1]
 "-----------------"
 test()

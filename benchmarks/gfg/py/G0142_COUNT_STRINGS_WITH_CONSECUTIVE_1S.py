@@ -12,7 +12,6 @@ def f_gold(n):
     for i in range(1, n):
         a[i] = a[i - 1] + b[i - 1]
         b[i] = a[i - 1]
-    retval_0 = (1 << n) - a[n - 1] - b[n - 1]
-    return retval_0
+    return (1 << n) - a[n - 1] - b[n - 1]
 "-----------------"
 test()

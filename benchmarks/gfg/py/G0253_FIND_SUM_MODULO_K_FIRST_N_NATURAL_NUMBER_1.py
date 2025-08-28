@@ -10,7 +10,6 @@ def f_gold(N, K):
     y = N / K
     x = N % K
     ans = (K * (K - 1) / 2) * y + (x * (x + 1)) / 2
-    retval_0 = int(ans)
-    return retval_0
+    return int(ans)
 "-----------------"
 test()

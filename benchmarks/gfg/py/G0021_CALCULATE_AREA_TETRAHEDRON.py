@@ -8,7 +8,6 @@ def test():
 import math
 def f_gold(side):
     volume = side ** 3 / (6 * math.sqrt(2))
-    retval_0 = round(volume, 2)
-    return retval_0
+    return round(volume, 2)
 "-----------------"
 test()

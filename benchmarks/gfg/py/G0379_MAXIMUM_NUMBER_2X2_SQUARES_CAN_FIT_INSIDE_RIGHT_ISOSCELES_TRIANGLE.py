@@ -8,7 +8,6 @@ def test():
 def f_gold(base):
     base = base - 2
     base = base / 2
-    retval_0 = base * (base + 1) / 2
-    return retval_0
+    return base * (base + 1) / 2
 "-----------------"
 test()

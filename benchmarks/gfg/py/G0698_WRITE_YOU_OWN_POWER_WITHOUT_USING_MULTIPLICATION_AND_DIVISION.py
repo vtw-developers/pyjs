@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(a, b):
     if b == 0:
-        retval_0 = 1
-        return retval_0
+        return 1
     answer = a
     increment = a
     for i in range(1, b):

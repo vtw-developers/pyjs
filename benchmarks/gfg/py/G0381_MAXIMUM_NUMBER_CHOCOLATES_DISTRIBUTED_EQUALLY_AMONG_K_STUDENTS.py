@@ -19,7 +19,6 @@ def f_gold(arr, n, k):
             um[curr_rem] = i
         elif maxSum < (sm[i] - sm[um[curr_rem]]):
             maxSum = sm[i] - sm[um[curr_rem]]
-    retval_0 = maxSum // k
-    return retval_0
+    return maxSum // k
 "-----------------"
 test()

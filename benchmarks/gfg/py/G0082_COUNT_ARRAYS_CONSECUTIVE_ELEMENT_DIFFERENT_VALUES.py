@@ -13,7 +13,6 @@ def f_gold(n, k, x):
     while i < n:
         dp.append((k - 2) * dp[i - 1] + (k - 1) * dp[i - 2])
         i = i + 1
-    retval_0 = (k - 1) * dp[n - 2] if x == 1 else dp[n - 1]
-    return retval_0
+    return (k - 1) * dp[n - 2] if x == 1 else dp[n - 1]
 "-----------------"
 test()

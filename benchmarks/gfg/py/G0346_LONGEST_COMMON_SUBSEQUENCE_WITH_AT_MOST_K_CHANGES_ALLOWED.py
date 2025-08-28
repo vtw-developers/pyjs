@@ -18,11 +18,9 @@ def test():
 "-----------------"
 def f_gold(dp, arr1, n, arr2, m, k):
     if k < 0:
-        retval_0 = -(10 ** 7)
-        return retval_0
+        return -(10 ** 7)
     if n < 0 or m < 0:
-        retval_1 = 0
-        return retval_1
+        return 0
     ans = dp[n][m][k]
     if ans != -1:
         return ans

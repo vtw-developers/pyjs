@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(num, divisor):
-    retval_0 = num - divisor * (num // divisor)
-    return retval_0
+    return num - divisor * (num // divisor)
 "-----------------"
 test()

@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     if n <= 0:
-        retval_0 = 0
-        return retval_0
+        return 0
     incl = arr[0]
     excl = 0
     for i in range(1, n):
@@ -16,7 +15,6 @@ def f_gold(arr, n):
         excl_new = incl
         incl = incl_new
         excl = excl_new
-    retval_1 = min(incl, excl)
-    return retval_1
+    return min(incl, excl)
 "-----------------"
 test()

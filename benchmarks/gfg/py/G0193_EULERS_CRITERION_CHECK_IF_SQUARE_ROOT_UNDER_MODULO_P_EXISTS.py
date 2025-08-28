@@ -9,9 +9,7 @@ def f_gold(n, p):
     n = n % p
     for x in range(2, p, 1):
         if (x * x) % p == n:
-            retval_0 = True
-            return retval_0
-    retval_1 = False
-    return retval_1
+            return True
+    return False
 "-----------------"
 test()

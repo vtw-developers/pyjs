@@ -7,19 +7,15 @@ def test():
 "-----------------"
 def f_gold(num):
     if num // 10 == 0:
-        retval_0 = True
-        return retval_0
+        return True
     while num != 0:
         if num // 10 == 0:
-            retval_1 = True
-            return retval_1
+            return True
         digit1 = num % 10
         digit2 = (num // 10) % 10
         if abs(digit2 - digit1) > 1:
-            retval_2 = False
-            return retval_2
+            return False
         num = num // 10
-    retval_3 = True
-    return retval_3
+    return True
 "-----------------"
 test()

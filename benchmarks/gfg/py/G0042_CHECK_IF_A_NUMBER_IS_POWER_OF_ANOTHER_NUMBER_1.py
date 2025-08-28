@@ -9,7 +9,6 @@ import math
 def f_gold(x, y):
     res1 = math.log(y) / math.log(x)
     res2 = math.log(y) / math.log(x)
-    retval_0 = 1 if (res1 == res2) else 0
-    return retval_0
+    return 1 if (res1 == res2) else 0
 "-----------------"
 test()

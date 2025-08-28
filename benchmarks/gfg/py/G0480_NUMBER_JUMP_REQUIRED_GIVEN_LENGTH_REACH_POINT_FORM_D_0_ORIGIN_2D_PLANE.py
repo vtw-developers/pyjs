@@ -10,15 +10,11 @@ def f_gold(a, b, d):
     a = min(a, b)
     b = max(temp, b)
     if d >= b:
-        retval_0 = (d + b - 1) / b
-        return retval_0
+        return (d + b - 1) / b
     if d == 0:
-        retval_1 = 0
-        return retval_1
+        return 0
     if d == a:
-        retval_2 = 1
-        return retval_2
-    retval_3 = 2
-    return retval_3
+        return 1
+    return 2
 "-----------------"
 test()

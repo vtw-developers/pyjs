@@ -13,7 +13,6 @@ def f_gold(arr, N, k):
             MS[i] = max(arr[i], MS[i + 1])
         else:
             MS[i] = max(arr[i] + MS[i + k + 1], MS[i + 1])
-    retval_0 = MS[0]
-    return retval_0
+    return MS[0]
 "-----------------"
 test()

@@ -21,9 +21,7 @@ def f_gold(mat, N):
     for i in range(N):
         for j in range(N):
             if mat[i][j] != mat[j][i]:
-                retval_0 = False
-                return retval_0
-    retval_1 = True
-    return retval_1
+                return False
+    return True
 "-----------------"
 test()

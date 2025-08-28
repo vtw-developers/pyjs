@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n, X):
     if X < arr[0]:
-        retval_0 = 0
-        return retval_0
+        return 0
     elif X > arr[n - 1]:
         return n
     lowerPnt = 0

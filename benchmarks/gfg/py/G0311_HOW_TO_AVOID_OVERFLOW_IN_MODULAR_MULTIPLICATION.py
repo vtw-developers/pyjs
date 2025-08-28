@@ -13,7 +13,6 @@ def f_gold(a, b, mod):
             res = (res + a) % mod
         a = (a * 2) % mod
         b //= 2
-    retval_0 = res % mod
-    return retval_0
+    return res % mod
 "-----------------"
 test()

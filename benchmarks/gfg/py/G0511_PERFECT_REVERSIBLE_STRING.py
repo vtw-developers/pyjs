@@ -10,11 +10,9 @@ def f_gold(str_0):
     j = len(str_0) - 1
     while i < j:
         if str_0[i] != str_0[j]:
-            retval_0 = False
-            return retval_0
+            return False
         i += 1
         j -= 1
-    retval_1 = True
-    return retval_1
+    return True
 "-----------------"
 test()

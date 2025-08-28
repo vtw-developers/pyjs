@@ -11,7 +11,6 @@ def f_gold(strA, strB):
         res = res ^ (ord)(strA[i])
     for i in range(0, len(strB)):
         res = res ^ (ord)(strB[i])
-    retval_0 = (chr)(res)
-    return retval_0
+    return (chr)(res)
 "-----------------"
 test()

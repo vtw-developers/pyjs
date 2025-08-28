@@ -9,8 +9,7 @@ def f_gold(num1, num2):
     len1 = len(num1)
     len2 = len(num2)
     if len1 == 0 or len2 == 0:
-        retval_0 = "0"
-        return retval_0
+        return "0"
     result = [0] * (len1 + len2)
     i_n1 = 0
     i_n2 = 0
@@ -31,8 +30,7 @@ def f_gold(num1, num2):
     while i >= 0 and result[i] == 0:
         i -= 1
     if i == -1:
-        retval_1 = "0"
-        return retval_1
+        return "0"
     s = ""
     while i >= 0:
         s += chr(result[i] + 48)

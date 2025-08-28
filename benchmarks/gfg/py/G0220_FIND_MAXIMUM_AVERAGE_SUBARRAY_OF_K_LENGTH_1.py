@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n, k):
     if k > n:
-        retval_0 = -1
-        return retval_0
+        return -1
     sum_0 = arr[0]
     for i in range(1, k):
         sum_0 += arr[i]
@@ -19,7 +18,6 @@ def f_gold(arr, n, k):
         if sum_0 > max_sum:
             max_sum = sum_0
             max_end = i
-    retval_1 = max_end - k + 1
-    return retval_1
+    return max_end - k + 1
 "-----------------"
 test()

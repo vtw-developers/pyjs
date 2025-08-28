@@ -19,7 +19,6 @@ def f_gold(arr, n):
             maxB = arr[i]
         elif arr[i] > maxC:
             maxC = arr[i]
-    retval_0 = maxA + maxB + maxC
-    return retval_0
+    return maxA + maxB + maxC
 "-----------------"
 test()

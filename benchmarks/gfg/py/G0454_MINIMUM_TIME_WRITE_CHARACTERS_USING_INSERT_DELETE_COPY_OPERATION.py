@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(N, insrt, remov, cpy):
     if N == 0:
-        retval_0 = 0
-        return retval_0
+        return 0
     if N == 1:
         return insrt
     dp = [0] * (N + 1)
@@ -17,7 +16,6 @@ def f_gold(N, insrt, remov, cpy):
             dp[i] = min(dp[i - 1] + insrt, dp[i // 2] + cpy)
         else:
             dp[i] = min(dp[i - 1] + insrt, dp[(i + 1) // 2] + cpy + remov)
-    retval_1 = dp[N]
-    return retval_1
+    return dp[N]
 "-----------------"
 test()

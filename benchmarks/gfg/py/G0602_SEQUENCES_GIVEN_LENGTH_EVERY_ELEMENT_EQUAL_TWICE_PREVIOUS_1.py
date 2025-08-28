@@ -17,7 +17,6 @@ def f_gold(m, n):
                 T[i][j] = i
             else:
                 T[i][j] = T[i - 1][j] + T[i // 2][j - 1]
-    retval_0 = T[m][n]
-    return retval_0
+    return T[m][n]
 "-----------------"
 test()

@@ -20,7 +20,6 @@ def f_gold(arr, n):
                 SubsetSum_1 += arr[i]
             else:
                 SubsetSum_2 += arr[i]
-    retval_0 = abs(SubsetSum_1 - SubsetSum_2)
-    return retval_0
+    return abs(SubsetSum_1 - SubsetSum_2)
 "-----------------"
 test()

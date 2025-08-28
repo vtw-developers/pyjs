@@ -11,7 +11,6 @@ def f_gold(n):
     while n / i >= 1:
         count += int(n / i)
         i *= 5
-    retval_0 = int(count)
-    return retval_0
+    return int(count)
 "-----------------"
 test()

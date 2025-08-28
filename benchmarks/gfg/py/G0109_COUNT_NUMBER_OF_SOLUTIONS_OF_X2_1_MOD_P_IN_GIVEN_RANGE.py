@@ -13,7 +13,6 @@ def f_gold(n, p):
             if last > n:
                 last -= p
             ans += (last - x) / p + 1
-    retval_0 = int(ans)
-    return retval_0
+    return int(ans)
 "-----------------"
 test()

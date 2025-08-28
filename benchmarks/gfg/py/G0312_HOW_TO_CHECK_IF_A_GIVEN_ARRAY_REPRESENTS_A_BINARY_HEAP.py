@@ -7,12 +7,9 @@ def test():
 "-----------------"
 def f_gold(arr, i, n):
     if i > int((n - 2) / 2):
-        retval_0 = True
-        return retval_0
+        return True
     if (arr[i] >= arr[2 * i + 1] and arr[i] >= arr[2 * i + 2] and f_gold(arr, 2 * i + 1, n) and f_gold(arr, 2 * i + 2, n)):
-        retval_1 = True
-        return retval_1
-    retval_2 = False
-    return retval_2
+        return True
+    return False
 "-----------------"
 test()

@@ -10,8 +10,7 @@ def f_gold(n):
     l = math.sqrt(n)
     sq = l * l
     if sq == n:
-        retval_0 = l * 4
-        return retval_0
+        return l * 4
     else:
         row = n / l
         perimeter = 2 * (l + row)

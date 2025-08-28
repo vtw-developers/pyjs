@@ -26,7 +26,6 @@ def f_gold(cost, N):
     for i in range(1, N):
         for j in range(1, N):
             dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]) + cost[i][j]
-    retval_0 = dp[N - 1][N - 1] / (2 * N - 1)
-    return retval_0
+    return dp[N - 1][N - 1] / (2 * N - 1)
 "-----------------"
 test()

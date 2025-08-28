@@ -7,7 +7,6 @@ def test():
 "-----------------"
 def f_gold(str_0):
     n = len(str_0)
-    retval_0 = int(n * (n + 1) / 2)
-    return retval_0
+    return int(n * (n + 1) / 2)
 "-----------------"
 test()

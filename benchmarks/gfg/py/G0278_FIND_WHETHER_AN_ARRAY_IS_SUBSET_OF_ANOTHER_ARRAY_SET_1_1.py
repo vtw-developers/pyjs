@@ -9,8 +9,7 @@ def f_gold(arr1, arr2, m, n):
     i = 0
     j = 0
     if m < n:
-        retval_0 = 0
-        return retval_0
+        return 0
     arr1.sort()
     arr2.sort()
     while i < n and j < m:
@@ -20,9 +19,7 @@ def f_gold(arr1, arr2, m, n):
             j += 1
             i += 1
         elif arr1[j] > arr2[i]:
-            retval_1 = 0
-            return retval_1
-    retval_2 = False if i < n else True
-    return retval_2
+            return 0
+    return False if i < n else True
 "-----------------"
 test()

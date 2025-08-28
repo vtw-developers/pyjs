@@ -8,12 +8,10 @@ def test():
 import sys
 def f_gold(arr, n, m):
     if m == 0 or n == 0:
-        retval_0 = 0
-        return retval_0
+        return 0
     arr.sort()
     if n < m:
-        retval_1 = -1
-        return retval_1
+        return -1
     min_diff = sys.maxsize
     first = 0
     last = 0
@@ -25,7 +23,6 @@ def f_gold(arr, n, m):
             first = i
             last = i + m - 1
         i += 1
-    retval_2 = arr[last] - arr[first]
-    return retval_2
+    return arr[last] - arr[first]
 "-----------------"
 test()

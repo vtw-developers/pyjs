@@ -8,7 +8,6 @@ def test():
 def f_gold(n):
     a = (n // 10) * 10
     b = a + 10
-    retval_0 = b if n - a > b - n else a
-    return retval_0
+    return b if n - a > b - n else a
 "-----------------"
 test()

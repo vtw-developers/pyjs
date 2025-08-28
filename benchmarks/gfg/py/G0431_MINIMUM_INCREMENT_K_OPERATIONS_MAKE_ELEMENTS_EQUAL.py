@@ -10,11 +10,9 @@ def f_gold(arr, n, k):
     res = 0
     for i in range(0, n):
         if (max1 - arr[i]) % k != 0:
-            retval_0 = -1
-            return retval_0
+            return -1
         else:
             res += (max1 - arr[i]) / k
-    retval_1 = int(res)
-    return retval_1
+    return int(res)
 "-----------------"
 test()

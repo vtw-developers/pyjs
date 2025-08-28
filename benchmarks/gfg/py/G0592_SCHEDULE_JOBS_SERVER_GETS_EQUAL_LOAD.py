@@ -10,16 +10,13 @@ def f_gold(a, b, n):
     for i in range(0, n):
         s += a[i] + b[i]
     if n == 1:
-        retval_0 = a[0] + b[0]
-        return retval_0
+        return a[0] + b[0]
     if s % n != 0:
-        retval_1 = -1
-        return retval_1
+        return -1
     x = s // n
     for i in range(0, n):
         if a[i] > x:
-            retval_2 = -1
-            return retval_2
+            return -1
         if i > 0:
             a[i] += b[i - 1]
             b[i - 1] = 0
@@ -42,12 +39,10 @@ def f_gold(a, b, n):
             a[i] += b[i + 1]
             b[i + 1] = 0
             continue
-        retval_3 = -1
-        return retval_3
+        return -1
     for i in range(0, n):
         if b[i] != 0:
-            retval_4 = -1
-            return retval_4
+            return -1
     return x
 "-----------------"
 test()

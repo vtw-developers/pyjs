@@ -7,7 +7,6 @@ def test():
 "-----------------"
 import math
 def f_gold(a, n):
-    retval_0 = (-1 + int(math.sqrt(1 + (8 * n)))) // 2
-    return retval_0
+    return (-1 + int(math.sqrt(1 + (8 * n)))) // 2
 "-----------------"
 test()

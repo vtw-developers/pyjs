@@ -11,9 +11,7 @@ def f_gold(A, arr_size, sum_0):
             for k in range(j + 1, arr_size):
                 if A[i] + A[j] + A[k] == sum_0:
                     print("Triplet is", A[i], ", ", A[j], ", ", A[k])
-                    retval_0 = True
-                    return retval_0
-    retval_1 = False
-    return retval_1
+                    return True
+    return False
 "-----------------"
 test()

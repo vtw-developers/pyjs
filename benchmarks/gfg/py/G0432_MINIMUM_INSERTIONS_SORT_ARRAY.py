@@ -17,7 +17,6 @@ def f_gold(arr, N):
     for i in range(N):
         if max_0 < lis[i]:
             max_0 = lis[i]
-    retval_0 = N - max_0
-    return retval_0
+    return N - max_0
 "-----------------"
 test()

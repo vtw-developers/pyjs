@@ -15,11 +15,9 @@ def f_gold(string_0):
                 elementsInside += 1
                 top = Stack.pop()
             if elementsInside < 1:
-                retval_0 = True
-                return retval_0
+                return True
         else:
             Stack.append(ch)
-    retval_1 = False
-    return retval_1
+    return False
 "-----------------"
 test()

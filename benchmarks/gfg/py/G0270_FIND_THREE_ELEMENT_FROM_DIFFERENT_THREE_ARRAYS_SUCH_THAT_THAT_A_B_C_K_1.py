@@ -12,9 +12,7 @@ def f_gold(a1, a2, a3, n1, n2, n3, sum_0):
     for i in range(n2):
         for j in range(n3):
             if sum_0 - a2[i] - a3[j] in s:
-                retval_0 = True
-                return retval_0
-    retval_1 = False
-    return retval_1
+                return True
+    return False
 "-----------------"
 test()

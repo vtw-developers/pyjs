@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n, k):
     if n == 1:
-        retval_0 = 0
-        return retval_0
+        return 0
     arr.sort()
     ans = arr[n - 1] - arr[0]
     small = arr[0] + k
@@ -24,7 +23,6 @@ def f_gold(arr, n, k):
             small = subtract
         else:
             big = add
-    retval_1 = min(ans, big - small)
-    return retval_1
+    return min(ans, big - small)
 "-----------------"
 test()

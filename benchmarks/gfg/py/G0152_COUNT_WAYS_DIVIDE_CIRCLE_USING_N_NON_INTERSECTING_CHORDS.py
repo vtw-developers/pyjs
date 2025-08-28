@@ -13,7 +13,6 @@ def f_gold(A):
     for i in range(4, n + 1, 2):
         for j in range(0, i - 1, 2):
             dpArray[i] += dpArray[j] * dpArray[i - 2 - j]
-    retval_0 = int(dpArray[n])
-    return retval_0
+    return int(dpArray[n])
 "-----------------"
 test()

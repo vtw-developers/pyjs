@@ -26,7 +26,6 @@ def f_gold(mat, n):
         for j in range(n):
             if transpose[i][j] != mat[i][j]:
                 flip += 1
-    retval_0 = int(flip / 2)
-    return retval_0
+    return int(flip / 2)
 "-----------------"
 test()

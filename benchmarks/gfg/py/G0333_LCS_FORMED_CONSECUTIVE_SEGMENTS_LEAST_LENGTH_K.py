@@ -18,7 +18,6 @@ def f_gold(k, s1, s2):
             if cnt[i][j] >= k:
                 for a in range(k, cnt[i][j] + 1):
                     lcs[i][j] = max(lcs[i][j], lcs[i - a][j - a] + a)
-    retval_0 = lcs[n][m]
-    return retval_0
+    return lcs[n][m]
 "-----------------"
 test()

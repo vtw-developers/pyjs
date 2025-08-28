@@ -16,7 +16,6 @@ def f_gold(arr, N, K):
                 dp[i] = max(dp[i], dp[i - 2] + arr[i] + arr[i - 1])
             else:
                 dp[i] = max(dp[i], arr[i] + arr[i - 1])
-    retval_0 = dp[N - 1]
-    return retval_0
+    return dp[N - 1]
 "-----------------"
 test()

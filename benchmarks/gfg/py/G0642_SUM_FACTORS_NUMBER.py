@@ -14,7 +14,6 @@ def f_gold(n):
                 result = result + i
             else:
                 result = result + (i + n // i)
-    retval_0 = result + n + 1
-    return retval_0
+    return result + n + 1
 "-----------------"
 test()

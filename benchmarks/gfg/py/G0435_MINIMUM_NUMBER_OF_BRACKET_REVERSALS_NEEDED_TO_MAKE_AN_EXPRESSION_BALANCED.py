@@ -8,8 +8,7 @@ def test():
 def f_gold(expr):
     lenn = len(expr)
     if lenn % 2:
-        retval_0 = -1
-        return retval_0
+        return -1
     s = []
     for i in range(lenn):
         if expr[i] == "" and len(s):
@@ -24,7 +23,6 @@ def f_gold(expr):
     while len(s) and s[0] == "":
         s.pop(0)
         n += 1
-    retval_1 = red_len // 2 + n % 2
-    return retval_1
+    return red_len // 2 + n % 2
 "-----------------"
 test()

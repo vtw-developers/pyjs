@@ -11,8 +11,7 @@ def f_gold(arr, n):
     for i in range(n):
         sum_0 += arr[i]
     if sum_0 % 2 != 0:
-        retval_0 = False
-        return retval_0
+        return False
     sum_0 = sum_0 / 2
     for i in range(n):
         val = sum_0 - arr[i]

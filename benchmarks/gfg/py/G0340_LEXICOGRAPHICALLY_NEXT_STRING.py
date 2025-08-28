@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(s):
     if s == " ":
-        retval_0 = "a"
-        return retval_0
+        return "a"
     i = len(s) - 1
     while s[i] == "z" and i >= 0:
         i -= 1

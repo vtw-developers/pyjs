@@ -19,7 +19,6 @@ def f_gold(n):
         if count == n:
             return curr
         curr += 9
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

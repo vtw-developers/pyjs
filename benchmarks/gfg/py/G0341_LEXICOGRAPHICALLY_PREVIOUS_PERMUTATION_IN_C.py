@@ -11,8 +11,7 @@ def f_gold(str_0):
     while i > 0 and str_0[i - 1] <= str_0[i]:
         i -= 1
     if i <= 0:
-        retval_0 = False
-        return retval_0
+        return False
     j = i - 1
     while j + 1 <= n and str_0[j + 1] <= str_0[i - 1]:
         j += 1
@@ -22,7 +21,6 @@ def f_gold(str_0):
     str_0[j] = temp
     str_0 = "".join(str_0)
     str_0[::-1]
-    retval_1 = True, str_0
-    return retval_1
+    return True, str_0
 "-----------------"
 test()

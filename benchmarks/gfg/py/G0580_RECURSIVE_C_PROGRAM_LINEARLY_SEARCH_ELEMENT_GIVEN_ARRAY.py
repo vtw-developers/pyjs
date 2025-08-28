@@ -7,13 +7,11 @@ def test():
 "-----------------"
 def f_gold(arr, l, r, x):
     if r < l:
-        retval_0 = -1
-        return retval_0
+        return -1
     if arr[l] == x:
         return l
     if arr[r] == x:
         return r
-    retval_1 = f_gold(arr, l + 1, r - 1, x)
-    return retval_1
+    return f_gold(arr, l + 1, r - 1, x)
 "-----------------"
 test()

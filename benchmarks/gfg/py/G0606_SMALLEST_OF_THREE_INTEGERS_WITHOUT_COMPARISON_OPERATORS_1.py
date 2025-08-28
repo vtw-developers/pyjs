@@ -7,9 +7,7 @@ def test():
 "-----------------"
 def f_gold(x, y, z):
     if not (y / x):
-        retval_0 = y if (not (y / z)) else z
-        return retval_0
-    retval_1 = x if (not (x / z)) else z
-    return retval_1
+        return y if (not (y / z)) else z
+    return x if (not (x / z)) else z
 "-----------------"
 test()

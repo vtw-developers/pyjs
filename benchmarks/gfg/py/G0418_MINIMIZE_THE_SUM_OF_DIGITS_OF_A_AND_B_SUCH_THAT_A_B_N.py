@@ -11,8 +11,7 @@ def f_gold(n):
         sum_0 += n % 10
         n //= 10
     if sum_0 == 1:
-        retval_0 = 10
-        return retval_0
+        return 10
     return sum_0
 "-----------------"
 test()

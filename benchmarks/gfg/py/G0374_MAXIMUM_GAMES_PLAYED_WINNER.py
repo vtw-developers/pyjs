@@ -13,7 +13,6 @@ def f_gold(N):
     while dp[i] <= N:
         i = i + 1
         dp[i] = dp[i - 1] + dp[i - 2]
-    retval_0 = i - 1
-    return retval_0
+    return i - 1
 "-----------------"
 test()

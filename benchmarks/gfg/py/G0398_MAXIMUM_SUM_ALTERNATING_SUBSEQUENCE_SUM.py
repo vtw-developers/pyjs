@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     if n == 1:
-        retval_0 = arr[0]
-        return retval_0
+        return arr[0]
     dec = [0 for i in range(n + 1)]
     inc = [0 for i in range(n + 1)]
     dec[0] = inc[0] = arr[0]

@@ -15,7 +15,6 @@ def f_gold(digits, n):
             count[i] = count[i - 1]
         if digits[i - 2] == "1" or (digits[i - 2] == "2" and digits[i - 1] < "7"):
             count[i] += count[i - 2]
-    retval_0 = count[n]
-    return retval_0
+    return count[n]
 "-----------------"
 test()

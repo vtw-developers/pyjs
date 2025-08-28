@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x):
-    retval_0 = x and (not (x & (x - 1)))
-    return retval_0
+    return x and (not (x & (x - 1)))
 "-----------------"
 test()

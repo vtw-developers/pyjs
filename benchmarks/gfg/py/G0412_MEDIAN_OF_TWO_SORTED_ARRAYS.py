@@ -29,7 +29,6 @@ def f_gold(ar1, ar2, n):
             m1 = m2
             m2 = ar2[j]
             j += 1
-    retval_0 = (m1 + m2) / 2
-    return retval_0
+    return (m1 + m2) / 2
 "-----------------"
 test()

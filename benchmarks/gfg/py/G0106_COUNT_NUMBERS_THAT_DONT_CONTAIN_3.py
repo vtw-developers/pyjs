@@ -9,17 +9,14 @@ def f_gold(n):
     if n < 3:
         return n
     elif n >= 3 and n < 10:
-        retval_0 = n - 1
-        return retval_0
+        return n - 1
     po = 1
     while n / po > 9:
         po = po * 10
     msd = n / po
     if msd != 3:
-        retval_1 = f_gold(msd) * f_gold(po - 1) + f_gold(msd) + f_gold(n % po)
-        return retval_1
+        return f_gold(msd) * f_gold(po - 1) + f_gold(msd) + f_gold(n % po)
     else:
-        retval_2 = f_gold(msd * po - 1)
-        return retval_2
+        return f_gold(msd * po - 1)
 "-----------------"
 test()

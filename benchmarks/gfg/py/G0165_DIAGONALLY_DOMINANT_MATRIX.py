@@ -23,9 +23,7 @@ def f_gold(m, n):
             sum_0 = sum_0 + abs(m[i][j])
         sum_0 = sum_0 - abs(m[i][i])
         if abs(m[i][i]) < sum_0:
-            retval_0 = False
-            return retval_0
-    retval_1 = True
-    return retval_1
+            return False
+    return True
 "-----------------"
 test()

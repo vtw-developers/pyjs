@@ -16,7 +16,6 @@ def f_gold(array_0, m, n):
         for j in range(0, n):
             if array_0[i][j] == 0:
                 counter = counter + 1
-    retval_0 = counter > ((m * n) // 2)
-    return retval_0
+    return counter > ((m * n) // 2)
 "-----------------"
 test()

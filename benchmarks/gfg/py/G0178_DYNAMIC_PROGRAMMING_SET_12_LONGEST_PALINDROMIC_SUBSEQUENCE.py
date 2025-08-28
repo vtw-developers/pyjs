@@ -19,7 +19,6 @@ def f_gold(str_0):
                 L[i][j] = L[i + 1][j - 1] + 2
             else:
                 L[i][j] = max(L[i][j - 1], L[i + 1][j])
-    retval_0 = L[0][n - 1]
-    return retval_0
+    return L[0][n - 1]
 "-----------------"
 test()

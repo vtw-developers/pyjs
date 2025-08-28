@@ -15,7 +15,6 @@ def f_gold(arr, n):
         if leftMax[i] < arr[i] and rightMin > arr[i]:
             return i
         rightMin = min(rightMin, arr[i])
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

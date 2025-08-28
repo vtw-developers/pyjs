@@ -8,11 +8,9 @@ def test():
 def f_gold(string_0):
     length = len(string_0)
     if string_0[0] < "A" or string_0[0] > "Z":
-        retval_0 = False
-        return retval_0
+        return False
     if string_0[length - 1] != ".":
-        retval_1 = False
-        return retval_1
+        return False
     prev_state = 0
     curr_state = 0
     index = 1
@@ -26,17 +24,13 @@ def f_gold(string_0):
         elif string_0[index] == ".":
             curr_state = 3
         if prev_state == curr_state and curr_state != 2:
-            retval_2 = False
-            return retval_2
+            return False
         if prev_state == 2 and curr_state == 0:
-            retval_3 = False
-            return retval_3
+            return False
         if curr_state == 3 and prev_state != 1:
-            retval_4 = True
-            return retval_4
+            return True
         index += 1
         prev_state = curr_state
-    retval_5 = False
-    return retval_5
+    return False
 "-----------------"
 test()

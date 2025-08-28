@@ -9,13 +9,10 @@ def f_gold(x1, y1, x2, y2, r1, r2):
     distSq = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     radSumSq = (r1 + r2) * (r1 + r2)
     if distSq == radSumSq:
-        retval_0 = 1
-        return retval_0
+        return 1
     elif distSq > radSumSq:
-        retval_1 = -1
-        return retval_1
+        return -1
     else:
-        retval_2 = 0
-        return retval_2
+        return 0
 "-----------------"
 test()

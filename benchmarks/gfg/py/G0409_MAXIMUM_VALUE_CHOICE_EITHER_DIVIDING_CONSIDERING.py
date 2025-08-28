@@ -13,7 +13,6 @@ def f_gold(n):
     while i < n + 1:
         res.append(max(i, (res[int(i / 2)] + res[int(i / 3)] + res[int(i / 4)] + res[int(i / 5)])))
         i = i + 1
-    retval_0 = res[n]
-    return retval_0
+    return res[n]
 "-----------------"
 test()
