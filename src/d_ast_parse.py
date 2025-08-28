@@ -175,6 +175,66 @@ def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
   return result
 
 
+def are_nodes_equal(node1, node2, ignore_nids: bool = True) -> bool:
+  '''
+  Recursively check if two AST nodes are equal.
+  '''
+  assert isinstance(node1, (list, str)), 'node1 is not list or str'
+  assert isinstance(node2, (list, str)), 'node2 is not list or str'
+
+  # both are terminals
+  if isinstance(node1, str) and isinstance(node2, str):
+    return node1 == node2
+
+  # exactly one is non-terminal or terminal
+  if type(node1) != type(node2):
+    return False
+
+  # both are non-terminals
+  assert isinstance(node1, list), 'sanity check'
+  assert isinstance(node2, list), 'sanity check'
+
+  ntype1, ntype2 = node1[0], node2[0]
+  assert isinstance(ntype1, str), 'sanity check'
+  assert isinstance(ntype2, str), 'sanity check'
+
+  # check if node types are equal
+  if ntype1 != ntype2:
+    return False
+
+  # special case for string annotations
+  if ntype1 == 'anno':
+    assert len(node1) == 3, 'sanity check: anno has 3 elements'
+    assert len(node2) == 3, 'sanity check: anno has 3 elements'
+    if node1[1][1] != node2[1][1]:  # stype
+      return False
+    if node1[2][1] != node2[2][1]:  # quote
+      return False
+    return True
+
+  # non-terminals have at least 3 elements
+  assert len(node1) > 2, 'sanity check: ntype, nid, children'
+  assert len(node2) > 2, 'sanity check: ntype, nid, children'
+
+  nid1, nid2 = node1[1], node2[1]
+  assert isinstance(nid1, int), 'sanity check'
+  assert isinstance(nid2, int), 'sanity check'
+
+  # check if node IDs are equal
+  if not ignore_nids and nid1 != nid2:
+    return False
+
+  children1, children2 = node1[2:], node2[2:]
+  if len(children1) != len(children2):
+    return False
+
+  for child1, child2 in zip(children1, children2):
+    child_res = are_nodes_equal(child1, child2)
+    if not child_res:
+      return False
+  return True
+
+
 def ast_to_dotgraph(
   text: str,
   lang: str,
