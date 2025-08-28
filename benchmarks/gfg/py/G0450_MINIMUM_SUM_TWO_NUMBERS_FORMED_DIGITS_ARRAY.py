@@ -14,7 +14,6 @@ def f_gold(arr, n):
             a = a * 10 + arr[i]
         else:
             b = b * 10 + arr[i]
-    retval_0 = a + b
-    return retval_0
+    return a + b
 "-----------------"
 test()

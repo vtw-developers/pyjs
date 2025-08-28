@@ -18,13 +18,10 @@ def test():
 "-----------------"
 def f_gold(dp, a, low, high, turn):
     if low == high:
-        retval_0 = a[low] * turn
-        return retval_0
+        return a[low] * turn
     if dp[low][high] != 0:
-        retval_1 = dp[low][high]
-        return retval_1
+        return dp[low][high]
     dp[low][high] = max(a[low] * turn + f_gold(dp, a, low + 1, high, turn + 1), a[high] * turn + f_gold(dp, a, low, high - 1, turn + 1))
-    retval_2 = dp[low][high]
-    return retval_2
+    return dp[low][high]
 "-----------------"
 test()

@@ -19,7 +19,6 @@ def f_gold(X, Y):
                 L[bi][j] = L[1 - bi][j - 1] + 1
             else:
                 L[bi][j] = max(L[1 - bi][j], L[bi][j - 1])
-    retval_0 = L[bi][n]
-    return retval_0
+    return L[bi][n]
 "-----------------"
 test()

@@ -17,7 +17,6 @@ def f_gold(s1, s2):
                     dp[i + 1][j + 1] = True
                 if s1[i].isupper() == False:
                     dp[i + 1][j] = True
-    retval_0 = dp[n][m]
-    return retval_0
+    return dp[n][m]
 "-----------------"
 test()

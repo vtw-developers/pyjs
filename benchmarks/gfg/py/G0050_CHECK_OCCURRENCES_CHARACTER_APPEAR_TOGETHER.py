@@ -12,14 +12,12 @@ def f_gold(s, c):
     while i < n:
         if s[i] == c:
             if oneSeen == True:
-                retval_0 = False
-                return retval_0
+                return False
             while i < n and s[i] == c:
                 i = i + 1
             oneSeen = True
         else:
             i = i + 1
-    retval_1 = True
-    return retval_1
+    return True
 "-----------------"
 test()

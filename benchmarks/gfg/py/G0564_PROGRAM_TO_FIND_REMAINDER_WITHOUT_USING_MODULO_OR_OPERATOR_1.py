@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(num, divisor):
     if divisor == 0:
-        retval_0 = False
-        return retval_0
+        return False
     if divisor < 0:
         divisor = -divisor
     if num < 0:
@@ -18,7 +17,6 @@ def f_gold(num, divisor):
     while product <= num:
         product = divisor * i
         i += 1
-    retval_1 = num - (product - divisor)
-    return retval_1
+    return num - (product - divisor)
 "-----------------"
 test()

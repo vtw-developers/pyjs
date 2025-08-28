@@ -11,10 +11,8 @@ def f_gold(p):
     for i in range(1, p - 1):
         nextval = (nextval * nextval - 2) % checkNumber
     if nextval == 0:
-        retval_0 = True
-        return retval_0
+        return True
     else:
-        retval_1 = False
-        return retval_1
+        return False
 "-----------------"
 test()

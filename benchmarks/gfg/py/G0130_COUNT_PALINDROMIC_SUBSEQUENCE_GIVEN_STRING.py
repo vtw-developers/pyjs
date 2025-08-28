@@ -18,7 +18,6 @@ def f_gold(str_0):
                     cps[i][k] = cps[i][k - 1] + cps[i + 1][k] + 1
                 else:
                     cps[i][k] = cps[i][k - 1] + cps[i + 1][k] - cps[i + 1][k - 1]
-    retval_0 = cps[0][N - 1]
-    return retval_0
+    return cps[0][N - 1]
 "-----------------"
 test()

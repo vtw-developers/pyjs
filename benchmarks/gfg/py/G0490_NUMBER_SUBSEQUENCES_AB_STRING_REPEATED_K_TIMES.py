@@ -16,7 +16,6 @@ def f_gold(s, K):
         if s[i] == "b":
             c2 += 1
             C += c1
-    retval_0 = C * K + (K * (K - 1) / 2) * c1 * c2
-    return retval_0
+    return C * K + (K * (K - 1) / 2) * c1 * c2
 "-----------------"
 test()

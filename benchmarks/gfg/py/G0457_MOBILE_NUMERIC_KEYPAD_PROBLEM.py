@@ -18,11 +18,9 @@ def test():
 "-----------------"
 def f_gold(keypad, n):
     if not keypad or n <= 0:
-        retval_0 = 0
-        return retval_0
+        return 0
     if n == 1:
-        retval_1 = 10
-        return retval_1
+        return 10
     odd = [0] * 10
     even = [0] * 10
     i = 0

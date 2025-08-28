@@ -11,11 +11,9 @@ def f_gold(n):
     while n > 0:
         digit = math.floor(n % 10)
         if ar[digit]:
-            retval_0 = 0
-            return retval_0
+            return 0
         ar[digit] = 1
         n = n / 10
-    retval_1 = 1
-    return retval_1
+    return 1
 "-----------------"
 test()

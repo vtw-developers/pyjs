@@ -12,10 +12,8 @@ def f_gold(n):
             n >>= 1
             count += 1
         if count % 2 == 0:
-            retval_0 = True
-            return retval_0
+            return True
         else:
-            retval_1 = False
-            return retval_1
+            return False
 "-----------------"
 test()

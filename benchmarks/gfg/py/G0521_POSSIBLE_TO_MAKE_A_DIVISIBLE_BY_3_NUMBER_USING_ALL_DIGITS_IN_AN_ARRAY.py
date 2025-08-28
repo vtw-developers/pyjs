@@ -9,7 +9,6 @@ def f_gold(arr, n):
     remainder = 0
     for i in range(0, n):
         remainder = (remainder + arr[i]) % 3
-    retval_0 = remainder == 0
-    return retval_0
+    return remainder == 0
 "-----------------"
 test()

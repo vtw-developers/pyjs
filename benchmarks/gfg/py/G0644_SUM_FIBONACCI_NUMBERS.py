@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(n):
     if n <= 0:
-        retval_0 = 0
-        return retval_0
+        return 0
     fibo = [0] * (n + 1)
     fibo[1] = 1
     sm = fibo[0] + fibo[1]

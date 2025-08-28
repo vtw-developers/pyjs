@@ -23,8 +23,7 @@ def f_gold(A, B, m, n):
     for i in range(1, n):
         for j in range(1, n):
             if A[i][j] - A[i][0] - A[0][j] + A[0][0] != 0:
-                retval_0 = -1
-                return retval_0
+                return -1
     result = 0
     for i in range(n):
         result += abs(A[i][0])

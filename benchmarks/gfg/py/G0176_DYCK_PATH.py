@@ -10,7 +10,6 @@ def f_gold(n):
     for i in range(0, n):
         res *= 2 * n - i
         res /= i + 1
-    retval_0 = res / (n + 1)
-    return retval_0
+    return res / (n + 1)
 "-----------------"
 test()

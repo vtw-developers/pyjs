@@ -12,9 +12,7 @@ def f_gold(arr, arr_size):
             if arr[i] == arr[j]:
                 count += 1
         if count % 2 != 0:
-            retval_0 = arr[i]
-            return retval_0
-    retval_1 = -1
-    return retval_1
+            return arr[i]
+    return -1
 "-----------------"
 test()

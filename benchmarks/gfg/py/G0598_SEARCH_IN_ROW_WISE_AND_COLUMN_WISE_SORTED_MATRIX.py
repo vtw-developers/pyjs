@@ -22,14 +22,12 @@ def f_gold(mat, n, x):
     while i < n and j >= 0:
         if mat[i][j] == x:
             print("n Found at ", i, ", ", j)
-            retval_0 = 1
-            return retval_0
+            return 1
         if mat[i][j] > x:
             j -= 1
         else:
             i += 1
     print("Element not found")
-    retval_1 = 0
-    return retval_1
+    return 0
 "-----------------"
 test()

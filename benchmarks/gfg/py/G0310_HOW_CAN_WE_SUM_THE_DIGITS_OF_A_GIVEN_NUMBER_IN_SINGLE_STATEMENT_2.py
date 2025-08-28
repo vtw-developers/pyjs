@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(no):
-    retval_0 = 0 if no == 0 else int(no % 10) + f_gold(int(no / 10))
-    return retval_0
+    return 0 if no == 0 else int(no % 10) + f_gold(int(no / 10))
 "-----------------"
 test()

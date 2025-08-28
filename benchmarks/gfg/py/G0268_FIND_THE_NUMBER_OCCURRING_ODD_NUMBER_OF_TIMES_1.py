@@ -12,7 +12,6 @@ def f_gold(arr, size):
     for i in Hash:
         if Hash[i] % 2 != 0:
             return i
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

@@ -25,7 +25,6 @@ def f_gold(arr, n):
                 d1 += arr[i][j]
             if i == n - j - 1:
                 d2 += arr[i][j]
-    retval_0 = abs(d1 - d2)
-    return retval_0
+    return abs(d1 - d2)
 "-----------------"
 test()

@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x, y):
-    retval_0 = (x ^ y) < 0
-    return retval_0
+    return (x ^ y) < 0
 "-----------------"
 test()

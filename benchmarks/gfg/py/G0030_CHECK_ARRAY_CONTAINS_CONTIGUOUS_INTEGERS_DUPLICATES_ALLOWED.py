@@ -10,16 +10,13 @@ def f_gold(arr, n):
     min1 = min(arr)
     m = max1 - min1 + 1
     if m > n:
-        retval_0 = False
-        return retval_0
+        return False
     visited = [0] * m
     for i in range(0, n):
         visited[arr[i] - min1] = True
     for i in range(0, m):
         if visited[i] == False:
-            retval_1 = False
-            return retval_1
-    retval_2 = True
-    return retval_2
+            return False
+    return True
 "-----------------"
 test()

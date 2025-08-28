@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    retval_0 = n != 0 and ((n & (n - 1)) == 0) and not (n & 0xAAAAAAAA)
-    return retval_0
+    return n != 0 and ((n & (n - 1)) == 0) and not (n & 0xAAAAAAAA)
 "-----------------"
 test()

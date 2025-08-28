@@ -19,7 +19,6 @@ def f_gold(arr, n):
     for i in arr:
         if i in hash_0.keys() and hash_0[i] > 0:
             return i
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

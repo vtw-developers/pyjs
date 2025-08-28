@@ -14,7 +14,6 @@ def f_gold(n):
         table[i] += table[i - 5]
     for i in range(10, n + 1):
         table[i] += table[i - 10]
-    retval_0 = table[n]
-    return retval_0
+    return table[n]
 "-----------------"
 test()

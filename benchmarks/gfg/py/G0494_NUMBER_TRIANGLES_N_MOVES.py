@@ -12,7 +12,6 @@ def f_gold(n):
     while i <= n:
         answer[i] = answer[i - 1] * 3 + 2
         i = i + 1
-    retval_0 = answer[n]
-    return retval_0
+    return answer[n]
 "-----------------"
 test()

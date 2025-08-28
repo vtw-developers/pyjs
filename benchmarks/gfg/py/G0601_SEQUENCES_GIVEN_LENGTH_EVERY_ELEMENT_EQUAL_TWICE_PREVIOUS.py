@@ -7,11 +7,9 @@ def test():
 "-----------------"
 def f_gold(m, n):
     if m < n:
-        retval_0 = 0
-        return retval_0
+        return 0
     if n == 0:
-        retval_1 = 1
-        return retval_1
+        return 1
     res = f_gold(m - 1, n) + f_gold(m // 2, n - 1)
     return res
 "-----------------"

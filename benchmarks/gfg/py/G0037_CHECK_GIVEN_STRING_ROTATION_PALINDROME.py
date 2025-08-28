@@ -12,9 +12,7 @@ def f_gold(string_0):
         l += 1
         h -= 1
         if string_0[l - 1] != string_0[h + 1]:
-            retval_0 = False
-            return retval_0
-    retval_1 = True
-    return retval_1
+            return False
+    return True
 "-----------------"
 test()

@@ -22,7 +22,6 @@ def f_gold(arr, n):
                 jumps[i] = min_0 + 1
             else:
                 jumps[i] = min_0
-    retval_0 = jumps[0]
-    return retval_0
+    return jumps[0]
 "-----------------"
 test()

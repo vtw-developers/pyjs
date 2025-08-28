@@ -7,7 +7,6 @@ def test():
 "-----------------"
 import math
 def f_gold(N):
-    retval_0 = math.ceil(math.log2(N + 1)) - 1
-    return retval_0
+    return math.ceil(math.log2(N + 1)) - 1
 "-----------------"
 test()

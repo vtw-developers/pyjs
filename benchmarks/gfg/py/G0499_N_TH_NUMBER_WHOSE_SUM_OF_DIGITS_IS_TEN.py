@@ -18,7 +18,6 @@ def f_gold(n):
             count = count + 1
         if count == n:
             return curr
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

@@ -17,8 +17,7 @@ def f_gold(stack1, stack2, stack3, n1, n2, n3):
     ans = 0
     while 1:
         if top1 == n1 or top2 == n2 or top3 == n3:
-            retval_0 = 0
-            return retval_0
+            return 0
         if sum1 == sum2 and sum2 == sum3:
             return sum1
         if sum1 >= sum2 and sum1 >= sum3:

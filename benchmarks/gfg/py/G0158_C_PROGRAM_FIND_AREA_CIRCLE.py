@@ -7,7 +7,6 @@ def test():
 "-----------------"
 def f_gold(r):
     PI = 3.142
-    retval_0 = PI * (r * r)
-    return retval_0
+    return PI * (r * r)
 "-----------------"
 test()

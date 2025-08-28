@@ -7,7 +7,6 @@ def test():
 "-----------------"
 import math
 def f_gold(side):
-    retval_0 = 2 * (1 + (math.sqrt(2))) * side * side
-    return retval_0
+    return 2 * (1 + (math.sqrt(2))) * side * side
 "-----------------"
 test()

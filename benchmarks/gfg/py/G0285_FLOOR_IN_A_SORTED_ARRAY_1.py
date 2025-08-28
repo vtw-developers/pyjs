@@ -7,20 +7,16 @@ def test():
 "-----------------"
 def f_gold(arr, low, high, x):
     if low > high:
-        retval_0 = -1
-        return retval_0
+        return -1
     if x >= arr[high]:
         return high
     mid = int((low + high) / 2)
     if arr[mid] == x:
         return mid
     if mid > 0 and arr[mid - 1] <= x and x < arr[mid]:
-        retval_1 = mid - 1
-        return retval_1
+        return mid - 1
     if x < arr[mid]:
-        retval_2 = f_gold(arr, low, mid - 1, x)
-        return retval_2
-    retval_3 = f_gold(arr, mid + 1, high, x)
-    return retval_3
+        return f_gold(arr, low, mid - 1, x)
+    return f_gold(arr, mid + 1, high, x)
 "-----------------"
 test()

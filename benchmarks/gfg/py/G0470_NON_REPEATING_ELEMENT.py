@@ -13,9 +13,7 @@ def f_gold(arr, n):
                 break
             j += 1
         if j == n:
-            retval_0 = arr[i]
-            return retval_0
-    retval_1 = -1
-    return retval_1
+            return arr[i]
+    return -1
 "-----------------"
 test()

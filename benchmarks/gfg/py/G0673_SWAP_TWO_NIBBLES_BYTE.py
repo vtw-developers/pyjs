@@ -6,7 +6,6 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(x):
-    retval_0 = (x & 0x0F) << 4 | (x & 0xF0) >> 4
-    return retval_0
+    return (x & 0x0F) << 4 | (x & 0xF0) >> 4
 "-----------------"
 test()

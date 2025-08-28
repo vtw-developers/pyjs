@@ -15,7 +15,6 @@ def f_gold(arr, n):
         sum_0[2] = max(sum_0[1], max(arr[1] + arr[2], arr[0] + arr[2]))
     for i in range(3, n):
         sum_0[i] = max(max(sum_0[i - 1], sum_0[i - 2] + arr[i]), arr[i] + arr[i - 1] + sum_0[i - 3])
-    retval_0 = sum_0[n - 1]
-    return retval_0
+    return sum_0[n - 1]
 "-----------------"
 test()

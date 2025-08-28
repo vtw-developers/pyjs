@@ -7,8 +7,7 @@ def test():
 "-----------------"
 def f_gold(a, n):
     if n == 1:
-        retval_0 = a[0]
-        return retval_0
+        return a[0]
     max_neg = -999999999999
     count_neg = 0
     count_zero = 0
@@ -22,12 +21,10 @@ def f_gold(a, n):
             max_neg = max(max_neg, a[i])
         prod = prod * a[i]
     if count_zero == n:
-        retval_1 = 0
-        return retval_1
+        return 0
     if count_neg & 1:
         if count_neg == 1 and count_zero > 0 and count_zero + count_neg == n:
-            retval_2 = 0
-            return retval_2
+            return 0
         prod = int(prod / max_neg)
     return prod
 "-----------------"

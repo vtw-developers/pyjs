@@ -7,7 +7,6 @@ def test():
 "-----------------"
 import math
 def f_gold(r1, r2, r3):
-    retval_0 = 1.33 * math.pi * r1 * r2 * r3
-    return retval_0
+    return 1.33 * math.pi * r1 * r2 * r3
 "-----------------"
 test()

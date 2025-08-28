@@ -17,7 +17,6 @@ def f_gold(n):
             n = n / i
     if n > 2:
         maxPrime = n
-    retval_0 = int(maxPrime)
-    return retval_0
+    return int(maxPrime)
 "-----------------"
 test()

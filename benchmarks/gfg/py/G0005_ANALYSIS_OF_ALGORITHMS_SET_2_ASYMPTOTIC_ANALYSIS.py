@@ -10,7 +10,6 @@ def f_gold(arr, n, x):
     for i in range(j, n):
         if arr[i] == x:
             return i
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()

@@ -23,7 +23,6 @@ def f_gold(arr, n, k):
                 if Q[0] < x:
                     heapq.heappop(Q)
                     heapq.heappush(Q, x)
-    retval_0 = Q[0]
-    return retval_0
+    return Q[0]
 "-----------------"
 test()

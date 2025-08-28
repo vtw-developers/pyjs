@@ -20,10 +20,8 @@ def f_gold(S, n):
                         continue
                     if S[i] == S[j] + S[k] + S[l]:
                         found = True
-                        retval_0 = S[i]
-                        return retval_0
+                        return S[i]
     if found == False:
-        retval_1 = -1
-        return retval_1
+        return -1
 "-----------------"
 test()

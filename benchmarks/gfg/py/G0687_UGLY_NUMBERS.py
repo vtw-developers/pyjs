@@ -23,7 +23,6 @@ def f_gold(n):
         if ugly[l] == next_multiple_of_5:
             i5 += 1
             next_multiple_of_5 = ugly[i5] * 5
-    retval_0 = ugly[-1]
-    return retval_0
+    return ugly[-1]
 "-----------------"
 test()

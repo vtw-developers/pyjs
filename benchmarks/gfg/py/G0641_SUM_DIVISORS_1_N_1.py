@@ -9,7 +9,6 @@ def f_gold(n):
     sum_0 = 0
     for i in range(1, n + 1):
         sum_0 += int(n / i) * i
-    retval_0 = int(sum_0)
-    return retval_0
+    return int(sum_0)
 "-----------------"
 test()

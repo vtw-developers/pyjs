@@ -7,10 +7,8 @@ def test():
 "-----------------"
 def f_gold(a, b, c):
     if (a + b <= c) or (a + c <= b) or (b + c <= a):
-        retval_0 = False
-        return retval_0
+        return False
     else:
-        retval_1 = True
-        return retval_1
+        return True
 "-----------------"
 test()

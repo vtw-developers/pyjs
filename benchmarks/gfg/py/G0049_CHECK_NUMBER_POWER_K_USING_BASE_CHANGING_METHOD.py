@@ -10,15 +10,12 @@ def f_gold(n, k):
     while n > 0:
         digit = n % k
         if digit > 1:
-            retval_0 = False
-            return retval_0
+            return False
         if digit == 1:
             if oneSeen:
-                retval_1 = False
-                return retval_1
+                return False
             oneSeen = True
         n //= k
-    retval_2 = True
-    return retval_2
+    return True
 "-----------------"
 test()

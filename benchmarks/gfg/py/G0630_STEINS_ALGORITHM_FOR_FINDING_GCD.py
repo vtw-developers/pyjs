@@ -25,7 +25,6 @@ def f_gold(a, b):
             a = b
             b = temp
         b = b - a
-    retval_0 = a << k
-    return retval_0
+    return a << k
 "-----------------"
 test()

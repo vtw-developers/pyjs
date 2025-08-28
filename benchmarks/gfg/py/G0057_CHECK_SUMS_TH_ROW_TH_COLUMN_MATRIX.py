@@ -26,9 +26,7 @@ def f_gold(a, n, m):
             sum1 += a[i][j]
             sum2 += a[j][i]
         if sum1 == sum2:
-            retval_0 = 1
-            return retval_0
-    retval_1 = 0
-    return retval_1
+            return 1
+    return 0
 "-----------------"
 test()

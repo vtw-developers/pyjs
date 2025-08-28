@@ -7,10 +7,8 @@ def test():
 "-----------------"
 def f_gold(arr, n):
     if n < 3:
-        retval_0 = -1
-        return retval_0
+        return -1
     arr.sort()
-    retval_1 = max(arr[0] * arr[1] * arr[n - 1], arr[n - 1] * arr[n - 2] * arr[n - 3])
-    return retval_1
+    return max(arr[0] * arr[1] * arr[n - 1], arr[n - 1] * arr[n - 2] * arr[n - 3])
 "-----------------"
 test()

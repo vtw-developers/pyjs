@@ -9,7 +9,6 @@ def f_gold(arr, n):
     for i in range(n):
         if arr[i] is i:
             return i
-    retval_0 = -1
-    return retval_0
+    return -1
 "-----------------"
 test()
