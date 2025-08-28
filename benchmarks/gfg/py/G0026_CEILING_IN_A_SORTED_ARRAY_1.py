@@ -10,7 +10,7 @@ def f_gold(arr, low, high, x):
         return low
     if x > arr[high]:
         return -1
-    mid = (low + high) / 2
+    mid = (low + high) // 2
     if arr[mid] == x:
         return mid
     elif arr[mid] < x:
