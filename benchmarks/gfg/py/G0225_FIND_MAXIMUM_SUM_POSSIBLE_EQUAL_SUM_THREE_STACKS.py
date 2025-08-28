@@ -26,7 +26,7 @@ def f_gold(stack1, stack2, stack3, n1, n2, n3):
         elif sum2 >= sum3 and sum2 >= sum3:
             sum2 -= stack2[top2]
             top2 = top2 + 1
-        elif sum3 >= sum2 and sum3 >= sum1:
+        else:
             sum3 -= stack3[top3]
             top3 = top3 + 1
 "-----------------"

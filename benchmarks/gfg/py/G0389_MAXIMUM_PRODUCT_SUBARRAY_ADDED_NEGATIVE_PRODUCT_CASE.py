@@ -16,7 +16,7 @@ def f_gold(arr, n):
         elif arr[i] == 0:
             minval = 1
             maxval = 0
-        elif arr[i] < 0:
+        else:
             prevMax = maxval
             maxval = minval * arr[i]
             minval = prevMax * arr[i]

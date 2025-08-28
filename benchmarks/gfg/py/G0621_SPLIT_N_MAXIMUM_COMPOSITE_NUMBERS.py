@@ -17,7 +17,7 @@ def f_gold(n):
         return (n - 9) // 4 + 1
     if rem == 2:
         return (n - 6) // 4 + 1
-    if rem == 3:
+    else:
         if n < 15:
             return -1
         return (n - 15) // 4 + 2
