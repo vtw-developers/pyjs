@@ -32,6 +32,7 @@ import json
 import re
 from typing import Callable, List, Optional, Tuple, Union
 
+import p_rule_inferencer
 import p_utils
 
 
@@ -418,6 +419,12 @@ class TranslationRule:
         node = PlainTerminalNode(s_expr, parent_node)
         parent_node.add_child(node)
         return
+      # special treatment for strings, refer to d_ast_parse._anno_func_py_string()
+      elif parent_node.get_parent() is not None and \
+        parent_node.get_parent().get_type() == 'anno':
+        node = PlainTerminalNode(s_expr, parent_node)
+        parent_node.add_child(node)
+        return
 
       if s_expr == '"."' or s_expr == '"*"':
         node = SourceDotStarPhNode(s_expr, parent_node, self.src_dot_star_next_phid)
@@ -620,7 +627,11 @@ class TranslationRule:
     _rec_pre_order(start_node, visit_fn)
 
   def __str__(self) -> str:
-    raise NotImplementedError()
+    return p_rule_inferencer.pretty_rule(
+      self.src_as_s_expression(),
+      self.tar_as_s_expression(),
+      tree_like=False
+    )
 
   # TODO re-implement hard-coded version
   def replace_secret_with_placeholder(self, secret_identifier: str) -> None:
