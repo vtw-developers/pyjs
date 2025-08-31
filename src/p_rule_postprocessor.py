@@ -448,7 +448,7 @@ class TranslationRule:
         parent_node.add_child(node)
         return
       elif str_match:
-        node = TargetDotStarPhNode(s_expr, parent_node, int(str_match.group(1)))
+        node = TargetStrPhNode(s_expr, parent_node, int(str_match.group(1)))
         parent_node.add_child(node)
         return
 
