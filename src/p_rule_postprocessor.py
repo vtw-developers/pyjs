@@ -239,9 +239,6 @@ class TerminalNode(AbstractNode):
   '''
   Terminal node for pattern on source side.
   '''
-  def __repr__(self) -> str:
-    return f'T({self.node_type})'
-
   # overridden methods
   def add_child(self, child: AbstractNode) -> None:
     raise AttributeError('Cannot add a child to a terminal node.')
@@ -278,6 +275,9 @@ class PlainTerminalNode(TerminalNode):
   def __init__(self, node_type: str, parent: AbstractNode) -> None:
     super().__init__(node_type, parent)
 
+  def __repr__(self):
+    return f'T({self.node_type})'
+
 
 class PhNode(TerminalNode):
   '''
@@ -295,43 +295,59 @@ class PhNode(TerminalNode):
 
 
 class SourcePhNode(PhNode):
-  def __repr__(self):
-    return f'SourcePH({self.node_type} #{self.phid})'
+  pass
 
 
 class TargetPhNode(PhNode):
-  def __repr__(self):
-    return f'TargetPH({self.node_type} #{self.phid})'
+  pass
 
 
 class SourceValPhNode(SourcePhNode):
   def __str__(self) -> str:
     return f'Source _val_ PH node id={self.get_phid()}'
 
+  def __repr__(self):
+    return f'SrcValPH({self.node_type} #{self.phid})'
+
 
 class SourceStrPhNode(SourcePhNode):
   def __str__(self) -> str:
     return f'Source _str_ PH node id={self.get_phid()}'
+
+  def __repr__(self):
+    return f'SrcStrPH({self.node_type} #{self.phid})'
 
 
 class SourceDotStarPhNode(SourcePhNode):
   def __str__(self) -> str:
     return f'Source .|* PH node id={self.get_phid()}'
 
+  def __repr__(self):
+    return f'SrcDotStarPH({self.node_type} #{self.phid})'
+
 
 class TargetValPhNode(TargetPhNode):
   def __str__(self) -> str:
     return f'Target _val<d>_ PH node id={self.get_phid()}'
+
+  def __repr__(self):
+    return f'TarValPH({self.node_type} #{self.phid})'
 
 
 class TargetStrPhNode(TargetPhNode):
   def __str__(self) -> str:
     return f'Target _str<d>_ PH node id={self.get_phid()}'
 
+  def __repr__(self):
+    return f'TarStrPH({self.node_type} #{self.phid})'
+
 
 class TargetDotStarPhNode(TargetPhNode):
   def __str__(self) -> str:
     return f'Target .<d>|*<d> PH node id={self.get_phid()}'
+
+  def __repr__(self):
+    return f'TarDotStarPH({self.node_type} #{self.phid})'
 
 
 class TranslationRule:
@@ -389,7 +405,10 @@ class TranslationRule:
     self._update_placeholder_sets()
 
     # mappings
-    self.STmap_val, self.TSmap_val, self.STmap_str, self.TSmap_str, self.STmap_dotstar, self.TSmap_dotstar = self._get_placeholder_mappings()
+    self.STmap_val, self.TSmap_val, \
+      self.STmap_str, self.TSmap_str, \
+        self.STmap_dotstar, self.TSmap_dotstar = \
+          self._get_placeholder_mappings()
 
   def _rec_construct_at(self, parent_node: AbstractNode, s_expr) -> None:
     # base case: terminal node
