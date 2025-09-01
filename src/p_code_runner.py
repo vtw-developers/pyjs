@@ -200,8 +200,7 @@ async def run_src_test_script(
   '''
   This function runs the source program with mylog and returns the log list and error.
   '''
-  # p_utils.log_json_time(f'{subject.name}_args-run_src_test_script.json', locals())
-  logger.debug('Starting p_code_runner.run_src_test_script')
+  logger.debug('Running source test script')
 
   mylog_impl = get_mylog_impl(subject.src_lang)
   src_program_run = mylog_impl + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
@@ -221,8 +220,7 @@ async def run_tar_test_script(
   This function runs the target program until the log list mismatch
   and returns the concatenated code, log list, and error if any.
   '''
-  # p_utils.log_json_time(f'{subject.name}_args-run_tar_test_script.json', locals())
-  logger.debug('Starting p_code_runner.run_tar_test_script')
+  logger.debug('Running target test script')
 
   mylog_impl = get_mylog_impl(subject.tar_lang)
   tar_program_run = mylog_impl + comment_out_default_mylog_impls(tar_program_instr, subject.tar_lang)
@@ -247,7 +245,7 @@ async def _test_run_src_test_script():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   src_program_instr = args_dict['src_program_instr']
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
 
   result = await run_src_test_script(src_program_instr, subject)
   print(json.dumps(result, indent=2))
@@ -265,7 +263,7 @@ async def _test_run_tar_test_script():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   tar_program_instr = args_dict['tar_program_instr']
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
 
   result = await run_tar_test_script(tar_program_instr, subject)
   print(json.dumps(result, indent=2))

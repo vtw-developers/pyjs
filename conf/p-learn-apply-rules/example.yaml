@@ -10,13 +10,12 @@ mode: benchmark
 # Run p_learn_apply_rules on a sample from a benchmark.
 
 # SCHEMA:
-# benchmark_name: str (leetcode | gfg | ctci)
+# benchmark_name: str (gfg)
 # src_lang: str
 # tar_lang: str
 #
 # [is_override_starting_ruleset]: bool (default: false)
 # [overriding_ruleset_fpath]: str (required if is_override_starting_ruleset is true)
-# [is_reuse_trans_rules_across_subjects]: bool (default: false)
 #
 # sample: object
 #   is_random: bool
@@ -29,14 +28,13 @@ mode: benchmark
 
 mode_benchmark:
   # base
-  benchmark_name: leetcode
+  benchmark_name: gfg
   src_lang: py
   tar_lang: js
 
   # starting ruleset can be overriden by this config
   is_override_starting_ruleset: false
-  overriding_ruleset_fpath: logs/learn-rules/L0001_learned_rules.snart
-  is_reuse_trans_rules_across_subjects: false
+  overriding_ruleset_fpath: relative/path/to/ruleset.snart
 
   # max number of concurrent subjects to learn rules for
   max_concurrent_subjects: 1000
@@ -46,7 +44,7 @@ mode_benchmark:
     is_random: false
     size: 20
     start_idx: 0
-    only: [L0001]
+    only: [G0001]
     exclude: []
 
   # flags

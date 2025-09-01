@@ -6,105 +6,16 @@ import d_grammar_expand
 import d_grammar_rules
 import p_consts
 import p_ext_rule_chooser
-import p_llm_gen
 import p_pirel
-import p_pynguin
 import p_rule_applicator as prapp
 import p_rule_postprocessor as prpp
 import p_ruleset
 import p_subject
 import p_tree_log as ptlog
 import p_utils
-import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
-
-
-class TestFunctionGenerationError(RuntimeError): pass
-
-
-def diff_history_used_rule_ids_deprecated(elem1: List[int], elem2: List[int]) -> List[dict]:
-  '''
-  Compare two used rule ids history elements and return the differences.
-  Returns a list of dictionaries with the following structure:
-  [
-    {
-      'idx': int,  # index of the rule that was changed
-      'old_rule_id': int,  # old rule id
-      'new_rule_id': int,  # new rule id
-    }
-  ]
-  '''
-  assert len(elem1) == len(elem2), 'elements must have the same length'
-  diff = []
-  for i in range(len(elem1)):
-    if elem1[i] != elem2[i]:
-      diff.append({
-        'idx': i,
-        'old_rule_id': elem1[i],
-        'new_rule_id': elem2[i]
-      })
-  return diff
-
-
-def process_used_rule_ids_history_deprecated(
-  used_rule_ids_history: List[List[int]]
-) -> List[List[dict]]:
-  '''
-  Produce a sequence of changes between each history element as a
-  list of old and new rule ids that were used.
-  Sample input:
-  used_rule_ids_history = [
-    [9, 10, 11, 12, 13, 6, 14, 1, 14, 11],
-    [9, 10, 11, 12, 13, 7, 14, 1, 14, 11]
-  ]
-  '''
-  # sanity check
-  assert len(used_rule_ids_history) >= 1, 'at least one history element is expected'
-  num_rules = len(used_rule_ids_history[0])
-  for history_elem in used_rule_ids_history:
-    assert len(history_elem) == num_rules, 'all history elements must have the same length'
-
-  # process the history
-  processed_history = []
-  for i in range(len(used_rule_ids_history) - 1):
-    elem1 = used_rule_ids_history[i]
-    elem2 = used_rule_ids_history[i + 1]
-    diff = diff_history_used_rule_ids_deprecated(elem1, elem2)
-    processed_history.append(diff)
-  return processed_history
-
-
-def update_ruleset_obj(
-  current_ruleset_obj: p_ruleset.Ruleset,
-  used_rule_ids_history: List[List[int]]
-) -> None:
-  '''
-  Given a history of used rule ids, update the current ruleset object
-  by converting unchecked rules to checked rules.
-  This function modifies the current ruleset object in place.
-  '''
-  logger.debug('~ Starting p_rule_validator.update_ruleset_obj')
-  for used_rule_ids in used_rule_ids_history:
-    for used_rule_id in used_rule_ids:
-      '''
-      The rule is either a:
-      1. log statement rule
-      2. extra rules for validation
-      Check translation_rules_main_code in is_valid_translation_rule_test_based()
-      '''
-      if not current_ruleset_obj.exists(used_rule_id):
-        continue
-
-      rule = current_ruleset_obj.get_rule(used_rule_id)
-
-      # rule must be an unchecked rule
-      if not isinstance(rule, p_ruleset.UncheckedRule):
-        continue
-
-      checked_rule = p_ruleset.CheckedRule.from_unchecked_rule(rule)
-      current_ruleset_obj.set_rule(used_rule_id, checked_rule)
 
 
 def is_valid_translation_rule_syntactic(
@@ -120,7 +31,7 @@ def is_valid_translation_rule_syntactic(
   PRE: exising ruleset fails to translate the code
   '''
 
-  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_syntactic.json', locals())
+  p_utils.log_json_time(f'args-is_valid_translation_rule_syntactic.json', locals())
 
   def _get_used_translation_rule_ids(dbg_history: List[dict]) -> List[int]:
     used_rule_ids : List[int] = []
@@ -150,7 +61,7 @@ def is_valid_translation_rule_syntactic(
         f'must be strictly greater than the\n'
         f'number of rules used before ({len(rule_ids_before)}) {str(rule_ids_before)}'
       )
-      logger.warning(msg)
+      logger.debug(msg)
       ltrule_syntax_val_res.is_valid = False
       ltrule_syntax_val_res.reason = msg
       return False
@@ -166,7 +77,7 @@ def is_valid_translation_rule_syntactic(
           'Should not happen under normal circumstances.\n'
           'More debugging needed.'
         )
-        logger.warning(msg)
+        logger.debug(msg)
         ltrule_syntax_val_res.is_valid = False
         ltrule_syntax_val_res.reason = msg
         return False
@@ -190,7 +101,7 @@ def is_valid_translation_rule_syntactic(
         'Should not happen under normal circumstances.\n'
         'More debugging needed.'
       )
-      logger.warning(msg)
+      logger.debug(msg)
       ltrule_syntax_val_res.is_valid = False
       ltrule_syntax_val_res.reason = msg
       return False
@@ -203,8 +114,7 @@ def is_valid_translation_rule_syntactic(
   msg = (
     f'~~ Checking if translation rule is syntactically valid:\n'
     f'Rule hash value: {ltrule.hash}\n'
-    f'{translation_rule}'
-  )
+    f'{translation_rule}')
   logger.debug(msg)
   ltrule_syntax_val_res = ptlog.TRuleSyntaxValRes()
   ltrule.syntax_val_res = ltrule_syntax_val_res
@@ -222,7 +132,7 @@ def is_valid_translation_rule_syntactic(
       f'is invalid due to rule mapping error:\n'
       f'{p_utils.exception_to_str(err)}'
     )
-    logger.warning(msg)
+    logger.debug(msg)
     ltrule_syntax_val_res.is_valid = False
     ltrule_syntax_val_res.reason = msg
     return False
@@ -234,13 +144,12 @@ def is_valid_translation_rule_syntactic(
   dbg_history_before = None
   try:
     _ = p_pirel.duoglot_translate_wrapper(
-      subject.src_main_code,
+      subject.get_src_main_code(),
       subject.src_lang,
       subject.tar_lang,
       current_ruleset,
       subject.auto_backward,
       subject.choices,
-      subject_name=subject.name,
       skip_template_extraction=True
     )
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
@@ -268,13 +177,12 @@ def is_valid_translation_rule_syntactic(
   dbg_history_after = None
   try:
     _ = p_pirel.duoglot_translate_wrapper(
-      subject.src_main_code,
+      subject.get_src_main_code(),
       subject.src_lang,
       subject.tar_lang,
       current_ruleset + '\n\n' + translation_rule,
       subject.auto_backward,
       subject.choices,
-      subject_name=subject.name,
       skip_template_extraction=True
     )
     # translation rule translated the remaining nodes
@@ -312,190 +220,81 @@ def is_valid_translation_rule_syntactic(
   return _process_used_rules(rule_ids_before, rule_ids_after, ltrule_syntax_val_res)
 
 
-async def is_valid_translation_rule_test_based(
-  snippet_under_test: str,
-  pre_context: str,
-  current_ruleset_obj: p_ruleset.Ruleset,
-  subject: p_subject.PirelSubject,
-  template_dict: dict,
-  lrules_validation: ptlog.RulesValidation
+def find_pirel_keyword_in_trule(
+  trule: str
+) -> Optional[str]:
+  '''
+  Very simple check for PiREL keywords in the translation rule.
+  RETURN the first matching keyword or None if no match is found.
+  '''
+  pirel_keywords = [
+    p_consts.GENERIC_SECRET_FN,
+    p_consts.PAR_PROG_PROB_NODE_REPLACE,
+    p_consts.PAR_PROG_DUMMY_IDENTIFIER,
+    p_consts.PIREL_LOG_OBJ_FN_NAME,
+    p_consts.PRE_CTX_SPEC_IDENT
+  ]
+  for keyword in pirel_keywords:
+    if keyword in trule:
+      return keyword
+  return None
+
+
+def is_invalid_pattern_detected(
+  trule_str: str
 ) -> bool:
   '''
-  RETURN True if valid, or raise relevant exceptions if not.
+  Check if the translation rule contains some invalid patterns.
+  RETURN True if an invalid pattern is detected, False otherwise.
+
+  NOTE This is a temporary hacky solution. It does not solve the
+  root cause of the problem. Solving the root cause will lift the
+  need for this function.
   '''
 
-  def _combine_pre_context_and_sut(pre_context: str, snippet_under_test: str) -> str:
-    logger.debug('~ combining pre_context and snippet_under_test')
-    assert pre_context.count(p_consts.PRE_CTX_SPEC_IDENT) == 1, \
-      'should not happen: pre_context must contain exactly one line with special identifier'
-    prectx_lines = pre_context.split('\n')
-    spec_id_line_idx = -1
-    for i, line in enumerate(prectx_lines):
-      if p_consts.PRE_CTX_SPEC_IDENT in line:
-        spec_id_line_idx = i
-        break
-    spec_id_indentation = p_utils.count_leading_spaces(prectx_lines[spec_id_line_idx])
-    indented_sut = p_utils.indent(snippet_under_test, spec_id_indentation)
-    indented_sut_lines = indented_sut.split('\n')
-    prectx_lines = prectx_lines[:spec_id_line_idx] + indented_sut_lines + prectx_lines[spec_id_line_idx + 1:]
-    prectx_w_sut = '\n'.join(prectx_lines)
-    logger.debug(f'~ combined pre_context and snippet_under_test:\n{prectx_w_sut}')
-    return prectx_w_sut
-
-  def _get_f_gold_fn_str(paramable_ids: List[str], pcsut: str) -> str:
-    logger.debug('~ preparing f_gold() function')
-    _params = ', '.join(paramable_ids)
-
-    # 1. prepare f_gold() function
-    _indented_snippet_block = p_utils.indent(pcsut, 4)
-    f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
-
-    # 2. insert break statements in loops
-    # this is needed to avoid infinite loops
-    # NOTE: this is a workaround for Pynguin
-    if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
-      tree = pvpy.Tree.from_str(f_gold_fn_str)
-      break_inserter = pvpy.BreakStatementInserter()
-      break_inserter.visit(tree.root_node)
-      f_gold_fn_str = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
-
-    # 3. replace possible recursive calls with a dummy function
-    # this is needed to avoid infinite recursion or type errors
-    # e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
-    defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(f_gold_fn_str)
-    f_gold_fn_str = pvpy.FunctionInvocationReplacer.replace_function_invocations(f_gold_fn_str, defined_fns)
-
-    logger.debug(f'~ f_gold() function:\n{f_gold_fn_str}')
-    return f_gold_fn_str
-
-  async def _get_test_fn_str_llm(
-    paramable_ids: List[str],
-    f_gold_fn_str: str,
-    subject: p_subject.PirelSubject,
-    template_dict: dict,
-    lrules_validation: ptlog.RulesValidation
-  ) -> Optional[str]:
+  def _pattern1_par_expr_to_number(trule: prpp.TranslationRule) -> bool:
     '''
-    RETURN test function or None if no test function was generated.
+    Check for the patterns like this:
+      (match_expand
+        (fragment ("py.parenthesized_expression" (str "(") "." (str ")")) "*")
+        (fragment ("js.number" (val "2")) "*2")
+      )
+    where a parenthesized expression is translated to anything
+    other than a parenthesized expression.
     '''
-    # cases such as `helper = {}` (L0001)
-    # in such cases, the test function just invokes the f_gold() function
-    if len(paramable_ids) == 0:
-      msg = (
-        'No parametrizable identifiers found.\n'
-        'Will not generate Pynguin tests for this snippet.\n'
-        'Will run the snippet directly after inserting the log statements.')
-      logger.debug(msg)
-      return '''def test():\n    f_gold()'''
+    mroot_node = trule.src_root_node.children[0]
+    if mroot_node.is_terminal():
+      return False
+    if mroot_node.get_type() != '"py.parenthesized_expression"':
+      return False
+    # number of placeholders in match pattern must be 2
+    if len(trule.S) != 2:
+      return False
+    eroot_node = trule.tar_root_node.children[0]
+    if eroot_node.is_terminal():
+      return False
+    if eroot_node.get_type() != '"js.parenthesized_expression"':
+      return True
+    # number of placeholders in expand pattern must be 2
+    if len(trule.T) != 2:
+      return True
+    return False
 
-    test_fn_str = await p_llm_gen.gen_test_function(
-      f_gold_fn_str, subject, template_dict, lrules_validation)
-    if test_fn_str is None:
-      return None
+  parsed_rules, _ = d_grammar_rules.parse_analyze_rules(trule_str)
+  assert len(parsed_rules) == 1, 'should not happen: there must be exactly one translation rule'
+  match_pattern, expand_pattern = parsed_rules[0]['match'], parsed_rules[0]['expand']
+  trule = prpp.TranslationRule(match_pattern, expand_pattern)
 
-    logger.debug(f'generated test function:\n{test_fn_str}')
-    return test_fn_str
-
-  logger.debug('~~~ Starting p_rule_validator.is_valid_translation_rule_test_based')
-  p_utils.log_json_time(f'{subject.name}_args-is_valid_translation_rule_test_based.json', locals())
-
-  logger.debug(
-    f'~~ Checking if translation rules are valid based on tests:\n'
-    f'Snippet to test translation rule:\n{snippet_under_test}\n'
-    f'Pre-context:\n{pre_context}\n')
-
-  # 1. combine pre_context and snippet_under_test
-  prectx_sut = _combine_pre_context_and_sut(pre_context, snippet_under_test)
-
-  # 2. extract parametrizable identifiers from pre_context + snippet_under_test
-  # these identifiers are used as parameters of f_gold() function
-  paramable_ids = pvpy.ParametrizableVariablesCollector.get_paramable_ids(prectx_sut)
-  logger.debug(f'~ parametrizable identifiers: {paramable_ids}')
-
-  # 3. prepare f_gold() function
-  # f_gold() function is a wrapper function that contains the snippet under test
-  f_gold_fn_str = _get_f_gold_fn_str(paramable_ids, prectx_sut)
-
-  # 4. generate tests for f_gold() function using LLM
-  _result = await _get_test_fn_str_llm(
-    paramable_ids, f_gold_fn_str, subject, template_dict, lrules_validation)
-  if _result is None:
-    msg = 'Failed to generate test function using LLM.'
-    logger.error(msg)
-    lrules_validation.success = False
-    lrules_validation.reason = msg
-    raise TestFunctionGenerationError(msg)
-  test_fn_str = _result
-
-  # 5. insert log statements into the test script
-  # log statements are inserted into the test script
-  # log statements print the values of assigned variables to produce a trace
-  f_gold_fn_str = pvpy.LogStatementInserter.insert_log_statements(f_gold_fn_str)
-  logger.debug(f'~ instrumented the f_gold with log statements:\n{f_gold_fn_str}')
-
-  # 6. index log statements in the test script
-  # log statements are indexed in the test script
-  f_gold_fn_str = pvpy.LogStatementsIndexer.index_log_statements(f_gold_fn_str)
-  logger.debug(f'~ indexed log statements in f_gold:\n{f_gold_fn_str}')
-
-  # 7. combine into a test script without log statements
-  # a test script contains a test() function, f_gold() function
-  # and test function invocation
-  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str=test_fn_str,
-    f_gold_fn_str=f_gold_fn_str,
-    test_call_str='test()'
-  )
-  logger.debug(f'combined test function and f_gold() into a test script:\n{test_script_str}')
-
-  # 8. translate the test script into the target language
-  # the test script is translated into the target language
-  # to compare its trace to the traces generated by test script in src language
-  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
-  extra_ruleset = p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
-  translation_rules_main_code = (
-    f'{current_ruleset_obj.to_string()}\n\n'
-    f'{log_statement_rule}\n\n'
-    f'{extra_ruleset}\n\n'
-  )
-
-  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
-  pirel_subject_snippet_conf['src_program'] = test_script_str
-  pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
-  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-
-  # this may raise AllRulesInMatcherGroupImplausibleError
-  initial_choices_list = await p_ext_rule_chooser.get_initial_choices_list(pirel_subject.src_main_code, translation_rules_main_code)
-  # readonly_choices_list is retrieved by getattr
-  pirel_subject.readonly_choices_list = initial_choices_list
-
-  logger.debug('~ attempting to obtain a plausible translation of the snippet under test')
-  used_rule_ids_history = None
-  try:
-    tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
-    logger.debug('successfully obtained the translation of the test script')
-    logger.debug('translation rule is valid based on tests')
-  except prapp.TRuleNotFoundSrcMainCodeError as err:
-    raise
-  except Exception as err:
-    logger.warning(
-      f'Failed to obtain a plausible translation of the test script:\n'
-      f'{p_utils.exception_to_str(err)}\n')
-    lrules_validation.success = False
-    lrules_validation.reason = f'Failed to translate the source test script due to:\n"{str(err)}"'
-    raise
-
-  '''
-  used_rule_ids_history is a history of list of rule ids used to obtain a
-  plausible translation of the source program. Using this structure, we can
-  know which rules were used and were invalid, and which rules were used and
-  were valid.
-  '''
-  assert used_rule_ids_history is not None, 'used_rule_ids_history must not be None'
-  update_ruleset_obj(current_ruleset_obj, used_rule_ids_history)
-
-  lrules_validation.success = True
-  return True
+  all_pattern_checks = [
+    _pattern1_par_expr_to_number,
+  ]
+  for pattern_check in all_pattern_checks:
+    if pattern_check(trule):
+      logger.warning(
+        f'Invalid pattern detected by {pattern_check.__name__} '
+        f'in translation rule:\n{trule_str}')
+      return True
+  return False
 
 
 def filter_translation_rules(
@@ -505,86 +304,77 @@ def filter_translation_rules(
   lprule_filter_log: ptlog.PRuleFilterLog
 ) -> List[str]:
   '''
-  Filter out translation rules that are not valid.
-  The filtering is done by checking if the translation rule is valid syntactically and test-based.
+  Filter out translation rules that are not syntactically correct.
+
+  subject must contain the following attributes:
+  - get_src_main_code()
+  - src_lang
+  - tar_lang
+  - auto_backward
+  - choices
   '''
   logger.debug('~~~ Starting p_rule_validator.filter_translation_rules')
 
-  # filter out invalid translation rules
-  checked_trules_list = []
-  for idx, translation_rule in enumerate(trules_list, start=1):
-    logger.debug(f'Checking translation rule {idx}/{len(trules_list)} for correctness')
-
-    ltrule = ptlog.TRule.from_str(translation_rule)
+  syn_cor_trules = []
+  for idx, trule in enumerate(trules_list, start=1):
+    ltrule = ptlog.TRule.from_str(trule)
     lprule_filter_log.trules_all.append(ltrule)
 
-    is_syntax_valid = is_valid_translation_rule_syntactic(subject, translation_rule, current_ruleset, ltrule)
+    is_syntax_valid = is_valid_translation_rule_syntactic(subject, trule, current_ruleset, ltrule)
     if not is_syntax_valid:
-      logger.warning(f'Translation rule is not syntactically valid:\n{translation_rule}')
+      logger.debug(f'~~~ Translation rule is not syntactically valid:\n{trule}')
+      continue
+
+    pirel_keyword = find_pirel_keyword_in_trule(trule)
+    if pirel_keyword is not None:
+      logger.debug(f'~~~ Found PiREL keyword "{pirel_keyword}" in translation rule:\n{trule}')
+      continue
+
+    is_inv_pat = is_invalid_pattern_detected(trule)
+    if is_inv_pat:
+      logger.debug(f'~~~ Found invalid pattern in translation rule:\n{trule}')
       continue
 
     lprule_filter_log.trules_syn_valid.append(ltrule)
-    checked_trules_list.append(translation_rule)
-    logger.debug(f'The number of syntactically valid translation rules so far is {len(checked_trules_list)}')
+    syn_cor_trules.append(trule)
 
-  return checked_trules_list
+  return syn_cor_trules
 
 
-# INDIVIDUAL RULE VALIDATION USAGE
-async def _validate_translation_rule_usage():
-  # we will check the translation of this snippet
-  snippet_under_test = 'c = d'
-  trule_under_test = p_utils.read_text(p_consts.ROOT_DIR / 'individual-trule-validation' / 'rule-validation-module-artifacts' / 'rule1-lex-decl.snart')
-  existing_ruleset = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
-  src_lang = 'py'
+async def check_trules_test_based(
+  val_subject: p_subject.PirelSubject,
+  current_ruleset: p_ruleset.Ruleset
+) -> None:
+  '''
+  A valid ruleset is one that can translate the source program
+  plausibly, i.e. both source and target programs behave
+  the same on the tests.
+  NOTE it is assumed that val_subject.src_main_code is instrumented.
+  '''
 
-  src_parser = p_consts.PARSER_DICT[src_lang]
-  log_statement_rule = p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)
-  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
+  p_utils.log_json_time(f'args-check_trules_test_based.json', locals())
+  logger.debug('~~ Starting test-based validation of translation rules')
+  assert val_subject.is_three_split, 'test script subject must contain test code'
 
-  # 1. extract parametrizable identifiers from the snippet
-  _ts_tree = src_parser.parse(bytes(snippet_under_test, 'utf-8'))
-  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
-  _param_collector = pvpy.ParametrizableVariablesCollector()
-  _param_collector.visit(_tree.root_node)
-  paramable_ids = _param_collector.get_parametrizable_identifiers()
+  '''
+  1. Raises AllRulesInMatcherGroupImplausibleError
+  2. ruleset_serialized contains verified rules that can be copied
+     to current_ruleset
+  '''
+  readonly_choices_list, ruleset_serialized = \
+    await p_ext_rule_chooser.get_readonly_choices_list(
+      val_subject.get_src_main_code(),
+      val_subject.translation_rules_main_code,
+      val_subject.get_src_test_code(),
+      val_subject.translation_rules_test_code,
+      current_ruleset.to_dict()
+    )
+  val_subject.readonly_choices_list = readonly_choices_list
 
-  # 2. prepare f_gold() function
-  _params = ', '.join(paramable_ids)
-  _indented_snippet_block = p_utils.indent(snippet_under_test, 4)
-  f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
+  tar_program_plausible = await prapp.apply_translation_rules(val_subject)
 
-  # 3. generate pynguin tests
-  test_fn_strs = p_pynguin.run_pynguin(f_gold_fn_str)
-  assert len(test_fn_strs) == 1, 'expecting a single test function'
-  test_fn_str = test_fn_strs[0]
-
-  # 4. combine into a test script without log statements
-  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str=test_fn_str,
-    f_gold_fn_str=f_gold_fn_str,
-    test_call_str='test()'
-  )
-
-  # 5. insert log statements into the test script
-  _ts_tree = src_parser.parse(bytes(test_script_str, 'utf-8'))
-  _tree = pvpy.Tree.from_ts_tree(_ts_tree)
-  _ls_inserter = pvpy.LogStatementInserter(function_name='f_gold')
-  _ls_inserter.visit(_tree.root_node)
-  test_script_str = pvpy.PrettyPrinter(indent_with='    ').visit(_tree.root_node).strip()
-
-  # 6. translate the test script into the target language
-  translation_rules_main_code = trule_under_test + '\n\n' + log_statement_rule + '\n\n' + existing_ruleset
-
-  pirel_subject_snippet_conf['src_program'] = test_script_str
-  pirel_subject_snippet_conf['translation_rules_main_code'] = translation_rules_main_code
-  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-  tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
-
-  p_utils.write_tmp_text('test_script.py', test_script_str)
-  p_utils.write_tmp_text('tar_program_plausible.js', tar_program_plausible)
-
-  print('the translation rule is good')
+  val_subject.readonly_choices_list = []
+  current_ruleset.merge_verified_rules_from(ruleset_serialized)
 
 
 # TEST HARNESSES
@@ -601,7 +391,7 @@ def _test_is_valid_translation_rule_syntactic():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
   translation_rule = args_dict['translation_rule']
   existing_ruleset = args_dict['existing_ruleset']
   ltrule = ptlog.TRule.from_str(translation_rule)
@@ -615,40 +405,23 @@ def _test_is_valid_translation_rule_syntactic():
   print(is_valid)
 
 
-async def _test_is_valid_translation_rule_test_based():
+async def _test_check_trules_test_based():
   '''
-  async def is_valid_translation_rule_test_based(
-    snippet_under_test: str,
-    pre_context: str,
-    current_ruleset_obj: p_ruleset.Ruleset,
-    subject: p_subject.PirelSubject,
-    template_dict: dict,
-    lrules_validation: ptlog.RulesValidation
-  ) -> bool:
+  async def check_trules_test_based(
+    val_subject: p_subject.PirelSubject,
+  ) -> None:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_test_based_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_check_trules_test_based_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  snippet_under_test = args_dict['snippet_under_test']
-  pre_context = args_dict['pre_context']
-  current_ruleset_obj = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset_obj']))
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  template_dict = args_dict['template_dict']
-  lrules_validation = ptlog.RulesValidation()
+  val_subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['val_subject']))
 
-  is_valid = await is_valid_translation_rule_test_based(
-    snippet_under_test,
-    pre_context,
-    current_ruleset_obj,
-    subject,
-    template_dict,
-    lrules_validation
+  await check_trules_test_based(
+    val_subject,
   )
-  print(is_valid)
 
 
 if __name__ == '__main__':
-  # asyncio.run(_validate_translation_rule_usage()
   # _test_is_valid_translation_rule_syntactic()
-  asyncio.run(_test_is_valid_translation_rule_test_based())
+  asyncio.run(_test_check_trules_test_based())
