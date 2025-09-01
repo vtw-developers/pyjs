@@ -9,8 +9,7 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-class _CptrError(RuntimeError):
-  '''Error type used internally'''
+class _CptrError(RuntimeError): pass
 
 
 class TemplateTree(pds.PirelTree):
@@ -148,24 +147,17 @@ class TemplateTree(pds.PirelTree):
 
 def extract_templates(
   problematic_ast: list,
-  full_ast: list,
   full_ast_text: list,
   ast_annotation: dict,
   src_lang: str,
   tar_lang: str,
   contexts: List[dict],
-  **kwargs
 ) -> dict:
   '''
   IDEAS
   - Grow the context starting from the problematic node up until the root node
   - Generate 'shallow' templates
   '''
-
-  subject_name = kwargs['subject_name']
-  # p_utils.log_json_time(f'{subject_name}_problematic_ast.json', problematic_ast)
-  # p_utils.log_json_time(f'{subject_name}_full_ast_text.json', full_ast_text)
-  # p_utils.log_json_time(f'{subject_name}_full_ast.json', full_ast)
 
   # 1 instantiate a `TemplateTree` - data structure for creating templates
   problematic_node_id = problematic_ast[1]
