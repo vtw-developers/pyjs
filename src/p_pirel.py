@@ -565,38 +565,6 @@ async def _get_test_fn_str_llm_deprecated(
   return test_fn_str
 
 
-def _get_stat_node_src_main_code_deprecated(
-  paramable_ids: List[str],
-  pre_ctx_simple_ntext: str
-) -> str:
-  '''
-  PARAM pcsut: combined pre-context and simplified node text
-  '''
-  params_str = ', '.join(paramable_ids)
-
-  pcsut_indented = p_utils.indent(pre_ctx_simple_ntext, 4)
-  f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(
-    params=params_str, indented_snippet_block=pcsut_indented)
-
-  '''
-  Insert break statements in loops to avoid infinite loops.
-  '''
-  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
-    tree = pvpy.Tree.from_str(f_gold_fn_str)
-    break_inserter = pvpy.BreakStatementInserter()
-    break_inserter.visit(tree.root_node)
-    f_gold_fn_str = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
-
-  '''
-  Replace possible recursive calls with a dummy function
-  to avoid infinite recursion or type errors,
-  e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
-  '''
-  defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(f_gold_fn_str)
-  f_gold_fn_str = pvpy.FunctionInvocationReplacer.replace_function_invocations(f_gold_fn_str, defined_fns)
-  return f_gold_fn_str
-
-
 def _combine_prectx_simple_ntext(
   pre_context: str,
   snippet_under_test: str
