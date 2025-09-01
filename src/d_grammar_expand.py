@@ -1,9 +1,5 @@
 import copy
-import json
-import logging
 import sys
-import timeit
-import traceback
 from typing import Callable, List, Tuple, Union
 
 import d_ast_parse
@@ -321,17 +317,17 @@ class TransSession():
 
       # 3 ~~~~~ PiREL template extraction entrypoint
       if expansion is None:
-        logger.warning(f'No expansion found for slot_id: {new_node_corres_slot_id} (idx: {slot_expan_idx})')
+        logger.debug(f'No expansion found for slot_id: {new_node_corres_slot_id} (idx: {slot_expan_idx})')
 
         skip_template_extraction = kwargs.get('skip_template_extraction', False)
         if skip_template_extraction:
           logger.debug('Skipping template extraction. Just problematic node type and id will be returned.')
-          prob_ntype, prob_nid = self.pirel_get_problematic_node(new_node_corres_slot_id, slot_expan_idx, **kwargs)
+          prob_ntype, prob_nid = self.pirel_get_problematic_node(new_node_corres_slot_id)
           templates_dict = {'problematic_node_type': prob_ntype, 'problematic_node_id': prob_nid}
           raise TranslationRuleNotFoundException(templates_dict)
 
         logger.debug('There is no translation rule for this node. PiREL template extraction will be performed.')
-        templates_dict: dict = self.pirel_get_templates(new_node_corres_slot_id, slot_expan_idx, **kwargs)
+        templates_dict: dict = self.pirel_get_templates(new_node_corres_slot_id)
         raise TranslationRuleNotFoundException(templates_dict)
 
       next_choices_status = self._get_expansions_stat_for_slot(new_node_corres_slot_id)
@@ -358,7 +354,7 @@ class TransSession():
     return self._alt_tree_dict[prev_alt_node["next_alt_choose_dict"][slot_expan_idx]]
 
 
-  def pirel_get_problematic_node(self, slot_id: int, idx: int, **kwargs) -> Tuple[str, int]:
+  def pirel_get_problematic_node(self, slot_id: int) -> Tuple[str, int]:
     '''
     When translation fails and PiREL is not enabled,
     finds what is id and type of the problematic node.
@@ -390,35 +386,27 @@ class TransSession():
 
 
   # ~~~~~ our logic for extracting templates from AST
-  def pirel_get_templates(self, slot_id: int, idx: int, **kwargs):
+  def pirel_get_templates(self, slot_id: int):
     '''
     slot_range_cursor:
     Tuple[ AST , start_idx , end_idx ]
     '''
-
-    subject_name = kwargs['subject_name']
     logger.debug(f'Starting PiREL template extraction.')
-    # p_utils.log_file_time(f'{subject_name}_program_to_translate.{self.source_language_name}', self.source_code)
-    # p_utils.log_file_time(f'{subject_name}_translation_rules.snart', self.translation_rules_str)
-
-    # translation rules used
     used_translation_rules = self.pirel_get_used_translation_rules()
-    # p_utils.log_file_time(f'{subject_name}_used_translation_rules.snart', used_translation_rules)
 
-    # context information
     try:
       contexts = self.pirel_get_all_contexts(slot_id)
     except Exception as exc:
       logger.error(f'Error during context extraction: type="{type(exc)}", msg="{str(exc)}"')
       raise ContextExtractionException from exc
-    # p_utils.log_json_time(f'{subject_name}_contexts_grammar_expand.json', contexts)
 
     # slot is pertinent to the node that cannot be translated
     slot = self._slot_dict[slot_id]
     slot_range_cursor = slot.range_cursor
     slot_child_node_ids = slot.slot_node_ids
 
-    slot_ast = slot_range_cursor[0]  # this is a pure AST node as parsed by d_ast_parse.parse_text_dbg() OR a sub-node
+    # this is a pure AST node as parsed by d_ast_parse.parse_text_dbg() OR a sub-node
+    slot_ast = slot_range_cursor[0]
     slot_start_idx = slot_range_cursor[1]
     slot_end_idx = slot_range_cursor[2]
 
@@ -434,19 +422,15 @@ class TransSession():
     full_ast_w_text, ast_annotation = d_ast_parse.parse_text_dbg(self.source_code, self.source_language_name, keep_text=True)
 
     templates_dict = p_templates.extract_templates(
-      problematic_ast=problem_node_ast,
-      full_ast=self.source_ast,
-      full_ast_text=full_ast_w_text,
-      ast_annotation=ast_annotation,
-      src_lang=self.source_language_name,
-      tar_lang=self.target_language_name,
-      contexts=contexts,
-      **kwargs
+      problem_node_ast,
+      full_ast_w_text,
+      ast_annotation,
+      self.source_language_name,
+      self.target_language_name,
+      contexts
     )
 
-    # p_utils.log_json_time(f'{subject_name}_ALL-TEMPLATES-d_grammar_expand.json', templates_dict)
     logger.debug(f'PiREL template extraction is complete.')
-
     return templates_dict
 
 
