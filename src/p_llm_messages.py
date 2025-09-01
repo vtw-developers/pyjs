@@ -6,6 +6,8 @@ starting messages and feedback messages
 
 import json
 from abc import ABC, abstractmethod
+from langchain_core.messages.human import HumanMessage
+from langchain_core.prompts.chat import HumanMessagePromptTemplate
 from typing import List, Optional, Tuple
 
 import p_consts
@@ -14,8 +16,6 @@ import p_llm_templates
 import p_llm_val
 import p_subject
 import p_utils
-from langchain_core.messages.human import HumanMessage
-from langchain_core.prompts.chat import HumanMessagePromptTemplate
 
 
 logger = p_utils.setup_logger(__name__)
