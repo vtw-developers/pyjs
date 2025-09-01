@@ -18,6 +18,18 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
+def _get_used_translation_rule_ids(
+  dbg_history: List[dict]
+) -> List[int]:
+  used_rule_ids : List[int] = []
+  for history_elem in dbg_history:
+    dbg_info : dict = history_elem['dbg_info']
+    notes : dict = dbg_info['notes']
+    rule_id = notes['rule_id']
+    used_rule_ids.append(rule_id)
+  return used_rule_ids
+
+
 def is_valid_translation_rule_syntactic(
   subject: p_subject.PirelSubject,
   translation_rule: str,
@@ -32,15 +44,6 @@ def is_valid_translation_rule_syntactic(
   '''
 
   p_utils.log_json_time(f'args-is_valid_translation_rule_syntactic.json', locals())
-
-  def _get_used_translation_rule_ids(dbg_history: List[dict]) -> List[int]:
-    used_rule_ids : List[int] = []
-    for history_elem in dbg_history:
-      dbg_info : dict = history_elem['dbg_info']
-      notes : dict = dbg_info['notes']
-      rule_id = notes['rule_id']
-      used_rule_ids.append(rule_id)
-    return used_rule_ids
 
   def _process_used_rules(
     rule_ids_before: List[int],

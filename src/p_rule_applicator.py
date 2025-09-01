@@ -795,18 +795,6 @@ def _program_parts_split(
   return src_test_code, src_main_code, src_test_call_code
 
 
-def _get_used_translation_rule_ids(
-  dbg_history: List[dict]
-) -> List[int]:
-  used_rule_ids : List[int] = []
-  for history_elem in dbg_history:
-    dbg_info : dict = history_elem['dbg_info']
-    notes : dict = dbg_info['notes']
-    rule_id = notes['rule_id']
-    used_rule_ids.append(rule_id)
-  return used_rule_ids
-
-
 # API
 async def apply_translation_rules(
   subject: p_subject.PirelSubject
