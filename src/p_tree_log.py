@@ -111,7 +111,7 @@ class LLMQueryStat:
                num_tokens_total=num_tokens_total)
 
 ##################################################################
-############### TRANSLATION RULE VALIDATION ######################
+################# TRANSLATION RULE FILTERING #####################
 ##################################################################
 
 @dataclass
@@ -139,7 +139,7 @@ class PRuleFilterLog:
     return cls(trules_all=trules_all)
 
 ##################################################################
-################ TRANSLATION RULE INFERENCE ######################
+################## TRANSLATION RULE INFERENCE ####################
 ##################################################################
 
 @dataclass
@@ -431,7 +431,7 @@ class PLLMGenLog:
 
 @dataclass
 class RuleApplicationPhase:
-  plausible_target_program: Optional[str] = None
+  tar_main_code_plausible: Optional[str] = None
   start_time: Optional[int] = None
   end_time: Optional[int] = None
   success: bool = False
@@ -468,17 +468,14 @@ class RulesRecovery:
   get_ref_trans: Optional[GetRefTrans] = None
 
 @dataclass
-class RulesValRecIteration:
+class StatNodeValRecIter:
   id: int
   rules_validation: Optional[RulesValidation] = None
   rules_recovery: Optional[RulesRecovery] = None
 
 @dataclass
-class RulesValidationRecovery:
-  id: int
-  val_rec_iterations: List[RulesValRecIteration] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
+class StatNodeValRec:
+  val_rec_iters: List[StatNodeValRecIter] = field(default_factory=list)
   start_time: Optional[int] = None
   end_time: Optional[int] = None
 
@@ -487,7 +484,7 @@ class RulesValidationRecovery:
     return self.reason
 
   @classmethod
-  def from_dict(cls, obj: dict) -> 'RulesValidationRecovery':
+  def from_dict(cls, obj: dict) -> 'StatNodeValRec':
     id_ = obj['id']
     success = obj.get('success', False)
     reason = obj.get('reason', None)
@@ -499,9 +496,9 @@ class RulesValidationRecovery:
 @dataclass
 class TRuleLearnAttempt:
   id: int
-  p_llm_gen_log: Optional[PLLMGenLog] = None  # get_translation_pairs_from_tsp()
-  p_rule_inferencer_log: Optional[PRuleInfLog] = None  # infer_translation_rules()
-  p_rule_filter_log: Optional[PRuleFilterLog] = None  # filter_translation_rules()
+  p_llm_gen_log: Optional[PLLMGenLog] = None
+  p_rule_inferencer_log: Optional[PRuleInfLog] = None
+  p_rule_filter_log: Optional[PRuleFilterLog] = None
   success: bool = False
   reason: Optional[str] = None
   start_time: Optional[int] = None
@@ -534,7 +531,7 @@ class TSP:
   id: int
   sp1: str
   sp2: str
-  trans_rule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
+  trule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None
   start_time: Optional[int] = None
@@ -557,9 +554,8 @@ class TSP:
                success=success, reason=reason, start_time=start_time, end_time=end_time)
 
 @dataclass
-class NodeTransIteration:
+class NodeTransIter:
   id: int
-  validation_id: int
   node_id: Optional[int] = None
   node_type: Optional[str] = None
   template_origin: Optional[str] = None
@@ -574,9 +570,8 @@ class NodeTransIteration:
     return self.reason
 
   @classmethod
-  def from_dict(cls, obj: dict) -> 'NodeTransIteration':
+  def from_dict(cls, obj: dict) -> 'NodeTransIter':
     id_ = obj['id']
-    validation_id = obj['validation_id']
     node_id = obj.get('node_id', None)
     node_type = obj.get('node_type', None)
     template_origin = obj.get('template_origin', None)
@@ -592,22 +587,30 @@ class NodeTransIteration:
     reason = obj.get('reason', None)
     start_time = obj.get('start_time', None)
     end_time = obj.get('end_time', None)
-    return cls(id=id_, validation_id=validation_id, node_id=node_id, node_type=node_type,
+    return cls(id=id_, node_id=node_id, node_type=node_type,
                template_origin=template_origin, tsps=tsps,
                unchecked_trules=unchecked_trules, success=success, reason=reason,
                start_time=start_time, end_time=end_time)
 
 @dataclass
-class StatementNode:
+class StatNodeLearn:
+  node_trans_iters: List[NodeTransIter] = field(default_factory=list)
+
+@dataclass
+class StatNodeLVRIter:
+  id: int
+  stat_node_learn: Optional[StatNodeLearn] = None
+  stat_node_val_rec: Optional[StatNodeValRec] = None
+
+@dataclass
+class StatNode:
   id: int
   node_id: Optional[int] = None
   node_text: Optional[str] = None
   simplified_node_text: Optional[str] = None
-  node_trans_iterations: List[NodeTransIteration] = field(default_factory=list)
-  unchecked_trules: List[TRule] = field(default_factory=list)
-  val_rec_iterations: List[RulesValidationRecovery] = field(default_factory=list)
   start_time: Optional[int] = None
   end_time: Optional[int] = None
+  lvr_iters: List[StatNodeLVRIter] = field(default_factory=list)
 
   def is_successful(self) -> bool:
     '''
@@ -620,14 +623,14 @@ class StatementNode:
     raise NotImplementedError()
 
   @classmethod
-  def from_dict(cls, obj: dict) -> 'StatementNode':
+  def from_dict(cls, obj: dict) -> 'StatNode':
     id_ = obj['id']
     node_id = obj.get('node_id', None)
     node_text = obj.get('node_text', None)
     simplified_node_text = obj.get('simplified_node_text', None)
     node_trans_iterations = []
     for nti_dict in obj.get('node_trans_iterations', []):
-      nti_obj = NodeTransIteration.from_dict(nti_dict)
+      nti_obj = NodeTransIter.from_dict(nti_dict)
       node_trans_iterations.append(nti_obj)
     unchecked_trules = []
     for trule_dict in obj.get('unchecked_trules', []):
@@ -648,7 +651,7 @@ class StatementNode:
 
 @dataclass
 class RuleLearnPhase:
-  statement_nodes: List[StatementNode] = field(default_factory=list)
+  stat_nodes: List[StatNode] = field(default_factory=list)
   start_time: Optional[int] = None
   end_time: Optional[int] = None
   success: bool = False
@@ -657,7 +660,7 @@ class RuleLearnPhase:
   def get_root_reason(self) -> str:
     assert self.success is False, 'Cannot get reason if success is True'
     reason = f'(RuleLearnPhase) {self.reason}'
-    for st_node in self.statement_nodes:
+    for st_node in self.stat_nodes:
       if not st_node.is_successful():
         reason += f' ~~~ {st_node.get_root_reason()}'
         return reason
@@ -667,7 +670,7 @@ class RuleLearnPhase:
   def from_dict(cls, obj: dict) -> 'RuleLearnPhase':
     statement_nodes = []
     for node_dict in obj.get('statement_nodes', []):
-      node_obj = StatementNode.from_dict(node_dict)
+      node_obj = StatNode.from_dict(node_dict)
       statement_nodes.append(node_obj)
     start_time = obj.get('start_time', None)
     end_time = obj.get('end_time', None)
@@ -678,12 +681,12 @@ class RuleLearnPhase:
 
 @dataclass
 class Subject:
-  subject_name: str
-  code_text: Optional[str] = None
+  subject_name: Optional[str] = None
+  src_main_code: Optional[str] = None
   id: Optional[int] = None
   rule_learn_phase: Optional[RuleLearnPhase] = None
   rule_application_phase: Optional[RuleApplicationPhase] = None
-  success: bool = False
+  success: Optional[bool] = None
   reason: Optional[str] = None
 
   def get_general_stats(self) -> dict:
@@ -764,7 +767,7 @@ class Subject:
 
 @dataclass
 class Benchmark:
-  benchmark_name: str
+  benchmark_name: Optional[str] = None
   sample_size: Optional[int] = None
   subjects: List[Subject] = field(default_factory=list)
 

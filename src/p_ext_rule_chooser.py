@@ -6,10 +6,13 @@ import d_ast_parse
 import d_grammar_rules
 import p_consts
 import p_llm_gen
+import p_pirel
+import p_ruleset
 import p_rule_applicator as prapp
 import p_subject
 import p_tree_log as ptlog
 import p_utils
+import p_visitor as pvis
 import p_visitor_py as pvpy
 
 
@@ -20,106 +23,11 @@ class NoRuleToHandleRangeCursorError(Exception): pass
 class UnhandledRangeCursorExistsError(Exception): pass
 class RuleCombinationsExhaustedError(RuntimeError): pass
 class AllRulesInMatcherGroupImplausibleError(RuntimeError): pass
+class ExprLogStatHasParseError(RuntimeError): pass
+class ExprLogStatContextError(RuntimeError): pass
 
 
-class TranslationRule:
-  def __init__(self, rule: dict, idx: int):
-    '''
-    PARAM rule: a dictionary representing a translation rule
-    as parsed by d_grammar_rules.parse_analyze_rules().
-    PARAM idx: index of the rule in the ruleset.
-    '''
-    assert isinstance(rule, dict), f'Expected rule to be a dict, got {type(rule)}'
-    assert 'type' in rule, 'Rule must have a "type" key'
-    assert 'match' in rule, 'Rule must have a "match" key'
-    assert 'expand' in rule, 'Rule must have a "expand" key'
-    self.rule = rule
-    self.idx = idx
-
-  def __str__(self):
-    return d_grammar_rules.pretty_rule(self.rule)
-
-  def __repr__(self):
-    return f'{self.__class__.__name__} {str(self.rule)}'
-
-  def __eq__(self, obj) -> bool:
-    if not isinstance(obj, TranslationRule):
-      raise ValueError(f'Cannot use == with {type(obj)}')
-    return str(self.rule) == str(obj.rule)
-
-  def get_matcher_signature(self) -> str:
-    return str(self.rule['match'])
-
-
-class Ruleset:
-  '''
-  Parsed version of a ruleset as a string.
-  Since the ruleset is immutable, rule idxs are maintained
-  by TranslationRule class.
-  INV: translation rules come in the order of their idxs.
-
-  `matcher_groups` is a dictionary that groups rules
-  by their matcher signatures.
-  '''
-  def __init__(self):
-    self.rules: List[TranslationRule] = []
-    self.matcher_groups: Dict[str, List[TranslationRule]] = {}
-    self.verified_rules: Dict[tuple, TranslationRule] = {}  # choice identifier -> TranslationRule
-
-  def assert_invariants(self):
-    for idx, rule in enumerate(self.rules):
-      assert isinstance(rule, TranslationRule), f'Expected rule to be a TranslationRule, got {type(rule)}'
-      assert rule.idx == idx, f'Translation rule #{idx} is out of order, must be #{rule.idx}'
-
-  def to_str(self) -> str:
-    self.assert_invariants()
-    return '\n\n'.join([str(rule) for rule in self.rules])
-
-  def intersect_matcher_groups(self, matcher_groups: Dict[str, List[TranslationRule]]) -> List[TranslationRule]:
-    '''
-    Return a list of all rules, for matcher signatures that are in matcher_groups,
-    use the rules from matcher_groups and for the rest use the rules from self.matcher_groups.
-    '''
-    trules = []
-    for mat_sig, mat_gr_rules in self.matcher_groups.items():
-      if mat_sig in matcher_groups:
-        trules.extend(matcher_groups[mat_sig])
-      else:
-        trules.extend(mat_gr_rules)
-    return trules
-
-  def get_rule_idx_in_matcher_group(self, rule: 'TranslationRule') -> int:
-    '''
-    Get the index of a rule in its matcher group.
-    '''
-    if rule.get_matcher_signature() not in self.matcher_groups:
-      raise ValueError(f'No matcher group with signature {rule.get_matcher_signature()}')
-    matcher_group = self.matcher_groups[rule.get_matcher_signature()]
-    for idx, r in enumerate(matcher_group):
-      if r == rule:
-        return idx
-    raise ValueError(f'Rule is not in the ruleset: {rule}')
-
-  def get_choices_list_from_verified_rules(self) -> List[Tuple[Tuple[int, int, int], int]]:
-    choices = []
-    for choice_identifier, rule in self.verified_rules.items():
-      rule_idx_in_matcher_group = self.get_rule_idx_in_matcher_group(rule)
-      choices.append((choice_identifier, rule_idx_in_matcher_group))
-    return choices
-
-  @classmethod
-  def from_str(cls, rules_str: str) -> 'Ruleset':
-    trules, dbg_info = d_grammar_rules.parse_analyze_rules(rules_str)
-    ruleset = cls()
-    for idx, trule in enumerate(trules):
-      rule = TranslationRule(trule, idx)
-      signature = rule.get_matcher_signature()
-      ruleset.rules.append(rule)
-      ruleset.matcher_groups.setdefault(signature, []).append(rule)
-    return ruleset
-
-
-# GENERATING INITIAL CHOICES LIST
+# GENERATING READONLY CHOICES LIST
 def match_rule_to_range_cursor(
   matcher: list,
   range_cursor: tuple
@@ -134,9 +42,6 @@ def match_rule_to_range_cursor(
   RETURN a match object {is_matched: bool, slot_cursors: list}
   '''
   def _is_anno_compatible(matcher_anno, intree_anno):
-    # print("matcher_anno:", matcher_anno, file=sys.stderr)
-    # print("intree_anno:", intree_anno, file=sys.stderr)
-    # return True
     matcher_anno_dict = {x[0]:x[1] for x in matcher_anno[1:]}
     intree_anno_dict = {x[0]:x[1] for x in intree_anno[1:]}
     for key in matcher_anno_dict:
@@ -196,7 +101,7 @@ def match_rule_to_range_cursor(
       split_idx = None
       for visit_cur_idx in range(range_cursor_idx, range_cursor[2]):
         visit_elem = range_cursor[0][visit_cur_idx]
-        if _is_elem_NT(visit_elem):
+        if d_ast_parse.is_elem_non_terminal(visit_elem):
           split_idx = visit_cur_idx + 1
           break
 
@@ -238,7 +143,8 @@ def match_rule_to_range_cursor(
     elif current_matcher_elem == '"_anno_"':
       current_range_elem = range_cursor[0][range_cursor_idx]
       assert isinstance(current_range_elem, list), '_anno_ meet none-annotation element: Not a list.'
-      assert current_range_elem[0] == "anno", '_anno_ meet none-annotation element: elem head: ' + current_range_elem[0]
+      assert current_range_elem[0] == "anno", \
+        '_anno_ meet none-annotation element: elem head: ' + current_range_elem[0]
       return _try_match_rec_inner_fun(
         range_cursor,  # range_cursor
         range_cursor_idx + 1,  # range_cursor_idx
@@ -347,7 +253,7 @@ def match_rule_to_range_cursor(
       if visit_elem[0] == "anno":
         continue
 
-      assert _is_elem_NT(visit_elem)
+      assert d_ast_parse.is_elem_non_terminal(visit_elem)
       if visit_elem[0] == current_matcher_type:
         # check if the matching element is matched
         children_matcher = current_matcher_elem[1:]
@@ -392,121 +298,7 @@ def match_rule_to_range_cursor(
   }
 
 
-def _is_elem_NT(elem) -> bool:
-  '''
-  Return True if the element is a non-terminal.
-  '''
-  if not isinstance(elem, list):
-    return False
-  if elem[0] == "anno":
-    return False
-  assert elem[0] != "fragment"
-  assert isinstance(elem[1], int)
-  return True
-
-
-def _range_cursor_to_ast_node(range_cursor: tuple) -> list:
-  '''
-  Convert a range cursor to an AST node.
-  range_cursor: Tuple[ List[src_ast] , int , int ]
-  '''
-  assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
-  assert isinstance(range_cursor[0], list)
-  assert isinstance(range_cursor[1], int)
-  assert isinstance(range_cursor[2], int)
-  assert range_cursor[1] + 1 == range_cursor[2], 'range cursors specify exactly one AST node'
-
-  # Convert the range cursor to an AST node
-  parent_ast = range_cursor[0]
-  child_ast_idx = range_cursor[1]
-  child_ast = parent_ast[child_ast_idx]
-  return child_ast
-
-
-def _range_cursor_to_choice_identifier(range_cursor: tuple) -> tuple:
-  '''
-  Choice identifier is a tuple of (node_id, start_idx, end_idx).
-  It is used for identifying the node in the AST for which a rule
-  choice is made. It is used in choices_list.
-  '''
-  node, start_idx, end_idx = range_cursor
-  assert _is_elem_NT(node), 'sanity check'
-  node_id = node[1]
-  assert isinstance(node_id, int), 'sanity check'
-  return (node_id, start_idx, end_idx)
-
-
-def _get_nt_children_as_range_cursors(nt_node: list) -> list:
-  '''
-  Given a duoglot-style AST node, return a list of non-terminal
-  children as range cursors.
-  NOTE range cursors specify exactly one AST node.
-  '''
-  assert _is_elem_NT(nt_node), 'expected non-terminal node'
-  result = []
-  for i in range(2, len(nt_node)):
-    if _is_elem_NT(nt_node[i]):
-      result.append((nt_node, i, i + 1))
-  return result
-
-
-def _range_cursor_seq_descending_from_ast(ast: list) -> list:
-  '''
-  Given a duoglot-style AST, generate a sequence of range cursors
-  in pre-order traversal. Sequence does not include the AST itself,
-  only the subtrees.
-  '''
-  assert _is_elem_NT(ast), 'expected non-terminal node'
-  result = []
-  def _rec_pre_order(node: list):
-    nonlocal result
-    if not _is_elem_NT(node):
-      return
-    for child_range_cursor in _get_nt_children_as_range_cursors(node):
-      result.append(child_range_cursor)
-      child_idx = child_range_cursor[1]
-      child_ast = child_range_cursor[0][child_idx]
-      _rec_pre_order(child_ast)
-  _rec_pre_order(ast)
-  return result
-
-
-def _ast_pretty_print_primitive(ast: list) -> str:
-  '''
-  Pretty print the AST node by concatenating all terminals without whitespaces.
-  PARAM ast: duoglot-style AST node
-  '''
-  def _rec_pre_order(node) -> str:
-    # duoglot-style ASTs contain annotations under string nodes
-    # must be handled separately
-    if node[0] == 'py.string':
-      quote = node[2][2][1]
-      quote = quote[1:-1].replace('\\', '')
-      return f'{quote}{node[4][2].strip('"')}{quote}'
-    if not _is_elem_NT(node):
-      assert isinstance(node, str), 'expected string here'
-      return node.strip('"')
-    result = ''
-    for child in node[2:]:
-      result += _rec_pre_order(child)
-    return result
-  result = _rec_pre_order(ast)
-  return result.strip()
-
-
-def _ast_pretty_print(ast: list) -> str:
-  '''
-  Pretty print the AST.
-  PARAM ast: duoglot-style AST node
-  '''
-  primitive_res = _ast_pretty_print_primitive(ast)
-  tree = pvpy.Tree.from_str(primitive_res)
-  pp = pvpy.PrettyPrinter(indent_with='    ')
-  result = pp.visit(tree.root_node)
-  return result.strip()
-
-
-def rules_contains(rules: List[TranslationRule], rule: TranslationRule) -> bool:
+def rules_contains(rules: List[p_ruleset.TRuleBase], rule: p_ruleset.TRuleBase) -> bool:
   '''
   Check if the rules list contains the rule.
   '''
@@ -516,7 +308,7 @@ def rules_contains(rules: List[TranslationRule], rule: TranslationRule) -> bool:
   return False
 
 
-def rules_deduplicate(rules: List[TranslationRule]) -> List[TranslationRule]:
+def rules_deduplicate(rules: List[p_ruleset.TRuleBase]) -> List[p_ruleset.TRuleBase]:
   '''
   Deduplicate a list of translation rules.
   '''
@@ -532,9 +324,9 @@ def rules_deduplicate(rules: List[TranslationRule]) -> List[TranslationRule]:
 
 
 def rules_intersection(
-  rules_a: List[TranslationRule],
-  rules_b: List[TranslationRule]
-) -> List[TranslationRule]:
+  rules_a: List[p_ruleset.TRuleBase],
+  rules_b: List[p_ruleset.TRuleBase]
+) -> List[p_ruleset.TRuleBase]:
   '''
   Return a list of rules that are in both rules_a and rules_b.
   '''
@@ -546,7 +338,7 @@ def rules_intersection(
   return intersection
 
 
-def rules_group_by_matcher(rules: List[TranslationRule]) -> Dict[str, List[TranslationRule]]:
+def rules_group_by_matcher(rules: List[p_ruleset.TRuleBase]) -> Dict[str, List[p_ruleset.TRuleBase]]:
   '''
   Group rules by their matcher signature.
   '''
@@ -559,11 +351,11 @@ def rules_group_by_matcher(rules: List[TranslationRule]) -> Dict[str, List[Trans
   return matcher_groups
 
 
-def assert_matchers_match(matcher_group: List[TranslationRule]) -> None:
+def assert_matchers_match(matcher_group: List[p_ruleset.TRuleBase]) -> None:
   '''
   Assert that all rules in the list have the same matcher signature.
   Assert that rule idx are sorted in ascending order.
-  PARAM matcher_group: a list of TranslationRule objects.
+  PARAM matcher_group: a list of TRuleBase objects.
   '''
   assert len(matcher_group) > 0, 'Expected at least one rule'
   first_rule_signature = matcher_group[0].get_matcher_signature()
@@ -571,12 +363,10 @@ def assert_matchers_match(matcher_group: List[TranslationRule]) -> None:
     assert rule.get_matcher_signature() == first_rule_signature, \
       f'Expected all rules to have the same matcher signature, got {rule.get_matcher_signature()}'
 
-  # Assert that rule idx are sorted in ascending order.
-  rule_ids = [rule.idx for rule in matcher_group]
-  assert rule_ids == sorted(rule_ids), 'Expected rule idx to be sorted in ascending order'
 
-
-def slot_cursor_remove_empty(slot_cursors: List[Tuple[list, int, int]]) -> List[Tuple[list, int, int]]:
+def slot_cursor_remove_empty(
+  slot_cursors: List[Tuple[list, int, int]]
+) -> List[Tuple[list, int, int]]:
   '''
   Remove empty slot cursors from the list.
   An empty slot cursor is a cursor that has the same start and end indices.
@@ -589,83 +379,171 @@ def slot_cursor_remove_empty(slot_cursors: List[Tuple[list, int, int]]) -> List[
   return non_empty_slot_cursors
 
 
-async def gen_test_fn_str_llm(
-  paramable_ids: List[str],
-  f_gold_fn_str: str,
-) -> Optional[str]:
+def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNode:
   '''
-  Generate a test function string using the LLM.
-  This test function will be used to validate translation rules.
-
-  p_llm_gen.gen_test_function uses the following attributes of
-  - subject
-    - name
-    - src_lang
-    - tar_lang
-  - template_dict
-    - src_lang
+  Given a choicable node, return its context node.
+  Context node is the nearest ancestor that is either
+  an ExpressionStatementNode, IfStatementNode, or WhileStatementNode.
   '''
-  if len(paramable_ids) == 0:
-    return '''def test():\n    f_gold()'''
 
-  # TODO so that PirelSubject does not complain
-  _dummy = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str='_dummy',
-    f_gold_fn_str='_dummy',
-    test_call_str='_dummy'
-  )
+  is_context_node = lambda node: \
+    isinstance(node, (pvpy.ExpressionStatementNode, pvpy.IfStatementNode, pvpy.WhileStatementNode))
 
-  pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
-  pirel_subject_snippet_conf['src_program'] = _dummy
-  pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
-
-  # TODO so that p_llm_gen.gen_test_function() works
-  # since we are intervening in the middle of the pipeline
-  template_dict = {
-    'src_lang': pirel_subject.src_lang,
-  }
-  lrules_validation = ptlog.RulesValidation()
-
-  test_fn_str = await p_llm_gen.gen_test_function(f_gold_fn_str, pirel_subject, template_dict, lrules_validation)
-  return test_fn_str
+  cursor = node.parent
+  while cursor is not None:
+    if is_context_node(cursor):
+      return cursor
+    cursor = cursor.parent
+  raise ValueError('No context node found')
 
 
-def get_f_gold_fn_str(paramable_ids: List[str], log_stat_str: str) -> str:
+def _get_expr_src_main_code(
+  src_main_code: str,
+  pre_context: str,
+  log_stat_str: str
+) -> str:
   '''
-  Given a list of parameterable identifiers and a log statement string,
-  return a formatted string for the f_gold function.
+  Create a f_gold() function for a node in a choicable AST.
+  The structure of this function is as follows:
+  <src_main_code/function_header>
+      <pre_context>
+      <log_statement>
   '''
-  _params = ', '.join(paramable_ids)
-  _indented_snippet_block = p_utils.indent(log_stat_str, 4)
-  f_gold_fn_str = p_consts.F_GOLD_SNIPPET_TEMPLATE.format(params=_params, indented_snippet_block=_indented_snippet_block)
-  return f_gold_fn_str
+
+  # src_main_code function header
+  smcfhs = [line for line in src_main_code.split('\n') if line.startswith('def f_gold(')]
+  assert len(smcfhs) == 1, 'Expected exactly one function header in src_main_code'
+  smcfh = smcfhs[0]
+  assert smcfh.endswith('):'), 'Expected function header to end with "):"'
+
+  # function body
+  prectx_log_stat = p_pirel._combine_prectx_simple_ntext(pre_context, log_stat_str)
+  indented_block = p_utils.indent(prectx_log_stat, 4)
+  expr_src_main_code = f'{smcfh}\n{indented_block}'
+
+  # insert break statements in loops to avoid infinite loops.
+  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
+    tree = pvpy.Tree.from_str(expr_src_main_code)
+    break_inserter = pvpy.BreakStatementInserter()
+    break_inserter.visit(tree.root_node)
+    expr_src_main_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
+
+  '''
+  Replace possible recursive calls with a dummy function
+  to avoid infinite recursion or type errors,
+  e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
+  '''
+  defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(expr_src_main_code)
+  expr_src_main_code = pvpy.FunctionInvocationReplacer.replace_function_invocations(expr_src_main_code, defined_fns)
+
+  return expr_src_main_code
 
 
-def get_log_statement(choicable_ast: list) -> str:
+def _get_log_stat_str(
+  choicable_range_cursor: tuple,
+  dgann: dict,
+  src_main_code: str
+) -> str:
   '''
   Return a log statement that logs the AST.
   '''
-  ast_str = _ast_pretty_print(choicable_ast)
-  return f'myexactlog({ast_str})'
+  ast_str = d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)
+  log_stat_str = f'myexactlog({ast_str})'
+
+  '''
+  Make sure that the log statement is parseable.
+  Examples where there are parse errors:
+  a = m[i:j]
+        ^^^
+  myexactlog(i:j)
+  '''
+  if p_utils.does_have_parse_error(log_stat_str, 'py'):
+    raise ExprLogStatHasParseError()
+
+  '''
+  Make sure that the logged expression has the same AST
+  structure as the original expression.
+  ["py.module", 0, ["py.expression_statement", 1, ["py.call", 2,
+    ["py.identifier", 3, "\"myexactlog\""],
+    ["py.argument_list", 4,
+      "\"(\"",
+      <sub-AST for logged expression is rooted here>,
+      "\")\""
+    ]
+  ]]]
+  '''
+  choicable_ast = d_ast_parse.range_cursor_to_ast_node(choicable_range_cursor)
+  log_stat_ast, _ = d_ast_parse.parse_text_dbg(log_stat_str, 'py')
+  logged_expr_ast = log_stat_ast[2][2][3][3]
+  if not d_ast_parse.are_nodes_equal(choicable_ast, logged_expr_ast):
+    raise ExprLogStatContextError()
+
+  return log_stat_str
+
+
+def _create_expr_subject(
+  src_test_script: str,
+  translation_rules_test_code: str,
+  rules_w_str: str,
+  ruleset: p_ruleset.Ruleset
+) -> p_subject.PirelSubject:
+  '''
+  Create a subject for validating a rule for expression.
+  '''
+
+  # all attributes of PirelSubject instance set explicitly
+  benchmark_name = 'n/a'
+  name = 'expr'
+  src_program = src_test_script
+  src_lang = 'py'
+  tar_lang = 'js'
+  translation_rules_main_code = \
+    rules_w_str + '\n\n' + \
+    p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH) + '\n\n' + \
+    p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
+  # translation_rules_test_code  # already set
+  is_three_split = True
+  auto_backward = True
+  choices = {'type': 'ASTNODE', 'choices_list': []}
+  readonly_choices_list = []
+
+  # create a subject instance
+  expr_subject = p_subject.PirelSubject(
+    benchmark_name, name, src_program, src_lang, tar_lang)
+  expr_subject.translation_rules_main_code = translation_rules_main_code
+  expr_subject.translation_rules_test_code = translation_rules_test_code
+  expr_subject.is_three_split = is_three_split
+  expr_subject.auto_backward = auto_backward
+  expr_subject.choices = choices
+  expr_subject.readonly_choices_list = readonly_choices_list
+
+  # override readonly_choices_list with verified rules
+  expr_subject.readonly_choices_list = ruleset.get_choices_list_from_verified_rules(
+    expr_subject.get_src_main_code())
+
+  return expr_subject
 
 
 def get_rules_that_handle_range_cursor_rec(
   range_cursor: tuple,
-  ruleset: Ruleset,
-  rules_mut_list: List[TranslationRule] = []
-) -> Optional[List[TranslationRule]]:
+  ruleset: p_ruleset.Ruleset,
+  dgann: dict,
+  src_main_code: str,
+) -> Optional[List[p_ruleset.TRuleBase]]:
   '''
   Recursively retrieve all rules that can handle the range cursor,
   and all slots that belong to the range cursor.
   '''
-  choice_identifier = _range_cursor_to_choice_identifier(range_cursor)
+  rules = []
 
   # base case: rule for range cursor not found
-  if choice_identifier not in ruleset.verified_rules:
+  range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+    range_cursor, dgann, src_main_code)
+  if not ruleset.verified_rule_exists(range_cursor_unparsed):
     return None
 
-  rule = ruleset.verified_rules[choice_identifier]
-  rules_mut_list.append(rule)
+  rule = ruleset.get_verified_rule(range_cursor_unparsed)
+  rules.append(rule)
 
   # get all slot cursors of range cursor
   match_obj = match_rule_to_range_cursor(rule.rule['match'], range_cursor)
@@ -675,65 +553,72 @@ def get_rules_that_handle_range_cursor_rec(
 
   # base case: rule has no slot cursors
   if len(slot_cursors) == 0:
-    return rules_mut_list
+    return rules
 
   # recursive case: rule has slot cursors
   for slot_cursor in slot_cursors:
-    rules = get_rules_that_handle_range_cursor_rec(slot_cursor, ruleset, rules_mut_list)
-    if rules is None:
-      return None
+    child_rules = get_rules_that_handle_range_cursor_rec(
+      slot_cursor, ruleset, dgann, src_main_code)
+    if child_rules is not None:
+      rules.extend(child_rules)
 
-  return rules_mut_list
+  return rules
 
 
 def _check_for_base_rules(
-  matcher_group: List[TranslationRule],
-  subtrees_rules: List[TranslationRule],
+  matcher_group: List[p_ruleset.TRuleBase],
+  subtrees_rules: List[p_ruleset.TRuleBase],
   matched_range_cursor: tuple,
-  ruleset: Ruleset,
+  ruleset: p_ruleset.Ruleset,
+  dgann: dict,
+  src_main_code: str
 ) -> bool:
   '''
   When validating matching rules, check if the matched rules are base rules.
+  The logic is this: if a rule that matched a range cursor is a rule
+  from starting ruleset, then we don't need to run test based validation
+  to verify that rule; we just mark that the range cursor can be
+  handled by that rule.
   RETURN True if the matched rules are base rules.
   '''
   logger.debug(f'~~~ starting _check_for_base_rules')
 
   STARTING_RULESET_STR = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
-  starting_ruleset = Ruleset.from_str(STARTING_RULESET_STR)
+  starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(STARTING_RULESET_STR)
 
-  # base rules do not have slot cursors -> no subtrees_rules
-  if len(subtrees_rules) > 0:
-    logger.debug('Matched rules are not base rules, since subtrees_rules is not empty.')
-    return False
-
-  # base rules usually have only one rule
+  # base rules usually just single rules in their matcher group
+  # i.e. there is just a single way to translate a matched AST
   # TODO this needs to be improved
   if len(matcher_group) > 1:
-    logger.warning('Matched rules are not base rules, since there is more than one matching rule.')
+    logger.debug('Matched rules are not base rules, since there is more than one matching rule.')
     return False
 
   assert len(matcher_group) == 1, 'Expected exactly one matching rule for base rules'
   matching_rule = matcher_group[0]
   for rule in starting_ruleset.rules:
     if rule == matching_rule:
-      logger.debug(f'Matched rule appears in a starting ruleset: {matching_rule}')
-      choice_identifier = _range_cursor_to_choice_identifier(matched_range_cursor)
-      ruleset.verified_rules[choice_identifier] = rule
+      logger.debug(f'Matched rule appears in the starting ruleset: {matching_rule}')
+      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+        matched_range_cursor, dgann, src_main_code)
+      ruleset.update_verified_rules(range_cursor_unparsed, rule)
       return True
 
-  raise NotImplementedError('new case for base rules? ' + str(matching_rule))
+  return False
 
 
 async def _validate_matcher_group_no_intersection(
   matched_range_cursor: tuple,
-  matcher_group: List[TranslationRule],
-  subtrees_rules: List[TranslationRule],
-  ruleset: Ruleset,
+  matcher_group: List[p_ruleset.TRuleBase],
+  subtrees_rules: List[p_ruleset.TRuleBase],
+  ruleset: p_ruleset.Ruleset,
   test_script_str: str,
+  translation_rules_test_code: str,
+  dgann: dict,
+  src_main_code: str,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
-  PARAM matcher_group: a list of TranslationRule objects that matched the range cursor.
+  PARAM matcher_group: a list of TRuleBase objects that matched the range cursor.
   PARAM subtrees_rules: rules that handle the descending slot cursors
   of the matched range cursor.
 
@@ -754,6 +639,8 @@ async def _validate_matcher_group_no_intersection(
     subtrees_rules,
     matched_range_cursor,
     ruleset,
+    dgann,
+    src_main_code
   )
   if flag_check_base_rule:
     logger.debug('Validation is complete. Matcher group is a list of base rules.')
@@ -770,7 +657,7 @@ async def _validate_matcher_group_no_intersection(
   the matched_range_cursor. This is used to validate the matcher_group.
   '''
   joined_matcher_groups = {**subtrees_matcher_groups, **{matcher_signature: []}}
-  rules_wo = ruleset.intersect_matcher_groups(joined_matcher_groups)
+  rules_wo = ruleset.add_all_rules_from_missing_matcher_groups(joined_matcher_groups)
   logger.debug(f'len(rules_wo): {len(rules_wo)}')
 
   '''
@@ -781,31 +668,28 @@ async def _validate_matcher_group_no_intersection(
 
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-
-    pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
-    pirel_subject_snippet_conf['src_program'] = test_script_str
-    pirel_subject_snippet_conf['translation_rules_main_code'] = rules_w_str
-    pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+    expr_subject = _create_expr_subject(
+      test_script_str, translation_rules_test_code, rules_w_str, ruleset)
 
     '''
     If this translation succeeds, it means that the rule is plausible
     with respect to the matched AST.
     '''
     try:
-      tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
-
-      choice_identifier = _range_cursor_to_choice_identifier(matched_range_cursor)
-      ruleset.verified_rules[choice_identifier] = rule
+      tar_program_plausible = await prapp.apply_translation_rules(expr_subject)
+      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+        matched_range_cursor, dgann, src_main_code)
+      ruleset.update_verified_rules(range_cursor_unparsed, rule)
       logger.debug(
         f'Rule {idx} is plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {_ast_pretty_print(_range_cursor_to_ast_node(matched_range_cursor))}')
+        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
       return
 
     except Exception as err:
-      logger.warning(f'Error while applying translation rules: {err}')
       logger.warning(
+        f'Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
         f'Rule {idx} is not plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {_ast_pretty_print(_range_cursor_to_ast_node(matched_range_cursor))}')
+        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
       continue
 
   raise AllRulesInMatcherGroupImplausibleError(
@@ -814,14 +698,17 @@ async def _validate_matcher_group_no_intersection(
 
 async def _validate_matcher_group_single_intersection(
   matched_range_cursor: tuple,
-  matcher_group: List[TranslationRule],
-  subtrees_rules: List[TranslationRule],
-  ruleset: Ruleset,
+  matcher_group: List[p_ruleset.TRuleBase],
+  subtrees_rules: List[p_ruleset.TRuleBase],
+  ruleset: p_ruleset.Ruleset,
   test_script_str: str,
+  translation_rules_test_code: str,
+  dgann: dict,
+  src_main_code: str,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
-  PARAM matcher_group: a list of TranslationRule objects that matched the range cursor.
+  PARAM matcher_group: a list of TRuleBase objects that matched the range cursor.
   PARAM subtrees_rules: rules that handle the descending slot cursors
   of the matched range cursor.
 
@@ -838,7 +725,8 @@ async def _validate_matcher_group_single_intersection(
   '''
   subtrees_matcher_groups = rules_group_by_matcher(subtrees_rules)
   assert matcher_signature in subtrees_matcher_groups, 'supposed to be no intersection'
-  assert len(subtrees_matcher_groups[matcher_signature]) == 1, 'expected exactly one rule in the matcher group'
+  assert len(subtrees_matcher_groups[matcher_signature]) == 1, \
+    'expected exactly one rule in the matcher group'
 
   intersect_rule = subtrees_matcher_groups[matcher_signature][0]
   other_rules = [rule for rule in matcher_group if rule != intersect_rule]
@@ -849,7 +737,7 @@ async def _validate_matcher_group_single_intersection(
   the matched_range_cursor. This is used to validate the matcher_group.
   '''
   joined_matcher_groups = {**subtrees_matcher_groups, **{matcher_signature: []}}
-  rules_wo = ruleset.intersect_matcher_groups(joined_matcher_groups)
+  rules_wo = ruleset.add_all_rules_from_missing_matcher_groups(joined_matcher_groups)
   logger.debug(f'len(rules_wo): {len(rules_wo)}')
 
   '''
@@ -860,31 +748,28 @@ async def _validate_matcher_group_single_intersection(
 
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-
-    pirel_subject_snippet_conf : dict = p_utils.read_yaml(p_consts.SNIPPET_UNDER_TEST_CONF_FPATH)
-    pirel_subject_snippet_conf['src_program'] = test_script_str
-    pirel_subject_snippet_conf['translation_rules_main_code'] = rules_w_str
-    pirel_subject = p_subject.PirelSubject.from_dict_config(pirel_subject_snippet_conf)
+    expr_subject = _create_expr_subject(
+      test_script_str, translation_rules_test_code, rules_w_str, ruleset)
 
     '''
     If this translation succeeds, it means that the rule is plausible
     with respect to the matched AST.
     '''
     try:
-      tar_program_plausible, used_rule_ids_history = await prapp.apply_translation_rules(pirel_subject)
-
-      choice_identifier = _range_cursor_to_choice_identifier(matched_range_cursor)
-      ruleset.verified_rules[choice_identifier] = rule
+      tar_program_plausible = await prapp.apply_translation_rules(expr_subject)
+      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+        matched_range_cursor, dgann, src_main_code)
+      ruleset.update_verified_rules(range_cursor_unparsed, rule)
       logger.debug(
         f'Rule {idx} is plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {_ast_pretty_print(_range_cursor_to_ast_node(matched_range_cursor))}')
+        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
       return
 
     except Exception as err:
       logger.warning(f'Error while applying translation rules: {err}')
       logger.warning(
         f'Rule {idx} is not plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {_ast_pretty_print(_range_cursor_to_ast_node(matched_range_cursor))}')
+        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
       continue
 
   raise AllRulesInMatcherGroupImplausibleError(
@@ -893,11 +778,14 @@ async def _validate_matcher_group_single_intersection(
 
 async def validate_matcher_group(
   matched_range_cursor: tuple,
-  matcher_group: List[TranslationRule],
-  subtrees_rules: List[TranslationRule],
-  ruleset: Ruleset,
-  paramable_ids: List[str],
-  test_fn_str: str,
+  matcher_group: List[p_ruleset.TRuleBase],
+  subtrees_rules: List[p_ruleset.TRuleBase],
+  ruleset: p_ruleset.Ruleset,
+  src_main_code: str,
+  pre_context: str,
+  src_test_code: str,
+  translation_rules_test_code: str,
+  dgann: dict,
 ) -> None:
   '''
   Validating a matcher group means checking if the rules in the matcher group
@@ -929,14 +817,13 @@ async def validate_matcher_group(
   '''
   Need to create a f_gold() function for the matched AST.
   '''
-  matched_ast = _range_cursor_to_ast_node(matched_range_cursor)
-  log_stat_str = get_log_statement(matched_ast)
-  f_gold_fn_str = get_f_gold_fn_str(paramable_ids, log_stat_str)
+  log_stat_str = _get_log_stat_str(matched_range_cursor, dgann, src_main_code)
+  expr_src_main_code = _get_expr_src_main_code(src_main_code, pre_context, log_stat_str)
 
   test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_fn_str=test_fn_str,
-    f_gold_fn_str=f_gold_fn_str,
-    test_call_str='test()'
+    test_code=src_test_code,
+    main_code=expr_src_main_code,
+    test_call_code='test()'
   )
   logger.debug(f'test_script_str:\n{test_script_str}')
 
@@ -960,7 +847,10 @@ async def validate_matcher_group(
       matcher_group,
       subtrees_rules,
       ruleset,
-      test_script_str
+      test_script_str,
+      translation_rules_test_code,
+      dgann,
+      src_main_code
     )
 
   elif len(reusable_rules) == 1:
@@ -969,19 +859,29 @@ async def validate_matcher_group(
       matcher_group,
       subtrees_rules,
       ruleset,
-      test_script_str
+      test_script_str,
+      translation_rules_test_code,
+      dgann,
+      src_main_code
     )
 
   else:
+    logger.critical(
+      f'The number of reusable rules is {len(reusable_rules)}. '
+      f'This case has not yet been implemented.')
+    p_utils.log_json_time('locals.json', locals())
     raise NotImplementedError('consider this case')
 
 
 async def _process_match_obj(
   match_obj: dict,
-  matcher_group: List[TranslationRule],
-  ruleset: Ruleset,
-  paramable_ids: List[str],
-  test_fn_str: str,
+  matcher_group: List[p_ruleset.TRuleBase],
+  ruleset: p_ruleset.Ruleset,
+  src_main_code: str,
+  pre_context: str,
+  src_test_code: str,
+  translation_rules_test_code: str,
+  dgann: dict,
 ) -> None:
   '''
   Process the match object and log the information.
@@ -1016,8 +916,11 @@ async def _process_match_obj(
       matcher_group,
       [],  # subtrees_rules
       ruleset,
-      paramable_ids,
-      test_fn_str
+      src_main_code,
+      pre_context,
+      src_test_code,
+      translation_rules_test_code,
+      dgann
     )
     return
 
@@ -1032,8 +935,9 @@ async def _process_match_obj(
     We need to check if there are rules that plausibly translate the slot_cursors
     under the matched range_cursor.
     '''
-    subtrees_plausible_rules = get_rules_that_handle_range_cursor_rec(slot_cursor, ruleset)
-    logger.debug(f'Slot cursor AST: {_ast_pretty_print(_range_cursor_to_ast_node(slot_cursor))}')
+    subtrees_plausible_rules = get_rules_that_handle_range_cursor_rec(
+      slot_cursor, ruleset, dgann, src_main_code)
+    logger.debug(f'Slot cursor AST: {d_ast_parse.range_cursor_pretty_print(slot_cursor, dgann, src_main_code)}')
 
     '''
     If there is no rule that can handle the range_cursor,
@@ -1054,17 +958,23 @@ async def _process_match_obj(
     matcher_group,
     subtrees_rules,
     ruleset,
-    paramable_ids,
-    test_fn_str,
+    src_main_code,
+    pre_context,
+    src_test_code,
+    translation_rules_test_code,
+    dgann
   )
 
 
 async def process_choicable_range_cursor(
-  matcher_group: List[TranslationRule],
+  matcher_group: List[p_ruleset.TRuleBase],
   all_range_cursors: List[Tuple[list, int, int]],
-  ruleset: Ruleset,
-  paramable_ids: List[str],
-  test_fn_str: str,
+  ruleset: p_ruleset.Ruleset,
+  src_main_code: str,
+  pre_context: str,
+  src_test_code: str,
+  translation_rules_test_code: str,
+  dgann: dict,
   processed_match_objs: Dict[str, list],
 ):
   '''
@@ -1088,7 +998,7 @@ async def process_choicable_range_cursor(
   '''
   all_range_cursors = [
     rc for rc in all_range_cursors
-    if _range_cursor_to_choice_identifier(rc) not in processed_match_objs.get(matcher_signature, [])
+    if d_ast_parse.range_cursor_to_choice_identifier(rc) not in processed_match_objs.get(matcher_signature, [])
   ]
   match_objs = [match_rule_to_range_cursor(matcher, range_cursor) for range_cursor in all_range_cursors]
   match_objs = [match_obj for match_obj in match_objs if match_obj['is_matched']]
@@ -1109,7 +1019,7 @@ async def process_choicable_range_cursor(
     logger.debug(
       f'Processing match_obj {idx}/{len(match_objs)}:\n'
       f'matcher_signature: {matcher_signature}\n'
-      f'matched AST: {_ast_pretty_print(_range_cursor_to_ast_node(range_cursor))}')
+      f'matched AST: {d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
 
     # Process the match object
     try:
@@ -1117,125 +1027,107 @@ async def process_choicable_range_cursor(
         match_obj,
         matcher_group,
         ruleset,
-        paramable_ids,
-        test_fn_str
+        src_main_code,
+        pre_context,
+        src_test_code,
+        translation_rules_test_code,
+        dgann
       )
       logger.debug('Successfully processed the match_obj.')
-      processed_match_objs.setdefault(matcher_signature, []).append(_range_cursor_to_choice_identifier(range_cursor))
+      processed_match_objs.setdefault(matcher_signature, []).append(
+        d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
     except NoRuleToHandleRangeCursorError:
-      logger.warning('No rule to handle the range cursor. Continuing with the next match_obj.')
+      logger.debug('No rule to handle the range cursor. Continuing with the next match_obj.')
       flag_unhandled_exists = True
       continue
+    except ExprLogStatHasParseError:
+      logger.debug(
+        'Logged expression has parse error. Unlinking the range cursor '
+        'from matcher group (rules that match this range cursor):\n'
+        f'{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
+      processed_match_objs.setdefault(matcher_signature, []).append(
+        d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
+    except ExprLogStatContextError:
+      logger.debug(
+        'Logged expression cannot be used as an argument to a log statement '
+        '(context issue).\nUnlinking the range cursor '
+        'from matcher group (rules that match this range cursor):\n'
+        f'{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
+      processed_match_objs.setdefault(matcher_signature, []).append(
+        d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
 
   if flag_unhandled_exists:
     raise UnhandledRangeCursorExistsError
 
 
-async def _process_choicable_range_cursor_init(
-  choicable_range_cursor: Tuple[list, int, int],
-) -> Tuple[List[str], str, list]:
-  '''
-  Before we proceed with doing anything, we generate a test
-  function using the choicable_range_cursor. This is done
-  to ensure that we generate the test function only for
-  subtrees under the choicable_range_cursor.
-  '''
-
-  choicable_ast = _range_cursor_to_ast_node(choicable_range_cursor)
-
-  log_stat_str = get_log_statement(choicable_ast)
-  paramable_ids = pvpy.ParametrizableVariablesCollector.get_paramable_ids(log_stat_str)
-  f_gold_fn_str = get_f_gold_fn_str(paramable_ids, log_stat_str)
-  test_fn_str = await gen_test_fn_str_llm(paramable_ids, f_gold_fn_str)
-
-  '''
-  Need to add itself, because _range_cursor_seq_descending_from_ast()
-  will include only the subtrees. all_range_cursors are all possible
-  range cursors under the choicable_range_cursor.
-  '''
-  all_range_cursors = [choicable_range_cursor]
-  choicable_range_cursor_children = _range_cursor_seq_descending_from_ast(choicable_ast)
-  all_range_cursors.extend(choicable_range_cursor_children)
-
-  return paramable_ids, test_fn_str, all_range_cursors
-
-
-def get_choicable_range_cursors(ast: list) -> List[Tuple[list, int, int]]:
+def _get_readonly_choices_list_init(
+  src_main_code: str
+) -> tuple:
   '''
   Given a duoglot-style AST, collect all nodes under AST,
   for which we should "cleverly" generate choices that
   result in a plausible translation.
-  NOTE can add more inner functions for more cases (e.g. binary expressions).
+  RETURN a list of tuples (range cursor, pre-context).
   '''
-  def _get_assignment_rhs_as_range_cursor(node: list) -> Tuple[list, int, int]:
-    assert node[0] == 'py.assignment', 'expected assignment node'
-    assert node[3].strip('"') == '=', 'expected assignment operator'
-    if node[4][0] == 'py.assignment':
-      # assignment to assignment, e.g. "a = b = 1"
-      return _get_assignment_rhs_as_range_cursor(node[4])
-    return (node, 4, 5)
+  crcpcs = []  # choices range cursors with pre-context
+  dgast, dgann = d_ast_parse.parse_text_dbg(src_main_code, 'py')
+  choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(src_main_code)
+  logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
 
-  def _rec_collect_assignment_rhs(node):
-    nonlocal assignment_rhs
-    # base case: terminal node
-    if not _is_elem_NT(node):
-      return
-    # recursive case: non-terminal node
-    for child in node[2:]:
-      _rec_collect_assignment_rhs(child)
-    # check the current node
-    if node[0] != 'py.expression_statement':
-      return
-    children = node[2:]
-    if len(children) != 1:
-      return
-    child = children[0]
-    assert _is_elem_NT(child), 'expected non-terminal node'
-    if child[0] != 'py.assignment':
-      return
-    # at this point we have "expr_statement -> assignment"
-    rhs = _get_assignment_rhs_as_range_cursor(child)
-    assignment_rhs.append(rhs)
+  for i, choicable_node in enumerate(choicable_nodes, start=1):
+    choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
+    stat_node = _choicable_node_get_context_node(choicable_node)
+    pre_context = p_pirel._get_pre_context(src_main_code, 'py', stat_node.get_node_id())
+    pre_context = pvpy.LogStatementRemover.remove_log_statements(pre_context)
+    crcpcs.append((choicable_range_cursor, pre_context))
+    logger.debug(
+      f'Choicable_node {i}/{len(choicable_nodes)}: '
+      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}\n'
+      f'pre_context:\n{pre_context}')
 
-  # TODO handle conditions of if statements, e.g. "if x == 1" -> "x == 1"
-  def _rec_collect_boolean_exprs(node):
-    nonlocal boolean_exprs
-    # base case: terminal node
-    if not _is_elem_NT(node):
-      return
-
-  assignment_rhs = []
-  boolean_exprs = []
-  _rec_collect_assignment_rhs(ast)
-  return assignment_rhs
+  return crcpcs, dgann
 
 
-async def get_initial_choices_list(
+async def get_readonly_choices_list(
   src_main_code: str,
-  rules: str
-) -> list:
+  translation_rules_main_code: str,
+  src_test_code: str,
+  translation_rules_test_code: str,
+  serialized_current_ruleset: dict
+) -> Tuple[list, dict]:
   '''
-  Generate an initial choices list for the given source code and rules.
-  Initial choices list contains choices to validated rules that result
+  Generate a readonly choices list for the given source code and rules.
+  Readonly choices list contains choices to validated rules that result
   in plausible translation. This is much better than blindly iterating
   over all possible rule combinations to get a plausible translation.
+
+  Readonly choices contains choices to right hand side of assignments,
+  and conditions of if statements.
+
+  PARAM src_main_code: instrumented with log statements.
   '''
 
-  ast, ann = d_ast_parse.parse_text_dbg(src_main_code, 'py', keep_text=False)
-  ruleset = Ruleset.from_str(rules)
+  p_utils.log_json_time('args-get_readonly_choices_list.json', locals())
+  logger.info('Starting generation of read-only choices list')
+  ruleset = p_ruleset.Ruleset.from_starting_ruleset(translation_rules_main_code)
+  ruleset.merge_verified_rules_from(serialized_current_ruleset)
 
   '''
   `choicable_range_cursors` - a list of range cursors
-  for which we need to create initial choices list
+  for which we need to create readonly choices list
   that results in a plausible translation.
   retval_0 = ((15 + (7 * (math.sqrt(5)))) / 4) * (math.pow(side, 3))
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  choicable_range_cursors = get_choicable_range_cursors(ast)
+  crcpcs, dgann = _get_readonly_choices_list_init(src_main_code)
 
-  for i, choicable_range_cursor in enumerate(choicable_range_cursors):
+  for i, (choicable_range_cursor, pre_context) in enumerate(crcpcs, start=1):
+
+    logger.debug(
+      f'Processing choicable_range_cursor {i}/{len(crcpcs)}: '
+      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}\n')
 
     '''
     Matcher groups are groups of rules that have the same matcher signature.
@@ -1256,7 +1148,15 @@ async def get_initial_choices_list(
     all_range_cursors: a list of all range cursors under choicable_range_cursor.
     This includes the choicable_range_cursor itself and all its subtrees.
     '''
-    paramable_ids, test_fn_str, all_range_cursors = await _process_choicable_range_cursor_init(choicable_range_cursor)
+    all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
+
+    '''
+    Attempt to control the infinite loop that may arise from
+    unchanging queue size.
+    '''
+    unchanged_count = 0
+    prev_queue_size = len(queue_matcher_groups)
+    _MAX_QUEUE_UNCHANGED_COUNT = len(queue_matcher_groups) * 2
 
     while queue_matcher_groups:
       logger.debug(f'queue size: {len(queue_matcher_groups)}')
@@ -1266,16 +1166,30 @@ async def get_initial_choices_list(
           matcher_group,
           all_range_cursors,
           ruleset,
-          paramable_ids,
-          test_fn_str,
+          src_main_code,
+          pre_context,
+          src_test_code,
+          translation_rules_test_code,
+          dgann,
           processed_match_objs
         )
       except UnhandledRangeCursorExistsError as err:
         logger.debug(f'Moving the matcher group to the end of the queue')
         queue_matcher_groups.append(matcher_group)
 
-  initial_choices_list = ruleset.get_choices_list_from_verified_rules()
-  return initial_choices_list
+      # prevent infinite loop
+      if len(queue_matcher_groups) == prev_queue_size:
+        unchanged_count += 1
+      else:
+        unchanged_count = 0
+      prev_queue_size = len(queue_matcher_groups)
+      if unchanged_count >= _MAX_QUEUE_UNCHANGED_COUNT:
+        logger.error(f'Potential infinite loop detected. Stopping processing for matcher group: {matcher_group}')
+        raise RuntimeError('Potential infinite loop detected')
+
+  logger.info('Finished generation of read-only choices list')
+  readonly_choices_list = ruleset.get_choices_list_from_verified_rules(src_main_code)
+  return readonly_choices_list, ruleset.to_dict()
 
 
 # GENERATING NEW CHOICES LIST BASED ON ERRORS
@@ -1763,7 +1677,8 @@ def get_proposed_choices_semantic_error(
   error_line_num is 0-based line index of a trace mismatch in
   tar_program_instr, we need to get the 0-based line index in tar_main_code.
   '''
-  err_line_idx = get_err_line_idx_in_tar_main_code(error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
+  err_line_idx = get_err_line_idx_in_tar_main_code(
+    error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
 
   '''
   Depending on the locations of log statements (myexactlog), we may end up
@@ -1837,50 +1752,35 @@ def _test_get_proposed_choices_compile_error():
   p_utils.write_tmp_json('new_choices.json', new_choices)
 
 
-# USAGE EXAMPLE
-async def get_initial_choices_list_usage() -> list:
+def _test_get_readonly_choices_list():
   '''
-  `choicable_range_cursors` - a list of range cursors
-  for which we need to create initial choices list
-  that results in a plausible translation.
-  retval_0 = ((15 + (7 * (math.sqrt(5)))) / 4) * (math.pow(side, 3))
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  async def get_readonly_choices_list(
+    src_main_code: str,
+    translation_rules_main_code: str,
+    src_test_code: str,
+    translation_rules_test_code: str,
+    serialized_current_ruleset: dict
+  ) -> Tuple[list, dict]:
   '''
+  config_fpath = p_consts.TMP_DIR / 'test_get_readonly_choices_list_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  code = p_utils.read_tmp_text('ext_rule_chooser_code.py')
-  rules = p_utils.read_tmp_text('ext_rule_chooser_rules.snart')
+  src_main_code = args_dict['src_main_code']
+  translation_rules_main_code = args_dict['translation_rules_main_code']
+  src_test_code = args_dict['src_test_code']
+  translation_rules_test_code = args_dict['translation_rules_test_code']
+  serialized_current_ruleset = args_dict['serialized_current_ruleset']
 
-  ast, ann = d_ast_parse.parse_text_dbg(code, 'py', keep_text=False)
-  ruleset = Ruleset.from_str(rules)
-  choicable_range_cursors = get_choicable_range_cursors(ast)
-
-  for i, choicable_range_cursor in enumerate(choicable_range_cursors):
-
-    queue_matcher_groups = list(ruleset.matcher_groups.values())
-    processed_match_objs : Dict[str, list] = {}
-    paramable_ids, test_fn_str, all_range_cursors = await _process_choicable_range_cursor_init(choicable_range_cursor)
-
-    while queue_matcher_groups:
-      logger.debug(f'queue size: {len(queue_matcher_groups)}')
-      matcher_group = queue_matcher_groups.pop(0)
-      try:
-        await process_choicable_range_cursor(
-          matcher_group,
-          all_range_cursors,
-          ruleset,
-          paramable_ids,
-          test_fn_str,
-          processed_match_objs
-        )
-      except UnhandledRangeCursorExistsError as err:
-        logger.debug(f'Moving the matcher group to the end of the queue')
-        queue_matcher_groups.append(matcher_group)
-
-  initial_choices_list = ruleset.get_choices_list_from_verified_rules()
-  p_utils.write_tmp_json('ext_rule_chooser_initial_choices_list.json', initial_choices_list)
-  return initial_choices_list
+  readonly_choices_list, ruleset_serialized = asyncio.run(get_readonly_choices_list(
+    src_main_code,
+    translation_rules_main_code,
+    src_test_code,
+    translation_rules_test_code,
+    serialized_current_ruleset
+  ))
 
 
 if __name__ == '__main__':
-  _test_get_proposed_choices_compile_error()
-  # asyncio.run(get_initial_choices_list_usage())
+  # _test_get_proposed_choices_compile_error()
+  _test_get_readonly_choices_list()

@@ -16,20 +16,20 @@ logger = p_utils.setup_logger(__name__)
 
 
 class UnknownTypeInTracesError(RuntimeError): pass
-class SrcTestScriptError(RuntimeError): pass
-class TarTestScriptError(RuntimeError):
+class SrcTestScriptRunError(RuntimeError): pass
+class TarTestScriptRunError(RuntimeError):
   def __init__(self, tar_error_dict: dict):
     super().__init__('Error running tar test script')
     self.tar_error_dict = tar_error_dict
   def __str__(self):
-    return f'TarTestScriptError: {json.dumps(self.tar_error_dict, indent=2)}'
+    return f'TarTestScriptRunError: {json.dumps(self.tar_error_dict, indent=2)}'
 class TraceMismatchError(RuntimeError):
   def __init__(self, error_lines: dict):
     super().__init__('Trace mismatch between src and tar test scripts')
     self.error_lines = error_lines
   def __str__(self):
     return f'TraceMismatchError: {json.dumps(self.error_lines, indent=2)}'
-class TRuleNotFoundSrcMainCodeError(RuntimeError):
+class SrcTestScriptProblematicNodeError(RuntimeError):
   '''
   This error is raised when there is a translation error
   when translating src_main_code.
@@ -44,86 +44,10 @@ class TRuleNotFoundSrcMainCodeError(RuntimeError):
 
 
 # INTERNAL API
-def _postprocess_src_program(translated_code: str, src_code: str, src_ann: dict) -> str:
-  '''
-  This function is used only for subjects that are long and require processing.
-  Processing is done only after the `src_program` is instrumented by adding
-  `mylog` function invocations to it. This is the case for GFG benchmark so far.
-  Some subjects have really long parameters, which may slow down the instrumentation (?).
-  That is why the `translation_rules_instr_src` includes a hacky translation rule
-  that translates `param = *` exclusively, where `*` is a fairly large construct.
-  For an example, check `GFG_ROW_WISE_COMMON_ELEMENTS_TWO_DIAGONALS_SQUARE_MATRIX.py`.
-  After the translation (instrumentation) is complete, `*` should be placed back
-  to the instrumented code, which is accomplished by this function.
-  '''
-  logger.debug('Starting p_rule_applicator._postprocess_src_program')
-
-  regexp = re.compile(r'SOURCE_AST_IDX\((\d+)\)')
-  all_matches : List[str] = regexp.findall(translated_code)
-  restored_code = translated_code
-
-  for match in all_matches:
-    replaced_token = f'SOURCE_AST_IDX({match})'
-    assert translated_code.count(replaced_token) == 1, f'{replaced_token} must appear once'
-
-    ast_ann = src_ann[int(match)]
-    start_point, end_point = ast_ann[:2]
-    replacing_token = src_code[start_point:end_point]
-
-    restored_code = restored_code.replace(replaced_token, replacing_token)
-
-  return restored_code
-
-
-def _postprocess_tar_program(translated_code: str, src_code: str, src_ann: dict) -> str:
-  '''
-  The intention of this function is similar to that of `_postprocess_src_program`.
-  Please refer to that function.
-  '''
-  logger.debug('Starting p_rule_applicator._postprocess_tar_program')
-
-  regexp = re.compile(r'SOURCE_AST_IDX\((\d+)\)')
-  all_matches = regexp.findall(translated_code)
-  restored_code = translated_code
-
-  for match in all_matches:
-    replaced_token = f'SOURCE_AST_IDX({match})'
-    assert translated_code.count(replaced_token) == 1, f'{replaced_token} must appear once'
-
-    ast_ann = src_ann[int(match)]
-    start_point, end_point = ast_ann[:2]
-    replacing_token = src_code[start_point:end_point]
-
-    # transform py nested list-tuple to js array
-    trans_chars = []
-    is_in_string = False
-    is_escaping = False
-    for rep_token_char in replacing_token:
-      if is_in_string:
-        if rep_token_char == '\\':
-          is_escaping = True
-        elif is_escaping:
-          is_escaping = False
-        elif rep_token_char == '"':
-          is_in_string = False
-      else:
-        if rep_token_char == '(':
-          trans_chars.append('[')
-          continue
-        if rep_token_char == ')':
-          trans_chars.append(']')
-          continue
-      trans_chars.append(rep_token_char)
-
-    assert len(trans_chars) == len(replacing_token), 'py_array_to_js_array string length mismatch'
-
-    new_replacing_token = ''.join(trans_chars)
-    restored_code = restored_code.replace(replaced_token, new_replacing_token)
-
-  return restored_code
-
-
-def are_traces_equal_rec(src_trace: list, tar_trace: list) -> bool:
+def are_traces_equal_rec(
+  src_trace: list,
+  tar_trace: list
+) -> bool:
   '''
   Compare the traces from the source and target programs.
   This is a recursive function.
@@ -190,7 +114,9 @@ def are_traces_equal_rec(src_trace: list, tar_trace: list) -> bool:
   raise UnknownTypeInTracesError(f'Unknown type in are_traces_equal_rec: "{type1}"')
 
 
-def is_valid_trace(trace: list) -> bool:
+def is_valid_trace(
+  trace: list
+) -> bool:
   '''
   Check if the trace is valid.
   A valid trace is a list with exactly 3 elements:
@@ -225,7 +151,9 @@ def is_valid_trace(trace: list) -> bool:
   return True
 
 
-def is_valid_trace_entry(trace_entry: list) -> bool:
+def is_valid_trace_entry(
+  trace_entry: list
+) -> bool:
   '''
   Check if the trace entry is valid.
   A valid trace entry is a list with exactly 3 elements:
@@ -265,7 +193,10 @@ def is_valid_trace_entry(trace_entry: list) -> bool:
   return True
 
 
-def is_trace_subsumed(shorter_trace: list, longer_trace: list) -> bool:
+def is_trace_subsumed(
+  shorter_trace: list,
+  longer_trace: list
+) -> bool:
   '''
   Check if the longer trace subsumes the shorter trace.
   '''
@@ -287,7 +218,10 @@ def is_trace_subsumed(shorter_trace: list, longer_trace: list) -> bool:
   return True
 
 
-def does_trace_subsume_another(trace1: list, trace2: list) -> bool:
+def does_trace_subsume_another(
+  trace1: list,
+  trace2: list
+) -> bool:
   '''
   Check if one trace subsumes the second trace.
   '''
@@ -303,7 +237,10 @@ def does_trace_subsume_another(trace1: list, trace2: list) -> bool:
     return are_traces_equal_rec(trace1, trace2)
 
 
-def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
+def _get_trace_mismatch_idx(
+  src_trace: list,
+  tar_trace: list
+) -> int:
   '''
   Given two traces, find the first index where they differ.
   If they are identical, return None. Index is 0-based.
@@ -370,7 +307,11 @@ def _get_trace_mismatch_idx(src_trace: list, tar_trace: list) -> int:
     return __get_trace_mismatch_idx_src_trace_larger(src_trace_entries, tar_trace_entries)
 
 
-def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> int:
+def _get_log_statement_idx(
+  src_trace: list,
+  tar_trace: list,
+  trace_idx: int
+) -> int:
   '''
   Given two traces and a trace index, find the log statement index under that trace index.
   Log statement indices are 1-based. trace_idx is 0-based.
@@ -401,11 +342,13 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
 
   src_trace_entry_type = src_trace_entry[0]
   tar_trace_entry_type = tar_trace_entry[0]
-  assert src_trace_entry_type == 'list' and tar_trace_entry_type == 'list', 'trace entries must be lists'
+  assert src_trace_entry_type == 'list' and tar_trace_entry_type == 'list', \
+    'trace entries must be lists'
 
   src_trace_arg_len = src_trace_entry[1]
   tar_trace_arg_len = tar_trace_entry[1]
-  assert src_trace_arg_len >= 2 and tar_trace_arg_len >= 2, 'trace entries must have at least 2 arguments logged'
+  assert src_trace_arg_len >= 2 and tar_trace_arg_len >= 2, \
+    'trace entries must have at least 2 arguments logged'
 
   src_trace_args = src_trace_entry[2]
   tar_trace_args = tar_trace_entry[2]
@@ -413,11 +356,13 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   tar_trace_arg1 = tar_trace_args[0]
   src_trace_arg1_type = src_trace_arg1[0]
   tar_trace_arg1_type = tar_trace_arg1[0]
-  assert src_trace_arg1_type == 'number' and tar_trace_arg1_type == 'number', 'trace entry first argument must be a number'
+  assert src_trace_arg1_type == 'number' and tar_trace_arg1_type == 'number', \
+    'trace entry first argument must be a number'
 
   src_trace_arg1_value = src_trace_arg1[1]
   tar_trace_arg1_value = tar_trace_arg1[1]
-  assert isinstance(src_trace_arg1_value, int) and isinstance(tar_trace_arg1_value, int), 'trace entry first argument must be an int'
+  assert isinstance(src_trace_arg1_value, int) and isinstance(tar_trace_arg1_value, int), \
+    'trace entry first argument must be an int'
 
   src_trace_arg2 = src_trace_args[1]
   tar_trace_arg2 = tar_trace_args[1]
@@ -438,7 +383,10 @@ def _get_log_statement_idx(src_trace: list, tar_trace: list, trace_idx: int) -> 
   return tar_trace_arg1_value
 
 
-def _get_log_statement_idx_subsumed(src_trace: list, tar_trace: list) -> int:
+def _get_log_statement_idx_subsumed(
+  src_trace: list,
+  tar_trace: list
+) -> int:
   '''
   Return a log statement index that caused the trace mismatch
   given that one trace is subsumed by another.
@@ -475,7 +423,10 @@ def _get_log_statement_idx_subsumed(src_trace: list, tar_trace: list) -> int:
   return trace_arg1_value
 
 
-def _get_mismatched_log_statement_idx(src_trace: list, tar_trace: list) -> int:
+def _get_mismatched_log_statement_idx(
+  src_trace: list,
+  tar_trace: list
+) -> int:
 
   if not does_trace_subsume_another(src_trace, tar_trace):
     '''
@@ -501,7 +452,10 @@ def _get_mismatched_log_statement_idx(src_trace: list, tar_trace: list) -> int:
     return mismatched_log_stat_idx
 
 
-def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Dict[int, str]:
+def _get_error_lines(
+  tar_program_instr: str,
+  mismatched_log_stat_idx: int
+) -> Dict[int, str]:
   '''
   Given a tar_program_instr (instrumented tar program) and a mismatched log statement index,
   return the line numbers right before the mismatched log statement.
@@ -580,8 +534,10 @@ def _get_error_lines(tar_program_instr: str, mismatched_log_stat_idx: int) -> Di
     mismatch_line_idx_before = mismatch_line_idx
     mismatch_line_idx = mismatch_line_idx + 2
 
-  assert mismatch_line_idx != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx} not found in stripped lines'
-  assert mismatch_line_idx_before != -1, f'mismatched_log_stat_idx {mismatched_log_stat_idx - 1} not found in stripped lines'
+  assert mismatch_line_idx != -1, \
+    f'mismatched_log_stat_idx {mismatched_log_stat_idx} not found in stripped lines'
+  assert mismatch_line_idx_before != -1, \
+    f'mismatched_log_stat_idx {mismatched_log_stat_idx - 1} not found in stripped lines'
 
   error_line_idxs = list(range(mismatch_line_idx_before + 1, mismatch_line_idx))
   error_lines = {line_idx: lines[line_idx] for line_idx in error_line_idxs}
@@ -619,12 +575,12 @@ async def _run_tests(
   subject: p_subject.PirelSubject
 ) -> None:
   '''
-  RAISE `SrcTestScriptError` if there is an error when running src test script.
-  RAISE `TarTestScriptError` if there is an error when running tar test script.
+  RAISE `SrcTestScriptRunError` if there is an error when running src test script.
+  RAISE `TarTestScriptRunError` if there is an error when running tar test script.
   RAISE `TraceMismatchError` if there is a trace mismatch between src and tar test scripts.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-run_tests.json', locals())
-  logger.debug('Starting p_rule_applicator._run_tests')
+  p_utils.log_json_time(f'args-run_tests.json', locals())
+  logger.debug('~~~ Starting to run source and target test scripts.')
 
   # 1. run `src_program_instr` and collect output trace
   src_trace, src_stderr = await p_code_runner.run_src_test_script(src_program_instr, subject)
@@ -634,7 +590,7 @@ async def _run_tests(
   if src_stderr != '':
     msg = f'SHOULD NOT HAPPEN! Error running src test script: {src_stderr}'
     logger.critical(msg)
-    raise SrcTestScriptError(msg)
+    raise SrcTestScriptRunError(msg)
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_std_error = await p_code_runner.run_tar_test_script(tar_program_instr, subject)
@@ -644,7 +600,7 @@ async def _run_tests(
   At this point, we have all the necessary data to decide whether to
   1. finish running tests without any errors
   2. raise TraceMismatchError if there is a trace mismatch
-  3. raise TarTestScriptError if there is an error in running tar test script
+  3. raise TarTestScriptRunError if there is an error in running tar test script
 
   NOTE Trace categories (relative to each other)
   src and tar traces may fall into one of the following 6 categories:
@@ -668,7 +624,7 @@ async def _run_tests(
 
   NOTE Error categories
   Regarding what error to raise:
-  1. raise TarTestScriptError iff
+  1. raise TarTestScriptRunError iff
      a. (tar_std_error != '') and is_trace_subsumed(tar_trace, src_trace)
         - case 2a
         - cases 1a, 3a are not supported yet
@@ -710,7 +666,7 @@ async def _run_tests(
       'NOT SUPPORTED: src_trace must be strictly longer than tar_trace'
 
     tar_error_dict = p_code_runner._extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
-    raise TarTestScriptError(tar_error_dict)
+    raise TarTestScriptRunError(tar_error_dict)
 
   # 3. compare traces
   are_traces_identical = are_traces_equal_rec(src_trace, tar_trace)
@@ -722,312 +678,51 @@ async def _run_tests(
     raise TraceMismatchError(error_lines)
 
 
-def _get_instrumented_src_program(subject: p_subject.PirelSubject) -> str:
-  '''
-  In `src_program_instr` only the `src_test_code` is instrumented.
-  "Instrumented" means that `mylog` invocations are added to the code.
-  '''
-
-  logger.debug('Starting p_rule_applicator._get_instrumented_src_program')
-
-  if not subject.needs_instrumentation:
-    logger.debug('program does not need instrumentation')
-    logger.debug('will use `src_program` as `src_program_instr`')
-    assert subject.translation_rules_instr_src is None, 'sanity check'
-    assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return subject.src_program
-
-  if subject.is_mylog_inserted:
-    logger.debug('program needs instrumentation, but it already is instrumented')
-    logger.debug('will use `src_program` as `src_program_instr`')
-    assert subject.translation_rules_instr_src is None, 'sanity check'
-    assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return subject.src_program
-
-  logger.debug('program needs instrumentation, starting it now.')
-
-  assert subject.translation_rules_instr_src is not None, 'sanity check'
-  assert subject.translation_rules_instr_tar is not None, 'sanity check'
-
-  # 1 translate `src_program` with `translation_rules_instr_src`
-  # actions of this operations must be restored by postprocessing function
-  # refer to `paramhack` and `_postprocess_src_program`
-  duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
-    src_code=subject.src_program,
-    src_lang=subject.src_lang,
-    tar_lang=subject.src_lang,
-    trans_rules=subject.translation_rules_instr_src,
-    auto_backward=subject.auto_backward,
-    choices=subject.choices,
-    subject_name=subject.name,
-    skip_template_extraction=True
-  )
-  src_program_instr_raw = duoglot_translate_result['tar_code']
-  src_program_ann = duoglot_translate_result['src_ann']
-
-  # 2 restore `param` in `src_program_instr_raw` (if needed)
-  if subject.is_long_requires_processing:
-    logger.debug('src_program is long and requires processing')
-    src_program_instr_raw = _postprocess_src_program(src_program_instr_raw, subject.src_program, src_program_ann)
-
-  # 3 replace each MYLOG_COUNTER with ints in range(0,)
-  _spir_chunks = src_program_instr_raw.split('MYLOG_COUNTER')
-  _interleaved_list = []
-  for i in range(len(_spir_chunks)):
-    _interleaved_list.append(_spir_chunks[i])
-    if i < len(_spir_chunks) - 1:
-      _interleaved_list.append(str(i))
-  src_program_instr_raw_2 = ''.join(_interleaved_list)
-
-  # 4 split the program into test, main, test call code snippets
-  _spir2_chunks = src_program_instr_raw_2.split(p_consts.TEST_MAIN_CALL_DELIMITER)
-  # NOTE this is an unexpected assertion
-  assert len(_spir2_chunks) == 3, 'sanity check: src_program_instr should be 3 parts'
-  src_test_code_instr_raw, src_main_code_instr_raw, src_test_call_code_raw = _spir2_chunks
-
-  # 5 replace `mylog` invocations with `myexactlog`
-  src_test_code_instr = src_test_code_instr_raw.replace('mylog(2', 'myexactlog(2')
-  src_test_code_instr = src_test_code_instr.replace('mylog(1', 'myexactlog(1')
-  src_test_code_instr = src_test_code_instr.replace('mylog(3', 'myexactlog(3')
-
-  # 5 remove lines starting with 'mylog' from `src_main_code_raw`
-  # this is done to remove instrumentation from `src_main_code`
-  src_main_code = '\n'.join([line for line in src_main_code_instr_raw.split('\n') if not line.strip().startswith('mylog')])
-  logger.debug("INFO: removed 'mylog' instrumentation in goldfunc (if any).")
-
-  src_program_instr = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code_instr, src_main_code, src_test_call_code_raw])
-  return src_program_instr
-
-
-async def _get_instrumented_tar_program_plausible(
-  src_program_instr: str,
+def _get_tar_test_code(
+  src_test_code: Optional[str],
   subject: p_subject.PirelSubject
-) -> Tuple[str, List[List[int]]]:
-  '''
-  This function is responsible for obtaining a plausible translation of
-  `src_program_instr` with `subject.translation_rules_main_code`.
-  RETURN a tuple of:
-  - `tar_program_instr` - the instrumented target program
-  - `used_rule_ids_history` - a list of lists of used translation rule IDs
-  '''
-
-  def _get_used_translation_rule_ids(dbg_history: List[dict]) -> List[int]:
-    used_rule_ids : List[int] = []
-    for history_elem in dbg_history:
-      dbg_info : dict = history_elem['dbg_info']
-      notes : dict = dbg_info['notes']
-      rule_id = notes['rule_id']
-      used_rule_ids.append(rule_id)
-    return used_rule_ids
-
-  logger.debug('Starting p_rule_applicator._get_instrumented_tar_program_plausible')
-
-  # 1 split `src_program_instr` into test, main, test call code snippets
-  src_test_code_instr, src_main_code, src_test_call_code = None, None, None
-  if subject.is_three_split:
-    logger.debug('`src_program` is three split')
-    _spi_chunks = src_program_instr.split(p_consts.TEST_MAIN_CALL_DELIMITER)
-    assert len(_spi_chunks) == 3, 'sanity check: src_program_instr should be 3 parts'
-    src_test_code_instr = _spi_chunks[0]
-    src_main_code = _spi_chunks[1]
-    src_test_call_code = _spi_chunks[2]
-  else:
-    logger.debug('`src_program` is not three split, will use `src_program_instr` as `src_main_code`')
-    logger.debug('`src_test_code_instr` is None and `src_test_call_code` is None')
-    src_main_code = src_program_instr
-
-  # 2 get corresponding instrumented test code and test call code
-  tar_test_code_instr = _get_instrumented_tar_test_code(src_test_code_instr, subject)
-  tar_test_call_code = _get_tar_test_call_code(src_test_call_code)
-
-  # 3 loop to get exhaustive translation of main code
-  logger.debug(
-    'Starting a loop to exhaustively translate `src_program_instr` '
-    'with different combinations of translation rules')
-
-  '''
-  This is a history of list of used translation rules that were used
-  to obtain a plausible translation of `src_program_instr`.
-  It is used outside this function. Here it is just for collecting.
-  '''
-  used_rule_ids_history = []
-
-  '''
-  This is a stack of choice options for each error line.
-  '''
-  choices_list_stack = []
-
-  '''
-  This is an object that is passed to the translator that tells it
-  which rules to choose at given AST nodes.
-  '''
-  current_choices = subject.choices
-  assert current_choices['type'] == 'ASTNODE', f'unsupported choices type "{current_choices["type"]}"'
-  readonly_choices_list = getattr(subject, 'readonly_choices_list', [])
-
-  '''
-  This loop exhaustively tries all possible combinations of translation rules
-  to obtain a plausible translation of `src_program_instr`.
-  '''
-  iteration = 0
-  while True:
-    logger.debug(f'_get_instrumented_tar_program_plausible.iteration {iteration}')
-    iteration += 1
-
-    # May raise
-    # 1. TRuleNotFoundSrcMainCodeError
-    tar_main_code, map_to_exid, translate_dbg_history = _get_tar_main_code(src_main_code, current_choices, subject)
-    used_rule_ids = _get_used_translation_rule_ids(translate_dbg_history)
-    used_rule_ids_history.append(used_rule_ids)
-
-    tar_program_instr = _concatenate_tar_snippets(tar_test_code_instr, tar_main_code, tar_test_call_code, subject)
-
-    try:
-      await _run_tests(src_program_instr, tar_program_instr, subject)
-      return tar_program_instr, used_rule_ids_history
-
-    except SrcTestScriptError as err:
-      logger.critical('There is an error in running src test script. This normally should not happen')
-      raise
-
-    except TarTestScriptError as err:
-      logger.warning(
-        'There is an error in running tar test script.\n'
-        'Depending on the location of the error, will attempt to find a new '
-        'translation rules combination.')
-      tar_error_dict = err.tar_error_dict
-
-      # May raise
-      # 1. RuleCombinationsExhaustedError
-      proposed_choices = p_ext_rule_chooser.get_proposed_choices_compile_error(
-        tar_program_instr,
-        tar_main_code,
-        tar_error_dict,
-        choices_list_stack,
-        map_to_exid,
-        translate_dbg_history,
-        readonly_choices_list
-      )
-
-      current_choices = proposed_choices
-
-    except TraceMismatchError as err:
-      logger.critical('There is a trace mismatch between src and tar test scripts.')
-      error_lines = err.error_lines
-
-      # May raise
-      # 1. RuleCombinationsExhaustedError
-      proposed_choices = p_ext_rule_chooser.get_proposed_choices_semantic_error(
-        tar_program_instr,
-        tar_main_code,
-        error_lines,
-        choices_list_stack,
-        map_to_exid,
-        translate_dbg_history,
-        readonly_choices_list
-      )
-
-      current_choices = proposed_choices
-
-
-async def _get_deinstrumented_tar_program_plausible(
-  src_program_instr: str,
-  subject: p_subject.PirelSubject
-) -> Tuple[str, List[List[int]]]:
-
-  logger.debug('Starting p_rule_applicator._get_deinstrumented_tar_program')
-  tar_program_plausible_instr, used_rule_ids_history = await _get_instrumented_tar_program_plausible(src_program_instr, subject)
-
-  if not subject.needs_instrumentation:
-    logger.debug('program does not need deinstrumentation')
-    assert subject.translation_rules_instr_src is None, 'sanity check'
-    assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return tar_program_plausible_instr, used_rule_ids_history
-
-  if subject.is_mylog_inserted:
-    logger.debug('program needs instrumentation, but it already is instrumented')
-    assert subject.translation_rules_instr_src is None, 'sanity check'
-    assert subject.translation_rules_instr_tar is None, 'sanity check'
-    return tar_program_plausible_instr, used_rule_ids_history
-
-  assert subject.translation_rules_instr_src is not None, 'sanity check'
-  assert subject.translation_rules_instr_tar is not None, 'sanity check'
-
-  # 1 translate `tar_program_plausible_instr` with `translation_rules_instr_tar`
-  logger.debug('deinstrumenting `tar_program_plausible_instr`')
-  duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
-    src_code=tar_program_plausible_instr,
-    src_lang=subject.tar_lang,
-    tar_lang=subject.tar_lang,
-    trans_rules=subject.translation_rules_instr_tar,
-    auto_backward=subject.auto_backward,
-    choices=subject.choices,
-    subject_name=subject.name,
-    skip_template_extraction=True
-  )
-  tar_program_plausible_deinstr = duoglot_translate_result['tar_code']
-  tar_program_plausible_instr_ann = duoglot_translate_result['src_ann']
-
-  # 2 restore `param` in `tar_program_plausible_deinstr` (if needed)
-  if subject.is_long_requires_processing:
-    logger.debug('tar_program_plausible is long and requires processing')
-    tar_program_plausible_deinstr = _postprocess_tar_program(
-      tar_program_plausible_deinstr,
-      tar_program_plausible_instr,
-      tar_program_plausible_instr_ann
-    )
-
-  return tar_program_plausible_deinstr, used_rule_ids_history
-
-
-def _get_instrumented_tar_test_code(src_test_code_instr: Optional[str], subject: p_subject.PirelSubject) -> Optional[str]:
+) -> Optional[str]:
   '''
   Ideally, this function is run only once.
   '''
-  logger.debug(f'Starting p_rule_applicator._get_instrumented_tar_test_code')
-
   if not subject.is_three_split:
-    logger.debug('`src_program` is not three split: tar_test_code is None')
-    assert src_test_code_instr is None, 'sanity check'
+    assert src_test_code is None, 'sanity check'
     return None
 
-  # translate `src_test_code_instr` using `translation_rules_test_code`
+  # translate `src_test_code` using `translation_rules_test_code`
   duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
-    src_code=src_test_code_instr,
+    src_code=src_test_code,
     src_lang=subject.src_lang,
     tar_lang=subject.tar_lang,
     trans_rules=subject.translation_rules_test_code,
     auto_backward=subject.auto_backward,
     choices=subject.choices,
-    subject_name=subject.name,
     skip_template_extraction=True
   )
-  tar_test_code_instr = duoglot_translate_result['tar_code']
-  src_test_code_instr_ann = duoglot_translate_result['src_ann']
-
-  if subject.is_long_requires_processing:
-    logger.debug('src_program is long and requires processing')
-    tar_test_code_instr = _postprocess_tar_program(tar_test_code_instr, src_test_code_instr, src_test_code_instr_ann)
-
-  return tar_test_code_instr
+  tar_test_code = duoglot_translate_result['tar_code']
+  return tar_test_code
 
 
-def _get_tar_test_call_code(src_test_call_code: str) -> str:
+def _get_tar_test_call_code(
+  src_test_call_code: str
+) -> str:
   '''
   For the moment, just use `src_test_call_code` as `tar_test_call_code`,
   because Python and JavaScript function call syntax is the same.
   '''
-  logger.debug(f'Starting p_rule_applicator._get_tar_test_call_code')
   return src_test_call_code
 
 
-def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.PirelSubject) -> Tuple[str, Dict[int, List[dict]], List[dict]]:
+def _get_tar_main_code_instr(
+  src_main_code: str,
+  choices: dict,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, Dict[int, List[dict]], List[dict]]:
   '''
   Translate `src_main_code` using `translation_rules_main_code` and `choices`.
+  RAISE SrcTestScriptProblematicNodeError
   '''
-  logger.debug('Starting p_rule_applicator._get_tar_main_code')
-  logger.debug('translating `src_main_code` to target language using choices:')
-  logger.debug(json.dumps(choices, indent=2))
+  logger.debug('Translating src_main_code_instr to get tar_main_code_instr.')
 
   assert subject.translation_rules_main_code is not None, \
     'translation rules for main code must be provided'
@@ -1042,14 +737,12 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
       trans_rules=subject.translation_rules_main_code,
       auto_backward=subject.auto_backward,
       choices=choices,
-      subject_name=subject.name,
       skip_template_extraction=True
     )
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
     templates_dict = exc.get_templates_dict()
     logger.warning(f'Caught TranslationRuleNotFoundException when translating src_main_code: {exc}')
-    logger.warning(f'templates_dict: {json.dumps(templates_dict, indent=2)}')
-    err_obj = TRuleNotFoundSrcMainCodeError(
+    err_obj = SrcTestScriptProblematicNodeError(
       f'There is a problematic node in src_main_code:\n'
       f'problematic_node_type = {templates_dict["problematic_node_type"]}, '
       f'problematic_node_id = {templates_dict["problematic_node_id"]}')
@@ -1066,46 +759,159 @@ def _get_tar_main_code(src_main_code: str, choices: dict, subject: p_subject.Pir
   return tar_main_code, map_to_exid, translate_dbg_history
 
 
-def _concatenate_tar_snippets(
-  tar_test_code_instr: Optional[str],
-  tar_main_code: str,
-  tar_test_call_code: Optional[str],
+def _program_parts_concatenate(
+  test_code: Optional[str],
+  main_code: str,
+  test_call_code: Optional[str],
   subject: p_subject.PirelSubject
 ) -> str:
   '''
-  Combine `tar_test_code_instr`, `tar_main_code`, and `tar_test_call_code`
-  into a single string.
+  Combine `test_code`, `main_code`, and `test_call_code` into a single string.
   '''
   if not subject.is_three_split:
-    assert tar_test_code_instr is None, 'sanity check'
-    assert tar_test_call_code is None, 'sanity check'
-    return tar_main_code
-  assert tar_test_code_instr is not None, 'sanity check'
-  assert tar_test_call_code is not None, 'sanity check'
-  return f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([tar_test_code_instr, tar_main_code, tar_test_call_code])
+    assert test_code is None, 'sanity check'
+    assert test_call_code is None, 'sanity check'
+    return main_code
+  assert test_code is not None, 'sanity check'
+  assert test_call_code is not None, 'sanity check'
+  return f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([test_code, main_code, test_call_code])
+
+
+def _program_parts_split(
+  program: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[Optional[str], str, Optional[str]]:
+  '''
+  Split `program` into test, main, and test call code snippets.
+  If `subject.is_three_split` is False, return None for test and test call code snippets.
+  '''
+  if not subject.is_three_split:
+    assert p_consts.TEST_MAIN_CALL_DELIMITER not in program, 'sanity check'
+    return None, program, None
+
+  chunks = program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+  assert len(chunks) == 3, 'sanity check: program should be split into 3 parts'
+  src_test_code, src_main_code, src_test_call_code = chunks
+  return src_test_code, src_main_code, src_test_call_code
+
+
+def _get_used_translation_rule_ids(
+  dbg_history: List[dict]
+) -> List[int]:
+  used_rule_ids : List[int] = []
+  for history_elem in dbg_history:
+    dbg_info : dict = history_elem['dbg_info']
+    notes : dict = dbg_info['notes']
+    rule_id = notes['rule_id']
+    used_rule_ids.append(rule_id)
+  return used_rule_ids
 
 
 # API
-async def apply_translation_rules(subject: p_subject.PirelSubject) -> Tuple[str, List[List[int]]]:
+async def apply_translation_rules(
+  subject: p_subject.PirelSubject
+) -> str:
   '''
   Apply the translation rules to the source program.
   Equivalent to index_bench.js::runBenchmarkHandler
+  RETURN a str tar_program_instr
 
-  RETURN `tar_program_deinstr` - the target program that is deinstrumented.
+  Raised or propagated exceptions:
+  - SrcTestScriptRunError
+  - RuleCombinationsExhaustedError
+  - SrcTestScriptProblematicNodeError
+
+  NOTE subject.src_program must be instrumented.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-apply_translation_rules.json', locals())
-  logger.info('Starting p_rule_applicator.apply_translation_rules (a la DuoGlot)')
 
-  src_program_instr = _get_instrumented_src_program(subject)
-  tar_program_deinstr, used_rule_ids_history = await _get_deinstrumented_tar_program_plausible(src_program_instr, subject)
+  p_utils.log_json_time(f'args-apply_translation_rules.json', locals())
+  logger.info('~~~ Starting rule applicator')
 
-  return tar_program_deinstr, used_rule_ids_history
+  src_program_instr = subject.src_program
+  src_test_code, src_main_code_instr, src_test_call_code = \
+    _program_parts_split(src_program_instr, subject)
+
+  # 2 get corresponding instrumented test code and test call code
+  tar_test_code = _get_tar_test_code(src_test_code, subject)
+  tar_test_call_code = _get_tar_test_call_code(src_test_call_code)
+
+  '''
+  This is a stack of choice options for each error line.
+  '''
+  choices_list_stack = []
+
+  '''
+  This is an object that is passed to the translator that tells it
+  which rules to choose at given AST nodes.
+  '''
+  current_choices = subject.choices
+  assert current_choices['type'] == 'ASTNODE', f'unsupported choices type "{current_choices["type"]}"'
+
+  # 3 loop to get exhaustive translation of main code
+  logger.debug(
+    'Starting a loop to exhaustively translate `src_program_instr` '
+    'with different combinations of translation rules')
+  iteration = 0
+  while True:
+    logger.debug(f'apply_translation_rules.iteration {iteration}')
+    iteration += 1
+
+    tar_main_code_instr, map_to_exid, translate_dbg_history = \
+      _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
+    tar_program_instr = _program_parts_concatenate(tar_test_code, tar_main_code_instr, tar_test_call_code, subject)
+
+    try:
+      await _run_tests(src_program_instr, tar_program_instr, subject)
+      return tar_program_instr
+
+    except SrcTestScriptRunError as err:
+      logger.critical('There is an error in running src test script. This normally should not happen')
+      raise
+
+    except TarTestScriptRunError as err:
+      logger.warning(
+        'There is an error in running tar test script.\n'
+        'Depending on the location of the error, will attempt to find a new '
+        'translation rules combination.')
+      tar_error_dict = err.tar_error_dict
+
+      # May raise
+      # 1. RuleCombinationsExhaustedError
+      proposed_choices = p_ext_rule_chooser.get_proposed_choices_compile_error(
+        tar_program_instr,
+        tar_main_code_instr,
+        tar_error_dict,
+        choices_list_stack,
+        map_to_exid,
+        translate_dbg_history,
+        subject.readonly_choices_list
+      )
+
+      current_choices = proposed_choices
+
+    except TraceMismatchError as err:
+      logger.critical('There is a trace mismatch between src and tar test scripts.')
+      error_lines = err.error_lines
+
+      # May raise
+      # 1. RuleCombinationsExhaustedError
+      proposed_choices = p_ext_rule_chooser.get_proposed_choices_semantic_error(
+        tar_program_instr,
+        tar_main_code_instr,
+        error_lines,
+        choices_list_stack,
+        map_to_exid,
+        translate_dbg_history,
+        subject.readonly_choices_list
+      )
+
+      current_choices = proposed_choices
 
 
 # USAGE
 async def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible, used_rule_ids_history = await apply_translation_rules(subject_config)
+  tar_program_plausible = await apply_translation_rules(subject_config)
   logger.debug(f'Plausible target program:\n{tar_program_plausible}')
 
 
@@ -1118,12 +924,9 @@ async def _test_apply_translation_rules():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
-  tar_program_deinstr, used_rule_ids_history = await apply_translation_rules(subject)
+  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  tar_program_deinstr = await apply_translation_rules(subject)
   print(f'Plausible target program:\n{tar_program_deinstr}')
-  print('Used rule IDs history:')
-  for used_rule_ids in used_rule_ids_history:
-    print(used_rule_ids)
 
 
 async def _test_run_tests():
@@ -1140,23 +943,12 @@ async def _test_run_tests():
 
   src_program_instr = args_dict['src_program_instr']
   tar_program_instr = args_dict['tar_program_instr']
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
 
   await _run_tests(src_program_instr, tar_program_instr, subject)
-
-
-def _test_postprocess_src_program():
-  translated_code = p_utils.read_text('temporary_validator_translated_code.py')
-  src_code = p_utils.read_text('temporary_validator_src_code.py')
-  src_ann : dict = p_utils.read_json('temporary_validator_src_ann.json')
-  # Convert all keys of src_ann from str to int
-  src_ann = {int(k): v for k, v in src_ann.items()}
-  result = _postprocess_src_program(translated_code, src_code, src_ann)
-  print(result)
 
 
 if __name__ == '__main__':
   # usage_apply_translation_rules()
   asyncio.run(_test_apply_translation_rules())
   # asyncio.run(_test_run_tests())
-  # _test_postprocess_src_program()

@@ -106,7 +106,7 @@ PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
 LLM_VAL_TS_MAX_DEPTH = 4
 
 # The number of attempts to learn translation rules from a single TSP
-LEARN_RULES_FROM_TSP_NUM_ATTEMPTS = 3
+TSP_NUM_ATTEMPTS = 3
 
 # Maximum number of TSPs from which some rules are learned
 MAX_NUM_USEFUL_TSPS = 1
@@ -270,68 +270,19 @@ TRANSLATION_SP2_MAX_FEEDBACKS = 3
 #################################### BENCHMARKS ################################################
 ################################################################################################
 TEST_MAIN_CALL_DELIMITER = '"-----------------"'
-LONG_SRC_PROGRAM_THRESHOLD = 5000
-PARAM_HACK_FLAG = '"disabled" "paramhack"'
-
 STARTING_RULESET_FPATH = TRANSLATION_RULES_DIR / 'starting-ruleset.snart'
-
-LC_BENCHMARK_DIR = BENCHMARKS_DIR / 'leetcode' / 'py'
-LC_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'leet.snart'
-LC_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'leet.snart'
 
 GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'gfg' / 'py'
 GFG_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'gfg.snart'
 GFG_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'gfg.snart'
-GFG_TRULES_INSTR_SRC_FPATH = TRANSLATION_RULES_DIR / 'instr' / 'gfg.snart'
-GFG_TRULES_INSTR_TAR_FPATH = TRANSLATION_RULES_DIR / 'deinstr' / 'gfg.snart'
-
-CTCI_BENCHMARK_DIR = BENCHMARKS_DIR / 'ctci' / 'py'
-CTCI_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'ctci.snart'
 
 BENCHMARK_CONFIGS = {
-  'leetcode': {
-    'benchmark_dir': LC_BENCHMARK_DIR,
-    'translation_rules_main_code_fpath': LC_TRULES_MAIN_FPATH,
-    'translation_rules_test_code_fpath': LC_TRULES_TEST_FPATH,
-    'translation_rules_instr_src_fpath': None,
-    'translation_rules_instr_tar_fpath': None,
-    'is_three_split': True,
-    'is_mylog_inserted': True,
-    'needs_instrumentation': True
-  },
   'gfg': {
     'benchmark_dir': GFG_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
     'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
-    'translation_rules_instr_src_fpath': GFG_TRULES_INSTR_SRC_FPATH,
-    'translation_rules_instr_tar_fpath': GFG_TRULES_INSTR_TAR_FPATH,
     'is_three_split': True,
-    'is_mylog_inserted': False,
-    'needs_instrumentation': True
   },
-  # this is a new configuration which is used during rule application phase.
-  # we do not instrument the test code, but rather the main code, the same way
-  # as during the rule validation phase.
-  'gfg2': {
-    'benchmark_dir': GFG_BENCHMARK_DIR,
-    'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
-    'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
-    'translation_rules_instr_src_fpath': None,
-    'translation_rules_instr_tar_fpath': None,
-    'is_three_split': True,
-    'is_mylog_inserted': True,
-    'needs_instrumentation': True
-  },
-  'ctci': {
-    'benchmark_dir': CTCI_BENCHMARK_DIR,
-    'translation_rules_main_code_fpath': CTCI_TRULES_MAIN_FPATH,
-    'translation_rules_test_code_fpath': None,
-    'translation_rules_instr_src_fpath': None,
-    'translation_rules_instr_tar_fpath': None,
-    'is_three_split': False,
-    'is_mylog_inserted': False,
-    'needs_instrumentation': False
-  }
 }
 
 
@@ -341,11 +292,11 @@ BENCHMARK_CONFIGS = {
 PIREL_LOG_OBJ_FN_NAME = 'myexactlog'
 F_GOLD_SNIPPET_TEMPLATE = 'def f_gold({params}):\n{indented_snippet_block}'
 TEST_SCRIPT_TEMPLATE = (
-  '{test_fn_str}\n'
+  '{test_code}\n'
   f'{TEST_MAIN_CALL_DELIMITER}\n'
-  '{f_gold_fn_str}\n'
+  '{main_code}\n'
   f'{TEST_MAIN_CALL_DELIMITER}\n'
-  '{test_call_str}'
+  '{test_call_code}'
 )
 LOG_STAT_RULE_FPATH = TRANSLATION_RULES_DIR / 'log-statement.snart'
 RULE_VAL_EXTRA_RULES_FPATH = TRANSLATION_RULES_DIR / 'rule-validation-extra.snart'

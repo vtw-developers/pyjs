@@ -2622,7 +2622,7 @@ class ChoicableNodeExtractor(pvis.Visitor):
   Extract all choicable nodes from a given AST.
   Choicable nodes are nodes for which we need to create
   initial choices list.
-  Refer to p_ext_rule_chooser.get_initial_choices_list
+  Refer to p_ext_rule_chooser.get_readonly_choices_list
   for more details.
   '''
   def __init__(self):

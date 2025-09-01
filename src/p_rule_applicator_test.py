@@ -4,13 +4,10 @@ from typing import Tuple
 
 import p_consts
 import p_code_runner
-import p_rule_applicator
+import p_rule_applicator as prapp
 
 
 class TestCompareTraces(unittest.TestCase):
-  '''
-  Test cases for the are_traces_equal_rec function in p_rule_applicator.
-  '''
   def setUp(self):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'compare-traces'
 
@@ -23,88 +20,88 @@ class TestCompareTraces(unittest.TestCase):
 
   def test_001(self):
     src_trace, tar_trace = self.get_fixtures('001')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_002(self):
     src_trace, tar_trace = self.get_fixtures('002')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_003(self):
     src_trace, tar_trace = self.get_fixtures('003')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_004(self):
     src_trace, tar_trace = self.get_fixtures('004')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_005(self):
     src_trace, tar_trace = self.get_fixtures('005')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_006_very_large(self):
     src_trace, tar_trace = self.get_fixtures('006')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_007(self):
     src_trace, tar_trace = self.get_fixtures('007')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_008(self):
     src_trace, tar_trace = self.get_fixtures('008')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_009_with_print_output(self):
     src_trace, tar_trace = self.get_fixtures('009')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_010(self):
     src_trace, tar_trace = self.get_fixtures('010')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_011_float_val(self):
     src_trace, tar_trace = self.get_fixtures('011')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertTrue(result, 'Expected traces not to match')
 
   def test_012(self):
     src_trace, tar_trace = self.get_fixtures('012')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_013(self):
     src_trace, tar_trace = self.get_fixtures('013')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_014(self):
     src_trace, tar_trace = self.get_fixtures('014')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_015(self):
     src_trace, tar_trace = self.get_fixtures('015')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
   def test_016_indexed_log_statements(self):
     src_trace, tar_trace = self.get_fixtures('016')
-    result = p_rule_applicator.are_traces_equal_rec(src_trace, tar_trace)
+    result = prapp.are_traces_equal_rec(src_trace, tar_trace)
     self.assertFalse(result, 'Expected traces not to match')
 
 
 class TestGetErrorLines(unittest.TestCase):
   '''
-  Test cases for the _get_error_lines function in p_rule_applicator.
+  Test cases for the _get_error_lines function in prapp.
   '''
   def setUp(self):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'get-error-lines'
@@ -122,30 +119,30 @@ class TestGetErrorLines(unittest.TestCase):
   def test_001(self):
     tar_program_instr = self.get_fixture('001')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 1)
+    result = prapp._get_error_lines(tar_program_instr, 1)
     gold = {5: '    let n = 0;'}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 2)
+    result = prapp._get_error_lines(tar_program_instr, 2)
     gold = {}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts must be empty')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 3)
+    result = prapp._get_error_lines(tar_program_instr, 3)
     gold = {8: '    n = 1;'}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 4)
+    result = prapp._get_error_lines(tar_program_instr, 4)
     gold = {10: '    while (n < 10) {'}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 5)
+    result = prapp._get_error_lines(tar_program_instr, 5)
     gold = {12: "        n += 'n';"}
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
   def test_log_stat_before_return_stat(self):
     tar_program_instr = self.get_fixture('002')
 
-    result = p_rule_applicator._get_error_lines(tar_program_instr, 1)
+    result = prapp._get_error_lines(tar_program_instr, 1)
     gold = {14: '  return 2 / 2;'}
     self.assertTrue(self.are_dicts_equal(result, gold), 'the error line is 3 with return statement')
 

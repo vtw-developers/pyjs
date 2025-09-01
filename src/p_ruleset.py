@@ -1,8 +1,16 @@
+from __future__ import annotations
+
 import json
 from abc import ABC
-from typing import List
+from typing import Dict, List, Optional, Tuple
 
+import d_ast_parse
 import d_grammar_rules
+import p_visitor_py as pvpy
+import p_utils
+
+
+logger = p_utils.setup_logger(__name__)
 
 
 class TRuleBase(ABC):
@@ -26,216 +34,250 @@ class TRuleBase(ABC):
   def __repr__(self):
     return f'{self.__class__.__name__} {str(self.rule)}'
 
+  def __eq__(self, obj) -> bool:
+    if not isinstance(obj, TRuleBase):
+      raise ValueError(f'Cannot use == with {type(obj)}')
+    return str(self.rule) == str(obj.rule)
 
-class StartingRule(TRuleBase):
+  def get_matcher_signature(self) -> str:
+    return str(self.rule['match'])
+
+  def to_dict(self) -> dict:
+    res = {
+      'type': self.__class__.__name__,
+      'rule_str': self.__str__(),
+    }
+    return res
+
+  @classmethod
+  def from_dict(cls, data: dict) -> TRuleBase:
+    '''
+    Create a rule instance from a dict.
+    '''
+    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(data['rule_str'])
+    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
+    rule = parsed_rules[0]
+    if data['type'] == 'StartingTRule':
+      return StartingTRule(rule)
+    elif data['type'] == 'LearnedTRule':
+      return LearnedTRule(rule)
+    else:
+      raise ValueError(f'Unknown rule type: {data["type"]}')
+
+  @classmethod
+  def from_rule_str(cls, rule_str: str) -> TRuleBase:
+    '''
+    Create a rule instance from a rule string.
+    '''
+    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(rule_str)
+    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
+    rule = parsed_rules[0]
+    return cls(rule)
+
+
+class StartingTRule(TRuleBase):
   '''
   A class that represents a translation rule that appears
-  in the starting ruleset. It is assumed to be validated
-  by the user manually.
+  in the starting ruleset. It is assumed to be valid.
   '''
-  def asdict(self) -> str:
-    res = {
-      'type': 'StartingRule',
-      'rule_str': self.__str__(),
-    }
-    return res
-
-  @classmethod
-  def from_dict(self, data: dict) -> 'StartingRule':
-    '''
-    Create a StartingRule from a dict.
-    PARAM data: a dictionary representing a StartingRule.
-    '''
-    assert data['type'] == 'StartingRule', 'Expected type to be StartingRule'
-    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(data['rule_str'])
-    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
-    rule = parsed_rules[0]
-    return StartingRule(rule)
 
 
-class LearnedRule(TRuleBase, ABC):
+class LearnedTRule(TRuleBase):
   '''
-  A translation rule that has been learned using LLM.
+  A class that represents a translation rule that appears
+  in the starting ruleset. It is assumed to be valid.
   '''
-  def __init__(self, rule: dict, src_node_id: int, src_stat_node_id: int):
-    '''
-    PARAM src_node_id: ID of the node from which this rule was learned
-    PARAM src_stat_node_id: ID of the statement node under which this rule was learned
-    '''
-    super().__init__(rule)
-    assert isinstance(src_node_id, int), \
-      f'Expected src_node_id to be an int, got {type(src_node_id)}'
-    assert isinstance(src_stat_node_id, int), \
-      f'Expected src_stat_node_id to be an int, got {type(src_stat_node_id)}'
-    self.src_node_id = src_node_id
-    self.src_stat_node_id = src_stat_node_id
-
-
-class CheckedRule(LearnedRule):
-  '''
-  A translation rule that has been validated or invalidated
-  by a test-driven approach.
-  '''
-  def asdict(self) -> dict:
-    res = {
-      'type': 'CheckedRule',
-      'rule_str': self.__str__(),
-      'src_node_id': self.src_node_id,
-      'src_stat_node_id': self.src_stat_node_id,
-    }
-    return res
-
-  @classmethod
-  def from_dict(cls, data: dict) -> 'CheckedRule':
-    '''
-    Create a CheckedRule from a dict.
-    PARAM data: a dictionary representing a CheckedRule.
-    '''
-    assert data['type'] == 'CheckedRule', 'Expected type to be CheckedRule'
-    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(data['rule_str'])
-    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
-    rule = parsed_rules[0]
-    assert 'src_node_id' in data, 'Expected src_node_id in data'
-    assert 'src_stat_node_id' in data, 'Expected src_stat_node_id in data'
-    src_node_id = data['src_node_id']
-    src_stat_node_id = data['src_stat_node_id']
-    assert isinstance(src_node_id, int), 'Expected src_node_id to be an int'
-    assert isinstance(src_stat_node_id, int), 'Expected src_stat_node_id to be an int'
-    return CheckedRule(rule, src_node_id, src_stat_node_id)
-
-  @classmethod
-  def from_unchecked_rule(cls, rule: 'UncheckedRule') -> 'CheckedRule':
-    '''
-    Create a CheckedRule from an UncheckedRule.
-    '''
-    assert isinstance(rule, UncheckedRule), 'Expected rule to be an UncheckedRule'
-    return CheckedRule(rule.rule, rule.src_node_id, rule.src_stat_node_id)
-
-
-class UncheckedRule(LearnedRule):
-  '''
-  A translation rule that was learned using LLM, but has not
-  been validated or invalidated by a test-driven approach.
-  '''
-  def asdict(self) -> dict:
-    res = {
-      'type': 'UncheckedRule',
-      'rule_str': self.__str__(),
-      'src_node_id': self.src_node_id,
-      'src_stat_node_id': self.src_stat_node_id,
-    }
-    return res
-
-  @classmethod
-  def from_dict(cls, data: dict) -> 'UncheckedRule':
-    '''
-    Create an UncheckedRule from a dict.
-    PARAM data: a dictionary representing an UncheckedRule.
-    '''
-    assert data['type'] == 'UncheckedRule', 'Expected type to be UncheckedRule'
-    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(data['rule_str'])
-    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
-    rule = parsed_rules[0]
-    assert 'src_node_id' in data, 'Expected src_node_id in data'
-    assert 'src_stat_node_id' in data, 'Expected src_stat_node_id in data'
-    src_node_id = data['src_node_id']
-    src_stat_node_id = data['src_stat_node_id']
-    assert isinstance(src_node_id, int), 'Expected src_node_id to be an int'
-    assert isinstance(src_stat_node_id, int), 'Expected src_stat_node_id to be an int'
-    return UncheckedRule(rule, src_node_id, src_stat_node_id)
-
-  @classmethod
-  def from_str(cls, rule_str: str, src_node_id: int, src_stat_node_id: int) -> 'UncheckedRule':
-    '''
-    PARAM rule_str: a string representing a translation rule in the standard format.
-    '''
-    rules, _ = d_grammar_rules.parse_analyze_rules(rule_str)
-    assert len(rules) == 1, f'Expected exactly one rule, got {len(rules)}'
-    rule = rules[0]
-    return UncheckedRule(rule, src_node_id, src_stat_node_id)
 
 
 class Ruleset:
+  '''
+  Represents a set of translation rules.
+
+  PROPERTY matcher_groups: is a dictionary that groups rules
+  by their matcher signatures.
+  INV: rules in self._verified_rules are also in self.rules
+  '''
   def __init__(self):
     self.rules : List[TRuleBase] = []
+    # Each time the ruleset is modified, call _update_matcher_groups() to update this property.
+    self.matcher_groups: Dict[str, List[TRuleBase]] = {}
+    # unparsed AST node -> TRuleBase
+    self._verified_rules: Dict[str, TRuleBase] = {}
 
   def __str__(self):
-    return self.to_json()
+    return json.dumps(self.to_dict(), indent=2)
 
-  def exists(self, rule_id: int) -> bool:
-    '''
-    Check if a rule with the given ID exists in the ruleset.
-    '''
-    assert isinstance(rule_id, int), 'Expected rule_id to be an int'
-    if rule_id < 0 or rule_id >= len(self.rules):
-      return False
-    return True
+  def _update_matcher_groups(self):
+    self.matcher_groups = {}
+    for rule in self.rules:
+      sig = rule.get_matcher_signature()
+      self.matcher_groups.setdefault(sig, []).append(rule)
 
-  def get_rule(self, rule_id: int) -> TRuleBase:
+  def append_rule(self, rule: TRuleBase):
     '''
-    Get a rule by its ID.
-    PARAM rule_id: ID of the rule to get.
+    Append a rule to the ruleset and update matcher_groups.
     '''
-    assert isinstance(rule_id, int), 'Expected rule_id to be an int'
-    if not self.exists(rule_id):
-      raise IndexError(f'Rule with ID {rule_id} does not exist')
-    return self.rules[rule_id]
+    assert isinstance(rule, TRuleBase), \
+      f'Expected rule to be subclass of TRuleBase, got {type(rule)}'
+    self.rules.append(rule)
+    self._update_matcher_groups()
 
-  def set_rule(self, rule_id: int, rule: TRuleBase) -> None:
+  def prepend_rule(self, rule: TRuleBase):
     '''
-    Set a rule at the given ID.
-    PARAM rule_id: ID of the rule to set.
-    PARAM rule: the rule to set.
+    Prepend a rule to the ruleset and update matcher_groups.
     '''
-    assert isinstance(rule_id, int), 'Expected rule_id to be an int'
-    if not self.exists(rule_id):
-      raise IndexError(f'Rule with ID {rule_id} does not exist')
-    assert isinstance(rule, TRuleBase), 'Expected rule to be an instance of TRuleBase'
-    self.rules[rule_id] = rule
+    assert isinstance(rule, TRuleBase), \
+      f'Expected rule to be subclass of TRuleBase, got {type(rule)}'
+    self.rules.insert(0, rule)
+    self._update_matcher_groups()
 
-  def to_string(self) -> str:
+  def get_rule_ref(self, other_rule: TRuleBase) -> Optional[TRuleBase]:
+    '''
+    Get a reference to a rule in the ruleset that is equal to other_rule.
+    '''
+    assert isinstance(other_rule, TRuleBase), \
+      f'Expected other_rule to be subclass of TRuleBase, got {type(other_rule)}'
+    for rule in self.rules:
+      if rule == other_rule:
+        return rule
+    return None
+
+  def update_verified_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
+    if unparsed_ast in self._verified_rules:
+      existing_vrf_rule = self._verified_rules[unparsed_ast]
+      # the existing verified rule is different from the new one
+      if existing_vrf_rule != rule:
+        logger.error(f'Verified rule for "{unparsed_ast}" is being updated.')
+        logger.error(f'Old rule: {existing_vrf_rule}')
+        logger.error(f'New rule: {rule}')
+        raise RuntimeError('Verified rule is being changed')
+    self._verified_rules[unparsed_ast] = rule
+
+  def get_verified_rule(self, unparsed_ast: str) -> TRuleBase:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    assert unparsed_ast in self._verified_rules, f'No verified rule for "{unparsed_ast}"'
+    return self._verified_rules[unparsed_ast]
+
+  def verified_rule_exists(self, unparsed_ast: str) -> bool:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    return unparsed_ast in self._verified_rules
+
+  def merge_verified_rules_from(self, serialized_ruleset: dict) -> None:
+    assert isinstance(serialized_ruleset, dict), f'Unexpected type {type(serialized_ruleset)}'
+    for unparsed_ast, serialized_trule in \
+      serialized_ruleset.get('verified_rules', {}).items():
+      other_rule = TRuleBase.from_dict(serialized_trule)
+      rule = self.get_rule_ref(other_rule)
+      if rule:
+        self.update_verified_rules(unparsed_ast, rule)
+
+  def get_rule_idx_in_matcher_group(self, rule: TRuleBase) -> int:
+    '''
+    Get the index of a rule in its matcher group.
+    '''
+    sig = rule.get_matcher_signature()
+    if sig not in self.matcher_groups:
+      raise ValueError(f'No matcher group with signature {sig}')
+    matcher_group = self.matcher_groups[sig]
+    for idx, r in enumerate(matcher_group):
+      if r == rule:
+        return idx
+    raise ValueError(f'Rule is not in the ruleset: {rule}')
+
+  def add_all_rules_from_missing_matcher_groups(
+    self, matcher_groups: Dict[str, List[TRuleBase]]
+  ) -> List[TRuleBase]:
+    '''
+    Return a list of all rules, for matcher signatures that are in `matcher_groups`,
+    use the rules from `matcher_groups` and for the rest use the rules from `self.matcher_groups`.
+    Example:
+    self.matcher_groups   matcher_groups   result
+    {a, b, c}             {a}              {a}
+    {d}                                    {d}
+    {e, f}                {e}              {e}
+    {g, h, i, j}                           {g, h, i, j}
+    '''
+    trules = []
+    for mat_sig, mat_gr_rules in self.matcher_groups.items():
+      if mat_sig in matcher_groups:
+        trules.extend(matcher_groups[mat_sig])
+      else:
+        trules.extend(mat_gr_rules)
+    return trules
+
+  def get_choices_list_from_verified_rules(
+    self,
+    code: str
+  ) -> List[Tuple[Tuple[int, int, int], int]]:
+    '''
+    Given a code string, self.rules, and self._verified_rules
+    return a list of choices for all choicable nodes in `code`
+    according to self._verified_rules.
+    '''
+    choices = []
+
+    dgast, dgann = d_ast_parse.parse_text_dbg(code, 'py')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
+
+    for choicable_node in choicable_nodes:
+      choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
+      all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
+      for range_cursor in all_range_cursors:
+        range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, code)
+        if range_cursor_unparsed in self._verified_rules:
+          rule = self._verified_rules[range_cursor_unparsed]
+          rule_idx_in_matcher_group = self.get_rule_idx_in_matcher_group(rule)
+          choice_identifier = d_ast_parse.range_cursor_to_choice_identifier(range_cursor)
+          choices.append((choice_identifier, rule_idx_in_matcher_group))
+
+    return choices
+
+  # SERIALIZATION METHODS
+  def to_str_ruleset(self) -> str:
+    '''
+    Convert the ruleset to a plain string representation.
+    '''
     return '\n\n'.join([str(rule) for rule in self.rules])
 
-  def to_json(self) -> str:
+  def to_dict(self) -> dict:
     '''
-    Convert the ruleset to a JSON string.
+    Serialize the Ruleset to a dict.
     '''
-    return json.dumps(self.asdict(), indent=2)
-
-  def asdict(self) -> dict:
     res = {
       'type': 'Ruleset',
-      'rules': [rule.asdict() for rule in self.rules],
+      'rules': [rule.to_dict() for rule in self.rules],
+      'verified_rules': {k: v.to_dict() for k, v in self._verified_rules.items()},
     }
     return res
 
   @classmethod
-  def from_dict(cls, data: dict) -> 'Ruleset':
+  def from_starting_ruleset(cls, starting_ruleset: str) -> Ruleset:
     '''
-    Create a Ruleset from a dict.
-    PARAM data: a dictionary representing a Ruleset.
+    Create a Ruleset from a plain string representation of starting rules.
+    '''
+    ruleset = cls()
+    rules, _ = d_grammar_rules.parse_analyze_rules(starting_ruleset)
+    for rule in rules:
+      ruleset.rules.append(StartingTRule(rule))
+    ruleset._update_matcher_groups()
+    return ruleset
+
+  @classmethod
+  def from_dict(cls, data: dict) -> Ruleset:
+    '''
+    Create a Ruleset from a serialized dict.
     '''
     assert data['type'] == 'Ruleset', 'Expected type to be Ruleset'
     ruleset = cls()
     for rule_data in data['rules']:
-      if rule_data['type'] == 'StartingRule':
-        rule = StartingRule.from_dict(rule_data)
-      elif rule_data['type'] == 'CheckedRule':
-        rule = CheckedRule.from_dict(rule_data)
-      elif rule_data['type'] == 'UncheckedRule':
-        rule = UncheckedRule.from_dict(rule_data)
+      if rule_data['type'] == 'StartingTRule':
+        rule = StartingTRule.from_dict(rule_data)
+      elif rule_data['type'] == 'LearnedTRule':
+        rule = LearnedTRule.from_dict(rule_data)
       else:
         raise ValueError(f'Unknown rule type: {rule_data["type"]}')
       ruleset.rules.append(rule)
-    return ruleset
-
-  def prepend_rule(self, rule: TRuleBase) -> None:
-    self.rules.insert(0, rule)
-
-  @classmethod
-  def from_starting_ruleset(cls, rules_str: str):
-    ruleset = cls()
-    rules, _ = d_grammar_rules.parse_analyze_rules(rules_str)
-    for rule in rules:
-      ruleset.rules.append(StartingRule(rule))
+    ruleset._update_matcher_groups()
     return ruleset
