@@ -117,9 +117,23 @@ def parse_text_dbg(text: str, lang: str, keep_text=False) -> Tuple[list, dict]:
   return extra_root[0], ann_info
 
 
+# AST AND RANGE CURSOR RELATED FUNCTIONS
+def is_elem_non_terminal(elem) -> bool:
+  '''
+  Return True if the element is a non-terminal.
+  '''
+  if not isinstance(elem, list):
+    return False
+  if elem[0] == "anno":
+    return False
+  assert elem[0] != "fragment"
+  assert isinstance(elem[1], int)
+  return True
+
+
 def get_nid_ntype_map(ast: list) -> Dict[int, str]:
   '''
-  Get mapping of node IDs to their types of trees obtained
+  Get mapping of node IDs to their node types obtained
   from parse_text_dbg.
   '''
   nid_ntype_map = {}
@@ -175,7 +189,120 @@ def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
   return result
 
 
-def are_nodes_equal(node1, node2, ignore_nids: bool = True) -> bool:
+def get_nt_children_as_range_cursors(nt_node: list) -> list:
+  '''
+  Given a duoglot-style AST node, return a list of non-terminal
+  children as range cursors.
+  POST: range cursors specify exactly one AST node.
+  '''
+  assert is_elem_non_terminal(nt_node), 'expected non-terminal node'
+  result = []
+  for i in range(2, len(nt_node)):
+    if is_elem_non_terminal(nt_node[i]):
+      result.append((nt_node, i, i + 1))
+  return result
+
+
+def range_cursor_seq_descending_from_ast(ast: list) -> list:
+  '''
+  Given a duoglot-style AST, generate a sequence of range cursors
+  in pre-order traversal.
+  POST: Sequence does not include the AST itself, only the subtrees.
+  '''
+  assert is_elem_non_terminal(ast), 'expected non-terminal node'
+  result = []
+  def _rec_pre_order(node: list):
+    nonlocal result
+    if not is_elem_non_terminal(node):
+      return
+    for child_range_cursor in get_nt_children_as_range_cursors(node):
+      result.append(child_range_cursor)
+      child_idx = child_range_cursor[1]
+      child_ast = child_range_cursor[0][child_idx]
+      _rec_pre_order(child_ast)
+  _rec_pre_order(ast)
+  return result
+
+
+def get_all_range_cursors_under(
+  range_cursor: Tuple[list, int, int],
+) -> list:
+  '''
+  Need to add itself, because range_cursor_seq_descending_from_ast()
+  will include only the subtrees. all_range_cursors are all possible
+  range cursors under the range_cursor.
+  '''
+  choicable_ast = range_cursor_to_ast_node(range_cursor)
+  all_range_cursors = [range_cursor]  # include itself
+  choicable_range_cursor_children = range_cursor_seq_descending_from_ast(choicable_ast)
+  all_range_cursors.extend(choicable_range_cursor_children)
+  return all_range_cursors
+
+
+def range_cursor_to_ast_node(range_cursor: tuple) -> list:
+  '''
+  Convert a range cursor to an AST node.
+  range_cursor: Tuple[ List[src_ast] , int , int ]
+  PRE: range_cursor specifies exactly one AST node
+  '''
+  assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
+  assert isinstance(range_cursor[0], list)
+  assert isinstance(range_cursor[1], int)
+  assert isinstance(range_cursor[2], int)
+  assert range_cursor[1] + 1 == range_cursor[2], 'range cursors specify exactly one AST node'
+
+  # Convert the range cursor to an AST node
+  parent_ast = range_cursor[0]
+  child_ast_idx = range_cursor[1]
+  child_ast = parent_ast[child_ast_idx]
+  return child_ast
+
+
+def range_cursor_to_choice_identifier(range_cursor: tuple) -> tuple:
+  '''
+  Choice identifier is a tuple of (node_id, start_idx, end_idx).
+  It is used for identifying the node in the AST for which a rule
+  choice is made. It is used in choices_list.
+  '''
+  node, start_idx, end_idx = range_cursor
+  assert is_elem_non_terminal(node), 'sanity check'
+  node_id = node[1]
+  assert isinstance(node_id, int), 'sanity check'
+  return (node_id, start_idx, end_idx)
+
+
+def range_cursor_pretty_print(range_cursor: tuple, ann: dict, src_code: str) -> str:
+  '''
+  Pretty print the AST node specified by the range cursor.
+  PARAM range_cursor: Tuple[ List[src_ast] , int , int ]
+  PARAM ann: annotation dict from parse_text_dbg
+  PARAM src_code: original source code
+  '''
+  ast = range_cursor_to_ast_node(range_cursor)
+  return ast_pretty_print(ast, ann, src_code)
+
+
+def ast_pretty_print(ast: list, ann: dict, src_code: str) -> str:
+  '''
+  Pretty print the AST.
+  PARAM ast: duoglot-style AST node
+  PARAM ann: annotation dict from parse_text_dbg
+  PARAM src_code: original source code
+  '''
+  assert isinstance(ast, list), 'expected list'
+  assert len(ast) >= 2, 'expected at least 2 elements in ast'
+  nid = ast[1]
+  assert isinstance(nid, int), 'expected nid to be int'
+  assert nid in ann, f'nid {nid} not in annotation dict'
+  start_byte, end_byte, _, _ = ann[nid]
+  return src_code[start_byte:end_byte].strip()
+
+
+def are_nodes_equal(
+  node1: Union[list, str],
+  node2: Union[list, str],
+  ignore_nids: bool = True
+) -> bool:
   '''
   Recursively check if two AST nodes are equal.
   '''
