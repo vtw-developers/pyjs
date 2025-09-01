@@ -1366,7 +1366,7 @@ async def _test_learn_trans_rules_for_prob_node():
     subject: p_subject.PirelSubject,
     current_ruleset_str: str,
     templates_dict: dict,
-    lnode_trans_iteration: ptlog.NodeTransIteration
+    lnode_trans_iter: ptlog.NodeTransIteration
   ) -> List[str]:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_learn_trans_rules_for_prob_node_config.yaml'
@@ -1376,9 +1376,9 @@ async def _test_learn_trans_rules_for_prob_node():
   subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
   current_ruleset_str = args_dict['current_ruleset_str']
   templates_dict = args_dict['templates_dict']
-  lnode_trans_iteration = ptlog.NodeTransIter(-1)
+  lnode_trans_iter = ptlog.NodeTransIter(-1)
 
-  result = await learn_trans_rules_for_prob_node(subject, current_ruleset_str, templates_dict, lnode_trans_iteration)
+  result = await learn_trans_rules_for_prob_node(subject, current_ruleset_str, templates_dict, lnode_trans_iter)
   print('\n\n'.join(result))
 
 

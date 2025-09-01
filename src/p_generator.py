@@ -153,6 +153,9 @@ def is_do_not_change_identifier_PY(
     # mapped node must be the first child of a call node
     if mapped_node.get_parent().children[0] != mapped_node:
       return False
+    logger.debug(
+      f'Do not change identifier: mapped_node is a function name: '
+      f'{mapped_node.children[0].node_type}')
     return True
 
   def _pattern_2_is_call_attribute_PY(mapped_node: pds.DuoGlotNode) -> bool:
@@ -175,6 +178,9 @@ def is_do_not_change_identifier_PY(
     call_node = attribute_node.get_parent()
     if call_node.get_ts_node_type() != 'call':
       return False
+    logger.debug(
+      f'Do not change identifier: mapped_node is an attribute of a call: '
+      f'{mapped_node.children[0].node_type}')
     return True
 
   def _pattern_3_is_keyword_argument_of_call_PY(mapped_node: pds.DuoGlotNode) -> bool:
@@ -201,12 +207,40 @@ def is_do_not_change_identifier_PY(
     call_node = arg_list_node.get_parent()
     if call_node.get_ts_node_type() != 'call':
       return False
+    logger.debug(
+      f'Do not change identifier: mapped_node is a keyword argument of a call: '
+      f'{mapped_node.children[0].node_type}')
+    return True
+
+  def _pattern_4_builtin_module_PY(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Return true, if `mapped_node` is a builtin module name (identifier).
+    For example, `math.pi`
+                  ^^^^
+    '''
+    # mapped node must be an identifier
+    if mapped_node.get_ts_node_type() != 'identifier':
+      return False
+    # mapped node must be a child of an attribute node
+    attribute_node = mapped_node.get_parent()
+    if attribute_node.get_ts_node_type() != 'attribute':
+      return False
+    # mapped node must be the first node of the attribute node
+    if attribute_node.children[0] != mapped_node:
+      return False
+    id_literal = mapped_node.children[0].node_type
+    if id_literal not in p_consts.PY_BUILT_IN_MODULES:
+      return False
+    logger.debug(
+      f'Do not change identifier: mapped_node is a builtin module name: '
+      f'{mapped_node.children[0].node_type}')
     return True
 
   pattern_callbacks = [
     lambda: _pattern_1_is_fn_name_PY(mapped_node),
     lambda: _pattern_2_is_call_attribute_PY(mapped_node),
     lambda: _pattern_3_is_keyword_argument_of_call_PY(mapped_node),
+    lambda: _pattern_4_builtin_module_PY(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
