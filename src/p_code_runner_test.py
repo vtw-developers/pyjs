@@ -13,6 +13,7 @@ class TestExtractTraceFromStdout(unittest.TestCase):
   '''
   def setUp(self):
     self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-code-runner' / 'extract-trace-from-stdout'
+    self.maxDiff = None
 
   def get_fixtures(self, fixture_id: str) -> Tuple[str, list]:
     stdout = (self.fixture_dir_path / f'{fixture_id}-stdout.txt').read_text()
@@ -105,6 +106,13 @@ class TestExtractTraceFromStdout(unittest.TestCase):
 
   def test_013(self):
     stdout, trace_gold = self.get_fixtures('013')
+    trace = p_code_runner._extract_trace_from_stdout(stdout)
+    trace_gold_str = json.dumps(trace_gold)
+    trace_str = json.dumps(trace)
+    self.assertEqual(trace_gold_str, trace_str, 'Expected traces to match')
+
+  def test_014_no_beginning_of_line_start(self):
+    stdout, trace_gold = self.get_fixtures('014')
     trace = p_code_runner._extract_trace_from_stdout(stdout)
     trace_gold_str = json.dumps(trace_gold)
     trace_str = json.dumps(trace)

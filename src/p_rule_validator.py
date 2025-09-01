@@ -320,6 +320,7 @@ def filter_translation_rules(
 
   syn_cor_trules = []
   for idx, trule in enumerate(trules_list, start=1):
+    logger.debug(f'Checking translation rule {idx}/{len(trules_list)}:\n{trule}')
     ltrule = ptlog.TRule.from_str(trule)
     lprule_filter_log.trules_all.append(ltrule)
 
@@ -364,6 +365,7 @@ async def check_trules_test_based(
   2. ruleset_serialized contains verified rules that can be copied
      to current_ruleset
   '''
+  logger.debug('~~ Getting readonly choices list before applying translation rules')
   readonly_choices_list, ruleset_serialized = \
     await p_ext_rule_chooser.get_readonly_choices_list(
       val_subject.get_src_main_code(),
@@ -373,8 +375,11 @@ async def check_trules_test_based(
       current_ruleset.to_dict()
     )
   val_subject.readonly_choices_list = readonly_choices_list
+  logger.debug('~~ Saved readonly choices list')
 
+  logger.debug('~~ Applying translation rules to get the target program')
   tar_program_plausible = await prapp.apply_translation_rules(val_subject)
+  logger.debug('~~ Finished applying translation rules')
 
   val_subject.readonly_choices_list = []
   current_ruleset.merge_verified_rules_from(ruleset_serialized)
