@@ -130,7 +130,7 @@ def query_range(ann, ast, marks):
         included_range_info.append([node_id, node_ids_to_node_asts_dict[node_id], node_ann])
 
     if len(included_range_info) == 0:
-      logger.warning('The boundaries of source code did not match any AST nodes. '
+      logger.debug('The boundaries of source code did not match any AST nodes. '
                      'It might be due to multiple AST nodes under a root node. '
                      'For example, multiple `expression_statement` nodes under `module` node.')
 
@@ -229,7 +229,7 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
 
     # should not happen in proper AST's
     elif isinstance(_node, int):
-      logger.warning(f'unexpected int node: {_node}')
+      logger.error(f'unexpected int node: {_node}')
 
     # `node` is terminal
     else:
@@ -237,7 +237,7 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
         return ['val', _node]
       else:
         if is_ignore_str:
-          logger.warning(f'str node (ignored): {_node}')
+          logger.debug(f'str node (ignored): {_node}')
           return ''
         return ['str', _node]
 
@@ -710,7 +710,7 @@ def infer_translation_rule(
         src_unified_pattern = translation_rule.src_as_s_expression()
         tar_unified_pattern = translation_rule.tar_as_s_expression()
       except prpp.SecretNodeNotFoundError as err:
-        logger.warning(err)
+        logger.debug(err)
         break
 
   # 11
@@ -718,7 +718,6 @@ def infer_translation_rule(
 
 
 def infer_translation_rule_wrapper(
-  subject: p_subject.PirelSubject,
   translation_pair: dict,
   src_lang: str,
   tar_lang: str,
@@ -734,7 +733,7 @@ def infer_translation_rule_wrapper(
 
   TODO consider option to choose the largest or smallest containing nodes.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-infer_translation_rule_wrapper.json', locals())
+  p_utils.log_json_time(f'args-infer_translation_rule_wrapper.json', locals())
 
   logger.debug(f'Translation pair:\n{json.dumps(translation_pair, indent=2)}')
   logger.debug(f'Context:\n{json.dumps(context, indent=2)}')
@@ -752,26 +751,22 @@ def infer_translation_rule_wrapper(
 
   logger.debug(
     f'Inferred translation rule:\n{translation_rule}\n'
-    f'Rule hash value: {d_utils.string_sha256(translation_rule)}'
-  )
-  p_utils.log_file_time(f'{subject.name}_learned-translation-rule.snart', translation_rule)
+    f'Rule hash value: {d_utils.string_sha256(translation_rule)}')
+  p_utils.log_file_time(f'learned-translation-rule.snart', translation_rule)
 
   return translation_rule
 
 
 def infer_translation_rules(
-  subject: p_subject.PirelSubject,
   template_dict: dict,
   translation_pairs: List[Tuple[Dict[str, str], Dict[str, str]]],
   lprule_inf_log: ptlog.PRuleInfLog
 ) -> List[str]:
   '''
   Infer translation rules for multiple translation pairs.
-
   RAISE None. All exceptions are handled.
   '''
-  p_utils.log_json_time(f'{subject.name}_args-infer_translation_rules.json', locals())
-
+  p_utils.log_json_time(f'args-infer_translation_rules.json', locals())
   lprule_inf_log.start_time = p_utils.current_time_sec()
 
   contexts : List[Dict[str, List[List[str]]]] = template_dict['contexts']
@@ -781,8 +776,7 @@ def infer_translation_rules(
 
   logger.debug(
     f'Attempting to infer translation rules from '
-    f'{len(translation_pairs)} translation pairs and {len(contexts)} contexts'
-  )
+    f'{len(translation_pairs)} translation pairs and {len(contexts)} contexts')
 
   _pot_rule_idx = 0
   _num_pot_rules = len(translation_pairs) * len(contexts) * 2 * 2
@@ -811,7 +805,6 @@ def infer_translation_rules(
           # NOTE be graceful, and skip translation pairs from which we get errors.
           try:
             translation_rule = infer_translation_rule_wrapper(
-              subject,
               translation_pair,
               src_lang,
               tar_lang,
@@ -837,18 +830,20 @@ def infer_translation_rules(
 
             else:
               msg = 'This rule already exists in the list. Skipping.'
-              logger.warning(msg)
+              logger.debug(msg)
               lrule_inf_comb.reason = msg
 
           except Exception as exc:
             msg = 'Error during rule inference. Skip this one\n'
             msg += p_utils.exception_to_str(exc)
-            logger.warning(msg)
+            logger.debug(msg)
             lrule_inf_comb.reason = msg
 
           logger.debug(f'the number of translation rules so far is {len(trules_list)}')
 
   lprule_inf_log.end_time = p_utils.current_time_sec()
+  if len(trules_list) == 0:
+    logger.warning('No translation rules were inferred from the given translation pairs and contexts.')
   return trules_list
 
 
@@ -856,7 +851,6 @@ def infer_translation_rules(
 def _test_infer_translation_rule_wrapper():
   '''
   def infer_translation_rule_wrapper(
-    subject: p_subject.PirelSubject,
     translation_pair: dict,
     src_lang: str,
     tar_lang: str,
@@ -870,7 +864,6 @@ def _test_infer_translation_rule_wrapper():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict_config(json.loads(args_dict['subject']))
   translation_pair = args_dict['translation_pair']
   src_lang = args_dict['src_lang']
   tar_lang = args_dict['tar_lang']
@@ -880,7 +873,6 @@ def _test_infer_translation_rule_wrapper():
   is_ignore_semicolon = args_dict['is_ignore_semicolon']
 
   trule = infer_translation_rule_wrapper(
-    subject,
     translation_pair,
     src_lang,
     tar_lang,
