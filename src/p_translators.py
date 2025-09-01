@@ -7,7 +7,7 @@ import p_utils
 
 logger = p_utils.setup_logger(__name__)
 _TRANSLATORS_CACHE = {}
-_MAX_CACHE_SIZE = 50
+_MAX_CACHE_SIZE = 1000
 
 
 def get_translator_cached(
@@ -18,8 +18,9 @@ def get_translator_cached(
   slot_dedup_enabled: bool,
 ) -> d_grammar_expand.TransSession:
 
-  translator_key = d_utils.strings_sha256([src_code, translation_rules, src_lang, tar_lang, str(slot_dedup_enabled)])
-  logger.debug(f'get_translator: translator_key={translator_key}, cache size={len(_TRANSLATORS_CACHE)}')
+  translator_key = d_utils.strings_sha256(
+    [src_code, translation_rules, src_lang, tar_lang, str(slot_dedup_enabled)])
+  logger.debug(f'translators cache size: {len(_TRANSLATORS_CACHE)}')
 
   if len(_TRANSLATORS_CACHE) > _MAX_CACHE_SIZE:
     logger.debug('Cache size exceeded, clearing cache')
@@ -65,5 +66,4 @@ def get_translator_cached(
     _TRANSLATORS_CACHE[translator_key] = translator_info
 
   assert translator is not None and translator_info is not None
-
   return translator
