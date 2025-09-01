@@ -63,7 +63,7 @@ def _extract_trace_from_stdout(stdout: str) -> list:
   return ['list', len(trace), trace]
 
 
-def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
+def extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
   '''
   Parse the error message from the stderr of the JS code.
 
@@ -104,7 +104,7 @@ def _extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
 
     # new error type identified
     if error_type is None:
-      msg = f'_extract_err_from_stderr_JS: Unknown error type in stderr: {stderr}'
+      msg = f'extract_err_from_stderr_JS: Unknown error type in stderr: {stderr}'
       logger.error(msg)
       raise RuntimeError(msg)
 

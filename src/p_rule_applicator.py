@@ -665,7 +665,7 @@ async def _run_tests(
     assert src_trace_size > tar_trace_size, \
       'NOT SUPPORTED: src_trace must be strictly longer than tar_trace'
 
-    tar_error_dict = p_code_runner._extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
+    tar_error_dict = p_code_runner.extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
     raise TarTestScriptRunError(tar_error_dict)
 
   # 3. compare traces
