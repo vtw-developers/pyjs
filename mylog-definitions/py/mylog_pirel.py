@@ -60,6 +60,9 @@ def serialize(arg):
   if isinstance(arg, KeysView):
     # e.g. myexactlog(frequency.keys())
     return serialize_list(list(arg))
+  if isinstance(arg, range):
+    # e.g. myexactlog(range(n + 1))
+    return serialize_list(list(arg))
   str_result = str(arg)
   return ["unknown", len(str_result), str_result]
 
