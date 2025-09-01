@@ -1,4 +1,3 @@
-import itertools
 import json
 from functools import reduce
 from random import sample
@@ -8,9 +7,8 @@ import d_ast_parse
 import p_consts
 import p_data_structures as pds
 import p_grammar
-import p_subject
 import p_utils
-import p_visitor_py
+import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
@@ -103,7 +101,7 @@ def is_force_identifiers_PY(
   def _pattern_1_mapped_node_is_identifier(mapped_node: pds.DuoGlotNode) -> bool:
     if mapped_node.get_ts_node_type() != 'identifier':
       return False
-    logger.warning('Forcing identifiers: mapped_node is an identifier')
+    logger.debug('Forcing identifiers: mapped_node is an identifier')
     return True
 
   def _pattern_2_call_attribute(mapped_node: pds.DuoGlotNode) -> bool:
@@ -297,9 +295,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     # Since `template_origin` is already simplified, we use it to get the `problematic_node`.
     template_origin = template_dict['template_origin']
     lang = template_dict['src_lang']
-    ast, _ = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=False)
-
-    # p_utils.write_tmp_json('1ast.json', ast)  # NOTE for debugging only
+    ast, ann = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=False)
 
     tree = pds.DuoGlotTree(ast)
     # `root_node` of `tree` should have only a single child, which is a `context_node`
@@ -308,6 +304,15 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     context_node = root_node.get_children()[0]
     problematic_node_path = template_dict['problematic_node_path']
     problematic_node = context_node.get_child_by_path(problematic_node_path)
+
+    problematic_node_str = d_ast_parse.range_cursor_pretty_print(
+      d_ast_parse.get_range_cursor(ast, problematic_node.get_id()),
+      ann, template_origin
+    )
+    logger.info(f'Problematic node is "{problematic_node}".')
+    logger.info(f'Context code is:\n{template_origin}')
+    logger.info(f'Problematic code is:\n{problematic_node_str}')
+
     return problematic_node
 
   def _is_valid_fuzz_node(node: pds.DuoGlotNode, template_dict: dict, grammar: p_grammar.TreeSitterGrammar) -> bool:
@@ -621,8 +626,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       return mapped_node.children[0].node_type
 
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-    code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
+    ast_tree = pvpy.Tree.from_gen_ast(ast)
+    code = pvpy.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
     return code
 
   def _gen_code_pair_for_node_with_check(
@@ -843,15 +848,16 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       filtered_program_pairs.append(program_pair)
     return filtered_program_pairs
 
-  # p_utils.write_tmp_json('1template_dict.json', template_dict)  # NOTE for debugging only
-
-  logger.info('~~~ Starting API call to p_generator.generate_tsps_with_generator')
+  logger.info('~~~ Starting generator based TSP generation.')
 
   # INPUTS TO THE GENERATOR
   lang = template_dict['src_lang']
   grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
   problematic_node = _init_problematic_node(template_dict)
-  logger.debug(f'Problematic node is "{problematic_node}"')
+  logger.debug(
+    f'Problematic node is "{problematic_node}". '
+    f'Problematic node unparsed:\n{template_dict["template_origin"]}'
+  )
 
   # before automatic generation, check if we can use manually generated TSPs
   # specific to Python
@@ -862,13 +868,10 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
   # `program_pairs` is a list of tuples, each tuple is a pair of programs
   program_pairs : List[Tuple[str, str]] = []
-  _program_pairs_dbg = []  # NOTE for debugging only
 
   # GROUPS OF NODES THAT CAN BE ROOTS OF ALTERNATIVE ASTs (similar to templatized nodes)
   fuzz_node_groups = _gen_seq_fuzz_node_groups(problematic_node, template_dict)
   logger.debug(f'There are {len(fuzz_node_groups)} fuzz node groups.')
-
-  # p_utils.write_tmp_json('1fuzz_node_groups.json', fuzz_node_groups)  # NOTE for debugging only
 
   for group_idx, fuzz_node_group in enumerate(fuzz_node_groups):
     # NOTE EXPERIMENTAL resetting a flag in `template_dict`
@@ -895,8 +898,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       else:
         all_alt_starting_nodes.append((node, [node.get_ts_node_type()]))
 
-    # p_utils.write_tmp_json(f'1fuzz_node_group_{group_idx}.json', all_alt_starting_nodes)  # NOTE for debugging only
-
     # APPLY ALTERNATIVE CODES AT DESIGNATED LOCATIONS
     # Since `fuzz_node_groups` are ordered from root nodes to leaf nodes,
     # `program_pairs` ends up containing the most abstract program pairs
@@ -906,11 +907,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     try:
       gen_src_prog_1, gen_src_prog_2 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
       program_pairs.append((gen_src_prog_1, gen_src_prog_2))
-      _program_pairs_dbg.append((gen_src_prog_1, gen_src_prog_2, str(fuzz_node_group)))  # NOTE for debugging only
     except _CannotGenerateProgramPairError:
       continue
-
-  # p_utils.write_tmp_json('1gen_program_pairs.json', _program_pairs_dbg)  # NOTE for debugging only
 
   # remove duplicates, sanity check
   unique_tsps = _filter_program_pairs(program_pairs, template_dict)
@@ -919,7 +917,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   return unique_tsps
 
 
-def simplify_template_with_generator(subject: p_subject.PirelSubject, template_dict: dict) -> dict:
+def simplify_template_with_generator(template_dict: dict) -> dict:
   '''
   Given a template_origin, problematic_node, and context_node,
   replace everything around problematic_node with a generated basic type
@@ -1029,8 +1027,8 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
   def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
     '''NOTE the generated code may have semantic errors'''
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-    code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
+    ast_tree = pvpy.Tree.from_gen_ast(ast)
+    code = pvpy.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
     return code
 
   def _gen_code_for_node(
@@ -1142,17 +1140,17 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
     gen_src_prog = _apply_alt_codes(alternative_codes, template_dict)
     return gen_src_prog
 
-  logger.debug('~~~ Starting API call to simplify_template_with_generator')
-  grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[subject.src_lang])
+  logger.debug('~~~ Starting generator based snippet simplification')
+  grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[template_dict['src_lang']])
   context_node, problematic_node = _get_context_problematic_nodes(
     template_dict['template_origin'],
-    subject.src_lang,
+    template_dict['src_lang'],
     template_dict['problematic_node_path']
   )
   simplifiable_nodes = _rec_collect_simplifiable_nodes(
     context_node,
     problematic_node,
-    subject.src_lang,
+    template_dict['src_lang'],
     is_simplify_nodes_before_prob_node=False
   )
   simplifiable_parents = _get_simplifiable_parents(simplifiable_nodes)
@@ -1169,7 +1167,7 @@ def simplify_template_with_generator(subject: p_subject.PirelSubject, template_d
   # NOTE problematic_node_path must be the same, since we haven't removed any nodes
   upd_context_node, upd_problematic_node = _get_context_problematic_nodes(
     simplified_template,
-    subject.src_lang,
+    template_dict['src_lang'],
     template_dict['problematic_node_path']
   )
 
@@ -1207,81 +1205,5 @@ def _test_generate_tsps_with_generator():
     print('')
 
 
-def _run_generate_tsps_with_generator():
-  '''
-  Run `generate_tsps_with_generator` on a list of template_dicts
-  to check the TSP generation on multitude of templates.
-  template_dict must include:
-  - template_origin: str
-  - src_lang: str
-  - problematic_node_path: List[int]
-  - is_insert_secret_fn: bool
-  '''
-  dir_path = p_consts.TEST_ARTIFACTS_DIR / 'tsp-generator'
-
-  # NOTE use this to bulk rename the files
-  # for idx, td_fpath in enumerate(dir_path.glob('*.json'), start=1):
-  #   new_fpath = dir_path / f'template_dict_{idx:03d}.json'
-  #   td_fpath.rename(new_fpath)
-  # return
-
-  # NOTE use this to remove duplicate template_dicts
-  # import d_utils
-  # hashes = []
-  # for idx, td_fpath in enumerate(sorted(dir_path.glob('*.json')), start=1):
-  #   template_dict = p_utils.read_json(td_fpath)
-  #   template_origin = template_dict['template_origin']
-  #   context_node_type = template_dict['context_node_type']
-  #   context_node_id = template_dict['context_node_id']
-  #   problematic_node_type = template_dict['problematic_node_type']
-  #   problematic_node_id = template_dict['problematic_node_id']
-  #   problematic_node_path = template_dict['problematic_node_path']
-  #   dna = f'{template_origin}{context_node_type}({context_node_id}){problematic_node_type}({problematic_node_id})[{problematic_node_path}]'
-  #   dna_hash = d_utils.string_sha256(dna)
-  #   if dna_hash in hashes:
-  #     td_fpath.unlink()
-  #     continue
-  #   hashes.append(dna_hash)
-  # return
-
-  import p_data_structures
-  all_tdict_fpaths = sorted(dir_path.glob('*.json'))
-  for idx, td_fpath in enumerate(all_tdict_fpaths, start=1):
-    # if idx not in []: continue
-    logger.debug(f'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Processing {idx}/{len(all_tdict_fpaths)}: {td_fpath.name}')
-
-    # unpack the template_dict
-    template_dict = p_utils.read_json(td_fpath)
-    template_origin = template_dict['template_origin']
-    context_node_type = template_dict['context_node_type']
-    context_node_id = template_dict['context_node_id']
-    problematic_node_type = template_dict['problematic_node_type']
-    problematic_node_id = template_dict['problematic_node_id']
-    problematic_node_path = template_dict['problematic_node_path']
-
-    # get the context and problematic nodes
-    ast_text, ann_text = d_ast_parse.parse_text_dbg(template_origin, template_dict['src_lang'], keep_text=True)
-    tree_text = p_data_structures.PirelTree(ast_text, ann_text)
-    tree_text._fix_indentation()
-    root_node = tree_text.get_root_node()
-    assert len(root_node.get_children()) == 1, 'Root node of template origin must have just a single child'
-    context_node = root_node.get_children()[0]
-    problematic_node = context_node.get_child_by_path(problematic_node_path)
-    assert context_node.get_id() == context_node_id, 'sanity check'
-    assert problematic_node.get_id() == problematic_node_id, 'sanity check'
-    assert context_node.get_ts_node_type() == context_node_type, 'sanity check'
-    assert problematic_node.get_ts_node_type() == problematic_node_type, 'sanity check'
-
-    # generate TSPs
-    logger.debug(f'context code: \n"{context_node.get_ts_node_type()}"\n"\n{context_node.get_text()}\n"')
-    logger.debug(f'problematic code: \n"{problematic_node.get_ts_node_type()}"\n"\n{problematic_node.get_text()}\n"')
-    tsps = generate_tsps_with_generator(template_dict)
-
-    # NOTE uncomment to update the template_dict with generated TSPs
-    # template_dict['tsps'] = tsps
-    # p_utils.write_json(td_fpath, template_dict)
-
-
 if __name__ == '__main__':
-  # _test_generate_tsps_with_generator()
-  _run_generate_tsps_with_generator()
+  _test_generate_tsps_with_generator()
