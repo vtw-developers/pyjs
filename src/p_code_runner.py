@@ -174,7 +174,6 @@ async def _run_code(code: str, lang: str,
     raise
   else:
     p_utils.log_file_time(f'{lang}-stdout.txt', stdout)
-    logger.debug(f'{lang} stderr: "\n{stderr.strip()}\n"')
     return stdout, stderr
 
 

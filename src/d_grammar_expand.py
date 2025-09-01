@@ -170,8 +170,6 @@ class TransSession():
     - ...
     '''
 
-    logger.debug(f'Starting TransSession.get_translation()')
-
     choice_type = choices['type']
     if choice_type == 'STEP':
       choices_dict = {x:y for x, y in choices['choices_list']}
@@ -317,16 +315,15 @@ class TransSession():
 
       # 3 ~~~~~ PiREL template extraction entrypoint
       if expansion is None:
-        logger.debug(f'No expansion found for slot_id: {new_node_corres_slot_id} (idx: {slot_expan_idx})')
+        logger.debug(f'Problematic node found during translation: no translation rule to handle it.')
 
         skip_template_extraction = kwargs.get('skip_template_extraction', False)
         if skip_template_extraction:
-          logger.debug('Skipping template extraction. Just problematic node type and id will be returned.')
+          logger.debug('Skipping template extraction. Just problematic node type and id will be extracted.')
           prob_ntype, prob_nid = self.pirel_get_problematic_node(new_node_corres_slot_id)
           templates_dict = {'problematic_node_type': prob_ntype, 'problematic_node_id': prob_nid}
           raise TranslationRuleNotFoundException(templates_dict)
 
-        logger.debug('There is no translation rule for this node. PiREL template extraction will be performed.')
         templates_dict: dict = self.pirel_get_templates(new_node_corres_slot_id)
         raise TranslationRuleNotFoundException(templates_dict)
 

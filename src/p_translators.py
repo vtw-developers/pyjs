@@ -30,7 +30,7 @@ def get_translator_cached(
   translator = None
 
   if translator_key in _TRANSLATORS_CACHE:
-    logger.debug('Translator found in cache')
+    logger.debug('cache hit: translator found in cache')
     translator_info = _TRANSLATORS_CACHE[translator_key]
     assert translator_info['src_code'] == src_code
     assert translator_info['translation_rules'] == translation_rules
@@ -39,7 +39,7 @@ def get_translator_cached(
     translator = translator_info['translator']
 
   else:
-    logger.debug('Translator not found in cache')
+    logger.debug('cache miss: translator not found in cache')
     src_ast, src_ann = d_ast_parse.parse_text_dbg(src_code, src_lang)
     target_grammar = p_consts.GRAMMAR_DICT[tar_lang]
     _optional_dbg_info_save_func = lambda *args, **kwargs: None

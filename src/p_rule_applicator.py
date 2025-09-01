@@ -591,6 +591,8 @@ async def _run_tests(
     msg = f'SHOULD NOT HAPPEN! Error running src test script: {src_stderr}'
     logger.critical(msg)
     raise SrcTestScriptRunError(msg)
+  else:
+    logger.debug('GOOD No errors running src test script.')
 
   # 2. run `tar_program_instr` and collect output trace
   tar_trace, tar_std_error = await p_code_runner.run_tar_test_script(tar_program_instr, subject)
@@ -639,7 +641,7 @@ async def _run_tests(
 
   # there is an error in running tar test script
   if tar_std_error != '':
-    logger.error(f'Error running tar test script: "{tar_std_error}"')
+    logger.debug(f'BAD Error running tar test script:\n{tar_std_error.strip()}')
     '''
     Sometimes, it might be the case that at the time an error occurs in tar test script,
     there already is a trace mismatch between src and tar traces. This suggests that the
@@ -648,9 +650,9 @@ async def _run_tests(
     are identical by choosing the correct translation rule.
     '''
     if not does_trace_subsume_another(src_trace, tar_trace):
-      logger.error('Trace mismatch between src and tar traces at the time of tar test script error.')
+      logger.debug('Trace mismatch between src and tar traces at the time of tar test script error.')
       error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
-      logger.error(f'Trace mismatch error lines:\n{json.dumps(error_lines, indent=2)}')
+      logger.debug(f'Trace mismatch error lines:\n{json.dumps(error_lines, indent=2)}')
       raise TraceMismatchError(error_lines)
 
     '''
@@ -667,12 +669,14 @@ async def _run_tests(
 
     tar_error_dict = p_code_runner.extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
     raise TarTestScriptRunError(tar_error_dict)
+  else:
+    logger.debug('GOOD No errors running tar test script.')
 
   # 3. compare traces
   are_traces_identical = are_traces_equal_rec(src_trace, tar_trace)
   if not are_traces_identical:
     error_lines = _extract_err_lines_from_trace_mismatch(src_trace, tar_program_instr, tar_trace)
-    logger.error(
+    logger.debug(
       f'Traces are not identical. There is a semantic error in translation.\n'
       f'error_lines:\n{json.dumps(error_lines, indent=2)}')
     raise TraceMismatchError(error_lines)
@@ -841,7 +845,7 @@ async def apply_translation_rules(
     'with different combinations of translation rules')
   iteration = 0
   while True:
-    logger.debug(f'apply_translation_rules.iteration {iteration}')
+    logger.debug(f'apply_translation_rules.iteration {iteration} starts')
     iteration += 1
 
     tar_main_code_instr, map_to_exid, translate_dbg_history = \
@@ -894,6 +898,8 @@ async def apply_translation_rules(
       )
 
       current_choices = proposed_choices
+
+    logger.debug(f'apply_translation_rules.iteration {iteration} ended')
 
 
 # USAGE
