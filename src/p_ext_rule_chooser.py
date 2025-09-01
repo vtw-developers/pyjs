@@ -681,15 +681,15 @@ async def _validate_matcher_group_no_intersection(
         matched_range_cursor, dgann, src_main_code)
       ruleset.update_verified_rules(range_cursor_unparsed, rule)
       logger.debug(
-        f'Rule {idx} is plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
+        f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
+        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
       return
 
     except Exception as err:
       logger.warning(
         f'Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
-        f'Rule {idx} is not plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
+        f'Rule {idx}/{len(matcher_group)} is not plausible with respect to the matched AST:\n{rule}\n'
+        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
       continue
 
   raise AllRulesInMatcherGroupImplausibleError(
@@ -761,15 +761,15 @@ async def _validate_matcher_group_single_intersection(
         matched_range_cursor, dgann, src_main_code)
       ruleset.update_verified_rules(range_cursor_unparsed, rule)
       logger.debug(
-        f'Rule {idx} is plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
+        f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
+        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
       return
 
     except Exception as err:
-      logger.warning(f'Error while applying translation rules: {err}')
       logger.warning(
-        f'Rule {idx} is not plausible with respect to the matched AST: {rule}\n'
-        f'Matched AST: {d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}')
+        f'Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
+        f'Rule {idx}/{len(matcher_group)} is not plausible with respect to the matched AST:\n{rule}\n'
+        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
       continue
 
   raise AllRulesInMatcherGroupImplausibleError(
@@ -894,7 +894,7 @@ async def _process_match_obj(
     'slot_cursors': slot_cursors  # list of slot cursors that match the range cursor
   }
   '''
-  logger.debug('~~~ starting _process_match_obj')
+  logger.debug('~~~ Starting match object processing')
   assert match_obj['is_matched'], 'Expected match_obj to be matched'
   range_cursor = match_obj['range_cursor']
 
@@ -930,21 +930,22 @@ async def _process_match_obj(
   Need to check if we can handle all slot cursors.
   '''
   subtrees_rules = []
-  for slot_cursor in slot_cursors:
+  for idx, slot_cursor in enumerate(slot_cursors, start=1):
     '''
     We need to check if there are rules that plausibly translate the slot_cursors
     under the matched range_cursor.
     '''
     subtrees_plausible_rules = get_rules_that_handle_range_cursor_rec(
       slot_cursor, ruleset, dgann, src_main_code)
-    logger.debug(f'Slot cursor AST: {d_ast_parse.range_cursor_pretty_print(slot_cursor, dgann, src_main_code)}')
+    logger.debug(
+      f'Slot cursor {idx}/{len(slot_cursors)} AST: '
+      f'"{d_ast_parse.range_cursor_pretty_print(slot_cursor, dgann, src_main_code)}"')
 
     '''
     If there is no rule that can handle the range_cursor,
     it means we need to check the next matching rule group.
     '''
     if subtrees_plausible_rules is None:
-      logger.warning('No rule to handle the slot cursor')
       raise NoRuleToHandleRangeCursorError
 
     logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_plausible_rules)}')
@@ -964,6 +965,8 @@ async def _process_match_obj(
     translation_rules_test_code,
     dgann
   )
+
+  logger.debug('~~~ Ended match object processing')
 
 
 async def process_choicable_range_cursor(
@@ -1004,7 +1007,7 @@ async def process_choicable_range_cursor(
   match_objs = [match_obj for match_obj in match_objs if match_obj['is_matched']]
 
   if len(match_objs) == 0:
-    logger.debug('No range cursor matches the matcher. Exiting.')
+    logger.debug('No range cursor matches the matcher. Matcher group will be removed from the queue.')
     return
 
   logger.debug(f'Number of range cursors that match the matcher: {len(match_objs)}')
@@ -1018,8 +1021,8 @@ async def process_choicable_range_cursor(
     range_cursor = match_obj['range_cursor']
     logger.debug(
       f'Processing match_obj {idx}/{len(match_objs)}:\n'
-      f'matcher_signature: {matcher_signature}\n'
-      f'matched AST: {d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
+      f'-> matcher signature: {matcher_signature}\n'
+      f'-> matched AST: "{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
 
     # Process the match object
     try:
@@ -1037,7 +1040,7 @@ async def process_choicable_range_cursor(
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
     except NoRuleToHandleRangeCursorError:
-      logger.debug('No rule to handle the range cursor. Continuing with the next match_obj.')
+      logger.debug('Not enough rules to handle the slot cursor. Continuing with the next match_obj.')
       flag_unhandled_exists = True
       continue
     except ExprLogStatHasParseError:
@@ -1127,7 +1130,7 @@ async def get_readonly_choices_list(
 
     logger.debug(
       f'Processing choicable_range_cursor {i}/{len(crcpcs)}: '
-      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}\n')
+      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}')
 
     '''
     Matcher groups are groups of rules that have the same matcher signature.
@@ -1629,7 +1632,7 @@ def get_proposed_choices_compile_error(
 
   logger.debug(
     f'there was an error running `tar_program_instr`\n'
-    f'{error_type} "{error_msg}" on line {err_line_idx + 1} of "{line_content}"\n')
+    f'{error_type} "{error_msg}" on line {err_line_idx + 1} of "{line_content}"')
 
   new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
@@ -1666,7 +1669,7 @@ def get_proposed_choices_semantic_error(
   logger.debug('Starting p_ext_rule_chooser.get_proposed_choices_compile_error')
   logger.debug(
     f'There are {len(error_lines)} error lines in the semantic error\n'
-    f'{json.dumps(error_lines, indent=2)}\n')
+    f'{json.dumps(error_lines, indent=2)}')
 
   assert len(error_lines) > 0, 'there must be at least one semantic error line'
   error_line_nums = list(error_lines.keys())

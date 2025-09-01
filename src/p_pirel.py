@@ -830,7 +830,6 @@ def duoglot_translate_wrapper(
   '''
 
   p_utils.log_json_time(f'args-duoglot_translate_wrapper.json', locals())
-  logger.debug(f'Starting p_pirel.duoglot_translate_wrapper')
 
   assert src_code.isascii()
   assert choices['type'] in ['STEP', 'ASTNODE'], 'Unknown choices type'
@@ -1141,7 +1140,7 @@ async def stat_node_learn_trules_standard(
       lnode_trans_iter
     )
 
-    logger.debug(f'Appending {len(trules_list)} newly learned translation rules.')
+    logger.debug(f'Appending {len(trules_list)} new translation rules.')
     for trule in trules_list:
       new_learned_trules.append(trule)
 
@@ -1164,7 +1163,10 @@ async def stat_node_validate_trules(
   '''
 
   p_utils.log_json_time(f'args-stat_node_validate_trules.json', locals())
-  logger.info('~~ Starting statement node translation rule validation')
+  logger.info('Starting statement node translation rule validation')
+  logger.debug(
+    f'stat-val: Current ruleset (excluding starting rules):\n'
+    f'{"\n".join([str(r) for r in current_ruleset.rules if isinstance(r, p_ruleset.LearnedTRule)])}')
 
   # 1. check for problematic nodes in the statement node
   templates_dict = _can_translate(
@@ -1191,6 +1193,8 @@ async def stat_node_validate_trules(
     stat_val_subject,
     current_ruleset
   )
+
+  logger.debug('stat-val: finished internal validation successfully')
 
 
 async def stat_node_main_learn_validate_trules(
@@ -1220,7 +1224,7 @@ async def stat_node_main_learn_validate_trules(
   iter_counter = 0
   while iter_counter < _MAX_NUM_ITERS:
     iter_counter += 1
-    logger.debug(f'~ Statement node main validate-learn loop iteration #{iter_counter}')
+    logger.debug(f'stat-main: Statement node main validate-learn loop iteration #{iter_counter}')
 
     stat_learn_subject = _create_stat_learn_subject(
       main_subject, simple_ntext, current_ruleset, simple_nchoices)
@@ -1309,7 +1313,9 @@ async def learn_trans_rules_for_subject(
   '''
   assert subject.is_three_split, 'assume for now, maybe remove for SKEL?'
   stat_nodes = _get_statement_nodes(subject.get_src_main_code(), subject.src_lang)
-  logger.debug(f'There are {len(stat_nodes)} statement nodes in src_main_code')
+  logger.debug(
+    f'There are {len(stat_nodes)} statement nodes in src_main_code:\n'
+    f'{subject.get_src_main_code()}')
 
   for sn_idx, stat_node in enumerate(stat_nodes, start=1):
     logger.debug(f'Statement node {sn_idx}/{len(stat_nodes)}')

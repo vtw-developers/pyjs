@@ -87,6 +87,8 @@ def _create_subject_for_apply_phase(
   '''
   Create a PirelSubject instance for the application phase.
   '''
+  logger.debug('Creating subject for application phase')
+  p_utils.log_json_time('args-_create_subject_for_apply_phase.json', locals())
   assert main_subject.is_three_split, 'expected three-split subject'
 
   # all attributes of PirelSubject instance set explicitly
