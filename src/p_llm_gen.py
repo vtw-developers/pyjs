@@ -3,14 +3,14 @@ This module is an attempt to generate translation rules statefully.
 
 Class diagram
                                         BasePirelTask
-                                        │     │    │
-                                        │     │    │
-                                        │     │    │
-                                        │     │    │
-                                        │     │    │
-                                        │     │    │
-                  ◄─────────────────────┘     ▼    └──────────────────────►
-        *SimplifyTemplateG             BaseTranslateSP1Task         BaseTranslateSP2Task
+                                              │    │
+                                              │    │
+                                              │    │
+                                              │    │
+                                              │    │
+                                              │    │
+                                              └──────────────────────►
+                                       BaseTranslateSP1Task         BaseTranslateSP2Task
                                           │  │                            │     │
                                           │  │                            │     │
                                           │  │                            │     │
@@ -19,8 +19,6 @@ Class diagram
                                           │  │                            │     │
                ◄──────────────────────────┘  ▼                            ▼     └──────────────►
       SP1_DirectTransG            SP1_PartialProgramG            SP2_DirectTransG        SP2_PartialProgramG
-
-*SimplifyTemplateG - deprecated and removed
 
 NOTE on adding a new task class:
 1. Create a main task class inheriting from `BasePirelTask`
@@ -39,8 +37,6 @@ import copy
 import json
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
-
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.base import BaseMessage
 from langchain_core.messages.human import HumanMessage
@@ -48,6 +44,7 @@ from langchain_core.messages.system import SystemMessage
 from langchain_core.prompts.chat import HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain_openai import ChatOpenAI
 from openai import APIError as OpenAIAPIError
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import d_ast_parse
 import d_utils
@@ -362,8 +359,8 @@ class BaseTranslateSP1Task(BasePirelTask):
     system_message = SystemMessagePromptTemplate.from_template(
       p_llm_templates.TranslateSP1.System.DIRECT_TRANS_2
     ).format(
-      src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
-      tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
     )
     return system_message
 
@@ -376,8 +373,8 @@ class BaseTranslateSP1Task(BasePirelTask):
       starting_prompt = HumanMessagePromptTemplate.from_template(
         p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE
       ).format(
-        src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
-        tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+        src_language = p_consts.LANG_DICT[self.subject.src_lang],
+        tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
         program_to_translate = self.sp1,
         template_origin = self.template_dict['template_origin'],
         src_program = self.template_dict['src_program']
@@ -388,8 +385,8 @@ class BaseTranslateSP1Task(BasePirelTask):
     starting_prompt = HumanMessagePromptTemplate.from_template(
       p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE_SAME_CONTEXT
     ).format(
-      src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
-      tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
       program_to_translate = self.sp1,
       template_origin = self.template_dict['template_origin'],
     )
@@ -398,7 +395,7 @@ class BaseTranslateSP1Task(BasePirelTask):
   def validate_code_blocks(self) -> p_llm_val.TranslateSP1ValidationResult:
     self._log('starting tp1 candidates validation')
     all_tp1_cands = self.get_all_gen_code_blocks()
-    val_result_obj = p_llm_val.val_tp1_candidates(all_tp1_cands, self.sp1, self.template_dict, subject_name=self.subject.name)
+    val_result_obj = p_llm_val.val_tp1_candidates(all_tp1_cands, self.sp1, self.template_dict)
     return val_result_obj
 
   def does_require_feedback_iteration(self) -> bool:
@@ -443,8 +440,8 @@ class SP1_DirectTransG(BaseTranslateSP1Task):
   Ask for translation directly.
   '''
   def get_system_message(self) -> BaseMessage:
-    src_language = p_consts.LANG_DICT[self.template_dict['src_lang']]
-    tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']]
+    src_language = p_consts.LANG_DICT[self.subject.src_lang]
+    tar_language = p_consts.LANG_DICT[self.subject.tar_lang]
     system_message = SystemMessagePromptTemplate.from_template(
       p_llm_templates.TranslateSP1.System.DIRECT_TRANS
     ).format(
@@ -465,8 +462,8 @@ class SP1_PartialProgramG(BaseTranslateSP1Task):
   Translate a portion of a larger program.
   '''
   def get_starting_prompt_message(self) -> HumanMessage:
-    src_lang = self.template_dict['src_lang']
-    tar_lang = self.template_dict['tar_lang']
+    src_lang = self.subject.src_lang
+    tar_lang = self.subject.tar_lang
     problematic_node_path = self.template_dict['problematic_node_path']
     partial_program = self.template_dict['partial_program']
 
@@ -529,8 +526,8 @@ class BaseTranslateSP2Task(BasePirelTask):
     starting_prompt = HumanMessagePromptTemplate.from_template(
       p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS
     ).format(
-      src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
-      tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
       program_to_translate = self.sp2
     )
     return starting_prompt
@@ -538,7 +535,7 @@ class BaseTranslateSP2Task(BasePirelTask):
   def validate_code_blocks(self) -> p_llm_val.TranslateSP2ValidationResult:
     self._log('starting tp2 candidates validation')
     all_tp2_cands = self.get_all_gen_code_blocks()
-    val_result_obj = p_llm_val.val_tp2_candidates(all_tp2_cands, self.sp1, self.sp2, self.tp1_cand, self.template_dict, subject_name=self.subject.name)
+    val_result_obj = p_llm_val.val_tp2_candidates(all_tp2_cands, self.sp1, self.sp2, self.tp1_cand, self.template_dict)
     return val_result_obj
 
   def does_require_feedback_iteration(self) -> bool:
@@ -585,8 +582,8 @@ class SP2_DirectTransG(BaseTranslateSP2Task):
   Ask for translation directly, but provide a reference translation (sp1 -> tp1_cand)
   '''
   def get_starting_prompt_message(self) -> HumanMessage:
-    src_lang = self.template_dict['src_lang']
-    tar_lang = self.template_dict['tar_lang']
+    src_lang = self.subject.src_lang
+    tar_lang = self.subject.tar_lang
 
     starting_prompt = HumanMessagePromptTemplate.from_template(
       p_llm_templates.TranslateSP2.Prompt.DIRECT_TRANS_SIMILAR
@@ -611,8 +608,8 @@ class SP2_PartialProgramG(BaseTranslateSP2Task):
   Ask for translation of a portion of a larger program, provide a reference translation (sp1 -> tp1_cand)
   '''
   def get_starting_prompt_message(self) -> HumanMessage:
-    src_lang = self.template_dict['src_lang']
-    tar_lang = self.template_dict['tar_lang']
+    src_lang = self.subject.src_lang
+    tar_lang = self.subject.tar_lang
     problematic_node_path = self.template_dict['problematic_node_path']
     partial_program = self.template_dict['partial_program']
 
@@ -690,9 +687,7 @@ class GenTestFunction(BasePirelTask):
     all_test_function_cands = self.get_all_gen_code_blocks()
     val_result_obj = p_llm_val.val_gen_test_function_candidates(
       all_test_function_cands,
-      self.f_gold_function,
-      self.template_dict,
-      subject_name=self.subject.name
+      self.subject.src_lang
     )
     return val_result_obj
 
@@ -743,8 +738,8 @@ class GetReferenceTranslation(BasePirelTask):
     starting_prompt = HumanMessagePromptTemplate.from_template(
       p_llm_templates.GetReferenceTranslation.Prompt.GENERIC
     ).format(
-      src_language = p_consts.LANG_DICT[self.template_dict['src_lang']],
-      tar_language = p_consts.LANG_DICT[self.template_dict['tar_lang']],
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
       program_to_translate = self.snippet,
     )
     return starting_prompt
@@ -760,8 +755,7 @@ class GetReferenceTranslation(BasePirelTask):
     all_ref_trans_cands_stats = self.get_all_gen_code_blocks()
     val_result_obj = p_llm_val.val_get_ref_trans_candidates(
       all_ref_trans_cands_stats,
-      self.template_dict,
-      subject_name=self.subject.name
+      self.subject.tar_lang,
     )
     return val_result_obj
 
@@ -923,11 +917,19 @@ async def get_translation_pairs_from_tsp(
   '''
   RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
   NOTE raised errors propagate to the caller.
-  '''
-  logger.info(f'~~~ Starting API call to p_llm_gen.get_translation_pairs_from_tsp')
-  logger.debug(f'Attempting to translate SP1 and SP2 to generate a translation pair:\n{json.dumps(tsp, indent=2)}')
 
-  def _check_sp1_sp2_identical(sp1_tp1_cands: List[Dict[str, str]], sp2: str) -> Optional[List[Tuple[Dict[str, str], Dict[str, str]]]]:
+  subject must contain the following attributes:
+  - name
+  - src_lang
+  - tar_lang
+  '''
+  logger.debug(
+    f'Attempting to translate SP1 and SP2 to generate a translation pair:\n'
+    f'{json.dumps(tsp, indent=2)}')
+
+  def _check_sp1_sp2_identical(
+    sp1_tp1_cands: List[Dict[str, str]], sp2: str
+  ) -> Optional[list[Tuple[dict, dict]]]:
     assert len(sp1_tp1_cands) > 0, 'sanity check'
     sp1 = sp1_tp1_cands[0]['source']
     assert all(map(lambda sp1_tp1_cand: sp1_tp1_cand['source'] == sp1, sp1_tp1_cands)), 'sanity check'
@@ -946,9 +948,9 @@ async def get_translation_pairs_from_tsp(
       hash = d_utils.string_sha256(sp1_tp1_cand['source'] + sp1_tp1_cand['target'])
       cand = json.dumps(sp1_tp1_cand, indent=2)
       s += f'[{idx}] {hash}:\n{cand}\n'
-    return s
+    return s.rstrip('\n')
 
-  def _aux_log_msb_trans_pair_cands(translation_pair_cands: List[Dict[str, str]]) -> str:
+  def _aux_log_msg_trans_pair_cands(translation_pair_cands: List[Dict[str, str]]) -> str:
     s = f'Generated {len(translation_pair_cands)} new translation pairs:\n'
     for idx, translation_pair_cand in enumerate(translation_pair_cands, start=1):
       sp1 = translation_pair_cand[0]['source']
@@ -958,7 +960,7 @@ async def get_translation_pairs_from_tsp(
       hash = d_utils.string_sha256(f'{sp1}{tp1}{sp2}{tp2}')
       cand = json.dumps(translation_pair_cand, indent=2)
       s += f'[{idx}] {hash}:\n{cand}\n'
-    return s
+    return s.rstrip('\n')
 
   lpllm_gen_log.start_time = p_utils.current_time_sec()
   sp1, sp2 = tsp
@@ -992,7 +994,7 @@ async def get_translation_pairs_from_tsp(
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
     logger.debug(
       f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
-      f'trans_sp2.id = {cand_idx}\n')
+      f'trans_sp2.id = {cand_idx}')
 
     ltrans_sp2 = ptlog.TransSP2()
     ltrans_sp2.id = cand_idx
@@ -1032,13 +1034,15 @@ async def get_translation_pairs_from_tsp(
     ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pair_cands]
     ltrans_sp2.end_time = p_utils.current_time_sec()
     ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
-    logger.debug(_aux_log_msb_trans_pair_cands(translation_pair_cands))
+    logger.debug(_aux_log_msg_trans_pair_cands(translation_pair_cands))
 
-  logger.debug(f'~~~ Finishing API call to p_llm_gen.get_translation_pairs_from_tsp')
-  logger.debug(f'The number of all translation pairs is {len(all_translation_pairs)}:\n{json.dumps(all_translation_pairs, indent=2)}')
+  logger.debug(
+    f'~~~ Finishing API call to p_llm_gen.get_translation_pairs_from_tsp\n'
+    f'The number of all translation pairs is {len(all_translation_pairs)}:\n'
+    f'{json.dumps(all_translation_pairs, indent=2)}')
 
   if len(all_translation_pairs) == 0:
-    msg = f'BAD: Could not generate any translation pairs from a program pair:\n{json.dumps(sp1_tp1_cands, indent=2)}'
+    msg = f'BAD: Could not gen trans pairs from a program pair:\n{json.dumps(sp1_tp1_cands, indent=2)}'
     logger.warning(msg)
     lpllm_gen_log.success = False
     lpllm_gen_log.reason = msg
@@ -1052,23 +1056,40 @@ async def get_translation_pairs_from_tsp(
 
 async def gen_test_function(
   f_gold_function: str,
-  subject: p_subject.PirelSubject,
-  template_dict: dict,
-  lrules_validation: ptlog.RulesValidation
-) -> Optional[str]:
+  src_lang: str,
+  tar_lang: str
+) -> Tuple[Optional[str], ptlog.GenTestFunction]:
   '''
   Generate a test function for validating a translation rule.
   RETURN: test function or None if failed
+
+  `subject` must contain the following attributes:
+  - name
+  - src_lang
+  - tar_lang
+  `template_dict` must contain the following attributes:
+  - src_lang
   '''
+  logger.info(f'~~~ Starting API call to p_llm_gen.gen_test_function')
+
   lgen_test_function = ptlog.GenTestFunction()
   lgen_test_function.f_gold_function = f_gold_function
-  lrules_validation.gen_test_function = lgen_test_function
+
+  fabr_template_dict = {'src_lang': src_lang}
+  subject_conf = {
+    'benchmark_name': 'gen_test_function',
+    'name': 'gen_test_function',
+    'src_program': 'gen_test_function',
+    'src_lang': src_lang,
+    'tar_lang': tar_lang,
+  }
+  fabr_subject = p_subject.PirelSubject.from_dict(subject_conf)
 
   gen_task = GenTestFunction(
     task_name='gen_test_function',
     f_gold_function=f_gold_function,
-    subject=subject,
-    template_dict=template_dict,
+    subject=fabr_subject,
+    template_dict=fabr_template_dict,
     lbase_task=lgen_test_function
   )
 
@@ -1078,8 +1099,9 @@ async def gen_test_function(
     logger.warning(str(err))
     lgen_test_function.success = False
     lgen_test_function.reason = str(err)
-    lgen_test_function.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
-    return None
+    lgen_test_function.llm_query_stats = [
+      ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
+    return None, lgen_test_function
 
   assert len(test_functions) > 0, 'sanity check'
   if len(test_functions) > 1:
@@ -1091,31 +1113,48 @@ async def gen_test_function(
   assert isinstance(test_function, str), 'sanity check'
   lgen_test_function.success = True
   lgen_test_function.test_function = test_function
-  lgen_test_function.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
-  return test_function
+  lgen_test_function.llm_query_stats = [
+    ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
+  return test_function, lgen_test_function
 
 
 async def get_reference_translations(
   snippet: str,
-  subject: p_subject.PirelSubject,
-  template_dict: dict,
-  lrules_recovery: ptlog.RulesRecovery
-) -> List[str]:
+  src_lang: str,
+  tar_lang: str
+) -> Tuple[List[str], ptlog.GetRefTrans]:
   '''
   Get a reference translation for a snippet.
-  RETURN: reference translations or empty list if failed
+  RETURN: reference translations or empty list if failed.
+
+  `subject` must contain the following attributes:
+  - name
+  - src_lang
+  - tar_lang
+  `template_dict` must contain the following attributes:
+  - src_lang
+  - tar_lang
   '''
   logger.info(f'~~~ Starting API call to p_llm_gen.get_reference_translations')
 
   lget_ref_trans = ptlog.GetRefTrans()
   lget_ref_trans.snippet = snippet
-  lrules_recovery.get_ref_trans = lget_ref_trans
+
+  fabr_template_dict = {'src_lang': src_lang, 'tar_lang': tar_lang}
+  subject_conf = {
+    'benchmark_name': 'get_reference_translations',
+    'name': 'get_reference_translations',
+    'src_program': 'get_reference_translations',
+    'src_lang': src_lang,
+    'tar_lang': tar_lang,
+  }
+  fabr_subject = p_subject.PirelSubject.from_dict(subject_conf)
 
   get_ref_trans_task = GetReferenceTranslation(
     task_name='get_ref_trans',
     snippet=snippet,
-    subject=subject,
-    template_dict=template_dict,
+    subject=fabr_subject,
+    template_dict=fabr_template_dict,
     lbase_task=lget_ref_trans
   )
 
@@ -1125,16 +1164,17 @@ async def get_reference_translations(
     logger.warning(str(err))
     lget_ref_trans.success = False
     lget_ref_trans.reason = str(err)
-    lget_ref_trans.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
-    return []
+    lget_ref_trans.llm_query_stats = [
+      ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
+    return [], lget_ref_trans
 
   assert len(ref_translations) > 0, 'sanity check'
 
   lget_ref_trans.success = True
   lget_ref_trans.ref_translations = ref_translations
-  lget_ref_trans.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
-
-  return ref_translations
+  lget_ref_trans.llm_query_stats = [
+    ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
+  return ref_translations, lget_ref_trans
 
 
 # TEST HARNESSES
@@ -1161,70 +1201,21 @@ async def _test_query_llm():
   print(json.dumps(query_stats, indent=2))
 
 
-async def _test_translate_sp1():
-  template_dict = p_utils.read_json('/code/repo-duoglot/backend/duoglotcore-server/pirel-logs/debug-11-broken-split/L0009/11-12-09-24-06.754595-L0009_SIMPLIFIED-TEMPLATE-p_llm_gen.json')
-  sp1 = 'if id_puox:\n    secret_fun_4071()'
-  trans_sp1 = BaseTranslateSP1Task('translate-sp1-basic', template_dict, sp1)
-  j_program_pairs = await trans_sp1.run()
-  p_utils.write_json('temporary_test_translate_sp1.json', j_program_pairs)
-
-
-def _test_translate_sp2():
-  pass
-
-
-async def _test_get_translation_pairs_from_tsp():
-  tsp = ("if id_puox:\n    secret_fun_4071()", "if 8860:\n    secret_fun_4071()")
-  template_dict = p_utils.read_json('/code/repo-duoglot/backend/duoglotcore-server/pirel-logs/debug-11-broken-split/L0009/11-12-09-24-06.754595-L0009_SIMPLIFIED-TEMPLATE-p_llm_gen.json')
-
-  translation_pairs = await get_translation_pairs_from_tsp(tsp, template_dict)
-  p_utils.write_json('temporary_test_get_translation_pairs_from_tsp.json', translation_pairs)
-
-
-def _test_get_feedback_message_trans_sp1_partial():
-  test_harness_config:dict = p_utils.read_json('temporary_test_get_feedback_message_trans_sp1_partial_config.json')
-
-  template_dict = p_utils.read_json(test_harness_config['template_dict_fpath'])
-  sp1 = test_harness_config['sp1']
-
-  validation_result = p_utils.read_json(test_harness_config['validation_result_dict_fpath'])
-  val_result_obj = p_llm_val.TranslateSP1ValidationResult(validation_result)
-
-  trans_obj = SP1_PartialProgramG('test-trans-sp1-partial', template_dict, sp1)
-  feedback_message = trans_obj.get_feedback_message(val_result_obj)
-  feedback_message.pretty_print()
-
-
-def _test_get_feedback_message_trans_sp2_partial():
-  test_harness_config:dict = p_utils.read_json('temporary_test_get_feedback_message_trans_sp2_partial_config.json')
-
-  template_dict = p_utils.read_json(test_harness_config['template_dict_fpath'])
-  sp1_tp1_cand = test_harness_config['sp1_tp1_cand']
-  sp2 = test_harness_config['sp2']
-
-  validation_result = p_utils.read_json(test_harness_config['validation_result_dict_fpath'])
-  val_result_obj = p_llm_val.TranslateSP2ValidationResult(validation_result)
-
-  trans_obj = SP2_PartialProgramG('test-trans-sp2-partial', template_dict, sp1_tp1_cand, sp2)
-  feedback_message = trans_obj.get_feedback_message(val_result_obj)
-  feedback_message.pretty_print()
-
-
 async def _test_gen_test_function():
   '''
-  def gen_test_function(f_gold_function: str):
+  async def gen_test_function(
+    f_gold_function: str,
+    src_lang: str,
+    tar_lang: str
+  ) -> Union[Optional[str], ptlog.GenTestFunction]:
   '''
   f_gold_fpath = p_consts.TMP_DIR / 'f_gold.py'
   f_gold_function = p_utils.read_text(f_gold_fpath)
-  test_function = await gen_test_function(f_gold_function)
+  test_function, lgen_test_function = \
+    await gen_test_function(f_gold_function, 'py', 'js')
   print(test_function)
 
 
 if __name__ == '__main__':
   # asyncio.run(_test_query_llm())
   asyncio.run(_test_gen_test_function())
-  # asyncio.run(_test_translate_sp1())
-  # _test_translate_sp2()
-  # asyncio.run(_test_get_translation_pairs_from_tsp())
-  # _test_get_feedback_message_trans_sp1_partial()
-  # _test_get_feedback_message_trans_sp2_partial()
