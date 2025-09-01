@@ -283,6 +283,9 @@ def log_file_time(fname: str, contents: str) -> None:
 
 
 # Helper functions to log directly to Learning Phase log dir
+def llog_json(fname: str, obj: Any) -> None:
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=False)
+
 def llog_json_time(fname: str, obj: Any) -> None:
   write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
 
