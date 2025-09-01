@@ -421,6 +421,9 @@ def _get_expr_src_main_code(
   indented_block = p_utils.indent(prectx_log_stat, 4)
   expr_src_main_code = f'{smcfh}\n{indented_block}'
 
+  # index log statements
+  expr_src_main_code = pvpy.LogStatementsIndexer.index_log_statements(expr_src_main_code)
+
   # insert break statements in loops to avoid infinite loops.
   if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
     tree = pvpy.Tree.from_str(expr_src_main_code)
