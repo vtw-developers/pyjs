@@ -145,14 +145,22 @@ class Ruleset:
   def update_verified_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
     assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
     assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
+
+    '''
+    Check if a verified rule for unparsed_ast already exists.
+    Current policy, if it exists and is different, log a warning and ignore the new rule.
+    TODO policy: update only if different ASTs?
+    '''
     if unparsed_ast in self._verified_rules:
       existing_vrf_rule = self._verified_rules[unparsed_ast]
       # the existing verified rule is different from the new one
       if existing_vrf_rule != rule:
-        logger.error(f'Verified rule for "{unparsed_ast}" is being updated.')
-        logger.error(f'Old rule: {existing_vrf_rule}')
-        logger.error(f'New rule: {rule}')
-        raise RuntimeError('Verified rule is being changed')
+        logger.warning(f'Verified rule for "{unparsed_ast}" was about to be updated.')
+        logger.warning(f'Old rule: {existing_vrf_rule}')
+        logger.warning(f'New rule: {rule}')
+        # raise RuntimeError('Verified rule is being changed')
+        return
+
     self._verified_rules[unparsed_ast] = rule
 
   def get_verified_rule(self, unparsed_ast: str) -> TRuleBase:
