@@ -8,16 +8,17 @@ def test():
 import itertools
 def f_gold(n):
     count = 0
-    for curr in itertools.count():
+    nat = itertools.count()
+    curr = next(nat)
+    while count != n:
         sum_0 = 0
         x = curr
+        curr = next(nat)
         while x:
             sum_0 = sum_0 + x % 10
             x = x // 10
         if sum_0 == 10:
             count = count + 1
-        if count == n:
-            return curr
-    return -1
+    return curr
 "-----------------"
 test()
