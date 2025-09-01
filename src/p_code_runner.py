@@ -42,13 +42,24 @@ def _extract_trace_from_stdout(stdout: str) -> list:
   sample stdout:
   ["MYLOGEX:", ["number", 0]]
   ["MYLOGEX:", ["number", 42]]
+  89 ["MYLOGEX:",["number",1],["hash",64,"31258e253c85ed2fcf5c0c1df7817d48be55a95e1b90d9b4f201183cf6bf9afb"]]
   '''
   lines_str = stdout.split('\n')
   trace = []
   for line_str in lines_str:
-    if line_str.startswith('["MYLOG'):
+    if line_str.startswith('["MYLOGEX:"'):
       line_obj = json.loads(line_str)
       trace.append(['list', len(line_obj) - 1, line_obj[1:]])
+
+    # Cases where myexactlog output is not at the beginning of the line
+    # e.g. '89 ["MYLOGEX:",["number",1],["hash",4,"8e25"]]'.
+    # Happens in JS when process.stdout.write is used instead of console.log
+    # as in G0004 in GFG benchmark.
+    elif '["MYLOGEX:"' in line_str:
+      begin_idx = line_str.index('["MYLOGEX:"')
+      line_obj = json.loads(line_str[begin_idx:])
+      trace.append(['list', len(line_obj) - 1, line_obj[1:]])
+
   return ['list', len(trace), trace]
 
 
