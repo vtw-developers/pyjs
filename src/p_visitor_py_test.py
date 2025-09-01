@@ -5,7 +5,7 @@ import d_ast_parse
 import p_consts
 import p_utils
 import p_visitor as pvis
-import p_visitor_py
+import p_visitor_py as pvpy
 
 
 class TestParametrizableVariablesCollector(unittest.TestCase):
@@ -13,14 +13,14 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
     self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestParametrizableVariablesCollector'
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
-    self.param_collector = p_visitor_py.ParametrizableVariablesCollector()
+    self.param_collector = pvpy.ParametrizableVariablesCollector()
 
-  def load_tree_from(self, subject_name: str) -> p_visitor_py.Tree:
+  def load_tree_from(self, subject_name: str) -> pvpy.Tree:
     for fpath in self.snippets_dir.iterdir():
       if fpath.name.startswith(subject_name):
         snippet_text = p_utils.read_text(fpath)
         ts_tree = self.parser.parse(bytes(snippet_text, 'utf8'))
-        tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+        tree = pvpy.Tree.from_ts_tree(ts_tree)
         return tree
     raise FileNotFoundError(f"No file starting with '{subject_name}' found in {self.snippets_dir}")
 
@@ -29,7 +29,7 @@ class TestParametrizableVariablesCollector(unittest.TestCase):
     print(id_wpyb, id_xafp=id_evw)
     break'''
     ts_tree = self.parser.parse(bytes(code, 'utf8'))
-    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    tree = pvpy.Tree.from_ts_tree(ts_tree)
     self.param_collector.visit(tree.root_node)
     self.assertCountEqual(self.param_collector.get_parametrizable_identifiers(), ['i', 'j', 'id_wpyb', 'id_evw'])
 
@@ -5409,8 +5409,8 @@ class TestPrettyPrinter(unittest.TestCase):
       subject_name = fpath.stem[:5]
       subject_code = fpath.read_text().strip()
       with self.subTest(subject_name=subject_name):
-        tree = p_visitor_py.Tree.from_str(subject_code)
-        pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
+        tree = pvpy.Tree.from_str(subject_code)
+        pp_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
         self.assertEqual(subject_code, pp_code)
 
   def test_all_leetcode(self):
@@ -5421,8 +5421,8 @@ class TestPrettyPrinter(unittest.TestCase):
         continue
       subject_code = fpath.read_text().strip()
       with self.subTest(subject_name=subject_name):
-        tree = p_visitor_py.Tree.from_str(subject_code)
-        pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
+        tree = pvpy.Tree.from_str(subject_code)
+        pp_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
         self.assertEqual(subject_code, pp_code)
 
 
@@ -5433,26 +5433,26 @@ class TestLogStatementInserter(unittest.TestCase):
     self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestLogStatementInserter'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
 
-  def to_tree(self, snippet: str) -> p_visitor_py.Tree:
+  def to_tree(self, snippet: str) -> pvpy.Tree:
     ts_tree = self.parser.parse(bytes(snippet, 'utf-8'))
-    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    tree = pvpy.Tree.from_ts_tree(ts_tree)
     assert tree.root_node is not None
     assert tree.root_node.node_type == 'module'
     return tree
 
   def test_insert_log_statements_L0001(self):
     tree = self.to_tree(p_utils.read_text(self.snippets_dir / 'L0001_input.py'))
-    inserter = p_visitor_py.LogStatementInserter(function_name='f_gold')
+    inserter = pvpy.LogStatementInserter(function_name='f_gold')
     inserter.visit(tree.root_node)
-    pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
+    pp_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
     gold_code = p_utils.read_text(self.snippets_dir / 'L0001_output.py')
     self.assertEqual(pp_code, gold_code)
 
   def test_double_subscript_assignment(self):
     tree = self.to_tree(p_utils.read_text(self.snippets_dir / 'double_subscript_input.py'))
-    inserter = p_visitor_py.LogStatementInserter(function_name='f_gold')
+    inserter = pvpy.LogStatementInserter(function_name='f_gold')
     inserter.visit(tree.root_node)
-    pp_code = p_visitor_py.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
+    pp_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node).strip()
     gold_code = p_utils.read_text(self.snippets_dir / 'double_subscript_output.py')
     self.assertEqual(pp_code, gold_code)
 
@@ -5469,17 +5469,17 @@ class TestLogStatementsIndexer(unittest.TestCase):
 
   def test_L0001(self):
     prog_in, prog_out_gold = self.get_fixtures('001')
-    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    prog_out = pvpy.LogStatementsIndexer.index_log_statements(prog_in)
     self.assertEqual(prog_out, prog_out_gold)
 
   def test_L0002(self):
     prog_in, prog_out_gold = self.get_fixtures('002')
-    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    prog_out = pvpy.LogStatementsIndexer.index_log_statements(prog_in)
     self.assertEqual(prog_out, prog_out_gold)
 
   def test_L0003(self):
     prog_in, prog_out_gold = self.get_fixtures('003')
-    prog_out = p_visitor_py.LogStatementsIndexer.index_log_statements(prog_in)
+    prog_out = pvpy.LogStatementsIndexer.index_log_statements(prog_in)
     self.assertEqual(prog_out, prog_out_gold)
 
 
@@ -5493,9 +5493,9 @@ class TestLogStatementRemover(unittest.TestCase):
       subject_name = fpath.stem[:5]
       subject_code = fpath.read_text()
       with self.subTest(subject_name=subject_name):
-        w_log_stat = p_visitor_py.LogStatementInserter.insert_log_statements(subject_code)
-        w_log_stat = p_visitor_py.LogStatementsIndexer.index_log_statements(w_log_stat)
-        wo_log_stat = p_visitor_py.LogStatementRemover.remove_log_statements(w_log_stat)
+        w_log_stat = pvpy.LogStatementInserter.insert_log_statements(subject_code)
+        w_log_stat = pvpy.LogStatementsIndexer.index_log_statements(w_log_stat)
+        wo_log_stat = pvpy.LogStatementRemover.remove_log_statements(w_log_stat)
         self.assertEqual(subject_code, wo_log_stat)
 
 
@@ -5503,12 +5503,12 @@ class TestLoggableValueExtractor(unittest.TestCase):
   def setUp(self):
     self.src_lang = 'py'
     self.parser = p_consts.PARSER_DICT[self.src_lang]
-    self.pp = p_visitor_py.PrettyPrinter(indent_with='    ')
+    self.pp = pvpy.PrettyPrinter(indent_with='    ')
     self.maxDiff = None
 
   def get_ast(self, snippet) -> pvis.AbstractNode:
     ts_tree = self.parser.parse(bytes(snippet, 'utf-8'))
-    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    tree = pvpy.Tree.from_ts_tree(ts_tree)
     assert tree.root_node is not None
     assert tree.root_node.node_type == 'module'
     assert len(tree.root_node.children) == 1, 'snippet must contain a single statement'
@@ -5516,7 +5516,7 @@ class TestLoggableValueExtractor(unittest.TestCase):
 
   def extract_loggable_values(self, snippet):
     ast = self.get_ast(snippet)
-    extractor = p_visitor_py.LoggableValueExtractor()
+    extractor = pvpy.LoggableValueExtractor()
     extractor.visit(ast)
     loggable_nodes = extractor.get_loggable_nodes()
     loggable_values = [self.pp.visit(node).strip() for node in loggable_nodes]
@@ -5724,7 +5724,7 @@ class TestLoggableIdentifierExtractor(unittest.TestCase):
 
   def get_ast(self, snippet) -> pvis.AbstractNode:
     ts_tree = self.parser.parse(bytes(snippet, 'utf-8'))
-    tree = p_visitor_py.Tree.from_ts_tree(ts_tree)
+    tree = pvpy.Tree.from_ts_tree(ts_tree)
     assert tree.root_node is not None
     assert tree.root_node.node_type == 'module'
     assert len(tree.root_node.children) == 1, 'snippet must contain a single statement'
@@ -5732,7 +5732,7 @@ class TestLoggableIdentifierExtractor(unittest.TestCase):
 
   def extract_loggable_values(self, snippet) -> List[str]:
     ast = self.get_ast(snippet)
-    extractor = p_visitor_py.LoggableIdentifierExtractor()
+    extractor = pvpy.LoggableIdentifierExtractor()
     extractor.visit(ast)
     loggable_values = extractor.get_loggable_identifiers()
     return loggable_values
@@ -5940,27 +5940,27 @@ class TestDefinedFunctionNameExtractor(unittest.TestCase):
 
   def test_simple_001(self):
     snippet = 'def my_function():\n    pass'
-    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    def_fn_names = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
     self.assertCountEqual(def_fn_names, ['my_function'])
 
   def test_simple_002(self):
     snippet = self.get_snippet('simple_002.py')
-    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    def_fn_names = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
     self.assertCountEqual(def_fn_names, ['f_gold'])
 
   def test_nested_001(self):
     snippet = 'def outer_function():\n    def inner_function():\n        pass'
-    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    def_fn_names = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
     self.assertCountEqual(def_fn_names, ['outer_function', 'inner_function'])
 
   def test_multiple_001(self):
     snippet = 'def func_one():\n    pass\n\ndef func_two():\n    pass'
-    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    def_fn_names = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
     self.assertCountEqual(def_fn_names, ['func_one', 'func_two'])
 
   def test_redefined_001(self):
     snippet = 'def func_one():\n    pass\n\ndef func_two():\n    pass\n\ndef func_two():\n    pass'
-    def_fn_names = p_visitor_py.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
+    def_fn_names = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snippet)
     self.assertCountEqual(def_fn_names, ['func_one', 'func_two'])
 
 
@@ -5976,12 +5976,12 @@ class TestFunctionInvocationReplacer(unittest.TestCase):
 
   def test_001(self):
     snippet, gold_snippet = self.get_snippets('001')
-    replaced = p_visitor_py.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
+    replaced = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
     self.assertEqual(replaced, gold_snippet)
 
   def test_002(self):
     snippet, gold_snippet = self.get_snippets('002')
-    replaced = p_visitor_py.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
+    replaced = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
     self.assertEqual(replaced, gold_snippet)
 
 
@@ -5994,8 +5994,8 @@ class TestTreeGetNidNodeMap(unittest.TestCase):
     ast, _ = d_ast_parse.parse_text_dbg(code, 'py')
     return ast
 
-  def get_tree(self, code: str) -> p_visitor_py.Tree:
-    tree = p_visitor_py.Tree.from_str(code)
+  def get_tree(self, code: str) -> pvpy.Tree:
+    tree = pvpy.Tree.from_str(code)
     return tree
 
   def compare_nid_node_maps(
@@ -6023,7 +6023,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
   def setUp(self):
     self.snippets_dir = p_consts.GFG_BENCHMARK_DIR
     self.maxDiff = None
-    self.pp = p_visitor_py.PrettyPrinter()
+    self.pp = pvpy.PrettyPrinter()
 
   def load_subject_code(self, subject_name: str) -> str:
     fpaths = list(self.snippets_dir.glob(f'{subject_name}_*.py'))
@@ -6035,140 +6035,140 @@ class TestChoicableNodeExtractor(unittest.TestCase):
 
   def test_G0001(self):
     code = self.load_subject_code('G0001')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['1', 'x & m', 'x ^ m', '1', 'x ^ m']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0002(self):
     code = self.load_subject_code('G0002')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['-(~x)']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0003(self):
     code = self.load_subject_code('G0003')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['y != 0', 'x & y', 'x ^ y', 'carry << 1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0004(self):
     code = self.load_subject_code('G0004')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['0', 'n - 1', 'i < j', '1', '1', 'n % 2 != 0']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0005(self):
     code = self.load_subject_code('G0005')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['0', 'arr[i] == x', '-1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0006(self):
     code = self.load_subject_code('G0006')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['(3 * math.sqrt(3) * (s * s)) / 2']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0007(self):
     code = self.load_subject_code('G0007')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['(math.pi * a * a) / 4']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0008(self):
     code = self.load_subject_code('G0008')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['2 * r * r']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0009(self):
     code = self.load_subject_code('G0009')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['k >= n - 1', '0', '0', 'a[i] > best', 'a[i]', 'i == True', '1', '1', 'times >= k']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0010(self):
     code = self.load_subject_code('G0010')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['dict()', 'arr[i] in frequency.keys()', '1', '1', '0', 'x == frequency[x]', '1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0011(self):
     code = self.load_subject_code('G0011')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['a == 0', 'f_gold(b % a, a)']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0012(self):
     code = self.load_subject_code('G0012')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['a == 0', '0', '1', '1', '1', 'f_gold(b % a, a, x1, y1)', 'y1 - (b / a) * x1', 'x1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0013(self):
     code = self.load_subject_code('G0013')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['[[0 for i in range(n + 1)] for j in range(n + 1)]', '1', 'bell[i - 1][i - 1]', 'bell[i - 1][j - 1] + bell[i][j - 1]', 'bell[n][0]']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0014(self):
     code = self.load_subject_code('G0014')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['len(num1)', 'list(num1)', 'l - 1', 'i >= 0', 'num[i] == "0"', '"1"', '"0"', '1', '"".join(num)', 'i < 0', '"1" + num1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0015(self):
     code = self.load_subject_code('G0015')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['r >= l', 'l + (r - l) // 2', 'arr[mid] == x', 'arr[mid] > x', 'f_gold(arr, l, mid - 1, x)', 'f_gold(arr, mid + 1, r, x)', '-1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0016(self):
     code = self.load_subject_code('G0016')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['len(N)', 'int((length) / 2)', '0', 'N[0:0 + i]', 'len(s)', 'N[i:l1 + i]', 's[0] == "0" or t[0] == "0"', 's == t', '1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0017(self):
     code = self.load_subject_code('G0017')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['0', 'i + j + k == n', 'count + 1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0018(self):
     code = self.load_subject_code('G0018')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['0', '(n + 1) * (n + 2) // 2']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0019(self):
     code = self.load_subject_code('G0019')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['""', 'text[i]', 'char.isupper()', 'chr((ord(char) + s - 65) % 26 + 65)', 'chr((ord(char) + s - 97) % 26 + 97)']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0020(self):
     code = self.load_subject_code('G0020')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'h < 0 or m < 0 or h > 12 or m > 60',
@@ -6185,49 +6185,49 @@ class TestChoicableNodeExtractor(unittest.TestCase):
 
   def test_G0024(self):
     code = self.load_subject_code('G0024')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['-1 if (n & 1) else 1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0028(self):
     code = self.load_subject_code('G0028')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['dict()', 'count.get(a[i])', '1', '1', '1', 'count[a[i]] != 1 or a[i] > n or a[i] < 1', '1', 'count.get(next_missing)', '1', 'next_missing', '1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0107_chained_assignment(self):
     code = self.load_subject_code('G0107')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['[0 for i in range(n)]', '[0 for i in range(n)]', '1', 'a[i - 1] + b[i - 1]', 'a[i - 1]', 'a[n - 1] + b[n - 1]']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0291_tuple_assignment(self):
     code = self.load_subject_code('G0291')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['1', '2', '0', 'n <= 2', 'b + (i - 1) * a', 'b', 'c']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0340_while(self):
     code = self.load_subject_code('G0340')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['s == " "', '"a"', 'len(s) - 1', 's[i] == "z" and i >= 0', '1', 'i == -1', 's + "a"', 's.replace(s[i], chr(ord(s[i]) + 1), 1)']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0611_if_elif_else(self):
     code = self.load_subject_code('G0611')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = ['0', 'arr_size - 1', '0', 'mid <= hi', 'a[mid] == 0', 'a[mid]', 'a[lo]', 'lo + 1', 'mid + 1', 'a[mid] == 1', 'mid + 1', 'a[hi]', 'a[mid]', 'hi - 1']
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
   def test_G0670_type_cast(self):
     code = self.load_subject_code('G0670')
-    choicable_nodes = p_visitor_py.ChoicableNodeExtractor.extract_choicable_nodes(code)
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(code)
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'len(str1) > len(str2)',

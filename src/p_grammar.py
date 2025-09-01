@@ -9,11 +9,10 @@ from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
 import p_consts
-import p_data_structures
+import p_data_structures as pds
 import p_grammar
-import p_subject
 import p_utils
-import p_visitor_py
+import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
@@ -454,9 +453,9 @@ class Rule():
   # abstract method
   def get_ast_mapping(
     self,
-    nodes: List[p_data_structures.DuoGlotNode],
+    nodes: List[pds.DuoGlotNode],
     grammar: TreeSitterGrammar
-  ) -> List[Tuple[p_data_structures.DuoGlotNode, SymbolRule|AliasRule, List[str]]]:
+  ) -> List[Tuple[pds.DuoGlotNode, SymbolRule|AliasRule, List[str]]]:
     '''
     Given a list of AST nodes, return a mapping of
     each non-terminal node to a SymbolRule (or AliasRule) instance.
@@ -559,7 +558,7 @@ class AliasRule(Rule):
     return self.content.get_all_symbols()
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     if len(nodes) == 1:
       node = nodes[0]
       # TODO what to do in else case of this if statement?
@@ -620,7 +619,7 @@ class BlankRule(Rule):
     return []
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     raise AM_UnmappableError
 
   # overrides an abstract method
@@ -671,7 +670,7 @@ class ChoiceRule(Rule):
     return symbol_rules
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[tuple]:
     is_optional_res = grammar.is_optional(self)
     if is_optional_res is not None:
       optional_rule = is_optional_res
@@ -771,7 +770,7 @@ class FieldRule(Rule):
     return self.content.get_all_symbols()
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     return self.content.get_ast_mapping(nodes, grammar)
 
   # overrides an abstract method
@@ -813,7 +812,7 @@ class PatternRule(Rule):
     return []
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     raise AM_UnmappableError
 
   # overrides an abstract method
@@ -860,7 +859,7 @@ class PrecRule(Rule):
     return self.content.get_all_symbols()
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     return self.content.get_ast_mapping(nodes, grammar)
 
   # overrides an abstract method
@@ -905,7 +904,7 @@ class RepeatRule(Rule):
     return self.content.get_all_symbols()
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     '''Every node in `nodes` should match `self.content`'''
     mappings = []
     for node in nodes:
@@ -971,7 +970,7 @@ class Repeat1Rule(Rule):
     return self.content.get_all_symbols()
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     '''Every node in `nodes` should match `self.content`'''
     mappings = []
     for node in nodes:
@@ -1034,7 +1033,7 @@ class SeqRule(Rule):
     return symbol_rules
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     '''
     Greedy top-down parsing algorithm.
 
@@ -1048,7 +1047,7 @@ class SeqRule(Rule):
     block             block
     '''
 
-    def _match_first_nodes_greedy(rule: Rule, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> Tuple[int, List[tuple]]:
+    def _match_first_nodes_greedy(rule: Rule, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> Tuple[int, List[tuple]]:
       '''
       greedy = match as much as possible
       Returns number of matched nodes and the mappings.
@@ -1108,7 +1107,7 @@ class SeqRule(Rule):
         must_match_rules.append(rule)
       return must_match_rules
 
-    def _treat_rep1_in_seq(rule: Repeat1Rule, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> Tuple[int, List[tuple]]:
+    def _treat_rep1_in_seq(rule: Repeat1Rule, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> Tuple[int, List[tuple]]:
       '''
       Treat `Repeat1Rule` in `SeqRule` as a special case.
       `Repeat1Rule` must match at least one node
@@ -1312,7 +1311,7 @@ class StringRule(Rule):
     return []
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     if len(nodes) != 1:
       raise AM_UnmappableError
     node = nodes[0]
@@ -1365,7 +1364,7 @@ class SymbolRule(Rule):
     return [self]
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     num_nodes = len(nodes)
 
     # `nodes` does not have any nodes
@@ -1491,7 +1490,7 @@ class TokenRule(Rule):
     return []
 
   # overrides an abstract method
-  def get_ast_mapping(self, nodes: List[p_data_structures.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
+  def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     raise AM_UnmappableError
 
   # overrides an abstract method
@@ -1504,7 +1503,7 @@ class TokenRule(Rule):
 
 
 # API for program context simplification
-def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> dict:
+def simplify_template(template_dict: dict) -> dict:
   '''
   An alternative to `p_llm_gen.simplify_template` whereby program
   context simplification is performed with the help of grammar
@@ -1536,10 +1535,10 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     *,
     problematic_node_id: int = None,
     problematic_node_path: List[int] = None,
-  ) -> Tuple[p_data_structures.DuoGlotNode, p_data_structures.DuoGlotNode, p_data_structures.PirelTree]:
+  ) -> Tuple[pds.DuoGlotNode, pds.DuoGlotNode, pds.PirelTree]:
 
     ast, ann = d_ast_parse.parse_text_dbg(program_text, lang, keep_text=False)
-    tree = p_data_structures.DuoGlotTree(ast)
+    tree = pds.DuoGlotTree(ast)
     root_node = tree.root_node
     assert len(root_node.get_children()) == 1, 'sanity check: root node must have exactly one child'
 
@@ -1556,21 +1555,21 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
     # context tree (PirelTree) for annotation and node texts
     ast_text, ann_text = d_ast_parse.parse_text_dbg(program_text, lang, keep_text=True)
-    tree_text = p_data_structures.PirelTree(ast_text, ann_text)
+    tree_text = pds.PirelTree(ast_text, ann_text)
     tree_text._fix_indentation()
 
     return context_node, problematic_node, tree_text
 
   def _gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar) -> str:
     ast = grammar.generate_simplest_ast(node_type)
-    ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-    code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
+    ast_tree = pvpy.Tree.from_gen_ast(ast)
+    code = pvpy.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
     return code
 
   def _get_num_nt_nodes(code: str, lang: str) -> int:
     '''RETURN number of non-terminal nodes in AST of `code`'''
     ast, _ = d_ast_parse.parse_text_dbg(code, lang, keep_text=False)
-    tree = p_data_structures.DuoGlotTree(ast)
+    tree = pds.DuoGlotTree(ast)
     return tree.get_num_nt_nodes()
 
   # STRATEGY 1
@@ -1594,8 +1593,8 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   def _process_all_siblings_can_be_simplified_node_prob_no(
     siblings_can_be_removed_node_id: int,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode]
-  ) -> p_data_structures.DuoGlotNode:
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode]
+  ) -> pds.DuoGlotNode:
     '''
     NOTE modifies `nodes_can_be_simplified_dict`
     Return a reference to a node whose all non-terminal children
@@ -1621,11 +1620,11 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     return parent_node
 
   def _strategy_1(
-    problematic_node: p_data_structures.DuoGlotNode,
-    context_tree: p_data_structures.PirelTree,
+    problematic_node: pds.DuoGlotNode,
+    context_tree: pds.PirelTree,
     orig_text: str,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode],
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode],
     grammar: p_grammar.TreeSitterGrammar,
     strat1_num_children_nodes_threshold: int = 5
   ) -> Tuple[str, int]:
@@ -1648,7 +1647,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     logger.debug('Starting context simplification using strategy 1')
 
     # ~~~ collect container nodes children of which are removed
-    all_children_can_be_removed_nodes_list : List[p_data_structures.DuoGlotNode] = []
+    all_children_can_be_removed_nodes_list : List[pds.DuoGlotNode] = []
     while True:
       siblings_can_be_removed_node_id = _all_siblings_can_be_simplified_prob_no(
         nodes_can_be_simplified_dict,
@@ -1709,8 +1708,8 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   def _process_all_siblings_can_be_simplified_node_prob_yes(
     siblings_can_be_removed_node_id: int,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode]
-  ) -> Tuple[p_data_structures.DuoGlotNode, p_data_structures.DuoGlotNode]:
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode]
+  ) -> Tuple[pds.DuoGlotNode, pds.DuoGlotNode]:
     '''
     NOTE modifies `nodes_can_be_simplified_dict`
 
@@ -1751,11 +1750,11 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     return leftmost_node, rightmost_node
 
   def _strategy_2(
-    problematic_node: p_data_structures.DuoGlotNode,
-    context_tree: p_data_structures.PirelTree,
+    problematic_node: pds.DuoGlotNode,
+    context_tree: pds.PirelTree,
     orig_text: str,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode],
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode],
   ) -> Tuple[str, int]:
     '''
     Go over nodes for which all siblings can be simplified and
@@ -1808,8 +1807,8 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   def _get_individually_simplifiable_nodes(
     problematic_node_id: int,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode]
-  ) -> List[p_data_structures.DuoGlotNode]:
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode]
+  ) -> List[pds.DuoGlotNode]:
     '''
     Remove all nodes that could be processed by strategy 1 and 2, and
     return the remaining nodes.
@@ -1851,10 +1850,10 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     return individually_simplifiable_nodes
 
   def _strategy_3(
-    problematic_node: p_data_structures.DuoGlotNode,
-    context_tree: p_data_structures.PirelTree,
+    problematic_node: pds.DuoGlotNode,
+    context_tree: pds.PirelTree,
     orig_text: str,
-    individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+    individually_simplifiable_nodes: List[pds.DuoGlotNode],
     template_dict: dict,
     grammar: p_grammar.TreeSitterGrammar,
     is_simplify_nodes_before_prob_node: bool = False,
@@ -1887,9 +1886,9 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
     def __simplify_node(
       orig_text: str,
-      node: p_data_structures.DuoGlotNode,
-      context_tree: p_data_structures.PirelTree,
-      individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+      node: pds.DuoGlotNode,
+      context_tree: pds.PirelTree,
+      individually_simplifiable_nodes: List[pds.DuoGlotNode],
       template_dict: dict,
       grammar: p_grammar.TreeSitterGrammar
     ) -> Optional[Tuple[str, dict]]:
@@ -1975,10 +1974,10 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
   # STRATEGY 4
   def _strategy_4(
-    problematic_node: p_data_structures.DuoGlotNode,
-    context_tree: p_data_structures.PirelTree,
+    problematic_node: pds.DuoGlotNode,
+    context_tree: pds.PirelTree,
     orig_text: str,
-    individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+    individually_simplifiable_nodes: List[pds.DuoGlotNode],
     template_dict: dict
   ) -> Tuple[str, int]:
     '''
@@ -2027,9 +2026,9 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
     def __simplify_node(
       orig_text: str,
-      node: p_data_structures.DuoGlotNode,
-      context_tree: p_data_structures.PirelTree,
-      individually_simplifiable_nodes: List[p_data_structures.DuoGlotNode],
+      node: pds.DuoGlotNode,
+      context_tree: pds.PirelTree,
+      individually_simplifiable_nodes: List[pds.DuoGlotNode],
       template_dict: dict
     ) -> Optional[Tuple[str, dict]]:
       '''
@@ -2100,7 +2099,7 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
 
     return orig_text, upd_prob_nid
 
-  logger.debug('~~~ Starting p_grammar.simplify_template')
+  logger.debug('~~~ Starting grammar based snippet simplification.')
 
   template_origin = template_dict['template_origin']
   src_lang = template_dict['src_lang']
@@ -2120,7 +2119,6 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat1.json', nodes_can_be_simplified_dict_strat1)
 
   # ~~~ simplify using strategy 1
   upd_text_strat1, upd_prob_nid_strat1 = _strategy_1(
@@ -2147,7 +2145,6 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat2.json', nodes_can_be_simplified_dict_strat2)
 
   # ~~~ simplify using strategy 2
   upd_text_strat2, upd_prob_nid_strat2 = _strategy_2(
@@ -2172,7 +2169,6 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat3.json', nodes_can_be_simplified_dict_strat3)
 
   # ~~~ simplify using strategy 3
   individually_simplifiable_nodes = _get_individually_simplifiable_nodes(
@@ -2205,7 +2201,6 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
     template_dict,
     grammar
   )
-  # p_utils.log_json_time(f'{subject.name}_nodes_can_be_simplified_dict_strat4.json', nodes_can_be_simplified_dict_strat4)
 
   # ~~~ simplify using strategy 4
   individually_simplifiable_nodes = _get_individually_simplifiable_nodes(
@@ -2237,10 +2232,10 @@ def simplify_template(subject: p_subject.PirelSubject, template_dict: dict) -> d
   return template_dict
 
 def _get_potential_simplifiable_nodes(
-  context_node: p_data_structures.DuoGlotNode,
-  problematic_node: p_data_structures.DuoGlotNode,
+  context_node: pds.DuoGlotNode,
+  problematic_node: pds.DuoGlotNode,
   template_dict: dict
-) -> Dict[int, p_data_structures.DuoGlotNode]:
+) -> Dict[int, pds.DuoGlotNode]:
   '''
   RETURN a sequence of nodes that can "potentially" be simplified/removed
   from the program. It is emphasized that not all the nodes in the
@@ -2248,8 +2243,8 @@ def _get_potential_simplifiable_nodes(
   '''
 
   def __is_potential_simplifiable_node(
-    node: p_data_structures.DuoGlotNode,
-    problematic_node: p_data_structures.DuoGlotNode,
+    node: pds.DuoGlotNode,
+    problematic_node: pds.DuoGlotNode,
     template_dict: dict
   ) -> bool:
     if node.is_terminal():
@@ -2273,9 +2268,9 @@ def _get_potential_simplifiable_nodes(
     return True
 
   def __rec_pre_order_collect_potential_simplifiable_nodes(
-    at_node: p_data_structures.DuoGlotNode,
-    context_node: p_data_structures.DuoGlotNode,
-    problematic_node: p_data_structures.DuoGlotNode,
+    at_node: pds.DuoGlotNode,
+    context_node: pds.DuoGlotNode,
+    problematic_node: pds.DuoGlotNode,
     template_dict: dict,
     container: dict
   ):
@@ -2298,7 +2293,7 @@ def _get_potential_simplifiable_nodes(
   return simplifiable_nodes
 
 def _process_potential_simplifiable_node_w_grammar(
-  pot_simplifiable_node: p_data_structures.DuoGlotNode,
+  pot_simplifiable_node: pds.DuoGlotNode,
   grammar: TreeSitterGrammar
 ) -> Optional[Dict[int, bool]]:
   '''
@@ -2308,8 +2303,8 @@ def _process_potential_simplifiable_node_w_grammar(
   '''
 
   def __child_node_can_be_simplified(
-    parent_node: p_data_structures.DuoGlotNode,
-    child_node: p_data_structures.DuoGlotNode,
+    parent_node: pds.DuoGlotNode,
+    child_node: pds.DuoGlotNode,
     production_path: List[str],  # ['_right_hand_side', 'expression', 'primary_expression']
     grammar: TreeSitterGrammar
   ) -> bool:
@@ -2383,11 +2378,11 @@ def _process_potential_simplifiable_node_w_grammar(
   return can_be_simplified_dict
 
 def _get_simplification_metadata(
-  context_node: p_data_structures.DuoGlotNode,
-  problematic_node: p_data_structures.DuoGlotNode,
+  context_node: pds.DuoGlotNode,
+  problematic_node: pds.DuoGlotNode,
   template_dict: dict,
   grammar: TreeSitterGrammar
-) -> Tuple[Dict[int, p_data_structures.DuoGlotNode], Dict[int, Dict[int, bool]]]:
+) -> Tuple[Dict[int, pds.DuoGlotNode], Dict[int, Dict[int, bool]]]:
   '''
   RETURN
   1. potential simplifiable nodes
@@ -2396,7 +2391,7 @@ def _get_simplification_metadata(
 
   def _update_can_be_simplified_dict(
     can_be_simplified_dict: Dict[int, bool],
-    pot_simplifiable_nodes: Dict[int, p_data_structures.DuoGlotNode]
+    pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode]
   ) -> Dict[int, bool]:
     '''
     WHY DO WE NEED THIS FUNCTION?
@@ -2430,9 +2425,9 @@ def _get_simplification_metadata(
 
 # API for TSP generation
 def get_alternative_starting_node_types(
-  problematic_node: p_data_structures.DuoGlotNode,
+  problematic_node: pds.DuoGlotNode,
   grammar: TreeSitterGrammar,
-) -> List[Tuple[p_data_structures.DuoGlotNode, List[str]]]:
+) -> List[Tuple[pds.DuoGlotNode, List[str]]]:
   '''
   NOTE There might be cases when there is no alternative to N. In such cases,
   we might have to find alternatives to children of N. TODO Let's consider it later.
@@ -2463,7 +2458,7 @@ def get_alternative_starting_node_types(
   nt_children = [n for n in children if n.is_nonterminal()]
   assert len(mappings) == len(nt_children), 'each non-terminal child should be mapped to a symbol'
 
-  all_alt_node_types : List[Tuple[p_data_structures.DuoGlotNode, List[str]]] = []
+  all_alt_node_types : List[Tuple[pds.DuoGlotNode, List[str]]] = []
   for mapped_node, mapped_rule, path_to_rule in mappings:
     try:
       alt_node_types = get_alternative_starting_node_type(problematic_node, mapped_node, mapped_rule, path_to_rule, grammar)
@@ -2475,8 +2470,8 @@ def get_alternative_starting_node_types(
 
 
 def get_alternative_starting_node_type(
-  problematic_node: p_data_structures.DuoGlotNode,
-  child_node: p_data_structures.DuoGlotNode,
+  problematic_node: pds.DuoGlotNode,
+  child_node: pds.DuoGlotNode,
   mapped_rule: Rule,
   path_to_rule: List[str],
   grammar: TreeSitterGrammar,
@@ -2654,8 +2649,8 @@ def match_ast_usage() -> None:
   given an AST, match the grammar to it
   '''
   def _find_alternative_nodes(
-    prob_node: p_data_structures.DuoGlotNode,
-    ch_node: p_data_structures.DuoGlotNode,
+    prob_node: pds.DuoGlotNode,
+    ch_node: pds.DuoGlotNode,
     rule: Rule,
     path_to_rule: List[str],
     grammar: TreeSitterGrammar
@@ -2736,15 +2731,15 @@ def match_ast_usage() -> None:
     print()
 
   def _do_sth_with_mapping(
-    prob_node: p_data_structures.DuoGlotNode,
-    mappings: List[Tuple[p_data_structures.DuoGlotNode, Rule, List[str]]],
+    prob_node: pds.DuoGlotNode,
+    mappings: List[Tuple[pds.DuoGlotNode, Rule, List[str]]],
     grammar: TreeSitterGrammar
   ) -> None:
     ''''''
     for node, rule, path in mappings:
       _find_alternative_nodes(prob_node, node, rule, path, grammar)
 
-  def _match_node_with_rule(node: p_data_structures.DuoGlotNode, rule: Rule, grammar: TreeSitterGrammar) -> None:
+  def _match_node_with_rule(node: pds.DuoGlotNode, rule: Rule, grammar: TreeSitterGrammar) -> None:
     assert node.is_nonterminal(), 'non-terminal node expected'
 
     children = node.get_children()
@@ -2799,7 +2794,7 @@ def f_gold(nums1: List[int], nums2: List[int]) -> float:
 '''.strip()
   lang = 'py'
   ast, ann = d_ast_parse.parse_text_dbg(code, lang, keep_text=False)
-  tree = p_data_structures.DuoGlotTree(ast)
+  tree = pds.DuoGlotTree(ast)
 
   # p_utils.write_json('temporary_ast.json', ast)
 
@@ -3115,8 +3110,8 @@ def simplify_program_context_usage() -> None:
   '''
 
   def _is_simplifiable_node(
-    node: p_data_structures.DuoGlotNode,
-    problematic_node: p_data_structures.DuoGlotNode
+    node: pds.DuoGlotNode,
+    problematic_node: pds.DuoGlotNode
   ) -> bool:
     if node.is_terminal():
       return False
@@ -3125,9 +3120,9 @@ def simplify_program_context_usage() -> None:
     return True
 
   def _rec_pre_order_collect_potential_simplifiable_nodes(
-    at_node: p_data_structures.DuoGlotNode,
-    context_node: p_data_structures.DuoGlotNode,
-    problematic_node: p_data_structures.DuoGlotNode,
+    at_node: pds.DuoGlotNode,
+    context_node: pds.DuoGlotNode,
+    problematic_node: pds.DuoGlotNode,
     container: dict
   ):
     if at_node == problematic_node:
@@ -3139,9 +3134,9 @@ def simplify_program_context_usage() -> None:
       _rec_pre_order_collect_potential_simplifiable_nodes(child, context_node, problematic_node, container)
 
   def _get_simplifiable_nodes(
-    context_node: p_data_structures.DuoGlotNode,
-    problematic_node: p_data_structures.DuoGlotNode
-  ) -> Dict[int, p_data_structures.DuoGlotNode]:
+    context_node: pds.DuoGlotNode,
+    problematic_node: pds.DuoGlotNode
+  ) -> Dict[int, pds.DuoGlotNode]:
     simplifiable_nodes = {}
     _rec_pre_order_collect_potential_simplifiable_nodes(
       context_node,
@@ -3152,8 +3147,8 @@ def simplify_program_context_usage() -> None:
     return simplifiable_nodes
 
   def _child_node_can_be_simplified(
-    parent_node: p_data_structures.DuoGlotNode,
-    child_node: p_data_structures.DuoGlotNode,
+    parent_node: pds.DuoGlotNode,
+    child_node: pds.DuoGlotNode,
     production_path: List[str],  # ['_right_hand_side', 'expression', 'primary_expression']
     grammar: TreeSitterGrammar
   ) -> bool:
@@ -3192,7 +3187,7 @@ def simplify_program_context_usage() -> None:
     return False
 
   def _process_simplifiable_node(
-    simplifiable_node: p_data_structures.DuoGlotNode,
+    simplifiable_node: pds.DuoGlotNode,
     grammar: TreeSitterGrammar
   ) -> Dict[int, bool]:
 
@@ -3246,8 +3241,8 @@ def simplify_program_context_usage() -> None:
 
   def _process_can_be_simplified_dict(
     nodes_can_be_simplified: Dict[int, Dict[int, bool]],
-    problematic_node: p_data_structures.DuoGlotNode,
-    simpl_nodes_dict: Dict[int, p_data_structures.DuoGlotNode]
+    problematic_node: pds.DuoGlotNode,
+    simpl_nodes_dict: Dict[int, pds.DuoGlotNode]
   ):
     '''
     1. if all siblings can be simplified
@@ -3290,8 +3285,8 @@ def simplify_program_context_usage() -> None:
     def __process_all_siblings_can_be_simplified_node_prob_no(
       siblings_can_be_removed_node_id: int,
       nodes_can_be_simplified_copy: Dict[int, Dict[int, bool]],
-      simpl_nodes_dict: Dict[int, p_data_structures.DuoGlotNode]
-    ) -> p_data_structures.DuoGlotNode:
+      simpl_nodes_dict: Dict[int, pds.DuoGlotNode]
+    ) -> pds.DuoGlotNode:
       '''
       modifies `nodes_can_be_simplified_copy`
       Return a reference to a node whose all non-terminal children
@@ -3319,8 +3314,8 @@ def simplify_program_context_usage() -> None:
     def __process_all_siblings_can_be_simplified_node_prob_yes(
       siblings_can_be_removed_node_id: int,
       nodes_can_be_simplified_copy: Dict[int, Dict[int, bool]],
-      simpl_nodes_dict: Dict[int, p_data_structures.DuoGlotNode]
-    ) -> Tuple[p_data_structures.DuoGlotNode, p_data_structures.DuoGlotNode]:
+      simpl_nodes_dict: Dict[int, pds.DuoGlotNode]
+    ) -> Tuple[pds.DuoGlotNode, pds.DuoGlotNode]:
       '''
       modifies `nodes_can_be_simplified_copy`
 
@@ -3364,8 +3359,8 @@ def simplify_program_context_usage() -> None:
       return leftmost_node, rightmost_node
 
     # ~~~ artifacts
-    all_children_can_be_simplified_nodes_list : List[p_data_structures.DuoGlotNode] = []
-    leftmost_rightmost_siblings_problematic_node : Optional[Tuple[p_data_structures.DuoGlotNode, p_data_structures.DuoGlotNode]] = None
+    all_children_can_be_simplified_nodes_list : List[pds.DuoGlotNode] = []
+    leftmost_rightmost_siblings_problematic_node : Optional[Tuple[pds.DuoGlotNode, pds.DuoGlotNode]] = None
 
     nodes_can_be_simplified_copy = copy.deepcopy(nodes_can_be_simplified)
 
@@ -3414,9 +3409,9 @@ def simplify_program_context_usage() -> None:
     return all_children_can_be_simplified_nodes_list, leftmost_rightmost_siblings_problematic_node
 
   def _simplify_context(
-    all_children_can_be_simplified_nodes_list: List[p_data_structures.DuoGlotNode],
-    leftmost_rightmost_siblings_problematic_node : Optional[Tuple[p_data_structures.DuoGlotNode, p_data_structures.DuoGlotNode]],
-    problematic_node: p_data_structures.DuoGlotNode,
+    all_children_can_be_simplified_nodes_list: List[pds.DuoGlotNode],
+    leftmost_rightmost_siblings_problematic_node : Optional[Tuple[pds.DuoGlotNode, pds.DuoGlotNode]],
+    problematic_node: pds.DuoGlotNode,
     template_dict: dict,
     grammar: p_grammar.TreeSitterGrammar
   ) -> str:
@@ -3426,13 +3421,13 @@ def simplify_program_context_usage() -> None:
     '''
     def __gen_code_for_node_type(node_type: str, grammar: p_grammar.TreeSitterGrammar):
       ast = grammar.generate_simplest_ast(node_type)
-      ast_tree = p_visitor_py.Tree.from_gen_ast(ast)
-      code = p_visitor_py.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
+      ast_tree = pvpy.Tree.from_gen_ast(ast)
+      code = pvpy.PrettyPrinterForGeneratedCode().visit(ast_tree.root_node)
       return code
 
     def __process_parent_nodes(
-      parent_nodes: List[p_data_structures.DuoGlotNode],
-      context_tree: p_data_structures.PirelTree,
+      parent_nodes: List[pds.DuoGlotNode],
+      context_tree: pds.PirelTree,
       orig_text: str,
       grammar: p_grammar.TreeSitterGrammar
     ):
@@ -3445,11 +3440,11 @@ def simplify_program_context_usage() -> None:
       return orig_text
 
     def __process_problematic_node(
-      leftmost_node: p_data_structures.DuoGlotNode,
-      rightmost_node: p_data_structures.DuoGlotNode,
-      problematic_node: p_data_structures.DuoGlotNode,
-      context_tree: p_data_structures.PirelTree,
-      context_node: p_data_structures.PirelNode,
+      leftmost_node: pds.DuoGlotNode,
+      rightmost_node: pds.DuoGlotNode,
+      problematic_node: pds.DuoGlotNode,
+      context_tree: pds.PirelTree,
+      context_node: pds.PirelNode,
       orig_text: str,
       template_dict: dict
     ):
@@ -3472,7 +3467,7 @@ def simplify_program_context_usage() -> None:
     src_lang = template_dict['src_lang']
 
     context_ast_text, context_annotation = d_ast_parse.parse_text_dbg(template_origin, lang=src_lang, keep_text=True)
-    context_tree = p_data_structures.PirelTree(context_ast_text, annotation=context_annotation)
+    context_tree = pds.PirelTree(context_ast_text, annotation=context_annotation)
     context_tree._fix_indentation()
     context_node = context_tree.get_root_node().get_children()[0]
     orig_text = context_node.get_text()
@@ -3520,7 +3515,7 @@ def simplify_program_context_usage() -> None:
 
   ast, ann = d_ast_parse.parse_text_dbg(template_origin, src_lang, keep_text=False)
   # p_utils.write_json('temporary_ast.json', ast)
-  tree = p_data_structures.DuoGlotTree(ast)
+  tree = pds.DuoGlotTree(ast)
   root_node = tree.root_node
   assert len(root_node.get_children()) == 1, 'sanity check: root node must have exactly one child'
 
@@ -3539,7 +3534,7 @@ def simplify_program_context_usage() -> None:
 
   # ~~~ check which nodes can be simplified
   nodes_can_be_simplified_dict : Dict[int, Dict[int, bool]] = {}
-  simpl_nodes_dict : Dict[int, p_data_structures.DuoGlotNode] = {}
+  simpl_nodes_dict : Dict[int, pds.DuoGlotNode] = {}
   for snid, simpl_node in simplifiable_nodes.items():
     can_be_simplified_dict = _process_simplifiable_node(simpl_node, grammar)
     nodes_can_be_simplified_dict[simpl_node.get_id()] = can_be_simplified_dict
@@ -3607,7 +3602,7 @@ def _test_get_alternative_starting_node_types():
   problematic_node_id = config_dict['problematic_node_id']
 
   ast, ann = d_ast_parse.parse_text_dbg(src_code, src_lang, keep_text=False)
-  tree = p_data_structures.DuoGlotTree(ast)
+  tree = pds.DuoGlotTree(ast)
   problematic_node = tree.get_node_with_id(problematic_node_id)
 
   grobj = p_consts.GRAMMAR_DICT_READONLY[src_lang]

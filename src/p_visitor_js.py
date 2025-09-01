@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import jsbeautifier
 import tree_sitter
-from typing import Dict, List, Union
+from typing import Dict
 
 import p_consts
 import p_utils

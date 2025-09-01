@@ -1,5 +1,4 @@
 import json
-import sys
 
 import d_consts
 import d_utils
