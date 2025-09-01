@@ -164,6 +164,21 @@ class AbstractNode(ABC):
     _traverse(self)
     return nid_node_map
 
+  def get_node_id(self) -> int:
+    '''
+    Get the node ID of `self` in the tree that `self` belongs to.
+    This function might be useful for connecting
+    DuoGlot-style ASTs with ASTs represented by this class.
+    NOTE Node IDs are assigned starting from 0 in a pre-order
+    traversal starting from the root node of the tree that `self` belongs to.
+    '''
+    root_node = self.get_root_node()
+    nid_node_map = root_node.get_nid_node_map()
+    for nid, node in nid_node_map.items():
+      if id(node) == id(self):
+        return nid
+    raise ValueError('Node not found in its own tree, should not happen')
+
 
 class TerminalNode(AbstractNode):
   def __repr__(self) -> str:
