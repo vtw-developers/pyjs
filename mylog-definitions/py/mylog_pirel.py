@@ -1,6 +1,7 @@
 import hashlib
 import json
 import math
+from collections.abc import KeysView
 from typing import Union
 
 _default_print = print
@@ -56,6 +57,9 @@ def serialize(arg):
     return serialize_set(arg)
   if isinstance(arg, dict):
     return serialize_dict(arg)
+  if isinstance(arg, KeysView):
+    # e.g. myexactlog(frequency.keys())
+    return serialize_list(list(arg))
   str_result = str(arg)
   return ["unknown", len(str_result), str_result]
 
