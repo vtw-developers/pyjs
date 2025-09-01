@@ -6,6 +6,7 @@ import io
 import json
 import logging
 import os
+import requests
 import time
 import tokenize
 import traceback
@@ -15,7 +16,6 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
 import p_consts
-import requests
 
 
 class MultilineLogFormatter(logging.Formatter):
@@ -46,6 +46,7 @@ def setup_logger(name: str) -> logging.Logger:
   _LOG_FPATH = p_consts.LOGS_DIR / 'pirel.log'
   _LOG_FMODE = 'a'
   _LOG_FORMAT = '%(asctime)s,%(msecs)d %(taskName)s %(levelname)s %(module)s.%(funcName)s:%(lineno)d %(message)s'
+  _LOG_FORMAT_CONSOLE = '%(asctime)s %(taskName)s %(levelname)s %(message)s'
   _LOG_DATE_FORMAT = '%H:%M:%S'
   _LOG_LEVEL_FILE = logging.DEBUG  # report everything to file
   _LOG_LEVEL_CONSOLE = logging.INFO  # report only INFO and above to console
@@ -69,8 +70,9 @@ def setup_logger(name: str) -> logging.Logger:
 
     # Formatter applied to both handlers
     formatter = MultilineLogFormatter(fmt=_LOG_FORMAT, datefmt=_LOG_DATE_FORMAT)
+    console_formatter = MultilineLogFormatter(fmt=_LOG_FORMAT_CONSOLE, datefmt=_LOG_DATE_FORMAT)
     file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+    console_handler.setFormatter(console_formatter)
 
     # Add handlers to the logger
     logger.addHandler(file_handler)
