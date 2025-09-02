@@ -321,6 +321,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   NOTE this function returns a third sample that is used during trans.rule validation
   '''
 
+  p_utils.log_json_time('args-generate_tsps_with_generator', locals())
+
   def _init_problematic_node(template_dict: dict) -> pds.DuoGlotNode:
     '''
     Parse `template_origin` and return a reference to the `problematic_node`.
@@ -344,8 +346,8 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       ann, template_origin
     )
     logger.info(f'Problematic node is "{problematic_node}".')
-    logger.info(f'Context code is:\n{template_origin}')
-    logger.info(f'Problematic code is:\n{problematic_node_str}')
+    logger.info(f'Context code is ({context_node.get_ts_node_type()}):\n{template_origin}')
+    logger.info(f'Problematic code is ({problematic_node.get_ts_node_type()}):\n{problematic_node_str}')
 
     return problematic_node
 
@@ -1219,24 +1221,27 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
 # TEST HARNESSES
 def _test_generate_tsps_with_generator():
   '''
-  TEST harness for `generate_tsps_with_generator`.
   template_dict must include:
   - template_origin: str
   - src_lang: str
   - problematic_node_path: List[int]
   - is_insert_secret_fn: bool
   '''
-  template_dict_fpath = p_consts.TMP_DIR / 'test_generate_tsps_with_generator_template_dict.yaml'
-  template_dict = p_utils.read_yaml(template_dict_fpath)
+  config_fpath = p_consts.TMP_DIR / 'test_generate_tsps_with_generator.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  template_dict = args_dict['template_dict']
   tsps = generate_tsps_with_generator(template_dict)
 
   print(template_dict['template_origin'])
-  print('')
+  print()
   print(f'Generated {len(tsps)} TSPs:')
-  for tsp in tsps:
-    print(f'  {tsp[0]}')
-    print(f'  {tsp[1]}')
-    print('')
+  for idx, tsp in enumerate(tsps, start=1):
+    print(f'TSP {idx}:')
+    print(f'{tsp[0]}')
+    print(f'{tsp[1]}')
+    print()
 
 
 if __name__ == '__main__':
