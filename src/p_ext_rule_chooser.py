@@ -1126,6 +1126,21 @@ def _get_readonly_choices_list_init(
   return crcpcs, dgann
 
 
+def _is_excluded_range_cursor(
+  range_cursor: tuple
+) -> bool:
+  '''
+  Check if the given range cursor is excluded from consideration.
+  '''
+  _EXCLUDED_TYPES = ['py.call']
+  ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
+  node_type = ast[0]
+  if node_type in _EXCLUDED_TYPES:
+    logger.debug(f'Excluding range cursor of type {node_type}')
+    return True
+  return False
+
+
 async def get_readonly_choices_list(
   src_main_code: str,
   translation_rules_main_code: str,
@@ -1197,6 +1212,8 @@ async def get_readonly_choices_list(
     This includes the choicable_range_cursor itself and all its subtrees.
     '''
     all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
+    all_range_cursors = [rc for rc in all_range_cursors if not _is_excluded_range_cursor(rc)]
+    logger.debug(f'Number of range cursors under choicable_range_cursor: {len(all_range_cursors)}')
 
     '''
     Attempt to control the infinite loop that may arise from
