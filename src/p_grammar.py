@@ -2591,6 +2591,10 @@ def get_alternative_starting_node_type(
   elif isinstance(mapped_rule.parent, RepeatRule):
     return get_alternative_starting_node_type(problematic_node, child_node, mapped_rule.parent, path_to_rule, grammar)
 
+  # 8 REP1: parent is Repeat1Rule
+  elif isinstance(mapped_rule.parent, Repeat1Rule):
+    raise API_NoAlternativeError('must appear at least once')
+
   # NOTE be vocal on new errors so new cases can be added above
   else:
     raise RuntimeError(f'rule.parent is {mapped_rule.parent.__class__.__name__}')
