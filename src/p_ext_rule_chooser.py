@@ -1137,6 +1137,16 @@ async def get_readonly_choices_list(
       f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}')
 
     '''
+    Verified rules may already contain rules that can handle
+    the choicable_range_cursor. If so, we skip processing it.
+    '''
+    choicable_range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+      choicable_range_cursor, dgann, src_main_code)
+    if ruleset.verified_rule_exists(choicable_range_cursor_unparsed):
+      logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by verified rules.')
+      continue
+
+    '''
     Matcher groups are groups of rules that have the same matcher signature.
     We make a queue of matcher groups to process them one by one.
     '''
