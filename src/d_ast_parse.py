@@ -189,6 +189,22 @@ def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
   return result
 
 
+def deduplicate_range_cursors(
+  range_cursors: list
+) -> list:
+  '''
+  Deduplicate range cursors.
+  '''
+  seen = set()
+  deduped = []
+  for rc in range_cursors:
+    rc_id = (id(rc[0]), rc[1], rc[2])
+    if rc_id not in seen:
+      deduped.append(rc)
+      seen.add(rc_id)
+  return deduped
+
+
 def get_nt_children_as_range_cursors(nt_node: list) -> list:
   '''
   Given a duoglot-style AST node, return a list of non-terminal
