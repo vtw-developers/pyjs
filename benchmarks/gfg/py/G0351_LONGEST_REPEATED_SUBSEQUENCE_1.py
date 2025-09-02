@@ -22,7 +22,7 @@ def f_gold(str_0):
             res += str_0[i - 1]
             i -= 1
             j -= 1
-        elif dp[i][j] == dp[i - 1][j]:
+        elif dp[i][j] == dp[i - 1][j] and (dp[i][j] != dp[i][j - 1] or i % 2):
             i -= 1
         else:
             j -= 1
