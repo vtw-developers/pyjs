@@ -444,15 +444,19 @@ def _get_expr_src_main_code(
 
 
 def _get_log_stat_str(
-  choicable_range_cursor: tuple,
+  matched_range_cursor: tuple,
   dgann: dict,
-  src_main_code: str
+  src_main_code: str,
+  matcher_group: List[p_ruleset.TRuleBase],
+  ruleset: p_ruleset.Ruleset
 ) -> str:
   '''
   Return a log statement that logs the AST.
+  If we cannot validate the matched_range_cursor with the given matcher_group,
+  then we need to mark the matching rules as unverifiable for the matched_range_cursor.
   '''
-  ast_str = d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)
-  log_stat_str = f'myexactlog({ast_str})'
+  matched_ast_str = d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)
+  log_stat_str = f'myexactlog({matched_ast_str})'
 
   '''
   Make sure that the log statement is parseable.
@@ -462,6 +466,11 @@ def _get_log_stat_str(
   myexactlog(i:j)
   '''
   if p_utils.does_have_parse_error(log_stat_str, 'py'):
+    logger.debug(
+      f'Expression "{matched_ast_str}" is unverifiable due to '
+      f'parse error in log statement "{log_stat_str}".')
+    for trule in matcher_group:
+      ruleset.update_unverifiable_rules(matched_ast_str, trule)
     raise ExprLogStatHasParseError()
 
   '''
@@ -476,10 +485,16 @@ def _get_log_stat_str(
     ]
   ]]]
   '''
-  choicable_ast = d_ast_parse.range_cursor_to_ast_node(choicable_range_cursor)
+  matched_ast = d_ast_parse.range_cursor_to_ast_node(matched_range_cursor)
   log_stat_ast, _ = d_ast_parse.parse_text_dbg(log_stat_str, 'py')
   logged_expr_ast = log_stat_ast[2][2][3][3]
-  if not d_ast_parse.are_nodes_equal(choicable_ast, logged_expr_ast):
+
+  if not d_ast_parse.are_nodes_equal(matched_ast, logged_expr_ast):
+    logger.debug(
+      f'Expression "{matched_ast_str}" is unverifiable due to '
+      f'tree non-isomorphism in log statement "{log_stat_str}".')
+    for trule in matcher_group:
+      ruleset.update_unverifiable_rules(matched_ast_str, trule)
     raise ExprLogStatContextError()
 
   return log_stat_str
@@ -535,38 +550,51 @@ def get_rules_that_handle_range_cursor_rec(
   src_main_code: str,
 ) -> Optional[List[p_ruleset.TRuleBase]]:
   '''
-  Recursively retrieve all rules that can handle the range cursor,
-  and all slots that belong to the range cursor.
-  '''
-  rules = []
+  Recursively retrieve both verified and unverifiable rules
+  that can handle the range cursor.
 
-  # base case: rule for range cursor not found
+  NOTE returns ALL VERIFIED AND UNVERIFIABLE rules
+  which defeats the purpose of identifying the failing matcher group.
+  TODO This can/should be optimized.
+  '''
+  trules : List[p_ruleset.TRuleBase] = []
   range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
     range_cursor, dgann, src_main_code)
-  if not ruleset.verified_rule_exists(range_cursor_unparsed):
+  if ruleset.verified_rule_exists(range_cursor_unparsed):
+    trules.append(ruleset.get_verified_rule(range_cursor_unparsed))
+  if ruleset.unverifiable_rules_exist(range_cursor_unparsed):
+    trules.extend(ruleset.get_unverifiable_rules(range_cursor_unparsed))
+
+  # base case: no rule for range cursor not found
+  if len(trules) == 0:
     return None
 
-  rule = ruleset.get_verified_rule(range_cursor_unparsed)
-  rules.append(rule)
+  assert ruleset.verified_rule_exists(range_cursor_unparsed) != \
+    ruleset.unverifiable_rules_exist(range_cursor_unparsed), \
+    'Expected either verified or unverifiable rules to exist, but not both.'
 
   # get all slot cursors of range cursor
-  match_obj = match_rule_to_range_cursor(rule.rule['match'], range_cursor)
-  assert match_obj['is_matched'], 'Expected rule to match the range cursor'
-  slot_cursors = match_obj['slot_cursors']
-  slot_cursors = slot_cursor_remove_empty(slot_cursors)
+  all_slot_cursors = []  # exist under the range_cursor
+  for trule in trules:
+    match_obj = match_rule_to_range_cursor(trule.rule['match'], range_cursor)
+    assert match_obj['is_matched'], 'Expected rule to match the range cursor'
+    all_slot_cursors.extend(match_obj['slot_cursors'])
+
+  all_slot_cursors = slot_cursor_remove_empty(all_slot_cursors)
+  all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
 
   # base case: rule has no slot cursors
-  if len(slot_cursors) == 0:
-    return rules
+  if len(all_slot_cursors) == 0:
+    return trules
 
   # recursive case: rule has slot cursors
-  for slot_cursor in slot_cursors:
+  for slot_cursor in all_slot_cursors:
     child_rules = get_rules_that_handle_range_cursor_rec(
       slot_cursor, ruleset, dgann, src_main_code)
     if child_rules is not None:
-      rules.extend(child_rules)
+      trules.extend(child_rules)
 
-  return rules
+  return trules
 
 
 def _check_for_base_rules(
@@ -787,6 +815,7 @@ async def validate_matcher_group(
   ruleset: p_ruleset.Ruleset,
   src_main_code: str,
   pre_context: str,
+  log_stat_str: str,
   src_test_code: str,
   translation_rules_test_code: str,
   dgann: dict,
@@ -821,9 +850,7 @@ async def validate_matcher_group(
   '''
   Need to create a f_gold() function for the matched AST.
   '''
-  log_stat_str = _get_log_stat_str(matched_range_cursor, dgann, src_main_code)
   expr_src_main_code = _get_expr_src_main_code(src_main_code, pre_context, log_stat_str)
-
   test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
     test_code=src_test_code,
     main_code=expr_src_main_code,
@@ -900,7 +927,9 @@ async def _process_match_obj(
   '''
   logger.debug('~~~ Starting match object processing')
   assert match_obj['is_matched'], 'Expected match_obj to be matched'
-  range_cursor = match_obj['range_cursor']
+  matched_range_cursor = match_obj['range_cursor']
+  log_stat_str = _get_log_stat_str(
+    matched_range_cursor, dgann, src_main_code, matcher_group, ruleset)
 
   '''
   slot_cursors are range_cursors that appear under the range_cursor.
@@ -916,12 +945,13 @@ async def _process_match_obj(
   if len(slot_cursors) == 0:
     logger.debug('Matched rule is non-recursive. Validating matching rules.')
     await validate_matcher_group(
-      range_cursor,
+      matched_range_cursor,
       matcher_group,
       [],  # subtrees_rules
       ruleset,
       src_main_code,
       pre_context,
+      log_stat_str,
       src_test_code,
       translation_rules_test_code,
       dgann
@@ -939,7 +969,7 @@ async def _process_match_obj(
     We need to check if there are rules that plausibly translate the slot_cursors
     under the matched range_cursor.
     '''
-    subtrees_plausible_rules = get_rules_that_handle_range_cursor_rec(
+    subtrees_rules = get_rules_that_handle_range_cursor_rec(
       slot_cursor, ruleset, dgann, src_main_code)
     logger.debug(
       f'Slot cursor {idx}/{len(slot_cursors)} AST: '
@@ -949,22 +979,23 @@ async def _process_match_obj(
     If there is no rule that can handle the range_cursor,
     it means we need to check the next matching rule group.
     '''
-    if subtrees_plausible_rules is None:
+    if subtrees_rules is None:
       raise NoRuleToHandleRangeCursorError
 
-    logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_plausible_rules)}')
-    subtrees_rules.extend(subtrees_plausible_rules)
+    logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_rules)}')
+    subtrees_rules.extend(subtrees_rules)
 
   '''
   This range_cursor is handled by the rule. Mark it as handled.
   '''
   await validate_matcher_group(
-    range_cursor,
+    matched_range_cursor,
     matcher_group,
     subtrees_rules,
     ruleset,
     src_main_code,
     pre_context,
+    log_stat_str,
     src_test_code,
     translation_rules_test_code,
     dgann
