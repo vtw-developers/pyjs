@@ -99,10 +99,27 @@ class Ruleset:
   '''
   def __init__(self):
     self.rules : List[TRuleBase] = []
-    # Each time the ruleset is modified, call _update_matcher_groups() to update this property.
+
+    '''
+    Matcher groups contains groups of rules that share the same matcher signature.
+    '''
     self.matcher_groups: Dict[str, List[TRuleBase]] = {}
-    # unparsed AST node -> TRuleBase
+
+    '''
+    Verified rules are rules that were validated based on tests
+    to be able to correctly translate a specific AST node.
+    Verified rules are "guaranteed" to work for the matched AST.
+    '''
     self._verified_rules: Dict[str, TRuleBase] = {}
+
+    '''
+    Unverifiable rules are rules that could not be verified
+    based on tests because the AST nodes they match are not
+    loggable. Unlike verified rules, a single AST node can
+    map to multiple unverifiable rules, because they might share
+    the same matcher signature but have different expansions.
+    '''
+    self._unverifiable_rules: Dict[str, List[TRuleBase]] = {}
 
   def __str__(self):
     return json.dumps(self.to_dict(), indent=2)
@@ -142,9 +159,12 @@ class Ruleset:
         return rule
     return None
 
+  # VERIFIED RULES RELATED
   def update_verified_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
     assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
     assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
+    assert self.get_rule_ref(rule) is not None, \
+      'Rule must be in self.rules to be added to verified rules'
 
     '''
     Check if a verified rule for unparsed_ast already exists.
@@ -173,13 +193,54 @@ class Ruleset:
     return unparsed_ast in self._verified_rules
 
   def merge_verified_rules_from(self, serialized_ruleset: dict) -> None:
+    '''
+    NOTE if serialized_ruleset has a verified rule for an AST that
+    already exists in self._verified_rules, it will be ignored.
+    If serialized_ruleset has a rule that does not exist in self.rules,
+    it will be ignored. This makes sure that self.rules are the only
+    rules that we have.
+    '''
     assert isinstance(serialized_ruleset, dict), f'Unexpected type {type(serialized_ruleset)}'
     for unparsed_ast, serialized_trule in \
       serialized_ruleset.get('verified_rules', {}).items():
       other_rule = TRuleBase.from_dict(serialized_trule)
-      rule = self.get_rule_ref(other_rule)
+      rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
       if rule:
         self.update_verified_rules(unparsed_ast, rule)
+      else:
+        logger.warning(f'Ignoring verified rule for "{unparsed_ast}" because it is not in self.rules.')
+
+  # UNVERIFIABLE RULES RELATED
+  def update_unverifiable_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
+    assert self.get_rule_ref(rule) is not None, \
+      'Rule must be in self.rules to be added to unverifiable rules'
+    self._unverifiable_rules.setdefault(unparsed_ast, []).append(rule)
+
+  def get_unverifiable_rules(self, unparsed_ast: str) -> List[TRuleBase]:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    assert unparsed_ast in self._unverifiable_rules, f'No unverifiable rules for "{unparsed_ast}"'
+    return self._unverifiable_rules[unparsed_ast]
+
+  def unverifiable_rules_exist(self, unparsed_ast: str) -> bool:
+    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+    return unparsed_ast in self._unverifiable_rules
+
+  def merge_unverifiable_rules_from(self, serialized_ruleset: dict) -> None:
+    '''
+    Check docs for merge_verified_rules_from().
+    '''
+    assert isinstance(serialized_ruleset, dict), f'Unexpected type {type(serialized_ruleset)}'
+    for unparsed_ast, serialized_trules in \
+      serialized_ruleset.get('unverifiable_rules', {}).items():
+      for serialized_trule in serialized_trules:
+        other_rule = TRuleBase.from_dict(serialized_trule)
+        rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
+        if rule:
+          self.update_unverifiable_rules(unparsed_ast, rule)
+        else:
+          logger.warning(f'Ignoring unverifiable rule for "{unparsed_ast}" because it is not in self.rules.')
 
   def get_rule_idx_in_matcher_group(self, rule: TRuleBase) -> int:
     '''
@@ -257,6 +318,9 @@ class Ruleset:
       'type': 'Ruleset',
       'rules': [rule.to_dict() for rule in self.rules],
       'verified_rules': {k: v.to_dict() for k, v in self._verified_rules.items()},
+      'unverifiable_rules': {
+        k: [r.to_dict() for r in v] for k, v in self._unverifiable_rules.items()
+      },
     }
     return res
 
@@ -279,6 +343,8 @@ class Ruleset:
     '''
     assert data['type'] == 'Ruleset', 'Expected type to be Ruleset'
     ruleset = cls()
+
+    # ruleset.rules
     for rule_data in data['rules']:
       if rule_data['type'] == 'StartingTRule':
         rule = StartingTRule.from_dict(rule_data)
@@ -287,5 +353,14 @@ class Ruleset:
       else:
         raise ValueError(f'Unknown rule type: {rule_data["type"]}')
       ruleset.rules.append(rule)
+
+    # ruleset.matcher_groups
     ruleset._update_matcher_groups()
+
+    # ruleset.verified_rules
+    ruleset.merge_verified_rules_from(data)
+
+    # ruleset._unverifiable_rules
+    ruleset.merge_unverifiable_rules_from(data)
+
     return ruleset
