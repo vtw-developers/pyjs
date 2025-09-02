@@ -903,14 +903,14 @@ async def apply_translation_rules(
 
 
 # USAGE
-async def usage_apply_translation_rules():
+def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible = await apply_translation_rules(subject_config)
+  tar_program_plausible = asyncio.run(apply_translation_rules(subject_config))
   logger.debug(f'Plausible target program:\n{tar_program_plausible}')
 
 
 # TEST HARNESSES
-async def _test_apply_translation_rules():
+def _test_apply_translation_rules():
   '''
   async def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
   '''
@@ -919,11 +919,11 @@ async def _test_apply_translation_rules():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
-  tar_program_deinstr = await apply_translation_rules(subject)
+  tar_program_deinstr = asyncio.run(apply_translation_rules(subject))
   print(f'Plausible target program:\n{tar_program_deinstr}')
 
 
-async def _test_run_tests():
+def _test_run_tests():
   '''
   async def _run_tests(
     src_program_instr: str,
@@ -939,10 +939,10 @@ async def _test_run_tests():
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
 
-  await _run_tests(src_program_instr, tar_program_instr, subject)
+  asyncio.run(_run_tests(src_program_instr, tar_program_instr, subject))
 
 
 if __name__ == '__main__':
   # usage_apply_translation_rules()
-  asyncio.run(_test_apply_translation_rules())
-  # asyncio.run(_test_run_tests())
+  _test_apply_translation_rules()
+  # _test_run_tests()
