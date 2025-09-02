@@ -1019,7 +1019,7 @@ async def stat_node_learn_trules_recovery(
   measure to recover from the internal validation failure.
   '''
   p_utils.log_json_time(f'args-stat_node_learn_trules_recovery.json', locals())
-  logger.debug('Starting statement node translation rule learning (RECOVERY)')
+  logger.debug('stat-rec: Starting statement node translation rule learning (RECOVERY)')
 
   def _synthesize_context(simple_ntext: str, src_lang: str) -> dict:
     tree = pds.DuoGlotTree.from_code_str(simple_ntext, src_lang)
@@ -1031,7 +1031,9 @@ async def stat_node_learn_trules_recovery(
       'target_context': [['unknown']]
     }
 
-  context = _synthesize_context(simple_ntext, src_lang)
+  logger.debug('Will insert secret function invocation if applicable')
+  simple_ntext = pvpy.SecretFunctionInserter.insert_secret_functions(simple_ntext)
+  logger.debug(f'Inserted secret function invocation:\n{simple_ntext}')
 
   reference_translations, lget_ref_trans = await p_llm_gen.get_reference_translations(
     simple_ntext, src_lang, tar_lang)
@@ -1041,6 +1043,7 @@ async def stat_node_learn_trules_recovery(
     logger.error(msg)
     raise CouldNotGenRefTranslationsError(msg)
 
+  context = _synthesize_context(simple_ntext, src_lang)
   overfitted_trules : List[str] = []
   for ref_trans in reference_translations:
     trule = p_rule_inferencer.infer_translation_rule_wrapper(
@@ -1048,11 +1051,11 @@ async def stat_node_learn_trules_recovery(
       src_lang=src_lang,
       tar_lang=tar_lang,
       context=context,
-      is_insert_secret_fn=False,  # TODO must be True for while, if, for statements
+      is_insert_secret_fn=(p_consts.GENERIC_SECRET_FN in simple_ntext),
       choose_largest_node=True,
       is_ignore_semicolon=False
     )
-    logger.debug(f'Error recovery: learned translation rule:\n{trule}')
+    logger.debug(f'stat-rec: Learned translation rule:\n{trule}')
     overfitted_trules.append(trule)
 
   return overfitted_trules
