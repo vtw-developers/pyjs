@@ -1,0 +1,1 @@
+print(arr[j], end=" ")
