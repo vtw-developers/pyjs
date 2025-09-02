@@ -1,0 +1,56 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "s = N[0:0 + i]",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "subscript",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.subscript",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.variable_declaration"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "var s = pirel_replace_var;",
+  "src_program": "s = N[0:0 + i]",
+  "tsps": [
+    [
+      "s = id_vyws[0:0 + i]",
+      "s = id_cru[0:0 + i]"
+    ],
+    [
+      "s = id_vpxm[2632:4533 + id_pnhs]",
+      "s = id_scog[8452:id_amc + id_rtxg]"
+    ]
+  ]
+}

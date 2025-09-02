@@ -760,6 +760,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     else:
       alt_ntype1, alt_ntype2 = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
 
+    if mapped_node.get_ts_node_type() in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
+      raise _CannotGenerateProgramPairError('mapped_node is of a type that does not allow TSP generation')
+
     # NOTE TODO no check is performed on the generated code
     code1 = _gen_code_for_node_type(alt_ntype1, mapped_node, template_dict, grammar)
     code2 = _gen_code_for_node_type(alt_ntype2, mapped_node, template_dict, grammar)

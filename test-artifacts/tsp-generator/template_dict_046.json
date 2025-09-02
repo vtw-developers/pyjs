@@ -57,11 +57,6 @@
   "pre_context": "if i >= m:\n    return nums2[j + k - 1]\nif j >= n:\n    return nums1[i + k - 1]\nif k == 1:\n    return min(nums1[i], nums2[j])\npirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "midVal1 = id_rjq if id_jboc else float(id_yse)",
-      "midVal1 = id_rjq if id_jboc else float(9362)",
-      "midVal1 = id_rjq if id_jboc else float(id_vzcg)"
-    ],
-    [
       "midVal1 = id_rjq if id_jboc else float('inf')",
       "midVal1 = id_rjq if id_jboc else float('inf')",
       "midVal1 = id_rjq if id_jboc else float('inf')"
