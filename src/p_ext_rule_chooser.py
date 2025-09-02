@@ -1246,36 +1246,31 @@ def are_choices_lists_equal(
   actual_choices_list: List[tuple]
 ) -> bool:
   '''
-  An actual choices list may be longer, because a new choice may
-  create new choice nodes down the line. For example,
+  Choices lists may be of different lengths. For example,
   [
     ((11, 3, 5), 0),
     ((19, 4, 5), 1)
   ]
-  we choose "1" in (19, 4, 5), and this is the actual choices after applying it:
+  and
   [
     ((11, 3, 5), 0),
     ((19, 4, 5), 1),
     ((23, 2, 3), 0),
     ((24, 3, 4), 0)
   ]
-  As you see, (23, 2, 3) and (24, 3, 4) are new nodes at which we can make new choices.
-  '''
+  In this case, we remove choices with choice_idx == 0
+  from both lists and compare the remaining choices.
 
-  # The following assertion does not hold for all cases.
-  # Refer to "debug-35-gfg20-rate-14" / G0001.
-  # assert len(actual_choices_list) >= len(gen_choices_list), \
-  #   'sanity check: actual choices list must be longer or equal to generated choices list'
-
-  if len(actual_choices_list) > len(gen_choices_list):
-    for choice in actual_choices_list[len(gen_choices_list):]:
-      range_info, choice_idx = choice
-      assert choice_idx == 0, 'sanity check: actual choices list must contain only 0 choice_idx for new nodes'
-
+  PRE: choice identifiers are unique and sorted.
   '''
-  In case actuall list is longer, the new nodes are not considered.
-  '''
-  for choice_a, choice_b in zip(gen_choices_list, actual_choices_list):
+  list_a = _choices_list_remove_default_choice_idxs(gen_choices_list)
+  list_b = _choices_list_remove_default_choice_idxs(actual_choices_list)
+
+  # base case
+  if len(list_a) != len(list_b):
+    return False
+
+  for choice_a, choice_b in zip(list_a, list_b):
     range_info_a, choice_idx_a = choice_a
     range_info_b, choice_idx_b = choice_b
     if range_info_a != range_info_b:
@@ -1300,6 +1295,15 @@ def choices_stack_list_to_choices_list(
       assert choice not in choices_list, f'duplicate choice found: {choice}'
       choices_list.append(choice)
   return choices_list
+
+
+def _choices_list_remove_default_choice_idxs(
+  choices_list: List[Tuple[Tuple[int], int]]
+) -> List[Tuple[Tuple[int], int]]:
+  '''
+  Remove choices with choice_idx == 0 from the choices_list.
+  '''
+  return [choice for choice in choices_list if choice[1] != 0]
 
 
 def _choices_list_get(
