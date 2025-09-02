@@ -1302,7 +1302,7 @@ async def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
-async def _test_learn_and_validate_trules_stat_node():
+def _test_learn_and_validate_trules_stat_node():
   '''
   async def stat_node_main_learn_validate_trules(
     subject: p_subject.PirelSubject,
@@ -1320,15 +1320,15 @@ async def _test_learn_and_validate_trules_stat_node():
   statement_nid = args_dict['statement_nid']
   lstatement_node = ptlog.StatNode(-1)
 
-  await stat_node_main_learn_validate_trules(
+  asyncio.run(stat_node_main_learn_validate_trules(
     subject,
     current_ruleset,
     statement_nid,
     lstatement_node
-  )
+  ))
 
 
-async def _test_learn_trans_rules_for_prob_node():
+def _test_learn_trans_rules_for_prob_node():
   '''
   async def learn_trans_rules_for_prob_node(
     subject: p_subject.PirelSubject,
@@ -1346,7 +1346,27 @@ async def _test_learn_trans_rules_for_prob_node():
   templates_dict = args_dict['templates_dict']
   lnode_trans_iter = ptlog.NodeTransIter(-1)
 
-  result = await learn_trans_rules_for_prob_node(subject, current_ruleset_str, templates_dict, lnode_trans_iter)
+  result = asyncio.run(learn_trans_rules_for_prob_node(subject, current_ruleset_str, templates_dict, lnode_trans_iter))
+  print('\n\n'.join(result))
+
+
+def _test_stat_node_learn_trules_recovery():
+  '''
+  async def stat_node_learn_trules_recovery(
+    simple_ntext: str,
+    src_lang: str,
+    tar_lang: str,
+  ) -> List[str]:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_stat_node_learn_trules_recovery_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  simple_ntext = args_dict['simple_ntext']
+  src_lang = args_dict['src_lang']
+  tar_lang = args_dict['tar_lang']
+
+  result = asyncio.run(stat_node_learn_trules_recovery(simple_ntext, src_lang, tar_lang))
   print('\n\n'.join(result))
 
 
@@ -1467,9 +1487,10 @@ def _test_adapt_rule_choices_assert_result():
 
 
 if __name__ == '__main__':
-  # asyncio.run(_test_learn_and_validate_trules_stat_node())
-  # asyncio.run(_test_learn_trans_rules_for_prob_node())
-  _test_duoglot_translate_wrapper()
+  # _test_learn_and_validate_trules_stat_node()
+  _test_learn_trans_rules_for_prob_node()
+  # _test_stat_node_learn_trules_recovery()
+  # _test_duoglot_translate_wrapper()
   # _test_get_pre_context()
   # _test_adapt_rule_choices()
   # _test_adapt_rule_choices_assert_result()
