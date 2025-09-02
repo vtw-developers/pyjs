@@ -1257,8 +1257,11 @@ async def stat_node_main_learn_validate_trules(
 
     assert len(iter_learned_trules) > 0, 'should not happen: iter_learned_trules is empty'
     logger.info(f'~ Saving {len(iter_learned_trules)} learned translation rules')
-    for trule in reversed(iter_learned_trules):
-      current_ruleset.prepend_rule(p_ruleset.LearnedTRule.from_rule_str(trule))
+    for trule_str in reversed(iter_learned_trules):
+      trule = p_ruleset.LearnedTRule.from_rule_str(trule_str)
+      # do not add duplicate rules
+      if current_ruleset.get_rule_ref(trule) is None:
+        current_ruleset.prepend_rule(trule)
 
   raise RuntimeError('stat_node_main_learn_validate_trules: hit max iterations')
 
