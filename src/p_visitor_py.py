@@ -985,6 +985,12 @@ class PrettyPrinter(pvis.Visitor):
   def visit_FalseNode(self, node: FalseNode) -> str:
     return 'False'
 
+  def visit_FinallyClauseNode(self, node: FinallyClauseNode) -> None:
+    self.write_line('finally:')
+    self.level += 1
+    self.visit(node.children[-1])  # body
+    self.level -= 1
+
   def visit_FloatNode(self, node: FloatNode) -> str:
     return node.val()
 
