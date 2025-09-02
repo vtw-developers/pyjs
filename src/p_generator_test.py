@@ -12,6 +12,9 @@ logger = p_utils.setup_logger(__name__)
 
 
 class TestGenerateTspsWithGenerator(unittest.TestCase):
+  def setUp(self):
+    self.maxDiff = None
+
   def load_template_dict(self, id: str) -> dict:
     template_dict = p_utils.read_json(p_consts.TEST_ARTIFACTS_DIR / 'tsp-generator' / f'template_dict_{id}.json')
     return template_dict
