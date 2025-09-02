@@ -1255,6 +1255,17 @@ async def stat_node_main_learn_validate_trules(
         stat_learn_subject.tar_lang,
       )
 
+    # all combinations of rules lead to implausible translations
+    except p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError as err:
+      logger.warning(
+        'Cannot get a plausible translation of an expression '
+        'under the statement node.')
+      iter_learned_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
+
     assert len(iter_learned_trules) > 0, 'should not happen: iter_learned_trules is empty'
     logger.info(f'~ Saving {len(iter_learned_trules)} learned translation rules')
     for trule_str in reversed(iter_learned_trules):
