@@ -203,6 +203,9 @@ def comment_out_default_mylog_impls(code: str, lang: str) -> str:
   return commented_out + f'{_SPLITTER}' + rest
 
 
+_CACHE_RUN_SRC_TS = {}
+_CACHE_RUN_SRC_TS_SIZE = 1000
+
 async def run_src_test_script(
   src_program_instr: str,
   subject: p_subject.PirelSubject
@@ -215,10 +218,20 @@ async def run_src_test_script(
   mylog_impl = get_mylog_impl(subject.src_lang)
   src_program_run = mylog_impl + comment_out_default_mylog_impls(src_program_instr, subject.src_lang)
 
+  if src_program_run in _CACHE_RUN_SRC_TS:
+    logger.debug('Cache hit: source test script found in cache')
+    p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
+    return _CACHE_RUN_SRC_TS[src_program_run]
+
   p_utils.log_file_time(f'{subject.name}_src_program_run.{subject.src_lang}', src_program_run)
   stdout, stderr = await _run_code(src_program_run, subject.src_lang)
   src_trace = _extract_trace_from_stdout(stdout)
 
+  if len(_CACHE_RUN_SRC_TS) > _CACHE_RUN_SRC_TS_SIZE:
+    logger.debug('Cache size exceeded, clearing cache')
+    _CACHE_RUN_SRC_TS.clear()
+
+  _CACHE_RUN_SRC_TS[src_program_run] = (src_trace, stderr)
   return src_trace, stderr
 
 
