@@ -2684,6 +2684,39 @@ class ChoicableNodeExtractor(pvis.Visitor):
     return extractor.get_choicable_nodes()
 
 
+class SecretFunctionInserter(pvis.Visitor):
+  '''
+  Replace body of "blocky" node types as p_consts.BODY_NODE_TYPES and
+  p_consts.SPECIAL_TREATMENT_BODY_NODE_TYPES with a call to
+  `secret_fun_4071()`.
+  This visitor is used for direct statement translation using LLM.
+  '''
+  # VISIT METHODS
+  def visit_BlockNode(self, node: BlockNode) -> None:
+    # replace all children with a call to secret function
+    secret_fn_name = IdentifierNode.build(p_consts.GENERIC_SECRET_FN)
+    secret_fn_args = ArgumentListNode.build([])  # no arguments
+    call_node = CallNode.build(secret_fn_name, secret_fn_args)
+    expr_stmt_node = ExpressionStatementNode.build(call_node)
+    node.children = [expr_stmt_node]
+    expr_stmt_node.set_parent(node)
+
+  @classmethod
+  def insert_secret_functions(cls, statement_str: str) -> str:
+    '''
+    Insert secret functions into the given statement_str.
+    The statement_str is expected to be a body of a Python script.
+    '''
+    src_parser = p_consts.PARSER_DICT['py']
+    ts_tree = src_parser.parse(bytes(statement_str, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    inserter = cls()
+    inserter.visit(tree.root_node)
+    pretty_printer = PrettyPrinter(indent_with='    ')
+    code = pretty_printer.visit(tree.root_node)
+    return code.strip()
+
+
 # TEST HARNESSES
 def _test_pretty_printer():
   snippet = p_utils.read_tmp_text('test_pp.py')

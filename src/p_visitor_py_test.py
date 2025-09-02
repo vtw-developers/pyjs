@@ -6253,5 +6253,31 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
 
+class TestSecretFunctionInserter(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-py' / 'secret-function-inserter'
+    self.maxDiff = None
+
+  def get_snippets(self, snippet_id: str) -> Tuple[str, str]:
+    snippet = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_in.py')
+    gold = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_out.py')
+    return snippet, gold
+
+  def test_all_positive(self):
+    for i in range(1, 10):
+      with self.subTest(i=i):
+        snippet, gold_snippet = self.get_snippets(f'{i:03d}')
+        modified = pvpy.SecretFunctionInserter.insert_secret_functions(snippet)
+        self.assertEqual(modified, gold_snippet)
+
+  def test_all_negative(self):
+    for i in range(10, 22):
+      with self.subTest(i=i):
+        snippet, gold_snippet = self.get_snippets(f'{i:03d}')
+        modified = pvpy.SecretFunctionInserter.insert_secret_functions(snippet)
+        self.assertEqual(modified, gold_snippet)
+        print('%'*100)
+
+
 if __name__ == '__main__':
   unittest.main()
