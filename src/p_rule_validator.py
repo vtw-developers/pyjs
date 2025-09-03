@@ -383,6 +383,7 @@ async def check_trules_test_based(
 
   val_subject.readonly_choices_list = []
   current_ruleset.merge_verified_rules_from(ruleset_serialized)
+  current_ruleset.merge_unverifiable_rules_from(ruleset_serialized)
 
 
 # TEST HARNESSES

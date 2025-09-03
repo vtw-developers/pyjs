@@ -1133,18 +1133,83 @@ def _get_readonly_choices_list_init(
 
 
 def _is_excluded_range_cursor(
-  range_cursor: tuple
+  range_cursor: tuple,
+  dgann: dict,
+  src_main_code: str
 ) -> bool:
   '''
   Check if the given range cursor is excluded from consideration.
   '''
-  _EXCLUDED_TYPES = ['py.call']
+  def __pattern_1_recursive_call_to_f_gold(ast: list) -> bool:
+    '''
+    PARAM ast: duoglot-style AST
+    '''
+    # must be non-terminal
+    if not isinstance(ast, list):
+      return False
+    ntype = ast[0]
+    nid = ast[1]
+    assert isinstance(nid, int), 'sanity check'
+    if ntype != 'py.call':
+      return False
+    children = ast[2:]
+    ch1 = children[0]
+    ch1_type = ch1[0]
+    if ch1_type != 'py.identifier':
+      return False
+    assert len(ch1) == 3, 'sanity check'
+    ch_literal = ch1[2]
+    if ch_literal == '"f_gold"':
+      return True
+    return False
+
   ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
-  node_type = ast[0]
-  if node_type in _EXCLUDED_TYPES:
-    logger.debug(f'Excluding range cursor of type {node_type}')
+  if __pattern_1_recursive_call_to_f_gold(ast):
+    logger.debug(
+      f'Excluding range cursor (pattern 1): '
+      f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
     return True
   return False
+
+
+def _filter_range_cursors(
+  range_cursors: list,
+  dgann: dict,
+  src_main_code: str,
+  ruleset: p_ruleset.Ruleset
+) -> list:
+  '''
+  Exclude some nodes from consideration.
+  All rules that match the removed range cursors must be
+  added to unverifiable rules.
+  '''
+  result = []
+  for range_cursor in range_cursors:
+    if not _is_excluded_range_cursor(range_cursor, dgann, src_main_code):
+      result.append(range_cursor)
+      continue
+    unparsed_range_cursor = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)
+
+    # if we reach here, it means the range cursor is excluded
+    # matcher_group is a list of rules that share the same matcher
+    for matcher_sig, matcher_group in ruleset.matcher_groups.items():
+      assert_matchers_match(matcher_group)
+      matcher = matcher_group[0].rule['match']
+      match_obj = match_rule_to_range_cursor(matcher, range_cursor)
+      if not match_obj['is_matched']:
+        continue
+      # if we reach here, it means that matcher_group contains rules
+      # that match the range_cursor
+      logger.debug(
+        f'Updating unverifiable rules for range cursor: '
+        f'{unparsed_range_cursor}')
+      for rule in matcher_group:
+        ruleset.update_unverifiable_rules(
+          unparsed_range_cursor,
+          rule
+        )
+
+  return result
 
 
 async def get_readonly_choices_list(
@@ -1170,6 +1235,7 @@ async def get_readonly_choices_list(
   logger.info('Starting generation of read-only choices list')
   ruleset = p_ruleset.Ruleset.from_starting_ruleset(translation_rules_main_code)
   ruleset.merge_verified_rules_from(serialized_current_ruleset)
+  ruleset.merge_unverifiable_rules_from(serialized_current_ruleset)
 
   '''
   `choicable_range_cursors` - a list of range cursors
@@ -1197,6 +1263,9 @@ async def get_readonly_choices_list(
     if ruleset.verified_rule_exists(choicable_range_cursor_unparsed):
       logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by verified rules.')
       continue
+    if ruleset.unverifiable_rules_exist(choicable_range_cursor_unparsed):
+      logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by unverifiable rules.')
+      continue
 
     '''
     Matcher groups are groups of rules that have the same matcher signature.
@@ -1218,7 +1287,8 @@ async def get_readonly_choices_list(
     This includes the choicable_range_cursor itself and all its subtrees.
     '''
     all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
-    all_range_cursors = [rc for rc in all_range_cursors if not _is_excluded_range_cursor(rc)]
+    all_range_cursors = _filter_range_cursors(
+      all_range_cursors, dgann, src_main_code, ruleset)
     logger.debug(f'Number of range cursors under choicable_range_cursor: {len(all_range_cursors)}')
 
     '''
