@@ -2660,11 +2660,22 @@ class ChoicableNodeExtractor(pvis.Visitor):
     self.add_choicable_node(node.condition)
     self.visit(node.consequence)
 
+  def visit_ExpressionListNode(self, node: ExpressionListNode) -> None:
+    for expr in node.get_nt_children():
+      self.add_choicable_node(expr)
+
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     self.add_choicable_node(node.condition)
     self.visit(node.consequence)
     for alternative in node.alternatives:
       self.visit(alternative)
+
+  def visit_ReturnStatementNode(self, node: ReturnStatementNode) -> None:
+    for child in node.get_nt_children():
+      if isinstance(child, ExpressionListNode):
+        self.visit(child)
+      else:
+        self.add_choicable_node(child)
 
   def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
     self.add_choicable_node(node.condition)
