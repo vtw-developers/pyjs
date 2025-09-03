@@ -386,8 +386,14 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
   an ExpressionStatementNode, IfStatementNode, or WhileStatementNode.
   '''
 
+  _CONTEXT_NODE_TYPES = (
+    pvpy.ExpressionStatementNode,
+    pvpy.IfStatementNode,
+    pvpy.ReturnStatementNode,
+    pvpy.WhileStatementNode
+  )
   is_context_node = lambda node: \
-    isinstance(node, (pvpy.ExpressionStatementNode, pvpy.IfStatementNode, pvpy.WhileStatementNode))
+    isinstance(node, _CONTEXT_NODE_TYPES)
 
   cursor = node.parent
   while cursor is not None:
