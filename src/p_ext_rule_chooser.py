@@ -25,6 +25,7 @@ class RuleCombinationsExhaustedError(RuntimeError): pass
 class AllRulesInMatcherGroupImplausibleError(RuntimeError): pass
 class ExprLogStatHasParseError(RuntimeError): pass
 class ExprLogStatContextError(RuntimeError): pass
+class QueueInfiniteLoopError(RuntimeError): pass
 
 
 # GENERATING READONLY CHOICES LIST
@@ -1325,8 +1326,8 @@ async def get_readonly_choices_list(
         unchanged_count = 0
       prev_queue_size = len(queue_matcher_groups)
       if unchanged_count >= _MAX_QUEUE_UNCHANGED_COUNT:
-        logger.error(f'Potential infinite loop detected. Stopping processing for matcher group: {matcher_group}')
-        raise RuntimeError('Potential infinite loop detected')
+        logger.error(f'Infinite loop detected. Stopping processing for matcher group: {matcher_group}')
+        raise QueueInfiniteLoopError('Infinite loop detected')
 
   logger.info('Finished generation of read-only choices list')
   readonly_choices_list = ruleset.get_choices_list_from_verified_rules(src_main_code)

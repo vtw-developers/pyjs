@@ -1255,6 +1255,15 @@ async def stat_node_main_learn_validate_trules(
         stat_learn_subject.tar_lang,
       )
 
+    # infinite loop when validating expressions
+    except p_ext_rule_chooser.QueueInfiniteLoopError as err:
+      logger.warning(f'Infinite loop detected when validating expressions: {err}')
+      iter_learned_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
+
     # all combinations of rules lead to implausible translations
     except p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError as err:
       logger.warning(
