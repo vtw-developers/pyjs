@@ -251,7 +251,7 @@ GENERATION_TEMPERATURE_ROUND_DIGITS = 2
 GENERATION_NUM_VARIANTS_IN_RESPONSE = 5
 
 DEFAULT_MODEL_PARAMS = {
-  'model_name': 'o4-mini',
+  'model_name': 'gpt-5',  # gpt-5-nano, o4-mini
   'temperature': 1.0,
   'max_completion_tokens': 16384,
   'request_timeout': None,
