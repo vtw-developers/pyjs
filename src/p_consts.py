@@ -99,9 +99,6 @@ GENERIC_SECRET_FN_INVOCATION = GENERIC_SECRET_FN + '()'
 PAR_PROG_PROB_NODE_REPLACE = 'pirel_replace_var'
 PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
 
-# The number of attempts to learn translation rules from a single TSP
-TSP_NUM_ATTEMPTS = 3
-
 # Maximum number of TSPs from which some rules are learned
 MAX_NUM_USEFUL_TSPS = 1
 
@@ -247,10 +244,13 @@ DEFAULT_MODEL_PARAMS = {
 }
 
 TRANSLATION_SP1_MAX_RETRIES = 2
-TRANSLATION_SP2_MAX_RETRIES = 4
+TRANSLATION_SP2_MAX_RETRIES = 2
 
-TRANSLATION_SP1_MAX_FEEDBACKS = 3
-TRANSLATION_SP2_MAX_FEEDBACKS = 3
+TRANSLATION_SP1_MAX_FEEDBACKS = 2
+TRANSLATION_SP2_MAX_FEEDBACKS = 2
+
+# The number of attempts to learn translation rules from a single TSP
+TSP_NUM_ATTEMPTS = 2
 
 
 ################################################################################################
