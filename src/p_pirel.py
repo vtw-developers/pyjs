@@ -116,7 +116,7 @@ def _get_pre_context_global(
   return pre_context
 
 
-def _get_pre_context(
+def get_pre_context(
   src_main_code: str,
   lang: str,
   stat_nid: int
@@ -126,8 +126,6 @@ def _get_pre_context(
   The pre-context is the code that appears before the statement node
   in the source code up to the closest enclosing function definition.
   '''
-  p_utils.log_json_time(f'args-_get_pre_context.json', locals())
-
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
   stat_node = tree.get_root_node().get_node_by_id(stat_nid)
   stat_npath = tree.get_root_node().get_path_to_child(stat_node)
@@ -547,25 +545,7 @@ def _adapt_rule_choices(
   return new_code_choices
 
 
-async def _get_test_fn_str_llm_deprecated(
-  paramable_ids: List[str],
-  src_main_code: str,
-  subject: p_subject.PirelSubject,
-) -> Optional[str]:
-  '''
-  RETURN test function or None if no test function was generated.
-  '''
-  if len(paramable_ids) == 0:
-    return '''def test():\n    f_gold()'''
-
-  test_fn_str, lgen_test_function = \
-    await p_llm_gen.gen_test_function(src_main_code, subject.src_lang, subject.tar_lang)
-  if test_fn_str is None:
-    raise TestFunctionGenerationError('Failed to generate test function using LLM.')
-  return test_fn_str
-
-
-def _combine_prectx_simple_ntext(
+def _combine_prectx_and_simple_ntext(
   pre_context: str,
   snippet_under_test: str
 ) -> str:
@@ -585,7 +565,7 @@ def _combine_prectx_simple_ntext(
   return prectx_w_sut
 
 
-def _create_stat_learn_subject(
+def _create_subject_for_stat_learn(
   main_subject: p_subject.PirelSubject,
   simple_ntext: str,
   current_ruleset: p_ruleset.Ruleset,
@@ -621,7 +601,7 @@ def _create_stat_learn_subject(
   return stat_learn_subject
 
 
-def _get_stat_node_val_src_program(
+def _create_src_program_for_stat_val(
   main_subject: p_subject.PirelSubject,
   pre_context: str,
   simple_ntext: str
@@ -648,7 +628,7 @@ def _get_stat_node_val_src_program(
   assert smcfh.endswith('):'), 'Expected function header to end with "):"'
 
   # function body
-  prectx_sntext = p_pirel._combine_prectx_simple_ntext(pre_context, simple_ntext)
+  prectx_sntext = p_pirel._combine_prectx_and_simple_ntext(pre_context, simple_ntext)
   indented_block = p_utils.indent(prectx_sntext, 4)
 
   # main code and instrumentation
@@ -681,7 +661,7 @@ def _get_stat_node_val_src_program(
   return snv_src_program
 
 
-def _create_stat_val_subject(
+def _create_subject_for_stat_val(
   main_subject: p_subject.PirelSubject,
   pre_context: str,
   simple_ntext: str,
@@ -693,7 +673,7 @@ def _create_stat_val_subject(
   # all attributes of PirelSubject instance set explicitly
   benchmark_name = 'n/a'
   name = 'stat-val'
-  src_program = _get_stat_node_val_src_program(main_subject, pre_context, simple_ntext)
+  src_program = _create_src_program_for_stat_val(main_subject, pre_context, simple_ntext)
   src_lang = main_subject.src_lang
   tar_lang = main_subject.tar_lang
   translation_rules_main_code = \
@@ -848,8 +828,10 @@ async def learn_trans_rules_from_tsp(
   - choices
   '''
 
-  logger.debug(f'Starting p.pirel.learn_trans_rules_from_tsp')
   p_utils.log_json_time(f'args-learn_trans_rules_from_tsp.json', locals())
+  logger.debug(
+    f'learn-tsp: starting p.pirel.learn_trans_rules_from_tsp:\n'
+    f'{json.dumps({"tsp": tsp}, indent=2)}')
 
   ltrule_learn_attempt.start_time = p_utils.current_time_sec()
 
@@ -871,11 +853,12 @@ async def learn_trans_rules_from_tsp(
     trules_list, subject, current_ruleset_str, lprule_filter_log)
 
   if len(checked_trules_list) == 0:
-    logger.warning('No translation rules were learned from TSP.')
+    logger.warning('learn-tsp: no translation rules were learned from TSP.')
     ltrule_learn_attempt.end_time = p_utils.current_time_sec()
     raise TSP_NoTRuleLearnedError('No translation rules were learned from TSP.')
 
   ltrule_learn_attempt.end_time = p_utils.current_time_sec()
+  logger.debug(f'learn-tsp: learned {len(checked_trules_list)} translation rules from TSP.')
   return checked_trules_list
 
 
@@ -904,7 +887,7 @@ async def learn_trans_rules_from_tsp_with_retries(
 
   while attempt_count < p_consts.TSP_NUM_ATTEMPTS:
     attempt_count += 1
-    logger.debug(f'Attempting to learn some translation rules from a TSP #{attempt_count}')
+    logger.debug(f'learn-tsp: attempting to learn some translation rules from a TSP #{attempt_count}')
     ltrule_learn_attempt = ptlog.TRuleLearnAttempt(attempt_count)
     ltsp.trule_learn_attempts.append(ltrule_learn_attempt)
 
@@ -956,7 +939,7 @@ async def learn_trans_rules_for_prob_node(
   - choices
   '''
 
-  logger.debug(f'~~ Starting rule learning for a problematic node.')
+  logger.debug(f'learn-prob: starting rule learning for a problematic node.')
   p_utils.log_json_time(f'args-learn_trans_rules_for_prob_node.json', locals())
 
   # ~~~ initialize template_dict and TSPs
@@ -973,7 +956,7 @@ async def learn_trans_rules_for_prob_node(
   all_trules_list : List[str] = []
   for tsp_idx, tsp in enumerate(tsps, start=1):
     logger.debug(
-      f'Learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
+      f'learn-prob: learning translation rules using TSP ({tsp_idx}/{len(tsps)}):\n'
       f'tsp.id = {tsp_idx}\n{json.dumps(tsp, indent=2)}')
 
     ltsp = ptlog.TSP(tsp_idx, *tsp)
@@ -981,9 +964,9 @@ async def learn_trans_rules_for_prob_node(
 
     trules_list = await learn_trans_rules_from_tsp_with_retries(tsp, template_dict, subject, current_ruleset_str, ltsp)
     if len(trules_list) == 0:
-      logger.debug(
-        f'Skipping a TSP: no translation rules were learnt from it (tsp.id = {tsp_idx}):\n'
-        f'{json.dumps(tsp, indent=2)}\n')
+      logger.warning(
+        f'learn-prob: skipping a TSP: no translation rules were learnt '
+        f'from it (tsp.id = {tsp_idx}):\n{json.dumps(tsp, indent=2)}')
       continue
 
     num_useful_tsps += 1
@@ -994,7 +977,7 @@ async def learn_trans_rules_for_prob_node(
   if len(all_trules_list) > 0:
     lnode_trans_iter.success = True
     lnode_trans_iter.end_time = p_utils.current_time_sec()
-    logger.debug(f'~~ Learned {len(all_trules_list)} translation rules.')
+    logger.debug(f'learn-prob: learned {len(all_trules_list)} translation rules.')
     return all_trules_list
 
   msg = (
@@ -1019,7 +1002,10 @@ async def stat_node_learn_trules_recovery(
   measure to recover from the internal validation failure.
   '''
   p_utils.log_json_time(f'args-stat_node_learn_trules_recovery.json', locals())
-  logger.debug('stat-rec: Starting statement node translation rule learning (RECOVERY)')
+  logger.info('Starting statement node translation rule learning (RECOVERY)')
+  logger.debug(
+    f'stat-learn-rec: will learn an overfitted rule '
+    f'to translate the statement:\n{simple_ntext}')
 
   def _synthesize_context(simple_ntext: str, src_lang: str) -> dict:
     tree = pds.DuoGlotTree.from_code_str(simple_ntext, src_lang)
@@ -1031,9 +1017,10 @@ async def stat_node_learn_trules_recovery(
       'target_context': [['unknown']]
     }
 
-  logger.debug('Will insert secret function invocation if applicable')
-  simple_ntext = pvpy.SecretFunctionInserter.insert_secret_functions(simple_ntext)
-  logger.debug(f'Inserted secret function invocation:\n{simple_ntext}')
+  simple_ntext_wsec = pvpy.SecretFunctionInserter.insert_secret_functions(simple_ntext)
+  if simple_ntext != simple_ntext_wsec:
+    simple_ntext = simple_ntext_wsec
+    logger.debug(f'Inserted secret function invocation:\n{simple_ntext}')
 
   reference_translations, lget_ref_trans = await p_llm_gen.get_reference_translations(
     simple_ntext, src_lang, tar_lang)
@@ -1045,7 +1032,7 @@ async def stat_node_learn_trules_recovery(
 
   context = _synthesize_context(simple_ntext, src_lang)
   overfitted_trules : List[str] = []
-  for ref_trans in reference_translations:
+  for idx, ref_trans in enumerate(reference_translations, start=1):
     trule = p_rule_inferencer.infer_translation_rule_wrapper(
       translation_pair=[{'source': simple_ntext, 'target': ref_trans}],
       src_lang=src_lang,
@@ -1055,7 +1042,9 @@ async def stat_node_learn_trules_recovery(
       choose_largest_node=True,
       is_ignore_semicolon=False
     )
-    logger.debug(f'stat-rec: Learned translation rule:\n{trule}')
+    logger.debug(
+      f'stat-learn-rec: Learned translation rule '
+      f'{idx}/{len(reference_translations)}:\n{trule}')
     overfitted_trules.append(trule)
 
   return overfitted_trules
@@ -1083,7 +1072,7 @@ async def stat_node_learn_trules_standard(
 
   while iter_counter < _MAX_NUM_ITERS:
     iter_counter += 1
-    logger.debug(f'~~ Rule learn loop (STANDARD) iteration #{iter_counter}')
+    logger.debug(f'stat-learn-sta: rule learn loop (STANDARD) iteration #{iter_counter}')
 
     lnode_trans_iter = ptlog.NodeTransIter(iter_counter)
 
@@ -1097,7 +1086,7 @@ async def stat_node_learn_trules_standard(
     )
     if templates_dict is None:
       logger.info('SUCCESS Learned rules to translate statement node (translation successful)')
-      logger.debug(f'Learned translation rules:\n' + '\n'.join(new_learned_trules))
+      logger.debug(f'stat-learn-sta: Learned translation rules:\n' + '\n'.join(new_learned_trules))
       return new_learned_trules
 
     '''
@@ -1111,7 +1100,7 @@ async def stat_node_learn_trules_standard(
       lnode_trans_iter
     )
 
-    logger.debug(f'Appending {len(trules_list)} new translation rules.')
+    logger.debug(f'stat-learn-sta: appending {len(trules_list)} new translation rules.')
     for trule in trules_list:
       new_learned_trules.append(trule)
 
@@ -1183,7 +1172,7 @@ async def stat_node_main_learn_validate_trules(
 
   stat_node = _get_statement_node_by_id(main_subject.get_src_main_code(), main_subject.src_lang, stat_nid)
   simple_ntext = _simplify_statement_node_text(stat_node)
-  pre_context = _get_pre_context(main_subject.get_src_main_code(), main_subject.src_lang, stat_nid)
+  pre_context = get_pre_context(main_subject.get_src_main_code(), main_subject.src_lang, stat_nid)
   simple_nchoices = {'type': 'ASTNODE', 'choices_list': []}
 
   logger.debug(
@@ -1195,15 +1184,20 @@ async def stat_node_main_learn_validate_trules(
   iter_counter = 0
   while iter_counter < _MAX_NUM_ITERS:
     iter_counter += 1
-    logger.debug(f'stat-main: Statement node main validate-learn loop iteration #{iter_counter}')
+    logger.debug(
+      f'stat-main: statement node (nid={stat_nid}): '
+      f'main validate-learn loop iteration #{iter_counter}')
 
-    stat_learn_subject = _create_stat_learn_subject(
+    stat_learn_subject = _create_subject_for_stat_learn(
       main_subject, simple_ntext, current_ruleset, simple_nchoices)
-    stat_val_subject = _create_stat_val_subject(
+    stat_val_subject = _create_subject_for_stat_val(
       main_subject, pre_context, simple_ntext, current_ruleset)
     iter_learned_trules : List[str] = []
 
     try:
+      logger.debug(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'about to start validation of learned rules')
       await stat_node_validate_trules(
         simple_nchoices,
         simple_ntext,
@@ -1211,14 +1205,18 @@ async def stat_node_main_learn_validate_trules(
         stat_val_subject,
         current_ruleset,
       )
-      logger.info('SUCCESS Statement node translation rules validated successfully')
+      logger.info(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'SUCCESS Statement node translation rules validated successfully')
       return
 
     # there is still a problematic node in the statement node
     except _ValidationError_ProblematicNodeExists:
       logger.info(
-        'There is a problematic node in the statement node. '
-        'Will start the standard rule learning procedure.')
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'_ValidationError_ProblematicNodeExists:\n'
+        f'There is a node with no translation rules to handle it. '
+        f'Will start the STANDARD rule learning procedure.')
       iter_learned_trules = await stat_node_learn_trules_standard(
         simple_ntext,
         simple_nchoices,
@@ -1229,14 +1227,15 @@ async def stat_node_main_learn_validate_trules(
     # new combination of rules leads to a problematic node
     except prapp.SrcTestScriptProblematicNodeError as err:
       logger.warning(
-        'New combination of rules leads to a problematic node. '
-        'Will start the standard rule learning procedure.')
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'prapp.SrcTestScriptProblematicNodeError:\n'
+        f'New combination of rules leads to a problematic node. '
+        f'Will start the STANDARD rule learning procedure.')
       adapted_choices = _adapt_rule_choices(err.src_main_code, err.choices, simple_ntext)
       _adapt_rule_choices_assert_result(
         err.src_main_code, err.choices, simple_ntext, adapted_choices,
         main_subject.src_lang, main_subject.tar_lang, current_ruleset.to_str_ruleset())
       simple_nchoices = adapted_choices
-
       iter_learned_trules = await stat_node_learn_trules_standard(
         simple_ntext,
         simple_nchoices,
@@ -1247,8 +1246,10 @@ async def stat_node_main_learn_validate_trules(
     # no combination of rules leads to a plausible translation
     except p_ext_rule_chooser.RuleCombinationsExhaustedError as err:
       logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'p_ext_rule_chooser.RuleCombinationsExhaustedError:\n'
         'No combination of rules leads to a plausible translation. '
-        'Will start the recovery rule learning procedure.')
+        'Will start the RECOVERY rule learning procedure.')
       iter_learned_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
@@ -1257,7 +1258,12 @@ async def stat_node_main_learn_validate_trules(
 
     # infinite loop when validating expressions
     except p_ext_rule_chooser.QueueInfiniteLoopError as err:
-      logger.warning(f'Infinite loop detected when validating expressions: {err}')
+      logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'p_ext_rule_chooser.QueueInfiniteLoopError:\n'
+        f'Cannot obtain a plausible translation of a choicable expression '
+        f'due to an infinite loop in the matcher queue. '
+        f'Will start the RECOVERY rule learning procedure.')
       iter_learned_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
@@ -1267,8 +1273,10 @@ async def stat_node_main_learn_validate_trules(
     # all combinations of rules lead to implausible translations
     except p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError as err:
       logger.warning(
-        'Cannot get a plausible translation of an expression '
-        'under the statement node.')
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError:\n'
+        'No combination of rules leads to a plausible translation. '
+        'Will start the RECOVERY rule learning procedure.')
       iter_learned_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
@@ -1443,7 +1451,7 @@ def _test_duoglot_translate_wrapper():
 
 def _test_get_pre_context():
   '''
-  def _get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
+  def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_get_pre_context_config.yaml'
   config = p_utils.read_yaml(config_fpath)
@@ -1453,7 +1461,7 @@ def _test_get_pre_context():
   lang = args_dict['lang']
   statement_nid = args_dict['statement_nid']
 
-  pre_context = _get_pre_context(src_main_code, lang, statement_nid)
+  pre_context = get_pre_context(src_main_code, lang, statement_nid)
   print(f'Pre-context for statement node {statement_nid}:\n{pre_context}')
 
 

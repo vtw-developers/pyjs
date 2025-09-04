@@ -775,7 +775,7 @@ def infer_translation_rules(
   is_insert_secret_fn = template_dict['is_insert_secret_fn']
 
   logger.debug(
-    f'Attempting to infer translation rules from '
+    f'rule-inf: attempting to infer translation rules from '
     f'{len(translation_pairs)} translation pairs and {len(contexts)} contexts')
 
   _pot_rule_idx = 0
@@ -844,6 +844,7 @@ def infer_translation_rules(
   lprule_inf_log.end_time = p_utils.current_time_sec()
   if len(trules_list) == 0:
     logger.warning('No translation rules were inferred from the given translation pairs and contexts.')
+  logger.debug(f'rule-inf: inferred {len(trules_list)} translation rules in total')
   return trules_list
 
 

@@ -2717,6 +2717,7 @@ class SecretFunctionInserter(pvis.Visitor):
     '''
     Insert secret functions into the given statement_str.
     The statement_str is expected to be a body of a Python script.
+    If statement does not contain any blocky nodes, it is returned as is.
     '''
     src_parser = p_consts.PARSER_DICT['py']
     ts_tree = src_parser.parse(bytes(statement_str, 'utf-8'))

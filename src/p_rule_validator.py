@@ -316,7 +316,9 @@ def filter_translation_rules(
   - auto_backward
   - choices
   '''
-  logger.debug('~~~ Starting p_rule_validator.filter_translation_rules')
+  logger.debug(
+    f'rule-filter: ~~~ Starting p_rule_validator.filter_translation_rules. '
+    f'Number of rules before: {len(trules_list)}')
 
   syn_cor_trules = []
   for idx, trule in enumerate(trules_list, start=1):
@@ -326,22 +328,25 @@ def filter_translation_rules(
 
     is_syntax_valid = is_valid_translation_rule_syntactic(subject, trule, current_ruleset, ltrule)
     if not is_syntax_valid:
-      logger.debug(f'~~~ Translation rule is not syntactically valid:\n{trule}')
+      logger.debug(f'rule-filter: translation rule is not syntactically valid:\n{trule}')
       continue
 
     pirel_keyword = find_pirel_keyword_in_trule(trule)
     if pirel_keyword is not None:
-      logger.debug(f'~~~ Found PiREL keyword "{pirel_keyword}" in translation rule:\n{trule}')
+      logger.debug(f'rule-filter: found PiREL keyword "{pirel_keyword}" in translation rule:\n{trule}')
       continue
 
     is_inv_pat = is_invalid_pattern_detected(trule)
     if is_inv_pat:
-      logger.debug(f'~~~ Found invalid pattern in translation rule:\n{trule}')
+      logger.debug(f'rule-filter: found invalid pattern in translation rule:\n{trule}')
       continue
 
     lprule_filter_log.trules_syn_valid.append(ltrule)
     syn_cor_trules.append(trule)
 
+  logger.debug(
+    f'rule-filter: ~~~ Finished filtering translation rules. '
+    f'Number of rules after: {len(syn_cor_trules)}')
   return syn_cor_trules
 
 

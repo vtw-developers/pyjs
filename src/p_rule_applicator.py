@@ -731,8 +731,6 @@ def _get_tar_main_code_instr(
   assert subject.translation_rules_main_code is not None, \
     'translation rules for main code must be provided'
 
-  # TODO consider a case when `choices` leads to a problematic slot.
-  # i.e. a slot for which we don't have a translation rule.
   try:
     duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
       src_code=src_main_code,
@@ -748,7 +746,7 @@ def _get_tar_main_code_instr(
     logger.warning(f'Caught TranslationRuleNotFoundException when translating src_main_code: {exc}')
     err_obj = SrcTestScriptProblematicNodeError(
       f'There is a problematic node in src_main_code:\n'
-      f'problematic_node_type = {templates_dict["problematic_node_type"]}, '
+      f'problematic_node_type = "{templates_dict["problematic_node_type"]}", '
       f'problematic_node_id = {templates_dict["problematic_node_id"]}')
     err_obj.src_main_code = src_main_code
     err_obj.choices = choices
@@ -817,7 +815,7 @@ async def apply_translation_rules(
   '''
 
   p_utils.log_json_time(f'args-apply_translation_rules.json', locals())
-  logger.info('~~~ Starting rule applicator')
+  logger.info('rule-app: starting rule applicator')
 
   src_program_instr = subject.src_program
   src_test_code, src_main_code_instr, src_test_call_code = \
@@ -845,7 +843,7 @@ async def apply_translation_rules(
     'with different combinations of translation rules')
   iteration = 0
   while True:
-    logger.debug(f'apply_translation_rules.iteration {iteration} starts')
+    logger.debug(f'rule-app: iteration {iteration} starts')
     iteration += 1
 
     tar_main_code_instr, map_to_exid, translate_dbg_history = \
@@ -862,7 +860,7 @@ async def apply_translation_rules(
 
     except TarTestScriptRunError as err:
       logger.warning(
-        'There is an error in running tar test script.\n'
+        'There is an error in running tar test script. '
         'Depending on the location of the error, will attempt to find a new '
         'translation rules combination.')
       tar_error_dict = err.tar_error_dict
@@ -899,7 +897,7 @@ async def apply_translation_rules(
 
       current_choices = proposed_choices
 
-    logger.debug(f'apply_translation_rules.iteration {iteration} ended')
+    logger.debug(f'rule-app: iteration {iteration} ended')
 
 
 # USAGE

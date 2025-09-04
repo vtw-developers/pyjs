@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 import p_consts
-import p_ext_rule_chooser
 import p_pirel
 import p_ruleset
 import p_rule_applicator as prapp
@@ -63,7 +62,7 @@ async def _mode_benchmark_subject_finish(
     p_utils.email_safely(subject=subject, message=message)
 
 
-def _get_src_program_for_apply_phase(
+def _create_src_program_for_apply_phase(
   main_subject: p_subject.PirelSubject
 ) -> str:
   '''
@@ -94,7 +93,7 @@ def _create_subject_for_apply_phase(
   # all attributes of PirelSubject instance set explicitly
   benchmark_name = main_subject.benchmark_name
   name = main_subject.name
-  src_program = _get_src_program_for_apply_phase(main_subject)
+  src_program = _create_src_program_for_apply_phase(main_subject)
   src_lang = main_subject.src_lang
   tar_lang = main_subject.tar_lang
   translation_rules_main_code = \
