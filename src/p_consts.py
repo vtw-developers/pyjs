@@ -94,16 +94,10 @@ NT_DICT = {
 ################################################################################################
 #################################### PIREL CONFIGS #############################################
 ################################################################################################
-PLACEHOLDER_TEXT = '__'  # string representation of a hole
-CONTEXT_PH_TEXT = '<|pirel_context_hole|>'
 GENERIC_SECRET_FN = 'secret_fun_4071'
 GENERIC_SECRET_FN_INVOCATION = GENERIC_SECRET_FN + '()'
 PAR_PROG_PROB_NODE_REPLACE = 'pirel_replace_var'
 PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
-
-# template simplification
-# max depth for a node before it's simplified
-LLM_VAL_TS_MAX_DEPTH = 4
 
 # The number of attempts to learn translation rules from a single TSP
 TSP_NUM_ATTEMPTS = 3
@@ -113,9 +107,6 @@ MAX_NUM_USEFUL_TSPS = 1
 
 # Maximum number of AST node groups fuzzed for TSP generation
 MAX_FUZZ_GROUP_LEN = 1000
-
-# Subject configuration file for statement node
-STAT_NODE_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'statement-node.yaml'
 
 # Maximum number of concurrent subjects to learn rules for
 MAX_CONCURRENT_SUBJECTS = 1000
@@ -246,10 +237,6 @@ PY_BUILT_IN_MODULES = {
 ################################################################################################
 #################################### LLM CONFIGS ###############################################
 ################################################################################################
-GENERATION_TEMPERATURE_INCREMENT = 0.02
-GENERATION_TEMPERATURE_ROUND_DIGITS = 2
-GENERATION_NUM_VARIANTS_IN_RESPONSE = 5
-
 DEFAULT_MODEL_PARAMS = {
   'model_name': 'gpt-5',  # gpt-5-nano, o4-mini
   'temperature': 1.0,
@@ -290,7 +277,6 @@ BENCHMARK_CONFIGS = {
 ############################# TRANSLATION RULE VALIDATION ######################################
 ################################################################################################
 PIREL_LOG_OBJ_FN_NAME = 'myexactlog'
-F_GOLD_SNIPPET_TEMPLATE = 'def f_gold({params}):\n{indented_snippet_block}'
 TEST_SCRIPT_TEMPLATE = (
   '{test_code}\n'
   f'{TEST_MAIN_CALL_DELIMITER}\n'
@@ -306,7 +292,6 @@ PRE_CTX_SPEC_IDENT = 'pirel_pre_ctx_spec_identifier'
 PRE_CTX_INSERT_BREAK_IN_LOOPS = True
 
 PYNGUIN_TIMEOUT_SECONDS = 20
-PYNGUIN_NUM_ATTEMPTS = 5
 
 GEN_TEST_FN_LLM_NUM_ATTEMPTS = 3
 GEN_TEST_FN_LLM_FEEDBACKS = 3
