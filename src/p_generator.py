@@ -17,7 +17,7 @@ logger = p_utils.setup_logger(__name__)
 class _CannotGenerateProgramPairError(RuntimeError): pass
 
 
-def is_invalid_pattern_detected_PY(
+def is_invalid_pattern_before_gen_mapped_node_PY(
   mapped_node: pds.DuoGlotNode,
   template_dict: dict,
 ) -> bool:
@@ -38,7 +38,7 @@ def is_invalid_pattern_detected_PY(
     node_type = mapped_node.get_ts_node_type()
     if node_type != 'block':
       return False
-    logger.warning(f'Invalid pattern detected: generating `block` with is_insert_secret_fn turned off')
+    logger.debug(f'Invalid pattern detected: generating `block` with is_insert_secret_fn turned off')
     return True
 
   def _pattern_2_argument_list_for_fn(mapped_node: pds.DuoGlotNode, fnname: str) -> bool:
@@ -63,7 +63,7 @@ def is_invalid_pattern_detected_PY(
     terminal = first_child.get_children()[0].node_type
     if terminal != fnname:
       return False
-    logger.warning(f'Invalid pattern detected: generating argument_list for "{fnname}"')
+    logger.debug(f'Invalid pattern detected: generating argument_list for "{fnname}"')
     return True
 
   def _pattern_3_keyword_argument(mapped_node: pds.DuoGlotNode) -> bool:
@@ -74,6 +74,7 @@ def is_invalid_pattern_detected_PY(
     # mapped_node must be a keyword_argument
     if mapped_node.get_ts_node_type() != 'keyword_argument':
       return False
+    logger.debug(f'Invalid pattern detected: generating keyword_argument')
     return True
 
   pattern_callbacks = [
@@ -101,7 +102,9 @@ def is_force_identifiers_PY(
   def _pattern_1_mapped_node_is_identifier(mapped_node: pds.DuoGlotNode) -> bool:
     if mapped_node.get_ts_node_type() != 'identifier':
       return False
-    logger.debug('Forcing identifiers: mapped_node is an identifier')
+    logger.debug(
+      f'Forcing identifiers: mapped_node is an identifier: '
+      f'"{mapped_node.children[0].node_type}"')
     return True
 
   def _pattern_2_call_attribute(mapped_node: pds.DuoGlotNode) -> bool:
@@ -117,7 +120,9 @@ def is_force_identifiers_PY(
     parent = mapped_node.get_parent()
     if parent.get_ts_node_type() != 'call':
       return False
-    logger.warning('Forcing identifiers: mapped_node is an attribute of a call')
+    logger.debug(
+      f'Forcing identifiers: mapped_node is an attribute of a call'
+      f'"{mapped_node.children[0].node_type}"')
     return True
 
   pattern_callbacks = [
@@ -650,7 +655,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   ) -> str:
     '''NOTE the generated code may have semantic errors'''
 
-    if is_invalid_pattern_detected_PY(mapped_node, template_dict):
+    if is_invalid_pattern_before_gen_mapped_node_PY(mapped_node, template_dict):
       raise _CannotGenerateProgramPairError('Invalid pattern detected')
 
     if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
@@ -887,16 +892,12 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       filtered_program_pairs.append(program_pair)
     return filtered_program_pairs
 
-  logger.info('~~~ Starting generator based TSP generation.')
+  logger.info('gen-tsp: starting generator based TSP generation.')
 
   # INPUTS TO THE GENERATOR
   lang = template_dict['src_lang']
   grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
   problematic_node = _init_problematic_node(template_dict)
-  logger.debug(
-    f'Problematic node is "{problematic_node}". '
-    f'Problematic node unparsed:\n{template_dict["template_origin"]}'
-  )
 
   # before automatic generation, check if we can use manually generated TSPs
   # specific to Python
@@ -951,7 +952,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
   # remove duplicates, sanity check
   unique_tsps = _filter_program_pairs(program_pairs, template_dict)
-  logger.debug(f'Generated {len(unique_tsps)} program pairs (TSPs):\n{json.dumps(unique_tsps, indent=2)}')
+  logger.debug(f'gen-tsp: generated {len(unique_tsps)} TSPs:\n{json.dumps(unique_tsps, indent=2)}')
 
   return unique_tsps
 

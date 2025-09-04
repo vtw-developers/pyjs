@@ -404,7 +404,7 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
   raise ValueError('No context node found')
 
 
-def _get_expr_src_main_code(
+def _create_src_main_code_for_expr(
   src_main_code: str,
   pre_context: str,
   log_stat_str: str
@@ -424,7 +424,7 @@ def _get_expr_src_main_code(
   assert smcfh.endswith('):'), 'Expected function header to end with "):"'
 
   # function body
-  prectx_log_stat = p_pirel._combine_prectx_simple_ntext(pre_context, log_stat_str)
+  prectx_log_stat = p_pirel._combine_prectx_and_simple_ntext(pre_context, log_stat_str)
   indented_block = p_utils.indent(prectx_log_stat, 4)
   expr_src_main_code = f'{smcfh}\n{indented_block}'
 
@@ -450,7 +450,7 @@ def _get_expr_src_main_code(
   return expr_src_main_code
 
 
-def _get_log_stat_str(
+def _create_log_stat_str_for_expr(
   matched_range_cursor: tuple,
   dgann: dict,
   src_main_code: str,
@@ -507,7 +507,7 @@ def _get_log_stat_str(
   return log_stat_str
 
 
-def _create_expr_subject(
+def _create_subject_for_expr(
   src_test_script: str,
   translation_rules_test_code: str,
   rules_w_str: str,
@@ -606,7 +606,6 @@ def get_rules_that_handle_range_cursor_rec(
 
 def _check_for_base_rules(
   matcher_group: List[p_ruleset.TRuleBase],
-  subtrees_rules: List[p_ruleset.TRuleBase],
   matched_range_cursor: tuple,
   ruleset: p_ruleset.Ruleset,
   dgann: dict,
@@ -620,7 +619,7 @@ def _check_for_base_rules(
   handled by that rule.
   RETURN True if the matched rules are base rules.
   '''
-  logger.debug(f'~~~ starting _check_for_base_rules')
+  logger.debug(f'~~~ Checking if rule(s) in the matcher group are base rules')
 
   STARTING_RULESET_STR = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
   starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(STARTING_RULESET_STR)
@@ -629,17 +628,19 @@ def _check_for_base_rules(
   # i.e. there is just a single way to translate a matched AST
   # TODO this needs to be improved
   if len(matcher_group) > 1:
-    logger.debug('Matched rules are not base rules, since there is more than one matching rule.')
+    logger.debug(
+      'The matcher group contains more than one rule. '
+      'The rules in this group are removed from consideration as base rules.')
     return False
 
   assert len(matcher_group) == 1, 'Expected exactly one matching rule for base rules'
   matching_rule = matcher_group[0]
-  for rule in starting_ruleset.rules:
-    if rule == matching_rule:
+  for st_trule in starting_ruleset.rules:
+    if st_trule == matching_rule:
       logger.debug(f'Matched rule appears in the starting ruleset: {matching_rule}')
       range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
         matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_unparsed, rule)
+      ruleset.update_verified_rules(range_cursor_unparsed, st_trule)
       return True
 
   return False
@@ -675,7 +676,6 @@ async def _validate_matcher_group_no_intersection(
   '''
   flag_check_base_rule = _check_for_base_rules(
     matcher_group,
-    subtrees_rules,
     matched_range_cursor,
     ruleset,
     dgann,
@@ -707,7 +707,7 @@ async def _validate_matcher_group_no_intersection(
 
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-    expr_subject = _create_expr_subject(
+    expr_subject = _create_subject_for_expr(
       test_script_str, translation_rules_test_code, rules_w_str, ruleset)
 
     '''
@@ -787,7 +787,7 @@ async def _validate_matcher_group_single_intersection(
 
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-    expr_subject = _create_expr_subject(
+    expr_subject = _create_subject_for_expr(
       test_script_str, translation_rules_test_code, rules_w_str, ruleset)
 
     '''
@@ -857,7 +857,7 @@ async def validate_matcher_group(
   '''
   Need to create a f_gold() function for the matched AST.
   '''
-  expr_src_main_code = _get_expr_src_main_code(src_main_code, pre_context, log_stat_str)
+  expr_src_main_code = _create_src_main_code_for_expr(src_main_code, pre_context, log_stat_str)
   test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
     test_code=src_test_code,
     main_code=expr_src_main_code,
@@ -935,7 +935,7 @@ async def _process_match_obj(
   logger.debug('~~~ Starting match object processing')
   assert match_obj['is_matched'], 'Expected match_obj to be matched'
   matched_range_cursor = match_obj['range_cursor']
-  log_stat_str = _get_log_stat_str(
+  log_stat_str = _create_log_stat_str_for_expr(
     matched_range_cursor, dgann, src_main_code, matcher_group, ruleset)
 
   '''
@@ -1031,7 +1031,7 @@ async def process_choicable_range_cursor(
   we cannot get a range cursor from an AST node, because range cursors
   need a reference to the parent AST node.
   '''
-  logger.debug('~~~ starting process_choicable_range_cursor()')
+  logger.debug('~~~ starting process_choicable_range_cursor')
 
   assert_matchers_match(matcher_group)
   matcher = matcher_group[0].rule['match']
@@ -1081,10 +1081,12 @@ async def process_choicable_range_cursor(
       logger.debug('Successfully processed the match_obj.')
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
+
     except NoRuleToHandleRangeCursorError:
       logger.debug('Not enough rules to handle the slot cursor. Continuing with the next match_obj.')
       flag_unhandled_exists = True
       continue
+
     except ExprLogStatHasParseError:
       logger.debug(
         'Logged expression has parse error. Unlinking the range cursor '
@@ -1092,6 +1094,7 @@ async def process_choicable_range_cursor(
         f'{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
+
     except ExprLogStatContextError:
       logger.debug(
         'Logged expression cannot be used as an argument to a log statement '
@@ -1122,12 +1125,12 @@ def _get_readonly_choices_list_init(
   for i, choicable_node in enumerate(choicable_nodes, start=1):
     choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
     stat_node = _choicable_node_get_context_node(choicable_node)
-    pre_context = p_pirel._get_pre_context(src_main_code, 'py', stat_node.get_node_id())
+    pre_context = p_pirel.get_pre_context(src_main_code, 'py', stat_node.get_node_id())
     pre_context = pvpy.LogStatementRemover.remove_log_statements(pre_context)
     crcpcs.append((choicable_range_cursor, pre_context))
     logger.debug(
-      f'Choicable_node {i}/{len(choicable_nodes)}: '
-      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}\n'
+      f'-> Choicable_node {i}/{len(choicable_nodes)}: '
+      f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"\n'
       f'pre_context:\n{pre_context}')
 
   return crcpcs, dgann
@@ -1167,7 +1170,7 @@ def _is_excluded_range_cursor(
   ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
   if __pattern_1_recursive_call_to_f_gold(ast):
     logger.debug(
-      f'Excluding range cursor (pattern 1): '
+      f'Excluding range cursor (recursive call to `f_gold`): '
       f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
     return True
   return False
@@ -1230,10 +1233,12 @@ async def get_readonly_choices_list(
   and conditions of if statements.
 
   PARAM src_main_code: instrumented with log statements.
+
+  NOTE This function should not add or remove rules from the ruleset.
   '''
 
   p_utils.log_json_time('args-get_readonly_choices_list.json', locals())
-  logger.info('Starting generation of read-only choices list')
+  logger.info('readonly-main: Starting generation of read-only choices list')
   ruleset = p_ruleset.Ruleset.from_starting_ruleset(translation_rules_main_code)
   ruleset.merge_verified_rules_from(serialized_current_ruleset)
   ruleset.merge_unverifiable_rules_from(serialized_current_ruleset)
@@ -1247,16 +1252,16 @@ async def get_readonly_choices_list(
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  crcpcs, dgann = _get_readonly_choices_list_init(src_main_code)
+  chable_rc_prectxs, dgann = _get_readonly_choices_list_init(src_main_code)
 
-  for i, (choicable_range_cursor, pre_context) in enumerate(crcpcs, start=1):
+  for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
 
     logger.debug(
-      f'Processing choicable_range_cursor {i}/{len(crcpcs)}: '
-      f'{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}')
+      f'Processing choicable_range_cursor {i}/{len(chable_rc_prectxs)}: '
+      f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"')
 
     '''
-    Verified rules may already contain rules that can handle
+    Verified or unverifiable rules may already contain rules that can handle
     the choicable_range_cursor. If so, we skip processing it.
     '''
     choicable_range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
@@ -1301,7 +1306,7 @@ async def get_readonly_choices_list(
     _MAX_QUEUE_UNCHANGED_COUNT = len(queue_matcher_groups) * 2
 
     while queue_matcher_groups:
-      logger.debug(f'queue size: {len(queue_matcher_groups)}')
+      logger.debug(f'~ Queue size: {len(queue_matcher_groups)}')
       matcher_group = queue_matcher_groups.pop(0)
       try:
         await process_choicable_range_cursor(
@@ -1329,7 +1334,7 @@ async def get_readonly_choices_list(
         logger.error(f'Infinite loop detected. Stopping processing for matcher group: {matcher_group}')
         raise QueueInfiniteLoopError('Infinite loop detected')
 
-  logger.info('Finished generation of read-only choices list')
+  logger.info('readonly-main: Finished generation of read-only choices list')
   readonly_choices_list = ruleset.get_choices_list_from_verified_rules(src_main_code)
   return readonly_choices_list, ruleset.to_dict()
 

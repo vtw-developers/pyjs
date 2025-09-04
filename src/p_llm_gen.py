@@ -924,8 +924,8 @@ async def get_translation_pairs_from_tsp(
   - tar_lang
   '''
   logger.debug(
-    f'Attempting to translate SP1 and SP2 to generate a translation pair:\n'
-    f'{json.dumps(tsp, indent=2)}')
+    f'trans-tsp: ~~~ attempting to translate SP1 and SP2 to generate '
+    f'a translation pair:\n{json.dumps(tsp, indent=2)}')
 
   def _check_sp1_sp2_identical(
     sp1_tp1_cands: List[Dict[str, str]], sp2: str
@@ -943,7 +943,7 @@ async def get_translation_pairs_from_tsp(
     return translation_pairs
 
   def _aux_log_msg_sp1_tp1_cands(sp1_tp1_cands: List[Dict[str, str]]) -> str:
-    s = f'Generated {len(sp1_tp1_cands)} candidate translations for SP1:\n'
+    s = f'trans-tsp: generated {len(sp1_tp1_cands)} candidate translations for SP1:\n'
     for idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
       hash = d_utils.string_sha256(sp1_tp1_cand['source'] + sp1_tp1_cand['target'])
       cand = json.dumps(sp1_tp1_cand, indent=2)
@@ -951,7 +951,7 @@ async def get_translation_pairs_from_tsp(
     return s.rstrip('\n')
 
   def _aux_log_msg_trans_pair_cands(translation_pair_cands: List[Dict[str, str]]) -> str:
-    s = f'Generated {len(translation_pair_cands)} new translation pairs:\n'
+    s = f'trans-tsp: generated {len(translation_pair_cands)} new translation pairs:\n'
     for idx, translation_pair_cand in enumerate(translation_pair_cands, start=1):
       sp1 = translation_pair_cand[0]['source']
       tp1 = translation_pair_cand[0]['target']
@@ -993,7 +993,7 @@ async def get_translation_pairs_from_tsp(
   all_translation_pairs = []
   for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
     logger.debug(
-      f'Translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
+      f'trans-tsp: translating SP2 (SP1-TP1 cand {cand_idx}/{len(sp1_tp1_cands)})\n'
       f'trans_sp2.id = {cand_idx}')
 
     ltrans_sp2 = ptlog.TransSP2()
@@ -1037,7 +1037,7 @@ async def get_translation_pairs_from_tsp(
     logger.debug(_aux_log_msg_trans_pair_cands(translation_pair_cands))
 
   logger.debug(
-    f'~~~ Finishing API call to p_llm_gen.get_translation_pairs_from_tsp\n'
+    f'trans-tsp: ~~~ finishing API call to p_llm_gen.get_translation_pairs_from_tsp\n'
     f'The number of all translation pairs is {len(all_translation_pairs)}:\n'
     f'{json.dumps(all_translation_pairs, indent=2)}')
 
