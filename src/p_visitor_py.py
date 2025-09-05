@@ -25,6 +25,9 @@ import p_utils
 import p_visitor as pvis
 
 
+logger = p_utils.setup_logger(__name__)
+
+
 class _CollectionElementsNode(pvis.AbstractNode): pass
 class _CompoundStatementNode(pvis.AbstractNode): pass
 class _ComprehensionClausesNode(pvis.AbstractNode): pass
@@ -2630,10 +2633,13 @@ class ChoicableNodeExtractor(pvis.Visitor):
   initial choices list.
   Refer to p_ext_rule_chooser.get_readonly_choices_list
   for more details.
+  NOTE repeated calls to node.get_node_id() are expensive
   '''
-  def __init__(self):
+  def __init__(self, exclude_statement_nodes_ids: List[int] = []):
     super().__init__()
     self.choicable_nodes : List[pvis.AbstractNode] = []
+    self.exclude_statement_nodes_ids = exclude_statement_nodes_ids
+    self.pp = PrettyPrinter(indent_with='    ')
 
   def add_choicable_node(self, node: pvis.AbstractNode) -> None:
     self.choicable_nodes.append(node)
@@ -2643,6 +2649,15 @@ class ChoicableNodeExtractor(pvis.Visitor):
 
   # VISIT METHODS
   def visit_AssignmentNode(self, node: AssignmentNode) -> None:
+    '''
+    Parent of assignment is an expression_statement node.
+    expression_statement can be a statement node.
+    '''
+    if node.get_parent().get_node_id() in self.exclude_statement_nodes_ids:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding right hand side of '
+        f'assignment node: "{self.pp.visit(node)}"')
+      return
     if isinstance(node.right, ExpressionListNode):
       for expr in node.right.get_nt_children():
         self.add_choicable_node(expr)
@@ -2654,23 +2669,74 @@ class ChoicableNodeExtractor(pvis.Visitor):
       self.add_choicable_node(node.right)
 
   def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
+    '''
+    Parent of augmented_assignment is an expression_statement node.
+    expression_statement can be a statement node.
+    '''
+    if node.get_parent().get_node_id() in self.exclude_statement_nodes_ids:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding right hand side of '
+        f'augmented assignment node: "{self.pp.visit(node)}"')
+      return
     self.add_choicable_node(node.right)
 
   def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
+    '''
+    Appears as a child of an if_statement node.
+    '''
     self.add_choicable_node(node.condition)
     self.visit(node.consequence)
 
   def visit_ExpressionListNode(self, node: ExpressionListNode) -> None:
+    '''
+    Appears on the right hand side of an assignment.
+    '''
     for expr in node.get_nt_children():
       self.add_choicable_node(expr)
 
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
-    self.add_choicable_node(node.condition)
+    '''
+    Add condition as a choicable node only if
+    the if_statement node is not in exclude_statement_nodes_ids.
+    Visit alternatives (elif and else clauses) only if
+    the if_statement node is not in exclude_statement_nodes_ids.
+    if_statement is a statement node.
+    '''
+    nid = node.get_node_id()
+    if nid not in self.exclude_statement_nodes_ids:
+      self.add_choicable_node(node.condition)
+    else:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding condition of '
+        f'if statement node: "{self.pp.visit(node.condition)}"')
+    # always visit the body
     self.visit(node.consequence)
-    for alternative in node.alternatives:
-      self.visit(alternative)
+    if nid not in self.exclude_statement_nodes_ids:
+      for alternative in node.alternatives:
+        self.visit(alternative)
+    else:
+      for alternative in node.alternatives:
+        if isinstance(alternative, ElifClauseNode):
+          logger.debug(
+            f'ChoicableNodeExtractor: excluding condition of '
+            f'elif clause node: "{self.pp.visit(alternative.condition)}"')
+          self.visit(alternative.consequence)
+        elif isinstance(alternative, ElseClauseNode):
+          self.visit(alternative.body)
 
   def visit_ReturnStatementNode(self, node: ReturnStatementNode) -> None:
+    '''
+    Add return value as a choicable node only if
+    the node is not in exclude_statement_nodes_ids.
+    return_statement is a statement node.
+    '''
+    if node.get_node_id() in self.exclude_statement_nodes_ids:
+      self.pp.lines = []
+      self.pp.visit(node)
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding return statement node: '
+        f'"{self.pp.lines[0]}"')
+      return
     for child in node.get_nt_children():
       if isinstance(child, ExpressionListNode):
         self.visit(child)
@@ -2678,21 +2744,33 @@ class ChoicableNodeExtractor(pvis.Visitor):
         self.add_choicable_node(child)
 
   def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
-    self.add_choicable_node(node.condition)
+    if not node.get_node_id() in self.exclude_statement_nodes_ids:
+      self.add_choicable_node(node.condition)
+    else:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding condition of '
+        f'while statement node: "{self.pp.visit(node.condition)}"')
     self.visit(node.body)
 
   @classmethod
-  def extract_choicable_nodes(cls, src_main_code: str) -> List[pvis.AbstractNode]:
+  def extract_choicable_nodes(
+    cls,
+    src_main_code: str,
+    exclude_statement_nodes_ids: List[int] = [],
+  ) -> List[pvis.AbstractNode]:
     '''
     Extract choicable nodes from the given src_main_code.
     The src_main_code is expected to be a body of a Python script.
+    PARAM exclude_statement_nodes_ids: list of IDs of statement nodes
+    choicable nodes under which must be excluded.
     '''
     src_parser = p_consts.PARSER_DICT['py']
     ts_tree = src_parser.parse(bytes(src_main_code, 'utf-8'))
     tree = Tree.from_ts_tree(ts_tree)
-    extractor = cls()
+    extractor = cls(exclude_statement_nodes_ids)
     extractor.visit(tree.root_node)
-    return extractor.get_choicable_nodes()
+    choicable_nodes = extractor.get_choicable_nodes()
+    return choicable_nodes
 
 
 class SecretFunctionInserter(pvis.Visitor):
