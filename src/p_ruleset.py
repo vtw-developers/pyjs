@@ -233,6 +233,12 @@ class Ruleset:
         return rule
     return None
 
+  def get_stat_overfitted_rules(self) -> List[StatementOverfittedTRule]:
+    '''
+    Get all StatementOverfittedTRule rules in the ruleset.
+    '''
+    return [rule for rule in self.rules if isinstance(rule, StatementOverfittedTRule)]
+
   # VERIFIED RULES RELATED
   def update_verified_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
     assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
