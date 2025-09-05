@@ -97,6 +97,9 @@ class AbstractNode(ABC):
     return list(filter(lambda node: not isinstance(node, TerminalNode), self.children))
 
   def is_ancestor_or_itself(self, other_node: AbstractNode) -> bool:
+    '''
+    Check if `self` is an ancestor of `other_node` or if they are the same node.
+    '''
     def _recurse(descendant: AbstractNode, other_node: AbstractNode) -> bool:
       if id(descendant) == id(other_node):
         return True
@@ -106,6 +109,14 @@ class AbstractNode(ABC):
           return True
       return False
     return _recurse(self, other_node)
+
+  def is_ancestor(self, other_node: AbstractNode) -> bool:
+    '''
+    Check if `self` is a strict ancestor of `other_node`.
+    '''
+    if id(self) == id(other_node):
+      return False
+    return self.is_ancestor_or_itself(other_node)
 
   def get_path_to_child(self, child_node: AbstractNode) -> List[int]:
     '''return path to a node under self as a list of int indices'''
