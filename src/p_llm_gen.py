@@ -357,7 +357,7 @@ class BaseTranslateSP1Task(BasePirelTask):
 
   def get_system_message(self) -> BaseMessage:
     system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateSP1.System.DIRECT_TRANS_2
+      p_llm_templates.TranslateAny.System.MODERNIZED
     ).format(
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
@@ -443,7 +443,7 @@ class SP1_DirectTransG(BaseTranslateSP1Task):
     src_language = p_consts.LANG_DICT[self.subject.src_lang]
     tar_language = p_consts.LANG_DICT[self.subject.tar_lang]
     system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateSP1.System.DIRECT_TRANS
+      p_llm_templates.TranslateAny.System.MODERNIZED
     ).format(
       src_language=src_language,
       tar_language=tar_language,
