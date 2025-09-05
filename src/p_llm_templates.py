@@ -48,7 +48,8 @@ class TranslateAny:
       'You must precisely follow the provided instructions while completing the translation task.\n'
       '\n'
     )
-    
+
+    # by Jinwoo for GPT-5
     MODERNIZED = (
       'You are an expert software engineer who is aware of {src_language} and {tar_language} language features.\n'
       '\n'
@@ -291,26 +292,6 @@ class TranslateSP1:
       '3. Reason through each part of the {src_language} code systematically, explaining how it maps to {tar_language}.\n'
       '4. Generate all possible {tar_language} codes that maintain semantic equivalence, including appropriate idiomatic adjustments.\n'
       '5. Validate the translated codes for correctness and clarity, ensuring it adheres to {tar_language} standards.\n'
-    )
-    
-    MODERNIZED = (
-      'You are an expert software engineer who is aware of {src_language} and {tar_language} language features.\n'
-      '\n'
-      'The ultimate goal of the user is to translate a {src_language} program into a semantically equivalent {tar_language} program.\n'
-      'The user decided to translate the source program by using translation rules for each statement.\n'
-      'The user currently wants to extract translation rules based on the given source code snippet and semantically equivalent {tar_language} code snippets.\n'
-      'However, the user does not have the {tar_language} code snippets.\n'
-      'Therefore, your task is to provide semantically equivalent {tar_language} code snippets from the given {src_language} code snippet.\n'
-      '\n'
-      'Note that one {src_language} code can be translated into multiple semantically equivalent {tar_language} programs, depending on the types of variables in the {src_language} program.\n'
-      'For example, the Python code `x in y` can be translated into `y.includes(x);` in JavaScript when `y` is a list in Python, but it can also be translated into `Object.prototype.hasOwnProperty.call(y, x);` in JavaScript when `y` is a dictionary in Python.\n'
-      'As you can see in this example case, you should always think of all the possible types of variables which appears in the code and give the user all the possible {tar_language} translations that are semantically equivalent to the given {src_language} code.\n'
-      '\n'
-      'Consider all the possible types of variables in the {src_language} code and translate the given {src_language} programs to semantically equivalent {tar_language} programs as follows:\n'
-      '1. List up all the possible combinations of variable types in the {src_language} code.\n'
-      '2. For each case, translate the {src_language} code into a semantically equivalent {tar_language} program.\n'
-      '3. The translated {tar_language} program should be surrounded with triple backticks (i.e. \'```\').\n'
-      '4. If some features in {src_language} programming language cannot be translated into {tar_language}, just ignore them and focus on semantic equivalence.\n'
     )
 
   class Prompt:
