@@ -1126,7 +1126,7 @@ async def stat_node_validate_trules(
   logger.info('Starting statement node translation rule validation')
   logger.debug(
     f'stat-val: Current ruleset (excluding starting rules):\n'
-    f'{"\n".join([str(r) for r in current_ruleset.rules if isinstance(r, p_ruleset.LearnedTRule)])}')
+    f'{"\n".join([str(r) for r in current_ruleset.rules if isinstance(r, p_ruleset.LearnedTRuleBase)])}')
 
   # 1. check for problematic nodes in the statement node
   templates_dict = _can_translate(
@@ -1192,7 +1192,9 @@ async def stat_node_main_learn_validate_trules(
       main_subject, simple_ntext, current_ruleset, simple_nchoices)
     stat_val_subject = _create_subject_for_stat_val(
       main_subject, pre_context, simple_ntext, current_ruleset)
-    iter_learned_trules : List[str] = []
+
+    learned_standard_trules : List[str] = []  # learned by standard procedure
+    learned_overfitted_trules : List[str] = []  # learned by recovery procedure
 
     try:
       logger.debug(
@@ -1217,7 +1219,7 @@ async def stat_node_main_learn_validate_trules(
         f'_ValidationError_ProblematicNodeExists:\n'
         f'There is a node with no translation rules to handle it. '
         f'Will start the STANDARD rule learning procedure.')
-      iter_learned_trules = await stat_node_learn_trules_standard(
+      learned_standard_trules = await stat_node_learn_trules_standard(
         simple_ntext,
         simple_nchoices,
         stat_learn_subject,
@@ -1236,7 +1238,7 @@ async def stat_node_main_learn_validate_trules(
         err.src_main_code, err.choices, simple_ntext, adapted_choices,
         main_subject.src_lang, main_subject.tar_lang, current_ruleset.to_str_ruleset())
       simple_nchoices = adapted_choices
-      iter_learned_trules = await stat_node_learn_trules_standard(
+      learned_standard_trules = await stat_node_learn_trules_standard(
         simple_ntext,
         simple_nchoices,
         stat_learn_subject,
@@ -1250,7 +1252,7 @@ async def stat_node_main_learn_validate_trules(
         f'p_ext_rule_chooser.RuleCombinationsExhaustedError:\n'
         'No combination of rules leads to a plausible translation. '
         'Will start the RECOVERY rule learning procedure.')
-      iter_learned_trules = await stat_node_learn_trules_recovery(
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
         stat_learn_subject.tar_lang,
@@ -1264,7 +1266,7 @@ async def stat_node_main_learn_validate_trules(
         f'Cannot obtain a plausible translation of a choicable expression '
         f'due to an infinite loop in the matcher queue. '
         f'Will start the RECOVERY rule learning procedure.')
-      iter_learned_trules = await stat_node_learn_trules_recovery(
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
         stat_learn_subject.tar_lang,
@@ -1277,19 +1279,41 @@ async def stat_node_main_learn_validate_trules(
         f'p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError:\n'
         'No combination of rules leads to a plausible translation. '
         'Will start the RECOVERY rule learning procedure.')
-      iter_learned_trules = await stat_node_learn_trules_recovery(
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
         stat_learn_subject.src_lang,
         stat_learn_subject.tar_lang,
       )
 
-    assert len(iter_learned_trules) > 0, 'should not happen: iter_learned_trules is empty'
-    logger.info(f'~ Saving {len(iter_learned_trules)} learned translation rules')
-    for trule_str in reversed(iter_learned_trules):
-      trule = p_ruleset.LearnedTRule.from_rule_str(trule_str)
-      # do not add duplicate rules
-      if current_ruleset.get_rule_ref(trule) is None:
-        current_ruleset.prepend_rule(trule)
+    # ADD LEARNED RULES TO THE CURRENT RULESET
+    if len(learned_standard_trules) > 0:
+      logger.debug(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'learned {len(learned_standard_trules)} new translation rules by STANDARD procedure:\n'
+        f'{"\n".join(learned_standard_trules)}')
+      logger.debug('Adding learned standard translation rules to the current ruleset')
+      for rule_str in reversed(learned_standard_trules):
+        rule_parsed = p_ruleset.TRuleBase.parse_rule_str(rule_str)
+        rule = p_ruleset.StandardTRule(rule_parsed, stat_nid, simple_ntext)
+        if current_ruleset.get_rule_ref(rule) is not None:
+          logger.debug(f'skipping duplicate rule:\n{rule}')
+          continue
+        current_ruleset.prepend_rule(rule)
+    elif len(learned_overfitted_trules) > 0:
+      logger.debug(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'learned {len(learned_overfitted_trules)} new translation rules by RECOVERY procedure:\n'
+        f'{"\n".join(learned_overfitted_trules)}')
+      logger.debug('Adding learned overfitted translation rules to the current ruleset')
+      for rule_str in reversed(learned_overfitted_trules):
+        rule_parsed = p_ruleset.TRuleBase.parse_rule_str(rule_str)
+        rule = p_ruleset.StatementOverfittedTRule(rule_parsed, stat_nid, simple_ntext)
+        if current_ruleset.get_rule_ref(rule) is not None:
+          logger.debug(f'skipping duplicate rule:\n{rule}')
+          continue
+        current_ruleset.prepend_rule(rule)
+    else:
+      raise RuntimeError('should not happen: no learned translation rules')
 
   raise RuntimeError('stat_node_main_learn_validate_trules: hit max iterations')
 

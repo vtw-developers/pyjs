@@ -583,7 +583,7 @@ def get_rules_that_handle_range_cursor_rec(
   # get all slot cursors of range cursor
   all_slot_cursors = []  # exist under the range_cursor
   for trule in trules:
-    match_obj = match_rule_to_range_cursor(trule.rule['match'], range_cursor)
+    match_obj = match_rule_to_range_cursor(trule.rule_parsed['match'], range_cursor)
     assert match_obj['is_matched'], 'Expected rule to match the range cursor'
     all_slot_cursors.extend(match_obj['slot_cursors'])
 
@@ -1034,7 +1034,7 @@ async def process_choicable_range_cursor(
   logger.debug('~~~ starting process_choicable_range_cursor')
 
   assert_matchers_match(matcher_group)
-  matcher = matcher_group[0].rule['match']
+  matcher = matcher_group[0].rule_parsed['match']
   matcher_signature = matcher_group[0].get_matcher_signature()
   logger.debug(f'Matcher: {matcher}')
 
@@ -1198,7 +1198,7 @@ def _filter_range_cursors(
     # matcher_group is a list of rules that share the same matcher
     for matcher_sig, matcher_group in ruleset.matcher_groups.items():
       assert_matchers_match(matcher_group)
-      matcher = matcher_group[0].rule['match']
+      matcher = matcher_group[0].rule_parsed['match']
       match_obj = match_rule_to_range_cursor(matcher, range_cursor)
       if not match_obj['is_matched']:
         continue

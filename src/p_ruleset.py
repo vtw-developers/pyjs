@@ -17,62 +17,70 @@ class TRuleBase(ABC):
   '''
   An abstract base class representing a translation rule.
   '''
-  def __init__(self, rule: dict):
+  def __init__(self, rule_parsed: dict):
     '''
-    PARAM rule: a dictionary representing a translation rule
+    PARAM rule_parsed: a dictionary representing a translation rule
     as parsed by d_grammar_rules.parse_analyze_rules().
     '''
-    assert isinstance(rule, dict), f'Expected rule to be a dict, got {type(rule)}'
-    assert 'type' in rule, 'Rule must have a "type" key'
-    assert 'match' in rule, 'Rule must have a "match" key'
-    assert 'expand' in rule, 'Rule must have a "expand" key'
-    self.rule = rule
+    assert isinstance(rule_parsed, dict), f'Expected rule to be a dict, got {type(rule_parsed)}'
+    assert 'type' in rule_parsed, 'Rule must have a "type" key'
+    assert 'match' in rule_parsed, 'Rule must have a "match" key'
+    assert 'expand' in rule_parsed, 'Rule must have a "expand" key'
+    self.rule_parsed = rule_parsed
 
   def __str__(self):
-    return d_grammar_rules.pretty_rule(self.rule)
+    return self.to_rule_str()
 
   def __repr__(self):
-    return f'{self.__class__.__name__} {str(self.rule)}'
+    return f'{self.__class__.__name__} {str(self.rule_parsed)}'
 
   def __eq__(self, obj) -> bool:
     if not isinstance(obj, TRuleBase):
       raise ValueError(f'Cannot use == with {type(obj)}')
-    return str(self.rule) == str(obj.rule)
+    return str(self.rule_parsed) == str(obj.rule_parsed)
 
   def get_matcher_signature(self) -> str:
-    return str(self.rule['match'])
+    return str(self.rule_parsed['match'])
+
+  @classmethod
+  def parse_rule_str(cls, rule_str: str) -> dict:
+    '''
+    Parse a rule string into a rule dict.
+    '''
+    rules_parsed, _ = d_grammar_rules.parse_analyze_rules(rule_str)
+    assert len(rules_parsed) == 1, f'Expected exactly one rule, got {len(rules_parsed)}'
+    return rules_parsed[0]
+
+  # SERIALIZATION METHODS
+  def to_rule_str(self) -> str:
+    '''
+    Convert the rule to a plain string representation.
+    '''
+    return d_grammar_rules.pretty_rule(self.rule_parsed)
 
   def to_dict(self) -> dict:
+    '''
+    Serialize the rule to a dict.
+    '''
     res = {
       'type': self.__class__.__name__,
-      'rule_str': self.__str__(),
+      'rule_str': self.to_rule_str(),
     }
     return res
 
   @classmethod
-  def from_dict(cls, data: dict) -> TRuleBase:
+  def from_dict(cls, rule_serialized: dict) -> TRuleBase:
     '''
-    Create a rule instance from a dict.
+    Create a rule instance from a serialized dict.
     '''
-    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(data['rule_str'])
-    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
-    rule = parsed_rules[0]
-    if data['type'] == 'StartingTRule':
-      return StartingTRule(rule)
-    elif data['type'] == 'LearnedTRule':
-      return LearnedTRule(rule)
+    if rule_serialized['type'] == 'StartingTRule':
+      return StartingTRule.from_dict(rule_serialized)
+    elif rule_serialized['type'] == 'StandardTRule':
+      return StandardTRule.from_dict(rule_serialized)
+    elif rule_serialized['type'] == 'StatementOverfittedTRule':
+      return StatementOverfittedTRule.from_dict(rule_serialized)
     else:
-      raise ValueError(f'Unknown rule type: {data["type"]}')
-
-  @classmethod
-  def from_rule_str(cls, rule_str: str) -> TRuleBase:
-    '''
-    Create a rule instance from a rule string.
-    '''
-    parsed_rules, _ = d_grammar_rules.parse_analyze_rules(rule_str)
-    assert len(parsed_rules) == 1, f'Expected exactly one rule, got {len(parsed_rules)}'
-    rule = parsed_rules[0]
-    return cls(rule)
+      raise ValueError(f'Unknown rule type: {rule_serialized["type"]}')
 
 
 class StartingTRule(TRuleBase):
@@ -80,13 +88,79 @@ class StartingTRule(TRuleBase):
   A class that represents a translation rule that appears
   in the starting ruleset. It is assumed to be valid.
   '''
+  @classmethod
+  def from_dict(cls, rule_serialized: dict) -> StartingTRule:
+    '''
+    Create a StartingTRule instance from a serialized dict.
+    '''
+    assert rule_serialized['type'] == 'StartingTRule', f'Expected type to be StartingTRule, got {rule_serialized["type"]}'
+    rule_str = rule_serialized['rule_str']
+    rule_parsed = cls.parse_rule_str(rule_str)
+    return cls(rule_parsed)
 
 
-class LearnedTRule(TRuleBase):
+class LearnedTRuleBase(TRuleBase, ABC):
   '''
-  A class that represents a translation rule that appears
-  in the starting ruleset. It is assumed to be valid.
+  An abstract class that represents a learned translation rule.
   '''
+  def __init__(
+    self,
+    rule_parsed: dict,
+    stat_nid: int,
+    simple_ntext: str,
+  ):
+    super().__init__(rule_parsed)
+    self.stat_nid = stat_nid
+    self.simple_ntext = simple_ntext
+
+  # SERIALIZATION METHODS
+  def to_dict(self) -> dict:
+    '''
+    Serialize the learned rule to a dict.
+    '''
+    res = super().to_dict()
+    res.update({
+      'stat_nid': self.stat_nid,
+      'simple_ntext': self.simple_ntext,
+    })
+    return res
+
+
+class StandardTRule(LearnedTRuleBase):
+  '''
+  A class that represents a translation rule that was
+  learned using the standard learning method.
+  '''
+  @classmethod
+  def from_dict(cls, rule_serialized: dict) -> StandardTRule:
+    '''
+    Create a StandardTRule instance from a serialized dict.
+    '''
+    assert rule_serialized['type'] == 'StandardTRule', f'Expected type to be StandardTRule, got {rule_serialized["type"]}'
+    rule_str = rule_serialized['rule_str']
+    rule_parsed = cls.parse_rule_str(rule_str)
+    stat_nid = rule_serialized['stat_nid']
+    simple_ntext = rule_serialized['simple_ntext']
+    return cls(rule_parsed, stat_nid, simple_ntext)
+
+
+class StatementOverfittedTRule(LearnedTRuleBase):
+  '''
+  A class that represents a translation rule that was
+  learned using the recovery learning method to translate
+  a specific statement directly.
+  '''
+  @classmethod
+  def from_dict(cls, rule_serialized: dict) -> StatementOverfittedTRule:
+    '''
+    Create a StatementOverfittedTRule instance from a serialized dict.
+    '''
+    assert rule_serialized['type'] == 'StatementOverfittedTRule', f'Expected type to be StatementOverfittedTRule, got {rule_serialized["type"]}'
+    rule_str = rule_serialized['rule_str']
+    rule_parsed = cls.parse_rule_str(rule_str)
+    stat_nid = rule_serialized['stat_nid']
+    simple_ntext = rule_serialized['simple_ntext']
+    return cls(rule_parsed, stat_nid, simple_ntext)
 
 
 class Ruleset:
@@ -192,17 +266,17 @@ class Ruleset:
     assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
     return unparsed_ast in self._verified_rules
 
-  def merge_verified_rules_from(self, serialized_ruleset: dict) -> None:
+  def merge_verified_rules_from(self, ruleset_serialized: dict) -> None:
     '''
-    NOTE if serialized_ruleset has a verified rule for an AST that
+    NOTE if ruleset_serialized has a verified rule for an AST that
     already exists in self._verified_rules, it will be ignored.
-    If serialized_ruleset has a rule that does not exist in self.rules,
+    If ruleset_serialized has a rule that does not exist in self.rules,
     it will be ignored. This makes sure that self.rules are the only
     rules that we have.
     '''
-    assert isinstance(serialized_ruleset, dict), f'Unexpected type {type(serialized_ruleset)}'
+    assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
     for unparsed_ast, serialized_trule in \
-      serialized_ruleset.get('verified_rules', {}).items():
+      ruleset_serialized.get('verified_rules', {}).items():
       other_rule = TRuleBase.from_dict(serialized_trule)
       rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
       if rule:
@@ -227,13 +301,13 @@ class Ruleset:
     assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
     return unparsed_ast in self._unverifiable_rules
 
-  def merge_unverifiable_rules_from(self, serialized_ruleset: dict) -> None:
+  def merge_unverifiable_rules_from(self, ruleset_serialized: dict) -> None:
     '''
     Check docs for merge_verified_rules_from().
     '''
-    assert isinstance(serialized_ruleset, dict), f'Unexpected type {type(serialized_ruleset)}'
+    assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
     for unparsed_ast, serialized_trules in \
-      serialized_ruleset.get('unverifiable_rules', {}).items():
+      ruleset_serialized.get('unverifiable_rules', {}).items():
       for serialized_trule in serialized_trules:
         other_rule = TRuleBase.from_dict(serialized_trule)
         rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
@@ -242,6 +316,7 @@ class Ruleset:
         else:
           logger.warning(f'Ignoring unverifiable rule for "{unparsed_ast}" because it is not in self.rules.')
 
+  # OTHER METHODS
   def get_rule_idx_in_matcher_group(self, rule: TRuleBase) -> int:
     '''
     Get the index of a rule in its matcher group.
@@ -308,7 +383,7 @@ class Ruleset:
     '''
     Convert the ruleset to a plain string representation.
     '''
-    return '\n\n'.join([str(rule) for rule in self.rules])
+    return '\n\n'.join([rule.to_rule_str() for rule in self.rules])
 
   def to_dict(self) -> dict:
     '''
@@ -330,37 +405,32 @@ class Ruleset:
     Create a Ruleset from a plain string representation of starting rules.
     '''
     ruleset = cls()
-    rules, _ = d_grammar_rules.parse_analyze_rules(starting_ruleset)
-    for rule in rules:
-      ruleset.rules.append(StartingTRule(rule))
+    rules_parsed, _ = d_grammar_rules.parse_analyze_rules(starting_ruleset)
+    for rule_parsed in rules_parsed:
+      ruleset.rules.append(StartingTRule(rule_parsed))
     ruleset._update_matcher_groups()
     return ruleset
 
   @classmethod
-  def from_dict(cls, data: dict) -> Ruleset:
+  def from_dict(cls, ruleset_serialized: dict) -> Ruleset:
     '''
     Create a Ruleset from a serialized dict.
     '''
-    assert data['type'] == 'Ruleset', 'Expected type to be Ruleset'
+    assert ruleset_serialized['type'] == 'Ruleset', 'Expected type to be Ruleset'
     ruleset = cls()
 
     # ruleset.rules
-    for rule_data in data['rules']:
-      if rule_data['type'] == 'StartingTRule':
-        rule = StartingTRule.from_dict(rule_data)
-      elif rule_data['type'] == 'LearnedTRule':
-        rule = LearnedTRule.from_dict(rule_data)
-      else:
-        raise ValueError(f'Unknown rule type: {rule_data["type"]}')
+    for rule_serialized in ruleset_serialized['rules']:
+      rule = TRuleBase.from_dict(rule_serialized)
       ruleset.rules.append(rule)
 
     # ruleset.matcher_groups
     ruleset._update_matcher_groups()
 
     # ruleset.verified_rules
-    ruleset.merge_verified_rules_from(data)
+    ruleset.merge_verified_rules_from(ruleset_serialized)
 
     # ruleset._unverifiable_rules
-    ruleset.merge_unverifiable_rules_from(data)
+    ruleset.merge_unverifiable_rules_from(ruleset_serialized)
 
     return ruleset
