@@ -1109,7 +1109,8 @@ async def process_choicable_range_cursor(
 
 
 def _get_readonly_choices_list_init(
-  src_main_code: str
+  src_main_code: str,
+  ruleset: p_ruleset.Ruleset
 ) -> tuple:
   '''
   Given a duoglot-style AST, collect all nodes under AST,
@@ -1117,23 +1118,34 @@ def _get_readonly_choices_list_init(
   result in a plausible translation.
   RETURN a list of tuples (range cursor, pre-context).
   '''
-  crcpcs = []  # choices range cursors with pre-context
-  dgast, dgann = d_ast_parse.parse_text_dbg(src_main_code, 'py')
-  choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(src_main_code)
+
+  '''
+  First, we collect the statement nodes for which we already have obtained
+  overfitted rules. We do not collect choicable nodes under them.
+  '''
+  overfitted_rules = ruleset.get_stat_overfitted_rules()
+  overfitted_stat_nids = set()
+  for rule in overfitted_rules:
+    overfitted_stat_nids.add(rule.stat_nid)
+  choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+    src_main_code, exclude_statement_nodes_ids=list(overfitted_stat_nids))
   logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
+
+  chable_rc_prectxs = []  # choices range cursors with pre-context
+  dgast, dgann = d_ast_parse.parse_text_dbg(src_main_code, 'py')
 
   for i, choicable_node in enumerate(choicable_nodes, start=1):
     choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
     stat_node = _choicable_node_get_context_node(choicable_node)
     pre_context = p_pirel.get_pre_context(src_main_code, 'py', stat_node.get_node_id())
     pre_context = pvpy.LogStatementRemover.remove_log_statements(pre_context)
-    crcpcs.append((choicable_range_cursor, pre_context))
+    chable_rc_prectxs.append((choicable_range_cursor, pre_context))
     logger.debug(
       f'-> Choicable_node {i}/{len(choicable_nodes)}: '
       f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"\n'
       f'pre_context:\n{pre_context}')
 
-  return crcpcs, dgann
+  return chable_rc_prectxs, dgann
 
 
 def _is_excluded_range_cursor(
@@ -1218,11 +1230,10 @@ def _filter_range_cursors(
 
 async def get_readonly_choices_list(
   src_main_code: str,
-  translation_rules_main_code: str,
   src_test_code: str,
   translation_rules_test_code: str,
-  serialized_current_ruleset: dict
-) -> Tuple[list, dict]:
+  ruleset: p_ruleset.Ruleset
+) -> list:
   '''
   Generate a readonly choices list for the given source code and rules.
   Readonly choices list contains choices to validated rules that result
@@ -1239,9 +1250,6 @@ async def get_readonly_choices_list(
 
   p_utils.log_json_time('args-get_readonly_choices_list.json', locals())
   logger.info('readonly-main: Starting generation of read-only choices list')
-  ruleset = p_ruleset.Ruleset.from_starting_ruleset(translation_rules_main_code)
-  ruleset.merge_verified_rules_from(serialized_current_ruleset)
-  ruleset.merge_unverifiable_rules_from(serialized_current_ruleset)
 
   '''
   `choicable_range_cursors` - a list of range cursors
@@ -1252,12 +1260,13 @@ async def get_readonly_choices_list(
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  chable_rc_prectxs, dgann = _get_readonly_choices_list_init(src_main_code)
+  chable_rc_prectxs, dgann = _get_readonly_choices_list_init(
+    src_main_code, ruleset)
 
   for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
 
     logger.debug(
-      f'Processing choicable_range_cursor {i}/{len(chable_rc_prectxs)}: '
+      f'readonly-main: processing choicable_range_cursor {i}/{len(chable_rc_prectxs)}: '
       f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"')
 
     '''
@@ -1336,7 +1345,7 @@ async def get_readonly_choices_list(
 
   logger.info('readonly-main: Finished generation of read-only choices list')
   readonly_choices_list = ruleset.get_choices_list_from_verified_rules(src_main_code)
-  return readonly_choices_list, ruleset.to_dict()
+  return readonly_choices_list
 
 
 # GENERATING NEW CHOICES LIST BASED ON ERRORS
@@ -1907,28 +1916,25 @@ def _test_get_readonly_choices_list():
   '''
   async def get_readonly_choices_list(
     src_main_code: str,
-    translation_rules_main_code: str,
     src_test_code: str,
     translation_rules_test_code: str,
-    serialized_current_ruleset: dict
-  ) -> Tuple[list, dict]:
+    ruleset: p_ruleset.Ruleset
+  ) -> list:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_get_readonly_choices_list_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   src_main_code = args_dict['src_main_code']
-  translation_rules_main_code = args_dict['translation_rules_main_code']
   src_test_code = args_dict['src_test_code']
   translation_rules_test_code = args_dict['translation_rules_test_code']
-  serialized_current_ruleset = args_dict['serialized_current_ruleset']
+  ruleset = p_ruleset.Ruleset.from_dict(json.loads(args_dict['ruleset']))
 
-  readonly_choices_list, ruleset_serialized = asyncio.run(get_readonly_choices_list(
+  readonly_choices_list = asyncio.run(get_readonly_choices_list(
     src_main_code,
-    translation_rules_main_code,
     src_test_code,
     translation_rules_test_code,
-    serialized_current_ruleset
+    ruleset
   ))
 
 

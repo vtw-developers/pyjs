@@ -371,24 +371,19 @@ async def check_trules_test_based(
      to current_ruleset
   '''
   logger.debug('~~ Getting readonly choices list before applying translation rules')
-  readonly_choices_list, ruleset_serialized = \
-    await p_ext_rule_chooser.get_readonly_choices_list(
-      val_subject.get_src_main_code(),
-      val_subject.translation_rules_main_code,
-      val_subject.get_src_test_code(),
-      val_subject.translation_rules_test_code,
-      current_ruleset.to_dict()
-    )
+  readonly_choices_list = await p_ext_rule_chooser.get_readonly_choices_list(
+    val_subject.get_src_main_code(),
+    val_subject.get_src_test_code(),
+    val_subject.translation_rules_test_code,
+    current_ruleset
+  )
   val_subject.readonly_choices_list = readonly_choices_list
   logger.debug('~~ Saved readonly choices list')
 
   logger.debug('~~ Applying translation rules to get the target program')
   tar_program_plausible = await prapp.apply_translation_rules(val_subject)
   logger.debug('~~ Finished applying translation rules')
-
-  val_subject.readonly_choices_list = []
-  current_ruleset.merge_verified_rules_from(ruleset_serialized)
-  current_ruleset.merge_unverifiable_rules_from(ruleset_serialized)
+  val_subject.readonly_choices_list = []  # reset
 
 
 # TEST HARNESSES
