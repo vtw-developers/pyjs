@@ -271,7 +271,7 @@ class BaseTask:  # abstract class
 
 @dataclass
 class GetRefTrans(BaseTask):
-  snippet: Optional[str] = None
+  statement_str: Optional[str] = None
   ref_translations: List[str] = field(default_factory=list)
   success: bool = False
   reason: Optional[str] = None

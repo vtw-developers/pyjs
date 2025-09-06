@@ -396,6 +396,17 @@ class GetRefTransF(BaseMessageFactory):
       return feedback_message
     self._log('case 2: some/all ref_trans_cands do not have parse error')
 
+    # case 3: checking if all ref_trans_cands have many statements
+    self._log('case 3: checking if all ref_trans_cands have many statements')
+    if self.val.all_have_many_statements():
+      self._log('all ref_trans_cands have many statements')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        'Please make sure that the generated reference translation is a single statement or expression.'
+      )
+      return feedback_message
+    self._log('case 3: some/all ref_trans_cands have a single statement/expression')
+
     raise NotImplementedError('new feedback case identified in GetRefTransF')
 
 

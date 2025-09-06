@@ -212,6 +212,10 @@ class GetRefTransValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_parse_error, self.ref_trans_cands_stats))
     return all(flags)
 
+  def all_have_many_statements(self) -> bool:
+    flags = list(map(self.ad_has_many_statements, self.ref_trans_cands_stats))
+    return all(flags)
+
   # ADAPTER METHODS TO `ref_trans_cands_stats` (have `ad` prefix)
   def ad_ref_trans_cand(self, ref_trans_cand_stat: dict) -> str:
     return ref_trans_cand_stat['ref_trans_cand']
@@ -221,6 +225,9 @@ class GetRefTransValidationResult(BaseValidationResult):
 
   def ad_has_parse_error(self, ref_trans_cand_stat: dict) -> bool:
     return ref_trans_cand_stat['has_parse_error'] is True
+
+  def ad_has_many_statements(self, ref_trans_cand_stat: dict) -> bool:
+    return ref_trans_cand_stat['has_many_statements'] is True
 
   # ABSTRACT METHOD IMPLEMENTATIONS
   def get_data(self) -> List[str]:
@@ -706,6 +713,7 @@ def _get_ref_trans_cand_gather_stats(
     'ref_trans_cand': ref_trans_cand,
     'success': None,
     'has_parse_error': None,
+    'has_many_statements': None,
   }
 
   logger.debug(f'Checking if generated reference translation candidate satisfies our criteria')
@@ -716,6 +724,16 @@ def _get_ref_trans_cand_gather_stats(
     logger.debug(f'BAD: generated reference translation candidate has a parse error')
     return_dict['success'] = False
     return_dict['has_parse_error'] = True
+    return return_dict
+
+  # criteria 2
+  tree = pds.DuoGlotTree.from_code_str(ref_trans_cand, tar_lang)
+  root_node = tree.get_root_node()
+  if root_node.get_num_nt_children() > 1:
+    logger.debug(f'BAD: generated reference translation candidate has multiple non-terminal children at root node')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['has_many_statements'] = True
     return return_dict
 
   logger.debug(f'GOOD: generated reference translation candidate passed the validation step.')

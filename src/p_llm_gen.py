@@ -711,24 +711,29 @@ class GetReferenceTranslation(BasePirelTask):
   def __init__(
     self,
     task_name: str,
-    snippet: str,
+    statement_str: str,
     subject: p_subject.PirelSubject,
     template_dict: dict,
     lbase_task: ptlog.BaseTask
   ):
     super().__init__(task_name, subject, template_dict, lbase_task)
-    self.snippet = snippet
+    self.statement_str = statement_str
     self.log_args_as_json(
       'args_init.json',
       task_name=task_name,
-      snippet=snippet,
+      statement_str=statement_str,
       subject=subject,
       template_dict=template_dict,
       lbase_task=lbase_task
     )
 
   def get_system_message(self) -> BaseMessage:
-    system_message = SystemMessage(p_llm_templates.GetReferenceTranslation.System.GENERIC)
+    system_message = SystemMessagePromptTemplate.from_template(
+      p_llm_templates.TranslateAny.System.MODERNIZED
+    ).format(
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
+    )
     return system_message
 
   def get_few_shot_messages(self) -> List[BaseMessage]:
@@ -740,7 +745,7 @@ class GetReferenceTranslation(BasePirelTask):
     ).format(
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
-      program_to_translate = self.snippet,
+      statement_to_translate = self.statement_str,
     )
     return starting_prompt
 
@@ -1119,12 +1124,12 @@ async def gen_test_function(
 
 
 async def get_reference_translations(
-  snippet: str,
+  statement_str: str,
   src_lang: str,
   tar_lang: str
 ) -> Tuple[List[str], ptlog.GetRefTrans]:
   '''
-  Get a reference translation for a snippet.
+  Get a reference translation for a statement node code.
   RETURN: reference translations or empty list if failed.
 
   `subject` must contain the following attributes:
@@ -1138,7 +1143,7 @@ async def get_reference_translations(
   logger.info(f'~~~ Starting API call to p_llm_gen.get_reference_translations')
 
   lget_ref_trans = ptlog.GetRefTrans()
-  lget_ref_trans.snippet = snippet
+  lget_ref_trans.statement_str = statement_str
 
   fabr_template_dict = {'src_lang': src_lang, 'tar_lang': tar_lang}
   subject_conf = {
@@ -1152,7 +1157,7 @@ async def get_reference_translations(
 
   get_ref_trans_task = GetReferenceTranslation(
     task_name='get_ref_trans',
-    snippet=snippet,
+    statement_str=statement_str,
     subject=fabr_subject,
     template_dict=fabr_template_dict,
     lbase_task=lget_ref_trans
