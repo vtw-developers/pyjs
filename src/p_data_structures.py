@@ -597,7 +597,7 @@ class DuoGlotNode():
 
 class TNode(DuoGlotNode):
   def __repr__(self) -> str:
-    return f'{self.__class__.__name__}("{self.node_type}")'
+    return f'{self.__class__.__name__}({self.node_type!r})'
 
   # implementing abstract methods
   def is_terminal(self) -> bool:
