@@ -1120,13 +1120,32 @@ def _get_readonly_choices_list_init(
   '''
 
   '''
-  First, we collect the statement nodes for which we already have obtained
-  overfitted rules. We do not collect choicable nodes under them.
+  First we collect all nodes that match the overfitted rules.
+  Then we pass their node ids to ChoicableNodeExtractor.
   '''
-  overfitted_rules = ruleset.get_stat_overfitted_rules()
+  rc_src_main_code, dgann = d_ast_parse.parse_text_to_range_cursor(src_main_code, 'py')
+  assert rc_src_main_code[1] + 1 == rc_src_main_code[2], \
+    'range cursor must specify just one node'
+  all_range_cursors = d_ast_parse.get_all_range_cursors_under(rc_src_main_code)
+
   overfitted_stat_nids = set()
+  overfitted_rules = ruleset.get_stat_overfitted_rules()
   for rule in overfitted_rules:
-    overfitted_stat_nids.add(rule.stat_nid)
+    matcher = rule.rule_parsed['match']
+    for range_cursor in all_range_cursors:
+      match_obj = match_rule_to_range_cursor(matcher, range_cursor)
+      if not match_obj['is_matched']:
+        continue
+      matched_ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
+      assert d_ast_parse.is_elem_non_terminal(matched_ast), 'sanity check'
+      stat_nid = matched_ast[1]
+      assert isinstance(stat_nid, int), 'sanity check'
+      logger.debug(
+        f'Will exclude statement node id {stat_nid}:\n'
+        f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"\n'
+        f'since it matches overfitted rule:\n{rule.to_rule_str()}')
+      overfitted_stat_nids.add(stat_nid)
+
   choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
     src_main_code, exclude_statement_nodes_ids=list(overfitted_stat_nids))
   logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
@@ -1243,7 +1262,9 @@ async def get_readonly_choices_list(
   Readonly choices contains choices to right hand side of assignments,
   and conditions of if statements.
 
-  PARAM src_main_code: instrumented with log statements.
+  PARAM src_main_code (check p_pirel._create_src_program_for_stat_val()):
+  - instrumented with log statements
+  - break statements inserted
 
   NOTE This function should not add or remove rules from the ruleset.
   '''
