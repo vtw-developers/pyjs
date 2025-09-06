@@ -592,6 +592,28 @@ class PrettyPrinter(pvis.Visitor):
     return node.children[0].node_type
 
 
+class CommentsRemover(pvis.Visitor):
+  def default_visit(self, node):
+    # Make a copy of the list to avoid modifying it while iterating
+    for child in list(node.children):
+      if isinstance(child, CommentNode):
+        node.children.remove(child)
+        child.set_parent(None)
+      else:
+        self.visit(child)  # Recurse into non-comment children
+
+  @classmethod
+  def remove_comments(cls, program: str) -> str:
+    parser = p_consts.PARSER_DICT['js']
+    ts_tree = parser.parse(bytes(program, 'utf8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    remover = CommentsRemover()
+    remover.visit(tree.root_node)
+    pp = PrettyPrinter()
+    code = pp.visit(tree.root_node)
+    return code
+
+
 # TEST HARNESSES
 def _get_js_boilerplate_code():
   '''

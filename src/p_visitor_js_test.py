@@ -24,5 +24,22 @@ class TestPrettyPrinter(unittest.TestCase):
         self.assertEqual(subject_code, pp_code)
 
 
+class TestCommentsRemover(unittest.TestCase):
+  def setUp(self):
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'p-visitor-js' / 'comments-remover'
+    self.maxDiff = None
+
+  def test_all(self):
+    NUM_SNIPPETS = 4
+    for i in range(1, NUM_SNIPPETS + 1):
+      fpath = self.snippets_dir / f'snippet_{i:03d}_in.js'
+      snippet = fpath.read_text().strip()
+      with self.subTest(i=i):
+        no_comments_code = p_visitor_js.CommentsRemover.remove_comments(snippet)
+        gold_fpath = self.snippets_dir / f'snippet_{i:03d}_out.js'
+        gold_code = gold_fpath.read_text().strip()
+        self.assertEqual(gold_code, no_comments_code)
+
+
 if __name__ == '__main__':
   unittest.main()
