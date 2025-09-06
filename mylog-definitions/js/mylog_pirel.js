@@ -47,7 +47,7 @@ function serializeObject(arg) {
 }
 
 function serialize(arg) {
-  if (arg === null)
+  if (arg === null || typeof arg === "undefined")
     return serializeNull();
   if (arg === true || arg === false)
     return serializeBool(arg);
