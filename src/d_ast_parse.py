@@ -153,6 +153,28 @@ def get_nid_ntype_map(ast: list) -> Dict[int, str]:
   return nid_ntype_map
 
 
+def parse_text_to_range_cursor(
+  code: str,
+  lang: str
+) -> Tuple[Tuple[list, int, int], dict]:
+  '''
+  A range cursor is another way to represent ASTs in DuoGlot world.
+  A structure of a range cursor is as follows:
+  (AST of the parent node, start_idx, end_idx)
+  start_idx and end_idx specify a range of nodes under a given
+  parent node.
+  NOTE Naturally, when using this function, it will not be able
+  to reference the root node of the parsed tree, because range
+  cursors require a parent node to be present. So this function
+  returns references to the children of the root node.
+  '''
+  ast, ann = parse_text_dbg(code, lang)
+  num_children = len(ast) - 2
+  assert num_children >= 1, 'expected at least one child under the root node'
+  range_cursor = (ast, 2, 2 + num_children)
+  return range_cursor, ann
+
+
 def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
   '''
   Given an DuoGlot-style AST and a node id, return the range cursor to the node.
