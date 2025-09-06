@@ -365,21 +365,6 @@ def assert_matchers_match(matcher_group: List[p_ruleset.TRuleBase]) -> None:
       f'Expected all rules to have the same matcher signature, got {rule.get_matcher_signature()}'
 
 
-def slot_cursor_remove_empty(
-  slot_cursors: List[Tuple[list, int, int]]
-) -> List[Tuple[list, int, int]]:
-  '''
-  Remove empty slot cursors from the list.
-  An empty slot cursor is a cursor that has the same start and end indices.
-  '''
-  non_empty_slot_cursors = []
-  for slot_cursor in slot_cursors:
-    # end_idx must be strictly greater than start_idx
-    if slot_cursor[1] < slot_cursor[2]:
-      non_empty_slot_cursors.append(slot_cursor)
-  return non_empty_slot_cursors
-
-
 def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNode:
   '''
   Given a choicable node, return its context node.
@@ -587,7 +572,7 @@ def get_rules_that_handle_range_cursor_rec(
     assert match_obj['is_matched'], 'Expected rule to match the range cursor'
     all_slot_cursors.extend(match_obj['slot_cursors'])
 
-  all_slot_cursors = slot_cursor_remove_empty(all_slot_cursors)
+  all_slot_cursors = d_ast_parse.range_cursor_remove_empty(all_slot_cursors)
   all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
 
   # base case: rule has no slot cursors
@@ -942,7 +927,7 @@ async def _process_match_obj(
   slot_cursors are range_cursors that appear under the range_cursor.
   '''
   slot_cursors = match_obj['slot_cursors']
-  slot_cursors = slot_cursor_remove_empty(slot_cursors)
+  slot_cursors = d_ast_parse.range_cursor_remove_empty(slot_cursors)
   logger.debug(f'Matched AST has {len(slot_cursors)} slots')
 
   '''
