@@ -20,6 +20,7 @@ import p_subject
 import p_translators
 import p_tree_log as ptlog
 import p_utils
+import p_visitor_js as pvjs
 import p_visitor_py as pvpy
 
 
@@ -1033,6 +1034,7 @@ async def stat_node_learn_trules_recovery(
   context = _synthesize_context(simple_ntext, src_lang)
   overfitted_trules : List[str] = []
   for idx, ref_trans in enumerate(reference_translations, start=1):
+    ref_trans = pvjs.CommentsRemover.remove_comments(ref_trans)
     trule = p_rule_inferencer.infer_translation_rule_wrapper(
       translation_pair=[{'source': simple_ntext, 'target': ref_trans}],
       src_lang=src_lang,
