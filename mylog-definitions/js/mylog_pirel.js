@@ -32,7 +32,20 @@ function serializeArray(arg) {
 }
 
 function serializeSet(arg) {
-  const sortedVals = Array.from(arg).sort(); // Convert Set to Array and sort
+  const arrVals = Array.from(arg);
+  let sortedVals;
+  if (arrVals.length === 0) {
+    sortedVals = arrVals;
+  } else {
+    const firstType = typeof arrVals[0];
+    if (firstType === "string") {
+      sortedVals = arrVals.slice().sort();
+    } else if (firstType === "number") {
+      sortedVals = arrVals.slice().sort((a, b) => a - b);
+    } else {
+      throw new Error("serializeSet only supports sets of strings or numbers");
+    }
+  }
   const serializedVals = sortedVals.map(val => serialize(val));
   return ["set", sortedVals.length, serializedVals];
 }
