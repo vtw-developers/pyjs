@@ -157,9 +157,9 @@ async def _run_code(code: str, lang: str,
   p_utils.write_text(temp_filename, code)
 
   logger.debug(f'Executing command: {command} {temp_filename}')
+  proc = await asyncio.create_subprocess_exec(
+    command, temp_filename, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   try:
-    proc = await asyncio.create_subprocess_exec(
-      command, temp_filename, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     async with asyncio.timeout(timeout_sec):
       # await proc.communicate() sometimes create a zombie process,
       # which probably has something to do with improper pipe cleanup
