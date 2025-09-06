@@ -1059,7 +1059,7 @@ async def get_translation_pairs_from_tsp(
   return all_translation_pairs
 
 
-async def gen_test_function(
+async def gen_test_function_deprecated(
   f_gold_function: str,
   src_lang: str,
   tar_lang: str
@@ -1075,23 +1075,23 @@ async def gen_test_function(
   `template_dict` must contain the following attributes:
   - src_lang
   '''
-  logger.info(f'~~~ Starting API call to p_llm_gen.gen_test_function')
+  logger.info(f'~~~ Starting API call to p_llm_gen.gen_test_function_deprecated')
 
   lgen_test_function = ptlog.GenTestFunction()
   lgen_test_function.f_gold_function = f_gold_function
 
   fabr_template_dict = {'src_lang': src_lang}
   subject_conf = {
-    'benchmark_name': 'gen_test_function',
-    'name': 'gen_test_function',
-    'src_program': 'gen_test_function',
+    'benchmark_name': 'gen_test_function_deprecated',
+    'name': 'gen_test_function_deprecated',
+    'src_program': 'gen_test_function_deprecated',
     'src_lang': src_lang,
     'tar_lang': tar_lang,
   }
   fabr_subject = p_subject.PirelSubject.from_dict(subject_conf)
 
   gen_task = GenTestFunction(
-    task_name='gen_test_function',
+    task_name='gen_test_function_deprecated',
     f_gold_function=f_gold_function,
     subject=fabr_subject,
     template_dict=fabr_template_dict,
@@ -1208,7 +1208,7 @@ async def _test_query_llm():
 
 async def _test_gen_test_function():
   '''
-  async def gen_test_function(
+  async def gen_test_function_deprecated(
     f_gold_function: str,
     src_lang: str,
     tar_lang: str
@@ -1217,7 +1217,7 @@ async def _test_gen_test_function():
   f_gold_fpath = p_consts.TMP_DIR / 'f_gold.py'
   f_gold_function = p_utils.read_text(f_gold_fpath)
   test_function, lgen_test_function = \
-    await gen_test_function(f_gold_function, 'py', 'js')
+    await gen_test_function_deprecated(f_gold_function, 'py', 'js')
   print(test_function)
 
 

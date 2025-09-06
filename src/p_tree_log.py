@@ -458,7 +458,7 @@ class RuleApplicationPhase:
 class RulesValidation:
   success: bool = False
   reason: Optional[str] = None
-  gen_test_function: Optional[GenTestFunction] = None
+  gen_test_function_deprecated: Optional[GenTestFunction] = None
 
 @dataclass
 class RulesRecovery:
