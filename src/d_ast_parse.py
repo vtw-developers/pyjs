@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import d_consts
 import p_consts
@@ -275,6 +275,60 @@ def get_all_range_cursors_under(
   choicable_range_cursor_children = range_cursor_seq_descending_from_ast(choicable_ast)
   all_range_cursors.extend(choicable_range_cursor_children)
   return all_range_cursors
+
+
+def range_cursor_is_empty(range_cursor: tuple) -> bool:
+  '''
+  Return True if the range cursor is empty.
+  An empty range cursor does not include any AST nodes.
+  '''
+  assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
+  assert isinstance(range_cursor[0], list)
+  assert isinstance(range_cursor[1], int)
+  assert isinstance(range_cursor[2], int)
+  return range_cursor[1] == range_cursor[2]
+
+
+def range_cursor_remove_empty(
+  range_cursors: List[Tuple[list, int, int]],
+) -> List[Tuple[list, int, int]]:
+  '''
+  Remove empty range cursors from the list.
+  '''
+  return [rc for rc in range_cursors if not range_cursor_is_empty(rc)]
+
+
+def range_cursor_split(
+  range_cursor: Tuple[list, int, int],
+) -> List[Tuple[list, int, int]]:
+  '''
+  Split a range cursor into multiple range cursors, each specifying
+  exactly one non-terminal AST node.
+  '''
+  assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
+  assert isinstance(range_cursor[0], list)
+  assert isinstance(range_cursor[1], int)
+  assert isinstance(range_cursor[2], int)
+  parent_ast = range_cursor[0]
+  start_idx = range_cursor[1]
+  end_idx = range_cursor[2]
+
+  # 2 is the index of the first child of a non-terminal node
+  assert start_idx >= 2, 'range cursor start index must be >= 2'
+  # start_idx == end_idx denotes an empty range cursor
+  assert start_idx <= end_idx, 'range cursor start index must be <= end index'
+  # end_idx > 2 means at least one child node is included
+  assert end_idx > 2, 'range cursor end index must be > 2'
+  # end_idx == len(parent_ast) means the range cursor includes the last child
+  assert end_idx <= len(parent_ast), 'range cursor end index out of bounds'
+
+  result = []
+  for idx in range(start_idx, end_idx):
+    rc = (parent_ast, idx, idx + 1)
+    ast = range_cursor_to_ast_node(rc)
+    if is_elem_non_terminal(ast):
+      result.append(rc)
+  return result
 
 
 def range_cursor_to_ast_node(range_cursor: tuple) -> list:
