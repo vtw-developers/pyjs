@@ -958,24 +958,41 @@ async def _process_match_obj(
   subtrees_rules = []
   for idx, slot_cursor in enumerate(slot_cursors, start=1):
     '''
-    We need to check if there are rules that plausibly translate the slot_cursors
-    under the matched range_cursor.
+    Need to check if slot_cursor spans multiple AST nodes. That might be the case
+    if matching rule contains a "*" placeholder. For example,
+    (match_expand
+      (fragment ("py.list" (str "[") "*" (str "]")) "*")
+      (fragment ("js.array" (str "[") "*1" (str "]")) "*2")
+    )
+    that matches
+    `[1, 2, 3, 4]`
     '''
-    subtrees_rules = get_rules_that_handle_range_cursor_rec(
-      slot_cursor, ruleset, dgann, src_main_code)
-    logger.debug(
-      f'Slot cursor {idx}/{len(slot_cursors)} AST: '
-      f'"{d_ast_parse.range_cursor_pretty_print(slot_cursor, dgann, src_main_code)}"')
+    sub_slot_cursors = d_ast_parse.range_cursor_split(slot_cursor)
+    if len(sub_slot_cursors) > 1:
+      logger.debug(
+        f'Slot cursor {idx}/{len(slot_cursors)} has {len(sub_slot_cursors)} '
+        f'sub-slot cursors. This is likely due to a "*" in the matcher.')
 
-    '''
-    If there is no rule that can handle the range_cursor,
-    it means we need to check the next matching rule group.
-    '''
-    if subtrees_rules is None:
-      raise NoRuleToHandleRangeCursorError
+    for sub_idx, sub_slot_cursor in enumerate(sub_slot_cursors, start=1):
+      '''
+      We need to check if there are rules that plausibly translate the slot_cursors
+      under the matched range_cursor.
+      '''
+      subtrees_rules = get_rules_that_handle_range_cursor_rec(
+        sub_slot_cursor, ruleset, dgann, src_main_code)
+      logger.debug(
+        f'Slot cursor {sub_idx}/{len(sub_slot_cursors)} {idx}/{len(slot_cursors)} AST: '
+        f'"{d_ast_parse.range_cursor_pretty_print(sub_slot_cursor, dgann, src_main_code)}"')
 
-    logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_rules)}')
-    subtrees_rules.extend(subtrees_rules)
+      '''
+      If there is no rule that can handle the range_cursor,
+      it means we need to check the next matching rule group.
+      '''
+      if subtrees_rules is None:
+        raise NoRuleToHandleRangeCursorError
+
+      logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_rules)}')
+      subtrees_rules.extend(subtrees_rules)
 
   '''
   This range_cursor is handled by the rule. Mark it as handled.
