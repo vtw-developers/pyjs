@@ -843,8 +843,8 @@ async def apply_translation_rules(
     'with different combinations of translation rules')
   iteration = 0
   while True:
-    logger.debug(f'rule-app: iteration {iteration} starts')
     iteration += 1
+    logger.debug(f'rule-app: iteration {iteration} starts')
 
     tar_main_code_instr, map_to_exid, translate_dbg_history = \
       _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
