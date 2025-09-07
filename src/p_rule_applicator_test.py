@@ -120,31 +120,157 @@ class TestGetErrorLines(unittest.TestCase):
     tar_program_instr = self.get_fixture('001')
 
     result = prapp._get_error_lines(tar_program_instr, 1)
-    gold = {5: '    let n = 0;'}
+    gold = {
+      5: '    let n = 0;'
+    }
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
     result = prapp._get_error_lines(tar_program_instr, 2)
-    gold = {}
-    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts must be empty')
+    gold = {
+
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
     result = prapp._get_error_lines(tar_program_instr, 3)
-    gold = {8: '    n = 1;'}
+    gold = {
+      8: '    n = 1;'
+    }
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
     result = prapp._get_error_lines(tar_program_instr, 4)
-    gold = {10: '    while (n < 10) {'}
+    gold = {
+      10: '    while (n < 10) {'
+    }
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
     result = prapp._get_error_lines(tar_program_instr, 5)
-    gold = {12: "        n += 'n';"}
+    gold = {
+      12: "        n += 'n';"
+    }
     self.assertTrue(self.are_dicts_equal(result, gold), 'dicts are not equal')
 
-  def test_log_stat_before_return_stat(self):
+  def test_002_log_stat_before_return_stat(self):
     tar_program_instr = self.get_fixture('002')
 
     result = prapp._get_error_lines(tar_program_instr, 1)
-    gold = {14: '  return 2 / 2;'}
+    gold = {
+      14: '  return 2 / 2;'
+    }
     self.assertTrue(self.are_dicts_equal(result, gold), 'the error line is 3 with return statement')
+
+  def test_003(self):
+    tar_program_instr = self.get_fixture('003')
+
+    result = prapp._get_error_lines(tar_program_instr, 1)
+    gold = {
+      22: '    var count = 0;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between f_gold and log_statement')
+
+    result = prapp._get_error_lines(tar_program_instr, 2)
+    gold = {
+      24: '    var ans = 1;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 3)
+    gold = {
+      26: '    while (n % 2 === 0) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 4)
+    gold = {
+      28: '        var count = count + 1;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 5)
+    gold = {
+      30: '        var n = Math.floor(n / 2);'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 6)
+    gold = {
+      33: '    if (count % 2 !== 0) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'consecutive compound statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 7)
+    gold = {
+      35: '        var ans = ans * 2;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 8)
+    gold = {
+      38: '    for (var i = 3; i <= Math.floor(Math.sqrt(n)); i += 2) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'consecutive compound statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 9)
+    gold = {
+      40: '        var count = 0;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 10)
+    gold = {
+      42: '        while (n % i === 0) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 11)
+    gold = {
+      44: '            var count = count + 1;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 12)
+    gold = {
+      46: '            var n = Math.floor(n / i);'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 13)
+    gold = {
+      49: '        if (count % 2 !== 0) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'consecutive compound statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 14)
+    gold = {
+      51: '            var ans = ans * i;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 15)
+    gold = {
+      55: '    if (n > 2) {'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'consecutive compound statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 16)
+    gold = {
+      57: '        var ans = ans * n;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'between two log statements')
+
+    result = prapp._get_error_lines(tar_program_instr, 17)
+    gold = {
+      61: '    return ans;'
+    }
+    self.assertTrue(self.are_dicts_equal(result, gold), 'return statement')
+
+  def test_003_second_of_consecutive_compound_statements(self):
+   tar_program_instr = self.get_fixture('003')
+
+   result = prapp._get_error_lines(tar_program_instr, 15)
+   gold = {
+     55: '    if (n > 2) {'
+   }
+   self.assertTrue(self.are_dicts_equal(result, gold), 'the error line is 15 with second of consecutive compound statements')
 
 
 if __name__ == '__main__':

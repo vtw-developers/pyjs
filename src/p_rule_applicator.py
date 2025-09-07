@@ -520,6 +520,7 @@ def _extract_err_lines_from_trace_mismatch(
   '''
   mismatched_log_stat_idx = _get_mismatched_log_statement_idx(src_trace, tar_trace)
   error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idx)
+  assert len(error_lines) > 0, 'error lines must be non-empty'
 
   return error_lines
 
