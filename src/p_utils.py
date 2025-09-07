@@ -515,10 +515,15 @@ def make_abs(fpath: Union[Path, str], base_dir: Union[Path, str]) -> Path:
   assert base_dir.is_absolute()
   return base_dir / fpath
 
-def are_equal(num1: Union[int, float], num2: Union[int, float], eps=1e-6) -> bool:
+def are_equal_numbers(
+  num1: Union[int, float],
+  num2: Union[int, float],
+  eps_percentage=1e-6
+) -> bool:
   '''
   Check if two numbers are equal.
   '''
   assert isinstance(num1, (int, float)), f'Expected int or float, got {type(num1)}'
   assert isinstance(num2, (int, float)), f'Expected int or float, got {type(num2)}'
-  return abs(num1 - num2) < eps
+  max_delta = max(abs(num1), abs(num2)) * eps_percentage / 100
+  return abs(num1 - num2) <= max_delta
