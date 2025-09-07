@@ -1852,8 +1852,9 @@ def get_proposed_choices_semantic_error(
     f'{json.dumps(error_lines, indent=2)}')
 
   assert len(error_lines) > 0, 'there must be at least one semantic error line'
-  error_line_nums = list(error_lines.keys())
-  error_line_num = error_line_nums[0]
+  error_line_num = min(error_lines.keys())
+  assert (set(range(error_line_num, max(error_lines.keys())+1))
+          == set(error_lines)), 'error lines must be continuous'
   error_line_content = error_lines[error_line_num]
 
   '''

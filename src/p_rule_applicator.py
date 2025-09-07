@@ -452,97 +452,52 @@ def _get_mismatched_log_statement_idx(
     return mismatched_log_stat_idx
 
 
+def _indentation(line: str) -> int:
+    '''Return the indentation in character count of given line.'''
+    return len(line.removesuffix(line.lstrip()))
+
+
 def _get_error_lines(
   tar_program_instr: str,
   mismatched_log_stat_idx: int
 ) -> Dict[int, str]:
   '''
-  Given a tar_program_instr (instrumented tar program) and a mismatched log statement index,
-  return the line numbers right before the mismatched log statement.
-  RETURN a dictionary with line numbers as keys and lines as values:
-  {
-    12: "        n += 'n';"
-  }
-  NOTE line numbers are 0-based indices of lines in `tar_program_instr`.
+  Return the line number and content
+  in the given instrumented target program
+  that can identify the nodes whose runtime value
+  is traced by the mismatched log statement.
+
+  Line numbers starts at 0 while log statement index starts at 1.
   '''
-
-  def __find_text(stripped_lines: List[str], text: str) -> int:
-    '''
-    RETURN -1 if not found.
-    '''
-    for idx, line in enumerate(stripped_lines):
-      if line.startswith(text):
-        return idx
-    return -1
-
-  def __find(stripped_lines: List[str], log_stat_idx: int) -> int:
-    '''
-    Return a 0-based index
-    '''
-    assert log_stat_idx >= 0, 'log_stat_idx must be >= 0'
-    assert log_stat_idx < len(stripped_lines), 'log_stat_idx must be less than the number of stripped lines'
-
-    # since log statement indices are 1-based, and requested
-    # `log_stat_idx == 0`, we need to return the index of `function f_gold`
-    if log_stat_idx == 0:
-      fgold_def_idx = __find_text(stripped_lines, 'function f_gold')
-      assert fgold_def_idx != -1, 'function f_gold definition must be present'
-      return fgold_def_idx
-
-    # either `console.log({log_stat_idx}` or `myexactlog({log_stat_idx}` must be searched
-    myexactlog_idx = __find_text(stripped_lines, f'myexactlog({log_stat_idx}')
-    print_idx = __find_text(stripped_lines, f'console.log({log_stat_idx}')
-    if myexactlog_idx == -1 and print_idx == -1:
-      return -1
-    return myexactlog_idx if myexactlog_idx != -1 else print_idx
-
-  def __is_log_stat_before_return_stat(stripped_lines: List[str], mismatched_log_stat_idx: int):
-    '''
-    The idea is to find the line that starts with `myexactlog(mismatched_log_stat_idx)`
-    and check if the next line starts with `return `.
-    '''
-    assert mismatched_log_stat_idx >= 1, 'mismatched_log_stat_idx must be >= 1'
-    myexactlog_idx = __find_text(stripped_lines, f'myexactlog({mismatched_log_stat_idx}')
-    next_idx = myexactlog_idx + 1
-    if stripped_lines[next_idx].startswith('return '):
-      logger.debug(f'Log statement {mismatched_log_stat_idx} appears right before return statement.')
-      return True
-    return False
-
-  assert mismatched_log_stat_idx >= 1, 'mismatched_log_stat_idx must be >= 1'
-
-  # split into stripped lines
+  assert mismatched_log_stat_idx >= 1, 'log index starts at 1'
   lines = tar_program_instr.split('\n')
-  stripped_lines = [line.strip() for line in lines]
+  assert len(lines) > mismatched_log_stat_idx, 'no nonlog statement'
+  for base, line in enumerate(lines):
+    if line.lstrip().startswith(f'myexactlog({mismatched_log_stat_idx}'):
+      break
+  else:
+    raise AssertionError(f'{mismatched_log_stat_idx=} not found')
 
-  '''
-  In order to find buggy lines not only we need the mismatched log statement index,
-  but also the log statement right before it (the one at which there was no mismatch).
-  Buggy lines would lie in between them two.
-  '''
-  mismatch_line_idx = __find(stripped_lines, mismatched_log_stat_idx)
-  mismatch_line_idx_before = __find(stripped_lines, mismatched_log_stat_idx - 1)
-
-  '''
-  We need to check whether log statement with index mismatch_line_idx_before
-  appears right before the return statement. If it does, then the error line
-  is at the return statement, and we need to overwrite the values of
-  mismatch_line_idx and mismatch_line_idx_before.
-  '''
-  if __is_log_stat_before_return_stat(stripped_lines, mismatched_log_stat_idx):
-    # return statement is in between these two lines
-    mismatch_line_idx_before = mismatch_line_idx
-    mismatch_line_idx = mismatch_line_idx + 2
-
-  assert mismatch_line_idx != -1, \
-    f'mismatched_log_stat_idx {mismatched_log_stat_idx} not found in stripped lines'
-  assert mismatch_line_idx_before != -1, \
-    f'mismatched_log_stat_idx {mismatched_log_stat_idx - 1} not found in stripped lines'
-
-  error_line_idxs = list(range(mismatch_line_idx_before + 1, mismatch_line_idx))
-  error_lines = {line_idx: lines[line_idx] for line_idx in error_line_idxs}
-
-  return error_lines
+  base_indentation = _indentation(lines[base])
+  if base + 1 < len(lines) and lines[base+1].lstrip().startswith('return '):
+    # The log statement for a return statement is after it.
+    start = base + 1
+    for stop, line in enumerate(lines[start+1:], start=start+1):
+      if _indentation(line) <= base_indentation:
+        break
+    else:  # empty loop would not set stop
+      stop = len(lines)
+  else:
+    stop = base
+    for start, line in zip(reversed(range(stop)), lines[stop-1::-1]):
+      if _indentation(line) <= base_indentation:
+        break
+    else:  # empty loop would not set start
+      start == 0
+    if lines[start].lstrip().startswith(f'myexactlog('):
+      assert start + 1 == stop, 'expecting consecutive log statements'
+      return {}
+  return {i: lines[i] for i in range(start, stop)}
 
 
 def _extract_err_lines_from_trace_mismatch(
