@@ -23,6 +23,11 @@
 )
 
 (match_expand
+  (fragment ("py.default_parameter" "." (str "=") ".") "*")
+  (fragment ("js.assignment_pattern" ".1" (str "=") ".2") "*3")
+)
+
+(match_expand
   (fragment ("py.block" "*") "*")
   (fragment ("js.statement_block" "*1") "*2")
 )
