@@ -739,6 +739,7 @@ def _get_ref_trans_cand_gather_stats(
   logger.debug(f'GOOD: generated reference translation candidate passed the validation step.')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
+  return_dict['has_many_statements'] = False
   return return_dict
 
 
