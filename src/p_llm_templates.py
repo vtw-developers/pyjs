@@ -673,6 +673,8 @@ class GetReferenceTranslation:
       '2. When translating assignment expression or assignment statement to JavaScript, provide exactly two translations:\n'
       '   i. Variable declaration with `var` (e.g. `a = 1` -> `var a = 1;`)\n'
       '   ii. Assignment expression without `var` (e.g. `a = 1` -> `a = 1;`)\n'
+      '3. The {tar_language} translation is a compound statement like `if_statement`, `while_statement`,\n'
+      '   or `for_statement`, you must use braces "{{" and "}}" to denote the body of the compound statement.\n'
       '\n'
     )
 

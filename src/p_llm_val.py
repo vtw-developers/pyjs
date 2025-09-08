@@ -216,6 +216,10 @@ class GetRefTransValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_many_statements, self.ref_trans_cands_stats))
     return all(flags)
 
+  def all_comp_stat_no_curly_braces(self) -> bool:
+    flags = list(map(self.ad_comp_stat_no_curly_braces, self.ref_trans_cands_stats))
+    return all(flags)
+
   # ADAPTER METHODS TO `ref_trans_cands_stats` (have `ad` prefix)
   def ad_ref_trans_cand(self, ref_trans_cand_stat: dict) -> str:
     return ref_trans_cand_stat['ref_trans_cand']
@@ -228,6 +232,9 @@ class GetRefTransValidationResult(BaseValidationResult):
 
   def ad_has_many_statements(self, ref_trans_cand_stat: dict) -> bool:
     return ref_trans_cand_stat['has_many_statements'] is True
+
+  def ad_comp_stat_no_curly_braces(self, ref_trans_cand_stat: dict) -> bool:
+    return ref_trans_cand_stat['comp_stat_no_curly_braces'] is True
 
   # ABSTRACT METHOD IMPLEMENTATIONS
   def get_data(self) -> List[str]:
@@ -714,6 +721,7 @@ def _get_ref_trans_cand_gather_stats(
     'success': None,
     'has_parse_error': None,
     'has_many_statements': None,
+    'comp_stat_no_curly_braces': None,
   }
 
   logger.debug(f'Checking if generated reference translation candidate satisfies our criteria')
@@ -736,10 +744,39 @@ def _get_ref_trans_cand_gather_stats(
     return_dict['has_many_statements'] = True
     return return_dict
 
+  # criteria 3
+  # if the reference translation is a compound statement,
+  # it must use curly braces
+  if tar_lang == 'js':
+    context_node = root_node.get_children()[0]
+    if context_node.get_ts_node_type() in [
+      'if_statement',
+      'switch_statement',
+      'for_statement',
+      'for_in_statement',
+      'while_statement',
+      'do_statement',
+      'try_statement',
+      'with_statement',
+    ]:
+      # statement_block must be one of direct children
+      statement_block_nodes = list(filter(
+        lambda node: node.is_nonterminal() and node.get_ts_node_type() == 'statement_block',
+        context_node.get_children()
+      ))
+      if not statement_block_nodes:
+        logger.debug(f'BAD: generated reference translation candidate has a compound statement without curly braces')
+        return_dict['success'] = False
+        return_dict['has_parse_error'] = False
+        return_dict['has_many_statements'] = False
+        return_dict['comp_stat_no_curly_braces'] = True
+        return return_dict
+
   logger.debug(f'GOOD: generated reference translation candidate passed the validation step.')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
   return_dict['has_many_statements'] = False
+  return_dict['comp_stat_no_curly_braces'] = False
   return return_dict
 
 

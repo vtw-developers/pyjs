@@ -407,6 +407,17 @@ class GetRefTransF(BaseMessageFactory):
       return feedback_message
     self._log('case 3: some/all ref_trans_cands have a single statement/expression')
 
+    # case 4: checking if all ref_trans_cands have a compound statement without curly braces
+    self._log('case 4: checking if all ref_trans_cands have a compound statement without curly braces')
+    if self.val.all_comp_stat_no_curly_braces():
+      self._log('all ref_trans_cands have a compound statement without curly braces')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        'Please make sure that the generated reference translation uses curly braces for the statement block.'
+      )
+      return feedback_message
+    self._log('case 4: some/all ref_trans_cands have a compound statement with curly braces')
+
     raise NotImplementedError('new feedback case identified in GetRefTransF')
 
 
