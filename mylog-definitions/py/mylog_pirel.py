@@ -5,6 +5,8 @@ from collections.abc import KeysView
 from typing import Union
 
 _default_print = print
+JS_MAX_SAFE_INTEGER = 9_007_199_254_740_991
+JS_MIN_SAFE_INTEGER = -9_007_199_254_740_991
 
 def serialize_none():
   return ["null"]
@@ -22,7 +24,9 @@ def serialize_num(arg: Union[int, float]):
     return serialize_str("-inf")
   if math.isnan(arg):
     return serialize_str("nan")
-  return ["number", arg]
+  if JS_MIN_SAFE_INTEGER <= arg <= JS_MAX_SAFE_INTEGER:
+    return ["number", arg]
+  return serialize_str('{:.6e}'.format(float(arg)))
 
 def serialize_list(arg: Union[list, tuple]):
   serialized_vals = [serialize(val) for val in arg]
