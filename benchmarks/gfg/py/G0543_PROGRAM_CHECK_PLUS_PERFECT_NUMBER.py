@@ -15,7 +15,7 @@ def f_gold(x):
     x = temp
     sm = 0
     while x != 0:
-        sm = sm + (int)(math.pow(x % 10, n))
+        sm = sm + int(math.pow(x % 10, n))
         x = x // 10
     return sm == temp
 "-----------------"

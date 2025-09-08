@@ -23,7 +23,7 @@ def f_gold(str1, str2):
     for i in range(n1, n2):
         sum_0 = (ord(str2[i]) - 48) + carry
         str_0 += chr(sum_0 % 10 + 48)
-        carry = (int)(sum_0 / 10)
+        carry = int(sum_0 / 10)
     if carry:
         str_0 += chr(carry + 48)
     str_0 = str_0[::-1]
