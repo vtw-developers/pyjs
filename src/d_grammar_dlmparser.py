@@ -390,10 +390,11 @@ class DelimitedParser():
 
   def dbg_print_tail_stack(self):
     # added by @satbekmyrza: entire tail stack
-    for i in range(0, len(self._tail_stack)):
+    # for i in range(0, len(self._tail_stack)):
     # original: last 20 elements
     # for i in range(len(self._tail_stack) - 20, len(self._tail_stack)):
-      print(self._pretty_frame_short(i, self._tail_stack[i]))
+    #   print(self._pretty_frame_short(i, self._tail_stack[i]))
+    pass
 
   def _add_expansion(self, expansion: Expansion):
     ex_id = expansion.ex_id

@@ -1534,8 +1534,9 @@ class TransSession():
       return parser_result
 
     except Exception as err:
-      print("#################### _ensure_parser_result FAILED! ####################")
+      # print("#################### _ensure_parser_result FAILED! ####################")
       self.any_error = True
+      logger.warning("Target [partial] AST does not respect the grammar!", exc_info=err)
       fetched_parser.dbg_print_tail_stack()
       err_dbg_info = fetched_parser._dbg_info_finish_for_ex_error()
 
