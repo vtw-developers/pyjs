@@ -389,52 +389,6 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
   raise ValueError('No context node found')
 
 
-def _create_src_main_code_for_expr(
-  src_main_code: str,
-  pre_context: str,
-  log_stat_str: str
-) -> str:
-  '''
-  Create a f_gold() function for a node in a choicable AST.
-  The structure of this function is as follows:
-  <src_main_code/function_header>
-      <pre_context>
-      <log_statement>
-  '''
-
-  # src_main_code function header
-  smcfhs = [line for line in src_main_code.split('\n') if line.startswith('def f_gold(')]
-  assert len(smcfhs) == 1, 'Expected exactly one function header in src_main_code'
-  smcfh = smcfhs[0]
-  assert smcfh.endswith('):'), 'Expected function header to end with "):"'
-
-  # function body
-  prectx_log_stat = p_pirel._combine_prectx_and_simple_ntext(pre_context, log_stat_str)
-  indented_block = p_utils.indent(prectx_log_stat, 4)
-  expr_src_main_code = f'{smcfh}\n{indented_block}'
-
-  # insert and index log statements
-  expr_src_main_code = pvpy.LogStatementInserter.insert_log_statements(expr_src_main_code)
-  expr_src_main_code = pvpy.LogStatementsIndexer.index_log_statements(expr_src_main_code)
-
-  # insert break statements in loops to avoid infinite loops.
-  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
-    tree = pvpy.Tree.from_str(expr_src_main_code)
-    break_inserter = pvpy.BreakStatementInserter()
-    break_inserter.visit(tree.root_node)
-    expr_src_main_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
-
-  '''
-  Replace possible recursive calls with a dummy function
-  to avoid infinite recursion or type errors,
-  e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
-  '''
-  # defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(expr_src_main_code)
-  # expr_src_main_code = pvpy.FunctionInvocationReplacer.replace_function_invocations(expr_src_main_code, defined_fns)
-
-  return expr_src_main_code
-
-
 def _create_log_stat_str_for_expr(
   matched_range_cursor: tuple,
   dgann: dict,
@@ -494,6 +448,7 @@ def _create_log_stat_str_for_expr(
 
 def _create_subject_for_expr(
   src_test_script: str,
+  is_three_split: bool,
   translation_rules_test_code: str,
   rules_w_str: str,
   ruleset: p_ruleset.Ruleset
@@ -513,17 +468,15 @@ def _create_subject_for_expr(
     p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH) + '\n\n' + \
     p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
   # translation_rules_test_code  # already set
-  is_three_split = True
   auto_backward = True
   choices = {'type': 'ASTNODE', 'choices_list': []}
   readonly_choices_list = []
 
   # create a subject instance
   expr_subject = p_subject.PirelSubject(
-    benchmark_name, name, src_program, src_lang, tar_lang)
+    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
   expr_subject.translation_rules_main_code = translation_rules_main_code
   expr_subject.translation_rules_test_code = translation_rules_test_code
-  expr_subject.is_three_split = is_three_split
   expr_subject.auto_backward = auto_backward
   expr_subject.choices = choices
   expr_subject.readonly_choices_list = readonly_choices_list
@@ -640,6 +593,7 @@ async def _validate_matcher_group_no_intersection(
   translation_rules_test_code: str,
   dgann: dict,
   src_main_code: str,
+  is_three_split: bool,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
@@ -693,7 +647,8 @@ async def _validate_matcher_group_no_intersection(
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
     expr_subject = _create_subject_for_expr(
-      test_script_str, translation_rules_test_code, rules_w_str, ruleset)
+      test_script_str, is_three_split,
+      translation_rules_test_code, rules_w_str, ruleset)
 
     '''
     If this translation succeeds, it means that the rule is plausible
@@ -729,6 +684,7 @@ async def _validate_matcher_group_single_intersection(
   translation_rules_test_code: str,
   dgann: dict,
   src_main_code: str,
+  is_three_split: bool,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
@@ -773,7 +729,8 @@ async def _validate_matcher_group_single_intersection(
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
     expr_subject = _create_subject_for_expr(
-      test_script_str, translation_rules_test_code, rules_w_str, ruleset)
+      test_script_str, is_three_split,
+      translation_rules_test_code, rules_w_str, ruleset)
 
     '''
     If this translation succeeds, it means that the rule is plausible
@@ -808,7 +765,7 @@ async def validate_matcher_group(
   src_main_code: str,
   pre_context: str,
   log_stat_str: str,
-  src_test_code: str,
+  src_test_code: str | None,
   translation_rules_test_code: str,
   dgann: dict,
 ) -> None:
@@ -839,15 +796,17 @@ async def validate_matcher_group(
   logger.debug(f'~~~ starting validate_matcher_group')
   assert_matchers_match(matcher_group)
 
-  '''
-  Need to create a f_gold() function for the matched AST.
-  '''
-  expr_src_main_code = _create_src_main_code_for_expr(src_main_code, pre_context, log_stat_str)
-  test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-    test_code=src_test_code,
-    main_code=expr_src_main_code,
-    test_call_code='test()'
-  )
+  is_three_split = src_test_code is not None
+  expr_src_main_code = p_pirel.contextualize_statement(
+    src_main_code, pre_context, log_stat_str, is_three_split)
+  if is_three_split:
+    # Create a f_gold() function for the matched AST.
+    test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+      test_code=src_test_code,
+      main_code=expr_src_main_code,
+      test_call_code='test()')
+  else:
+    test_script_str = expr_src_main_code
   logger.debug(f'test_script_str:\n{test_script_str}')
 
   '''
@@ -873,7 +832,8 @@ async def validate_matcher_group(
       test_script_str,
       translation_rules_test_code,
       dgann,
-      src_main_code
+      src_main_code,
+      is_three_split,
     )
 
   elif len(reusable_rules) == 1:
@@ -885,7 +845,8 @@ async def validate_matcher_group(
       test_script_str,
       translation_rules_test_code,
       dgann,
-      src_main_code
+      src_main_code,
+      is_three_split,
     )
 
   else:
@@ -902,7 +863,7 @@ async def _process_match_obj(
   ruleset: p_ruleset.Ruleset,
   src_main_code: str,
   pre_context: str,
-  src_test_code: str,
+  src_test_code: str | None,
   translation_rules_test_code: str,
   dgann: dict,
 ) -> None:
@@ -1019,7 +980,7 @@ async def process_choicable_range_cursor(
   ruleset: p_ruleset.Ruleset,
   src_main_code: str,
   pre_context: str,
-  src_test_code: str,
+  src_test_code: str | None,
   translation_rules_test_code: str,
   dgann: dict,
   processed_match_objs: Dict[str, list],
@@ -1112,7 +1073,8 @@ async def process_choicable_range_cursor(
 
 def _get_readonly_choices_list_init(
   src_main_code: str,
-  ruleset: p_ruleset.Ruleset
+  ruleset: p_ruleset.Ruleset,
+  is_three_split: bool,
 ) -> tuple:
   '''
   Given a duoglot-style AST, collect all nodes under AST,
@@ -1126,9 +1088,14 @@ def _get_readonly_choices_list_init(
   Then we pass their node ids to ChoicableNodeExtractor.
   '''
   rc_src_main_code, dgann = d_ast_parse.parse_text_to_range_cursor(src_main_code, 'py')
-  assert rc_src_main_code[1] + 1 == rc_src_main_code[2], \
-    'range cursor must specify just one node'
-  all_range_cursors = d_ast_parse.get_all_range_cursors_under(rc_src_main_code)
+  if is_three_split:
+    assert rc_src_main_code[1] + 1 == rc_src_main_code[2], \
+      'range cursor must specify just one node'
+    all_range_cursors = d_ast_parse.get_all_range_cursors_under(
+      rc_src_main_code)
+  else:
+    all_range_cursors = d_ast_parse.range_cursor_seq_descending_from_ast(
+      rc_src_main_code[0])
 
   overfitted_stat_nids = set()
   overfitted_rules = ruleset.get_stat_overfitted_rules()
@@ -1251,7 +1218,7 @@ def _filter_range_cursors(
 
 async def get_readonly_choices_list(
   src_main_code: str,
-  src_test_code: str,
+  src_test_code: str | None,
   translation_rules_test_code: str,
   ruleset: p_ruleset.Ruleset
 ) -> list:
@@ -1284,7 +1251,7 @@ async def get_readonly_choices_list(
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
   chable_rc_prectxs, dgann = _get_readonly_choices_list_init(
-    src_main_code, ruleset)
+    src_main_code, ruleset, src_test_code is not None)
 
   for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
 

@@ -744,7 +744,6 @@ def _program_parts_split(
   If `subject.is_three_split` is False, return None for test and test call code snippets.
   '''
   if not subject.is_three_split:
-    assert p_consts.TEST_MAIN_CALL_DELIMITER not in program, 'sanity check'
     return None, program, None
 
   chunks = program.split(p_consts.TEST_MAIN_CALL_DELIMITER)

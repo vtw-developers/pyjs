@@ -27,7 +27,8 @@ test()
       name='test_init_gfg',
       src_program=src_program,
       src_lang='py',
-      tar_lang='js'
+      tar_lang='js',
+      is_three_split=True,
     )
 
   def test_init_gfg(self):
@@ -43,8 +44,7 @@ test()
     self.assertEqual(subject.translation_rules_main_code, None)
     self.assertTrue(subject.translation_rules_test_code is not None)
 
-    self.assertEqual(subject.is_three_split, p_consts.BENCHMARK_CONFIGS['gfg']['is_three_split'])
-
+    self.assertEqual(subject.is_three_split, True)
     self.assertEqual(subject.get_src_test_code(), 'def test():\n  pass')
     self.assertEqual(subject.get_src_main_code(), 'def f_gold():\n  pass')
     self.assertEqual(subject.get_src_test_call_code(), 'test()')
@@ -55,7 +55,8 @@ test()
       name='test_init_custom',
       src_program='print()',
       src_lang='py',
-      tar_lang='js'
+      tar_lang='js',
+      is_three_split=False,
     )
     json_str = subject.to_json_str()
     expected_json_str = '''{"auto_backward": true, "benchmark_name": "custom", "choices": {"choices_list": [], "type": "ASTNODE"}, "is_three_split": false, "name": "test_init_custom", "readonly_choices_list": [], "src_lang": "py", "src_program": "print()", "tar_lang": "js", "translation_rules_main_code": null, "translation_rules_test_code": null}'''
