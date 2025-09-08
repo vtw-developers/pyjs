@@ -21,7 +21,10 @@ function serializeNum(arg) {
     return serializeString("-inf");
   if (Number.isNaN(arg))
     return serializeString("nan");
-  return ["number", arg];
+  if (arg >= Number.MIN_SAFE_INTEGER && arg <= Number.MAX_SAFE_INTEGER) {
+    return ["number", arg];
+  }
+  return serializeString(String(arg.toExponential(6)));
 }
 
 function serializeArray(arg) {
