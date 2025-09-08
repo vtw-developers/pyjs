@@ -9,7 +9,7 @@ class TestRuleset(unittest.TestCase):
     sr = p_ruleset.Ruleset.from_starting_ruleset(p_consts.STARTING_RULESET_FPATH.read_text())
     self.assertIsInstance(sr, p_ruleset.Ruleset)
     self.assertIsInstance(sr.rules, list)
-    self.assertEqual(len(sr.rules), 12, 'Expected 12 rules in the starting ruleset')
+    self.assertEqual(len(sr.rules), 13, 'Expected 13 rules in the starting ruleset')
 
 
 if __name__ == '__main__':
