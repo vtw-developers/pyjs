@@ -13,6 +13,7 @@ mode: benchmark
 # benchmark_name: str (gfg)
 # src_lang: str
 # tar_lang: str
+# is_three_split: bool
 #
 # [is_override_starting_ruleset]: bool (default: false)
 # [overriding_ruleset_fpath]: str (required if is_override_starting_ruleset is true)
@@ -31,6 +32,7 @@ mode_benchmark:
   benchmark_name: gfg
   src_lang: py
   tar_lang: js
+  is_three_split: true
 
   # starting ruleset can be overriden by this config
   is_override_starting_ruleset: false

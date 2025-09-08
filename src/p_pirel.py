@@ -422,7 +422,10 @@ def _init_template_dict(
   template_dict['partial_program'] = partial_program
 
   # `src_program` is needed for a prompt that uses it as a reference
-  template_dict['src_program'] = subject.get_src_main_code()
+  if subject.is_three_split:
+    template_dict['src_program'] = subject.get_src_main_code()
+  else:
+    template_dict['src_program'] = subject.src_program
 
   logger.debug(
     'Finished template_dict initialization\n'
@@ -591,15 +594,47 @@ def _create_subject_for_stat_learn(
 
   # create a subject instance
   stat_learn_subject = p_subject.PirelSubject(
-    benchmark_name, name, src_program, src_lang, tar_lang)
+    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
   stat_learn_subject.translation_rules_main_code = translation_rules_main_code
   stat_learn_subject.translation_rules_test_code = translation_rules_test_code
-  stat_learn_subject.is_three_split = is_three_split
   stat_learn_subject.auto_backward = auto_backward
   stat_learn_subject.choices = choices
   stat_learn_subject.readonly_choices_list = readonly_choices_list
 
   return stat_learn_subject
+
+
+def contextualize_statement(
+  src_main_code: str,
+  pre_context: str,
+  statement: str,
+  is_three_split: bool,
+) -> str:
+  '''
+  Return log-instrumented main code for statement node validation.
+
+  This snippet contains the given statement wrapped in its pre-context,
+  and if the subject program is in the three-split format,
+  wrapped again in the function header if src_main_code.
+  '''
+  stmt_in_ctx = _combine_prectx_and_simple_ntext(pre_context, statement)
+  if is_three_split: # wrap in f_gold
+    function_headers = [line for line in src_main_code.splitlines()
+                        if line.startswith('def f_gold(')]
+    assert len(function_headers) == 1
+    fn_header = function_headers[0].strip()
+    assert fn_header.endswith('):')
+    stmt_in_ctx = f'{fn_header}\n{p_utils.indent(stmt_in_ctx, 4)}'
+  stmt_in_ctx = pvpy.LogStatementInserter.insert_log_statements(stmt_in_ctx)
+  stmt_in_ctx = pvpy.LogStatementsIndexer.index_log_statements(stmt_in_ctx)
+
+  # insert break statements in loops to avoid infinite loops.
+  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
+    tree = pvpy.Tree.from_str(stmt_in_ctx)
+    break_inserter = pvpy.BreakStatementInserter()  # TODO: only while?
+    break_inserter.visit(tree.root_node)
+    stmt_in_ctx = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
+  return stmt_in_ctx
 
 
 def _create_src_program_for_stat_val(
@@ -612,37 +647,13 @@ def _create_src_program_for_stat_val(
   is the same as the main subject's test code.
   '''
   snv_src_test_code = main_subject.get_src_test_code()
-
-  '''
-  Main code for statement node validation contains:
-  1. Function header of main subject's src_main_code
-  2. Pre-context of simplified node text
-  3. Simplified node text
-  Main code then is instrumented with log statements.
-  '''
-  # src_main_code function header
-  smcfhs = [
-    line for line in main_subject.get_src_main_code().split('\n')
-    if line.startswith('def f_gold(')]
-  assert len(smcfhs) == 1, 'Expected exactly one function header in src_main_code'
-  smcfh = smcfhs[0].strip()
-  assert smcfh.endswith('):'), 'Expected function header to end with "):"'
-
-  # function body
-  prectx_sntext = p_pirel._combine_prectx_and_simple_ntext(pre_context, simple_ntext)
-  indented_block = p_utils.indent(prectx_sntext, 4)
-
-  # main code and instrumentation
-  snv_src_main_code = f'{smcfh}\n{indented_block}'
-  snv_src_main_code = pvpy.LogStatementInserter.insert_log_statements(snv_src_main_code)
-  snv_src_main_code = pvpy.LogStatementsIndexer.index_log_statements(snv_src_main_code)
-
-  # insert break statements in loops to avoid infinite loops.
-  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
-    tree = pvpy.Tree.from_str(snv_src_main_code)
-    break_inserter = pvpy.BreakStatementInserter()
-    break_inserter.visit(tree.root_node)
-    snv_src_main_code = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
+  snv_src_main_code = contextualize_statement(
+    main_subject.get_src_main_code(),
+    pre_context,
+    simple_ntext,
+    main_subject.is_three_split)
+  if not main_subject.is_three_split:
+    return snv_src_main_code
 
   '''
   Replace possible recursive calls with a dummy function
@@ -682,14 +693,14 @@ def _create_subject_for_stat_val(
     p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH) + '\n\n' + \
     p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
   translation_rules_test_code = main_subject.translation_rules_test_code
-  is_three_split = True
+  is_three_split = main_subject.is_three_split
   auto_backward = True
   choices = {'type': 'ASTNODE', 'choices_list': []}  # default
   readonly_choices_list = []  # default, will be set later
 
   # create a subject instance
   stat_val_subject = p_subject.PirelSubject(
-    benchmark_name, name, src_program, src_lang, tar_lang)
+    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
   stat_val_subject.translation_rules_main_code = translation_rules_main_code
   stat_val_subject.translation_rules_test_code = translation_rules_test_code
   stat_val_subject.is_three_split = is_three_split

@@ -68,7 +68,8 @@ def _create_src_program_for_apply_phase(
   '''
   RETURN the source program to be used in the application phase.
   '''
-  assert main_subject.is_three_split, 'expected three-split subject'
+  if not main_subject.is_three_split:
+    return main_subject.src_program
   src_main_code = main_subject.get_src_main_code()
   src_main_code = pvpy.LogStatementInserter.insert_log_statements(src_main_code)
   src_main_code = pvpy.LogStatementsIndexer.index_log_statements(src_main_code)
@@ -88,7 +89,6 @@ def _create_subject_for_apply_phase(
   '''
   logger.debug('Creating subject for application phase')
   p_utils.log_json_time('args-_create_subject_for_apply_phase.json', locals())
-  assert main_subject.is_three_split, 'expected three-split subject'
 
   # all attributes of PirelSubject instance set explicitly
   benchmark_name = main_subject.benchmark_name
@@ -96,21 +96,20 @@ def _create_subject_for_apply_phase(
   src_program = _create_src_program_for_apply_phase(main_subject)
   src_lang = main_subject.src_lang
   tar_lang = main_subject.tar_lang
+  is_three_split = main_subject.is_three_split
   translation_rules_main_code = \
     current_ruleset.to_str_ruleset() + '\n\n' + \
     p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH)  # code is instrumented
   translation_rules_test_code = main_subject.translation_rules_test_code
-  is_three_split = main_subject.is_three_split
   auto_backward = True
   choices = main_subject.choices
   readonly_choices_list = []
 
   # create a subject instance
   apply_phase_subject = p_subject.PirelSubject(
-    benchmark_name, name, src_program, src_lang, tar_lang)
+    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
   apply_phase_subject.translation_rules_main_code = translation_rules_main_code
   apply_phase_subject.translation_rules_test_code = translation_rules_test_code
-  apply_phase_subject.is_three_split = is_three_split
   apply_phase_subject.auto_backward = auto_backward
   apply_phase_subject.choices = choices
   apply_phase_subject.readonly_choices_list = readonly_choices_list
@@ -170,8 +169,11 @@ async def learn_and_application_phases_on_subject(
       logger.info('About to start rule application phase')
       apply_subject = _create_subject_for_apply_phase(subject, starting_ruleset)
       tar_program_plausible = await prapp.apply_translation_rules(apply_subject)
-      _, tar_main_code_plausible, _ = \
-        tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+      if subject.is_three_split:
+        _, tar_main_code_plausible, _ = \
+          tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+      else:
+        tar_main_code_plausible = tar_program_plausible
 
     logger.info(f'SUCCESS Rule application phase for "{subject.name}" succeeded.')
     p_utils.llog_text(f'{subject.name}_validated_rules.snart', starting_ruleset.to_str_ruleset())
@@ -221,11 +223,14 @@ def _mode_benchmark_init(
       src_program = p_utils.read_text(subject_fpath)
 
       # NOTE remove comments, docstrings, and empty lines from main_code (not extensively tested)
-      # NOTE three_split is assumed to be True
-      src_test_code, src_main_code, src_test_call_code = src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
-      src_main_code = p_utils.remove_comments_and_docstrings_py(src_main_code)
-      src_main_code = p_utils.remove_empty_lines(src_main_code)
-      src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code, src_main_code, src_test_call_code])
+      if conf['is_three_split']:
+        src_test_code, src_main_code, src_test_call_code = src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
+        src_main_code = p_utils.remove_comments_and_docstrings_py(src_main_code)
+        src_main_code = p_utils.remove_empty_lines(src_main_code)
+        src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code, src_main_code, src_test_call_code])
+      else:
+        src_program = p_utils.remove_comments_and_docstrings_py(src_program)
+        src_program = p_utils.remove_empty_lines(src_program)
 
       # NOTE first five characters of the filename is the subject name for `leetcode` and `gfg`
       subject_name = subject_fpath.stem[:5]
@@ -279,6 +284,7 @@ def _mode_benchmark_init(
       src_program=src_program,
       src_lang=conf['src_lang'],
       tar_lang=conf['tar_lang'],
+      is_three_split=conf['is_three_split'],
     )
 
     lsubject = ptlog.Subject()
@@ -326,7 +332,6 @@ async def mode_custom(conf: dict) -> None:
 
   subject = p_subject.PirelSubject.from_file_config(
     p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
-  assert subject.is_three_split, 'p_ext_rule_chooser relies on test_code'
   starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(
     subject.translation_rules_main_code)
 

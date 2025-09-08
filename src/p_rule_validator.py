@@ -363,7 +363,6 @@ async def check_trules_test_based(
 
   p_utils.log_json_time(f'args-check_trules_test_based.json', locals())
   logger.debug('~~ Starting test-based validation of translation rules')
-  assert val_subject.is_three_split, 'test script subject must contain test code'
 
   '''
   1. Raises AllRulesInMatcherGroupImplausibleError

@@ -272,7 +272,6 @@ BENCHMARK_CONFIGS = {
     'benchmark_dir': GFG_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
     'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
-    'is_three_split': True,
   },
 }
 

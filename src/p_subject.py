@@ -35,6 +35,7 @@ class PirelSubject:
     src_program: str,  # test_code + main_code + test_call_code | main_code
     src_lang: str,  # py
     tar_lang: str,  # js
+    is_three_split: bool,
   ):
     # all attributes are listed here
     self.benchmark_name = benchmark_name
@@ -42,9 +43,9 @@ class PirelSubject:
     self.src_program = src_program
     self.src_lang = src_lang
     self.tar_lang = tar_lang
+    self.is_three_split = is_three_split
     self.translation_rules_main_code = None
     self.translation_rules_test_code = None
-    self.is_three_split = False
     self.auto_backward = True
     self.choices = {'type': 'ASTNODE', 'choices_list': []}
     self.readonly_choices_list: List[Tuple[Tuple[int, int, int], int]] = []
@@ -52,7 +53,6 @@ class PirelSubject:
     # some additional checks and initializations
     if benchmark_name in p_consts.BENCHMARK_CONFIGS:
       self.translation_rules_test_code = self._load_translation_rules_test_code(benchmark_name)
-      self.is_three_split = p_consts.BENCHMARK_CONFIGS[benchmark_name]['is_three_split']
 
     if self.is_three_split:
       assert self.src_program.count(p_consts.TEST_MAIN_CALL_DELIMITER) == 2, (
@@ -68,20 +68,19 @@ class PirelSubject:
   def __repr__(self) -> str:
     return f'{self.__class__.__name__}({self.name})'
 
-  def _split_src_program(self) -> Tuple[str, str, str]:
+  def _split_src_program(self) -> tuple[str|None, str, str|None]:
     '''
     Split the source program into test code, main code, and test call code.
     Returns a tuple of (test_code, main_code, and test_call_code).
     If the subject does not have test code or test call code,
     the corresponding values will be None.
     '''
-    assert self.is_three_split is not None, 'is_three_split is not set'
     if self.is_three_split:
       assert self.src_program.count(p_consts.TEST_MAIN_CALL_DELIMITER) == 2
       parts = self.src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
       return parts[0], parts[1], parts[2]
     else:
-      assert p_consts.TEST_MAIN_CALL_DELIMITER not in self.src_program
+      assert self.is_three_split is not None, 'is_three_split is not set'
       return None, self.src_program, None
 
   def get_src_test_code(self) -> Optional[str]:
@@ -153,7 +152,8 @@ class PirelSubject:
       name=name,
       src_program=src_program,
       src_lang=src_lang,
-      tar_lang=tar_lang
+      tar_lang=tar_lang,
+      is_three_split=obj.get('is_three_split', False),
     )
 
     # override the default values with values from obj
@@ -170,10 +170,6 @@ class PirelSubject:
     elif 'translation_rules_test_code_fpath' in obj:
       fpath = p_utils.make_abs(obj['translation_rules_test_code_fpath'], p_consts.ROOT_DIR)
       pirel_subject.translation_rules_test_code = p_utils.read_text(fpath)
-
-    # is_three_split
-    if 'is_three_split' in obj:
-      pirel_subject.is_three_split = obj['is_three_split']
 
     # auto_backward
     if 'auto_backward' in obj:
