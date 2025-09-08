@@ -10,7 +10,7 @@ def f_gold(n):
     if n % 2 != 0:
         return 0
     res = 1
-    for i in range(2, (int)(math.sqrt(n)) + 1):
+    for i in range(2, int(math.sqrt(n)) + 1):
         count = 0
         curr_sum = 1
         curr_term = 1

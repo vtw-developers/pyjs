@@ -6620,7 +6620,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'carry',
       'chr(carry + 48)',
       'str_0[::-1]',
@@ -6650,7 +6650,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'carry',
       'chr(carry + 48)',
       'str_0[::-1]',
@@ -6662,7 +6662,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     code = self.load_subject_code('G0670')
     choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
       code,
-      exclude_statement_nodes_ids=[7, 163]  # both if_statement's
+      exclude_statement_nodes_ids=[7, 162]  # both if_statement's
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
@@ -6680,7 +6680,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'chr(carry + 48)',
       'str_0[::-1]',
       'str_0',
@@ -6691,7 +6691,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     code = self.load_subject_code('G0670')
     choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
       code,
-      exclude_statement_nodes_ids=[7, 163, 68, 120]  # both ifs, both fors
+      exclude_statement_nodes_ids=[7, 162, 68, 120]  # both ifs, both fors
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
@@ -6709,7 +6709,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'chr(carry + 48)',
       'str_0[::-1]',
       'str_0',
@@ -6720,7 +6720,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     code = self.load_subject_code('G0670')
     choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
       code,
-      exclude_statement_nodes_ids=[7, 163, 68, 120, 183]  # both ifs, both fors, return
+      exclude_statement_nodes_ids=[7, 162, 68, 120, 182]  # both ifs, both fors, return
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
@@ -6738,7 +6738,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'chr(carry + 48)',
       'str_0[::-1]',
     ]
@@ -6748,7 +6748,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     code = self.load_subject_code('G0670')
     choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
       code,
-      exclude_statement_nodes_ids=[7, 163, 68, 120, 183, 30, 34, 41, 48, 56, 64, 175]  # all top level statements
+      exclude_statement_nodes_ids=[7, 162, 68, 120, 182, 30, 34, 41, 48, 56, 64, 174]  # all top level statements
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
@@ -6760,7 +6760,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'int(sum_0 / 10)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
-      '(int)(sum_0 / 10)',
+      'int(sum_0 / 10)',
       'chr(carry + 48)',
     ]
     self.assertCountEqual(ground_truth, choicable_nodes_str)

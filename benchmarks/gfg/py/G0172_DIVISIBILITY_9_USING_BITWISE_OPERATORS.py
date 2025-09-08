@@ -10,6 +10,6 @@ def f_gold(n):
         return True
     if n < 9:
         return False
-    return f_gold((int)(n >> 3) - (int)(n & 7))
+    return f_gold(int(n >> 3) - int(n & 7))
 "-----------------"
 test()
