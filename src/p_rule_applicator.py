@@ -620,6 +620,17 @@ async def _run_tests(
     '''
     src_trace_size = src_trace[1]
     tar_trace_size = tar_trace[1]
+
+    '''
+    Special case: both traces are empty and tar test script fails.
+    It means that there is an issue at log statement idx=1.
+    '''
+    if src_trace_size == tar_trace_size and src_trace_size == 0:
+      logger.debug('Both src and tar traces are empty.')
+      error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idx=1)
+      assert len(error_lines) > 0, 'error lines must be non-empty'
+      raise TraceMismatchError(error_lines)
+
     assert src_trace_size > tar_trace_size, \
       'NOT SUPPORTED: src_trace must be strictly longer than tar_trace'
 
