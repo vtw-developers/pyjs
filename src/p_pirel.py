@@ -1315,6 +1315,18 @@ async def stat_node_main_learn_validate_trules(
         stat_learn_subject.tar_lang,
       )
 
+    except ProbNode_NoTRule_AllTSPsExhaustedError as err:
+      logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'ProbNode_NoTRule_AllTSPsExhaustedError:\n'
+        'Could not learn any translation rules to translate the problematic node '
+        'with any of the TSPs. Will start the RECOVERY rule learning procedure.')
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
+
     # ADD LEARNED RULES TO THE CURRENT RULESET
     if len(learned_standard_trules) > 0:
       logger.debug(
