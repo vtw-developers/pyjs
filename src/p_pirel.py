@@ -32,6 +32,7 @@ class TSP_NoTRuleLearnedError(RuntimeError): pass
 class CouldNotGenRefTranslationsError(RuntimeError): pass
 class _ValidationError_ProblematicNodeExists(RuntimeError): pass
 class TestFunctionGenerationError(RuntimeError): pass
+class NoTSPsGeneratedError(RuntimeError): pass
 
 
 def _get_pre_context_global(
@@ -194,7 +195,8 @@ def _init_tsps(
   TODO consider built-in function names
   '''
   tsps = p_generator.generate_tsps_with_generator(template_dict)
-  assert len(tsps) > 0, 'Zero TSPs generated'
+  if len(tsps) == 0:
+    raise NoTSPsGeneratedError('Could not generate any TSPs')
   p_utils.log_json_time(f'TSPs-generated.json', tsps)
   return tsps
 
@@ -1294,6 +1296,18 @@ async def stat_node_main_learn_validate_trules(
         f'stat-main: statement node (nid={stat_nid}): '
         f'p_ext_rule_chooser.AllRulesInMatcherGroupImplausibleError:\n'
         'No combination of rules leads to a plausible translation. '
+        'Will start the RECOVERY rule learning procedure.')
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
+
+    except NoTSPsGeneratedError as err:
+      logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'NoTSPsGeneratedError:\n'
+        'No TSPs (two generated snippets in src lang) were generated. '
         'Will start the RECOVERY rule learning procedure.')
       learned_overfitted_trules = await stat_node_learn_trules_recovery(
         simple_ntext,
