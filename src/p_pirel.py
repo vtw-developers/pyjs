@@ -67,6 +67,15 @@ def _get_pre_context_global(
     else_clause_node.body.children = [pass_statement_node]
     pass_statement_node.set_parent(else_clause_node.body)
 
+  def _process_except_clause(except_clause_node: pvpy.ExceptClauseNode) -> None:
+    '''
+    Replace all children of `except` clause's body with a pass statement.
+    '''
+    pass_statement_node = pvpy.PassStatementNode.build()
+    except_clause_body = except_clause_node.get_nt_children()[-1]
+    except_clause_body.children = [pass_statement_node]
+    pass_statement_node.set_parent(except_clause_body)
+
   tree = pvpy.Tree.from_str(src_main_code)
   statement_node = tree.root_node.get_child_by_path(stat_npath)
 
@@ -91,6 +100,10 @@ def _get_pre_context_global(
         continue
       if isinstance(next_sibling, pvpy.ElseClauseNode):
         _process_else_clauses(next_sibling)
+        next_sibling = next_next_sibling
+        continue
+      if isinstance(next_sibling, pvpy.ExceptClauseNode):
+        _process_except_clause(next_sibling)
         next_sibling = next_next_sibling
         continue
 
@@ -128,6 +141,7 @@ def get_pre_context(
   The pre-context is the code that appears before the statement node
   in the source code up to the closest enclosing function definition.
   '''
+  p_utils.log_json_time(f'args-get_pre_context.json', locals())
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
   stat_node = tree.get_root_node().get_node_by_id(stat_nid)
   stat_npath = tree.get_root_node().get_path_to_child(stat_node)
@@ -1534,7 +1548,11 @@ def _test_duoglot_translate_wrapper_quick():
 
 def _test_get_pre_context():
   '''
-  def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
+  def _get_pre_context(
+    src_main_code: str,
+    lang: str,
+    stat_nid: int
+  ) -> str:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_get_pre_context_config.yaml'
   config = p_utils.read_yaml(config_fpath)
@@ -1542,10 +1560,11 @@ def _test_get_pre_context():
 
   src_main_code = args_dict['src_main_code']
   lang = args_dict['lang']
-  statement_nid = args_dict['statement_nid']
+  stat_nid = args_dict['stat_nid']
 
-  pre_context = get_pre_context(src_main_code, lang, statement_nid)
-  print(f'Pre-context for statement node {statement_nid}:\n{pre_context}')
+  pre_context = get_pre_context(src_main_code, lang, stat_nid)
+  print(src_main_code)
+  print(f'Pre-context for statement node {stat_nid}:\n{pre_context}')
 
 
 def _test_adapt_rule_choices():
