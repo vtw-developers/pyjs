@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import d_consts
 import p_consts
+import p_data_structures as pds
 from tree_sitter import Language, Node, Parser, Tree
 
 
@@ -388,6 +389,19 @@ def ast_pretty_print(ast: list, ann: dict, src_code: str) -> str:
   assert nid in ann, f'nid {nid} not in annotation dict'
   start_byte, end_byte, _, _ = ann[nid]
   return src_code[start_byte:end_byte].strip()
+
+
+def node_id_pretty_print(src_code: str, src_lang: str, node_id: int) -> str:
+  '''
+  Pretty print the AST node specified by the node id.
+  PARAM src_code: original source code
+  PARAM node_id: node id
+  '''
+  tree = pds.PirelTree.from_code_str(src_code, src_lang)
+  tree._fix_indentation()
+  node = tree.get_node_with_id(node_id)
+  assert node is not None, f'node id {node_id} not found in the AST'
+  return node.get_text()
 
 
 def are_nodes_equal(
