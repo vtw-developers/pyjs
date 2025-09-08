@@ -1248,6 +1248,8 @@ def _test_generate_tsps_with_generator():
     print(f'{tsp[0]}')
     print(f'{tsp[1]}')
     print()
+    print(json.dumps([tsp[0], tsp[1]]))
+    print()
 
 
 if __name__ == '__main__':
