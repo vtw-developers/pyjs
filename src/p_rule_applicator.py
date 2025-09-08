@@ -753,6 +753,72 @@ def _program_parts_split(
   return src_test_code, src_main_code, src_test_call_code
 
 
+def _check_and_update_choices(
+  src_main_code_instr: str,
+  current_choices: dict,
+  subject: p_subject.PirelSubject
+) -> dict:
+  '''
+  This function checks if the current_choices can produce
+  a translation of src_main_code_instr. If not, it updates
+  the current_choices to ensure that a translation is possible.
+  This function is a workaround for the issue where the
+  initial choices may not lead to any translation.
+  '''
+  logger.debug('Making sure that initial translation is possible with current choices.')
+  assert subject.translation_rules_main_code is not None, \
+    'translation rules for main code must be provided'
+
+  choices_list_stack = []
+
+  '''
+  The loop breaks in two cases:
+  1. translation is successful, return current_choices
+  2. RuleCombinationsExhaustedError is raised in get_next_unique_choices().
+     This signals that we cannot get any translation of src_main_code_instr
+     with the given translation rules. In this case, we raise
+     SrcTestScriptProblematicNodeError.
+  '''
+  while True:
+    try:
+      duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
+        src_code=src_main_code_instr,
+        src_lang=subject.src_lang,
+        tar_lang=subject.tar_lang,
+        trans_rules=subject.translation_rules_main_code,
+        auto_backward=subject.auto_backward,
+        choices=current_choices,
+        skip_template_extraction=True
+      )
+      # if translation is successful, return current_choices
+      return current_choices
+    except d_grammar_expand.TranslationRuleNotFoundException as exc:
+      dbg_history = exc.dbg_history
+      rel_alt_step_infos : Dict[int, dict] = {}
+      for i in range(2, len(dbg_history) + 1):
+        prev_dbgh_elem = dbg_history[i - 2]
+        dbgh_elem = dbg_history[i - 1]
+        prev_alt_step = prev_dbgh_elem['alt_step']
+        alt_step = dbgh_elem['alt_step']
+        assert prev_alt_step == i - 1, 'sanity check'
+        assert alt_step == i, 'sanity check'
+        next_choices_count = prev_dbgh_elem['next_choices_status']['count']
+        current_choose_idx = dbgh_elem['dbg_info']['notes']['choose_idx']
+        current_range_info = dbgh_elem['range_info']
+        rel_alt_step_infos[alt_step] = {
+          'next_choices_count': next_choices_count,
+          'current_choose_idx': current_choose_idx,
+          'current_range_info': current_range_info
+        }
+      try:
+        current_choices = p_ext_rule_chooser.get_next_unique_choices(
+          rel_alt_step_infos, choices_list_stack, [])
+      except p_ext_rule_chooser.RuleCombinationsExhaustedError:
+        msg = 'No rule to handle a node in source code.'
+        logger.warning(msg)
+        raise SrcTestScriptProblematicNodeError(msg)
+
+
 # API
 async def apply_translation_rules(
   subject: p_subject.PirelSubject
@@ -792,6 +858,20 @@ async def apply_translation_rules(
   '''
   current_choices = subject.choices
   assert current_choices['type'] == 'ASTNODE', f'unsupported choices type "{current_choices["type"]}"'
+
+  '''
+  Rule applicator uses vanilla translator in _get_tar_main_code_instr().
+  Vanilla translator is sensitive to the order of rules in translation_rules_main_code.
+  This causes situations where the first iteration of the loop fails
+  to just get "some" tar_main_code_instr, and therefore the entire rule
+  application process fails. To mitigate this, we check the current_choices,
+  and update it so that we get "some" translation src_main_code_instr.
+  All the above works on the premise that the translation rules
+  allow obtaining "some" translation of src_main_code_instr. If not,
+  SrcTestScriptProblematicNodeError is raised as the last resort.
+  '''
+  current_choices = _check_and_update_choices(
+    src_main_code_instr, current_choices, subject)
 
   # 3 loop to get exhaustive translation of main code
   logger.debug(
