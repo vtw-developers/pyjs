@@ -1115,6 +1115,23 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
           has_fn_with_empty_arglist = self.pre_order(root_node, pat.pattern_3_has_fn_with_empty_argument_list, ntype)
           self.assertFalse(has_fn_with_empty_arglist, f'Empty argument list for "{ntype}" found in "{snippet}"')
 
+  def test_061_large_if_elif_else_block(self):
+    template_dict = self.load_template_dict('061')
+    self.log_ctx_prob_nodes(template_dict, '061')
+    tsps = p_generator.generate_tsps_with_generator(template_dict)
+    self.assertEqual(len(tsps), len(template_dict['tsps']))
+    for tsp in tsps:
+      for snippet in tsp:
+        root_node = self.parse_snippet(snippet, template_dict)
+        has_int_as_call_function = self.pre_order(root_node, pat.pattern_1_has_integer_as_function_name)
+        self.assertFalse(has_int_as_call_function, f'Integer as function name found in "{snippet}"')
+        has_block_with_return_statement = self.pre_order(root_node, pat.pattern_2_has_block_with_ret_stat_secretfn_flag_on, template_dict)
+        self.assertFalse(has_block_with_return_statement, f'Return statement not expected in "{snippet}"')
+        # Check for empty argument lists
+        for ntype in p_consts.FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST[template_dict['src_lang']]:
+          has_fn_with_empty_arglist = self.pre_order(root_node, pat.pattern_3_has_fn_with_empty_argument_list, ntype)
+          self.assertFalse(has_fn_with_empty_arglist, f'Empty argument list for "{ntype}" found in "{snippet}"')
+
 
 if __name__ == '__main__':
   unittest.main()
