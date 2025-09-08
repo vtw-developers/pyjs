@@ -604,7 +604,7 @@ def _create_subject_for_stat_learn(
   return stat_learn_subject
 
 
-def contextualize_statement(
+def _create_src_main_code_for_val(
   src_main_code: str,
   pre_context: str,
   statement: str,
@@ -647,7 +647,7 @@ def _create_src_program_for_stat_val(
   is the same as the main subject's test code.
   '''
   snv_src_test_code = main_subject.get_src_test_code()
-  snv_src_main_code = contextualize_statement(
+  snv_src_main_code = _create_src_main_code_for_val(
     main_subject.get_src_main_code(),
     pre_context,
     simple_ntext,

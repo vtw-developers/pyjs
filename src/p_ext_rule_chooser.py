@@ -765,7 +765,7 @@ async def validate_matcher_group(
   src_main_code: str,
   pre_context: str,
   log_stat_str: str,
-  src_test_code: str | None,
+  src_test_code: Optional[str],
   translation_rules_test_code: str,
   dgann: dict,
 ) -> None:
@@ -797,7 +797,7 @@ async def validate_matcher_group(
   assert_matchers_match(matcher_group)
 
   is_three_split = src_test_code is not None
-  expr_src_main_code = p_pirel.contextualize_statement(
+  expr_src_main_code = p_pirel._create_src_main_code_for_val(
     src_main_code, pre_context, log_stat_str, is_three_split)
   if is_three_split:
     # Create a f_gold() function for the matched AST.
@@ -863,7 +863,7 @@ async def _process_match_obj(
   ruleset: p_ruleset.Ruleset,
   src_main_code: str,
   pre_context: str,
-  src_test_code: str | None,
+  src_test_code: Optional[str],
   translation_rules_test_code: str,
   dgann: dict,
 ) -> None:
@@ -980,7 +980,7 @@ async def process_choicable_range_cursor(
   ruleset: p_ruleset.Ruleset,
   src_main_code: str,
   pre_context: str,
-  src_test_code: str | None,
+  src_test_code: Optional[str],
   translation_rules_test_code: str,
   dgann: dict,
   processed_match_objs: Dict[str, list],
@@ -1218,7 +1218,7 @@ def _filter_range_cursors(
 
 async def get_readonly_choices_list(
   src_main_code: str,
-  src_test_code: str | None,
+  src_test_code: Optional[str],
   translation_rules_test_code: str,
   ruleset: p_ruleset.Ruleset
 ) -> list:

@@ -68,7 +68,7 @@ class PirelSubject:
   def __repr__(self) -> str:
     return f'{self.__class__.__name__}({self.name})'
 
-  def _split_src_program(self) -> tuple[str|None, str, str|None]:
+  def _split_src_program(self) -> Tuple[Optional[str], str, Optional[str]]:
     '''
     Split the source program into test code, main code, and test call code.
     Returns a tuple of (test_code, main_code, and test_call_code).
