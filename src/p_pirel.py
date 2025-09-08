@@ -1503,6 +1503,23 @@ def _test_duoglot_translate_wrapper():
     print(f'Unexpected error: {exc}')
 
 
+def _test_duoglot_translate_wrapper_quick():
+  src_code = p_utils.read_tmp_text('src.py')
+  translation_rules = p_utils.read_tmp_text('src.snart')
+  src_lang, tar_lang = 'py', 'js'
+  auto_backward = True
+  choices = {'type': 'ASTNODE', 'choices_list': []}
+  result = duoglot_translate_wrapper(
+    src_code,
+    src_lang,
+    tar_lang,
+    translation_rules,
+    auto_backward,
+    choices
+  )
+  print(result['tar_code'])
+
+
 def _test_get_pre_context():
   '''
   def get_pre_context(src_main_code: str, lang: str, statement_nid: int) -> str:
@@ -1579,6 +1596,7 @@ if __name__ == '__main__':
   _test_learn_trans_rules_for_prob_node()
   # _test_stat_node_learn_trules_recovery()
   # _test_duoglot_translate_wrapper()
+  # _test_duoglot_translate_wrapper_quick()
   # _test_get_pre_context()
   # _test_adapt_rule_choices()
   # _test_adapt_rule_choices_assert_result()
