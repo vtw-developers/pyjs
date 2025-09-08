@@ -1230,22 +1230,25 @@ async def stat_node_main_learn_validate_trules(
 
     # new combination of rules leads to a problematic node
     except prapp.SrcTestScriptProblematicNodeError as err:
-      logger.warning(
-        f'stat-main: statement node (nid={stat_nid}): '
-        f'prapp.SrcTestScriptProblematicNodeError:\n'
-        f'New combination of rules leads to a problematic node. '
-        f'Will start the STANDARD rule learning procedure.')
-      adapted_choices = _adapt_rule_choices(err.src_main_code, err.choices, simple_ntext)
-      _adapt_rule_choices_assert_result(
-        err.src_main_code, err.choices, simple_ntext, adapted_choices,
-        main_subject.src_lang, main_subject.tar_lang, current_ruleset.to_str_ruleset())
-      simple_nchoices = adapted_choices
-      learned_standard_trules = await stat_node_learn_trules_standard(
-        simple_ntext,
-        simple_nchoices,
-        stat_learn_subject,
-        current_ruleset,
-      )
+      # logger.warning(
+      #   f'stat-main: statement node (nid={stat_nid}): '
+      #   f'prapp.SrcTestScriptProblematicNodeError:\n'
+      #   f'New combination of rules leads to a problematic node. '
+      #   f'Will start the STANDARD rule learning procedure.')
+      # adapted_choices = _adapt_rule_choices(err.src_main_code, err.choices, simple_ntext)
+      # _adapt_rule_choices_assert_result(
+      #   err.src_main_code, err.choices, simple_ntext, adapted_choices,
+      #   main_subject.src_lang, main_subject.tar_lang, current_ruleset.to_str_ruleset())
+      # simple_nchoices = adapted_choices
+      # learned_standard_trules = await stat_node_learn_trules_standard(
+      #   simple_ntext,
+      #   simple_nchoices,
+      #   stat_learn_subject,
+      #   current_ruleset,
+      # )
+      # TODO
+      p_utils.log_json_time('locals.json', locals())
+      raise NotImplementedError('this case has to be reworked')
 
     # no combination of rules leads to a plausible translation
     except p_ext_rule_chooser.RuleCombinationsExhaustedError as err:
