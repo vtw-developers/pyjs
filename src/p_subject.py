@@ -118,6 +118,12 @@ class PirelSubject:
     '''
     return json.dumps(self.__dict__, sort_keys=True)
 
+  def to_dict(self) -> dict:
+    '''
+    Convert the PirelSubject instance to a dictionary.
+    '''
+    return self.__dict__
+
   @classmethod
   def from_dict(cls, obj: dict) -> PirelSubject:
     '''
