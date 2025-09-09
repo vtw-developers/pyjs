@@ -8,6 +8,9 @@ import p_visitor as pvis
 import p_visitor_py as pvpy
 
 
+logger = p_utils.setup_logger(__name__)
+
+
 class TestParametrizableVariablesCollector(unittest.TestCase):
   def setUp(self):
     self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestParametrizableVariablesCollector'
@@ -6089,6 +6092,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '0',
+      'i',
+      'range(j, n)',
       'arr[i] == x',
       'i',
       '-1',
@@ -6132,6 +6137,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'n',
       '0',
       '0',
+      'i',
+      'range(n)',
       'a[i] > best',
       'a[i]',
       'i',
@@ -6149,10 +6156,14 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'dict()',
+      'i',
+      'range(start, end + 1)',
       'arr[i] in frequency.keys()',
       '1',
       '1',
       '0',
+      'x',
+      'frequency',
       'x == frequency[x]',
       '1',
       'count',
@@ -6195,7 +6206,11 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     ground_truth = [
       '[[0 for i in range(n + 1)] for j in range(n + 1)]',
       '1',
+      'i',
+      'range(1, n + 1)',
       'bell[i - 1][i - 1]',
+      'j',
+      'range(1, i + 1)',
       'bell[i - 1][j - 1] + bell[i][j - 1]',
       'bell[n][0]',
     ]
@@ -6413,6 +6428,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'len(N)',
       'int((length) / 2)',
       '0',
+      'i',
+      'range(l + 1)',
       'N[0:0 + i]',
       'len(s)',
       'N[i:l1 + i]',
@@ -6429,6 +6446,12 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '0',
+      'i',
+      'range(0, n + 1)',
+      'j',
+      'range(0, n + 1)',
+      'k',
+      'range(0, n + 1)',
       'i + j + k == n',
       'count + 1',
       'count',
@@ -6452,6 +6475,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '""',
+      'i',
+      'range(len(text))',
       'text[i]',
       'char.isupper()',
       'chr((ord(char) + s - 65) % 26 + 65)',
@@ -6493,10 +6518,14 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'dict()',
+      'i',
+      'range(n)',
       'count.get(a[i])',
       '1',
       '1',
       '1',
+      'i',
+      'range(n)',
       'count[a[i]] != 1 or a[i] > n or a[i] < 1',
       '1',
       'count.get(next_missing)',
@@ -6514,9 +6543,148 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       '[0 for i in range(n)]',
       '[0 for i in range(n)]',
       '1',
+      'i',
+      'range(1, n)',
       'a[i - 1] + b[i - 1]',
       'a[i - 1]',
       'a[n - 1] + b[n - 1]',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[]  # no exclusions
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      '0',
+      '0',
+      'i',
+      'range(n)',
+      'j',
+      'range(m)',
+      'arr2[i] == arr1[j]',
+      '0',
+      '1',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_1(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[9, 13]  # two assignments
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      'i',
+      'range(n)',
+      'j',
+      'range(m)',
+      'arr2[i] == arr1[j]',
+      '0',
+      '1',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_2(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[17, 24]  # two for loops
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      '0',
+      '0',
+      'arr2[i] == arr1[j]',
+      '0',
+      '1',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_3(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[31]  # if statement
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      '0',
+      '0',
+      'i',
+      'range(n)',
+      'j',
+      'range(m)',
+      '0',
+      '1',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_4(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[43, 45]  # two return stats
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      '0',
+      '0',
+      'i',
+      'range(n)',
+      'j',
+      'range(m)',
+      'arr2[i] == arr1[j]',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_5(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[9, 13, 17, 24, 31, 43, 45]  # all statements
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_6(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[17, 24, 31]  # two for loops, if stat
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      '0',
+      '0',
+      '0',
+      '1',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_7(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[9, 13, 43, 45]  # both assignments and returns
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      'i',
+      'range(n)',
+      'j',
+      'range(m)',
+      'arr2[i] == arr1[j]',
+    ]
+    self.assertCountEqual(ground_truth, choicable_nodes_str)
+
+  def test_G0277_for_else_exclude_8(self):
+    code = self.load_subject_code('G0277')
+    choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
+      code, exclude_statement_nodes_ids=[9, 13, 17, 24, 43, 45]  # all except if stat
+    )
+    choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
+    ground_truth = [
+      'arr2[i] == arr1[j]',
     ]
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
@@ -6530,6 +6698,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       '0',
       'n <= 2',
       'n',
+      'i',
+      'range(3, n + 1)',
       'b + (i - 1) * a',
       'b',
       'c',
@@ -6615,9 +6785,13 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
+      'i',
+      'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
+      'i',
+      'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
@@ -6645,9 +6819,13 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
+      'i',
+      'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
+      'i',
+      'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
@@ -6675,9 +6853,13 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
+      'i',
+      'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
+      'i',
+      'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',

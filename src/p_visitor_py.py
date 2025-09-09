@@ -2633,12 +2633,16 @@ class ChoicableNodeExtractor(pvis.Visitor):
   initial choices list.
   Refer to p_ext_rule_chooser.get_readonly_choices_list
   for more details.
-  NOTE repeated calls to node.get_node_id() are expensive
   '''
-  def __init__(self, exclude_statement_nodes_ids: List[int] = []):
+  def __init__(
+    self,
+    exclude_statement_nodes_ids: List[int] = [],
+    nid_node_map: Dict[int, pvis.AbstractNode] = {}
+  ):
     super().__init__()
     self.choicable_nodes : List[pvis.AbstractNode] = []
     self.exclude_statement_nodes_ids = exclude_statement_nodes_ids
+    self.nid_node_map = nid_node_map
     self.pp = PrettyPrinter(indent_with='    ')
 
   def add_choicable_node(self, node: pvis.AbstractNode) -> None:
@@ -2647,13 +2651,23 @@ class ChoicableNodeExtractor(pvis.Visitor):
   def get_choicable_nodes(self) -> List[pvis.AbstractNode]:
     return self.choicable_nodes
 
+  def nid_reverse_lookup(self, lookup: pvis.AbstractNode) -> int:
+    '''
+    RAISE ValueError if the node is not found in the nid_node_map.
+    '''
+    for nid, node in self.nid_node_map.items():
+      if node is lookup:
+        return nid
+    raise ValueError('node must be in nid_node_map')
+
   # VISIT METHODS
   def visit_AssignmentNode(self, node: AssignmentNode) -> None:
     '''
     Parent of assignment is an expression_statement node.
     expression_statement can be a statement node.
     '''
-    if node.get_parent().get_node_id() in self.exclude_statement_nodes_ids:
+    parent_nid = self.nid_reverse_lookup(node.get_parent())
+    if parent_nid in self.exclude_statement_nodes_ids:
       logger.debug(
         f'ChoicableNodeExtractor: excluding right hand side of '
         f'assignment node: "{self.pp.visit(node)}"')
@@ -2673,7 +2687,8 @@ class ChoicableNodeExtractor(pvis.Visitor):
     Parent of augmented_assignment is an expression_statement node.
     expression_statement can be a statement node.
     '''
-    if node.get_parent().get_node_id() in self.exclude_statement_nodes_ids:
+    parent_nid = self.nid_reverse_lookup(node.get_parent())
+    if parent_nid in self.exclude_statement_nodes_ids:
       logger.debug(
         f'ChoicableNodeExtractor: excluding right hand side of '
         f'augmented assignment node: "{self.pp.visit(node)}"')
@@ -2694,6 +2709,21 @@ class ChoicableNodeExtractor(pvis.Visitor):
     for expr in node.get_nt_children():
       self.add_choicable_node(expr)
 
+  def visit_ForStatementNode(self, node: ForStatementNode) -> None:
+    nid = self.nid_reverse_lookup(node)
+    if nid not in self.exclude_statement_nodes_ids:
+      self.add_choicable_node(node.left)
+      self.add_choicable_node(node.right)
+    else:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding iterable of '
+        f'for statement node: "{self.pp.visit(node.left)}"'
+        f' and "{self.pp.visit(node.right)}"')
+    # always visit the body and alternative
+    self.visit(node.body)
+    if node.alternative:
+      self.visit(node.alternative)
+
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     '''
     Add condition as a choicable node only if
@@ -2702,7 +2732,7 @@ class ChoicableNodeExtractor(pvis.Visitor):
     the if_statement node is not in exclude_statement_nodes_ids.
     if_statement is a statement node.
     '''
-    nid = node.get_node_id()
+    nid = self.nid_reverse_lookup(node)
     if nid not in self.exclude_statement_nodes_ids:
       self.add_choicable_node(node.condition)
     else:
@@ -2730,7 +2760,8 @@ class ChoicableNodeExtractor(pvis.Visitor):
     the node is not in exclude_statement_nodes_ids.
     return_statement is a statement node.
     '''
-    if node.get_node_id() in self.exclude_statement_nodes_ids:
+    nid = self.nid_reverse_lookup(node)
+    if nid in self.exclude_statement_nodes_ids:
       self.pp.lines = []
       self.pp.visit(node)
       logger.debug(
@@ -2744,7 +2775,8 @@ class ChoicableNodeExtractor(pvis.Visitor):
         self.add_choicable_node(child)
 
   def visit_WhileStatementNode(self, node: WhileStatementNode) -> None:
-    if not node.get_node_id() in self.exclude_statement_nodes_ids:
+    nid = self.nid_reverse_lookup(node)
+    if nid not in self.exclude_statement_nodes_ids:
       self.add_choicable_node(node.condition)
     else:
       logger.debug(
@@ -2767,7 +2799,8 @@ class ChoicableNodeExtractor(pvis.Visitor):
     src_parser = p_consts.PARSER_DICT['py']
     ts_tree = src_parser.parse(bytes(src_main_code, 'utf-8'))
     tree = Tree.from_ts_tree(ts_tree)
-    extractor = cls(exclude_statement_nodes_ids)
+    nid_node_map = tree.root_node.get_nid_node_map()
+    extractor = cls(exclude_statement_nodes_ids, nid_node_map)
     extractor.visit(tree.root_node)
     choicable_nodes = extractor.get_choicable_nodes()
     return choicable_nodes
