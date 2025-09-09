@@ -374,6 +374,7 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
 
   _CONTEXT_NODE_TYPES = (
     pvpy.ExpressionStatementNode,
+    pvpy.ForStatementNode,
     pvpy.IfStatementNode,
     pvpy.ReturnStatementNode,
     pvpy.WhileStatementNode
