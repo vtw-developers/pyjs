@@ -1988,7 +1988,7 @@ class LogStatementInserter(pvis.Visitor):
     return expression_statement
 
   # VISIT METHODS
-  def visit_BlockNode(self, node: BlockNode) -> None:
+  def visit_BlockNode(self, node: BlockNode | ModuleNode) -> None:
     '''
     Insert log statements after assignment statements.
     Assignment statements appear only under block nodes.
@@ -2149,6 +2149,12 @@ class LogStatementInserter(pvis.Visitor):
     return code.strip()
 
 
+class LogInserterNo3Split(LogStatementInserter):
+  '''LogStatementInserter for subjects without the three-split format.'''
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    self.visit_BlockNode(node)
+
+
 class LogStatementsIndexer(pvis.Visitor):
   '''
   Index all invocations of myexactlog() and print()
@@ -2231,6 +2237,12 @@ class LogStatementsIndexer(pvis.Visitor):
     pretty_printer = PrettyPrinter(indent_with='    ')
     code = pretty_printer.visit(tree.root_node)
     return code.strip()
+
+
+class LogIndexerNo3Split(LogStatementsIndexer):
+  '''LogStatementsIndexer for subject without the three-split format.'''
+  def visit_ModuleNode(self, node: ModuleNode) -> None:
+    self.default_visit(node)
 
 
 class LogStatementRemover(pvis.Visitor):

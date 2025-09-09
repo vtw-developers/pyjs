@@ -1,5 +1,6 @@
 import asyncio
 import json
+from sys import executable
 from typing import List, Optional, Tuple
 
 import d_ast_parse
@@ -131,10 +132,53 @@ def _get_pre_context_global(
   return pre_context
 
 
+def _get_pre_context_eot(
+  src_program: str,
+  stat_npath: list[int],
+  npath_blacklist: list[list[int]],
+) -> str:
+  '''Return the context of the statement to be translated.
+
+  Nodes blacklisted are to be translated after this statement
+  in execution-order translation, so that only the pre-context is left.
+  '''
+  root_node = pvpy.Tree.from_str(src_program).root_node
+  for node in map(root_node.get_child_by_path, reversed(npath_blacklist)):
+    if isinstance(node, pvpy.ElseClauseNode):
+      node.body.children = []
+    elif isinstance(node, pvpy.ElifClauseNode):
+      node.consequence.children = []
+    else:
+      node.parent.children.remove(node)
+
+  stack = [root_node]
+  while stack:
+    node = stack.pop()
+    if isinstance(node, pvpy.BlockNode) and not node.children:
+      pass_statement_node = pvpy.PassStatementNode.build()
+      node.children = [pass_statement_node]
+      pass_statement_node.set_parent(node)
+    stack.extend(node.children)
+
+  statement_node = root_node.get_child_by_path(stat_npath)
+  spec_id_stat = pvpy.ExpressionStatementNode.build(
+    pvpy.IdentifierNode.build(p_consts.PRE_CTX_SPEC_IDENT))
+  spec_id_stat.set_parent(statement_node.get_parent())
+  context_node_idx_as_child = statement_node.parent.children.index(statement_node)
+  statement_node.parent.children[context_node_idx_as_child] = spec_id_stat
+
+  pp = pvpy.PrettyPrinter(indent_with='    ')
+  pp.visit(root_node)
+  pre_context = '\n'.join(pp.lines)
+  return pre_context
+
+
 def get_pre_context(
   src_main_code: str,
   lang: str,
-  stat_nid: int
+  is_three_split: bool,
+  stat_nid: int,
+  nid_blacklist: list[int],
 ) -> str:
   '''
   Get pre-context for the statement node.
@@ -143,10 +187,15 @@ def get_pre_context(
   '''
   p_utils.log_json_time(f'args-get_pre_context.json', locals())
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
-  stat_node = tree.get_root_node().get_node_by_id(stat_nid)
-  stat_npath = tree.get_root_node().get_path_to_child(stat_node)
-  pre_context = _get_pre_context_global(src_main_code, stat_npath)
-  return pre_context
+  root_node = tree.get_root_node()
+  stat_node = root_node.get_node_by_id(stat_nid)
+  stat_npath = root_node.get_path_to_child(stat_node)
+  if is_three_split:
+    return _get_pre_context_global(src_main_code, stat_npath)
+  else:
+    blacklist = list(map(root_node.get_path_to_child,
+                         map(root_node.get_node_by_id, nid_blacklist)))
+    return _get_pre_context_eot(src_main_code, stat_npath, blacklist)
 
 
 def _can_be_context_node(
@@ -177,9 +226,73 @@ def _can_be_context_node(
   return True
 
 
-def _get_statement_nodes(
+async def _get_not_implemented_id(module: str,
+                                  node_lines: list[int]) -> int | None:
+  proc = await asyncio.create_subprocess_exec(executable, '-c', module,
+    stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
+  stderr = (await proc._read_stream(2)).decode()
+  if not any(f'  File "<string>", line {n}, in ' in stderr
+             for n in node_lines):
+    return None
+  lines = stderr.splitlines()
+  assert lines and lines[-1].startswith('NotImplementedError: PiREL: ')
+  return int(lines[-1].removeprefix('NotImplementedError: PiREL: '))
+
+
+async def _get_statement_nodes_eot(
+  src_program: str,
+  lang: str,
+  top_level_nodes: list[pds.PirelNode],
+) -> list[pds.PirelNode]:
+  '''Return a list of statement nodes for execution-order transaltion.'''
+  restore = {}
+  stack = [*top_level_nodes]
+  while stack:
+    node = stack.pop()
+    if not node.is_nonterminal():
+      continue
+    stack.extend(node.get_children())
+    if node.get_ts_node_type() == 'function_definition':
+      node_id = node.get_id()
+      exc_text = f'raise NotImplementedError("PiREL: {node_id}")'
+      fn_text = node.get_text()
+      fn_body = node.get_children()[-1]
+      assert fn_body.get_ts_node_type() == 'block'
+      fn_body_text = fn_body.get_text().strip()
+      fn_not_implemented_text = fn_text.replace(fn_body_text, exc_text)
+      restore[node_id] = node, fn_not_implemented_text
+      src_program = src_program.replace(fn_text, fn_not_implemented_text)
+
+  nodes = []
+  stack.extend(reversed(top_level_nodes))
+  while stack:
+    node = stack.pop()
+    if _can_be_context_node(node, lang):
+      if node.get_ts_node_type() == 'function_definition':
+        continue
+      nodes.append(node)
+      cmt = f'  # PiREL: {node.get_id()}'
+      node_text = node.get_text().rstrip()
+      commented_text = node_text.replace('\n', cmt+'\n') + cmt
+      # Prevent confusion between call and function signature
+      src_with_cmt = src_program.replace('def '+node_text, 'PiREL def')
+      src_with_cmt = src_with_cmt.replace(node_text, commented_text)
+      src_with_cmt = src_with_cmt.replace('PiREL def', 'def '+node_text)
+      lines = [i for i, line in enumerate(src_with_cmt.splitlines(), start=1)
+               if cmt in line]
+      fn_id = await _get_not_implemented_id(src_with_cmt, lines)
+      if fn_id is not None:  # switch context
+        fn_node, replaced_text = restore.pop(fn_id)  # once per function
+        src_program = src_program.replace(replaced_text, fn_node.get_text())
+        stack.extend(reversed(fn_node.get_children()))
+    stack.extend(reversed(node.get_children()))
+  return nodes
+
+
+async def _get_statement_nodes(
   src_main_code: str,
-  lang: str
+  lang: str,
+  is_three_split: bool,
 ) -> List[pds.PirelNode]:
   '''
   Statement nodes are primary units of code in the source code.
@@ -193,6 +306,9 @@ def _get_statement_nodes(
       __rec_pre_order(child, lang)
 
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
+  if not is_three_split:
+    return await _get_statement_nodes_eot(src_main_code, lang,
+                                          tree.get_root_node().get_children())
   nodes : List[pds.PirelNode] = []
   __rec_pre_order(tree.get_root_node(), lang)
 
@@ -641,8 +757,11 @@ def _create_src_main_code_for_val(
     fn_header = function_headers[0].strip()
     assert fn_header.endswith('):')
     stmt_in_ctx = f'{fn_header}\n{p_utils.indent(stmt_in_ctx, 4)}'
-  stmt_in_ctx = pvpy.LogStatementInserter.insert_log_statements(stmt_in_ctx)
-  stmt_in_ctx = pvpy.LogStatementsIndexer.index_log_statements(stmt_in_ctx)
+    stmt_in_ctx = pvpy.LogStatementInserter.insert_log_statements(stmt_in_ctx)
+    stmt_in_ctx = pvpy.LogStatementsIndexer.index_log_statements(stmt_in_ctx)
+  else:
+    stmt_in_ctx = pvpy.LogInserterNo3Split.insert_log_statements(stmt_in_ctx)
+    stmt_in_ctx = pvpy.LogIndexerNo3Split.index_log_statements(stmt_in_ctx)
 
   # insert break statements in loops to avoid infinite loops.
   if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
@@ -1190,6 +1309,7 @@ async def stat_node_main_learn_validate_trules(
   main_subject: p_subject.PirelSubject,
   current_ruleset: p_ruleset.Ruleset,  # starting ruleset + learned rules so far
   stat_nid: int,
+  nid_blacklist: list[int],
   lstat_node: ptlog.StatNode
 ):
   '''
@@ -1198,10 +1318,14 @@ async def stat_node_main_learn_validate_trules(
   NOTE adds new translation rules to the current_ruleset.
   '''
   p_utils.log_json_time(f'args-stat_node_main_learn_validate_trules.json', locals())
+  src_main_code = main_subject.get_src_main_code()
+  src_lang = main_subject.src_lang
 
-  stat_node = _get_statement_node_by_id(main_subject.get_src_main_code(), main_subject.src_lang, stat_nid)
+  stat_node = _get_statement_node_by_id(src_main_code, src_lang, stat_nid)
   simple_ntext = _simplify_statement_node_text(stat_node)
-  pre_context = get_pre_context(main_subject.get_src_main_code(), main_subject.src_lang, stat_nid)
+  pre_context = get_pre_context(src_main_code, src_lang,
+                                main_subject.is_three_split,
+                                stat_nid, nid_blacklist)
   simple_nchoices = {'type': 'ASTNODE', 'choices_list': []}
 
   logger.debug(
@@ -1393,8 +1517,8 @@ async def learn_trans_rules_for_subject(
   Using this relation between context nodes and statement nodes,
   we will make a list of such nodes.
   '''
-  assert subject.is_three_split, 'assume for now, maybe remove for SKEL?'
-  stat_nodes = _get_statement_nodes(subject.get_src_main_code(), subject.src_lang)
+  stat_nodes = await _get_statement_nodes(
+    subject.get_src_main_code(), subject.src_lang, subject.is_three_split)
   logger.debug(
     f'There are {len(stat_nodes)} statement nodes in src_main_code:\n'
     f'{subject.get_src_main_code()}')
@@ -1409,6 +1533,7 @@ async def learn_trans_rules_for_subject(
       subject,
       starting_ruleset,
       stat_node.get_id(),
+      [node.get_id() for node in stat_nodes[sn_idx:]],
       lstat_node
     )
 

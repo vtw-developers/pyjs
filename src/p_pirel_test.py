@@ -107,7 +107,7 @@ class TestGetPreContext(unittest.TestCase):
       with self.subTest(i=i):
         src_main_code, expected_pre_context, stat_nid = self.read_fixture(f'{i:03}')
         stat_ntext = d_ast_parse.node_id_pretty_print(src_main_code, self.lang, stat_nid)
-        pre_context = p_pirel.get_pre_context(src_main_code, self.lang, stat_nid)
+        pre_context = p_pirel.get_pre_context(src_main_code, self.lang, True, stat_nid, [])
         logger.debug(
           f'\n\n~~~ Test case {i}, stat_nid={stat_nid}\n'
           f'~~~ Test case {i}, src_main_code=\n```\n{src_main_code}\n```\n'
@@ -119,7 +119,7 @@ class TestGetPreContext(unittest.TestCase):
   def test_if_in_try(self):
     src_main_code, expected_pre_context, stat_nid = self.read_fixture('try_except')
     stat_ntext = d_ast_parse.node_id_pretty_print(src_main_code, self.lang, stat_nid)
-    pre_context = p_pirel.get_pre_context(src_main_code, self.lang, stat_nid)
+    pre_context = p_pirel.get_pre_context(src_main_code, self.lang, True, stat_nid, [])
     logger.debug(
       f'~~~ stat_nid={stat_nid}\n'
       f'~~~ src_main_code=\n```\n{src_main_code}\n```\n'
