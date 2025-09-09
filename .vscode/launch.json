@@ -14,6 +14,15 @@
       "justMyCode": true
     },
     {
+      "name": "e_analyze_data.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "e_analyze_data.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "p_code_runner.py",
       "type": "debugpy",
       "request": "launch",
