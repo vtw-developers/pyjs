@@ -30,11 +30,82 @@ def _get_used_translation_rule_ids(
   return used_rule_ids
 
 
+def _process_used_rules(
+  rule_ids_before: List[int],
+  rule_ids_after: List[int],
+  current_ruleset: str,
+  ltrule_syntax_val_res: Optional[ptlog.TRuleSyntaxValRes] = None
+) -> bool:
+
+  logger.debug('~~ checking rule under test based on the rule ids used')
+  logger.debug(f'rule_ids_before: {rule_ids_before}')
+  logger.debug(f'rule_ids_after: {rule_ids_after}')
+  ltrule_syntax_val_res = ltrule_syntax_val_res or ptlog.TRuleSyntaxValRes()
+
+  # number of rules used after must be strictly greater than the number of rules used before
+  logger.debug('~ checking if the number of rules used after is greater than before')
+  if not (len(rule_ids_after) > len(rule_ids_before)):
+    msg = (
+      f'Translation rule is BAD:\n'
+      f'number of rules used after ({len(rule_ids_after)}) {str(rule_ids_after)}\n'
+      f'must be strictly greater than the\n'
+      f'number of rules used before ({len(rule_ids_before)}) {str(rule_ids_before)}')
+    logger.debug(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
+    return False
+  logger.debug('~ [good] the number of rules used after is greater than before')
+
+  # used rule id's before must be identical to the first rule id's after
+  logger.debug('~ checking if the used rule ids after are prefixed with the rule ids before')
+  for i in range(len(rule_ids_before)):
+    if rule_ids_before[i] != rule_ids_after[i]:
+      msg = (
+        'Translation rule is BAD:\n'
+        f'used rule ids at index {i} are different.\n'
+        'Should not happen under normal circumstances.\n'
+        'More debugging needed.'
+      )
+      logger.debug(msg)
+      ltrule_syntax_val_res.is_valid = False
+      ltrule_syntax_val_res.reason = msg
+      return False
+  logger.debug('~ [good] used rule ids after are prefixed with the rule ids before')
+
+  # id of the first rule used must be of rule under test
+  # `rule_ids_before = [3, 10, 4, 5, 6, 0]`
+  # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
+  # as in the example above, `17` must be id of the rule under test
+  logger.debug('~ checking if rule under test is used for the problematic node')
+  existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(current_ruleset)
+  num_rules_in_before_ruleset = len(existing_rules_list)
+  # this will be id of the rule under test
+  rule_under_test_idx_in_after_ruleset = num_rules_in_before_ruleset
+  num_rules_used_in_before_rule_ids = len(rule_ids_before)
+  rule_under_test_idx_in_after_rule_ids = num_rules_used_in_before_rule_ids
+  if rule_under_test_idx_in_after_ruleset != rule_ids_after[rule_under_test_idx_in_after_rule_ids]:
+    msg = (
+      'Translation rule is BAD:\n'
+      'The last used rule id is not of the rule under test.\n'
+      'Should not happen under normal circumstances.\n'
+      'More debugging needed.'
+    )
+    logger.debug(msg)
+    ltrule_syntax_val_res.is_valid = False
+    ltrule_syntax_val_res.reason = msg
+    return False
+  logger.debug('~ [good] rule under test is used for the problematic node')
+
+  logger.debug('translation rule is syntactically valid')
+  ltrule_syntax_val_res.is_valid = True
+  return True
+
+
 def is_valid_translation_rule_syntactic(
   subject: p_subject.PirelSubject,
   translation_rule: str,
   current_ruleset: str,
-  ltrule: ptlog.TRule
+  ltrule: Optional[ptlog.TRule] = None
 ) -> bool:
   '''
   Check if the provided translation rule:
@@ -44,81 +115,10 @@ def is_valid_translation_rule_syntactic(
   '''
 
   p_utils.log_json_time(f'args-is_valid_translation_rule_syntactic.json', locals())
-
-  def _process_used_rules(
-    rule_ids_before: List[int],
-    rule_ids_after: List[int],
-    ltrule_syntax_val_res: ptlog.TRuleSyntaxValRes
-  ) -> bool:
-    nonlocal current_ruleset
-    logger.debug('~~ checking rule under test based on the rule ids used')
-    logger.debug(f'rule_ids_before: {rule_ids_before}')
-    logger.debug(f'rule_ids_after: {rule_ids_after}')
-
-    # number of rules used after must be strictly greater than the number of rules used before
-    logger.debug('~ checking if the number of rules used after is greater than before')
-    if not (len(rule_ids_after) > len(rule_ids_before)):
-      msg = (
-        f'Translation rule is BAD:\n'
-        f'number of rules used after ({len(rule_ids_after)}) {str(rule_ids_after)}\n'
-        f'must be strictly greater than the\n'
-        f'number of rules used before ({len(rule_ids_before)}) {str(rule_ids_before)}'
-      )
-      logger.debug(msg)
-      ltrule_syntax_val_res.is_valid = False
-      ltrule_syntax_val_res.reason = msg
-      return False
-    logger.debug('~ [good] the number of rules used after is greater than before')
-
-    # used rule id's before must be identical to the first rule id's after
-    logger.debug('~ checking if the used rule ids after are prefixed with the rule ids before')
-    for i in range(len(rule_ids_before)):
-      if rule_ids_before[i] != rule_ids_after[i]:
-        msg = (
-          'Translation rule is BAD:\n'
-          f'used rule ids at index {i} are different.\n'
-          'Should not happen under normal circumstances.\n'
-          'More debugging needed.'
-        )
-        logger.debug(msg)
-        ltrule_syntax_val_res.is_valid = False
-        ltrule_syntax_val_res.reason = msg
-        return False
-    logger.debug('~ [good] used rule ids after are prefixed with the rule ids before')
-
-    # id of the first rule used must be of rule under test
-    # `rule_ids_before = [3, 10, 4, 5, 6, 0]`
-    # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
-    # as in the example above, `17` must be id of the rule under test
-    logger.debug('~ checking if rule under test is used for the problematic node')
-    existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(current_ruleset)
-    num_rules_in_before_ruleset = len(existing_rules_list)
-    # this will be id of the rule under test
-    rule_under_test_idx_in_after_ruleset = num_rules_in_before_ruleset
-    num_rules_used_in_before_rule_ids = len(rule_ids_before)
-    rule_under_test_idx_in_after_rule_ids = num_rules_used_in_before_rule_ids
-    if rule_under_test_idx_in_after_ruleset != rule_ids_after[rule_under_test_idx_in_after_rule_ids]:
-      msg = (
-        'Translation rule is BAD:\n'
-        'The last used rule id is not of the rule under test.\n'
-        'Should not happen under normal circumstances.\n'
-        'More debugging needed.'
-      )
-      logger.debug(msg)
-      ltrule_syntax_val_res.is_valid = False
-      ltrule_syntax_val_res.reason = msg
-      return False
-    logger.debug('~ [good] rule under test is used for the problematic node')
-
-    logger.debug('translation rule is syntactically valid')
-    ltrule_syntax_val_res.is_valid = True
-    return True
-
-  msg = (
+  logger.debug(
     f'~~ Checking if translation rule is syntactically valid:\n'
-    f'Rule hash value: {ltrule.hash}\n'
-    f'{translation_rule}')
-  logger.debug(msg)
+    f'Rule hash value: {ltrule.hash}\n{translation_rule}')
+  ltrule = ltrule or ptlog.TRule.from_str(translation_rule)
   ltrule_syntax_val_res = ptlog.TRuleSyntaxValRes()
   ltrule.syntax_val_res = ltrule_syntax_val_res
 
@@ -220,7 +220,12 @@ def is_valid_translation_rule_syntactic(
   rule_ids_before = _get_used_translation_rule_ids(dbg_history_before)
   rule_ids_after = _get_used_translation_rule_ids(dbg_history_after)
 
-  return _process_used_rules(rule_ids_before, rule_ids_after, ltrule_syntax_val_res)
+  return _process_used_rules(
+    rule_ids_before,
+    rule_ids_after,
+    current_ruleset,
+    ltrule_syntax_val_res
+  )
 
 
 def find_pirel_keyword_in_trule(
@@ -304,7 +309,7 @@ def filter_translation_rules(
   trules_list: List[str],
   subject: p_subject.PirelSubject,
   current_ruleset: str,
-  lprule_filter_log: ptlog.PRuleFilterLog
+  lprule_filter_log: Optional[ptlog.PRuleFilterLog] = None
 ) -> List[str]:
   '''
   Filter out translation rules that are not syntactically correct.
@@ -319,6 +324,7 @@ def filter_translation_rules(
   logger.debug(
     f'rule-filter: ~~~ Starting p_rule_validator.filter_translation_rules. '
     f'Number of rules before: {len(trules_list)}')
+  lprule_filter_log = lprule_filter_log or ptlog.PRuleFilterLog()
 
   syn_cor_trules = []
   for idx, trule in enumerate(trules_list, start=1):
@@ -352,7 +358,8 @@ def filter_translation_rules(
 
 async def check_trules_test_based(
   val_subject: p_subject.PirelSubject,
-  current_ruleset: p_ruleset.Ruleset
+  current_ruleset: p_ruleset.Ruleset,
+  lstat_node_val: Optional[ptlog.StatNodeVal] = None
 ) -> None:
   '''
   A valid ruleset is one that can translate the source program
@@ -363,6 +370,9 @@ async def check_trules_test_based(
 
   p_utils.log_json_time(f'args-check_trules_test_based.json', locals())
   logger.debug('~~ Starting test-based validation of translation rules')
+
+  lstat_node_val = lstat_node_val or ptlog.StatNodeVal()
+  lstat_node_val.v2_expr_valid_stms = p_utils.current_time_msec()
 
   '''
   1. Raises AllRulesInMatcherGroupImplausibleError
@@ -379,10 +389,17 @@ async def check_trules_test_based(
   val_subject.readonly_choices_list = readonly_choices_list
   logger.debug('~~ Saved readonly choices list')
 
+  lstat_node_val.v2_expr_valid_ok = True
+  lstat_node_val.v2_expr_valid_etms = p_utils.current_time_msec()
+  lstat_node_val.v3_rule_apply_stms = p_utils.current_time_msec()
+
   logger.debug('~~ Applying translation rules to get the target program')
   tar_program_plausible = await prapp.apply_translation_rules(val_subject)
-  logger.debug('~~ Finished applying translation rules')
   val_subject.readonly_choices_list = []  # reset
+  logger.debug('~~ Finished applying translation rules')
+
+  lstat_node_val.v3_rule_apply_ok = True
+  lstat_node_val.v3_rule_apply_etms = p_utils.current_time_msec()
 
 
 # TEST HARNESSES
@@ -391,8 +408,8 @@ def _test_is_valid_translation_rule_syntactic():
   def is_valid_translation_rule_syntactic(
     subject: p_subject.PirelSubject,
     translation_rule: str,
-    existing_ruleset: str,
-    ltrule: ptlog.TRule
+    current_ruleset: str,
+    ltrule: Optional[ptlog.TRule] = None
   ) -> bool:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_is_valid_translation_rule_syntactic_config.yaml'
@@ -401,14 +418,12 @@ def _test_is_valid_translation_rule_syntactic():
 
   subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
   translation_rule = args_dict['translation_rule']
-  existing_ruleset = args_dict['existing_ruleset']
-  ltrule = ptlog.TRule.from_str(translation_rule)
+  current_ruleset = args_dict['current_ruleset']
 
   is_valid = is_valid_translation_rule_syntactic(
     subject,
     translation_rule,
-    existing_ruleset,
-    ltrule
+    current_ruleset,
   )
   print(is_valid)
 

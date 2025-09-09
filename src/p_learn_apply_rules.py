@@ -142,6 +142,7 @@ async def learn_and_application_phases_on_subject(
   # rule learning phase
   lrule_learn_phase = ptlog.RuleLearnPhase()
   lsubject.rule_learn_phase = lrule_learn_phase
+
   try:
     async with semaphore:
       logger.info('About to start rule learning phase')
@@ -149,23 +150,26 @@ async def learn_and_application_phases_on_subject(
         subject, starting_ruleset, lrule_learn_phase)
 
     logger.info(f'SUCCESS Rule learning phase for "{subject.name}" succeeded.')
+    lrule_learn_phase.success = True
+    lrule_learn_phase.etms = p_utils.current_time_msec()
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', starting_ruleset.to_str_ruleset())
     p_utils.llog_json(f'{subject.name}_learned_rules.json', starting_ruleset.to_dict())
     p_utils.llog_text(f'{subject.name}_src_main_code.py', subject.get_src_main_code())
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_success.yaml', asdict(lsubject))
-    lrule_learn_phase.success = True
 
   except Exception as exc:
     logger.critical(f'FAIL Rule learning phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
-    p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
     lrule_learn_phase.success = False
     lrule_learn_phase.reason = p_utils.exception_to_str(exc)
+    lrule_learn_phase.etms = p_utils.current_time_msec()
+    p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
     return await _mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
 
   # rule application phase
   lrule_application_phase = ptlog.RuleApplicationPhase()
   lsubject.rule_application_phase = lrule_application_phase
+  lrule_application_phase.stms = p_utils.current_time_msec()
   try:
     async with semaphore:
       logger.info('About to start rule application phase')
@@ -178,19 +182,21 @@ async def learn_and_application_phases_on_subject(
         tar_main_code_plausible = tar_program_plausible
 
     logger.info(f'SUCCESS Rule application phase for "{subject.name}" succeeded.')
+    lrule_application_phase.tar_main_code_plausible = tar_main_code_plausible
+    lrule_application_phase.success = True
+    lrule_application_phase.etms = p_utils.current_time_msec()
     p_utils.llog_text(f'{subject.name}_validated_rules.snart', starting_ruleset.to_str_ruleset())
     p_utils.llog_json(f'{subject.name}_validated_rules.json', starting_ruleset.to_dict())
     p_utils.llog_text(f'{subject.name}_tar_main_code_plausible.{subject.tar_lang}', tar_main_code_plausible)
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_success.yaml', asdict(lsubject))
-    lrule_application_phase.success = True
-    lrule_application_phase.tar_main_code_plausible = tar_main_code_plausible
 
   except Exception as exc:
     logger.critical(f'FAIL Rule application phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
-    p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
     lrule_application_phase.success = False
     lrule_application_phase.reason = p_utils.exception_to_str(exc)
+    lrule_application_phase.etms = p_utils.current_time_msec()
+    p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
     return await _mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
 
   logger.info(f'SUCCESS Both learn and apply phases for "{subject.name}" succeeded.')
@@ -290,9 +296,9 @@ def _mode_benchmark_init(
     )
 
     lsubject = ptlog.Subject()
+    lsubject.id = subject_idx
     lsubject.subject_name = subject.name
     lsubject.src_main_code = subject.get_src_main_code()
-    lsubject.id = subject_idx
 
     subject_list.append(subject)
     lbenchmark.subjects.append(lsubject)
@@ -325,19 +331,21 @@ async def mode_benchmark(conf: dict) -> None:
   p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
 
 
-async def mode_custom(conf: dict) -> None:
+async def mode_custom_deprecated(conf: dict) -> None:
   '''
   Run PiREL to learn translation rules for any program.
   '''
 
-  logger.info('~~~ Starting mode_custom()')
+  logger.info('~~~ Starting mode_custom_deprecated()')
 
   subject = p_subject.PirelSubject.from_file_config(
     p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
   starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(
     subject.translation_rules_main_code)
 
-  lsubject = ptlog.Subject(subject.name)
+  lsubject = ptlog.Subject()
+  lsubject.id = 1
+  lsubject.subject_name = subject.name
   lsubject.src_main_code = subject.get_src_main_code()
   lrule_learn_phase = ptlog.RuleLearnPhase()
   lsubject.rule_learn_phase = lrule_learn_phase
@@ -350,7 +358,7 @@ async def mode_custom(conf: dict) -> None:
     )
 
     lrule_learn_phase.success = True
-    lsubject.success = True
+    lrule_learn_phase.etms = p_utils.current_time_msec()
     logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
     logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
     p_utils.llog_text(f'{subject.name}_learned_rules.snart', starting_ruleset.to_str_ruleset())
@@ -362,8 +370,7 @@ async def mode_custom(conf: dict) -> None:
     msg += p_utils.exception_to_str(exc)
     lrule_learn_phase.success = False
     lrule_learn_phase.reason = msg
-    lsubject.success = False
-    lsubject.reason = 'Translation rule learning phase failed'
+    lrule_learn_phase.etms = p_utils.current_time_msec()
     logger.error(msg)
 
   p_utils.llog_yaml(f'tree-log-custom-mode-{subject.name}.yaml', asdict(lsubject))
@@ -371,7 +378,7 @@ async def mode_custom(conf: dict) -> None:
 
 MODE_CALLBACKS = {
   'benchmark': mode_benchmark,
-  'custom': mode_custom,
+  'custom': mode_custom_deprecated,
 }
 
 

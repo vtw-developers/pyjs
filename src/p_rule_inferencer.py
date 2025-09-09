@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import d_ast_match
 import d_ast_parse
@@ -760,14 +760,15 @@ def infer_translation_rule_wrapper(
 def infer_translation_rules(
   template_dict: dict,
   translation_pairs: List[Tuple[Dict[str, str], Dict[str, str]]],
-  lprule_inf_log: ptlog.PRuleInfLog
+  lprule_inf_log: Optional[ptlog.PRuleInfLog] = None
 ) -> List[str]:
   '''
   Infer translation rules for multiple translation pairs.
   RAISE None. All exceptions are handled.
   '''
   p_utils.log_json_time(f'args-infer_translation_rules.json', locals())
-  lprule_inf_log.start_time = p_utils.current_time_sec()
+  lprule_inf_log = lprule_inf_log or ptlog.PRuleInfLog()
+  lprule_inf_log.stms = p_utils.current_time_sec()
 
   contexts : List[Dict[str, List[List[str]]]] = template_dict['contexts']
   src_lang = template_dict['src_lang']
@@ -834,14 +835,14 @@ def infer_translation_rules(
               lrule_inf_comb.reason = msg
 
           except Exception as exc:
-            msg = 'Error during rule inference. Skip this one\n'
-            msg += p_utils.exception_to_str(exc)
+            msg = f'Error during rule inference. Skip this one: {exc}'
             logger.debug(msg)
             lrule_inf_comb.reason = msg
 
           logger.debug(f'the number of translation rules so far is {len(trules_list)}')
 
-  lprule_inf_log.end_time = p_utils.current_time_sec()
+  lprule_inf_log.success = True
+  lprule_inf_log.etms = p_utils.current_time_sec()
   if len(trules_list) == 0:
     logger.warning('No translation rules were inferred from the given translation pairs and contexts.')
   logger.debug(f'rule-inf: inferred {len(trules_list)} translation rules in total')
