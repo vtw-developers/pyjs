@@ -319,12 +319,12 @@ def _get_log_statement_idx(
   Sample trace:
   ["list", 1,
     [
-      [
-        "list", 2, [
-          ["number", 5],
-          ["number", 2]
-        ]
-      ]
+      [                                     | 1st trace entry
+        "list", 2, [                        |
+          ["number", 5],  | 1st logged arg  |
+          ["number", 2]   | 2nd logged arg  |
+        ]                                   |
+      ]                                     |
     ]
   ]
 
@@ -898,7 +898,7 @@ async def apply_translation_rules(
 
     try:
       await _run_tests(src_program_instr, tar_program_instr, subject)
-      return tar_program_instr
+      return tar_program_instr.strip()
 
     except SrcTestScriptRunError as err:
       logger.critical('There is an error in running src test script. This normally should not happen')

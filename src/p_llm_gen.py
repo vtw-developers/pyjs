@@ -114,7 +114,8 @@ class BasePirelTask(ABC):
     self._log(f'creating an in instance of "{task_name}"')
 
     # creating an attribute in PLLMGenLog
-    self.ltask_loop = ptlog.TaskLoop(self.task_name)
+    self.ltask_loop = ptlog.TaskLoop()
+    self.ltask_loop.task_name = task_name
     lbase_task.task_loop = self.ltask_loop
 
     # stats
@@ -136,7 +137,8 @@ class BasePirelTask(ABC):
     self._log('BasePirelTask.run: starting the task loop')
     while self.does_require_task_iteration():
 
-      ltask_iteration = ptlog.TaskIteration(self.task_iteration_counter)
+      ltask_iteration = ptlog.TaskIteration()
+      ltask_iteration.id = self.task_iteration_counter
       self.ltask_loop.task_iterations.append(ltask_iteration)
 
       try:
@@ -208,7 +210,8 @@ class BasePirelTask(ABC):
       self._log(f'_run_task_once: feedback loop (run #{self.task_iteration_counter}) (iteration #{self.feedback_iteration_counter})')
       self.run_task_once_feedback_init()
 
-      lfeedback = ptlog.Feedback(self.feedback_iteration_counter)
+      lfeedback = ptlog.Feedback()
+      lfeedback.id = self.feedback_iteration_counter
       ltask_iteration.feedbacks.append(lfeedback)
 
       # feedback prompt and response
@@ -807,7 +810,7 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
     f'{json.dumps(model_params, indent=2)}')
 
   query_stats = {}
-  query_stats['start_time_msec'] = p_utils.current_time_msec()
+  query_stats['stms'] = p_utils.current_time_msec()
 
   chatgpt = ChatOpenAI(openai_api_key=api_key, openai_organization=org_id, **model_params)
   excs = []
@@ -823,10 +826,16 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
   else:
     raise OpenAIErrors('Repeated API failures', excs)
 
-  query_stats['end_time_msec'] = p_utils.current_time_msec()
-  query_stats['num_tokens_prompt'] = chat_result.response_metadata['token_usage']['prompt_tokens']
-  query_stats['num_tokens_completion'] = chat_result.response_metadata['token_usage']['completion_tokens']
-  query_stats['num_tokens_total'] = chat_result.response_metadata['token_usage']['total_tokens']
+  query_stats['etms'] = p_utils.current_time_msec()
+  # number of input tokens (model takes in)
+  query_stats['num_tokens_prompt'] = \
+    chat_result.response_metadata['token_usage']['prompt_tokens']
+  # number of output tokens (model generates)
+  query_stats['num_tokens_completion'] = \
+    chat_result.response_metadata['token_usage']['completion_tokens']
+  # total number of tokens (input + output)
+  query_stats['num_tokens_total'] = \
+    chat_result.response_metadata['token_usage']['total_tokens']
 
   return chat_result.content, query_stats
 
@@ -917,7 +926,7 @@ async def get_translation_pairs_from_tsp(
   subject: p_subject.PirelSubject,
   tsp: Tuple[str, str, str],
   template_dict: dict,
-  lpllm_gen_log: ptlog.PLLMGenLog
+  lpllm_gen_log: Optional[ptlog.PLLMGenLog] = None
 ) -> List[Tuple[dict, dict]]:
   '''
   RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
@@ -967,29 +976,30 @@ async def get_translation_pairs_from_tsp(
       s += f'[{idx}] {hash}:\n{cand}\n'
     return s.rstrip('\n')
 
-  lpllm_gen_log.start_time = p_utils.current_time_sec()
+  lpllm_gen_log = lpllm_gen_log or ptlog.PLLMGenLog()
+  lpllm_gen_log.stms = p_utils.current_time_sec()
   sp1, sp2 = tsp
 
   # ~~~ TRANSLATE `SP1` TO PRODUCE SP1_TP1_CANDS (A.K.A. PROGRAM PAIRS)
   ltrans_sp1 = ptlog.TransSP1()
   ltrans_sp1.sp1 = sp1
-  ltrans_sp1.start_time = p_utils.current_time_sec()
+  ltrans_sp1.stms = p_utils.current_time_sec()
   lpllm_gen_log.trans_sp1 = ltrans_sp1
   trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1, ltrans_sp1)
 
   try:
     sp1_tp1_cands = await trans_sp1.run()
-    ltrans_sp1.success = True
     ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_gen_cands(_c) for _c in sp1_tp1_cands]
-    ltrans_sp1.end_time = p_utils.current_time_sec()
     ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
+    ltrans_sp1.success = True
+    ltrans_sp1.etms = p_utils.current_time_sec()
   except SP1TranslationRetryLimitError as err:
     msg = f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}'
     logger.warning(msg)
+    ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
     ltrans_sp1.success = False
     ltrans_sp1.reason = msg
-    ltrans_sp1.end_time = p_utils.current_time_sec()
-    ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
+    ltrans_sp1.etms = p_utils.current_time_sec()
     raise NoTransPairsFromTSPError from err
 
   logger.debug(_aux_log_msg_sp1_tp1_cands(sp1_tp1_cands))
@@ -1005,7 +1015,8 @@ async def get_translation_pairs_from_tsp(
     ltrans_sp2.id = cand_idx
     ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_gen_cands(sp1_tp1_cand)
     ltrans_sp2.sp2 = sp2
-    ltrans_sp2.start_time = p_utils.current_time_sec()
+    ltrans_sp2.sp1_sp2_are_identical = False
+    ltrans_sp2.stms = p_utils.current_time_sec()
     lpllm_gen_log.trans_sp2s.append(ltrans_sp2)
 
     # check if SP1 and SP2 are identical
@@ -1013,9 +1024,9 @@ async def get_translation_pairs_from_tsp(
     if translation_pairs is not None:
       all_translation_pairs.extend(translation_pairs)
       ltrans_sp2.sp1_sp2_are_identical = True
-      ltrans_sp2.success = True
       ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pairs]
-      ltrans_sp2.end_time = p_utils.current_time_sec()
+      ltrans_sp2.success = True
+      ltrans_sp2.etms = p_utils.current_time_sec()
       continue
 
     trans_sp2 = BaseTranslateSP2Task.dispatch(subject, template_dict, sp1_tp1_cand, sp2, ltrans_sp2)
@@ -1028,17 +1039,17 @@ async def get_translation_pairs_from_tsp(
         f'{str(err)}\n'
         f'Will try with the next TP1 cands ({len(sp1_tp1_cands)-cand_idx} left)')
       logger.warning(msg)
+      ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
       ltrans_sp2.success = False
       ltrans_sp2.reason = msg
-      ltrans_sp2.end_time = p_utils.current_time_sec()
-      ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
+      ltrans_sp2.etms = p_utils.current_time_sec()
       continue
 
     all_translation_pairs.extend(translation_pair_cands)
-    ltrans_sp2.success = True
     ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pair_cands]
-    ltrans_sp2.end_time = p_utils.current_time_sec()
     ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
+    ltrans_sp2.success = True
+    ltrans_sp2.etms = p_utils.current_time_sec()
     logger.debug(_aux_log_msg_trans_pair_cands(translation_pair_cands))
 
   logger.debug(
@@ -1051,11 +1062,11 @@ async def get_translation_pairs_from_tsp(
     logger.warning(msg)
     lpllm_gen_log.success = False
     lpllm_gen_log.reason = msg
-    lpllm_gen_log.end_time = p_utils.current_time_sec()
+    lpllm_gen_log.etms = p_utils.current_time_sec()
     raise NoTransPairsFromTSPError(msg)
 
   lpllm_gen_log.success = True
-  lpllm_gen_log.end_time = p_utils.current_time_sec()
+  lpllm_gen_log.etms = p_utils.current_time_sec()
   return all_translation_pairs
 
 
@@ -1063,7 +1074,7 @@ async def gen_test_function_deprecated(
   f_gold_function: str,
   src_lang: str,
   tar_lang: str
-) -> Tuple[Optional[str], ptlog.GenTestFunction]:
+) -> Tuple[Optional[str], ptlog.GenTestFn_deprecated]:
   '''
   Generate a test function for validating a translation rule.
   RETURN: test function or None if failed
@@ -1077,8 +1088,8 @@ async def gen_test_function_deprecated(
   '''
   logger.info(f'~~~ Starting API call to p_llm_gen.gen_test_function_deprecated')
 
-  lgen_test_function = ptlog.GenTestFunction()
-  lgen_test_function.f_gold_function = f_gold_function
+  lgen_test_fn = ptlog.GenTestFn_deprecated()
+  lgen_test_fn.f_gold_function = f_gold_function
 
   fabr_template_dict = {'src_lang': src_lang}
   subject_conf = {
@@ -1095,18 +1106,18 @@ async def gen_test_function_deprecated(
     f_gold_function=f_gold_function,
     subject=fabr_subject,
     template_dict=fabr_template_dict,
-    lbase_task=lgen_test_function
+    lbase_task=lgen_test_fn
   )
 
   try:
     test_functions = await gen_task.run()
   except GenTestFunctionRetryLimitError as err:
     logger.warning(str(err))
-    lgen_test_function.success = False
-    lgen_test_function.reason = str(err)
-    lgen_test_function.llm_query_stats = [
+    lgen_test_fn.success = False
+    lgen_test_fn.reason = str(err)
+    lgen_test_fn.llm_query_stats = [
       ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
-    return None, lgen_test_function
+    return None, lgen_test_fn
 
   assert len(test_functions) > 0, 'sanity check'
   if len(test_functions) > 1:
@@ -1116,11 +1127,11 @@ async def gen_test_function_deprecated(
 
   test_function = test_functions[0]
   assert isinstance(test_function, str), 'sanity check'
-  lgen_test_function.success = True
-  lgen_test_function.test_function = test_function
-  lgen_test_function.llm_query_stats = [
+  lgen_test_fn.success = True
+  lgen_test_fn.test_function = test_function
+  lgen_test_fn.llm_query_stats = [
     ptlog.LLMQueryStat.from_dict(stats) for stats in gen_task.llm_query_stats]
-  return test_function, lgen_test_function
+  return test_function, lgen_test_fn
 
 
 async def get_reference_translations(
@@ -1143,6 +1154,7 @@ async def get_reference_translations(
   logger.info(f'~~~ Starting API call to p_llm_gen.get_reference_translations')
 
   lget_ref_trans = ptlog.GetRefTrans()
+  lget_ref_trans.stms = p_utils.current_time_sec()
   lget_ref_trans.statement_str = statement_str
 
   fabr_template_dict = {'src_lang': src_lang, 'tar_lang': tar_lang}
@@ -1167,18 +1179,21 @@ async def get_reference_translations(
     ref_translations = await get_ref_trans_task.run()
   except GetRefTransRetryLimitError as err:
     logger.warning(str(err))
+    lget_ref_trans.llm_query_stats = \
+      [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
     lget_ref_trans.success = False
     lget_ref_trans.reason = str(err)
-    lget_ref_trans.llm_query_stats = [
-      ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
+    lget_ref_trans.etms = p_utils.current_time_sec()
     return [], lget_ref_trans
 
   assert len(ref_translations) > 0, 'sanity check'
 
+  lget_ref_trans.llm_query_stats = \
+    [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
   lget_ref_trans.success = True
   lget_ref_trans.ref_translations = ref_translations
-  lget_ref_trans.llm_query_stats = [
-    ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
+  lget_ref_trans.etms = p_utils.current_time_sec()
+
   return ref_translations, lget_ref_trans
 
 

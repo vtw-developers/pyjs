@@ -326,7 +326,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   NOTE this function returns a third sample that is used during trans.rule validation
   '''
 
-  p_utils.log_json_time('args-generate_tsps_with_generator', locals())
+  p_utils.log_json_time('args-generate_tsps_with_generator.json', locals())
 
   def _init_problematic_node(template_dict: dict) -> pds.DuoGlotNode:
     '''

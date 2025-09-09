@@ -5,11 +5,25 @@ The information is stored in a tree-like structure.
 '''
 
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import d_utils
 
+
+##################################################################
+######################## BASE CLASSES ############################
+##################################################################
+@dataclass
+class BaseLogNode(ABC):
+  '''
+  ATTRIBUTES (stms, etms, success, reason)
+  '''
+  stms: Optional[int] = None  # start time in milliseconds
+  etms: Optional[int] = None  # end time in milliseconds
+  success: Optional[bool] = None
+  reason: Optional[str] = None
 
 ##################################################################
 ###################### COMMON CLASSES ############################
@@ -34,6 +48,7 @@ class TRule:
     if 'syntax_val_res' in obj:
       syntax_val_res = TRuleSyntaxValRes.from_dict(obj['syntax_val_res'])
     return cls(hash=hash, rule=rule, syntax_val_res=syntax_val_res)
+
 
 @dataclass
 class TransPair:
@@ -69,6 +84,7 @@ class TransPair:
     return cls(hash=hash, sp1=sp1, sp2=sp2, tp1=tp1, tp2=tp2,
                contexts=contexts, num_inferred_rules=num_inferred_rules)
 
+
 @dataclass
 class Sp1Tp1Cand:
   hash: str
@@ -89,23 +105,23 @@ class Sp1Tp1Cand:
     tp1_cand = obj['tp1_cand']
     return cls(hash=hash, sp1=sp1, tp1_cand=tp1_cand)
 
+
 @dataclass
 class LLMQueryStat:
-  start_time_msec: Optional[int] = None
-  end_time_msec: Optional[int] = None
-  num_tokens_prompt: Optional[int] = None
-  num_tokens_completion: Optional[int] = None
-  num_tokens_total: Optional[int] = None
+  stms: Optional[int] = None  # start time in milliseconds
+  etms: Optional[int] = None  # end time in milliseconds
+  num_tokens_prompt: Optional[int] = None  # input tokens
+  num_tokens_completion: Optional[int] = None  # output tokens
+  num_tokens_total: Optional[int] = None  # total tokens
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'LLMQueryStat':
-    start_time_msec = obj['start_time_msec']
-    end_time_msec = obj['end_time_msec']
+    stms = obj['stms']
+    etms = obj['etms']
     num_tokens_prompt = obj['num_tokens_prompt']
     num_tokens_completion = obj['num_tokens_completion']
     num_tokens_total = obj['num_tokens_total']
-    return cls(start_time_msec=start_time_msec,
-               end_time_msec=end_time_msec,
+    return cls(stms=stms, etms=etms,
                num_tokens_prompt=num_tokens_prompt,
                num_tokens_completion=num_tokens_completion,
                num_tokens_total=num_tokens_total)
@@ -125,10 +141,15 @@ class TRuleSyntaxValRes:
     reason = obj.get('reason', None)
     return cls(is_valid=is_valid, reason=reason)
 
+
 @dataclass
-class PRuleFilterLog:
+class PRuleFilterLog(BaseLogNode):
   trules_all: List[TRule] = field(default_factory=list)
   trules_syn_valid: List[TRule] = field(default_factory=list)
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PRuleFilterLog':
@@ -136,7 +157,19 @@ class PRuleFilterLog:
     for tr_dict in obj.get('trules_all', []):
       tr_obj = TRule.from_dict(tr_dict)
       trules_all.append(tr_obj)
-    return cls(trules_all=trules_all)
+    trules_syn_valid = []
+    for tr_dict in obj.get('trules_syn_valid', []):
+      tr_obj = TRule.from_dict(tr_dict)
+      trules_syn_valid.append(tr_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(trules_all=trules_all,
+               trules_syn_valid=trules_syn_valid,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
 
 ##################################################################
 ################## TRANSLATION RULE INFERENCE ####################
@@ -144,14 +177,14 @@ class PRuleFilterLog:
 
 @dataclass
 class RuleInfComb:
-  largest_and_ignore: Optional[List[bool]] = None
+  largest_and_ignore: List[bool] = field(default_factory=list)
   translation_rule: Optional[TRule] = None
   reason: Optional[str] = None
   num_inferred_rules: int = 0
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleInfComb':
-    largest_and_ignore = obj.get('largest_and_ignore', None)
+    largest_and_ignore = obj.get('largest_and_ignore', [])
     translation_rule = None
     if 'translation_rule' in obj:
       translation_rule = TRule.from_dict(obj['translation_rule'])
@@ -160,6 +193,7 @@ class RuleInfComb:
     return cls(largest_and_ignore=largest_and_ignore,
                translation_rule=translation_rule,
                reason=reason, num_inferred_rules=num_inferred_rules)
+
 
 @dataclass
 class Context:
@@ -171,9 +205,9 @@ class Context:
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Context':
-    id_ = obj['id']
-    source_context = obj['source_context']
-    target_context = obj['target_context']
+    id_ = obj.get('id', None)
+    source_context = obj.get('source_context', [])
+    target_context = obj.get('target_context', [])
     num_inferred_rules = obj.get('num_inferred_rules', 0)
     combinations = []
     for comb_dict in obj.get('combinations', []):
@@ -184,12 +218,15 @@ class Context:
                num_inferred_rules=num_inferred_rules,
                combinations=combinations)
 
+
 @dataclass
-class PRuleInfLog:
+class PRuleInfLog(BaseLogNode):
   translation_pairs: List[TransPair] = field(default_factory=list)
   num_inferred_rules: int = 0
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PRuleInfLog':
@@ -198,215 +235,265 @@ class PRuleInfLog:
       tp_obj = TransPair.from_dict(tp_dict)
       translation_pairs.append(tp_obj)
     num_inferred_rules = obj.get('num_inferred_rules', 0)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
     return cls(translation_pairs=translation_pairs,
                num_inferred_rules=num_inferred_rules,
-               start_time=start_time, end_time=end_time)
+               stms=stms, etms=etms,
+               success=success, reason=reason)
 
 ##################################################################
 ################## TRANSLATION PAIR GENERATION ###################
 ##################################################################
 
 @dataclass
-class Feedback:
-  id: int
+class Feedback(BaseLogNode):
+  id: Optional[int] = None
   code_blocks: List[str] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Feedback':
-    id_ = obj['id']
+    id_ = obj.get('id', None)
     code_blocks = obj.get('code_blocks', [])
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
     return cls(id=id_, code_blocks=code_blocks,
+               stms=stms, etms=etms,
                success=success, reason=reason)
 
+
 @dataclass
-class TaskIteration:
-  id: int
+class TaskIteration(BaseLogNode):
+  id: Optional[int] = None
   starting_code_blocks: List[str] = field(default_factory=list)
   feedbacks: List[Feedback] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TaskIteration':
-    id_ = obj['id']
+    id_ = obj.get('id', None)
     starting_code_blocks = obj.get('starting_code_blocks', [])
     feedbacks = []
     for fb_dict in obj.get('feedbacks', []):
       fb_obj = Feedback.from_dict(fb_dict)
       feedbacks.append(fb_obj)
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
     return cls(id=id_, starting_code_blocks=starting_code_blocks,
-               feedbacks=feedbacks, success=success,
-               reason=reason)
+               feedbacks=feedbacks, stms=stms, etms=etms,
+               success=success, reason=reason)
+
 
 @dataclass
-class TaskLoop:
-  task_name: str
+class TaskLoop(BaseLogNode):
+  task_name: Optional[str] = None
   task_iterations: List[TaskIteration] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TaskLoop':
-    task_name = obj['task_name']
+    task_name = obj.get('task_name', None)
     task_iterations = []
     for ti_dict in obj.get('task_iterations', []):
       ti_obj = TaskIteration.from_dict(ti_dict)
       task_iterations.append(ti_obj)
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
     return cls(task_name=task_name, task_iterations=task_iterations,
+               stms=stms, etms=etms,
                success=success, reason=reason)
 
+
 @dataclass
-class BaseTask:  # abstract class
+class BaseTask(BaseLogNode, ABC):
   task_loop: Optional[TaskLoop] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
+
 
 @dataclass
 class GetRefTrans(BaseTask):
   statement_str: Optional[str] = None
   ref_translations: List[str] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
   llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
+  # task_loop: Optional[TaskLoop] = None  # in BaseTask
+  # stms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # etms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
+  # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'GetRefTrans':
-    # task_loop is from superclass
-    task_loop = None
-    if 'task_loop' in obj:
-      task_loop = TaskLoop.from_dict(obj['task_loop'])
-    snippet = obj.get('snippet', None)
+    statement_str = obj.get('statement_str', None)
     ref_translations = obj.get('ref_translations', [])
-    success = obj.get('success', False)
-    reason = obj.get('reason', None)
     llm_query_stats = []
     for stats_dict in obj.get('llm_query_stats', []):
       stats_obj = LLMQueryStat.from_dict(stats_dict)
       llm_query_stats.append(stats_obj)
-    return cls(task_loop=task_loop, snippet=snippet,
-               ref_translations=ref_translations, success=success,
-               reason=reason, llm_query_stats=llm_query_stats)
+    # BaseTask
+    task_loop = None
+    if 'task_loop' in obj:
+      task_loop = TaskLoop.from_dict(obj['task_loop'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(statement_str=statement_str, ref_translations=ref_translations,
+               llm_query_stats=llm_query_stats,
+               task_loop=task_loop,
+               stms=stms, etms=etms, success=success, reason=reason)
+
 
 @dataclass
-class GenTestFunction(BaseTask):
+class GenTestFn_deprecated(BaseTask):
   f_gold_function: Optional[str] = None
   test_function: Optional[str] = None
-  success: bool = False
-  reason: Optional[str] = None
   llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
+  # task_loop: Optional[TaskLoop] = None  # in BaseTask
+  # stms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # etms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
+  # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
   @classmethod
-  def from_dict(cls, obj: dict) -> 'GenTestFunction':
-    # task_loop is from superclass
-    task_loop = None
-    if 'task_loop' in obj:
-      task_loop = TaskLoop.from_dict(obj['task_loop'])
+  def from_dict_deprecated(cls, obj: dict) -> 'GenTestFn_deprecated':
     f_gold_function = obj.get('f_gold_function', None)
     test_function = obj.get('test_function', None)
-    success = obj.get('success', False)
-    reason = obj.get('reason', None)
     llm_query_stats = []
     for stats_dict in obj.get('llm_query_stats', []):
       stats_obj = LLMQueryStat.from_dict(stats_dict)
       llm_query_stats.append(stats_obj)
-    return cls(task_loop=task_loop, f_gold_function=f_gold_function,
-               test_function=test_function, success=success, reason=reason,
-               llm_query_stats=llm_query_stats)
+    # BaseTask
+    task_loop = None
+    if 'task_loop' in obj:
+      task_loop = TaskLoop.from_dict(obj['task_loop'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(f_gold_function=f_gold_function, test_function=test_function,
+               llm_query_stats=llm_query_stats,
+               task_loop=task_loop,
+               stms=stms, etms=etms, success=success, reason=reason)
 
 @dataclass
 class TransSP2(BaseTask):
   id: Optional[int] = None
   sp1_tp1_cand: Optional[Sp1Tp1Cand] = None
   sp2: Optional[str] = None
-  sp1_sp2_are_identical: bool = False
-  success: bool = False
-  reason: Optional[str] = None
+  sp1_sp2_are_identical: Optional[bool] = None
   translation_pairs: List[TransPair] = field(default_factory=list)
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
   llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
+  # task_loop: Optional[TaskLoop] = None  # in BaseTask
+  # stms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # etms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
+  # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP2':
-    # task_loop is from superclass
-    task_loop = None
-    if 'task_loop' in obj:
-      task_loop = TaskLoop.from_dict(obj['task_loop'])
     id_ = obj.get('id', None)
     sp1_tp1_cand = None
     if 'sp1_tp1_cand' in obj:
       sp1_tp1_cand = Sp1Tp1Cand.from_dict(obj['sp1_tp1_cand'])
     sp2 = obj.get('sp2', None)
-    sp1_sp2_are_identical = obj.get('sp1_sp2_are_identical', False)
-    success = obj.get('success', False)
-    reason = obj.get('reason', None)
+    sp1_sp2_are_identical = obj.get('sp1_sp2_are_identical', None)
     translation_pairs = []
     for tp_dict in obj.get('translation_pairs', []):
       tp_obj = TransPair.from_dict(tp_dict)
       translation_pairs.append(tp_obj)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
     llm_query_stats = []
     for stats_dict in obj.get('llm_query_stats', []):
       stats_obj = LLMQueryStat.from_dict(stats_dict)
       llm_query_stats.append(stats_obj)
-    return cls(task_loop=task_loop, id=id_, sp1_tp1_cand=sp1_tp1_cand,
+    # BaseTask
+    task_loop = None
+    if 'task_loop' in obj:
+      task_loop = TaskLoop.from_dict(obj['task_loop'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(id=id_, sp1_tp1_cand=sp1_tp1_cand,
                sp2=sp2, sp1_sp2_are_identical=sp1_sp2_are_identical,
-               success=success, reason=reason,
                translation_pairs=translation_pairs,
-               start_time=start_time, end_time=end_time,
-               llm_query_stats=llm_query_stats)
+               llm_query_stats=llm_query_stats,
+               task_loop=task_loop,
+               stms=stms, etms=etms, success=success, reason=reason)
+
 
 @dataclass
 class TransSP1(BaseTask):
   sp1: Optional[str] = None
-  success: bool = False
-  reason: Optional[str] = None
   sp1_tp1_cands: List[Sp1Tp1Cand] = field(default_factory=list)
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
   llm_query_stats: List[LLMQueryStat] = field(default_factory=list)
+  # task_loop: Optional[TaskLoop] = None  # in BaseTask
+  # stms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # etms: Optional[int] = None  # in BaseLogNode (via BaseTask)
+  # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
+  # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP1':
-    # task_loop is from superclass
-    task_loop = None
-    if 'task_loop' in obj:
-      task_loop = TaskLoop.from_dict(obj['task_loop'])
     sp1 = obj.get('sp1', None)
-    success = obj.get('success', False)
-    reason = obj.get('reason', None)
     sp1_tp1_cands = []
     for sp1_tp1_cand_dict in obj.get('sp1_tp1_cands', []):
       sp1_tp1_cand_obj = Sp1Tp1Cand.from_dict(sp1_tp1_cand_dict)
       sp1_tp1_cands.append(sp1_tp1_cand_obj)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
     llm_query_stats = []
     for stats_dict in obj.get('llm_query_stats', []):
       stats_obj = LLMQueryStat.from_dict(stats_dict)
       llm_query_stats.append(stats_obj)
-    return cls(task_loop=task_loop, sp1=sp1, success=success,
-               reason=reason, sp1_tp1_cands=sp1_tp1_cands,
-               start_time=start_time, end_time=end_time,
-               llm_query_stats=llm_query_stats)
+    # BaseTask
+    task_loop = None
+    if 'task_loop' in obj:
+      task_loop = TaskLoop.from_dict(obj['task_loop'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(sp1=sp1, sp1_tp1_cands=sp1_tp1_cands,
+               llm_query_stats=llm_query_stats,
+               task_loop=task_loop,
+               stms=stms, etms=etms, success=success, reason=reason)
+
 
 @dataclass
-class PLLMGenLog:
+class PLLMGenLog(BaseLogNode):
   trans_sp1: Optional[TransSP1] = None
   trans_sp2s: List[TransSP2] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PLLMGenLog':
@@ -417,96 +504,77 @@ class PLLMGenLog:
     for trans_sp2_dict in obj.get('trans_sp2s', []):
       trans_sp2_obj = TransSP2.from_dict(trans_sp2_dict)
       trans_sp2s.append(trans_sp2_obj)
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
     return cls(trans_sp1=trans_sp1, trans_sp2s=trans_sp2s,
-               success=success, reason=reason,
-               start_time=start_time, end_time=end_time)
+               stms=stms, etms=etms,
+               success=success, reason=reason)
 
 ##################################################################
 ################## PiREL RULE LEARNING PHASE #####################
 ##################################################################
 
 @dataclass
-class RuleApplicationPhase:
+class RuleApplicationPhase(BaseLogNode):
   tar_main_code_plausible: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
-  success: bool = False
-  reason: Optional[str] = None
-
-  def get_root_reason(self) -> str:
-    assert self.success is False, 'Cannot get reason if success is True'
-    assert self.reason is not None, 'Reason must be set if success is False'
-    reason = f'(RuleApplicationPhase) {self.reason}'
-    return reason
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleApplicationPhase':
-    plausible_target_program = obj.get('plausible_target_program', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
-    success = obj.get('success', False)
+    tar_main_code_plausible = obj.get('tar_main_code_plausible', None)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    return cls(plausible_target_program=plausible_target_program,
-               start_time=start_time, end_time=end_time,
+    return cls(tar_main_code_plausible=tar_main_code_plausible,
+               stms=stms, etms=etms,
                success=success, reason=reason)
 
-@dataclass
-class RulesValidation:
-  success: bool = False
-  reason: Optional[str] = None
-  gen_test_function_deprecated: Optional[GenTestFunction] = None
 
 @dataclass
-class RulesRecovery:
-  success: bool = False
-  reason: Optional[str] = None
-  simple_ntext: Optional[str] = None
+class RuleLearnRec(BaseLogNode):
   get_ref_trans: Optional[GetRefTrans] = None
-
-@dataclass
-class StatNodeValRecIter:
-  id: int
-  rules_validation: Optional[RulesValidation] = None
-  rules_recovery: Optional[RulesRecovery] = None
-
-@dataclass
-class StatNodeValRec:
-  val_rec_iters: List[StatNodeValRecIter] = field(default_factory=list)
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
-
-  def get_root_reason(self) -> str:
-    assert not self.success, 'Cannot get reason if success is True'
-    return self.reason
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
-  def from_dict(cls, obj: dict) -> 'StatNodeValRec':
-    id_ = obj['id']
-    success = obj.get('success', False)
+  def from_dict(cls, obj: dict) -> 'RuleLearnRec':
+    get_ref_trans = None
+    if 'get_ref_trans' in obj:
+      get_ref_trans = GetRefTrans.from_dict(obj['get_ref_trans'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
-    return cls(id=id_, success=success, reason=reason,
-               start_time=start_time, end_time=end_time)
+    return cls(get_ref_trans=get_ref_trans,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
+
 
 @dataclass
-class TRuleLearnAttempt:
-  id: int
+class TRuleLearnAttempt(BaseLogNode):
+  id: Optional[int] = None
   p_llm_gen_log: Optional[PLLMGenLog] = None
   p_rule_inferencer_log: Optional[PRuleInfLog] = None
   p_rule_filter_log: Optional[PRuleFilterLog] = None
-  success: bool = False
-  reason: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TRuleLearnAttempt':
-    id_ = obj['id']
+    id_ = obj.get('id', None)
     p_llm_gen_log = None
     if 'p_llm_gen_log' in obj:
       p_llm_gen_log = PLLMGenLog.from_dict(obj['p_llm_gen_log'])
@@ -516,62 +584,62 @@ class TRuleLearnAttempt:
     p_rule_filter_log = None
     if 'p_rule_filter_log' in obj:
       p_rule_filter_log = PRuleFilterLog.from_dict(obj['p_rule_filter_log'])
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
     return cls(id=id_, p_llm_gen_log=p_llm_gen_log,
                p_rule_inferencer_log=p_rule_inferencer_log,
                p_rule_filter_log=p_rule_filter_log,
                success=success, reason=reason,
-               start_time=start_time, end_time=end_time)
+               stms=stms, etms=etms)
+
 
 @dataclass
-class TSP:
-  id: int
-  sp1: str
-  sp2: str
+class TSP(BaseLogNode):
+  id: Optional[int] = None
+  sp1: Optional[str] = None
+  sp2: Optional[str] = None
   trule_learn_attempts: List[TRuleLearnAttempt] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TSP':
-    id_ = obj['id']
-    sp1 = obj['sp1']
-    sp2 = obj['sp2']
-    trans_rule_learn_attempts = []
-    for trla_dict in obj.get('trans_rule_learn_attempts', []):
+    id_ = obj.get('id', None)
+    sp1 = obj.get('sp1', None)
+    sp2 = obj.get('sp2', None)
+    trule_learn_attempts = []
+    for trla_dict in obj.get('trule_learn_attempts', []):
       trla_obj = TRuleLearnAttempt.from_dict(trla_dict)
-      trans_rule_learn_attempts.append(trla_obj)
-    success = obj.get('success', False)
+      trule_learn_attempts.append(trla_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
-    return cls(id=id_, sp1=sp1, sp2=sp2, trans_rule_learn_attempts=trans_rule_learn_attempts,
-               success=success, reason=reason, start_time=start_time, end_time=end_time)
+    return cls(id=id_, sp1=sp1, sp2=sp2, trule_learn_attempts=trule_learn_attempts,
+               success=success, reason=reason, stms=stms, etms=etms)
+
 
 @dataclass
-class NodeTransIter:
-  id: int
+class NodeTransIter(BaseLogNode):
+  id: Optional[int] = None
   node_id: Optional[int] = None
   node_type: Optional[str] = None
   template_origin: Optional[str] = None
   tsps: List[TSP] = field(default_factory=list)
-  unchecked_trules: List[TRule] = field(default_factory=list)
-  success: bool = False
-  reason: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
-
-  def get_root_reason(self) -> str:
-    return self.reason
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'NodeTransIter':
-    id_ = obj['id']
+    id_ = obj.get('id', None)
     node_id = obj.get('node_id', None)
     node_type = obj.get('node_type', None)
     template_origin = obj.get('template_origin', None)
@@ -579,191 +647,214 @@ class NodeTransIter:
     for tsp_dict in obj.get('tsps', []):
       tsp_obj = TSP.from_dict(tsp_dict)
       tsps.append(tsp_obj)
-    unchecked_trules = []
-    for trule_dict in obj.get('unchecked_trules', []):
-      trule_obj = TRule.from_dict(trule_dict)
-      unchecked_trules.append(trule_obj)
-    success = obj.get('success', False)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
     return cls(id=id_, node_id=node_id, node_type=node_type,
                template_origin=template_origin, tsps=tsps,
-               unchecked_trules=unchecked_trules, success=success, reason=reason,
-               start_time=start_time, end_time=end_time)
+               success=success, reason=reason,
+               stms=stms, etms=etms)
+
 
 @dataclass
-class StatNodeLearn:
+class RuleLearnStd(BaseLogNode):
   node_trans_iters: List[NodeTransIter] = field(default_factory=list)
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'RuleLearnStd':
+    node_trans_iters = []
+    for nti_dict in obj.get('node_trans_iters', []):
+      nti_obj = NodeTransIter.from_dict(nti_dict)
+      node_trans_iters.append(nti_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(node_trans_iters=node_trans_iters,
+               success=success, reason=reason,
+               stms=stms, etms=etms)
+
 
 @dataclass
-class StatNodeLVRIter:
-  id: int
-  stat_node_learn: Optional[StatNodeLearn] = None
-  stat_node_val_rec: Optional[StatNodeValRec] = None
+class StatNodeVal(BaseLogNode):
+  v1_enough_rules: Optional[bool] = None
+  v2_expr_valid_ok: Optional[bool] = None
+  v2_expr_valid_stms: Optional[int] = None
+  v2_expr_valid_etms: Optional[int] = None
+  v3_rule_apply_ok: Optional[bool] = None
+  v3_rule_apply_stms: Optional[int] = None
+  v3_rule_apply_etms: Optional[int] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'StatNodeVal':
+    v1_enough_rules = obj.get('v1_enough_rules', None)
+    v2_expr_valid_ok = obj.get('v2_expr_valid_ok', None)
+    v2_expr_valid_stms = obj.get('v2_expr_valid_stms', None)
+    v2_expr_valid_etms = obj.get('v2_expr_valid_etms', None)
+    v3_rule_apply_ok = obj.get('v3_rule_apply_ok', None)
+    v3_rule_apply_stms = obj.get('v3_rule_apply_stms', None)
+    v3_rule_apply_etms = obj.get('v3_rule_apply_etms', None)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(v1_enough_rules=v1_enough_rules,
+               v2_expr_valid_ok=v2_expr_valid_ok,
+               v2_expr_valid_stms=v2_expr_valid_stms,
+               v2_expr_valid_etms=v2_expr_valid_etms,
+               v3_rule_apply_ok=v3_rule_apply_ok,
+               v3_rule_apply_stms=v3_rule_apply_stms,
+               v3_rule_apply_etms=v3_rule_apply_etms,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
 
 @dataclass
-class StatNode:
-  id: int
+class StatNodeIter(BaseLogNode):
+  id: Optional[int] = None
+  stat_node_val: Optional[StatNodeVal] = None
+  stat_node_learn_std: Optional[RuleLearnStd] = None
+  stat_node_learn_rec: Optional[RuleLearnRec] = None
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'StatNodeIter':
+    id_ = obj.get('id', None)
+    stat_node_val = None
+    if 'stat_node_val' in obj:
+      stat_node_val = StatNodeVal.from_dict(obj['stat_node_val'])
+    stat_node_learn_std = None
+    if 'stat_node_learn_std' in obj:
+      stat_node_learn_std = RuleLearnStd.from_dict(obj['stat_node_learn_std'])
+    stat_node_learn_rec = None
+    if 'stat_node_learn_rec' in obj:
+      stat_node_learn_rec = RuleLearnRec.from_dict(obj['stat_node_learn_rec'])
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(id=id_, stat_node_val=stat_node_val,
+               stat_node_learn_std=stat_node_learn_std,
+               stat_node_learn_rec=stat_node_learn_rec,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
+
+
+@dataclass
+class StatNode(BaseLogNode):
+  id: Optional[int] = None
   node_id: Optional[int] = None
   node_text: Optional[str] = None
-  simplified_node_text: Optional[str] = None
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
-  lvr_iters: List[StatNodeLVRIter] = field(default_factory=list)
-
-  def is_successful(self) -> bool:
-    '''
-    Returns True if the statement node is successful, i.e. all nodes under it
-    can be translated successfully and all translation rules are valid.
-    '''
-    raise NotImplementedError()
-
-  def get_root_reason(self) -> str:
-    raise NotImplementedError()
+  pre_context: Optional[str] = None
+  simple_ntext: Optional[str] = None
+  stat_node_iters: List[StatNodeIter] = field(default_factory=list)
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'StatNode':
-    id_ = obj['id']
+    id_ = obj.get('id', None)
     node_id = obj.get('node_id', None)
     node_text = obj.get('node_text', None)
-    simplified_node_text = obj.get('simplified_node_text', None)
-    node_trans_iterations = []
-    for nti_dict in obj.get('node_trans_iterations', []):
-      nti_obj = NodeTransIter.from_dict(nti_dict)
-      node_trans_iterations.append(nti_obj)
-    unchecked_trules = []
-    for trule_dict in obj.get('unchecked_trules', []):
-      trule_obj = TRule.from_dict(trule_dict)
-      unchecked_trules.append(trule_obj)
-    val_rec_iterations = []
-    for vr_dict in obj.get('val_rec_iterations', []):
-      vr_obj = RulesValidationRecovery.from_dict(vr_dict)
-      val_rec_iterations.append(vr_obj)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
+    pre_context = obj.get('pre_context', None)
+    simple_ntext = obj.get('simple_ntext', None)
+    stat_node_iters = []
+    for sni_dict in obj.get('stat_node_iters', []):
+      sni_obj = StatNodeIter.from_dict(sni_dict)
+      stat_node_iters.append(sni_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', False)
+    reason = obj.get('reason', None)
     return cls(id=id_, node_id=node_id, node_text=node_text,
-               simplified_node_text=simplified_node_text,
-               node_trans_iterations=node_trans_iterations,
-               unchecked_trules=unchecked_trules,
-               val_rec_iterations=val_rec_iterations,
-               start_time=start_time, end_time=end_time)
+               pre_context=pre_context, simple_ntext=simple_ntext,
+               stat_node_iters=stat_node_iters,
+               stms=stms, etms=etms, success=success, reason=reason)
+
 
 @dataclass
-class RuleLearnPhase:
+class RuleLearnPhase(BaseLogNode):
+  num_stat_nodes: Optional[int] = None
   stat_nodes: List[StatNode] = field(default_factory=list)
-  start_time: Optional[int] = None
-  end_time: Optional[int] = None
-  success: bool = False
-  reason: Optional[str] = None
-
-  def get_root_reason(self) -> str:
-    assert self.success is False, 'Cannot get reason if success is True'
-    reason = f'(RuleLearnPhase) {self.reason}'
-    for st_node in self.stat_nodes:
-      if not st_node.is_successful():
-        reason += f' ~~~ {st_node.get_root_reason()}'
-        return reason
-    raise RuntimeError('expected one unsuccessful statement node')
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleLearnPhase':
-    statement_nodes = []
-    for node_dict in obj.get('statement_nodes', []):
-      node_obj = StatNode.from_dict(node_dict)
-      statement_nodes.append(node_obj)
-    start_time = obj.get('start_time', None)
-    end_time = obj.get('end_time', None)
-    success = obj.get('success', False)
+    num_stat_nodes = obj.get('num_stat_nodes', None)
+    stat_nodes = []
+    for sn_dict in obj.get('stat_nodes', []):
+      sn_obj = StatNode.from_dict(sn_dict)
+      stat_nodes.append(sn_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
-    return cls(statement_nodes=statement_nodes, start_time=start_time,
-               end_time=end_time, success=success, reason=reason)
+    return cls(num_stat_nodes=num_stat_nodes, stat_nodes=stat_nodes,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
+
 
 @dataclass
-class Subject:
+class Subject():
+  id: Optional[int] = None
   subject_name: Optional[str] = None
   src_main_code: Optional[str] = None
-  id: Optional[int] = None
   rule_learn_phase: Optional[RuleLearnPhase] = None
   rule_application_phase: Optional[RuleApplicationPhase] = None
-  success: Optional[bool] = None
-  reason: Optional[str] = None
 
   def get_general_stats(self) -> dict:
     '''
     subject_name
-    success
+    learn_phase_success
+    apply_phase_success
     reason
     '''
     stats = {
       'subject_name': self.subject_name,
-      'success': self.success,
+      'learn_phase_success': self.rule_learn_phase.success is True,
+      'apply_phase_success': self.rule_application_phase.success is True,
+      'reason': self.rule_application_phase.reason or self.rule_learn_phase.reason
     }
-    assert self.rule_learn_phase is not None, 'Rule learn phase must be set'
-    if not self.rule_learn_phase.success:
-      stats['reason'] = self.rule_learn_phase.get_root_reason()
-      return stats
-    assert self.rule_application_phase is not None, 'Rule application phase must be set'
-    if not self.rule_application_phase.success:
-      stats['reason'] = self.rule_application_phase.get_root_reason()
-      return stats
     return stats
-
-  def write_gsheet_stats(self, file_out) -> None:
-    '''
-    Learn Phase Success, Apply Phase Success, Reason
-    NOTE print statements conform the structure of Google Sheets "GFG"
-    '''
-    lps = self.rule_learn_phase.success
-    if lps is False:
-      reason = self.rule_learn_phase.get_root_reason()
-      print(str(lps).upper(), '', reason, sep='\t', file=file_out)
-      return
-
-    aps = self.rule_application_phase.success
-    if aps is False:
-      reason = self.rule_application_phase.get_root_reason()
-      print(str(lps).upper(), str(aps).upper(), reason, sep='\t', file=file_out)
-      return
-
-    print(str(lps).upper(), str(aps).upper(), sep='\t', file=file_out)
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Subject':
-    subject_name = obj['subject_name']
-    code_text = obj.get('code_text', None)
     id_ = obj.get('id', None)
+    subject_name = obj.get('subject_name', None)
+    src_main_code = obj.get('src_main_code', None)
     rule_learn_phase = None
     if 'rule_learn_phase' in obj:
       rule_learn_phase = RuleLearnPhase.from_dict(obj['rule_learn_phase'])
     rule_application_phase = None
     if 'rule_application_phase' in obj:
       rule_application_phase = RuleApplicationPhase.from_dict(obj['rule_application_phase'])
-    success = obj.get('success', False)
-    reason = obj.get('reason', None)
-    return cls(subject_name=subject_name, code_text=code_text, id=id_,
-               rule_learn_phase=rule_learn_phase, rule_application_phase=rule_application_phase,
-               success=success, reason=reason)
+    return cls(id=id_, subject_name=subject_name,
+               src_main_code=src_main_code,
+               rule_learn_phase=rule_learn_phase,
+               rule_application_phase=rule_application_phase)
 
-  def get_total_time(self) -> str:
-    assert self.rule_learn_phase.start_time is not None, 'Start time must be set'
-    assert self.rule_learn_phase.end_time is not None, 'End time must be set'
-    # only rule learn phase ran
-    start_time = self.rule_learn_phase.start_time
-    end_time = self.rule_learn_phase.end_time
-    # if rule application phase ran, end time is the end time of the rule application phase
-    if self.rule_application_phase is not None:
-      assert self.rule_application_phase.start_time is not None, 'Start time must be set'
-      assert self.rule_application_phase.end_time is not None, 'End time must be set'
-      end_time = self.rule_application_phase.end_time
-    total_sec = end_time - start_time
-    if total_sec < 60:
-      return f'{total_sec}s'
-    total_min, total_sec = divmod(total_sec, 60)
-    total_hr, total_min = divmod(total_min, 60)
-    if total_hr == 0:
-      return f'{total_min}m{total_sec}s'
-    return f'{total_hr}h{total_min}m{total_sec}s'
 
 @dataclass
 class Benchmark:
@@ -779,7 +870,7 @@ class Benchmark:
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Benchmark':
-    benchmark_name = obj['benchmark_name']
+    benchmark_name = obj.get('benchmark_name', None)
     sample_size = obj.get('sample_size', None)
     subjects = []
     for subject_dict in obj.get('subjects', []):
