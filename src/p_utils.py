@@ -194,8 +194,19 @@ def read_yaml(fpath: Union[Path, str]) -> Any:
 def write_text(fpath: Union[Path, str], content: str) -> None:
   write_file(fpath, content, include_timestamp=False)
 
+def _json_dumps(obj: Any) -> str:
+  def _serialize(obj: Any):
+    if isinstance(obj, (list, tuple)):
+      return [_serialize(item) for item in obj]
+    elif isinstance(obj, dict):
+      return {key: _serialize(value) for key, value in obj.items()}
+    elif hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
+      return obj.to_dict()  # do not deepcopy for safety
+    return obj
+  return json.dumps(_serialize(obj), default=str)
+
 def write_json(fpath: Union[Path, str], obj: Any, include_timestamp=False) -> None:
-  write_file(fpath, json.dumps(obj, default=str), include_timestamp=include_timestamp)
+  write_file(fpath, _json_dumps(obj), include_timestamp=include_timestamp)
 
 def write_yaml(
   fpath: Union[Path, str],
@@ -275,10 +286,10 @@ def write_file(
 
 # Helper functions to log directly to PiREL log dir
 def log_json(fname: str, obj: Any) -> None:
-  write_file(p_consts.PIREL_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=False)
+  write_file(p_consts.PIREL_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=False)
 
 def log_json_time(fname: str, obj: Any) -> None:
-  write_file(p_consts.PIREL_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
+  write_file(p_consts.PIREL_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=True)
 
 def log_file_time(fname: str, contents: str) -> None:
   write_file(p_consts.PIREL_LOGS_DIR / fname, contents, include_timestamp=True)
@@ -286,10 +297,10 @@ def log_file_time(fname: str, contents: str) -> None:
 
 # Helper functions to log directly to Learning Phase log dir
 def llog_json(fname: str, obj: Any) -> None:
-  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=False)
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=False)
 
 def llog_json_time(fname: str, obj: Any) -> None:
-  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, json.dumps(obj, default=str), include_timestamp=True)
+  write_file(p_consts.LEARN_RULES_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=True)
 
 def llog_yaml(
   fname: str,
