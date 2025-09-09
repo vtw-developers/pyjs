@@ -1126,7 +1126,12 @@ def _get_readonly_choices_list_init(
   for i, choicable_node in enumerate(choicable_nodes, start=1):
     choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
     stat_node = _choicable_node_get_context_node(choicable_node)
-    pre_context = p_pirel.get_pre_context(src_main_code, 'py', stat_node.get_node_id())
+    # For subject without the three-split format,
+    # statements yet to be translated (by the order of execution)
+    # are already purged from src_main_code,
+    # hence the node blacklist is empty here.
+    pre_context = p_pirel.get_pre_context(
+      src_main_code, 'py', is_three_split, stat_node.get_node_id(), [])
     pre_context = pvpy.LogStatementRemover.remove_log_statements(pre_context)
     chable_rc_prectxs.append((choicable_range_cursor, pre_context))
     logger.debug(

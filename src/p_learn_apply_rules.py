@@ -69,7 +69,9 @@ def _create_src_program_for_apply_phase(
   RETURN the source program to be used in the application phase.
   '''
   if not main_subject.is_three_split:
-    return main_subject.src_program
+    return pvpy.LogIndexerNo3Split.index_log_statements(
+      pvpy.LogInserterNo3Split.insert_log_statements(
+        main_subject.src_program))
   src_main_code = main_subject.get_src_main_code()
   src_main_code = pvpy.LogStatementInserter.insert_log_statements(src_main_code)
   src_main_code = pvpy.LogStatementsIndexer.index_log_statements(src_main_code)
