@@ -24,6 +24,16 @@
       "justMyCode": true
     },
     {
+      "name": "e_gfg_experiments.py -e 1",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "e_gfg_experiments.py",
+      "args": ["-e", "1"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
       "name": "p_code_runner.py",
       "type": "debugpy",
       "request": "launch",
