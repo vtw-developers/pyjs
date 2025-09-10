@@ -9,19 +9,21 @@ from tree_sitter import Language, Parser
 ################################################################################################
 SRC_DIR = Path(__file__).parent
 ROOT_DIR = SRC_DIR.parent
-LOGS_DIR = ROOT_DIR / 'logs'
-CONFIGS_DIR = ROOT_DIR / 'conf'
+
 BENCHMARKS_DIR = ROOT_DIR / 'benchmarks'
+BUILD_DIR = ROOT_DIR / 'build'
+CONFIGS_DIR = ROOT_DIR / 'conf'
+EXPERIMENTS_DIR = ROOT_DIR / 'experiments'
+LOGS_DIR = ROOT_DIR / 'logs'
+MYLOG_DEFINITIONS_DIR = ROOT_DIR / 'mylog-definitions'
+TEST_ARTIFACTS_DIR = ROOT_DIR / 'test-artifacts'
+TMP_DIR = ROOT_DIR / 'tmp'
 TRANSLATION_RULES_DIR = ROOT_DIR / 'translation-rules'
 TREE_SITTER_GRAMMARS_DIR = ROOT_DIR / 'tree-sitter-util'
-BUILD_DIR = ROOT_DIR / 'build'
-TMP_DIR = ROOT_DIR / 'tmp'
-TEST_ARTIFACTS_DIR = ROOT_DIR / 'test-artifacts'
-MYLOG_DEFINITIONS_DIR = ROOT_DIR / 'mylog-definitions'
 
-PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 DUOGLOT_LOGS_DIR = LOGS_DIR / 'duoglot'
 LEARN_RULES_LOGS_DIR = LOGS_DIR / 'learn-rules'
+PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 
 LEARN_APPLY_RULES_CONFIGS_DIR = CONFIGS_DIR / 'p-learn-apply-rules'
 PIREL_SUBJECT_CONFIGS_DIR = CONFIGS_DIR / 'pirel-subject'
