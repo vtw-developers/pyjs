@@ -14,11 +14,12 @@
       "justMyCode": true
     },
     {
-      "name": "e_analyze_data.py",
+      "name": "e_analyze_data.py -m primitive",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
       "program": "e_analyze_data.py",
+      "args": ["-m", "primitive"],
       "console": "integratedTerminal",
       "justMyCode": true
     },

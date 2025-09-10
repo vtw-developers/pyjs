@@ -824,20 +824,11 @@ class Subject():
   rule_learn_phase: Optional[RuleLearnPhase] = None
   rule_application_phase: Optional[RuleApplicationPhase] = None
 
-  def get_general_stats(self) -> dict:
-    '''
-    subject_name
-    learn_phase_success
-    apply_phase_success
-    reason
-    '''
-    stats = {
-      'subject_name': self.subject_name,
-      'learn_phase_success': self.rule_learn_phase.success is True,
-      'apply_phase_success': self.rule_application_phase.success is True,
-      'reason': self.rule_application_phase.reason or self.rule_learn_phase.reason
-    }
-    return stats
+  def get_primitive_stats(self) -> tuple:
+    return (
+      self.rule_learn_phase.success if self.rule_learn_phase else None,
+      self.rule_application_phase.success if self.rule_application_phase else None
+    )
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Subject':
@@ -862,10 +853,10 @@ class Benchmark:
   sample_size: Optional[int] = None
   subjects: List[Subject] = field(default_factory=list)
 
-  def get_general_stats(self) -> List[dict]:
+  def get_primitive_stats(self) -> List[dict]:
     stats = []
     for subject in self.subjects:
-      stats.append(subject.get_general_stats())
+      stats.append(subject.get_primitive_stats())
     return stats
 
   @classmethod
