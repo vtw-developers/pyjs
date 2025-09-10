@@ -218,7 +218,8 @@ def _mode_benchmark_init(
       return list(filter(lambda x: x[0] not in exclude_list, sample))
 
     benchmark_name = conf['benchmark_name']
-    assert benchmark_name in ['gfg'], f'benchmark "{benchmark_name}" not supported'
+    assert benchmark_name in p_consts.BENCHMARK_CONFIGS, \
+      f'{benchmark_name=} not supported'
 
     benchmark_conf = p_consts.BENCHMARK_CONFIGS[benchmark_name]
     benchmark_dir = benchmark_conf['benchmark_dir']
@@ -240,8 +241,10 @@ def _mode_benchmark_init(
         src_program = p_utils.remove_comments_and_docstrings_py(src_program)
         src_program = p_utils.remove_empty_lines(src_program)
 
-      # NOTE first five characters of the filename is the subject name for `leetcode` and `gfg`
-      subject_name = subject_fpath.stem[:5]
+      if conf['benchmark_name'] in ('gfg', 'leetcode'):
+        subject_name = subject_fpath.stem[:5]
+      else:
+        subject_name = subject_fpath.stem
       dataset.append((subject_name, src_program))
 
     logger.debug(f'Loaded {len(dataset)} programs for translation rule learning phase.')
