@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import p_consts
+import p_ruleset
 import p_tree_log as ptlog
 import p_utils
 
@@ -29,14 +30,71 @@ def _normalize_path(path: Union[str, Path]) -> Path:
   return path.expanduser().resolve()
 
 
-def load_lsubject(subject_log_fpath: Path) -> Optional[ptlog.Subject]:
+def load_lsubject(subject_log_fpath: Path) -> ptlog.Subject:
   '''
   Loads a YAML file containing the log data for a subject.
   '''
+  assert subject_log_fpath is not None, 'subject_log_fpath should not be None'
+  assert subject_log_fpath.exists(), f'subject_log_fpath does not exist: {subject_log_fpath}'
+  assert subject_log_fpath.suffix == '.yaml', 'subject_log_fpath should be a .yaml file'
   yaml_text = p_utils.read_text(subject_log_fpath)
   yaml_obj = yaml.safe_load(yaml_text)
   lsubject = ptlog.Subject.from_dict(yaml_obj)
   return lsubject
+
+
+def load_rulesets(
+  subject_names: List[str],
+  logs_dir: Path,
+) -> p_ruleset.Ruleset:
+  '''
+  Loads rulesets from the log files of the given subjects.
+  If multiple subject_names are given, returns a ruleset object
+  that contains a union of all rulesets.
+  PRE len(subject_names) > 0
+  PRE application phase is successful for all subjects in subject_names
+  '''
+  assert len(subject_names) > 0, 'subject_names should not be empty'
+  assert logs_dir.exists(), f'logs_dir does not exist: {logs_dir}'
+
+  # bootstrap by loading the first subject's ruleset
+  ruleset_serialized = get_ruleset_serialized(subject_names[0], logs_dir)
+  ruleset = p_ruleset.Ruleset.from_dict(ruleset_serialized)
+
+  for idx, subject_name in enumerate(subject_names[1:], start=2):
+    logger.debug(f'[{idx}/{len(subject_names)}] Extending ruleset with rules from subject: {subject_name}')
+    subject_ruleset_serialized = get_ruleset_serialized(subject_name, logs_dir)
+    subject_ruleset = p_ruleset.Ruleset.from_dict(subject_ruleset_serialized)
+    ruleset.extend(subject_ruleset)
+
+  return ruleset
+
+
+def get_ruleset_serialized(subject_name: str, logs_dir: Path) -> dict:
+  '''
+  Returns the ruleset as a serialized dict from the log dir.
+  Serialized ruleset is saved by p_learn_apply_rules as
+  {subject_name}_validated_rules.json and {subject_name}_learned_rules.json.
+  '''
+  fpaths = list(logs_dir.glob(f'{subject_name}_validated_rules.json'))
+  assert len(fpaths) == 1, f'{subject_name}_validated_rules.json not found in {logs_dir}'
+  ruleset_serialized = p_utils.read_json(fpaths[0])
+  return ruleset_serialized
+
+
+def get_subject_src_program(
+  subject_name: str,
+  benchmark_name: str,
+) -> str:
+  '''
+  Returns the source program for a given subject name.
+  '''
+  if benchmark_name == 'gfg':
+    subject_fpaths = list(p_consts.GFG_BENCHMARK_DIR.glob(f'{subject_name}_*.py'))
+    assert len(subject_fpaths) == 1, f'Expected exactly one file for subject {subject_name}'
+    return p_utils.read_text(subject_fpaths[0])
+
+  raise NotImplementedError(f'{benchmark_name} is not supported')
 
 
 def get_subject_tree_log_fpath(subject_name: str, logs_dir: Path) -> Optional[Path]:
@@ -132,7 +190,7 @@ def get_error_from_log(log_fpath: Path) -> str:
 
 def mode_primitive(args) -> None:
   '''
-  LEARN, APPLY, ERROR for each subject.
+  (LEARN, APPLY, ERROR) for each subject.
   '''
   output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'primitive-stats.txt')
   output_fpath = _normalize_path(output_fpath)
@@ -176,7 +234,7 @@ def mode_primitive(args) -> None:
 
 def mode_tokens(args) -> None:
   '''
-  Token statistics for each subject.
+  (INPUT-TOKENS, OUTPUT-TOKENS) for each subject.
   '''
   output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'tokens-stats.txt')
   output_fpath = _normalize_path(output_fpath)
