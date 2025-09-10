@@ -346,6 +346,18 @@ class GetRefTrans(BaseTask):
   # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
   # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_prompt or 0
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_completion or 0
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'GetRefTrans':
     statement_str = obj.get('statement_str', None)
@@ -416,6 +428,18 @@ class TransSP2(BaseTask):
   # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
   # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_prompt or 0
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_completion or 0
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP2':
     id_ = obj.get('id', None)
@@ -460,6 +484,18 @@ class TransSP1(BaseTask):
   # success: Optional[bool] = None  # in BaseLogNode (via BaseTask)
   # reason: Optional[str] = None  # in BaseLogNode (via BaseTask)
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_prompt or 0
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for llm_query_stat in self.llm_query_stats:
+      total_tokens += llm_query_stat.num_tokens_completion or 0
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'TransSP1':
     sp1 = obj.get('sp1', None)
@@ -494,6 +530,22 @@ class PLLMGenLog(BaseLogNode):
   # etms: Optional[int] = None  # in BaseLogNode
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
+
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    if self.trans_sp1 is not None:
+      total_tokens += self.trans_sp1.get_num_input_tokens()
+    for trans_sp2 in self.trans_sp2s:
+      total_tokens += trans_sp2.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    if self.trans_sp1 is not None:
+      total_tokens += self.trans_sp1.get_num_output_tokens()
+    for trans_sp2 in self.trans_sp2s:
+      total_tokens += trans_sp2.get_num_output_tokens()
+    return total_tokens
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'PLLMGenLog':
@@ -546,6 +598,16 @@ class RuleLearnRec(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    if self.get_ref_trans is None:
+      return 0
+    return self.get_ref_trans.get_num_input_tokens()
+
+  def get_num_output_tokens(self) -> int:
+    if self.get_ref_trans is None:
+      return 0
+    return self.get_ref_trans.get_num_output_tokens()
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleLearnRec':
     get_ref_trans = None
@@ -571,6 +633,16 @@ class TRuleLearnAttempt(BaseLogNode):
   # etms: Optional[int] = None  # in BaseLogNode
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
+
+  def get_num_input_tokens(self) -> int:
+    if self.p_llm_gen_log is None:
+      return 0
+    return self.p_llm_gen_log.get_num_input_tokens()
+
+  def get_num_output_tokens(self) -> int:
+    if self.p_llm_gen_log is None:
+      return 0
+    return self.p_llm_gen_log.get_num_output_tokens()
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'TRuleLearnAttempt':
@@ -607,6 +679,18 @@ class TSP(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for tla in self.trule_learn_attempts:
+      total_tokens += tla.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for tla in self.trule_learn_attempts:
+      total_tokens += tla.get_num_output_tokens()
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'TSP':
     id_ = obj.get('id', None)
@@ -637,6 +721,18 @@ class NodeTransIter(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for tsp in self.tsps:
+      total_tokens += tsp.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for tsp in self.tsps:
+      total_tokens += tsp.get_num_output_tokens()
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'NodeTransIter':
     id_ = obj.get('id', None)
@@ -665,6 +761,18 @@ class RuleLearnStd(BaseLogNode):
   # etms: Optional[int] = None  # in BaseLogNode
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
+
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for nti in self.node_trans_iters:
+      total_tokens += nti.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for nti in self.node_trans_iters:
+      total_tokens += nti.get_num_output_tokens()
+    return total_tokens
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleLearnStd':
@@ -731,6 +839,22 @@ class StatNodeIter(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    if self.stat_node_learn_std is not None:
+      total_tokens += self.stat_node_learn_std.get_num_input_tokens()
+    if self.stat_node_learn_rec is not None:
+      total_tokens += self.stat_node_learn_rec.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    if self.stat_node_learn_std is not None:
+      total_tokens += self.stat_node_learn_std.get_num_output_tokens()
+    if self.stat_node_learn_rec is not None:
+      total_tokens += self.stat_node_learn_rec.get_num_output_tokens()
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'StatNodeIter':
     id_ = obj.get('id', None)
@@ -768,6 +892,18 @@ class StatNode(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for stat_node_iter in self.stat_node_iters:
+      total_tokens += stat_node_iter.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for stat_node_iter in self.stat_node_iters:
+      total_tokens += stat_node_iter.get_num_output_tokens()
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'StatNode':
     id_ = obj.get('id', None)
@@ -799,6 +935,18 @@ class RuleLearnPhase(BaseLogNode):
   # success: Optional[bool] = None  # in BaseLogNode
   # reason: Optional[str] = None  # in BaseLogNode
 
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for stat_node in self.stat_nodes:
+      total_tokens += stat_node.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for stat_node in self.stat_nodes:
+      total_tokens += stat_node.get_num_output_tokens()
+    return total_tokens
+
   @classmethod
   def from_dict(cls, obj: dict) -> 'RuleLearnPhase':
     num_stat_nodes = obj.get('num_stat_nodes', None)
@@ -829,6 +977,16 @@ class Subject():
       self.rule_learn_phase.success if self.rule_learn_phase else None,
       self.rule_application_phase.success if self.rule_application_phase else None
     )
+
+  def get_num_input_tokens(self) -> int:
+    if self.rule_learn_phase is None:
+      return 0
+    return self.rule_learn_phase.get_num_input_tokens()
+
+  def get_num_output_tokens(self) -> int:
+    if self.rule_learn_phase is None:
+      return 0
+    return self.rule_learn_phase.get_num_output_tokens()
 
   @classmethod
   def from_dict(cls, obj: dict) -> 'Subject':
