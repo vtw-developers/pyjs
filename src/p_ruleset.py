@@ -384,6 +384,18 @@ class Ruleset:
 
     return choices
 
+  # RULESET TO RULESET
+  def extend(self, other_ruleset: Ruleset) -> None:
+    '''
+    Extend self by adding everything from other_ruleset.
+    '''
+    assert isinstance(other_ruleset, Ruleset), f'Expected other_ruleset to be Ruleset, got {type(other_ruleset)}'
+    for rule in other_ruleset.rules:
+      if self.get_rule_ref(rule) is None:
+        self.append_rule(rule)  # TODO: expensive as it updates matcher_groups each time
+    self.merge_verified_rules_from(other_ruleset.to_dict())
+    self.merge_unverifiable_rules_from(other_ruleset.to_dict())
+
   # SERIALIZATION METHODS
   def to_str_ruleset(self) -> str:
     '''
