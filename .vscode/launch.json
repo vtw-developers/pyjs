@@ -68,7 +68,7 @@
       "justMyCode": true
     },
     {
-      "name": "p_learn_apply_rules.py",
+      "name": "p_learn_apply_rules.py test",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
@@ -78,7 +78,7 @@
       "justMyCode": true
     },
     {
-      "name": "p_learn_apply_rules.py (w/o args)",
+      "name": "p_learn_apply_rules.py",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
