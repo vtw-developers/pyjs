@@ -795,9 +795,17 @@ class PrettyPrinter(pvis.Visitor):
     print('\n'.join(self.lines))
     raise NotImplementedError(f'visit_{node.__class__.__name__} not implemented')
 
+  def visit_AliasedImportNode(self, node: AliasedImportNode) -> str:
+    source, target = node.get_nt_children()
+    return f'{self.visit(source)} as {self.visit(target)}'
+
   def visit_ArgumentListNode(self, node: ArgumentListNode) -> str:
     arguments = ', '.join([self.visit(child) for child in node.get_nt_children()])
     return arguments
+
+  def visit_AssertStatementNode(self, node: AssertStatementNode) -> None:
+    children = ', '.join(map(self.visit, node.get_nt_children()))
+    self.write_line(f'assert {children}')
 
   def visit_AssignmentNode(self, node: AssignmentNode) -> str:
     left = self.visit(node.left)
@@ -892,6 +900,9 @@ class PrettyPrinter(pvis.Visitor):
 
     return left
 
+  def visit_ConcatenatedStringNode(self, node: ConcatenatedStringNode) -> str:
+    return ' '.join(map(self.visit, node.get_nt_children()))
+
   def visit_ConditionalExpressionNode(self, node: ConditionalExpressionNode) -> str:
     assert len(node.get_children()) == 5, 'per grammar: sanity check'
     assert len(node.get_nt_children()) == 3, 'per grammar: sanity check'
@@ -943,7 +954,7 @@ class PrettyPrinter(pvis.Visitor):
     return f'{{{pairs}}}'
 
   def visit_DottedNameNode(self, node: DottedNameNode) -> str:
-    return '.'.join([self.visit(child) for child in node.children])
+    return '.'.join(map(self.visit, node.get_nt_children()))
 
   def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
     assert len(node.get_nt_children()) == 2, 'per grammar: there must be exactly two non-terminal children'
@@ -1132,6 +1143,9 @@ class PrettyPrinter(pvis.Visitor):
   def visit_ListSplatNode(self, node: ListSplatNode) -> str:
     return f'*{self.visit(node.children[1])}'
 
+  def visit_ListSplatPatternNode(self, node: ListSplatPatternNode) -> str:
+    return f'*{self.visit(node.children[1])}'
+
   def visit_ModuleNode(self, node: ModuleNode) -> str:
     for stmt in node.children:
       self.visit(stmt)
@@ -1179,6 +1193,14 @@ class PrettyPrinter(pvis.Visitor):
   def visit_PatternListNode(self, node: PatternListNode) -> str:
     pattern_list = ', '.join([self.visit(child) for child in node.get_nt_children()])
     return f'{pattern_list}'
+
+  def visit_RaiseStatementNode(self, node: RaiseStatementNode) -> None:
+    children = node.get_nt_children()
+    if children:
+      assert len(children) == 1
+      self.write_line(f'raise {self.visit(*children)}')
+    else:
+      self.write_line('raise')
 
   def visit_ReturnStatementNode(self, node: ReturnStatementNode) -> None:
     if len(node.get_nt_children()) == 0:
@@ -1327,6 +1349,33 @@ class PrettyPrinter(pvis.Visitor):
 
   def visit_WildcardImportNode(self, node: WildcardImportNode) -> str:
     return '*'
+
+  def visit_WithClauseNode(self, node: WithClauseNode) -> str:
+    return ', '.join(map(self.visit, node.get_nt_children()))
+
+  def visit_WithItemNode(self, node: WithItemNode) -> str:
+    # In later tree-sitter-python grammar,
+    # with_item has one single named child: value.
+    children = node.get_nt_children()
+    if len(children) == 1:
+      return self.visit(*children)
+    source, target = children
+    return f'{self.visit(source)} as {self.visit(target)}'
+
+  def visit_WithStatementNode(self, node: WithStatementNode) -> None:
+    with_clause, body = node.get_nt_children()
+    self.write_line(f'with {self.visit(with_clause)}:')
+    self.level += 1
+    self.visit(body)
+    self.level -= 1
+
+  def visit_YieldNode(self, node: YieldNode) -> None:
+    children = node.get_nt_children()
+    if children:
+      assert len(children) == 1
+      return f'yield {self.visit(*children)}'
+    else:
+      return 'yield'
 
 
 class ParametrizableVariablesCollector(pvis.Visitor):
@@ -2431,7 +2480,9 @@ class LoggableIdentifierExtractor(pvis.Visitor):
     mat[i].sort()  # G0236
     ^^^
     '''
-    assert isinstance(node.object, (IdentifierNode, SubscriptNode)), 'sanity check'
+    assert isinstance(node.object, (AttributeNode,
+                                    IdentifierNode,
+                                    SubscriptNode)), 'sanity check'
     self.visit(node.object)
 
   def visit_AugmentedAssignmentNode(self, node: AugmentedAssignmentNode) -> None:
