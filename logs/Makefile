@@ -139,8 +139,14 @@ format_json:
 # alias
 format: format_json
 
-split_log:
-	python makefile_helper.py split
+split_pirel_log:
+	@total=699; \
+	for i in $$(seq 1 $$total); do \
+		num=$$(printf "%04d" $$i); \
+		echo "Processing $$i/$$total: G$$num.log"; \
+		grep G$$num pirel.log > G$$num.log; \
+	done
+	mv G0*.log learn-rules/
 
 # alias
-split: split_log
+split: split_pirel_log
