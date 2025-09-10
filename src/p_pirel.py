@@ -1,5 +1,6 @@
 import asyncio
 import json
+from os import fspath
 from sys import executable
 from typing import List, Optional, Tuple
 
@@ -165,11 +166,7 @@ def _get_pre_context_eot(
   spec_id_stat.set_parent(statement_node.get_parent())
   context_node_idx_as_child = statement_node.parent.children.index(statement_node)
   statement_node.parent.children[context_node_idx_as_child] = spec_id_stat
-
-  pp = pvpy.PrettyPrinter(indent_with='    ')
-  pp.visit(root_node)
-  pre_context = '\n'.join(pp.lines)
-  return pre_context
+  return pvpy.PrettyPrinter(indent_with='    ').visit(root_node)
 
 
 def get_pre_context(
@@ -227,15 +224,21 @@ def _can_be_context_node(
 
 async def _get_not_implemented_id(module: str,
                                   node_lines: list[int]) -> int | None:
+  workdir = fspath(p_consts.BENCHMARK_CONFIGS['skel']['benchmark_dir'])  # FIXME
+  module = f'from os import chdir\nchdir({workdir!r})\n{module}'
   proc = await asyncio.create_subprocess_exec(executable, '-c', module,
     stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
   stderr = (await proc._read_stream(2)).decode()
-  if not any(f'  File "<string>", line {n}, in ' in stderr
-             for n in node_lines):
+  await proc.wait()
+  if proc.returncode == 0:
     return None
   lines = stderr.splitlines()
-  assert lines and lines[-1].startswith('NotImplementedError: PiREL: ')
-  return int(lines[-1].removeprefix('NotImplementedError: PiREL: '))
+  assert proc.returncode == 1
+  assert lines and lines[-1].startswith('NotImplementedError: PiREL: '), breakpoint()
+  if any(line.startswith(f'  File "<string>", line {n+2}, in ')
+         for n in node_lines for line in lines):
+    return int(lines[-1].removeprefix('NotImplementedError: PiREL: '))
+  return None  # call happens after given lines
 
 
 async def _get_statement_nodes_eot(
@@ -248,19 +251,41 @@ async def _get_statement_nodes_eot(
   stack = [*top_level_nodes]
   while stack:
     node = stack.pop()
-    if not node.is_nonterminal():
+    if node.is_terminal():
       continue
-    stack.extend(node.get_children())
+    children = node.get_children()
+    stack.extend(children)
     if node.get_ts_node_type() == 'function_definition':
       node_id = node.get_id()
       exc_text = f'raise NotImplementedError("PiREL: {node_id}")'
       fn_text = node.get_text()
-      fn_body = node.get_children()[-1]
+      fn_body = children[-1]
       assert fn_body.get_ts_node_type() == 'block'
       fn_body_text = fn_body.get_text().strip()
-      fn_not_implemented_text = fn_text.replace(fn_body_text, exc_text)
-      restore[node_id] = node, fn_not_implemented_text
+      rest, frags = fn_body_text, []
+      for child in fn_body.get_children():
+        child_text = child.get_text().strip()
+        i = rest.index(child_text)
+        if i > 0:
+          frags.append(rest[:i])
+        if (child.is_nonterminal()
+            and child.get_ts_node_type() != 'function_definition'):
+          frags.append(exc_text)
+        else:
+          frags.append(child_text)
+        rest = rest[i+len(child_text):]
+      frags.append(rest)
+      fn_not_implemented_text = fn_text.replace(fn_body_text, ''.join(frags))
+      restore[node_id] = node, fn_text, fn_not_implemented_text
       src_program = src_program.replace(fn_text, fn_not_implemented_text)
+      while node.has_parent():
+        node = node.get_parent()
+        node_id = node.get_id()
+        if node_id in restore:
+          _, before, after = restore[node_id]
+          before = before.replace(fn_text, fn_not_implemented_text)
+          after = after.replace(fn_text, fn_not_implemented_text)
+          restore[node_id] = node, before, after
 
   nodes = []
   stack.extend(reversed(top_level_nodes))
@@ -271,18 +296,16 @@ async def _get_statement_nodes_eot(
         continue
       nodes.append(node)
       cmt = f'  # PiREL: {node.get_id()}'
-      node_text = node.get_text().rstrip()
-      commented_text = node_text.replace('\n', cmt+'\n') + cmt
-      # Prevent confusion between call and function signature
-      src_with_cmt = src_program.replace('def '+node_text, 'PiREL def')
-      src_with_cmt = src_with_cmt.replace(node_text, commented_text)
-      src_with_cmt = src_with_cmt.replace('PiREL def', 'def '+node_text)
+      node_text = node.get_text() + '\n'
+      assert not node_text.endswith('\n\n')
+      commented_text = node_text.replace('\n', cmt+'\n')
+      src_with_cmt = src_program.replace(node_text, commented_text)
       lines = [i for i, line in enumerate(src_with_cmt.splitlines(), start=1)
                if cmt in line]
       fn_id = await _get_not_implemented_id(src_with_cmt, lines)
       if fn_id is not None:  # switch context
-        fn_node, replaced_text = restore.pop(fn_id)  # once per function
-        src_program = src_program.replace(replaced_text, fn_node.get_text())
+        fn_node, before, after = restore.pop(fn_id)  # once per function
+        src_program = src_program.replace(after, before)
         stack.extend(reversed(fn_node.get_children()))
     stack.extend(reversed(node.get_children()))
   return nodes
@@ -306,7 +329,7 @@ async def _get_statement_nodes(
 
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
   if not is_three_split:
-    return await _get_statement_nodes_eot(src_main_code, lang,
+    return await _get_statement_nodes_eot(src_main_code+'\n', lang,
                                           tree.get_root_node().get_children())
   nodes : List[pds.PirelNode] = []
   __rec_pre_order(tree.get_root_node(), lang)
