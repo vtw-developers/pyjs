@@ -1,0 +1,17 @@
+mode: benchmark
+mode_benchmark:
+  benchmark_name: skel
+  src_lang: py
+  tar_lang: js
+  is_three_split: false
+  is_override_starting_ruleset: true
+  overriding_ruleset_fpath: translation-rules/main/leet.snart
+  max_concurrent_subjects: 1000
+  sample:
+    is_random: false
+    size: 20
+    start_idx: 0
+    only:
+      - colorsys
+    exclude: []
+  is_email_report: false
