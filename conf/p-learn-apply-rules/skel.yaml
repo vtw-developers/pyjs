@@ -5,7 +5,9 @@ mode_benchmark:
   tar_lang: js
   is_three_split: false
   is_override_starting_ruleset: true
-  overriding_ruleset_fpath: translation-rules/main/leet.snart
+  overriding_ruleset_fpaths:
+    - translation-rules/main/leet.snart
+    - translation-rules/starting-ruleset.snart
   max_concurrent_subjects: 1000
   sample:
     is_random: false

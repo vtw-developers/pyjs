@@ -273,9 +273,12 @@ def _mode_benchmark_init(
     the configuration file or the default starting ruleset.
     '''
     if conf.get('is_override_starting_ruleset', False):
-      overriding_ruleset_fpath = p_consts.ROOT_DIR / conf['overriding_ruleset_fpath']
-      assert overriding_ruleset_fpath.exists(), 'Starting ruleset file does not exist'
-      return p_utils.read_text(overriding_ruleset_fpath)
+      overriding_ruleset = ''
+      for path_str in conf['overriding_ruleset_fpaths']:
+        overriding_ruleset_fpath = p_consts.ROOT_DIR / path_str
+        assert overriding_ruleset_fpath.exists(), f'Overriding ruleset file does not exist: {overriding_ruleset_fpath}'
+        overriding_ruleset += p_utils.read_text(overriding_ruleset_fpath).strip() + '\n\n'
+      return overriding_ruleset.strip()
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
   starting_ruleset_str = _load_starting_ruleset(conf)
