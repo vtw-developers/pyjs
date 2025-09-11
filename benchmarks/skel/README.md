@@ -23,3 +23,5 @@ to remove the dependency on `six`.
 
 `SKEL/benchmarks_new/*/tracer_skip.py` modules were inlined
 with adjusted paths to test inputs.
+
+Functions consisting only of dead code were then eliminated.

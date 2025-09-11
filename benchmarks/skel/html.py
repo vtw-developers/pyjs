@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: Python Software Foundation
 # SPDX-License-Identifier: PSF-2.0
 
-
 import json
 import os
 import re

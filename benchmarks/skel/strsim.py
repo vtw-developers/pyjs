@@ -1,48 +1,16 @@
 # SPDX-FileCopyrightText: 2018 Luo Zhouyang
 # SPDX-License-Identifier: MIT
 
-### SKEL HEAD BEGIN
-def user_get_type(obj):
-    if hasattr(obj, '_class_name'):
-        return "<function " + obj._class_name.split(";")[0] + " >"
-    else:
-        return type(obj)
-
-
-def user_check_type(obj, _type):
-    if str(_type).startswith("<class") and str(_type).split("'")[1] in ["dict", "object"]:
-        return isinstance(obj, _type)
-    elif hasattr(obj, '_class_name'):
-        if "function" in str(_type):
-            for i in obj._class_name.split(";"):
-                if i == str(_type).split(" ")[1]:
-                    return True
-            return False
-    else:
-        if str(_type).startswith("<function"):
-            typename = str(_type).split(" ")[1]
-            if typename == 'func_dict':
-                return isinstance(obj, dict)
-        return isinstance(obj, _type)
-
-
-def SkelClass(class_name, super_class=None):
-    if super_class is None:
-        class myclass:
-            _class_name = class_name
-    else:
-        class myclass(super_class):
-            _class_name = class_name
-    return myclass()
-
-### SKEL HEAD END
-
 import functools
 import re
 import math
 
 input_shanghai = "上海"
 input_shanghai_city = "上海市"
+
+
+def SkelClass(class_name):
+    return type(class_name, (), {'_class_name': class_name})()
 
 
 def StringDistance(*args):
@@ -843,14 +811,6 @@ def SIFT4Options(param_0):
         'transpositioncostevaluator': _code4,
         'transpositionsevaluator': _code5
         }
-        otheroptions = {
-        'tokenizer': {'ngram': class_var.ngramtokenizer, 'wordsplit': class_var.wordsplittokenizer,'characterfrequency': class_var.characterfrequencytokenizer},
-        'tokematcher': {'sift4tokenmatcher': class_var.sift4tokenmatcher},
-        'matchingevaluator': {'sift4matchingevaluator': class_var.sift4matchingevaluator},
-        'locallengthevaluator': {'rewardlengthevaluator': class_var.rewardlengthevaluator, 'rewardlengthevaluator2': class_var.rewardlengthevaluator2},
-        'transpositioncostevaluator': {'longertranspositionsaremorecostly':class_var.longertranspositionsaremorecostly},
-        'transpositionsevaluator': {}
-        }
         if isinstance(options, dict):
             for k, v in options.items():
                 if k in class_var.options.keys():
@@ -881,92 +841,9 @@ def SIFT4Options(param_0):
         class_var.transpositionsevaluator = class_var.options['transpositionsevaluator']
         ### --- BLOCK END 47
     
-    
-    
-    # tokenizers:
-    def ngramtokenizer(s, n):
-        ### --- BLOCK BEGIN 48
-        result = []
-        if not s:
-            return result
-        for i in range(len(s) - n - 1):
-            result.append(s[i:(i + n)])
-        return result
-        ### --- BLOCK END 48
-    
-    
-    
-    def wordsplittokenizer(s):
-        ### --- BLOCK BEGIN 49
-        if not s:
-            return []
-        return s.split()
-        ### --- BLOCK END 49
-    
-    
-    
-    def characterfrequencytokenizer(s):
-        ### --- BLOCK BEGIN 50
-        letters = [i for i in 'abcdefghijklmnopqrstuvwxyz']
-        return [s.lower().count(x) for x in letters]
-        ### --- BLOCK END 50
-    
-    
-    
-    # tokenMatchers:
-    def sift4tokenmatcher(t1, t2):
-        ### --- BLOCK BEGIN 51
-        similarity = 1 - SIFT4().distance(t1, t2, 5) / max(len(t1), len(t2))
-        return similarity > 0.7
-        ### --- BLOCK END 51
-    
-    
-    
-    # matchingEvaluators:
-    def sift4matchingevaluator(t1, t2):
-        ### --- BLOCK BEGIN 52
-        similarity = 1 - SIFT4().distance(t1, t2, 5) / max(len(t1), len(t2))
-        return similarity
-        ### --- BLOCK END 52
-    
-    
-    
-    # localLengthEvaluators:
-    def rewardlengthevaluator(l):
-        ### --- BLOCK BEGIN 53
-        if l < 1:
-            return l
-        return l - 1 / (l + 1)
-        ### --- BLOCK END 53
-    
-    
-    
-    def rewardlengthevaluator2(l):
-        ### --- BLOCK BEGIN 54
-        return pow(l, 1.5)
-        ### --- BLOCK END 54
-    
-    
-    
-    # transpositionCostEvaluators:
-    def longertranspositionsaremorecostly(c1, c2):
-        ### --- BLOCK BEGIN 55
-        return abs(c2 - c1) / 9 + 1
-        ### --- BLOCK END 55
-    
-    
-    
     class_var = MetricStringDistance()
     class_var._class_name = 'SIFT4Options;' + class_var._class_name
     class_var.__init__ = __init__
-    class_var.ngramtokenizer = ngramtokenizer
-    class_var.wordsplittokenizer = wordsplittokenizer
-    class_var.characterfrequencytokenizer = characterfrequencytokenizer
-    class_var.sift4tokenmatcher = sift4tokenmatcher
-    class_var.sift4matchingevaluator = sift4matchingevaluator
-    class_var.rewardlengthevaluator = rewardlengthevaluator
-    class_var.rewardlengthevaluator2 = rewardlengthevaluator2
-    class_var.longertranspositionsaremorecostly = longertranspositionsaremorecostly
     __init__(param_0)
     return class_var
 

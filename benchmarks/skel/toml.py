@@ -7,12 +7,18 @@
 # SPDX-FileCopyrightText: 2019 Filippo Broggini
 # SPDX-License-Identifier: MIT
 
-### SKEL HEAD BEGIN
-def user_get_type(obj):
-    if hasattr(obj, '_class_name'):
-        return "<function " + obj._class_name.split(";")[0] + " >"
-    else:
-        return type(obj)
+import copy
+import datetime
+import datetime
+import io
+import re
+import re
+import sys
+import sys
+from collections import OrderedDict
+from datetime import tzinfo, timedelta
+from decimal import Decimal
+from os import linesep
 
 
 def user_check_type(obj, _type):
@@ -33,88 +39,12 @@ def user_check_type(obj, _type):
 
 
 def SkelClass(class_name, super_class=None):
-    if super_class is None:
-        class myclass:
-            _class_name = class_name
-    else:
-        class myclass(super_class):
-            _class_name = class_name
-    return myclass()
-
-### SKEL HEAD END
-
-import copy
-import datetime
-import datetime
-import io
-import re
-import re
-import sys
-import sys
-from collections import OrderedDict
-from datetime import tzinfo, timedelta
-from decimal import Decimal
-from os import linesep
+    return type(class_name, () if super_class is None else (super_class,),
+                {'_class_name': class_name})()
 
 
 def func_dict(*args):
-    class_var = SkelClass(class_name='dict', super_class=dict)
-    return class_var
-
-
-def _detect_pathlib_path(p):
-    ### --- BLOCK BEGIN 1
-    if (3, 4) <= sys.version_info:
-        import pathlib
-        if user_check_type(p, pathlib.PurePath):
-            return True
-    return False
-    ### --- BLOCK END 1
-
-
-
-def _ispath(p):
-    ### --- BLOCK BEGIN 2
-    if user_check_type(p, (bytes, str)):
-        return True
-    return _detect_pathlib_path(p)
-    ### --- BLOCK END 2
-
-
-
-def _getpath(p):
-    ### --- BLOCK BEGIN 3
-    if (3, 6) <= sys.version_info:
-        import os
-        return os.fspath(p)
-    if _detect_pathlib_path(p):
-        return str(p)
-    return p
-    ### --- BLOCK END 3
-
-
-
-def TomlDecodeError(param_0, param_1, param_2):
-    """Base toml Exception / Error."""
-    def __init__(msg, doc, pos):
-        ### --- BLOCK BEGIN 4
-        lineno = doc.count('\n', 0, pos) + 1
-        colno = pos - doc.rfind('\n', 0, pos)
-        emsg = '{} (line {} column {} char {})'.format(msg, lineno, colno, pos)
-        ValueError.__init__(class_var, emsg)
-        class_var.msg = msg
-        class_var.doc = doc
-        class_var.pos = pos
-        class_var.lineno = lineno
-        class_var.colno = colno
-        ### --- BLOCK END 4
-    
-    
-    
-    class_var = ValueError()
-    class_var._class_name = 'TomlDecodeError;' + class_var._class_name
-    class_var.__init__ = __init__
-    __init__(param_0, param_1, param_2)
+    class_var = SkelClass('func_dict', dict)
     return class_var
 
 
@@ -126,20 +56,6 @@ def CommentValue(param_0, param_1, param_2, param_3):
         class_var.comment = separator + comment
         class_var._dict = _dict
         ### --- BLOCK END 5
-    
-    
-    
-    def __getitem__(key):
-        ### --- BLOCK BEGIN 6
-        return class_var.val[key]
-        ### --- BLOCK END 6
-    
-    
-    
-    def __setitem__(key, value):
-        ### --- BLOCK BEGIN 7
-        class_var.val[key] = value
-        ### --- BLOCK END 7
     
     
     
@@ -156,8 +72,6 @@ def CommentValue(param_0, param_1, param_2, param_3):
     
     class_var = SkelClass('CommentValue')
     class_var.__init__ = __init__
-    class_var.__getitem__ = __getitem__
-    class_var.__setitem__ = __setitem__
     class_var.dump = dump
     __init__(param_0, param_1, param_2, param_3)
     return class_var
@@ -189,38 +103,13 @@ def _strictly_valid_num(n):
 
 
 
-def load(f, _dict, decoder):
-    """Parses named file or files as toml and returns a dictionary
-
-    Args:
-        f: Path to the file to open, array of files to read into single dict
-           or a file descriptor
-        _dict: (optional) Specifies the class of the returned toml dictionary
-        decoder: The decoder to use
-
-    Returns:
-        Parsed toml file represented as a dictionary
-
-    Raises:
-        TypeError -- When f is invalid type
-        TomlDecodeError: Error while decoding toml
-        IOError / FileNotFoundError -- When an array with no valid (existing)
-        (Python 2 / Python 3)          file paths is passed
-    """
-    ### --- BLOCK BEGIN 10
-    pass
-    # Not Reachable
-    ### --- BLOCK END 10
-
-
-
-def loads(s, _dict, decoder):
+def loads(s, _dict=func_dict, decoder=None):
     def handle_keyname():
         nonlocal key, openstring, openstrchar, keyname, dottedkey, prev_key
         ### --- BLOCK BEGIN 11
         key += item
         if item == '\n':
-            raise TomlDecodeError("Key name found without value. Reached end of line.", original, i)
+            raise ValueError("Key name found without value. Reached end of line.", original, i)
         if openstring:
             if item == openstrchar:
                 oddbackslash = False
@@ -266,7 +155,7 @@ def loads(s, _dict, decoder):
             key = ''
             dottedkey = False
         else:
-            raise TomlDecodeError("Found invalid character in key name: '" +
+            raise ValueError("Found invalid character in key name: '" +
             item + "'. Try quoting the key name.",
             original, i)
         ### --- BLOCK END 11
@@ -352,7 +241,7 @@ def loads(s, _dict, decoder):
         if item == '\n':
             if openstring or multilinestr:
                 if not multilinestr:
-                    raise TomlDecodeError("Unbalanced quotes", original, i)
+                    raise ValueError("Unbalanced quotes", original, i)
                 if ((sl[i - 1] == "'" or sl[i - 1] == '"') and (
                 sl[i - 2] == sl[i - 1])):
                     sl[i] = sl[i - 1]
@@ -367,7 +256,7 @@ def loads(s, _dict, decoder):
             beginline = False
             if not keygroup and not arrayoftables:
                 if sl[i] == '=':
-                    raise TomlDecodeError("Found empty keyname. ", original, i)
+                    raise ValueError("Found empty keyname. ", original, i)
                 keyname = 1
                 key += item
         ### --- BLOCK END 15
@@ -418,7 +307,7 @@ def loads(s, _dict, decoder):
                 try:
                     value, vtype = decoder.load_value(multilinestr, True)
                 except ValueError as err:
-                    raise TomlDecodeError(str(err), original, pos)
+                    raise ValueError(str(err), original, pos)
                 currentlevel[multikey] = value
                 multikey = None
                 multilinestr = ""
@@ -450,7 +339,7 @@ def loads(s, _dict, decoder):
                         len(groupstr) == 1):
                             j += 1
                             if j > len(groups) + 2:
-                                raise TomlDecodeError("Invalid group name '" +
+                                raise ValueError("Invalid group name '" +
                                 groupstr + "' Something " +
                                 "went wrong.", original, pos)
                             groupstr = '.'.join(groups[i:j]).strip()
@@ -458,7 +347,7 @@ def loads(s, _dict, decoder):
                         groups[i + 1:j] = []
                     else:
                         if not _groupname_re.match(groups[i]):
-                            raise TomlDecodeError("Invalid group name '" +
+                            raise ValueError("Invalid group name '" +
                             groups[i] + "'. Try quoting it.",
                             original, pos)
                     i += 1
@@ -470,7 +359,7 @@ def loads(s, _dict, decoder):
             ### --- BLOCK BEGIN 19
             arrayoftables = False
             if len(line) == 1:
-                raise TomlDecodeError("Opening key group bracket on line by itself.", original, pos)
+                raise ValueError("Opening key group bracket on line by itself.", original, pos)
             if line[1] == '[':
                 arrayoftables = True
                 line = line[2:]
@@ -488,7 +377,7 @@ def loads(s, _dict, decoder):
                 quoted = not quoted
             line = line.split(splitstr, i)
             if len(line) < i + 1 or line[-1].strip() != "":
-                raise TomlDecodeError("Key group not on a line by itself.",
+                raise ValueError("Key group not on a line by itself.",
                 original, pos)
             groups = splitstr.join(line[:-1]).split('.')
             handle_groupname()
@@ -496,20 +385,20 @@ def loads(s, _dict, decoder):
             for i in range(len(groups)):
                 group = groups[i]
                 if group == "":
-                    raise TomlDecodeError("Can't have a keygroup with an empty name", original, pos)
+                    raise ValueError("Can't have a keygroup with an empty name", original, pos)
                 try:
                     currentlevel[group]
                     if i == len(groups) - 1:
                         if group in implicitgroups:
                             implicitgroups.remove(group)
                             if arrayoftables:
-                                raise TomlDecodeError("An implicitly defined table can't be an array",
+                                raise ValueError("An implicitly defined table can't be an array",
                                 original, pos)
                         elif arrayoftables:
                             currentlevel[group].append(decoder.get_empty_table()
                             )
                         else:
-                            raise TomlDecodeError("What? " + group +
+                            raise ValueError("What? " + group +
                             " already exists?" +
                             str(currentlevel),
                             original, pos)
@@ -559,17 +448,17 @@ def loads(s, _dict, decoder):
                 handle_start_bracket()
             elif line[0] == "{":
                 if line[-1] != "}":
-                    raise TomlDecodeError("Line breaks are not allowed in inline objects", original, pos)
+                    raise ValueError("Line breaks are not allowed in inline objects", original, pos)
                 try:
                     decoder.load_inline_object(line, currentlevel, multikey,
                     multibackslash)
                 except ValueError as err:
-                    raise TomlDecodeError(str(err), original, pos)
+                    raise ValueError(str(err), original, pos)
             elif "=" in line:
                 try:
                     ret = decoder.load_line(line, currentlevel, multikey, multibackslash)
                 except ValueError as err:
-                    raise TomlDecodeError(str(err), original, pos)
+                    raise ValueError(str(err), original, pos)
                 if ret is not None:
                     multikey, multilinestr, multibackslash = ret
         return retval
@@ -588,7 +477,7 @@ def loads(s, _dict, decoder):
 
     Raises:
         TypeError: When a non-string is passed
-        TomlDecodeError: Error while decoding toml
+        ValueError: Error while decoding toml
     """
     ### --- BLOCK BEGIN 21
     implicitgroups = []
@@ -634,9 +523,9 @@ def loads(s, _dict, decoder):
         handle_bracket()
         handle_backslash()
     if keyname:
-        raise TomlDecodeError("Key name found without value. Reached end of file.", original, len(s))
+        raise ValueError("Key name found without value. Reached end of file.", original, len(s))
     if openstring:  # reached EOF and have an unterminated string
-        raise TomlDecodeError("Unterminated string found. Reached end of file.", original, len(s))
+        raise ValueError("Unterminated string found. Reached end of file.", original, len(s))
     return handle_remaining()
     ### --- BLOCK END 21
 
@@ -752,12 +641,6 @@ def _unescape(v):
 
 
 
-def InlineTableDict(*args):
-    """Sentinel subclass of dict for inline tables."""
-    class_var = SkelClass('InlineTableDict')
-    return class_var
-
-
 def DynamicInlineTableDict(*args):
     """Concrete sentinel subclass for inline tables.
     It is a subclass of _dict which is passed in dynamically at load
@@ -765,7 +648,7 @@ def DynamicInlineTableDict(*args):
 
     It is also a subclass of InlineTableDict
     """
-    class_var = SkelClass(class_name='dict', super_class=dict)
+    class_var = SkelClass('DynamicInlineTableDict', dict)
     return class_var
 
 
@@ -1267,30 +1150,6 @@ def TomlPreserveCommentDecoder(param_0):
     return class_var
 
 
-def dump(o, f, encoder):
-    """Writes out dict as toml to a file
-
-    Args:
-        o: Object to dump into toml
-        f: File descriptor where the toml should be stored
-        encoder: The ``TomlEncoder`` to use for constructing the output string
-
-    Returns:
-        String containing the toml corresponding to dictionary
-
-    Raises:
-        TypeError: When anything other than file descriptor is passed
-    """
-    ### --- BLOCK BEGIN 42
-    if not f.write:
-        raise TypeError("You can only dump an object to a file descriptor")
-    d = dumps(o, encoder=encoder)
-    f.write(d)
-    return d
-    ### --- BLOCK END 42
-
-
-
 def dumps(o, encoder):
     """Stringifies input dict as toml
 
@@ -1376,17 +1235,6 @@ def _dump_float(v):
 
 
 
-def _dump_time(v):
-    ### --- BLOCK BEGIN 46
-    utcoffset = v.utcoffset()
-    if utcoffset is None:
-        return v.isoformat()
-    # The TOML norm specifies that it's local time thus we drop the offset
-    return v.isoformat()[:-6]
-    ### --- BLOCK END 46
-
-
-
 def _dump_bool(v):
     ### --- BLOCK BEGIN 47
     return str(v).lower()
@@ -1398,20 +1246,6 @@ def _dump_int(v):
     ### --- BLOCK BEGIN 48
     return v
     ### --- BLOCK END 48
-
-
-
-def _dump_datetime(v):
-    ### --- BLOCK BEGIN 49
-    return v.isoformat().replace('+00:00', 'Z')
-    ### --- BLOCK END 49
-
-
-
-def _dump_date(v):
-    ### --- BLOCK BEGIN 50
-    return v.isoformat()
-    ### --- BLOCK END 50
 
 
 
@@ -1446,27 +1280,6 @@ def TomlEncoder(param_0, param_1):
         retval += "]"
         return retval
         ### --- BLOCK END 53
-    
-    
-    
-    def dump_inline_table(section):
-        """Preserve inline table in its compact syntax instead of expanding
-            into subsection.
-    
-            https://github.com/toml-lang/toml#user-content-inline-table
-            """
-        ### --- BLOCK BEGIN 54
-        retval = ""
-        if isinstance(section, dict):
-            val_list = []
-            for k, v in section.items():
-                val = class_var.dump_inline_table(v)
-                val_list.append(k + " = " + val)
-            retval += "{ " + ", ".join(val_list) + " }\n"
-            return retval
-        else:
-            return str(class_var.dump_value(section))
-        ### --- BLOCK END 54
     
     
     
@@ -1551,26 +1364,9 @@ def TomlEncoder(param_0, param_1):
     class_var.__init__ = __init__
     class_var.get_empty_table = get_empty_table
     class_var.dump_list = dump_list
-    class_var.dump_inline_table = dump_inline_table
     class_var.dump_value = dump_value
     class_var.dump_sections = dump_sections
     __init__(param_0, param_1)
-    return class_var
-
-
-def TomlPreserveInlineDictEncoder(param_0):
-    def __init__(_dict):
-        ### --- BLOCK BEGIN 57
-        
-        pass
-        ### --- BLOCK END 57
-    
-    
-    
-    class_var = TomlEncoder(param_0, True)
-    class_var._class_name = 'TomlPreserveInlineDictEncoder;' + class_var._class_name
-    class_var.__init__ = __init__
-    __init__(param_0)
     return class_var
 
 
@@ -1587,62 +1383,10 @@ def TomlArraySeparatorEncoder(param_0, param_1, param_2):
     
     
     
-    def dump_list(v):
-        ### --- BLOCK BEGIN 59
-        t = []
-        retval = "["
-        for u in v:
-            t.append(class_var.dump_value(u))
-        while t != []:
-            s = []
-            for u in t:
-                if isinstance(u, list):
-                    for r in u:
-                        s.append(r)
-                else:
-                    retval += " " + str(u) + class_var.separator
-            t = s
-        retval += "]"
-        return retval
-        ### --- BLOCK END 59
-    
-    
-    
     class_var = TomlEncoder(param_0, param_1)
     class_var._class_name = 'TomlArraySeparatorEncoder;' + class_var._class_name
     class_var.__init__ = __init__
-    class_var.dump_list = dump_list
     __init__(param_0, param_1, param_2)
-    return class_var
-
-
-def TomlNumpyEncoder(param_0, param_1):
-    def __init__(_dict, preserve):
-        ### --- BLOCK BEGIN 60
-        import numpy as np
-        
-        class_var.dump_funcs[np.float16] = _dump_float
-        class_var.dump_funcs[np.float32] = _dump_float
-        class_var.dump_funcs[np.float64] = _dump_float
-        class_var.dump_funcs[np.int16] = class_var._dump_int
-        class_var.dump_funcs[np.int32] = class_var._dump_int
-        class_var.dump_funcs[np.int64] = class_var._dump_int
-        ### --- BLOCK END 60
-    
-    
-    
-    def _dump_int(v):
-        ### --- BLOCK BEGIN 61
-        return "{}".format(int(v))
-        ### --- BLOCK END 61
-    
-    
-    
-    class_var = TomlEncoder(param_0, param_1)
-    class_var._class_name = 'TomlNumpyEncoder;' + class_var._class_name
-    class_var.__init__ = __init__
-    class_var._dump_int = _dump_int
-    __init__(param_0, param_1)
     return class_var
 
 
@@ -1662,64 +1406,6 @@ def TomlPreserveCommentEncoder(param_0, param_1):
     return class_var
 
 
-def TomlPathlibEncoder(*args):
-    def _dump_pathlib_path(v):
-        ### --- BLOCK BEGIN 63
-        return _dump_str(str(v))
-        ### --- BLOCK END 63
-    
-    
-    
-    def dump_value(v):
-        ### --- BLOCK BEGIN 64
-        if (3, 4) <= sys.version_info:
-            import pathlib
-            if user_check_type(v, pathlib.PurePath):
-                v = str(v)
-        return TomlEncoder(TomlPathlibEncoder, class_var).dump_value(v)
-        ### --- BLOCK END 64
-    
-    
-    
-    class_var = TomlEncoder(*args)
-    class_var._class_name = 'TomlPathlibEncoder;' + class_var._class_name
-    class_var._dump_pathlib_path = _dump_pathlib_path
-    class_var.dump_value = dump_value
-    return class_var
-
-
-def TomlOrderedDecoder():
-    def __init__():
-        ### --- BLOCK BEGIN 65
-        
-        pass
-        ### --- BLOCK END 65
-    
-    
-    
-    class_var = TomlDecoder('Error: Type not support')
-    class_var._class_name = 'TomlOrderedDecoder;' + class_var._class_name
-    class_var.__init__ = __init__
-    __init__()
-    return class_var
-
-
-def TomlOrderedEncoder():
-    def __init__():
-        ### --- BLOCK BEGIN 66
-        
-        pass
-        ### --- BLOCK END 66
-    
-    
-    
-    class_var = TomlEncoder('Error: Type not support')
-    class_var._class_name = 'TomlOrderedEncoder;' + class_var._class_name
-    class_var.__init__ = __init__
-    __init__()
-    return class_var
-
-
 def TomlTz(param_0):
     def __init__(toml_offset):
         ### --- BLOCK BEGIN 67
@@ -1734,27 +1420,6 @@ def TomlTz(param_0):
     
     
     
-    def __getinitargs__():
-        ### --- BLOCK BEGIN 68
-        return (class_var._raw_offset,)
-        ### --- BLOCK END 68
-    
-    
-    
-    def __deepcopy__(memo):
-        ### --- BLOCK BEGIN 69
-        return class_var.__class__(class_var._raw_offset)
-        ### --- BLOCK END 69
-    
-    
-    
-    def tzname(dt):
-        ### --- BLOCK BEGIN 70
-        return "UTC" + class_var._raw_offset
-        ### --- BLOCK END 70
-    
-    
-    
     def utcoffset(dt):
         ### --- BLOCK BEGIN 71
         return class_var._sign * timedelta(hours=class_var._hours, minutes=class_var._minutes)
@@ -1762,20 +1427,9 @@ def TomlTz(param_0):
     
     
     
-    def dst(dt):
-        ### --- BLOCK BEGIN 72
-        return timedelta(0)
-        ### --- BLOCK END 72
-    
-    
-    
-    class_var = SkelClass(class_name='tzinfo', super_class=tzinfo)
+    class_var = SkelClass('TomlTz', tzinfo)
     class_var.__init__ = __init__
-    class_var.__getinitargs__ = __getinitargs__
-    class_var.__deepcopy__ = __deepcopy__
-    class_var.tzname = tzname
     class_var.utcoffset = utcoffset
-    class_var.dst = dst
     __init__(param_0)
     return class_var
 
@@ -1955,6 +1609,7 @@ def test():
     tester("String")
     tester("Array")
     tester("Array of Tables")
+    tester("Datetime")
     test_bug_148()
     test__dict()
     test_dict_decoder()
