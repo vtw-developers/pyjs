@@ -21,6 +21,9 @@ cp SKEL/benchmarks_new/toml/example.toml \
 In `evtx.py`, the use of `six.string_types` got expanded to `str`
 to remove the dependency on `six`.
 
+In `strsim.py`, `"上海"` and `"上海市"` got substituted
+with `"SH"` and `"SHC"`, respectively, as a work around for tree-sitter.
+
 `SKEL/benchmarks_new/*/tracer_skip.py` modules were inlined
 with adjusted paths to test inputs.
 

@@ -5,8 +5,8 @@ import functools
 import re
 import math
 
-input_shanghai = "上海"
-input_shanghai_city = "上海市"
+input_shanghai = "SH"
+input_shanghai_city = "SHC"
 
 
 def SkelClass(class_name):
