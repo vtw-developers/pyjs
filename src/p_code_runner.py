@@ -268,7 +268,7 @@ async def _test_run_src_test_script():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   src_program_instr = args_dict['src_program_instr']
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
   result = await run_src_test_script(src_program_instr, subject)
   print(json.dumps(result, indent=2))
@@ -286,7 +286,7 @@ async def _test_run_tar_test_script():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   tar_program_instr = args_dict['tar_program_instr']
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
   result = await run_tar_test_script(tar_program_instr, subject)
   print(json.dumps(result, indent=2))

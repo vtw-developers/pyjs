@@ -416,7 +416,7 @@ def _test_is_valid_translation_rule_syntactic():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
   translation_rule = args_dict['translation_rule']
   current_ruleset = args_dict['current_ruleset']
 
@@ -438,7 +438,7 @@ async def _test_check_trules_test_based():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  val_subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['val_subject']))
+  val_subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
   await check_trules_test_based(
     val_subject,

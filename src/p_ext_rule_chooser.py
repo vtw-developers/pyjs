@@ -1925,7 +1925,7 @@ def _test_get_readonly_choices_list():
   src_main_code = args_dict['src_main_code']
   src_test_code = args_dict['src_test_code']
   translation_rules_test_code = args_dict['translation_rules_test_code']
-  ruleset = p_ruleset.Ruleset.from_dict(json.loads(args_dict['ruleset']))
+  ruleset = p_ruleset.Ruleset.from_dict(args_dict['current_ruleset'])
 
   readonly_choices_list = asyncio.run(get_readonly_choices_list(
     src_main_code,

@@ -956,13 +956,15 @@ def usage_apply_translation_rules():
 # TEST HARNESSES
 def _test_apply_translation_rules():
   '''
-  async def apply_translation_rules(subject: p_subject.PirelSubject) -> str:
+  async def apply_translation_rules(
+    subject: p_subject.PirelSubject
+  ) -> str:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_apply_translation_rules_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
   tar_program_deinstr = asyncio.run(apply_translation_rules(subject))
   print(f'Plausible target program:\n{tar_program_deinstr}')
 
@@ -981,7 +983,7 @@ def _test_run_tests():
 
   src_program_instr = args_dict['src_program_instr']
   tar_program_instr = args_dict['tar_program_instr']
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
   asyncio.run(_run_tests(src_program_instr, tar_program_instr, subject))
 
