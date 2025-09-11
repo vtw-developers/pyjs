@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2021 Luke Weiler
 # SPDX-License-Identifier: MIT
 
-### SKEL HEAD BEGIN
 import hashlib
 import math
+
 seed = 1
 
 
@@ -58,42 +58,6 @@ def user_uniform(a, b):
 def user_reset_seed():
     global seed
     seed = 1
-
-
-def user_get_type(obj):
-    if hasattr(obj, '_class_name'):
-        return "<function " + obj._class_name.split(";")[0] + " >"
-    else:
-        return type(obj)
-
-
-def user_check_type(obj, _type):
-    if str(_type).startswith("<class") and str(_type).split("'")[1] in ["dict", "object"]:
-        return isinstance(obj, _type)
-    elif hasattr(obj, '_class_name'):
-        if "function" in str(_type):
-            for i in obj._class_name.split(";"):
-                if i == str(_type).split(" ")[1]:
-                    return True
-            return False
-    else:
-        if str(_type).startswith("<function"):
-            typename = str(_type).split(" ")[1]
-            if typename == 'func_dict':
-                return isinstance(obj, dict)
-        return isinstance(obj, _type)
-
-
-def SkelClass(class_name, super_class=None):
-    if super_class is None:
-        class myclass:
-            _class_name = class_name
-    else:
-        class myclass(super_class):
-            _class_name = class_name
-    return myclass()
-
-### SKEL HEAD END
 
 
 def absolute_difference(max_a, max_b):

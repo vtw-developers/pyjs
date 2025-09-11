@@ -1,47 +1,8 @@
 # SPDX-FileCopyrightText: 2016-2022 TheAlgorithms and contributors
 # SPDX-License-Identifier: MIT
 
-### SKEL HEAD BEGIN
-def user_get_type(obj):
-    if hasattr(obj, '_class_name'):
-        return "<function " + obj._class_name.split(";")[0] + " >"
-    else:
-        return type(obj)
-
-def user_check_type(obj, _type):
-    if str(_type).startswith("<class") and str(_type).split("'")[1] in ["dict", "object"]:
-        return isinstance(obj, _type)
-    elif hasattr(obj, '_class_name'):
-        if "function" in str(_type):
-            for i in obj._class_name.split(";"):
-                if i == str(_type).split(" ")[1]:
-                    return True
-            return False
-    else:
-        if str(_type).startswith("<function"):
-            typename = str(_type).split(" ")[1]
-            if typename == 'func_dict':
-                return isinstance(obj, dict)
-        return isinstance(obj, _type)
-
-
-def SkelClass(class_name, super_class=None):
-    if super_class is None:
-        class myclass:
-            _class_name = class_name
-    else:
-        class myclass(super_class):
-            _class_name = class_name
-    return myclass()
-
-### SKEL HEAD END
-
-"""
-psf/black : true
-ruff : passed
-"""
-
 from collections.abc import Iterator
+
 
 def RedBlackTree(param_0, param_1, param_2, param_3, param_4):
     """
@@ -614,7 +575,7 @@ def RedBlackTree(param_0, param_1, param_2, param_3, param_4):
     def __eq__(other):
         """Test if two trees are equal."""
         ### --- BLOCK BEGIN 26
-        if not user_check_type(other, RedBlackTree):
+        if other.__class__.__name__ != class_var.__class__.__name__:
             return NotImplemented
         if class_var.label == other.label:
             return ((hasattr(class_var.left, '__eq__') and class_var.left.__eq__(other.left)) or (not hasattr(class_var.left, '__eq__') and class_var.left == other.left)) and ((hasattr(class_var.right, '__eq__') and class_var.right.__eq__(other.right)) or (not hasattr(class_var.right, '__eq__') and class_var.right == other.right))
@@ -624,7 +585,7 @@ def RedBlackTree(param_0, param_1, param_2, param_3, param_4):
     
     
     
-    class_var = SkelClass('RedBlackTree')
+    class_var = type('RedBlackTree', (), {})()
     class_var.__init__ = __init__
     class_var.rotate_left = rotate_left
     class_var.rotate_right = rotate_right
