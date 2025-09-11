@@ -6092,7 +6092,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '0',
-      'i',
       'range(j, n)',
       'arr[i] == x',
       'i',
@@ -6137,7 +6136,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'n',
       '0',
       '0',
-      'i',
       'range(n)',
       'a[i] > best',
       'a[i]',
@@ -6156,13 +6154,11 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'dict()',
-      'i',
       'range(start, end + 1)',
       'arr[i] in frequency.keys()',
       '1',
       '1',
       '0',
-      'x',
       'frequency',
       'x == frequency[x]',
       '1',
@@ -6206,10 +6202,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     ground_truth = [
       '[[0 for i in range(n + 1)] for j in range(n + 1)]',
       '1',
-      'i',
       'range(1, n + 1)',
       'bell[i - 1][i - 1]',
-      'j',
       'range(1, i + 1)',
       'bell[i - 1][j - 1] + bell[i][j - 1]',
       'bell[n][0]',
@@ -6428,7 +6422,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'len(N)',
       'int((length) / 2)',
       '0',
-      'i',
       'range(l + 1)',
       'N[0:0 + i]',
       'len(s)',
@@ -6446,11 +6439,8 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '0',
-      'i',
       'range(0, n + 1)',
-      'j',
       'range(0, n + 1)',
-      'k',
       'range(0, n + 1)',
       'i + j + k == n',
       'count + 1',
@@ -6475,7 +6465,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       '""',
-      'i',
       'range(len(text))',
       'text[i]',
       'char.isupper()',
@@ -6518,13 +6507,11 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
       'dict()',
-      'i',
       'range(n)',
       'count.get(a[i])',
       '1',
       '1',
       '1',
-      'i',
       'range(n)',
       'count[a[i]] != 1 or a[i] > n or a[i] < 1',
       '1',
@@ -6543,7 +6530,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       '[0 for i in range(n)]',
       '[0 for i in range(n)]',
       '1',
-      'i',
       'range(1, n)',
       'a[i - 1] + b[i - 1]',
       'a[i - 1]',
@@ -6560,9 +6546,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     ground_truth = [
       '0',
       '0',
-      'i',
       'range(n)',
-      'j',
       'range(m)',
       'arr2[i] == arr1[j]',
       '0',
@@ -6577,9 +6561,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
-      'i',
       'range(n)',
-      'j',
       'range(m)',
       'arr2[i] == arr1[j]',
       '0',
@@ -6611,9 +6593,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     ground_truth = [
       '0',
       '0',
-      'i',
       'range(n)',
-      'j',
       'range(m)',
       '0',
       '1',
@@ -6629,9 +6609,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     ground_truth = [
       '0',
       '0',
-      'i',
       'range(n)',
-      'j',
       'range(m)',
       'arr2[i] == arr1[j]',
     ]
@@ -6669,9 +6647,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
     )
     choicable_nodes_str = [self.pp.visit(node) for node in choicable_nodes]
     ground_truth = [
-      'i',
       'range(n)',
-      'j',
       'range(m)',
       'arr2[i] == arr1[j]',
     ]
@@ -6698,7 +6674,6 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       '0',
       'n <= 2',
       'n',
-      'i',
       'range(3, n + 1)',
       'b + (i - 1) * a',
       'b',
@@ -6785,12 +6760,10 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
-      'i',
       'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
-      'i',
       'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
@@ -6819,12 +6792,10 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
-      'i',
       'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
-      'i',
       'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
@@ -6853,12 +6824,10 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'str1[::-1]',
       'str2[::-1]',
       '0',
-      'i',
       'range(n1)',
       '(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)',
       'chr(sum_0 % 10 + 48)',
       'int(sum_0 / 10)',
-      'i',
       'range(n1, n2)',
       '(ord(str2[i]) - 48) + carry',
       'chr(sum_0 % 10 + 48)',
