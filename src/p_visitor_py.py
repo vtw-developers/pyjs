@@ -2775,7 +2775,6 @@ class ChoicableNodeExtractor(pvis.Visitor):
   def visit_ForStatementNode(self, node: ForStatementNode) -> None:
     nid = self.nid_reverse_lookup(node)
     if nid not in self.exclude_statement_nodes_ids:
-      self.add_choicable_node(node.left)
       self.add_choicable_node(node.right)
     else:
       logger.debug(
