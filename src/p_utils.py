@@ -43,7 +43,7 @@ def setup_logger(name: str, path: Optional[Path] = None) -> logging.Logger:
   NOTE Logging levels:
   DEBUG, INFO, WARNING, ERROR, CRITICAL
   '''
-  _LOG_FPATH = path or (p_consts.PIREL_LOGS_DIR / 'pirel.log')
+  _LOG_FPATH = path or (p_consts.LOGS_DIR / 'pirel.log')
   _LOG_FMODE = 'a'
   _LOG_FORMAT = '%(asctime)s,%(msecs)d %(taskName)s %(levelname)s %(module)s.%(funcName)s:%(lineno)d %(message)s'
   _LOG_FORMAT_CONSOLE = '%(asctime)s %(taskName)s %(levelname)s %(message)s'
