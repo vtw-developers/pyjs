@@ -16,7 +16,7 @@ mode: benchmark
 # is_three_split: bool
 #
 # [is_override_starting_ruleset]: bool (default: false)
-# [overriding_ruleset_fpath]: str (required if is_override_starting_ruleset is true)
+# [overriding_ruleset_fpaths]: List[str] (required if is_override_starting_ruleset is true)
 #
 # sample: object
 #   is_random: bool
@@ -36,7 +36,8 @@ mode_benchmark:
 
   # starting ruleset can be overriden by this config
   is_override_starting_ruleset: false
-  overriding_ruleset_fpath: relative/path/to/ruleset.snart
+  overriding_ruleset_fpaths:
+    - relative/path/to/ruleset.snart
 
   # max number of concurrent subjects to learn rules for
   max_concurrent_subjects: 1000
