@@ -1677,7 +1677,7 @@ async def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
-def _test_learn_and_validate_trules_stat_node():
+def _test_stat_node_main_learn_validate_trules():
   '''
   async def stat_node_main_learn_validate_trules(
     main_subject: p_subject.PirelSubject,
@@ -1687,12 +1687,12 @@ def _test_learn_and_validate_trules_stat_node():
     lstat_node: Optional[ptlog.StatNode] = None
   ):
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_learn_and_validate_trules_stat_node_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_stat_node_main_learn_validate_trules_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  main_subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['main_subject']))
-  current_ruleset = p_ruleset.Ruleset.from_dict(json.loads(args_dict['current_ruleset']))
+  main_subject = p_subject.PirelSubject.from_dict(args_dict['main_subject'])
+  current_ruleset = p_ruleset.Ruleset.from_dict(args_dict['current_ruleset'])
   stat_nid = args_dict['stat_nid']
   nid_blacklist = args_dict['nid_blacklist']
 
@@ -1888,7 +1888,7 @@ def _test_adapt_rule_choices_assert_result():
 
 
 if __name__ == '__main__':
-  # _test_learn_and_validate_trules_stat_node()
+  # _test_stat_node_main_learn_validate_trules()
   _test_learn_trans_rules_for_prob_node()
   # _test_stat_node_learn_trules_recovery()
   # _test_duoglot_translate_wrapper()
