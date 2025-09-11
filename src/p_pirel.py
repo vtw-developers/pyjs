@@ -1717,7 +1717,7 @@ def _test_learn_trans_rules_for_prob_node():
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  subject = p_subject.PirelSubject.from_dict(json.loads(args_dict['subject']))
+  subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
   current_ruleset_str = args_dict['current_ruleset_str']
   templates_dict = args_dict['templates_dict']
 
