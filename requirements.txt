@@ -6,6 +6,7 @@ langchain-core==0.3.54
 langchain-openai==0.3.14
 langchain-text-splitters==0.3.8
 Levenshtein>=0.22
+matplotlib==3.10.6
 pydantic==2.8.2
 pydantic_core==2.20.1
 pyparsing==3.0.9
