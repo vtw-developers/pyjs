@@ -241,12 +241,12 @@ PY_BUILT_IN_MODULES = {
 #################################### LLM CONFIGS ###############################################
 ################################################################################################
 DEFAULT_MODEL_PARAMS = {
-  'model_name': 'gpt-5',  # gpt-5-nano, o4-mini
+  'model_name': 'gpt-5',
+  # 'model_name': 'gpt-5-nano',
   'temperature': 1.0,
   'max_completion_tokens': 16384,
   'request_timeout': None,
   'max_retries': 2,
-  # 'num_completions': 1,  # can be used only with model._generate
 }
 
 TRANSLATION_SP1_MAX_RETRIES = 2
