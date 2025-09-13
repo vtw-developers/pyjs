@@ -14,21 +14,21 @@
       "justMyCode": true
     },
     {
-      "name": "e_analyze_data.py -m primitive",
+      "name": "e_logs_analyze.py -m primitive",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
-      "program": "e_analyze_data.py",
+      "program": "e_logs_analyze.py",
       "args": ["-m", "primitive"],
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "e_gfg_experiments.py -e 1",
+      "name": "e_experiments.py -e 1",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
-      "program": "e_gfg_experiments.py",
+      "program": "e_experiments.py",
       "args": ["-e", "1"],
       "console": "integratedTerminal",
       "justMyCode": true

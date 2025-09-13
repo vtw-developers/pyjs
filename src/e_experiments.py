@@ -2,7 +2,8 @@ import argparse
 import asyncio
 from typing import Optional, Tuple
 
-import e_analyze_data
+import e_common
+import e_consts
 import p_consts
 import p_learn_apply_rules
 import p_rule_applicator as prapp
@@ -13,17 +14,14 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-_BENCHMARK_NAME = 'gfg'
-_SRC_LANG = 'py'
-_TAR_LANG = 'js'
-
-
 def get_rule_application_duration_msec(
   apply_subject: p_subject.PirelSubject
 ) -> Tuple[int, Optional[str]]:
   '''
   Returns the time taken to apply rules to the subject in milliseconds,
-  along with a boolean indicating if there was an error during application.
+  along with a error string if an exception occurred (None otherwise).
+
+  NOTE Refer to p_learn_apply_rules for what apply_subject should be.
   '''
   try:
     start_time = p_utils.current_time_msec()
@@ -31,11 +29,10 @@ def get_rule_application_duration_msec(
   except Exception as err:
     logger.error(f'Error applying rules for subject {apply_subject.name}: {err}')
     return p_utils.current_time_msec() - start_time, str(err)
-
   return p_utils.current_time_msec() - start_time, None
 
 
-def e01_rule_application_runtime_no_union(args):
+def e01_gfg_rule_application_runtime_no_union(args):
   '''
   Measure the time it takes to translate a subject using only the rules
   learned from that subject (i.e., no union of rules from other subjects).
@@ -44,20 +41,16 @@ def e01_rule_application_runtime_no_union(args):
 
   NOTE NUM_RULES includes rules from starting ruleset.
   '''
-  output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'e01_rule_application_runtime_no_union.txt')
-  output_fpath = e_analyze_data._normalize_path(output_fpath)
+  output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'e01_gfg_rule_application_runtime_no_union.txt')
   fout = open(output_fpath, 'w')
 
-  subject_names = e_analyze_data.get_subject_names(args)
+  subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
     logger.info(f'[{idx}/{len(subject_names)}] Processing subject: {subject_name}')
 
-    src_program = e_analyze_data.get_subject_src_program(subject_name, _BENCHMARK_NAME)
-    subject = p_subject.PirelSubject(
-      benchmark_name=_BENCHMARK_NAME, name=subject_name, src_program=src_program,
-      src_lang=_SRC_LANG, tar_lang=_TAR_LANG, is_three_split=True)
-    ruleset = e_analyze_data.load_rulesets(
-      [subject_name], e_analyze_data._normalize_path(args.logs_dir))
+    src_program = e_common.get_subject_src_from_bench_dir(subject_name, 'gfg')
+    subject = p_subject.PirelSubject('gfg', subject_name, src_program, 'py', 'js', True)
+    ruleset = e_common.load_rulesets_union([subject_name], args.logs_dir)
     apply_subject = p_learn_apply_rules._create_subject_for_apply_phase(subject, ruleset)
     duration_msec, error_str = get_rule_application_duration_msec(apply_subject)
     fout.write(f'{len(ruleset.rules)}\t{duration_msec}\t{error_str or ""}\n')
@@ -65,28 +58,26 @@ def e01_rule_application_runtime_no_union(args):
   fout.close()
 
 
-def e02_rule_application_runtime_union(args):
+def e02_gfg_rule_application_runtime_union(args):
   '''
   Measure the time it takes to translate a subject using the union of rules
   learned from that subject and other subjects.
   Outputs a TSV file with columns:
   (NUM_RULES, DURATION_MSEC, ERROR_STR)
   '''
-  output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'e02_rule_application_runtime_union.txt')
-  output_fpath = e_analyze_data._normalize_path(output_fpath)
+  output_fpath = args.output_fpath or (p_consts.EXPERIMENTS_DIR / 'e02_gfg_rule_application_runtime_union.txt')
   fout = open(output_fpath, 'w')
 
-  subject_names = e_analyze_data.get_subject_names(args)
-  ruleset = e_analyze_data.load_rulesets(
-    subject_names, e_analyze_data._normalize_path(args.logs_dir))
+  subject_names = e_common.load_subject_names(args.subject_names_fpath)
+  ruleset = e_common.load_rulesets_union(subject_names, args.logs_dir)
 
   for idx, subject_name in enumerate(subject_names, start=1):
     logger.info(f'[{idx}/{len(subject_names)}] Processing subject: {subject_name}')
 
-    src_program = e_analyze_data.get_subject_src_program(subject_name, _BENCHMARK_NAME)
+    src_program = e_common.get_subject_src_from_bench_dir(subject_name, 'gfg')
     subject = p_subject.PirelSubject(
-      benchmark_name=_BENCHMARK_NAME, name=subject_name, src_program=src_program,
-      src_lang=_SRC_LANG, tar_lang=_TAR_LANG, is_three_split=True)
+      benchmark_name='gfg', name=subject_name, src_program=src_program,
+      src_lang=e_consts.SRC_LANG, tar_lang=e_consts.TAR_LANG, is_three_split=True)
     apply_subject = p_learn_apply_rules._create_subject_for_apply_phase(subject, ruleset)
     duration_msec, error_str = get_rule_application_duration_msec(apply_subject)
     fout.write(f'{len(ruleset.rules)}\t{duration_msec}\t{error_str or ""}\n')
@@ -113,10 +104,18 @@ def get_args():
 
 def main():
   args = get_args()
+
+  if args.subject_names_fpath:
+    args.subject_names_fpath = e_common.normalize_path(args.subject_names_fpath)
+  if args.output_fpath:
+    args.output_fpath = e_common.normalize_path(args.output_fpath)
+  if args.logs_dir:
+    args.logs_dir = e_common.normalize_path(args.logs_dir)
+
   if args.experiment == 1:
-    e01_rule_application_runtime_no_union(args)
+    e01_gfg_rule_application_runtime_no_union(args)
   if args.experiment == 2:
-    e02_rule_application_runtime_union(args)
+    e02_gfg_rule_application_runtime_union(args)
   else:
     raise ValueError(f'Unknown experiment: {args.experiment}')
 
