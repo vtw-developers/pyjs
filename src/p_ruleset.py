@@ -45,7 +45,7 @@ class TRuleBase(ABC):
   @classmethod
   def parse_rule_str(cls, rule_str: str) -> dict:
     '''
-    Parse a rule string into a rule dict.
+    Parse a rule string into a rule_parsed dict.
     '''
     rules_parsed, _ = d_grammar_rules.parse_analyze_rules(rule_str)
     assert len(rules_parsed) == 1, f'Expected exactly one rule, got {len(rules_parsed)}'
@@ -75,6 +75,8 @@ class TRuleBase(ABC):
     '''
     if rule_serialized['type'] == 'StartingTRule':
       return StartingTRule.from_dict(rule_serialized)
+    elif rule_serialized['type'] == 'LogStatTRule':
+      return LogStatTRule.from_dict(rule_serialized)
     elif rule_serialized['type'] == 'StandardTRule':
       return StandardTRule.from_dict(rule_serialized)
     elif rule_serialized['type'] == 'StatementOverfittedTRule':
@@ -94,6 +96,22 @@ class StartingTRule(TRuleBase):
     Create a StartingTRule instance from a serialized dict.
     '''
     assert rule_serialized['type'] == 'StartingTRule', f'Expected type to be StartingTRule, got {rule_serialized["type"]}'
+    rule_str = rule_serialized['rule_str']
+    rule_parsed = cls.parse_rule_str(rule_str)
+    return cls(rule_parsed)
+
+
+class LogStatTRule(TRuleBase):
+  '''
+  A class that represents a translation rule for log statements
+  used during instrumentation.
+  '''
+  @classmethod
+  def from_dict(cls, rule_serialized: dict) -> LogStatTRule:
+    '''
+    Create a LogStatTRule instance from a serialized dict.
+    '''
+    assert rule_serialized['type'] == 'LogStatTRule', f'Expected type to be LogStatTRule, got {rule_serialized["type"]}'
     rule_str = rule_serialized['rule_str']
     rule_parsed = cls.parse_rule_str(rule_str)
     return cls(rule_parsed)
