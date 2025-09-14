@@ -25,7 +25,8 @@ def get_rule_application_duration_msec(
   '''
   try:
     start_time = p_utils.current_time_msec()
-    tar_program_plausible = asyncio.run(prapp.apply_translation_rules(apply_subject))
+    tar_program_plausible, translate_dbg_history = \
+      asyncio.run(prapp.apply_translation_rules(apply_subject))
   except Exception as err:
     logger.error(f'Error applying rules for subject {apply_subject.name}: {err}')
     return p_utils.current_time_msec() - start_time, str(err)
