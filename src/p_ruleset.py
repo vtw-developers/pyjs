@@ -251,6 +251,13 @@ class Ruleset:
         return rule
     return None
 
+  def get_rule_by_idx(self, idx: int) -> TRuleBase:
+    '''
+    Get a rule by its index in the ruleset.
+    '''
+    assert 0 <= idx < len(self.rules), f'Index {idx} out of bounds for ruleset of size {len(self.rules)}'
+    return self.rules[idx]
+
   def get_stat_overfitted_rules(self) -> List[StatementOverfittedTRule]:
     '''
     Get all StatementOverfittedTRule rules in the ruleset.
