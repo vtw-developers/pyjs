@@ -18,7 +18,7 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
-def _get_used_translation_rule_ids(
+def get_used_translation_rule_ids(
   dbg_history: List[dict]
 ) -> List[int]:
   used_rule_ids : List[int] = []
@@ -217,8 +217,8 @@ def is_valid_translation_rule_syntactic(
     return False
 
   # there still is a problematic node
-  rule_ids_before = _get_used_translation_rule_ids(dbg_history_before)
-  rule_ids_after = _get_used_translation_rule_ids(dbg_history_after)
+  rule_ids_before = get_used_translation_rule_ids(dbg_history_before)
+  rule_ids_after = get_used_translation_rule_ids(dbg_history_after)
 
   return _process_used_rules(
     rule_ids_before,
