@@ -832,11 +832,14 @@ def _check_and_update_choices(
 # API
 async def apply_translation_rules(
   subject: p_subject.PirelSubject
-) -> str:
+) -> Tuple[str, List[dict]]:
   '''
   Apply the translation rules to the source program.
   Equivalent to index_bench.js::runBenchmarkHandler
-  RETURN a str tar_program_instr
+
+  RETURN tuple:
+  - plausible tar_program_instr (str)
+  - translate_dbg_history (List[dict])
 
   Raised or propagated exceptions:
   - SrcTestScriptRunError
@@ -894,11 +897,12 @@ async def apply_translation_rules(
 
     tar_main_code_instr, map_to_exid, translate_dbg_history = \
       _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
-    tar_program_instr = _program_parts_concatenate(tar_test_code, tar_main_code_instr, tar_test_call_code, subject)
+    tar_program_instr = \
+      _program_parts_concatenate(tar_test_code, tar_main_code_instr, tar_test_call_code, subject)
 
     try:
       await _run_tests(src_program_instr, tar_program_instr, subject)
-      return tar_program_instr.strip()
+      return tar_program_instr.strip(), translate_dbg_history
 
     except SrcTestScriptRunError as err:
       logger.critical('There is an error in running src test script. This normally should not happen')
@@ -949,7 +953,8 @@ async def apply_translation_rules(
 # USAGE
 def usage_apply_translation_rules():
   subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible = asyncio.run(apply_translation_rules(subject_config))
+  tar_program_plausible, translate_dbg_history = \
+    asyncio.run(apply_translation_rules(subject_config))
   logger.debug(f'Plausible target program:\n{tar_program_plausible}')
 
 
@@ -965,8 +970,9 @@ def _test_apply_translation_rules():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
-  tar_program_deinstr = asyncio.run(apply_translation_rules(subject))
-  print(f'Plausible target program:\n{tar_program_deinstr}')
+  tar_program_plausible, translate_dbg_history = \
+    asyncio.run(apply_translation_rules(subject))
+  print(f'Plausible target program:\n{tar_program_plausible}')
 
 
 def _test_run_tests():

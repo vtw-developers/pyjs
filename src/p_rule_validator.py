@@ -394,7 +394,8 @@ async def check_trules_test_based(
   lstat_node_val.v3_rule_apply_stms = p_utils.current_time_msec()
 
   logger.debug('~~ Applying translation rules to get the target program')
-  tar_program_plausible = await prapp.apply_translation_rules(val_subject)
+  tar_program_plausible, translate_dbg_history = \
+    await prapp.apply_translation_rules(val_subject)
   val_subject.readonly_choices_list = []  # reset
   logger.debug('~~ Finished applying translation rules')
 

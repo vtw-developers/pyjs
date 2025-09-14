@@ -174,7 +174,8 @@ async def learn_and_application_phases_on_subject(
     async with semaphore:
       logger.info('About to start rule application phase')
       apply_subject = _create_subject_for_apply_phase(subject, starting_ruleset)
-      tar_program_plausible = await prapp.apply_translation_rules(apply_subject)
+      tar_program_plausible, translate_dbg_history = \
+        await prapp.apply_translation_rules(apply_subject)
       if subject.is_three_split:
         _, tar_main_code_plausible, _ = \
           tar_program_plausible.split(p_consts.TEST_MAIN_CALL_DELIMITER)

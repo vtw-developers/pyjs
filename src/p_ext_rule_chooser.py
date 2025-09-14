@@ -656,7 +656,8 @@ async def _validate_matcher_group_no_intersection(
     with respect to the matched AST.
     '''
     try:
-      tar_program_plausible = await prapp.apply_translation_rules(expr_subject)
+      tar_program_plausible, translate_dbg_history = \
+        await prapp.apply_translation_rules(expr_subject)
       range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
         matched_range_cursor, dgann, src_main_code)
       ruleset.update_verified_rules(range_cursor_unparsed, rule)
@@ -738,7 +739,8 @@ async def _validate_matcher_group_single_intersection(
     with respect to the matched AST.
     '''
     try:
-      tar_program_plausible = await prapp.apply_translation_rules(expr_subject)
+      tar_program_plausible, translate_dbg_history = \
+        await prapp.apply_translation_rules(expr_subject)
       range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
         matched_range_cursor, dgann, src_main_code)
       ruleset.update_verified_rules(range_cursor_unparsed, rule)
