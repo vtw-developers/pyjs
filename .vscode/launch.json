@@ -14,22 +14,31 @@
       "justMyCode": true
     },
     {
-      "name": "e_logs_analyze.py -m primitive",
+      "name": "e_logs_analyze.py -a 1",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
       "program": "e_logs_analyze.py",
-      "args": ["-m", "primitive"],
+      "args": ["-a", "1"],
       "console": "integratedTerminal",
       "justMyCode": true
     },
     {
-      "name": "e_experiments.py -e 1",
+      "name": "e_experiments.py -e 3",
       "type": "debugpy",
       "request": "launch",
       "cwd": "${workspaceFolder}/src/",
       "program": "e_experiments.py",
-      "args": ["-e", "1"],
+      "args": ["-e", "3"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "e_plots.py",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/",
+      "program": "e_plots.py",
       "console": "integratedTerminal",
       "justMyCode": true
     },
