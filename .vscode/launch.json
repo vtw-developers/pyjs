@@ -144,15 +144,6 @@
       "justMyCode": true
     },
     {
-      "name": "p_pynguin.py",
-      "type": "debugpy",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/src/",
-      "program": "p_pynguin.py",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    },
-    {
       "name": "p_rule_applicator.py",
       "type": "debugpy",
       "request": "launch",
