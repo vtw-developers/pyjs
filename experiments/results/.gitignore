@@ -1,5 +1,6 @@
 # ignore all files in this directory
-*
+/2025-*
+/temp_*
 
 # but not these files
 !.gitignore

@@ -32,14 +32,14 @@ def get_error_from_log(log_fpath: Path) -> str:
 def a01_table_learn_apply_error(args) -> None:
   '''
   Writes a CSV file with columns
-  (LEARN, APPLY, ERROR) for each subject.
+  (SUBJECT_NAME, LEARN, APPLY, ERROR) for each subject.
   '''
   logger = p_utils.setup_logger(__name__, args.output_dir / 'a01.log')
   fout = open(args.output_dir / 'a01_table_learn_apply_error.csv', 'w', newline='')
   writer = csv.writer(fout)
 
   # Write header
-  writer.writerow(['LEARN', 'APPLY', 'ERROR'])
+  writer.writerow(['SUBJECT_NAME', 'LEARN', 'APPLY', 'ERROR'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
@@ -49,7 +49,7 @@ def a01_table_learn_apply_error(args) -> None:
     log_fpath = e_common.get_path_log(subject_name, args.logs_dir)
 
     if yaml_fpath is None:
-      writer.writerow(['killed', 'n/a', ''])
+      writer.writerow([subject_name, 'killed', 'n/a', ''])
       continue
 
     lsubject = e_common.load_subject_from_yaml(yaml_fpath)
@@ -59,19 +59,19 @@ def a01_table_learn_apply_error(args) -> None:
 
     if learn_phase_success is True:
       if apply_phase_success is True:
-        writer.writerow(['TRUE', 'TRUE', ''])
+        writer.writerow([subject_name, 'TRUE', 'TRUE', ''])
       elif apply_phase_success is False:
         error = get_error_from_log(log_fpath)
-        writer.writerow(['TRUE', 'FALSE', error])
+        writer.writerow([subject_name, 'TRUE', 'FALSE', error])
       elif apply_phase_success is None:
-        writer.writerow(['TRUE', 'killed', ''])
+        writer.writerow([subject_name, 'TRUE', 'killed', ''])
     elif learn_phase_success is False:
       assert apply_phase_success is None, 'apply_phase_success should be None if learn_phase_success is not True'
       error = get_error_from_log(log_fpath)
-      writer.writerow(['FALSE', 'n/a', error])
+      writer.writerow([subject_name, 'FALSE', 'n/a', error])
     elif learn_phase_success is None:
       assert apply_phase_success is None, 'apply_phase_success should be None if learn_phase_success is not True'
-      writer.writerow(['killed', 'n/a', ''])
+      writer.writerow([subject_name, 'killed', 'n/a', ''])
 
   fout.close()
 
@@ -79,14 +79,14 @@ def a01_table_learn_apply_error(args) -> None:
 def a02_table_input_output_tokens(args) -> None:
   '''
   Writes a CSV file with columns
-  (INPUT-TOKENS, OUTPUT-TOKENS) for each subject.
+  (SUBJECT_NAME, INPUT-TOKENS, OUTPUT-TOKENS) for each subject.
   '''
   logger = p_utils.setup_logger(__name__, args.output_dir / 'a02.log')
   fout = open(args.output_dir / 'a02_table_input_output_tokens.csv', 'w', newline='')
   writer = csv.writer(fout)
 
   # Write header
-  writer.writerow(['INPUT-TOKENS', 'OUTPUT-TOKENS'])
+  writer.writerow(['SUBJECT_NAME', 'INPUT-TOKENS', 'OUTPUT-TOKENS'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
@@ -95,13 +95,13 @@ def a02_table_input_output_tokens(args) -> None:
     yaml_fpath = e_common.get_path_yaml(subject_name, args.logs_dir)
 
     if yaml_fpath is None:
-      writer.writerow(['', ''])
+      writer.writerow([subject_name, '', ''])
       continue
 
     lsubject = e_common.load_subject_from_yaml(yaml_fpath)
     num_intok = lsubject.get_num_input_tokens()
     num_outtok = lsubject.get_num_output_tokens()
-    writer.writerow([num_intok, num_outtok])
+    writer.writerow([subject_name, num_intok, num_outtok])
 
   fout.close()
 

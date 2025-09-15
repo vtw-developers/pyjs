@@ -55,14 +55,14 @@ def e01_table_gfg_rule_application_runtime_no_union(args):
   Measure the time it takes to translate a subject using only the rules
   learned from that subject (i.e., no union of rules from other subjects).
   Outputs a CSV file with columns:
-  (NUM_RULES, DURATION_MSEC, ERROR_STR)
+  (SUBJECT_NAME, NUM_RULES, DURATION_MSEC, ERROR_STR)
 
   NOTE NUM_RULES includes rules from starting ruleset.
   '''
   logger = p_utils.setup_logger(__name__, args.output_dir / 'e01.log')
   fout = open(args.output_dir / 'e01_table_gfg_rule_application_runtime_no_union.csv', 'w', newline='')
   writer = csv.writer(fout)
-  writer.writerow(['NUM_RULES', 'DURATION_MSEC', 'ERROR_STR'])
+  writer.writerow(['SUBJECT_NAME', 'NUM_RULES', 'DURATION_MSEC', 'ERROR_STR'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
@@ -73,7 +73,8 @@ def e01_table_gfg_rule_application_runtime_no_union(args):
     ruleset = e_common.load_rulesets_union([subject_name], args.logs_dir)
     apply_subject = p_learn_apply_rules._create_subject_for_apply_phase(subject, ruleset)
     duration_msec, error_str = get_rule_application_duration_msec(apply_subject)
-    writer.writerow([len(ruleset.rules), duration_msec, error_str or ""])
+    writer.writerow([subject_name, len(ruleset.rules), duration_msec, error_str or ""])
+
   fout.close()
 
 def e02_table_gfg_rule_application_runtime_union(args):
@@ -81,15 +82,17 @@ def e02_table_gfg_rule_application_runtime_union(args):
   Measure the time it takes to translate a subject using the union of rules
   learned from that subject and other subjects.
   Outputs a CSV file with columns:
-  (NUM_RULES, DURATION_MSEC, ERROR_STR)
+  (SUBJECT_NAME, NUM_RULES, DURATION_MSEC, ERROR_STR)
   '''
   logger = p_utils.setup_logger(__name__, args.output_dir / 'e02.log')
   fout = open(args.output_dir / 'e02_table_gfg_rule_application_runtime_union.csv', 'w', newline='')
   writer = csv.writer(fout)
-  writer.writerow(['NUM_RULES', 'DURATION_MSEC', 'ERROR_STR'])
+  writer.writerow(['SUBJECT_NAME', 'NUM_RULES', 'DURATION_MSEC', 'ERROR_STR'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   ruleset = e_common.load_rulesets_union(subject_names, args.logs_dir)
+  logger.info(f'Loaded {len(ruleset.rules)} rules in total for union of rulesets.')
+  p_utils.write_json(args.output_dir / 'ruleset-union.json', ruleset.to_dict())
 
   for idx, subject_name in enumerate(subject_names, start=1):
     logger.info(f'[{idx}/{len(subject_names)}] Processing subject: {subject_name}')
@@ -100,14 +103,15 @@ def e02_table_gfg_rule_application_runtime_union(args):
       src_lang='py', tar_lang='js', is_three_split=True)
     apply_subject = p_learn_apply_rules._create_subject_for_apply_phase(subject, ruleset)
     duration_msec, error_str = get_rule_application_duration_msec(apply_subject)
-    writer.writerow([len(ruleset.rules), duration_msec, error_str or ""])
+    writer.writerow([subject_name, len(ruleset.rules), duration_msec, error_str or ""])
+
   fout.close()
 
 
 def e03_rq1_gfg_subtree_trans_success_rate(args):
   '''
   Write a CSV file with columns:
-  (NUMERATOR, DENOMINATOR, ERROR_STR)
+  (SUBJECT_NAME, NUMERATOR, DENOMINATOR, ERROR_STR)
 
   where NUMERATOR is the number of subtrees that were successfully translated,
   DENOMINATOR is the total number of subtrees, and ERROR_STR is an error
@@ -116,7 +120,7 @@ def e03_rq1_gfg_subtree_trans_success_rate(args):
   logger = p_utils.setup_logger(__name__, args.output_dir / 'e03.log')
   fout = open(args.output_dir / 'e03_rq1_gfg_subtree_trans_success_rate.csv', 'w', newline='')
   writer = csv.writer(fout)
-  writer.writerow(['NUMERATOR', 'DENOMINATOR', 'ERROR_STR'])
+  writer.writerow(['SUBJECT_NAME', 'NUMERATOR', 'DENOMINATOR', 'ERROR_STR'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
@@ -129,6 +133,7 @@ def e03_rq1_gfg_subtree_trans_success_rate(args):
 
     # need to add the rule since it's added at a str level in
     # p_learn_apply_rules._create_subject_for_apply_phase
+    # and is used by get_rule_application_used_rules()
     ruleset.append_rule(p_ruleset.LogStatTRule(p_ruleset.LogStatTRule.parse_rule_str(
       p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH))))
 
@@ -136,7 +141,7 @@ def e03_rq1_gfg_subtree_trans_success_rate(args):
       used_rules = get_rule_application_used_rules(apply_subject, ruleset)
     except Exception as err:
       logger.error(f'Error applying rules for subject {apply_subject.name}: {err}')
-      writer.writerow(['', '', str(err)])
+      writer.writerow([subject_name, '', '', str(err)])
       continue
 
     numerator = len([r for r in used_rules
@@ -145,14 +150,15 @@ def e03_rq1_gfg_subtree_trans_success_rate(args):
     denominator = len([r for r in used_rules
                    if isinstance(r, p_ruleset.StandardTRule)
                    or isinstance(r, p_ruleset.StatementOverfittedTRule)])
-    writer.writerow([numerator, denominator, ''])
+    writer.writerow([subject_name, numerator, denominator, ''])
+
   fout.close()
 
 
 def e04_rq2_gfg_rule_extractability(args):
   '''
   Write a CSV file with columns:
-  (NUMERATOR, DENOMINATOR, ERROR_STR)
+  (SUBJECT_NAME, NUMERATOR, DENOMINATOR, ERROR_STR)
 
   where NUMERATOR is the number of subtrees for which rules are successfully extracted,
   DENOMINATOR is the number of subtrees PiREL attempts to translate, and ERROR_STR is an error
@@ -161,7 +167,7 @@ def e04_rq2_gfg_rule_extractability(args):
   logger = p_utils.setup_logger(__name__, args.output_dir / 'e04.log')
   fout = open(args.output_dir / 'e04_rq2_gfg_rule_extractability.csv', 'w', newline='')
   writer = csv.writer(fout)
-  writer.writerow(['NUMERATOR', 'DENOMINATOR', 'ERROR_STR'])
+  writer.writerow(['SUBJECT_NAME', 'NUMERATOR', 'DENOMINATOR', 'ERROR_STR'])
 
   subject_names = e_common.load_subject_names(args.subject_names_fpath)
   for idx, subject_name in enumerate(subject_names, start=1):
@@ -174,6 +180,7 @@ def e04_rq2_gfg_rule_extractability(args):
 
     # need to add the rule since it's added at a str level in
     # p_learn_apply_rules._create_subject_for_apply_phase
+    # and is used by get_rule_application_used_rules()
     ruleset.append_rule(p_ruleset.LogStatTRule(p_ruleset.LogStatTRule.parse_rule_str(
       p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH))))
 
@@ -181,7 +188,7 @@ def e04_rq2_gfg_rule_extractability(args):
       used_rules = get_rule_application_used_rules(apply_subject, ruleset)
     except Exception as err:
       logger.error(f'Error applying rules for subject {apply_subject.name}: {err}')
-      writer.writerow(['', '', str(err)])
+      writer.writerow([subject_name, '', '', str(err)])
       continue
 
     numerator = len([r for r in used_rules
@@ -189,7 +196,66 @@ def e04_rq2_gfg_rule_extractability(args):
     denominator = len([r for r in used_rules
                    if isinstance(r, p_ruleset.StandardTRule)
                    or isinstance(r, p_ruleset.StatementOverfittedTRule)])
-    writer.writerow([numerator, denominator, ''])
+    writer.writerow([subject_name, numerator, denominator, ''])
+  fout.close()
+
+
+def e05_rq3_gfg_rule_reusability(args):
+  '''
+  Writes a CSV file with columns
+  (COUNT, RULE_STR)
+  COUNT is the number of times a rule is used for translation.
+  '''
+  logger = p_utils.setup_logger(__name__, args.output_dir / 'e05.log')
+  subject_names = e_common.load_subject_names(args.subject_names_fpath)
+
+  logger.info('Loading union of rulesets...')
+  ruleset = e_common.load_rulesets_union(subject_names, args.logs_dir)
+  p_utils.write_json(args.output_dir / 'ruleset-union.json', ruleset.to_dict())
+  logger.info(f'Loaded {len(ruleset.rules)} rules in total.')
+
+  all_used_rules: List[p_ruleset.TRuleBase] = []
+  subject_names = e_common.load_subject_names(args.subject_names_fpath)
+  for idx, subject_name in enumerate(subject_names, start=1):
+    logger.info(f'[{idx}/{len(subject_names)}] Processing subject: {subject_name}')
+
+    src_program = e_common.get_subject_src_from_bench_dir(subject_name, 'gfg')
+    subject = p_subject.PirelSubject('gfg', subject_name, src_program, 'py', 'js', True)
+    apply_subject = p_learn_apply_rules._create_subject_for_apply_phase(subject, ruleset)
+
+    # need to add the rule since it's added at a str level in
+    # p_learn_apply_rules._create_subject_for_apply_phase
+    # and is used by get_rule_application_used_rules()
+    ruleset.append_rule(p_ruleset.LogStatTRule(p_ruleset.LogStatTRule.parse_rule_str(
+      p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH))))
+
+    try:
+      used_rules = get_rule_application_used_rules(apply_subject, ruleset)
+    except Exception as err:
+      logger.error(f'Error applying rules for subject {apply_subject.name}: {err}')
+      continue
+
+    all_used_rules.extend(used_rules)
+
+  all_used_rules = [r for r in all_used_rules
+                if isinstance(r, p_ruleset.StandardTRule)
+                or isinstance(r, p_ruleset.StatementOverfittedTRule)]
+  logger.info(f'Used rules count: {len(all_used_rules)}')
+  p_utils.write_json(args.output_dir / 'all-used-rules.json', [r.to_dict() for r in all_used_rules])
+
+  rule_counts = dict()
+  for rule in all_used_rules:
+    rule_str = rule.to_rule_str()
+    rule_counts[rule_str] = rule_counts.get(rule_str, 0) + 1
+  rule_counts = [(count, rule_str) for rule_str, count in rule_counts.items()]
+  rule_counts.sort(reverse=True, key=lambda x: x[0])
+
+  fout = open(args.output_dir / 'e05_rq3_gfg_rule_reusability.csv', 'w', newline='')
+  writer = csv.writer(fout)
+  writer.writerow(['COUNT', 'RULE_STR'])
+
+  for (count, rule_str) in rule_counts:
+    writer.writerow([count, rule_str])
   fout.close()
 
 
@@ -237,6 +303,8 @@ def main():
     e03_rq1_gfg_subtree_trans_success_rate(args)
   elif args.experiment == 4:
     e04_rq2_gfg_rule_extractability(args)
+  elif args.experiment == 5:
+    e05_rq3_gfg_rule_reusability(args)
   else:
     raise ValueError(f'Unknown experiment: {args.experiment}')
 
