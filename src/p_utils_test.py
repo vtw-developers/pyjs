@@ -135,5 +135,15 @@ class TestToCamelCase(unittest.TestCase):
       self.assertEqual(p_utils.to_camel_case(k), v)
 
 
+class TestCodeNormalization(unittest.TestCase):
+  def test_remove_comments_and_docstrings_py(self):
+    self.assertEqual(
+      p_utils.remove_comments_and_docstrings_py(
+        'def hoare(p, c, q):\n'
+        '    """Format the given Hoare triple."""\n'
+        '    return f"{{{p}}}{c}{{{q}}}"  # wow, much readability!\n'),
+      'def hoare(p, c, q):\n    \n    return f"{{{p}}}{c}{{{q}}}"\n')
+
+
 if __name__ == '__main__':
   unittest.main()

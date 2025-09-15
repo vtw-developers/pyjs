@@ -379,7 +379,7 @@ def remove_comments_and_docstrings_py(source: str) -> str:
   Returns 'source' minus comments and docstrings.
   """
   io_obj = io.StringIO(source)
-  out = ""
+  out = []
   prev_toktype = tokenize.INDENT
   last_lineno = -1
   last_col = 0
@@ -395,11 +395,22 @@ def remove_comments_and_docstrings_py(source: str) -> str:
     # whitespace).
     if start_line > last_lineno:
       last_col = 0
-    if start_col > last_col:
-      out += (" " * (start_col - last_col))
+    assert start_col >= last_col
+    # Don't keep whitespace before comments, which is now trailing.
+    if start_col > last_col and token_type != tokenize.COMMENT:
+      out.append(" " * (start_col - last_col))
     # Remove comments:
     if token_type == tokenize.COMMENT:
       pass
+    elif token_type == tokenize.FSTRING_MIDDLE:
+      if token_string.endswith('{'):
+          out.append(token_string+'{')
+          end_col += 1
+      elif token_string.endswith('}'):
+          out.append(token_string+'}')
+          end_col += 1
+      else:
+          out.append(token_string)
     # This series of conditionals removes docstrings:
     elif token_type == tokenize.STRING:
       if prev_toktype != tokenize.INDENT:
@@ -413,7 +424,7 @@ def remove_comments_and_docstrings_py(source: str) -> str:
           # Catch whole-module docstrings:
           if start_col > 0:
             # Unlabelled indentation means we're inside an operator
-            out += token_string
+            out.append(token_string)
           # Note regarding the INDENT token: The tokenize module does
           # not label indentation inside of an operator (parens,
           # brackets, and curly braces) as actual indentation.
@@ -424,11 +435,11 @@ def remove_comments_and_docstrings_py(source: str) -> str:
           #         "The spaces before this string do not get a token"
           #     ]
     else:
-      out += token_string
+      out.append(token_string)
     prev_toktype = token_type
     last_col = end_col
     last_lineno = end_line
-  return out
+  return ''.join(out)
 
 def remove_empty_lines(source: str) -> str:
   return '\n'.join([line for line in source.splitlines() if line.strip()])
