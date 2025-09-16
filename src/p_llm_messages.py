@@ -418,6 +418,17 @@ class GetRefTransF(BaseMessageFactory):
       return feedback_message
     self._log('case 4: some/all ref_trans_cands have a compound statement with curly braces')
 
+    # case 5: checking if all ref_trans_cands are comment-only strings
+    self._log('case 5: checking if all ref_trans_cands are comment-only strings')
+    if self.val.all_are_comment_only():
+      self._log('all ref_trans_cands are comment-only strings')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        'Please make sure that the generated reference translation is not just comments.'
+      )
+      return feedback_message
+    self._log('case 5: some/all ref_trans_cands are not comment-only strings')
+
     raise NotImplementedError('new feedback case identified in GetRefTransF')
 
 

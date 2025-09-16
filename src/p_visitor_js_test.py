@@ -30,7 +30,7 @@ class TestCommentsRemover(unittest.TestCase):
     self.maxDiff = None
 
   def test_all(self):
-    NUM_SNIPPETS = 4
+    NUM_SNIPPETS = 5
     for i in range(1, NUM_SNIPPETS + 1):
       fpath = self.snippets_dir / f'snippet_{i:03d}_in.js'
       snippet = fpath.read_text().strip()
