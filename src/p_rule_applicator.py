@@ -789,7 +789,15 @@ def _check_and_update_choices(
      with the given translation rules. In this case, we raise
      SrcTestScriptProblematicNodeError.
   '''
+  _MAX_ITER_COUNT = 1000
+  iter_count = 0
   while True:
+    iter_count += 1
+    if iter_count > _MAX_ITER_COUNT:
+      msg = f'Exceeded max iteration count {_MAX_ITER_COUNT} in _check_and_update_choices().'
+      logger.critical(msg)
+      raise NotImplementedError(msg)
+
     try:
       duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
         src_code=src_main_code_instr,
