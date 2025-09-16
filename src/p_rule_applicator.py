@@ -91,7 +91,7 @@ def are_traces_equal_rec(
   # base case: types are num
   if type1 == 'number':
     val1, val2 = src_trace[1], tar_trace[1]
-    return p_utils.are_equal_numbers(val1, val2, eps_percentage=0)
+    return p_utils.are_equal_numbers(val1, val2, eps_percentage=p_consts.EPS_PERCENTAGE)
 
   # recurse
   if type1 in ['list', 'set', 'dict']:
