@@ -290,7 +290,7 @@ def range_cursor_is_empty(range_cursor: tuple) -> bool:
   return range_cursor[1] == range_cursor[2]
 
 
-def range_cursor_remove_empty(
+def range_cursors_remove_empty(
   range_cursors: List[Tuple[list, int, int]],
 ) -> List[Tuple[list, int, int]]:
   '''
