@@ -526,7 +526,7 @@ def get_rules_that_handle_range_cursor_rec(
     assert match_obj['is_matched'], 'Expected rule to match the range cursor'
     all_slot_cursors.extend(match_obj['slot_cursors'])
 
-  all_slot_cursors = d_ast_parse.range_cursor_remove_empty(all_slot_cursors)
+  all_slot_cursors = d_ast_parse.range_cursors_remove_empty(all_slot_cursors)
   all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
 
   # base case: rule has no slot cursors
@@ -891,7 +891,7 @@ async def _process_match_obj(
   slot_cursors are range_cursors that appear under the range_cursor.
   '''
   slot_cursors = match_obj['slot_cursors']
-  slot_cursors = d_ast_parse.range_cursor_remove_empty(slot_cursors)
+  slot_cursors = d_ast_parse.range_cursors_remove_empty(slot_cursors)
   logger.debug(f'Matched AST has {len(slot_cursors)} slots')
 
   '''
