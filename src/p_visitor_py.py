@@ -2786,6 +2786,9 @@ class ChoicableNodeExtractor(pvis.Visitor):
     if node.alternative:
       self.visit(node.alternative)
 
+  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
+    pass
+
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     '''
     Add condition as a choicable node only if
