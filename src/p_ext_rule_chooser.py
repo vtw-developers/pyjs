@@ -526,6 +526,7 @@ def get_rules_that_handle_range_cursor_rec(
     assert match_obj['is_matched'], 'Expected rule to match the range cursor'
     all_slot_cursors.extend(match_obj['slot_cursors'])
 
+  all_slot_cursors = d_ast_parse.range_cursors_sharpen(all_slot_cursors)
   all_slot_cursors = d_ast_parse.range_cursors_remove_empty(all_slot_cursors)
   all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
 
