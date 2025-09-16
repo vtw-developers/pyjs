@@ -582,7 +582,7 @@ def infer_translation_rule(
   choose_largest_node: bool,  # choose the largest/smallest node for a given mark
   is_ignore_semicolon: bool,  # update end column of a mark depending on semicolon
   pretty_print_tree_like: bool
-):
+) -> str:
   '''
   Given a list of source-target program pairs, infer a translation rule.
 
@@ -887,5 +887,55 @@ def _test_infer_translation_rule_wrapper():
   print(trule)
 
 
+def _usage_infer_translation_rule():
+  '''
+  def infer_translation_rule(
+    translation_pair: list,
+    src_lang: str,
+    tar_lang: str,
+    context: dict,
+    is_insert_secret_fn: bool,  # for post-processing
+    choose_largest_node: bool,  # choose the largest/smallest node for a given mark
+    is_ignore_semicolon: bool,  # update end column of a mark depending on semicolon
+    pretty_print_tree_like: bool
+  ):
+  '''
+  translation_pair = [
+    {
+      "source": "a = 'hi'",
+      "target": "a = 'hi';"
+    },
+    {
+      "source": "a = 'hello'",
+      "target": "a = 'hello';"
+    }
+  ]
+
+  src_lang = 'py'
+  tar_lang = 'js'
+  context = {
+    'source_context': [['py.expression_statement']],
+    'target_context': [['unknown']]
+  }
+  is_insert_secret_fn = False
+  choose_largest_node = True
+  is_ignore_semicolon = False
+  pretty_print_tree_like = True
+
+  trule = infer_translation_rule(
+    translation_pair,
+    src_lang,
+    tar_lang,
+    context,
+    is_insert_secret_fn,
+    choose_largest_node,
+    is_ignore_semicolon,
+    pretty_print_tree_like
+  )
+
+  print(trule)
+
+
 if __name__ == '__main__':
-  _test_infer_translation_rule_wrapper()
+  # _test_infer_translation_rule_wrapper()
+  _usage_infer_translation_rule()
