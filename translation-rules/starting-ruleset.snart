@@ -62,6 +62,16 @@
   (fragment ("js.number" "_val1_") "*1")
 )
 
+(match_expand
+  (fragment ("py.string_content" "_val_") "*")
+  (fragment ("js.string_fragment" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.string" "*") "*")
+  (fragment ("js.string" "*1") "*2")
+)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; RULE(S) THAT WE CANNOT LEARN AT THE MOMENT ;;;;;;;;;;;;
