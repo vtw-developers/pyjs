@@ -354,9 +354,6 @@ class BaseTranslateSP1Task(BasePirelTask):
   ):
     super().__init__(task_name, subject, template_dict, lbase_task)
     self.sp1 = sp1
-    self.log_args_as_json(
-      'args_init.json', task_name=task_name, template_dict=template_dict, sp1=sp1
-    )
 
   def get_system_message(self) -> BaseMessage:
     system_message = SystemMessagePromptTemplate.from_template(
@@ -514,10 +511,6 @@ class BaseTranslateSP2Task(BasePirelTask):
     self.sp1 = sp1_tp1_cand['source']
     self.tp1_cand = sp1_tp1_cand['target']
     self.sp2 = sp2
-    self.log_args_as_json(
-      'args_init.json', task_name=task_name, template_dict=template_dict,
-      sp1_tp1_cand=sp1_tp1_cand, sp2=sp2
-    )
 
   def get_system_message(self) -> BaseMessage:
     return SystemMessage(p_llm_templates.TranslateAny.System.GENERIC)
@@ -654,14 +647,6 @@ class GenTestFunction(BasePirelTask):
   ):
     super().__init__(task_name, subject, template_dict, lbase_task)
     self.f_gold_function = f_gold_function
-    self.log_args_as_json(
-      'args_init.json',
-      task_name=task_name,
-      f_gold_function=f_gold_function,
-      subject=subject,
-      template_dict=template_dict,
-      lbase_task=lbase_task
-    )
 
   def get_system_message(self) -> BaseMessage:
     system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
@@ -721,14 +706,6 @@ class GetReferenceTranslation(BasePirelTask):
   ):
     super().__init__(task_name, subject, template_dict, lbase_task)
     self.statement_str = statement_str
-    self.log_args_as_json(
-      'args_init.json',
-      task_name=task_name,
-      statement_str=statement_str,
-      subject=subject,
-      template_dict=template_dict,
-      lbase_task=lbase_task
-    )
 
   def get_system_message(self) -> BaseMessage:
     system_message = SystemMessagePromptTemplate.from_template(
