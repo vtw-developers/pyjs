@@ -1402,7 +1402,7 @@ async def stat_node_main_learn_validate_trules(
     f'Statement node:\n{simple_ntext}\n'
     f'Pre-context:\n{pre_context}')
 
-  _MAX_NUM_ITERS = 5
+  _MAX_NUM_ITERS = 4
   iter_counter = 0
   while iter_counter < _MAX_NUM_ITERS:
     iter_counter += 1
