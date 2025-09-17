@@ -127,6 +127,10 @@ class TranslateSP2ValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_parse_error, self.tp2_cands_stats))
     return all(flags)
 
+  def all_are_comment_only(self) -> bool:
+    flags = list(map(self.ad_is_comment_only, self.tp2_cands_stats))
+    return all(flags)
+
   def all_miss_context(self) -> bool:
     flags = list(map(self.ad_has_context, self.tp2_cands_stats))
     return not any(flags)
@@ -154,6 +158,9 @@ class TranslateSP2ValidationResult(BaseValidationResult):
 
   def ad_has_parse_error(self, tp2_stat: dict) -> bool:
     return tp2_stat['has_parse_error'] is True
+
+  def ad_is_comment_only(self, tp2_stat: dict) -> bool:
+    return tp2_stat['is_comment_only'] is True
 
   def ad_has_context(self, tp2_stat: dict) -> bool:
     return tp2_stat['has_context'] is True
@@ -426,7 +433,16 @@ def val_tp2_candidates(
     success = tp2_cand_stat['success']
 
     if success:
-      translation_pairs.append(({'source': sp1, 'target': tp1_cand}, {'source': sp2, 'target': tp2_cand}))
+      translation_pairs.append((
+        {
+          'source': tp2_cand_stat['sp1'],
+          'target': tp2_cand_stat['tp1_cand']
+        },
+        {
+          'source': tp2_cand_stat['sp2'],
+          'target': tp2_cand_stat['tp2_cand']
+        }
+      ))
 
   if len(translation_pairs) == 0:
     _ = {'sp1': sp1, 'sp2': sp2, 'tp1': tp1_cand, 'tp2_cands': tp2_cands}
@@ -459,6 +475,7 @@ def _tp2_cand_gather_stats(
     'tp2_cand': tp2_cand,
     'success': None,
     'has_parse_error': None,
+    'is_comment_only': None,
     'has_context': None,
     'is_type_isomorphic_to_tp1_cand': None,
   }
@@ -473,7 +490,20 @@ def _tp2_cand_gather_stats(
     return_dict['has_parse_error'] = True
     return return_dict
 
+  # actually remove comments from tp2_cand after checking for parse errors
+  tp2_cand = pvjs.CommentsRemover.remove_comments(tp2_cand).strip()
+  return_dict['tp2_cand'] = tp2_cand
+
   # criteria 2
+  # the TP2 candidate should not be a comment-only string
+  if tp2_cand == '':
+    logger.debug(f'BAD: generated TP2 candidate is a comment-only string')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = True
+    return return_dict
+
+  # criteria 3
   source_trees : List[pds.DuoGlotTree] = []
   for source in [sp1, sp2]:
     source_ast, _ = d_ast_parse.parse_text_dbg(source, src_lang)
@@ -490,6 +520,7 @@ def _tp2_cand_gather_stats(
     logger.debug(f'BAD: SP1-TP1 and SP2-TP2 do not contain any of the contexts')
     return_dict['success'] = False
     return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = False
     return_dict['has_context'] = False
     return return_dict
 
@@ -503,6 +534,7 @@ def _tp2_cand_gather_stats(
     logger.debug(f'BAD: TP1 and TP2 are not type-isomorphic.')
     return_dict['success'] = False
     return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = False
     return_dict['has_context'] = True
     return_dict['is_type_isomorphic_to_tp1_cand'] = False
     return return_dict
@@ -510,6 +542,7 @@ def _tp2_cand_gather_stats(
   logger.debug(f'GOOD: TP2 candidate passed the validation step.')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
+  return_dict['is_comment_only'] = False
   return_dict['is_type_isomorphic_to_tp1_cand'] = True
   return_dict['has_context'] = True
   return return_dict
@@ -1003,9 +1036,19 @@ def _test_val_tp1_candidates():
   print(json.dumps(val_result_dict.get_val_result(), indent=2, default=str))
 
 
-def _test_val_translation_pair_candidates():
-  test_harness_config:dict = p_utils.read_json('temporary_test_val_translation_pair_candidates_config.json')
-  args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
+def _test_val_tp2_candidates():
+  '''
+  def val_tp2_candidates(
+    tp2_cands: List[str],
+    sp1: str,
+    sp2: str,
+    tp1_cand: str,
+    template_dict: dict
+  ) -> TranslateSP2ValidationResult:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_val_tp2_candidates_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   tp2_cands = args_dict['tp2_cands']
   sp1 = args_dict['sp1']
@@ -1014,7 +1057,7 @@ def _test_val_translation_pair_candidates():
   template_dict = args_dict['template_dict']
 
   val_result_dict = val_tp2_candidates(tp2_cands, sp1, sp2, tp1_cand, template_dict)
-  p_utils.write_json('temporary_test_val_translation_pair_candidates.json', val_result_dict)
+  print(json.dumps(val_result_dict.get_val_result(), indent=2, default=str))
 
 
 def _test_val_get_ref_trans_candidates():
@@ -1041,5 +1084,5 @@ def _test_val_get_ref_trans_candidates():
 
 if __name__ == '__main__':
   # _test_val_tp1_candidates()
-  # _test_val_translation_pair_candidates()
+  # _test_val_tp2_candidates()
   _test_val_get_ref_trans_candidates()
