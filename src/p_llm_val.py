@@ -213,16 +213,16 @@ class GetRefTransValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_parse_error, self.ref_trans_cands_stats))
     return all(flags)
 
+  def all_are_comment_only(self) -> bool:
+    flags = list(map(self.ad_is_comment_only, self.ref_trans_cands_stats))
+    return all(flags)
+
   def all_have_many_statements(self) -> bool:
     flags = list(map(self.ad_has_many_statements, self.ref_trans_cands_stats))
     return all(flags)
 
   def all_comp_stat_no_curly_braces(self) -> bool:
     flags = list(map(self.ad_comp_stat_no_curly_braces, self.ref_trans_cands_stats))
-    return all(flags)
-
-  def all_are_comment_only(self) -> bool:
-    flags = list(map(self.ad_is_comment_only, self.ref_trans_cands_stats))
     return all(flags)
 
   # ADAPTER METHODS TO `ref_trans_cands_stats` (have `ad` prefix)
@@ -235,14 +235,14 @@ class GetRefTransValidationResult(BaseValidationResult):
   def ad_has_parse_error(self, ref_trans_cand_stat: dict) -> bool:
     return ref_trans_cand_stat['has_parse_error'] is True
 
+  def ad_is_comment_only(self, ref_trans_cand_stat: dict) -> bool:
+    return ref_trans_cand_stat['is_comment_only'] is True
+
   def ad_has_many_statements(self, ref_trans_cand_stat: dict) -> bool:
     return ref_trans_cand_stat['has_many_statements'] is True
 
   def ad_comp_stat_no_curly_braces(self, ref_trans_cand_stat: dict) -> bool:
     return ref_trans_cand_stat['comp_stat_no_curly_braces'] is True
-
-  def ad_is_comment_only(self, ref_trans_cand_stat: dict) -> bool:
-    return ref_trans_cand_stat['is_comment_only'] is True
 
   # ABSTRACT METHOD IMPLEMENTATIONS
   def get_data(self) -> List[str]:
@@ -701,7 +701,7 @@ def val_get_ref_trans_candidates(
     success = ref_trans_cand_stats['success']
 
     if success:
-      ref_translations.append(ref_trans_cand)
+      ref_translations.append(ref_trans_cand_stats['ref_trans_cand'])
 
     logger.debug(f'Reference translation candidate satisfies our criteria => ({success})')
     logger.debug(f'The number of reference translations so far is {len(ref_translations)}/{len(ref_trans_cands)}')
@@ -724,13 +724,14 @@ def _get_ref_trans_cand_gather_stats(
   ref_trans_cand: str,
   tar_lang: str
 ) -> dict:
+
   return_dict = {
     'ref_trans_cand': ref_trans_cand,
     'success': None,
     'has_parse_error': None,
+    'is_comment_only': None,
     'has_many_statements': None,
     'comp_stat_no_curly_braces': None,
-    'is_comment_only': None,
   }
 
   logger.debug(f'Checking if generated reference translation candidate satisfies our criteria')
@@ -743,17 +744,31 @@ def _get_ref_trans_cand_gather_stats(
     return_dict['has_parse_error'] = True
     return return_dict
 
+  # actually remove comments from ref_trans_cand after checking for parse errors
+  ref_trans_cand = pvjs.CommentsRemover.remove_comments(ref_trans_cand).strip()
+  return_dict['ref_trans_cand'] = ref_trans_cand
+
   # criteria 2
+  # the reference translation should not be a comment-only string
+  if ref_trans_cand == '':
+    logger.debug(f'BAD: generated reference translation candidate is a comment-only string')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = True
+    return return_dict
+
+  # criteria 3
   tree = pds.DuoGlotTree.from_code_str(ref_trans_cand, tar_lang)
   root_node = tree.get_root_node()
   if root_node.get_num_nt_children() > 1:
     logger.debug(f'BAD: generated reference translation candidate has multiple non-terminal children at root node')
     return_dict['success'] = False
     return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = False
     return_dict['has_many_statements'] = True
     return return_dict
 
-  # criteria 3
+  # criteria 4
   # if the reference translation is a compound statement,
   # it must use curly braces
   if tar_lang == 'js':
@@ -777,27 +792,17 @@ def _get_ref_trans_cand_gather_stats(
         logger.debug(f'BAD: generated reference translation candidate has a compound statement without curly braces')
         return_dict['success'] = False
         return_dict['has_parse_error'] = False
+        return_dict['is_comment_only'] = False
         return_dict['has_many_statements'] = False
         return_dict['comp_stat_no_curly_braces'] = True
         return return_dict
 
-  # criteria 4
-  # the reference translation should not be a comment-only string
-  if pvjs.CommentsRemover.remove_comments(ref_trans_cand).strip() == '':
-    logger.debug(f'BAD: generated reference translation candidate is a comment-only string')
-    return_dict['success'] = False
-    return_dict['has_parse_error'] = False
-    return_dict['has_many_statements'] = False
-    return_dict['comp_stat_no_curly_braces'] = False
-    return_dict['is_comment_only'] = True
-    return return_dict
-
   logger.debug(f'GOOD: generated reference translation candidate passed the validation step.')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
+  return_dict['is_comment_only'] = False
   return_dict['has_many_statements'] = False
   return_dict['comp_stat_no_curly_braces'] = False
-  return_dict['is_comment_only'] = False
   return return_dict
 
 
