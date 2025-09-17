@@ -63,6 +63,10 @@ class TranslateSP1ValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_parse_error, self.tp1_cands_stats))
     return all(flags)
 
+  def all_are_comment_only(self) -> bool:
+    flags = list(map(self.ad_is_comment_only, self.tp1_cands_stats))
+    return all(flags)
+
   def all_miss_context(self) -> bool:
     '''
     c1, c2, ..., ci
@@ -90,6 +94,9 @@ class TranslateSP1ValidationResult(BaseValidationResult):
 
   def ad_has_parse_error(self, tp1_stat: dict) -> bool:
     return tp1_stat['has_parse_error'] is True
+
+  def ad_is_comment_only(self, tp1_stat: dict) -> bool:
+    return tp1_stat['is_comment_only'] is True
 
   def ad_has_context(self, tp1_stat: dict) -> bool:
     return tp1_stat['has_context'] is True
@@ -288,7 +295,10 @@ def val_tp1_candidates(
     success = tp1_cand_stats['success']
 
     if success:
-      program_pairs.append({'source': sp1, 'target': tp1_cand})
+      program_pairs.append({
+        'source': tp1_cand_stats['sp1'],
+        'target': tp1_cand_stats['tp1_cand']
+      })
 
     logger.debug(f'TP1 candidate satisfies our criteria => ({success})')
     logger.debug(f'The number of good program pairs so far is {len(program_pairs)}/{len(tp1_cands)}')
@@ -319,6 +329,7 @@ def _tp1_cand_gather_stats(
     'tp1_cand': tp1_cand,
     'success': None,
     'has_parse_error': None,
+    'is_comment_only': None,
     'has_context': None,
   }
 
@@ -332,7 +343,20 @@ def _tp1_cand_gather_stats(
     return_dict['has_parse_error'] = True
     return return_dict
 
+  # actually remove comments from tp1_cand after checking for parse errors
+  tp1_cand = pvjs.CommentsRemover.remove_comments(tp1_cand).strip()
+  return_dict['tp1_cand'] = tp1_cand
+
   # criteria 2
+  # the TP1 candidate should not be a comment-only string
+  if tp1_cand == '':
+    logger.debug(f'BAD: generated TP1 candidate is a comment-only string')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = True
+    return return_dict
+
+  # criteria 3
   sp1_ast, _ = d_ast_parse.parse_text_dbg(sp1, src_lang)
   sp1_tree = pds.DuoGlotTree(sp1_ast)
   tp1_cand_ast, _ = d_ast_parse.parse_text_dbg(tp1_cand, tar_lang)
@@ -349,12 +373,14 @@ def _tp1_cand_gather_stats(
     logger.debug(f'BAD: None of the contexts are found in both SP1 and TP1 candidate')
     return_dict['success'] = False
     return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = False
     return_dict['has_context'] = False
     return return_dict
 
   logger.debug('GOOD: TP1 candidate satisfies our criteria')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
+  return_dict['is_comment_only'] = False
   return_dict['has_context'] = True
   return return_dict
 
@@ -958,16 +984,23 @@ def _context_exists(
 
 # TEST HARNESSES
 def _test_val_tp1_candidates():
-  test_harness_config:dict = p_utils.read_json('temporary_test_val_tp1_candidates_config.json')
-  args_dict = p_utils.read_json(test_harness_config['args_dict_fpath'])
+  '''
+  def val_tp1_candidates(
+    tp1_cands: List[str],
+    sp1: str,
+    template_dict: dict
+  ) -> TranslateSP1ValidationResult:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_val_tp1_candidates_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   tp1_cands = args_dict['tp1_cands']
   sp1 = args_dict['sp1']
   template_dict = args_dict['template_dict']
 
   val_result_dict = val_tp1_candidates(tp1_cands, sp1, template_dict)
-  print(json.dumps(val_result_dict, indent=2, default=str))
-  p_utils.write_json(f'temporary_test_val_tp1_candidates.json', val_result_dict)
+  print(json.dumps(val_result_dict.get_val_result(), indent=2, default=str))
 
 
 def _test_val_translation_pair_candidates():
@@ -1007,6 +1040,6 @@ def _test_val_get_ref_trans_candidates():
 
 
 if __name__ == '__main__':
-  # _test_val_translation_pair_candidates()
   # _test_val_tp1_candidates()
+  # _test_val_translation_pair_candidates()
   _test_val_get_ref_trans_candidates()
