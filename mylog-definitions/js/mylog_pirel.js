@@ -53,9 +53,38 @@ function serializeSet(arg) {
   return ["set", sortedVals.length, serializedVals];
 }
 
+function _isStringNumber(str) {
+  return str.trim() !== "" && !isNaN(str);
+}
+
 function serializeObject(arg) {
+  const sortedKeys = Object.keys(arg);
+  // keys in JS objects are always strings unlike Python
+  // so we need to convert numeric and boolean strings to their respective types
+  for (let i = 0; i < sortedKeys.length; i++) {
+    const key = sortedKeys[i];
+    if (_isStringNumber(key)) {
+      sortedKeys[i] = Number(key);
+    } else if (key === "true") {
+      sortedKeys[i] = true;
+    } else if (key === "false") {
+      sortedKeys[i] = false;
+    }
+  }
+  // sort to ensure correct order after type conversion
+  sortedKeys.sort((a, b) => {
+    const typeA = typeof a;
+    const typeB = typeof b;
+    if (typeA === typeB) {
+      if (typeA === "string") {
+        return a.localeCompare(b);
+      } else {
+        return a - b;
+      }
+    }
+    throw new Error("cannot serialize object with mixed key types");
+  });
   let serializedKeyValuePairs = [];
-  const sortedKeys = Object.keys(arg).sort(); // Sort keys alphabetically
   for (const key of sortedKeys) {
       serializedKeyValuePairs.push(serialize([key, arg[key]]));
   }
