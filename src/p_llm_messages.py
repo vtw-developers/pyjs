@@ -257,6 +257,17 @@ class BaseTranslateSP2Factory(BaseMessageFactory):
       return feedback_message
     self._log('common case 2: some/all tp2_cands do not have parse error')
 
+    # common case 3: checking if all tp2_cands are comment-only strings
+    self._log('common case 3: checking if all tp2_cands are comment-only strings')
+    if self.val.all_are_comment_only():
+      self._log('all tp2_cands are comment-only strings')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        'Please make sure that the generated translation is not just comments.'
+      )
+      return feedback_message
+    self._log('common case 3: some/all tp2_cands are not comment-only strings')
+
     self._log('finished checking for common cases')
 
 
