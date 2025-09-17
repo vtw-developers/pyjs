@@ -77,6 +77,8 @@ function serialize(arg) {
     return serializeSet(arg);
   if (Object.prototype.toString.call(arg) === "[object Object]")
     return serializeObject(arg);
+  if (typeof arg === "bigint")
+    return serializeNum(Number(arg));
   let str_result = String(arg);
   return ["unknown", str_result.length, str_result];
 }
