@@ -1615,6 +1615,7 @@ async def stat_node_main_learn_validate_trules(
     if len(learned_standard_trules) > 0:
       logger.debug(
         f'stat-main: statement node (nid={stat_nid}): '
+        f'simple_ntext:\n{simple_ntext}\n'
         f'learned {len(learned_standard_trules)} new translation rules by STANDARD procedure:\n'
         f'{"\n".join(learned_standard_trules)}')
       logger.debug('Adding learned standard translation rules to the current ruleset')
@@ -1628,6 +1629,7 @@ async def stat_node_main_learn_validate_trules(
     elif len(learned_overfitted_trules) > 0:
       logger.debug(
         f'stat-main: statement node (nid={stat_nid}): '
+        f'simple_ntext:\n{simple_ntext}\n'
         f'learned {len(learned_overfitted_trules)} new translation rules by RECOVERY procedure:\n'
         f'{"\n".join(learned_overfitted_trules)}')
       logger.debug('Adding learned overfitted translation rules to the current ruleset')
