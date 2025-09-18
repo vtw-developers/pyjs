@@ -1912,6 +1912,45 @@ def _test_get_proposed_choices_compile_error():
   p_utils.write_tmp_json('new_choices.json', new_choices)
 
 
+def _test_get_proposed_choices_semantic_error():
+  '''
+  def get_proposed_choices_semantic_error(
+    tar_program_instr: str,
+    tar_main_code: str,
+    error_lines: dict,
+    choices_list_stack: list,
+    map_to_exid: Dict[int, List[dict]],
+    translate_dbg_history: List[dict],
+    readonly_choices_list: List[Tuple[Tuple[int], int]] = [],
+  ) -> dict:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_get_proposed_choices_semantic_error_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  tar_program_instr = args_dict['tar_program_instr']
+  tar_main_code = args_dict['tar_main_code']
+  error_lines = args_dict['error_lines']
+  error_lines = {int(k): v for k, v in error_lines.items()}  # ensure keys are int
+  choices_list_stack = args_dict['choices_list_stack']
+  map_to_exid = args_dict['map_to_exid']
+  map_to_exid = {int(k): v for k, v in map_to_exid.items()}  # ensure keys are int
+  translate_dbg_history = args_dict['translate_dbg_history']
+  readonly_choices_list = args_dict['readonly_choices_list']
+
+  new_choices = get_proposed_choices_semantic_error(
+    tar_program_instr,
+    tar_main_code,
+    error_lines,
+    choices_list_stack,
+    map_to_exid,
+    translate_dbg_history,
+    readonly_choices_list
+  )
+  print(f'New choices: {json.dumps(new_choices, indent=2)}')
+  p_utils.write_tmp_json('new_choices.json', new_choices)
+
+
 def _test_get_readonly_choices_list():
   '''
   async def get_readonly_choices_list(
@@ -1940,4 +1979,5 @@ def _test_get_readonly_choices_list():
 
 if __name__ == '__main__':
   # _test_get_proposed_choices_compile_error()
+  # _test_get_proposed_choices_semantic_error()
   _test_get_readonly_choices_list()
