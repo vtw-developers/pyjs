@@ -22,6 +22,10 @@ function serializeNum(arg) {
   if (Number.isNaN(arg))
     return serializeString("nan");
   if (arg >= Number.MIN_SAFE_INTEGER && arg <= Number.MAX_SAFE_INTEGER) {
+    // force whole numbers to be int type
+    if (arg % 1 === 0) {
+      return ["number", Math.round(arg)];
+    }
     return ["number", arg];
   }
   return serializeString(String(arg.toExponential(6)));

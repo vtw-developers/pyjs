@@ -25,6 +25,9 @@ def serialize_num(arg: Union[int, float]):
   if math.isnan(arg):
     return serialize_str("nan")
   if JS_MIN_SAFE_INTEGER <= arg <= JS_MAX_SAFE_INTEGER:
+    # force whole numbers to be int type
+    if arg % 1 == 0:
+      return ["number", int(arg)]
     return ["number", arg]
   return serialize_str('{:.6e}'.format(float(arg)))
 
