@@ -24,7 +24,10 @@ class TranslationRuleNotFoundException(Exception):
   If this exception is caught, signal a loop for automatic rule inference.
   '''
   def __init__(self, templates_dict: dict) -> None:
-    super().__init__()
+    problematic_node_type = templates_dict['problematic_node_type']
+    problematic_node_id = templates_dict['problematic_node_id']
+    message = f'problematic_node_type="{problematic_node_type}", problematic_node_id={problematic_node_id}'
+    super().__init__(message)
     self.templates_dict = templates_dict
 
   def get_templates_dict(self) -> dict:
