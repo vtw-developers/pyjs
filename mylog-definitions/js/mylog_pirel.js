@@ -91,6 +91,28 @@ function serializeObject(arg) {
   return ["dict", sortedKeys.length, serializedKeyValuePairs];
 }
 
+function serializeMap(arg) {
+  const sortedKeys = Array.from(arg.keys());
+  // sort to ensure correct order after type conversion
+  sortedKeys.sort((a, b) => {
+    const typeA = typeof a;
+    const typeB = typeof b;
+    if (typeA === typeB) {
+      if (typeA === "string") {
+        return a.localeCompare(b);
+      } else {
+        return a - b;
+      }
+    }
+    throw new Error("cannot serialize object with mixed key types");
+  });
+  let serializedKeyValuePairs = [];
+  for (const key of sortedKeys) {
+      serializedKeyValuePairs.push(serialize([key, arg.get(key)]));
+  }
+  return ["dict", sortedKeys.length, serializedKeyValuePairs];
+}
+
 function serialize(arg) {
   if (arg === null || typeof arg === "undefined")
     return serializeNull();
@@ -106,6 +128,8 @@ function serialize(arg) {
     return serializeSet(arg);
   if (Object.prototype.toString.call(arg) === "[object Object]")
     return serializeObject(arg);
+  if (Object.prototype.toString.call(arg) === "[object Map]")
+    return serializeMap(arg);
   if (typeof arg === "bigint")
     return serializeNum(Number(arg));
   let str_result = String(arg);
