@@ -675,6 +675,13 @@ class GetReferenceTranslation:
       '   ii. Assignment expression without `var` (e.g. `a = 1` -> `a = 1;`)\n'
       '3. The {tar_language} translation is a compound statement like `if_statement`, `while_statement`,\n'
       '   or `for_statement`, you must use braces "{{" and "}}" to denote the body of the compound statement.\n'
+      '4. The structure of control flow statements (such as if, elif, else, while, for) in the {src_language} \n'
+      '   code must be preserved exactly in the {tar_language} translation. Do not merge, remove, \n'
+      '   or optimize away any branches, even if their bodies are identical.\n'
+      '5. Any function call named secret_fun_4071() that appears as the body of a control flow statement is a \n'
+      '   placeholder and must be translated as an equivalent function call in the {tar_language} code, preserving the control flow structure.\n'
+      '6. Do not optimize, merge, or remove any code or branches, even if they appear redundant or have identical bodies. \n'
+      '   The translation must match the structure of the original code exactly.'
       '\n'
     )
 
