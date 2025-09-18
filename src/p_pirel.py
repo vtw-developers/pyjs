@@ -34,6 +34,7 @@ class CouldNotGenRefTranslationsError(RuntimeError): pass
 class _ValidationError_ProblematicNodeExists(RuntimeError): pass
 class TestFunctionGenerationError(RuntimeError): pass
 class NoTSPsGeneratedError(RuntimeError): pass
+class PartialProgramGenerationError(RuntimeError): pass
 
 
 def _get_pre_context_global(
@@ -572,7 +573,11 @@ def _init_template_dict(
   template_dict = _rerun_translation_for_context(subject, current_ruleset_str, template_dict['template_origin'])
 
   # prepare partial program
-  partial_program = _get_partial_program(subject, current_ruleset_str, template_dict)
+  try:
+    partial_program = _get_partial_program(subject, current_ruleset_str, template_dict)
+  except Exception as e:
+    logger.warning(f'Failed to generate partial program: {e}')
+    raise PartialProgramGenerationError(f'Failed to generate partial program: {e}')
   template_dict['partial_program'] = partial_program
 
   # `src_program` is needed for a prompt that uses it as a reference
@@ -1557,6 +1562,25 @@ async def stat_node_main_learn_validate_trules(
 
       lstat_node_val.success = False
       lstat_node_val.reason = 'All rules in a matcher group are implausible.'
+      lstat_node_val.etms = p_utils.current_time_sec()
+      lrule_learn_rec = ptlog.RuleLearnRec()
+      lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
+
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
+
+    except PartialProgramGenerationError as err:
+      logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'PartialProgramGenerationError:\n'
+        'Could not generate a partial program for the statement node. '
+        'Will start the RECOVERY rule learning procedure.')
+
+      lstat_node_val.success = False
+      lstat_node_val.reason = 'Could not generate a partial program for a node.'
       lstat_node_val.etms = p_utils.current_time_sec()
       lrule_learn_rec = ptlog.RuleLearnRec()
       lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
