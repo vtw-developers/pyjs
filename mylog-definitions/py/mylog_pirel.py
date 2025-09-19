@@ -45,6 +45,18 @@ def serialize_set(arg: set):
   return ["set", len(arg), serialized_vals]
 
 def serialize_dict(arg: dict):
+  keys = list(arg.keys())
+  # convert int and float keys to strings
+  # since JS object keys are always strings
+  for key in keys:
+    if isinstance(key, str):
+      continue
+    if isinstance(key, (int, float)):
+      new_key = str(key)
+      arg[new_key] = arg[key]
+      del arg[key]
+      continue
+    raise NotImplementedError
   serialized_key_value_pairs = []
   sorted_keys = sorted(arg.keys())
   for key in sorted_keys:
