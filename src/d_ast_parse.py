@@ -319,6 +319,26 @@ def range_cursor_sharpen(
   That is, move start_idx forward until it points to a non-terminal node,
   and move end_idx backward until it points to a non-terminal node.
   If the range cursor includes only terminal nodes, it becomes empty.
+
+  NOTE Handles `string` cases as well. For the following AST:
+  (
+    ['py.string', 49,
+      ['anno', [...], [...]],
+      '"\\""',
+      ['py.string_content', 50, '"*"'],
+      '"\\""'
+    ], 2, 6
+  )
+  The sharpened range cursor will be:
+  (
+    ['py.string', 49,
+      ['anno', [...], [...]],
+      '"\\""',
+      ['py.string_content', 50, '"*"'],
+      '"\\""'
+    ], 4, 5
+  )
+  `py.string_content` is the only non-terminal child of `py.string`.
   '''
   assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
   assert isinstance(range_cursor[0], list)
