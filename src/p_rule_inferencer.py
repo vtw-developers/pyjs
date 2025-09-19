@@ -183,6 +183,8 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
       return True
     if node_type == 'py.float':
       return True
+    if 'escape_sequence' in node_type:
+      return True
     return False
 
   def _s_expr_rec(_node, _parent_name: str, _current_depth: int):
