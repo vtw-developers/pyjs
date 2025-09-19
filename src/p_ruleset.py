@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from abc import ABC
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import d_ast_parse
 import d_grammar_rules
@@ -228,7 +228,16 @@ class Ruleset:
     '''
     assert isinstance(rule, TRuleBase), \
       f'Expected rule to be subclass of TRuleBase, got {type(rule)}'
-    self.rules.append(rule)
+    if rule not in self.rules:
+      self.rules.append(rule)
+      self._update_matcher_groups()
+
+  def _extend_rules(self, rules: Iterable[TRuleBase]):
+    for rule in rules:
+      assert isinstance(rule, TRuleBase), \
+        f'Expected rule to be subclass of TRuleBase, got {type(rule)}'
+      if rule not in self.rules:
+        self.rules.append(rule)
     self._update_matcher_groups()
 
   def prepend_rule(self, rule: TRuleBase):
@@ -415,9 +424,7 @@ class Ruleset:
     Extend self by adding everything from other_ruleset.
     '''
     assert isinstance(other_ruleset, Ruleset), f'Expected other_ruleset to be Ruleset, got {type(other_ruleset)}'
-    for rule in other_ruleset.rules:
-      if self.get_rule_ref(rule) is None:
-        self.append_rule(rule)  # TODO: expensive as it updates matcher_groups each time
+    self._extend_rules(other_ruleset.rules)
     self.merge_verified_rules_from(other_ruleset.to_dict())
     self.merge_unverifiable_rules_from(other_ruleset.to_dict())
 
@@ -449,9 +456,7 @@ class Ruleset:
     '''
     ruleset = cls()
     rules_parsed, _ = d_grammar_rules.parse_analyze_rules(starting_ruleset)
-    for rule_parsed in rules_parsed:
-      ruleset.rules.append(StartingTRule(rule_parsed))
-    ruleset._update_matcher_groups()
+    ruleset._extend_rules(map(StartingTRule, rules_parsed))
     return ruleset
 
   @classmethod
@@ -461,19 +466,11 @@ class Ruleset:
     '''
     assert ruleset_serialized['type'] == 'Ruleset', 'Expected type to be Ruleset'
     ruleset = cls()
-
-    # ruleset.rules
-    for rule_serialized in ruleset_serialized['rules']:
-      rule = TRuleBase.from_dict(rule_serialized)
-      ruleset.rules.append(rule)
-
-    # ruleset.matcher_groups
-    ruleset._update_matcher_groups()
-
+    # ruleset.rules and ruleset.matcher_groups
+    ruleset._extend_rules(map(TRuleBase.from_dict,
+                              ruleset_serialized['rules']))
     # ruleset.verified_rules
     ruleset.merge_verified_rules_from(ruleset_serialized)
-
     # ruleset._unverifiable_rules
     ruleset.merge_unverifiable_rules_from(ruleset_serialized)
-
     return ruleset
