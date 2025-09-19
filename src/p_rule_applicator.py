@@ -66,9 +66,7 @@ def are_traces_equal_rec(
     return False
 
   assert type1 == type2, f'compare_traces: {type1} != {type2}'
-
-  # base case: types are null
-  if type1 == 'null':
+  if len(src_trace) == 1:  # no content in case of null or function
     return True
 
   # base case: types are bool
