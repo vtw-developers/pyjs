@@ -2700,14 +2700,12 @@ class ChoicableNodeExtractor(pvis.Visitor):
   def __init__(
     self,
     exclude_statement_nodes_ids: List[int] = [],
-    nid_node_map: Dict[int, pvis.AbstractNode] = {},
-    is_skip_fndef: bool = False,
+    nid_node_map: Dict[int, pvis.AbstractNode] = {}
   ):
     super().__init__()
     self.choicable_nodes : List[pvis.AbstractNode] = []
     self.exclude_statement_nodes_ids = exclude_statement_nodes_ids
     self.nid_node_map = nid_node_map
-    self.is_skip_fndef = is_skip_fndef
     self.pp = PrettyPrinter(indent_with='    ')
 
   def add_choicable_node(self, node: pvis.AbstractNode) -> None:
@@ -2788,19 +2786,6 @@ class ChoicableNodeExtractor(pvis.Visitor):
     if node.alternative:
       self.visit(node.alternative)
 
-  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
-    '''
-    Visit the body of the function definition only if
-    is_skip_fndef is False.
-    '''
-    if self.is_skip_fndef:
-      logger.debug(
-        f'ChoicableNodeExtractor: skipping function definition node: '
-        f'"{node.name.val()}"')
-      return
-    for child in node.get_nt_children():
-      self.visit(child)
-
   def visit_IfStatementNode(self, node: IfStatementNode) -> None:
     '''
     Add condition as a choicable node only if
@@ -2866,7 +2851,6 @@ class ChoicableNodeExtractor(pvis.Visitor):
     cls,
     src_main_code: str,
     exclude_statement_nodes_ids: List[int] = [],
-    is_skip_fndef: bool = False,
   ) -> List[pvis.AbstractNode]:
     '''
     Extract choicable nodes from the given src_main_code.
@@ -2878,7 +2862,7 @@ class ChoicableNodeExtractor(pvis.Visitor):
     ts_tree = src_parser.parse(bytes(src_main_code, 'utf-8'))
     tree = Tree.from_ts_tree(ts_tree)
     nid_node_map = tree.root_node.get_nid_node_map()
-    extractor = cls(exclude_statement_nodes_ids, nid_node_map, is_skip_fndef)
+    extractor = cls(exclude_statement_nodes_ids, nid_node_map)
     extractor.visit(tree.root_node)
     choicable_nodes = extractor.get_choicable_nodes()
     return choicable_nodes
