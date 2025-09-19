@@ -440,6 +440,11 @@ def range_cursor_pretty_print(range_cursor: tuple, ann: dict, src_code: str) -> 
   PARAM src_code: original source code
   '''
   ast = range_cursor_to_ast_node(range_cursor)
+  if ast[0] == 'py.string_content':
+    assert is_elem_non_terminal(ast), 'expected non-terminal node'
+    assert len(ast) == 3, 'expected py.string_content to have 3 elements'
+    assert isinstance(ast[2], str), 'expected py.string_content to have a string child'
+    return ast[2]
   return ast_pretty_print(ast, ann, src_code)
 
 
