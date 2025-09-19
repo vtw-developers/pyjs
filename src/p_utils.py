@@ -500,7 +500,7 @@ def exception_to_str(
     f'\nstr(exc):\n{str(exc)}' if include_str else ''
     f'\ntraceback:\n{traceback.format_exc()}' if include_traceback else ''
   )
-  return msg
+  return msg.strip()
 
 def header(subject_name: str) -> str:
   '''
