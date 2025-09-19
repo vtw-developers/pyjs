@@ -6,6 +6,7 @@
 import hashlib
 import json
 import os
+from functools import cache
 from pathlib import Path
 
 import pyparsing as pp
@@ -66,6 +67,7 @@ SExprList = pp.Group(pp.Located(pp.ZeroOrMore(SExpr | Atom | Comment))) # replac
 SExpr << LP + SExprList + RP
 
 
+@cache
 def parse_sexpr_list(sexprlist_str):
   try:
     pr = SExprList.parseString(sexprlist_str)
