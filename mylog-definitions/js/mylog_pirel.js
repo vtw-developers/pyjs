@@ -136,6 +136,8 @@ function serialize(arg) {
     return serializeMap(arg);
   if (typeof arg === "bigint")
     return serializeNum(Number(arg));
+  if (arg instanceof Function)
+    return ["function"]
   let str_result = String(arg);
   return ["unknown", str_result.length, str_result];
 }

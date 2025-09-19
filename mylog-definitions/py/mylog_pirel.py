@@ -72,6 +72,8 @@ def serialize(arg):
   if isinstance(arg, range):
     # e.g. myexactlog(range(n + 1))
     return serialize_list(list(arg))
+  if callable(arg):
+    return ["function"]
   str_result = str(arg)
   return ["unknown", len(str_result), str_result]
 
