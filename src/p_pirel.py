@@ -593,121 +593,6 @@ def _init_template_dict(
   return template_dict
 
 
-def _adapt_rule_choices_assert_result(
-  code: str,
-  code_choices: dict,
-  new_code: str,
-  new_code_choices: dict,
-  src_lang: str,
-  tar_lang: str,
-  translation_rules: str,
-) -> None:
-  '''
-  Check if the adapted rule choices are valid.
-  This function can be disabled if needed.
-  '''
-  p_utils.log_json_time(f'args-_adapt_rule_choices_assert_result.json', locals())
-
-  pntype_before = None
-  try:
-    result = duoglot_translate_wrapper(
-      code,
-      src_lang,
-      tar_lang,
-      translation_rules,
-      True,
-      code_choices,
-      skip_template_extraction=True
-    )
-  except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    logger.debug(f'TranslationRuleNotFoundException is expected')
-    templates_dict_before = exc.get_templates_dict()
-    pntype_before = templates_dict_before['problematic_node_type']
-  assert pntype_before is not None, 'expected TranslationRuleNotFoundException when translating code'
-
-  pntype_after = None
-  try:
-    result = duoglot_translate_wrapper(
-      new_code,
-      src_lang,
-      tar_lang,
-      translation_rules,
-      True,
-      new_code_choices,
-      skip_template_extraction=True
-    )
-  except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    logger.debug(f'TranslationRuleNotFoundException is expected')
-    templates_dict_after = exc.get_templates_dict()
-    pntype_after = templates_dict_after['problematic_node_type']
-  assert pntype_after is not None, 'expected TranslationRuleNotFoundException when translating new_code'
-  assert pntype_before == pntype_after, 'Problematic node type must not change after adaptation'
-
-
-def _adapt_rule_choices_get_new_nid(
-  tree: pds.DuoGlotTree,
-  node_id: int,
-  new_tree: pds.DuoGlotTree
-) -> int:
-  '''
-  choices_list_elem contains an id of the node in the tree,
-  we need to locate a node with the same structure in the new_tree.
-  '''
-  ref_node = tree.get_node_with_id(node_id)
-  assert ref_node is not None, f'Node with id {node_id} not found in the tree'
-
-  similar_nodes_tree = tree.find_all_similar_nodes(ref_node)
-  assert len(similar_nodes_tree) > 0, f'must at least find ref_node itself in the tree'
-  assert len(similar_nodes_tree) == 1, 'support only one similar node in the tree'
-
-  similar_nodes_new_tree = new_tree.find_all_similar_nodes(ref_node)
-  assert len(similar_nodes_new_tree) > 0, f'sanity check: ref_node must be in the new_tree'
-  assert len(similar_nodes_new_tree) == 1, 'support only one similar node in the new_tree'
-  new_node = similar_nodes_new_tree[0]
-  return new_node.get_id()
-
-
-def _adapt_rule_choices(
-  code: str,
-  code_choices: dict,
-  new_code: str
-) -> dict:
-  '''
-  PARAM code: instrumented version of new_code (during rule validation)
-  PARAM code_choices: choices for the code
-
-  Since choices uses AST node ids, and code & new_code are different,
-  code_choices must be adapted to new_code.
-  '''
-  p_utils.log_json_time(f'args-_adapt_rule_choices.json', locals())
-
-  logger.debug(
-    'Adapting rule choices that trigger a translation error in src_main_code\n'
-    'to trigger a translation error in simplified statement code.')
-
-  choices_type = code_choices['type']
-  assert choices_type == 'ASTNODE', 'Only ASTNODE choices are supported'
-
-  choices_list = code_choices['choices_list']
-  new_choices_list = []
-
-  tree = pds.DuoGlotTree.from_code_str(code, 'py')
-  new_tree = pds.DuoGlotTree.from_code_str(new_code, 'py')
-
-  for choices_list_elem in choices_list:
-    range_info, choice_idx = choices_list_elem
-    assert len(range_info) == 3, 'range_info must have 3 elements: [node_id, start, end]'
-    node_id, start, end = range_info
-    new_node_id = _adapt_rule_choices_get_new_nid(tree, node_id, new_tree)
-    new_choices_list.append([[new_node_id, start, end], choice_idx])
-
-  new_code_choices = {
-    'type': choices_type,
-    'choices_list': new_choices_list
-  }
-  return new_code_choices
-
-
 def _combine_prectx_and_simple_ntext(
   pre_context: str,
   snippet_under_test: str
@@ -1592,13 +1477,6 @@ async def stat_node_main_learn_validate_trules(
       )
 
     except prapp.SrcTestScriptProblematicNodeError as err:
-      # adapted_choices = _adapt_rule_choices(err.src_main_code, err.choices, simple_ntext)
-      # _adapt_rule_choices_assert_result(
-      #   err.src_main_code, err.choices, simple_ntext, adapted_choices,
-      #   main_subject.src_lang, main_subject.tar_lang, current_ruleset.to_str_ruleset())
-      # simple_nchoices = adapted_choices
-      # learned_standard_trules = await stat_node_learn_trules_standard(
-      #   simple_ntext, simple_nchoices, stat_learn_subject, current_ruleset,)
       lstat_node_val.success = False
       lstat_node_val.reason = 'SrcTestScriptProblematicNodeError'
       lstat_node_val.etms = p_utils.current_time_sec()
@@ -1858,61 +1736,6 @@ def _test_get_pre_context():
   print(f'Pre-context for statement node {stat_nid}:\n{pre_context}')
 
 
-def _test_adapt_rule_choices():
-  '''
-  def _adapt_rule_choices(
-    code: str,
-    code_choices: dict,
-    new_code: str
-  ) -> dict:
-  '''
-  config_fpath = p_consts.TMP_DIR / 'test_adapt_rule_choices_config.yaml'
-  config = p_utils.read_yaml(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  code = args_dict['code']
-  code_choices = args_dict['code_choices']
-  new_code = args_dict['new_code']
-
-  new_code_choices = _adapt_rule_choices(code, code_choices, new_code)
-  print(f'New code choices:\n{json.dumps(new_code_choices, indent=2)}')
-
-
-def _test_adapt_rule_choices_assert_result():
-  '''
-  def _adapt_rule_choices_assert_result(
-    code: str,
-    code_choices: dict,
-    new_code: str,
-    new_code_choices: dict,
-    src_lang: str,
-    tar_lang: str,
-    translation_rules: str,
-  ) -> None:
-  '''
-  config_fpath = p_consts.TMP_DIR / 'test_adapt_rule_choices_assert_result_config.yaml'
-  config = p_utils.read_yaml(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  code = args_dict['code']
-  code_choices = args_dict['code_choices']
-  new_code = args_dict['new_code']
-  new_code_choices = args_dict['new_code_choices']
-  src_lang = args_dict['src_lang']
-  tar_lang = args_dict['tar_lang']
-  translation_rules = args_dict['translation_rules']
-
-  _adapt_rule_choices_assert_result(
-    code,
-    code_choices,
-    new_code,
-    new_code_choices,
-    src_lang,
-    tar_lang,
-    translation_rules
-  )
-
-
 if __name__ == '__main__':
   # _test_stat_node_main_learn_validate_trules()
   _test_learn_trans_rules_for_prob_node()
@@ -1920,5 +1743,3 @@ if __name__ == '__main__':
   # _test_duoglot_translate_wrapper()
   # _test_duoglot_translate_wrapper_quick()
   # _test_get_pre_context()
-  # _test_adapt_rule_choices()
-  # _test_adapt_rule_choices_assert_result()
