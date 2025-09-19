@@ -1477,17 +1477,23 @@ async def stat_node_main_learn_validate_trules(
       )
 
     except prapp.SrcTestScriptProblematicNodeError as err:
+      logger.warning(
+        f'stat-main: statement node (nid={stat_nid}): '
+        f'prapp.SrcTestScriptProblematicNodeError:\n'
+        'The source test script has a problematic node. '
+        'Will start the RECOVERY rule learning procedure.')
+
       lstat_node_val.success = False
-      lstat_node_val.reason = 'SrcTestScriptProblematicNodeError'
+      lstat_node_val.reason = 'The source test script has a problematic node.'
       lstat_node_val.etms = p_utils.current_time_sec()
-      lstat_node_iter.success = False
-      lstat_node_iter.reason = 'This case has to be reworked.'
-      lstat_node_iter.etms = p_utils.current_time_msec()
-      lstat_node.success = False
-      lstat_node.reason = 'Unhandled case in stat node val-learn loop'
-      lstat_node.etms = p_utils.current_time_msec()
-      p_utils.log_json_time('locals.json', locals())
-      raise NotImplementedError('this case has to be reworked')
+      lrule_learn_rec = ptlog.RuleLearnRec()
+      lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
+
+      learned_overfitted_trules = await stat_node_learn_trules_recovery(
+        simple_ntext,
+        stat_learn_subject.src_lang,
+        stat_learn_subject.tar_lang,
+      )
 
     # ADD LEARNED RULES TO THE CURRENT RULESET
     if len(learned_standard_trules) > 0:
