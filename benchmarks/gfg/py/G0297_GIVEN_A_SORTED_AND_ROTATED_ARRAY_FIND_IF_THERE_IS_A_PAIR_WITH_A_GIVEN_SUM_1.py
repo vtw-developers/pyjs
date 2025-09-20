@@ -6,6 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n, x):
+    i = 0
     for i in range(n):
         if arr[i] > arr[i + 1]:
             break
