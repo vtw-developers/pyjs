@@ -647,6 +647,7 @@ async def _run_tests(
     raise TraceMismatchError(error_lines)
 
 
+_CACHE_get_tar_test_code = {}
 def _get_tar_test_code(
   src_test_code: Optional[str],
   subject: p_subject.PirelSubject
@@ -654,6 +655,9 @@ def _get_tar_test_code(
   '''
   Ideally, this function is run only once.
   '''
+  if src_test_code in _CACHE_get_tar_test_code:
+    return _CACHE_get_tar_test_code[src_test_code]
+
   if not subject.is_three_split:
     assert src_test_code is None, 'sanity check'
     return None
@@ -669,6 +673,7 @@ def _get_tar_test_code(
     skip_template_extraction=True
   )
   tar_test_code = duoglot_translate_result['tar_code']
+  _CACHE_get_tar_test_code[src_test_code] = tar_test_code
   return tar_test_code
 
 
