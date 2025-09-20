@@ -26,6 +26,7 @@ def f_gold(string_0, l):
             continue
         print("Not Possible")
         return ""
-    return "".join(string_0)
+    retval_1 = "".join(string_0)
+    return retval_1
 "-----------------"
 test()

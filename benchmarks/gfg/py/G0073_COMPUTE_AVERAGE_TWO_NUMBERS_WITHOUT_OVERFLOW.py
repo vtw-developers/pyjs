@@ -7,6 +7,7 @@ def test():
 "-----------------"
 from math import floor
 def f_gold(a, b):
-    return floor((a + b) / 2)
+    retval_1 = floor((a + b) / 2)
+    return retval_1
 "-----------------"
 test()

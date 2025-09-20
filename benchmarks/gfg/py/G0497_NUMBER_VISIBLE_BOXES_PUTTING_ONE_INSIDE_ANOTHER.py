@@ -15,6 +15,7 @@ def f_gold(arr, n):
         if arr[i] >= 2 * now:
             q.popleft()
         q.append(arr[i])
-    return len(q)
+    retval_1 = len(q)
+    return retval_1
 "-----------------"
 test()

@@ -13,6 +13,7 @@ def f_gold(m, n, x):
         for j in range(1, x + 1):
             for k in range(1, min(m + 1, j)):
                 table[i][j] += table[i - 1][j - k]
-    return table[-1][-1]
+    retval_1 = table[-1][-1]
+    return retval_1
 "-----------------"
 test()

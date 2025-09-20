@@ -14,6 +14,7 @@ def f_gold(str_0):
             zeros = zeros + 1
         else:
             ones = ones + 1
-    return zeros == 1 or ones == 1
+    retval_1 = zeros == 1 or ones == 1
+    return retval_1
 "-----------------"
 test()

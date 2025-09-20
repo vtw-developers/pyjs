@@ -23,6 +23,7 @@ def f_gold(arr, n, k):
             small = subtract
         else:
             big = add
-    return min(ans, big - small)
+    retval_1 = min(ans, big - small)
+    return retval_1
 "-----------------"
 test()

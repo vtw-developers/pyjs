@@ -17,6 +17,7 @@ def f_gold(n, m):
             count[i] = 1
         else:
             count[i] = 2
-    return count[n]
+    retval_1 = count[n]
+    return retval_1
 "-----------------"
 test()

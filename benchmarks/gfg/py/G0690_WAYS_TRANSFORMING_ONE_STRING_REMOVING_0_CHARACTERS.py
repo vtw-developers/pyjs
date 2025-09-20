@@ -28,6 +28,7 @@ def f_gold(a, b):
                     dp[i][j] = dp[i][j - 1] + dp[i - 1][j - 1]
                 else:
                     dp[i][j] = dp[i][j - 1]
-    return dp[m - 1][n - 1]
+    retval_1 = dp[m - 1][n - 1]
+    return retval_1
 "-----------------"
 test()

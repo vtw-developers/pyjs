@@ -16,6 +16,7 @@ def f_gold(n, a, b, c):
                 dp[i + b] = max(dp[i] + 1, dp[i + b])
             if i + c <= n:
                 dp[i + c] = max(dp[i] + 1, dp[i + c])
-    return dp[n]
+    retval_1 = dp[n]
+    return retval_1
 "-----------------"
 test()

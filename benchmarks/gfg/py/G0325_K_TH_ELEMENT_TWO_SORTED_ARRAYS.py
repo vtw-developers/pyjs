@@ -26,6 +26,7 @@ def f_gold(arr1, arr2, m, n, k):
         sorted1[d] = arr2[j]
         d += 1
         j += 1
-    return sorted1[k - 1]
+    retval_1 = sorted1[k - 1]
+    return retval_1
 "-----------------"
 test()

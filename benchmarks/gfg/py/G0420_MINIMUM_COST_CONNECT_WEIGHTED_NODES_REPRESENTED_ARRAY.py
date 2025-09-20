@@ -12,6 +12,7 @@ def f_gold(a, n):
     for i in range(n):
         mn = min(a[i], mn)
         sum_0 += a[i]
-    return mn * (sum_0 - mn)
+    retval_1 = mn * (sum_0 - mn)
+    return retval_1
 "-----------------"
 test()

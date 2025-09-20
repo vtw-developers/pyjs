@@ -18,6 +18,7 @@ def f_gold(x, y, n):
             dp[i] = True
         else:
             dp[i] = False
-    return dp[n]
+    retval_1 = dp[n]
+    return retval_1
 "-----------------"
 test()

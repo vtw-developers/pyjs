@@ -11,6 +11,7 @@ def f_gold(n):
     dp[1] = 1
     for i in range(2, n + 1):
         dp[i] = max(dp[int(i / 2)] + dp[int(i / 3)] + dp[int(i / 4)], i)
-    return dp[n]
+    retval_1 = dp[n]
+    return retval_1
 "-----------------"
 test()

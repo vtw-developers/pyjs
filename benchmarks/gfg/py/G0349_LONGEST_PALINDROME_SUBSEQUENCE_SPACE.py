@@ -20,6 +20,7 @@ def f_gold(s):
             else:
                 back_up = a[j]
                 a[j] = max(a[j - 1], a[j])
-    return a[n - 1]
+    retval_1 = a[n - 1]
+    return retval_1
 "-----------------"
 test()

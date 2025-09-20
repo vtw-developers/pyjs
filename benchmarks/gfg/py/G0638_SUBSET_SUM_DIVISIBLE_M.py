@@ -21,6 +21,7 @@ def f_gold(arr, n, m):
             if temp[j]:
                 DP[j] = True
         DP[arr[i] % m] = True
-    return DP[0]
+    retval_1 = DP[0]
+    return retval_1
 "-----------------"
 test()

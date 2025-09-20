@@ -19,7 +19,9 @@ def f_gold(arr, size, KthIndex):
         else:
             KthIndex = KthIndex - 1
         if KthIndex == 0:
-            return arr[i]
-    return -1
+            retval_1 = arr[i]
+            return retval_1
+    retval_2 = -1
+    return retval_2
 "-----------------"
 test()

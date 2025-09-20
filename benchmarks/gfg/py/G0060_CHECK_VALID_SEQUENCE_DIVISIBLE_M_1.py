@@ -23,7 +23,8 @@ def f_gold(n, index, modulo, M, arr, dp):
             return 1
         return 0
     if modulo in dp[index]:
-        return dp[index][modulo]
+        retval_1 = dp[index][modulo]
+        return retval_1
     placeAdd = f_gold(n, index + 1, modulo + arr[index], M, arr, dp)
     placeMinus = f_gold(n, index + 1, modulo - arr[index], M, arr, dp)
     res = bool(placeAdd or placeMinus)

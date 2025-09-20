@@ -20,6 +20,7 @@ def f_gold(arr1, arr2, m, n):
             i += 1
         else:
             return 0
-    return False if i < n else True
+    retval_1 = False if i < n else True
+    return retval_1
 "-----------------"
 test()

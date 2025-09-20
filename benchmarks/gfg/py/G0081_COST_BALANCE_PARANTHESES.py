@@ -17,7 +17,8 @@ def f_gold(s):
         if s[i] == ")":
             c += 1
     if o != c:
-        return -1
+        retval_1 = -1
+        return retval_1
     a = [0 for i in range(len(s))]
     if s[0] == "(":
         a[0] = 1

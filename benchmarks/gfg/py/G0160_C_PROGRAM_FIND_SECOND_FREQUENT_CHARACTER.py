@@ -17,6 +17,7 @@ def f_gold(str_0):
             first = i
         elif count[i] > count[second] and count[i] != count[first]:
             second = i
-    return chr(second)
+    retval_1 = chr(second)
+    return retval_1
 "-----------------"
 test()

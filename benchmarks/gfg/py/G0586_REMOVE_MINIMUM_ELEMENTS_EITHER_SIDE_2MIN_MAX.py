@@ -25,6 +25,7 @@ def f_gold(arr, n):
                 longest_end = end
     if longest_start == -1:
         return n
-    return n - (longest_end - longest_start + 1)
+    retval_1 = n - (longest_end - longest_start + 1)
+    return retval_1
 "-----------------"
 test()
