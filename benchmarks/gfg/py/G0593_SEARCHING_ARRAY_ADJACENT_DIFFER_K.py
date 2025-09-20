@@ -12,6 +12,7 @@ def f_gold(arr, n, x, k):
             return i
         i = i + max(1, int(abs(arr[i] - x) / k))
     print("number is not present!")
-    return -1
+    retval_1 = -1
+    return retval_1
 "-----------------"
 test()

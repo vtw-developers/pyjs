@@ -6,6 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n):
-    return max(arr)
+    retval_1 = max(arr)
+    return retval_1
 "-----------------"
 test()

@@ -11,6 +11,7 @@ def f_gold(n):
     for i in range(2, n + 1):
         for j in range(i):
             BT[i] += BT[j] * BT[i - j - 1]
-    return BT[n]
+    retval_1 = BT[n]
+    return retval_1
 "-----------------"
 test()

@@ -21,6 +21,7 @@ def f_gold(S, T):
                 mat[i][j] = mat[i][j - 1]
             else:
                 mat[i][j] = mat[i][j - 1] + mat[i - 1][j - 1]
-    return mat[m][n]
+    retval_1 = mat[m][n]
+    return retval_1
 "-----------------"
 test()

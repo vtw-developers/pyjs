@@ -8,6 +8,7 @@ def test():
 import math
 def f_gold(n):
     fibo = 2.078087 * math.log(n) + 1.672276
-    return round(fibo)
+    retval_1 = round(fibo)
+    return retval_1
 "-----------------"
 test()

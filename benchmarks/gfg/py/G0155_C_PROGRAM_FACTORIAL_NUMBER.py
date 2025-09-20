@@ -6,6 +6,7 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(n):
-    return 1 if (n == 1 or n == 0) else n * f_gold(n - 1)
+    retval_1 = 1 if (n == 1 or n == 0) else n * f_gold(n - 1)
+    return retval_1
 "-----------------"
 test()

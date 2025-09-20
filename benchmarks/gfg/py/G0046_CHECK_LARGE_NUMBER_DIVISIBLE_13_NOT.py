@@ -27,6 +27,7 @@ def f_gold(num):
         sum_0 = sum_0 + group * p
         p *= -1
     sum_0 = abs(sum_0)
-    return sum_0 % 13 == 0
+    retval_1 = sum_0 % 13 == 0
+    return retval_1
 "-----------------"
 test()

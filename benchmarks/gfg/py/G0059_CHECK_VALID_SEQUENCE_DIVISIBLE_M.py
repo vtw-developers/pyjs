@@ -22,7 +22,8 @@ def f_gold(n, index, Sum, M, arr, dp):
             return True
         return False
     if Sum in dp[index]:
-        return dp[index][Sum]
+        retval_1 = dp[index][Sum]
+        return retval_1
     placeAdd = f_gold(n, index + 1, Sum + arr[index], M, arr, dp)
     placeMinus = f_gold(n, index + 1, Sum - arr[index], M, arr, dp)
     res = placeAdd or placeMinus

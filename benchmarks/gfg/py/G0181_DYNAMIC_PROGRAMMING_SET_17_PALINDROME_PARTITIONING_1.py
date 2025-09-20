@@ -27,6 +27,7 @@ def f_gold(str1):
             for j in range(i):
                 if P[j + 1][i] == True and 1 + C[j] < C[i]:
                     C[i] = 1 + C[j]
-    return C[n - 1]
+    retval_1 = C[n - 1]
+    return retval_1
 "-----------------"
 test()

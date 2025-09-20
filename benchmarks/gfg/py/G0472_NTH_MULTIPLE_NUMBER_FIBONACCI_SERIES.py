@@ -15,6 +15,7 @@ def f_gold(k, n):
         f2 = f3
         f3 = f1 + f2
         i += 1
-    return n * i
+    retval_1 = n * i
+    return retval_1
 "-----------------"
 test()

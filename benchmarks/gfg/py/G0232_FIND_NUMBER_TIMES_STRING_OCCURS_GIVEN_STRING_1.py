@@ -19,6 +19,7 @@ def f_gold(a, b):
                 lookup[i][j] = lookup[i - 1][j - 1] + lookup[i - 1][j]
             else:
                 lookup[i][j] = lookup[i - 1][j]
-    return lookup[m][n]
+    retval_1 = lookup[m][n]
+    return retval_1
 "-----------------"
 test()

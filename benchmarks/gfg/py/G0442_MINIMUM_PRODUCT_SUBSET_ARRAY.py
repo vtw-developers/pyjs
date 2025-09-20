@@ -7,7 +7,8 @@ def test():
 "-----------------"
 def f_gold(a, n):
     if n == 1:
-        return a[0]
+        retval_1 = a[0]
+        return retval_1
     max_neg = float("-inf")
     min_pos = float("inf")
     count_neg = 0

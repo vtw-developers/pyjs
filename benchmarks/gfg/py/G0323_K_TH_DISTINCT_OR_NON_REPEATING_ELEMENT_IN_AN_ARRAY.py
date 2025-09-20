@@ -16,7 +16,9 @@ def f_gold(arr, n, k):
         if j == n:
             dist_count += 1
         if dist_count == k:
-            return arr[i]
-    return -1
+            retval_1 = arr[i]
+            return retval_1
+    retval_2 = -1
+    return retval_2
 "-----------------"
 test()
