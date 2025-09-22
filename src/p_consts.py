@@ -12,7 +12,6 @@ ROOT_DIR = SRC_DIR.parent
 
 BENCHMARKS_DIR = ROOT_DIR / 'benchmarks'
 BUILD_DIR = ROOT_DIR / 'build'
-CONFIGS_DIR = ROOT_DIR / 'conf'
 EXPERIMENTS_DIR = ROOT_DIR / 'experiments'
 LOGS_DIR = ROOT_DIR / 'logs'
 MYLOG_DEFINITIONS_DIR = ROOT_DIR / 'mylog-definitions'

@@ -1,8 +1,0 @@
-# ignore everything
-*
-
-# except these
-!.gitignore
-!README.md
-!example.yaml
-!skel.yaml
