@@ -3,7 +3,7 @@ import asyncio
 import random
 from dataclasses import asdict
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import p_consts
 import p_pirel
@@ -126,17 +126,18 @@ def _create_subject_for_apply_phase(
 async def learn_and_application_phases_on_subject(
   subject: p_subject.PirelSubject,
   starting_ruleset_str: str,
-  lsubject: ptlog.Subject,
-  lbenchmark: ptlog.Benchmark,
   semaphore: asyncio.Semaphore,
   lock: asyncio.Lock,
   shared_cnt_fin: List[int],
-):
+  lsubject: ptlog.Subject,
+  lbenchmark: ptlog.Benchmark,
+) -> Optional[str]:
   '''
   Wrapper function to run both rule learning and application phases.
   RETURN validated ruleset or None on failure.
   '''
   starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset_str)
+  logger.debug(f'Starting ruleset size: {len(starting_ruleset.rules)}')
 
   # rule learning phase
   lrule_learn_phase = ptlog.RuleLearnPhase()
@@ -163,7 +164,8 @@ async def learn_and_application_phases_on_subject(
     lrule_learn_phase.reason = p_utils.exception_to_str(exc)
     lrule_learn_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
-    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
+    await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
+    return None
 
   # rule application phase
   lrule_application_phase = ptlog.RuleApplicationPhase()
@@ -197,13 +199,15 @@ async def learn_and_application_phases_on_subject(
     lrule_application_phase.reason = p_utils.exception_to_str(exc)
     lrule_application_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
-    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
+    await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
+    return None
 
   logger.info(f'SUCCESS Both learn and apply phases for "{subject.name}" succeeded.')
   await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
+  return starting_ruleset.to_str_ruleset()
 
 
-def _run_benchmark_init() -> tuple:
+def _run_benchmark_init() -> Tuple[str, ptlog.Benchmark, List[p_subject.PirelSubject]]:
 
   def _load_benchmark_sample() -> List[Tuple[str, str]]:
     '''
@@ -241,8 +245,6 @@ def _run_benchmark_init() -> tuple:
         subject_name = subject_fpath.stem
       dataset.append((subject_name, src_program))
 
-    logger.debug(f'Loaded {len(dataset)} programs for translation rule learning phase.')
-
     # GO OVER THE SAMPLE LOADING OPTIONS
     # 1. `sample_only` has the highest priority
     if len(Config.sample_only) > 0:
@@ -276,6 +278,7 @@ def _run_benchmark_init() -> tuple:
 
   starting_ruleset_str = _load_starting_ruleset()
   benchmark_sample = _load_benchmark_sample()
+  logger.debug(f'Loaded {len(benchmark_sample)} programs for translation rule learning phase.')
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
 
   lbenchmark = ptlog.Benchmark()
@@ -302,30 +305,68 @@ def _run_benchmark_init() -> tuple:
     subject_list.append(subject)
     lbenchmark.subjects.append(lsubject)
 
-  return starting_ruleset_str, benchmark_sample, lbenchmark, subject_list
+  return starting_ruleset_str, lbenchmark, subject_list
+
+
+async def _run_benchmark_sequential(
+  starting_ruleset_str: str,
+  subject_list: List[p_subject.PirelSubject],
+  semaphore: asyncio.Semaphore,
+  lock: asyncio.Lock,
+  shared_cnt_fin: List[int],
+  lbenchmark: ptlog.Benchmark,
+) -> None:
+  logger.debug('Running benchmark sequentially')
+  current_ruleset_str = starting_ruleset_str
+  for subject, lsubject in zip(subject_list, lbenchmark.subjects):
+    async with ForgivingTaskGroup() as tg:
+      coroutine = learn_and_application_phases_on_subject(
+        subject, current_ruleset_str,
+        semaphore, lock, shared_cnt_fin,
+        lsubject, lbenchmark)
+      task = tg.create_task(coroutine, name=subject.name)
+    latest_learned_rules = task.result()
+    if latest_learned_rules is not None and Config.reuse_translation_rules:
+      logger.info('Reusing learned translation rules for the next subject')
+      current_ruleset_str = latest_learned_rules
+
+
+async def _run_benchmark_concurrent(
+  starting_ruleset_str: str,
+  subject_list: List[p_subject.PirelSubject],
+  semaphore: asyncio.Semaphore,
+  lock: asyncio.Lock,
+  shared_cnt_fin: List[int],
+  lbenchmark: ptlog.Benchmark,
+) -> None:
+  logger.debug('Running benchmark concurrently')
+  async with ForgivingTaskGroup() as tg:
+    for subject, lsubject in zip(subject_list, lbenchmark.subjects):
+      coroutine = learn_and_application_phases_on_subject(
+        subject, starting_ruleset_str,
+        semaphore, lock, shared_cnt_fin,
+        lsubject, lbenchmark)
+      tg.create_task(coroutine, name=subject.name)
 
 
 async def run_benchmark() -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
-  starting_ruleset_str, benchmark_sample, lbenchmark, subject_list = \
-    _run_benchmark_init()
-
-  num_concurrent_subjects = min(len(benchmark_sample), Config.max_concurrent_subjects)
+  starting_ruleset_str, lbenchmark, subject_list = _run_benchmark_init()
+  num_concurrent_subjects = min(lbenchmark.sample_size, Config.max_concurrent_subjects)
   semaphore = asyncio.Semaphore(num_concurrent_subjects)
-
   lock = asyncio.Lock()
   shared_cnt_fin = [0]
 
-  async with ForgivingTaskGroup() as tg:
-    for subject, lsubject in zip(subject_list, lbenchmark.subjects):
-      coroutine = learn_and_application_phases_on_subject(
-        subject, starting_ruleset_str, lsubject, lbenchmark,
-        semaphore, lock, shared_cnt_fin)
-      tg.create_task(coroutine, name=subject.name)
-
-  p_utils.llog_yaml(f'tree-log-{Config.benchmark_name}.yaml', asdict(lbenchmark))
+  if Config.max_concurrent_subjects == 1:
+    await _run_benchmark_sequential(
+      starting_ruleset_str, subject_list,
+      semaphore, lock, shared_cnt_fin, lbenchmark)
+  else:
+    await _run_benchmark_concurrent(
+      starting_ruleset_str, subject_list,
+      semaphore, lock, shared_cnt_fin, lbenchmark)
 
 
 def get_args() -> argparse.Namespace:

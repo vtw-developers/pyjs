@@ -1216,10 +1216,6 @@ async def stat_node_validate_trules(
 
   p_utils.log_json_time(f'args-stat_node_validate_trules.json', locals())
   logger.info('Starting statement node translation rule validation')
-  logger.debug(
-    f'stat-val: Current ruleset (excluding starting rules):\n'
-    f'{"\n".join([str(r) for r in current_ruleset.rules if isinstance(r, p_ruleset.LearnedTRuleBase)])}')
-
   lstat_node_val = lstat_node_val or ptlog.StatNodeVal()
   lstat_node_val.stms = p_utils.current_time_sec()
 
