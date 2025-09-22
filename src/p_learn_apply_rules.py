@@ -25,7 +25,7 @@ class ForgivingTaskGroup(asyncio.TaskGroup):
   _abort = lambda self: None
 
 
-async def _mode_benchmark_subject_finish(
+async def _run_benchmark_subject_finish(
   lsubject: ptlog.Subject,
   lbenchmark: ptlog.Benchmark,
   lock: asyncio.Lock,
@@ -164,7 +164,7 @@ async def learn_and_application_phases_on_subject(
     lrule_learn_phase.reason = p_utils.exception_to_str(exc)
     lrule_learn_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
-    return await _mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
 
   # rule application phase
   lrule_application_phase = ptlog.RuleApplicationPhase()
@@ -198,13 +198,13 @@ async def learn_and_application_phases_on_subject(
     lrule_application_phase.reason = p_utils.exception_to_str(exc)
     lrule_application_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
-    return await _mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
 
   logger.info(f'SUCCESS Both learn and apply phases for "{subject.name}" succeeded.')
-  await _mode_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+  await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
 
 
-def _mode_benchmark_init(
+def _run_benchmark_init(
   conf: dict
 ) -> Tuple[str, List[Tuple[str, str]], ptlog.Benchmark, List[p_subject.PirelSubject]]:
 
@@ -313,12 +313,12 @@ def _mode_benchmark_init(
   return starting_ruleset_str, benchmark_sample, lbenchmark, subject_list
 
 
-async def mode_benchmark(conf: dict) -> None:
+async def run_benchmark(conf: dict) -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
   starting_ruleset_str, benchmark_sample, lbenchmark, subject_list = \
-    _mode_benchmark_init(conf)
+    _run_benchmark_init(conf)
 
   num_concurrent_subjects = min(
     len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
@@ -338,11 +338,6 @@ async def mode_benchmark(conf: dict) -> None:
   p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
 
 
-MODE_CALLBACKS = {
-  'benchmark': mode_benchmark,
-}
-
-
 def main():
   argparser = argparse.ArgumentParser()
   argparser.add_argument('conf_fname', type=str, help='Name of the configuration file')
@@ -351,17 +346,12 @@ def main():
   conf_fname : str = args.conf_fname if args.conf_fname.endswith('.yaml') else args.conf_fname + '.yaml'
   conf_fpath = p_consts.CONFIGS_DIR / conf_fname
   assert conf_fpath.exists(), f'Configuration file does not exist: {conf_fpath}'
-
   conf = p_utils.read_yaml(conf_fpath)
-  mode = conf['mode']
-  assert mode in MODE_CALLBACKS, f'Invalid mode: {mode}. Must be one of {MODE_CALLBACKS}'
-  assert f'mode_{mode}' in conf, f'"mode_{mode}" mode configuration is missing in "{conf_fpath}"'
-  mode_conf = conf[f'mode_{mode}']
 
   try:
-    asyncio.run(MODE_CALLBACKS[mode](mode_conf))
+    asyncio.run(run_benchmark(conf))
   except Exception as exc:
-    p_utils.email_safely(subject='LEARNING PHASE SCRIPT ERROR', message=p_utils.exception_to_str(exc))
+    p_utils.email_safely(subject='SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise
 
 

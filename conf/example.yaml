@@ -1,54 +1,15 @@
-# SCHEMA:
-# mode: str
-
-mode: benchmark
-
-
-################################################
-############### BENCHMARK MODE #################
-################################################
-# Run p_learn_apply_rules on a sample from a benchmark.
-
-# SCHEMA:
-# benchmark_name: str (gfg)
-# src_lang: str
-# tar_lang: str
-# is_three_split: bool
-#
-# [is_override_starting_ruleset]: bool (default: false)
-# [overriding_ruleset_fpaths]: List[str] (required if is_override_starting_ruleset is true)
-#
-# sample: object
-#   is_random: bool
-#   size: int
-#   start_idx: int
-#   only: List[str]
-#   exclude: List[str]
-#
-# is_email_report: bool
-
-mode_benchmark:
-  # base
-  benchmark_name: gfg
-  src_lang: py
-  tar_lang: js
-  is_three_split: true
-
-  # starting ruleset can be overriden by this config
-  is_override_starting_ruleset: false
-  overriding_ruleset_fpaths:
-    - relative/path/to/ruleset.snart
-
-  # max number of concurrent subjects to learn rules for
-  max_concurrent_subjects: 1000
-
-  # sample
-  sample:
-    is_random: false
-    size: 20
-    start_idx: 0
-    only: [G0001]
-    exclude: []
-
-  # flags
-  is_email_report: true
+benchmark_name: gfg
+src_lang: py
+tar_lang: js
+is_three_split: true
+is_override_starting_ruleset: false
+overriding_ruleset_fpaths:
+  - relative/path/to/ruleset.snart
+max_concurrent_subjects: 1000
+sample:
+  is_random: false
+  size: 20
+  start_idx: 0
+  only: [G0001]
+  exclude: []
+is_email_report: true
