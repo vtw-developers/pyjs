@@ -167,103 +167,103 @@ def test_assertions():
     ### --- BLOCK BEGIN 10
     print("--- rgb_to_yiq ---")
     tmp = rgb_to_yiq(0.5, 0.5, 0.5)
-    const =  [0.49999999999999994, 2.6090241078691177e-17, 4.940492459581946e-17]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.49999999999999994, 2.6090241078691177e-17, 4.940492459581946e-17]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_yiq(0, 0.5, 1)
-    const =  [0.40499999999999997, -0.46035, 0.04954999999999998]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.40499999999999997, -0.46035, 0.04954999999999998]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_yiq(1, 0, 0)
-    const =  [0.3, 0.599, 0.21299999999999997]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.3, 0.599, 0.21299999999999997]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_yiq(0, 0, 0)
-    const =  [0.0, 0.0, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.0, 0.0, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_yiq(1, 0.1, 0.3)
-    const =  [0.392, 0.47476, 0.25411999999999996]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.392, 0.47476, 0.25411999999999996]
+    assert_iter_almost_equal(tmp, expected)
     print("--- yiq_to_rgb ---")
     tmp = yiq_to_rgb(1.0, 0.5957, 0.0)
-    const =  [1.0, 0.8363089990996986, 0.33963972286374133]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [1.0, 0.8363089990996986, 0.33963972286374133]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(0.0, -0.5957, -0.5226)
-    const =  [0.0, 0.49590315888362624, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.0, 0.49590315888362624, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(0.8, 0.1, 0.2)
-    const =  [1.0, 0.6453830195326262, 1.0]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [1.0, 0.6453830195326262, 1.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(0.0, 0.0, 0.0)
-    const =  [0.0, 0.0, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.0, 0.0, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(1.0, 0.0, 0.0)
-    const =  [1.0, 1.0, 1.0]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [1.0, 1.0, 1.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(0.5, 0.0, 0.0)
-    const =  [0.5, 0.5, 0.5]
-    assert_iter_almost_equal(tmp, const)
+    expected =  [0.5, 0.5, 0.5]
+    assert_iter_almost_equal(tmp, expected)
     print("--- rgb_to_hls ---")
     tmp = rgb_to_hls(0.5, 0.5, 0.5)
-    const = [0.0, 0.5, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 0.5, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hls(0, 0.5, 1)
-    const = [0.5833333333333334, 0.5, 1.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.5833333333333334, 0.5, 1.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hls(1, 0, 0)
-    const = [0.0, 0.5, 1.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 0.5, 1.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hls(0, 0, 0)
-    const = [0.0, 0.0, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 0.0, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hls(1, 0.1, 0.3)
-    const = [0.9629629629629629, 0.55, 1.0000000000000002]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.9629629629629629, 0.55, 1.0000000000000002]
+    assert_iter_almost_equal(tmp, expected)
     print("--- hls_to_rgb ---")
     tmp = hls_to_rgb(0.5, 0.5, 0.5)
-    const = [0.25, 0.7499999999999999, 0.75]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.25, 0.7499999999999999, 0.75]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hls_to_rgb(0, 0.5, 1)
-    const = [1.0, 0.0, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [1.0, 0.0, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hls_to_rgb(1, 0, 0)
-    const = [0, 0, 0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0, 0, 0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hls_to_rgb(0, 0, 0)
-    const = [0, 0, 0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0, 0, 0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hls_to_rgb(1, 0.1, 0.3)
-    const = [0.13, 0.07, 0.07]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.13, 0.07, 0.07]
+    assert_iter_almost_equal(tmp, expected)
     print("--- rgb_to_hsv ---")
     tmp = rgb_to_hsv(0.5, 0.5, 0.5)
-    const = [0.0, 0.0, 0.5]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 0.0, 0.5]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hsv(0, 0.5, 1)
-    const = [0.5833333333333334, 1.0, 1]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.5833333333333334, 1.0, 1]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hsv(1, 0, 0)
-    const = [0.0, 1.0, 1]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 1.0, 1]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hsv(0, 0, 0)
-    const = [0.0, 0.0, 0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.0, 0.0, 0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hsv(1, 0.1, 0.3)
-    const = [0.9629629629629629, 0.9, 1]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.9629629629629629, 0.9, 1]
+    assert_iter_almost_equal(tmp, expected)
     print("--- hsv_to_rgb ---")
     tmp = hsv_to_rgb(0.5, 0.5, 0.5)
-    const = [0.25, 0.5, 0.5]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.25, 0.5, 0.5]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0, 0.5, 1)
-    const = [1, 0.5, 0.5]
-    assert_iter_almost_equal(tmp, const)
+    expected = [1, 0.5, 0.5]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(1, 0, 0)
-    const = [0, 0, 0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0, 0, 0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0, 0, 0)
-    const = [0, 0, 0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0, 0, 0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(1, 0.1, 0.3)
-    const = [0.3, 0.27, 0.27]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.3, 0.27, 0.27]
+    assert_iter_almost_equal(tmp, expected)
     ### --- BLOCK END 10
 
 
@@ -279,32 +279,32 @@ def test():
 def additional_tests():
     ### --- BLOCK BEGIN 12
     tmp = yiq_to_rgb(0.0, 1.0, 0.3)
-    const = [1.0, 0.0, 0.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [1.0, 0.0, 0.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = yiq_to_rgb(2.0, 0.0, 0.0)
-    const = [1.0, 1.0, 1.0]
-    assert_iter_almost_equal(tmp, const)
+    expected = [1.0, 1.0, 1.0]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hls(0.5, 1.5, 0.2)
-    const = [0.2948717948717949, 0.85, 4.333333333333333]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.2948717948717949, 0.85, 4.333333333333333]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hls_to_rgb(0.5, 0.6, 0.2)
-    const = [0.5199999999999999, 0.68, 0.68]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.5199999999999999, 0.68, 0.68]
+    assert_iter_almost_equal(tmp, expected)
     tmp = rgb_to_hsv(0.5, 1.5, 0.2)
-    const = [0.2948717948717949, 0.8666666666666666, 1.5]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.2948717948717949, 0.8666666666666666, 1.5]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0.2, 0.6, 0.2)
-    const = [0.176, 0.2, 0.08]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.176, 0.2, 0.08]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0.4, 0.6, 0.2)
-    const = [0.08, 0.2, 0.128]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.08, 0.2, 0.128]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0.7, 0.6, 0.2)
-    const = [0.10399999999999993, 0.08000000000000002, 0.2]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.10399999999999993, 0.08000000000000002, 0.2]
+    assert_iter_almost_equal(tmp, expected)
     tmp = hsv_to_rgb(0.9, 0.6, 0.2)
-    const = [0.2, 0.08000000000000002, 0.15199999999999997]
-    assert_iter_almost_equal(tmp, const)
+    expected = [0.2, 0.08000000000000002, 0.15199999999999997]
+    assert_iter_almost_equal(tmp, expected)
     ### --- BLOCK END 12
 
 
