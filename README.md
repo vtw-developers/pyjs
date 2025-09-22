@@ -23,6 +23,6 @@ python -m unittest p_visitor_py_test.py
 # from https://github.com/bloomberg/memray
 pip install memray
 
-python -m memray run p_learn_apply_rules.py <conf-name>
+python -m memray run p_learn_apply_rules.py <options>
 memray flamegraph p_learn_apply_rules.<some-id>.bin
 ```

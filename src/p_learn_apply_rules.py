@@ -13,6 +13,7 @@ import p_subject
 import p_tree_log as ptlog
 import p_utils
 import p_visitor_py as pvpy
+from p_config import Config, load_configs
 
 
 logger = p_utils.setup_logger(__name__)
@@ -30,7 +31,6 @@ async def _run_benchmark_subject_finish(
   lbenchmark: ptlog.Benchmark,
   lock: asyncio.Lock,
   shared_cnt_fin: List[int],
-  conf: dict
 ) -> None:
   '''
   Called when a task for a subject finishes.
@@ -58,7 +58,7 @@ async def _run_benchmark_subject_finish(
     subject = subject + f'L-NO'
     message = message + lrule_learn_phase.reason
 
-  if conf.get('is_email_report', False):
+  if Config.is_email_report:
     p_utils.email_safely(subject=subject, message=message)
 
 
@@ -131,7 +131,6 @@ async def learn_and_application_phases_on_subject(
   semaphore: asyncio.Semaphore,
   lock: asyncio.Lock,
   shared_cnt_fin: List[int],
-  conf: dict
 ):
   '''
   Wrapper function to run both rule learning and application phases.
@@ -164,7 +163,7 @@ async def learn_and_application_phases_on_subject(
     lrule_learn_phase.reason = p_utils.exception_to_str(exc)
     lrule_learn_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_fail.yaml', asdict(lsubject))
-    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
 
   # rule application phase
   lrule_application_phase = ptlog.RuleApplicationPhase()
@@ -198,17 +197,15 @@ async def learn_and_application_phases_on_subject(
     lrule_application_phase.reason = p_utils.exception_to_str(exc)
     lrule_application_phase.etms = p_utils.current_time_msec()
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_fail.yaml', asdict(lsubject))
-    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+    return await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
 
   logger.info(f'SUCCESS Both learn and apply phases for "{subject.name}" succeeded.')
-  await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin, conf)
+  await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
 
 
-def _run_benchmark_init(
-  conf: dict
-) -> Tuple[str, List[Tuple[str, str]], ptlog.Benchmark, List[p_subject.PirelSubject]]:
+def _run_benchmark_init() -> tuple:
 
-  def _load_benchmark_sample(conf: dict) -> List[Tuple[str, str]]:
+  def _load_benchmark_sample() -> List[Tuple[str, str]]:
     '''
     RETURN a sequence of (subject_name, src_program).
     `subject_name` is a five character prefix of the program in the dataset.
@@ -218,14 +215,10 @@ def _run_benchmark_init(
     def _exclude(sample: List[Tuple[str, str]], exclude_list: List[str]) -> List[Tuple[str, str]]:
       return list(filter(lambda x: x[0] not in exclude_list, sample))
 
-    benchmark_name = conf['benchmark_name']
-    assert benchmark_name in p_consts.BENCHMARK_CONFIGS, \
-      f'{benchmark_name=} not supported'
-
-    benchmark_conf = p_consts.BENCHMARK_CONFIGS[benchmark_name]
+    benchmark_conf = p_consts.BENCHMARK_CONFIGS[Config.benchmark_name]
     benchmark_dir = benchmark_conf['benchmark_dir']
 
-    subject_fpaths : List[Path] = list(sorted(benchmark_dir.glob(f"*.{conf['src_lang']}")))
+    subject_fpaths : List[Path] = list(sorted(benchmark_dir.glob(f"*.{Config.src_lang}")))
     dataset : List[Tuple[str, str]] = []
 
     # LOAD ALL SUBJECTS
@@ -233,7 +226,7 @@ def _run_benchmark_init(
       src_program = p_utils.read_text(subject_fpath)
 
       # NOTE remove comments, docstrings, and empty lines from main_code (not extensively tested)
-      if conf['is_three_split']:
+      if Config.is_three_split:
         src_test_code, src_main_code, src_test_call_code = src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
         src_main_code = p_utils.remove_comments_and_docstrings_py(src_main_code)
         src_main_code = p_utils.remove_empty_lines(src_main_code)
@@ -242,64 +235,63 @@ def _run_benchmark_init(
         src_program = p_utils.remove_comments_and_docstrings_py(src_program)
         src_program = p_utils.remove_empty_lines(src_program)
 
-      if conf['benchmark_name'] in ('gfg', 'leetcode'):
+      if Config.benchmark_name == 'gfg':
         subject_name = subject_fpath.stem[:5]
-      else:
+      elif Config.benchmark_name == 'skel':
         subject_name = subject_fpath.stem
       dataset.append((subject_name, src_program))
 
     logger.debug(f'Loaded {len(dataset)} programs for translation rule learning phase.')
 
     # GO OVER THE SAMPLE LOADING OPTIONS
-    # 1. `only` has the highest priority
-    if len(conf['sample']['only']) > 0:
-      sample = list(filter(lambda x: x[0] in conf['sample']['only'], dataset))
-      return _exclude(sample, conf['sample']['exclude'])
+    # 1. `sample_only` has the highest priority
+    if len(Config.sample_only) > 0:
+      sample = list(filter(lambda x: x[0] in Config.sample_only, dataset))
+      return _exclude(sample, Config.sample_exclude)
 
-    # 2. `is_random` has the second highest priority
-    if conf['sample']['is_random']:
-      dataset = _exclude(dataset, conf['sample']['exclude'])
-      sample = sorted(random.sample(dataset, conf['sample']['size']))
+    # 2. `sample_randomize` has the second highest priority
+    if Config.sample_randomize:
+      dataset = _exclude(dataset, Config.sample_exclude)
+      sample = sorted(random.sample(dataset, Config.sample_size))
       return sample
 
     # 3. slice the dataset
-    start_idx = conf['sample']['start_idx']
-    end_idx = start_idx + conf['sample']['size']
+    start_idx = Config.sample_start_idx
+    end_idx = start_idx + Config.sample_size
     sample = dataset[start_idx:end_idx]
-    return _exclude(sample, conf['sample']['exclude'])
+    return _exclude(sample, Config.sample_exclude)
 
-  def _load_starting_ruleset(conf: dict) -> str:
+  def _load_starting_ruleset() -> str:
     '''
     RETURN the starting ruleset for the learning phase from
     the configuration file or the default starting ruleset.
     '''
-    if conf.get('is_override_starting_ruleset', False):
+    if len(Config.overriding_rulesets) > 0:
       overriding_ruleset = ''
-      for path_str in conf['overriding_ruleset_fpaths']:
-        overriding_ruleset_fpath = p_consts.ROOT_DIR / path_str
-        assert overriding_ruleset_fpath.exists(), f'Overriding ruleset file does not exist: {overriding_ruleset_fpath}'
-        overriding_ruleset += p_utils.read_text(overriding_ruleset_fpath).strip() + '\n\n'
+      for fpath in Config.overriding_rulesets:
+        assert fpath.exists(), f'Overriding ruleset file does not exist: {fpath}'
+        overriding_ruleset += p_utils.read_text(fpath).strip() + '\n\n'
       return overriding_ruleset.strip()
     return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
 
-  starting_ruleset_str = _load_starting_ruleset(conf)
-  benchmark_sample = _load_benchmark_sample(conf)
+  starting_ruleset_str = _load_starting_ruleset()
+  benchmark_sample = _load_benchmark_sample()
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
 
   lbenchmark = ptlog.Benchmark()
-  lbenchmark.benchmark_name = conf['benchmark_name']
+  lbenchmark.benchmark_name = Config.benchmark_name
   lbenchmark.sample_size = len(benchmark_sample)
 
   subject_list = []
   for subject_idx, (subject_name, src_program) in enumerate(benchmark_sample, start=1):
 
     subject = p_subject.PirelSubject(
-      benchmark_name=conf['benchmark_name'],
+      benchmark_name=Config.benchmark_name,
       name=subject_name,
       src_program=src_program,
-      src_lang=conf['src_lang'],
-      tar_lang=conf['tar_lang'],
-      is_three_split=conf['is_three_split'],
+      src_lang=Config.src_lang,
+      tar_lang=Config.tar_lang,
+      is_three_split=Config.is_three_split,
     )
 
     lsubject = ptlog.Subject()
@@ -313,16 +305,14 @@ def _run_benchmark_init(
   return starting_ruleset_str, benchmark_sample, lbenchmark, subject_list
 
 
-async def run_benchmark(conf: dict) -> None:
+async def run_benchmark() -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
   starting_ruleset_str, benchmark_sample, lbenchmark, subject_list = \
-    _run_benchmark_init(conf)
+    _run_benchmark_init()
 
-  num_concurrent_subjects = min(
-    len(benchmark_sample), conf.get('max_concurrent_subjects', p_consts.MAX_CONCURRENT_SUBJECTS))
-  logger.debug(f'Using a semaphore with {num_concurrent_subjects} concurrent subjects')
+  num_concurrent_subjects = min(len(benchmark_sample), Config.max_concurrent_subjects)
   semaphore = asyncio.Semaphore(num_concurrent_subjects)
 
   lock = asyncio.Lock()
@@ -332,24 +322,94 @@ async def run_benchmark(conf: dict) -> None:
     for subject, lsubject in zip(subject_list, lbenchmark.subjects):
       coroutine = learn_and_application_phases_on_subject(
         subject, starting_ruleset_str, lsubject, lbenchmark,
-        semaphore, lock, shared_cnt_fin, conf)
+        semaphore, lock, shared_cnt_fin)
       tg.create_task(coroutine, name=subject.name)
 
-  p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
+  p_utils.llog_yaml(f'tree-log-{Config.benchmark_name}.yaml', asdict(lbenchmark))
+
+
+def get_args() -> argparse.Namespace:
+  '''
+  NOTE perform sanity checks on the new arguments.
+  '''
+  argparser = argparse.ArgumentParser()
+
+  argparser.add_argument('--benchmark_name', '-b',
+                         choices=list(['gfg', 'skel']), required=True,
+                         help='Name of the benchmark')
+  argparser.add_argument('--src_lang',
+                         default='py',
+                         help='Source programming language (default: py)')
+  argparser.add_argument('--tar_lang',
+                         default='js',
+                         help='Target programming language (default: js)')
+  argparser.add_argument('--is_three_split',
+                         action='store_true',
+                         help='Whether the benchmark uses three-split (test, main, test_call) '
+                              'programs (default: False)')
+
+  argparser.add_argument('--overriding_rulesets', '-r',
+                         nargs='+', default=[],
+                         help='Relative path(s) to overriding rulesets. '
+                              'Overrides the default starting ruleset (default: empty list)')
+  argparser.add_argument('--max_concurrent_subjects', '-m',
+                         type=int, default=p_consts.MAX_CONCURRENT_SUBJECTS,
+                         help='Maximum number of subjects to run concurrently. '
+                              f'(default: {p_consts.MAX_CONCURRENT_SUBJECTS})')
+
+  argparser.add_argument('--sample_randomize', '-R',
+                         action='store_true',
+                         help='Whether to randomize the sample (default: False)')
+  argparser.add_argument('--sample_size', '-N',
+                         type=int, default=1,
+                         help='Size of the sample (default: 1)')
+  argparser.add_argument('--sample_start_idx', '-S',
+                         type=int, default=0,
+                         help='Start index of the sample (0-based) (default: 0)')
+  argparser.add_argument('--sample_only', '-O',
+                         nargs='+', default=[],
+                         help='List of subject names to include only (default: empty list)')
+  argparser.add_argument('--sample_exclude', '-E',
+                         nargs='+', default=[],
+                         help='List of subject names to exclude (default: empty list)')
+
+  argparser.add_argument('--is_email_report', '-e',
+                         action='store_true',
+                         help='Whether to email the report after each subject finishes (default: False)')
+
+  args = argparser.parse_args()
+
+  # benchmark_name, src_lang, tar_lang, is_three_split
+  assert args.benchmark_name in ['gfg', 'skel'], f'Unsupported benchmark: {args.benchmark_name}'
+  assert args.src_lang in ['py'], f'Unsupported source language: {args.src_lang}'
+  assert args.tar_lang in ['js'], f'Unsupported target language: {args.tar_lang}'
+  assert isinstance(args.is_three_split, bool), f'is_three_split must be boolean'
+
+  # overriding_rulesets, max_concurrent_subjects
+  assert isinstance(args.overriding_rulesets, list), f'overriding_rulesets must be a list'
+  args.overriding_rulesets = [p_utils.make_abs(p, p_consts.ROOT_DIR) for p in args.overriding_rulesets]
+  assert isinstance(args.max_concurrent_subjects, int) and args.max_concurrent_subjects > 0, \
+    f'max_concurrent_subjects must be a positive integer'
+
+  # sample_randomize, sample_size, sample_start_idx, sample_only, sample_exclude
+  assert isinstance(args.sample_randomize, bool), f'sample_randomize must be boolean'
+  assert isinstance(args.sample_size, int) and args.sample_size > 0, f'sample_size must be a positive integer'
+  assert isinstance(args.sample_start_idx, int) and args.sample_start_idx >= 0, f'sample_start_idx must be a non-negative integer'
+  assert isinstance(args.sample_only, list), f'sample_only must be a list'
+  assert isinstance(args.sample_exclude, list), f'sample_exclude must be a list'
+
+  # is_email_report
+  assert isinstance(args.is_email_report, bool), f'is_email_report must be boolean'
+
+  return args
 
 
 def main():
-  argparser = argparse.ArgumentParser()
-  argparser.add_argument('conf_fname', type=str, help='Name of the configuration file')
-  args = argparser.parse_args()
-
-  conf_fname : str = args.conf_fname if args.conf_fname.endswith('.yaml') else args.conf_fname + '.yaml'
-  conf_fpath = p_consts.CONFIGS_DIR / conf_fname
-  assert conf_fpath.exists(), f'Configuration file does not exist: {conf_fpath}'
-  conf = p_utils.read_yaml(conf_fpath)
+  args = get_args()
+  load_configs(args)
 
   try:
-    asyncio.run(run_benchmark(conf))
+    asyncio.run(run_benchmark())
   except Exception as exc:
     p_utils.email_safely(subject='SCRIPT ERROR', message=p_utils.exception_to_str(exc))
     raise
