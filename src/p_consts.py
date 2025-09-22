@@ -26,7 +26,6 @@ LEARN_RULES_LOGS_DIR = LOGS_DIR / 'learn-rules'
 PIREL_LOGS_DIR = LOGS_DIR / 'pirel'
 
 LEARN_APPLY_RULES_CONFIGS_DIR = CONFIGS_DIR / 'p-learn-apply-rules'
-PIREL_SUBJECT_CONFIGS_DIR = CONFIGS_DIR / 'pirel-subject'
 
 
 ################################################################################################

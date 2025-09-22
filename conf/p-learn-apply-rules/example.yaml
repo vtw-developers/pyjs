@@ -52,15 +52,3 @@ mode_benchmark:
 
   # flags
   is_email_report: true
-
-
-################################################
-################# CUSTOM MODE ##################
-################################################
-# Run p_learn_apply_rules on a program in src_lang.
-
-# SCHEMA:
-# pirel_subject_conf: str (.yaml config file in p_consts.PIREL_SUBJECT_CONFIGS_DIR)
-
-mode_custom:
-  pirel_subject_conf: example.yaml

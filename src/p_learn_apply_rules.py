@@ -338,54 +338,8 @@ async def mode_benchmark(conf: dict) -> None:
   p_utils.llog_yaml(f'tree-log-{conf["benchmark_name"]}.yaml', asdict(lbenchmark))
 
 
-async def mode_custom_deprecated(conf: dict) -> None:
-  '''
-  Run PiREL to learn translation rules for any program.
-  '''
-
-  logger.info('~~~ Starting mode_custom_deprecated()')
-
-  subject = p_subject.PirelSubject.from_file_config(
-    p_consts.PIREL_SUBJECT_CONFIGS_DIR / conf['pirel_subject_conf'])
-  starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(
-    subject.translation_rules_main_code)
-
-  lsubject = ptlog.Subject()
-  lsubject.id = 1
-  lsubject.subject_name = subject.name
-  lsubject.src_main_code = subject.get_src_main_code()
-  lrule_learn_phase = ptlog.RuleLearnPhase()
-  lsubject.rule_learn_phase = lrule_learn_phase
-
-  try:
-    await p_pirel.learn_trans_rules_for_subject(
-      subject,
-      starting_ruleset,
-      lrule_learn_phase
-    )
-
-    lrule_learn_phase.success = True
-    lrule_learn_phase.etms = p_utils.current_time_msec()
-    logger.info(f'SUCCESS Translation of "{subject.name}" is successful.')
-    logger.debug(f"Saving learned rules and target program in {p_consts.LEARN_RULES_LOGS_DIR}.")
-    p_utils.llog_text(f'{subject.name}_learned_rules.snart', starting_ruleset.to_str_ruleset())
-    p_utils.llog_json(f'{subject.name}_learned_rules.json', starting_ruleset.to_dict())
-    p_utils.llog_text(f'{subject.name}_source_program.py', subject.get_src_main_code())
-
-  except Exception as exc:
-    msg = f'FAIL Failed to translate "{subject.name}"\n'
-    msg += p_utils.exception_to_str(exc)
-    lrule_learn_phase.success = False
-    lrule_learn_phase.reason = msg
-    lrule_learn_phase.etms = p_utils.current_time_msec()
-    logger.error(msg)
-
-  p_utils.llog_yaml(f'tree-log-custom-mode-{subject.name}.yaml', asdict(lsubject))
-
-
 MODE_CALLBACKS = {
   'benchmark': mode_benchmark,
-  'custom': mode_custom_deprecated,
 }
 
 

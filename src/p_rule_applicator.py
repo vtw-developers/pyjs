@@ -961,14 +961,6 @@ async def apply_translation_rules(
     logger.debug(f'rule-app: iteration {iteration} ended')
 
 
-# USAGE
-def usage_apply_translation_rules():
-  subject_config = p_subject.PirelSubject.from_file_config(p_consts.ROOT_DIR / 'conf' / 'pirel-subject' / 'test.yaml')
-  tar_program_plausible, translate_dbg_history = \
-    asyncio.run(apply_translation_rules(subject_config))
-  logger.debug(f'Plausible target program:\n{tar_program_plausible}')
-
-
 # TEST HARNESSES
 def _test_apply_translation_rules():
   '''
