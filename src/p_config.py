@@ -8,7 +8,9 @@ class Config:
   is_three_split: bool = None
 
   overriding_rulesets: List[str] = None
+
   max_concurrent_subjects: int = None
+  reuse_translation_rules: bool = None
 
   sample_randomize: bool = None
   sample_size: int = None
@@ -26,7 +28,9 @@ def load_configs(args):
   Config.is_three_split = args.is_three_split
 
   Config.overriding_rulesets = args.overriding_rulesets
+
   Config.max_concurrent_subjects = args.max_concurrent_subjects
+  Config.reuse_translation_rules = args.reuse_translation_rules
 
   Config.sample_randomize = args.sample_randomize
   Config.sample_size = args.sample_size

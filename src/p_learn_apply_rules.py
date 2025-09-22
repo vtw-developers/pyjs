@@ -352,10 +352,15 @@ def get_args() -> argparse.Namespace:
                          nargs='+', default=[],
                          help='Relative path(s) to overriding rulesets. '
                               'Overrides the default starting ruleset (default: empty list)')
+
   argparser.add_argument('--max_concurrent_subjects', '-m',
                          type=int, default=p_consts.MAX_CONCURRENT_SUBJECTS,
                          help='Maximum number of subjects to run concurrently. '
                               f'(default: {p_consts.MAX_CONCURRENT_SUBJECTS})')
+  argparser.add_argument('--reuse_translation_rules',
+                         action='store_true',
+                         help='Whether to reuse the learned translation rules from previous subjects. '
+                              'Works only with `--max_concurrent_subjects 1`. (default: False)')
 
   argparser.add_argument('--sample_randomize', '-R',
                          action='store_true',
@@ -385,11 +390,17 @@ def get_args() -> argparse.Namespace:
   assert args.tar_lang in ['js'], f'Unsupported target language: {args.tar_lang}'
   assert isinstance(args.is_three_split, bool), f'is_three_split must be boolean'
 
-  # overriding_rulesets, max_concurrent_subjects
+  # overriding_rulesets
   assert isinstance(args.overriding_rulesets, list), f'overriding_rulesets must be a list'
   args.overriding_rulesets = [p_utils.make_abs(p, p_consts.ROOT_DIR) for p in args.overriding_rulesets]
+
+  # max_concurrent_subjects, reuse_translation_rules
   assert isinstance(args.max_concurrent_subjects, int) and args.max_concurrent_subjects > 0, \
     f'max_concurrent_subjects must be a positive integer'
+  assert isinstance(args.reuse_translation_rules, bool), f'reuse_translation_rules must be boolean'
+  if args.reuse_translation_rules:
+    assert args.max_concurrent_subjects == 1, \
+      f'When reuse_translation_rules is set, max_concurrent_subjects must be 1'
 
   # sample_randomize, sample_size, sample_start_idx, sample_only, sample_exclude
   assert isinstance(args.sample_randomize, bool), f'sample_randomize must be boolean'
