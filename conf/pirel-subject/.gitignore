@@ -5,5 +5,4 @@
 !.gitignore
 !README.md
 !example.yaml
-!snippet-under-test.yaml
 !statement-node.yaml
