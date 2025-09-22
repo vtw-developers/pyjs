@@ -194,13 +194,13 @@ class PirelSubject:
     assert conf_fpath.is_absolute(), f'Config file is not an absolute path: {conf_fpath}'
     assert conf_fpath.suffix == '.yaml', f'Config file is not a YAML file: {conf_fpath}'
     logger.debug(f'Loading a PiREL subject from a config file: {conf_fpath}')
-    conf : dict = p_utils.read_yaml(conf_fpath)
-    return cls.from_dict(conf)
+    conf_dict : dict = p_utils.read_yaml(conf_fpath)
+    return cls.from_dict(conf_dict)
 
   @classmethod
   def from_json_str(cls, json_str: str) -> PirelSubject:
     '''
     Create a PirelSubject instance from a JSON string.
     '''
-    conf = json.loads(json_str)
-    return cls.from_dict(conf)
+    conf_dict = json.loads(json_str)
+    return cls.from_dict(conf_dict)
