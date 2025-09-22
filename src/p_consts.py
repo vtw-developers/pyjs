@@ -296,7 +296,6 @@ TEST_SCRIPT_TEMPLATE = (
 )
 LOG_STAT_RULE_FPATH = TRANSLATION_RULES_DIR / 'log-statement.snart'
 RULE_VAL_EXTRA_RULES_FPATH = TRANSLATION_RULES_DIR / 'rule-validation-extra.snart'
-SNIPPET_UNDER_TEST_CONF_FPATH = PIREL_SUBJECT_CONFIGS_DIR / 'snippet-under-test.yaml'
 
 PRE_CTX_SPEC_IDENT = 'pirel_pre_ctx_spec_identifier'
 PRE_CTX_INSERT_BREAK_IN_LOOPS = True
