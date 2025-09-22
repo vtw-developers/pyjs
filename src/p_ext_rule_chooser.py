@@ -1,5 +1,6 @@
 import asyncio
 import json
+from itertools import chain
 from typing import Dict, List, Optional, Tuple, Set
 
 import d_ast_parse
@@ -489,7 +490,7 @@ def _create_subject_for_expr(
   return expr_subject
 
 
-def get_rules_that_handle_range_cursor_rec(
+def _get_rules_that_handle_range_cursor_rec(
   range_cursor: tuple,
   ruleset: p_ruleset.Ruleset,
   dgann: dict,
@@ -526,7 +527,8 @@ def get_rules_that_handle_range_cursor_rec(
     assert match_obj['is_matched'], 'Expected rule to match the range cursor'
     all_slot_cursors.extend(match_obj['slot_cursors'])
 
-  all_slot_cursors = d_ast_parse.range_cursors_sharpen(all_slot_cursors)
+  all_slot_cursors = chain.from_iterable(map(d_ast_parse.range_cursor_split,
+                                             all_slot_cursors))
   all_slot_cursors = d_ast_parse.range_cursors_remove_empty(all_slot_cursors)
   all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
 
@@ -536,7 +538,7 @@ def get_rules_that_handle_range_cursor_rec(
 
   # recursive case: rule has slot cursors
   for slot_cursor in all_slot_cursors:
-    child_rules = get_rules_that_handle_range_cursor_rec(
+    child_rules = _get_rules_that_handle_range_cursor_rec(
       slot_cursor, ruleset, dgann, src_main_code)
     if child_rules is not None:
       trules.extend(child_rules)
@@ -932,7 +934,7 @@ async def _process_match_obj(
     that matches
     `[1, 2, 3, 4]`
     '''
-    sub_slot_cursors = d_ast_parse.range_cursor_split(slot_cursor)
+    sub_slot_cursors = list(d_ast_parse.range_cursor_split(slot_cursor))
     if len(sub_slot_cursors) > 1:
       logger.debug(
         f'Slot cursor {idx}/{len(slot_cursors)} has {len(sub_slot_cursors)} '
@@ -943,7 +945,7 @@ async def _process_match_obj(
       We need to check if there are rules that plausibly translate the slot_cursors
       under the matched range_cursor.
       '''
-      subtrees_rules = get_rules_that_handle_range_cursor_rec(
+      subtrees_rules = _get_rules_that_handle_range_cursor_rec(
         sub_slot_cursor, ruleset, dgann, src_main_code)
       logger.debug(
         f'Slot cursor {sub_idx}/{len(sub_slot_cursors)} {idx}/{len(slot_cursors)} AST: '

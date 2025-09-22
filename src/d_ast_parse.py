@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple, Union
 
 import d_consts
 import p_consts
@@ -291,7 +291,7 @@ def range_cursor_is_empty(range_cursor: tuple) -> bool:
 
 
 def range_cursors_remove_empty(
-  range_cursors: List[Tuple[list, int, int]],
+  range_cursors: Iterable[tuple[list, int, int]],
 ) -> List[Tuple[list, int, int]]:
   '''
   Remove empty range cursors from the list.
@@ -299,77 +299,9 @@ def range_cursors_remove_empty(
   return [rc for rc in range_cursors if not range_cursor_is_empty(rc)]
 
 
-def range_cursors_sharpen(
-  range_cursors: List[Tuple[list, int, int]],
-) -> List[Tuple[list, int, int]]:
-  '''
-  Sharpen a list of range cursors to exclude any terminal nodes.
-  That is, move start_idx forward until it points to a non-terminal node,
-  and move end_idx backward until it points to a non-terminal node.
-  If the range cursor includes only terminal nodes, it becomes empty.
-  '''
-  return [range_cursor_sharpen(rc) for rc in range_cursors]
-
-
-def range_cursor_sharpen(
-  range_cursor: Tuple[list, int, int],
-) -> Tuple[list, int, int]:
-  '''
-  Sharpen a range cursor to exclude any terminal nodes.
-  That is, move start_idx forward until it points to a non-terminal node,
-  and move end_idx backward until it points to a non-terminal node.
-  If the range cursor includes only terminal nodes, it becomes empty.
-
-  NOTE Handles `string` cases as well. For the following AST:
-  (
-    ['py.string', 49,
-      ['anno', [...], [...]],
-      '"\\""',
-      ['py.string_content', 50, '"*"'],
-      '"\\""'
-    ], 2, 6
-  )
-  The sharpened range cursor will be:
-  (
-    ['py.string', 49,
-      ['anno', [...], [...]],
-      '"\\""',
-      ['py.string_content', 50, '"*"'],
-      '"\\""'
-    ], 4, 5
-  )
-  `py.string_content` is the only non-terminal child of `py.string`.
-  '''
-  assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
-  assert isinstance(range_cursor[0], list)
-  assert isinstance(range_cursor[1], int)
-  assert isinstance(range_cursor[2], int)
-  parent_ast = range_cursor[0]
-  start_idx = range_cursor[1]
-  end_idx = range_cursor[2]
-
-  # 2 is the index of the first child of a non-terminal node
-  assert start_idx >= 2, 'range cursor start index must be >= 2'
-  # start_idx == end_idx denotes an empty range cursor
-  assert start_idx <= end_idx, 'range cursor start index must be <= end index'
-  # end_idx > 2 means at least one child node is included
-  assert end_idx > 2, 'range cursor end index must be > 2'
-  # end_idx == len(parent_ast) means the range cursor includes the last child
-  assert end_idx <= len(parent_ast), 'range cursor end index out of bounds'
-
-  # move start_idx forward until it points to a non-terminal node or reaches end_idx
-  while start_idx < end_idx and not is_elem_non_terminal(parent_ast[start_idx]):
-    start_idx += 1
-  # move end_idx backward until it points to a non-terminal node or reaches start_idx
-  while end_idx > start_idx and not is_elem_non_terminal(parent_ast[end_idx - 1]):
-    end_idx -= 1
-
-  return (parent_ast, start_idx, end_idx)
-
-
 def range_cursor_split(
   range_cursor: Tuple[list, int, int],
-) -> List[Tuple[list, int, int]]:
+) -> Iterator[tuple[list, int, int]]:
   '''
   Split a range cursor into multiple range cursors, each specifying
   exactly one non-terminal AST node.
@@ -391,13 +323,11 @@ def range_cursor_split(
   # end_idx == len(parent_ast) means the range cursor includes the last child
   assert end_idx <= len(parent_ast), 'range cursor end index out of bounds'
 
-  result = []
   for idx in range(start_idx, end_idx):
     rc = (parent_ast, idx, idx + 1)
     ast = range_cursor_to_ast_node(rc)
     if is_elem_non_terminal(ast):
-      result.append(rc)
-  return result
+      yield rc
 
 
 def range_cursor_to_ast_node(range_cursor: tuple) -> list:
