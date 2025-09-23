@@ -88,7 +88,7 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
       self.assertFalse(has_int_rhs_for_in_clause, f'RHS of for_in_clause being an integer found in "{snippet}"')
 
   def test_all_general(self):
-    NUM_TESTS = 62
+    NUM_TESTS = 63
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
