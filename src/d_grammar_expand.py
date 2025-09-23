@@ -258,7 +258,7 @@ class TransSession():
         raise err
 
     current_alt_node_dict = self._alt_tree_dict[0]
-    MAX_LOOPCOUNT = 15000
+    MAX_LOOPCOUNT = 400000  # be cautious, as it may use a lot of memory
     loop_count = 0
     last_checkpoint_step = 0
 
