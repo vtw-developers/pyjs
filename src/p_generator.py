@@ -142,10 +142,28 @@ def is_force_identifiers_PY(
       f'"{mapped_node.children[0].node_type}"')
     return True
 
+  def _pattern_4_rhs_for_in_clause(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as `dp = [6169 for id_nwi in 848]`
+                                                    ^^^
+    '''
+    # parent of mapped_node must be an for_in_clause
+    parent = mapped_node.get_parent()
+    if parent.get_ts_node_type() != 'for_in_clause':
+      return False
+    # mapped_node is the last child of parent
+    if parent.children[-1] != mapped_node:
+      return False
+    logger.debug(
+      f'Forcing identifiers: mapped_node is the rhs of a for_in_clause'
+      f'"{mapped_node.children[0].node_type}"')
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_mapped_node_is_identifier(mapped_node),
     lambda: _pattern_2_call_attribute(mapped_node),
     lambda: _pattern_3_int_as_value_of_subscript(mapped_node),
+    lambda: _pattern_4_rhs_for_in_clause(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
@@ -1268,6 +1286,8 @@ def _test_generate_tsps_with_generator():
     print()
     print(json.dumps([tsp[0], tsp[1]]))
     print()
+  template_dict['tsps'] = tsps
+  print(json.dumps(template_dict))
 
 
 if __name__ == '__main__':
