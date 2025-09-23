@@ -378,6 +378,20 @@ def range_cursor_pretty_print(range_cursor: tuple, ann: dict, src_code: str) -> 
   return ast_pretty_print(ast, ann, src_code)
 
 
+def range_cursor_encode(range_cursor: tuple, ann: dict, src_code: str) -> str:
+  '''
+  Encode the AST node specified by the range cursor.
+  PARAM range_cursor: Tuple[ List[src_ast] , int , int ]
+  PARAM ann: annotation dict from parse_text_dbg
+  PARAM src_code: original source code
+  '''
+  unparsed = range_cursor_pretty_print(range_cursor, ann, src_code)
+  ast = range_cursor_to_ast_node(range_cursor)
+  ast_encoded = ast_encode(ast)
+  encoded = f'{unparsed}--{ast_encoded}'
+  return encoded
+
+
 def ast_pretty_print(ast: list, ann: dict, src_code: str) -> str:
   '''
   Pretty print the AST.
@@ -469,6 +483,37 @@ def are_nodes_equal(
     if not child_res:
       return False
   return True
+
+
+def ast_encode(
+  ast: list,
+  ignore_node_ids: bool = True,
+  ignore_anno: bool = True
+) -> str:
+  '''
+  Encode the AST as a string.
+  PARAM ast: duoglot-style AST node
+  '''
+  def _pre_order(node: Union[list, str]) -> str:
+    nonlocal ignore_anno
+    # base case: terminal node
+    if isinstance(node, str):
+      return node
+    # base case: anno nodes
+    if node[0] == 'anno' and ignore_anno:
+      return ''
+    assert is_elem_non_terminal(node), 'expected non-terminal node'
+    res = '[' + node[0]  # node type
+    if not ignore_node_ids:
+      res += f'_{node[1]}'  # node id
+    for child in node[2:]:
+      child_str = _pre_order(child)
+      if child_str != '':
+        res += f' {child_str}'
+    return res + ']'
+
+  assert ignore_anno, 'anno is not supported at the moment'
+  return _pre_order(ast).strip()
 
 
 def ast_to_dotgraph(
