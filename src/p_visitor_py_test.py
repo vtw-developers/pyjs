@@ -6534,6 +6534,7 @@ class TestChoicableNodeExtractor(unittest.TestCase):
       'a[i - 1] + b[i - 1]',
       'a[i - 1]',
       'a[n - 1] + b[n - 1]',
+      'retval_1'
     ]
     self.assertCountEqual(ground_truth, choicable_nodes_str)
 
