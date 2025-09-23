@@ -159,11 +159,37 @@ def is_force_identifiers_PY(
       f'"{mapped_node.children[0].node_type}"')
     return True
 
+  def _pattern_5_arg_ord_builtin_fn(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as `ord(123)`
+                               ^^^
+    '''
+    # parent of mapped_node must be an argument_list
+    parent = mapped_node.get_parent()
+    if parent.get_ts_node_type() != 'argument_list':
+      return False
+    # parent must have one non-terminal child
+    if len(parent.get_nt_children()) != 1:
+      return False
+    # previous sibling of parent must be an identifier
+    prevs = parent.get_left_sibling()
+    if prevs.get_ts_node_type() != 'identifier':
+      return False
+    # function name is `ord`
+    fnname = prevs.children[0].node_type
+    if fnname != 'ord':
+      return False
+    logger.debug(
+      f'Forcing identifiers: mapped_node is an argument of a builtin function `ord`'
+      f'"{mapped_node.children[0].node_type}"')
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_mapped_node_is_identifier(mapped_node),
     lambda: _pattern_2_call_attribute(mapped_node),
     lambda: _pattern_3_int_as_value_of_subscript(mapped_node),
     lambda: _pattern_4_rhs_for_in_clause(mapped_node),
+    lambda: _pattern_5_arg_ord_builtin_fn(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
