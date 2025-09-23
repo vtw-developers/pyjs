@@ -79,8 +79,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
         has_fn_with_empty_arglist = self._pre_order(root_node, _pattern_3_has_fn_with_empty_argument_list, ntype)
         self.assertFalse(has_fn_with_empty_arglist, f'Empty argument list for "{ntype}" found in "{snippet}"')
 
+      # Check for value of subscript being an integer
+      has_value_of_sub_not_id = self._pre_order(root_node, _pattern_4_value_of_subscript_is_integer)
+      self.assertFalse(has_value_of_sub_not_id, f'Value of subscript being an integer found in "{snippet}"')
+
   def test_all_general(self):
-    NUM_TESTS = 59
+    NUM_TESTS = 60
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -199,6 +203,29 @@ def _pattern_3_has_fn_with_empty_argument_list(node: pds.DuoGlotNode, fnname: st
   if second_child.get_num_nt_children() > 0:
     return False
   return True
+
+
+def _pattern_4_value_of_subscript_is_integer(node: pds.DuoGlotNode) -> bool:
+  '''
+  RETURN True if the node is an integer that is used as the value of a subscript.
+  For example, 3740 in retval_1 = 3740[id_jubr]
+                                  ^^^^
+  '''
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must have a parent
+  if node.get_parent() is None:
+    return False
+  # parent of node must be a subscript
+  parent = node.get_parent()
+  if parent.get_ts_node_type() != 'subscript':
+    return False
+  # node must be the first child of parent
+  if parent.children[0] != node:
+    return False
+  # node must not be integer
+  return node.get_ts_node_type() == 'integer'
 
 
 if __name__ == '__main__':
