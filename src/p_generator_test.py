@@ -87,8 +87,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
       has_int_rhs_for_in_clause = self._pre_order(root_node, _pattern_5_rhs_for_in_clause_is_integer)
       self.assertFalse(has_int_rhs_for_in_clause, f'RHS of for_in_clause being an integer found in "{snippet}"')
 
+      # Check for ord() builtin function having an integer as argument
+      has_int_as_arg_ord_builtin_fn = self._pre_order(root_node, _pattern_6_arg_ord_builtin_fn_is_integer)
+      self.assertFalse(has_int_as_arg_ord_builtin_fn, f'Argument of ord() being an integer found in "{snippet}"')
+
   def test_all_general(self):
-    NUM_TESTS = 63
+    NUM_TESTS = 64
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -252,6 +256,39 @@ def _pattern_5_rhs_for_in_clause_is_integer(node: pds.DuoGlotNode) -> bool:
     return False
   # node must be integer
   return node.get_ts_node_type() == 'integer'
+
+
+def _pattern_6_arg_ord_builtin_fn_is_integer(node: pds.DuoGlotNode) -> bool:
+  '''
+  RETURN True if the node is an integer that is used as the argument of ord() builtin function.
+  For example, `ord(1234)`
+  '''
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must be call
+  if node.get_ts_node_type() != 'call':
+    return False
+  # first child must be identifier
+  first_child = node.get_children()[0]
+  if first_child.get_ts_node_type() != 'identifier':
+    return False
+  # function name must be ord
+  fn_name = first_child.get_children()[0].node_type
+  if fn_name != 'ord':
+    return False
+  # second child must be argument_list
+  second_child = node.get_children()[1]
+  if second_child.get_ts_node_type() != 'argument_list':
+    return False
+  # argument_list must have exactly one non-terminal child
+  if second_child.get_num_nt_children() != 1:
+    return False
+  # the single non-terminal child must be integer
+  arg_node = second_child.get_nt_children()[0]
+  if arg_node.get_ts_node_type() != 'integer':
+    return False
+  return True
 
 
 if __name__ == '__main__':
