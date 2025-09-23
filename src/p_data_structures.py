@@ -11,7 +11,7 @@ p_rule_postprocessor.py data structures are a bit different than DuoGlot-style A
 '''
 
 import re
-from typing import Callable, List, Set, Tuple, Union
+from typing import Callable, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
 import d_grammar_dlmparser as gdp
@@ -468,6 +468,28 @@ class DuoGlotNode():
     siblings = self.get_siblings_include_self()
     self_idx = siblings.index(self)
     return siblings[:self_idx]
+
+  def get_siblings_to_the_right(self) -> List['DuoGlotNode']:
+    ''''''
+    siblings = self.get_siblings_include_self()
+    self_idx = siblings.index(self)
+    return siblings[self_idx + 1:]
+
+  def get_left_sibling(self) -> Optional['DuoGlotNode']:
+    ''''''
+    siblings = self.get_siblings_include_self()
+    self_idx = siblings.index(self)
+    if self_idx == 0:
+      return None
+    return siblings[self_idx - 1]
+
+  def get_right_sibling(self) -> Optional['DuoGlotNode']:
+    ''''''
+    siblings = self.get_siblings_include_self()
+    self_idx = siblings.index(self)
+    if self_idx == len(siblings) - 1:
+      return None
+    return siblings[self_idx + 1]
 
   def get_num_siblings(self) -> int:
     '''
