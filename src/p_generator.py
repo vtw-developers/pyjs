@@ -125,9 +125,27 @@ def is_force_identifiers_PY(
       f'"{mapped_node.children[0].node_type}"')
     return True
 
+  def _pattern_3_int_as_value_of_subscript(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as retval_1 = 3740[id_jubr]
+                                     ^^^^
+    '''
+    # parent of mapped_node must be a subscript
+    parent = mapped_node.get_parent()
+    if parent.get_ts_node_type() != 'subscript':
+      return False
+    # mapped_node is the first child of parent
+    if parent.children[0] != mapped_node:
+      return False
+    logger.debug(
+      f'Forcing identifiers: mapped_node is the value of a subscript'
+      f'"{mapped_node.children[0].node_type}"')
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_mapped_node_is_identifier(mapped_node),
     lambda: _pattern_2_call_attribute(mapped_node),
+    lambda: _pattern_3_int_as_value_of_subscript(mapped_node),
   ]
 
   for pattern_callback in pattern_callbacks:
