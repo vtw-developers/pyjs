@@ -693,7 +693,7 @@ def infer_translation_rule(
   # p_utils.log_json_time('target-unified-pattern.json', tar_unified_pattern)
 
   # 10 post-process inferred rule
-  # NOTE Creating an instance of `TranslationRule` might raise `pptr.RuleMappingError`
+  # NOTE Creating an instance of `TranslationRule` might raise `prpp.RuleMappingError`
   # It is good to be vocal about errors in translation rules.
   translation_rule = prpp.TranslationRule(src_unified_pattern, tar_unified_pattern)
   if not _is_context_empty(context):
