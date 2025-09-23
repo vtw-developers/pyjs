@@ -375,53 +375,59 @@ def get_args() -> argparse.Namespace:
   '''
   argparser = argparse.ArgumentParser()
 
-  argparser.add_argument('--benchmark_name', '-b',
-                         choices=list(['gfg', 'skel']), required=True,
+  argparser.add_argument('--benchmark-name', '-b',
+                         choices={'gfg', 'skel'}, required=True,
                          help='Name of the benchmark')
-  argparser.add_argument('--src_lang',
-                         default='py',
+  argparser.add_argument('--src-lang', choices={'py'}, default='py',
                          help='Source programming language (default: py)')
-  argparser.add_argument('--tar_lang',
-                         default='js',
+  argparser.add_argument('--tar-lang', choices={'js'}, default='js',
                          help='Target programming language (default: js)')
-  argparser.add_argument('--is_three_split',
+  argparser.add_argument('--is-three-split',
                          action='store_true',
-                         help='Whether the benchmark uses three-split (test, main, test_call) '
-                              'programs (default: False)')
+                         help=('Whether the benchmark uses three-split'
+                               ' (test, main, test_call) programs'
+                               ' (default: False)'))
 
-  argparser.add_argument('--overriding_rulesets', '-r',
+  argparser.add_argument('--overriding-rulesets', '-r', metavar='PATH',
                          nargs='+', default=[],
-                         help='Relative path(s) to overriding rulesets. '
-                              'Overrides the default starting ruleset (default: empty list)')
+                         help=('Relative path(s) to overriding rulesets.'
+                               ' Overrides the default starting ruleset'
+                               ' (default: empty list)'))
 
-  argparser.add_argument('--max_concurrent_subjects', '-m',
+  argparser.add_argument('--max-concurrent-subjects', '-m', metavar='N',
                          type=int, default=p_consts.MAX_CONCURRENT_SUBJECTS,
-                         help='Maximum number of subjects to run concurrently. '
-                              f'(default: {p_consts.MAX_CONCURRENT_SUBJECTS})')
-  argparser.add_argument('--reuse_translation_rules',
+                         help=('Maximum number of subjects'
+                               ' to run concurrently. (default:'
+                               f' {p_consts.MAX_CONCURRENT_SUBJECTS})'))
+  argparser.add_argument('--reuse-translation-rules',
                          action='store_true',
-                         help='Whether to reuse the learned translation rules from previous subjects. '
-                              'Works only with `--max_concurrent_subjects 1`. (default: False)')
+                         help=('Whether to reuse the learned translation rules'
+                               ' from previous subjects. Works only'
+                               ' with `--max-concurrent-subjects 1`.'
+                               ' (default: False)'))
 
-  argparser.add_argument('--sample_randomize', '-R',
+  argparser.add_argument('--sample-randomize', '-R',
                          action='store_true',
-                         help='Whether to randomize the sample (default: False)')
-  argparser.add_argument('--sample_size', '-N',
+                         help=('Whether to randomize the sample'
+                               ' (default: False)'))
+  argparser.add_argument('--sample-size', '-N', metavar='N',
                          type=int, default=1,
                          help='Size of the sample (default: 1)')
-  argparser.add_argument('--sample_start_idx', '-S',
+  argparser.add_argument('--sample-start-idx', '-S', metavar='N',
                          type=int, default=0,
-                         help='Start index of the sample (0-based) (default: 0)')
-  argparser.add_argument('--sample_only', '-O',
+                         help=('Start index of the sample'
+                               ' (0-based) (default: 0)'))
+  argparser.add_argument('--sample-only', '-O', metavar='SUBJECT_NAME',
                          nargs='+', default=[],
-                         help='List of subject names to include only (default: empty list)')
-  argparser.add_argument('--sample_exclude', '-E',
+                         help='Subject name whitelist (default: empty list)')
+  argparser.add_argument('--sample-exclude', '-E', metavar='SUBJECT_NAME',
                          nargs='+', default=[],
-                         help='List of subject names to exclude (default: empty list)')
+                         help='Subject names blacklist (default: empty list)')
 
-  argparser.add_argument('--is_email_report', '-e',
+  argparser.add_argument('--is-email-report', '-e',
                          action='store_true',
-                         help='Whether to email the report after each subject finishes (default: False)')
+                         help=('Whether to email the report after '
+                               ' each subject finishes (default: False)'))
 
   args = argparser.parse_args()
 
