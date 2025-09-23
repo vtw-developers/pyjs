@@ -80,11 +80,15 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
         self.assertFalse(has_fn_with_empty_arglist, f'Empty argument list for "{ntype}" found in "{snippet}"')
 
       # Check for value of subscript being an integer
-      has_value_of_sub_not_id = self._pre_order(root_node, _pattern_4_value_of_subscript_is_integer)
-      self.assertFalse(has_value_of_sub_not_id, f'Value of subscript being an integer found in "{snippet}"')
+      has_int_as_value_of_sub = self._pre_order(root_node, _pattern_4_value_of_subscript_is_integer)
+      self.assertFalse(has_int_as_value_of_sub, f'Value of subscript being an integer found in "{snippet}"')
+
+      # Check for rhs of for_in_clause being an integer
+      has_int_rhs_for_in_clause = self._pre_order(root_node, _pattern_5_rhs_for_in_clause_is_integer)
+      self.assertFalse(has_int_rhs_for_in_clause, f'RHS of for_in_clause being an integer found in "{snippet}"')
 
   def test_all_general(self):
-    NUM_TESTS = 60
+    NUM_TESTS = 62
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -224,7 +228,29 @@ def _pattern_4_value_of_subscript_is_integer(node: pds.DuoGlotNode) -> bool:
   # node must be the first child of parent
   if parent.children[0] != node:
     return False
-  # node must not be integer
+  # node must be integer
+  return node.get_ts_node_type() == 'integer'
+
+
+def _pattern_5_rhs_for_in_clause_is_integer(node: pds.DuoGlotNode) -> bool:
+  '''
+  RETURN True if the node is an integer that is used as the rhs of a for_in_clause.
+  For example, `dp = [2409 for id_frmu in 3645]`
+  '''
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must have a parent
+  if node.get_parent() is None:
+    return False
+  # parent of node must be a for_in_clause
+  parent = node.get_parent()
+  if parent.get_ts_node_type() != 'for_in_clause':
+    return False
+  # node must be the last child of parent
+  if parent.children[-1] != node:
+    return False
+  # node must be integer
   return node.get_ts_node_type() == 'integer'
 
 

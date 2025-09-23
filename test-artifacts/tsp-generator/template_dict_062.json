@@ -1,0 +1,76 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "dp = [[[0, 0] for __ in range(k + 1)] for _ in range(n + 1)]",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "list_comprehension",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": true,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.list_comprehension",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.variable_declaration"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "var dp = pirel_replace_var;",
+  "src_program": "dp = [[[0, 0] for __ in range(k + 1)] for _ in range(n + 1)]",
+  "tsps": [
+    [
+      "dp = [id_ype for id_qvmo in id_kyh]",
+      "dp = [5154 for id_qzl in id_vxiw]"
+    ],
+    [
+      "dp = [[id_uqo for id_wpkn in id_mxj] for id_gtru in id_whj]",
+      "dp = [[1766 for id_zeud in id_zprd] for id_hwv in id_fadm]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_nfj in id_exhi] for id_tag in id_rgm]",
+      "dp = [[[secret_fun_4071()] for id_aqxh in id_qcrw] for id_uvx in id_xgmb]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_csk in range(k + 1)] for id_rnot in id_gdu]",
+      "dp = [[[secret_fun_4071()] for id_csa in range(k + 1)] for id_cdsl in id_pse]"
+    ],
+    [
+      "dp = [[id_qbt for id_ubyk in id_dik] for id_rep in range(id_zkq)]",
+      "dp = [[3546 for id_nwod in id_jtq] for id_wal in range(6566)]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_hpgs in id_akrs] for id_gbu in range(id_swi)]",
+      "dp = [[[secret_fun_4071()] for id_kfj in id_gyiq] for id_pmr in range(1377)]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_ncue in range(k + 1)] for id_jvko in range(id_qjbl)]",
+      "dp = [[[secret_fun_4071()] for id_ahg in range(k + 1)] for id_rwuc in range(1746)]"
+    ]
+  ]
+}

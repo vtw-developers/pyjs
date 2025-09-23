@@ -1,0 +1,60 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "dp = [0 for i in range(n + 1)]",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "list_comprehension",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.list_comprehension",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.variable_declaration"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "var dp = pirel_replace_var;",
+  "src_program": "dp = [0 for i in range(n + 1)]",
+  "tsps": [
+    [
+      "dp = [4400 for id_swj in id_spo]",
+      "dp = [id_bxai for id_fcmt in id_tpn]"
+    ],
+    [
+      "dp = [2274 for id_clv in id_zmk]",
+      "dp = [2409 for id_frmu in id_mlq]"
+    ],
+    [
+      "dp = [8326 for id_igzr in range(id_roih)]",
+      "dp = [4554 for id_tovr in range(5173)]"
+    ]
+  ]
+}
