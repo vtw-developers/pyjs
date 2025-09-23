@@ -3,7 +3,7 @@ import json
 import math
 import random
 import sys
-from collections.abc import KeysView
+from collections.abc import Iterable
 from typing import Union
 
 _default_print = print
@@ -33,7 +33,7 @@ def serialize_num(arg: Union[int, float]):
     return ["number", arg]
   return serialize_str('{:.6e}'.format(float(arg)))
 
-def serialize_list(arg: Union[list, tuple]):
+def serialize_list(arg: Iterable):
   serialized_vals = [serialize(val) for val in arg]
   serialized_vals_str = json.dumps(serialized_vals, separators=(',', ':'))
   hashed = hashlib.sha256(serialized_vals_str.encode('utf-8')).hexdigest()
@@ -72,17 +72,11 @@ def serialize(arg):
     return serialize_str(arg)
   if isinstance(arg, (int, float)):
     return serialize_num(arg)
-  if isinstance(arg, (list, tuple)):
-    return serialize_list(arg)
-  if isinstance(arg, set):
+  if isinstance(arg, (set, frozenset)):
     return serialize_set(arg)
   if isinstance(arg, dict):
     return serialize_dict(arg)
-  if isinstance(arg, KeysView):
-    # e.g. myexactlog(frequency.keys())
-    return serialize_list(list(arg))
-  if isinstance(arg, range):
-    # e.g. myexactlog(range(n + 1))
+  if isinstance(arg, Iterable):
     return serialize_list(list(arg))
   if callable(arg):
     return ["function"]
