@@ -404,6 +404,7 @@ def _create_log_stat_str_for_expr(
   then we need to mark the matching rules as unverifiable for the matched_range_cursor.
   '''
   matched_ast_str = d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)
+  matched_ast_encoded = d_ast_parse.range_cursor_encode(matched_range_cursor, dgann, src_main_code)
   log_stat_str = f'myexactlog({matched_ast_str})'
 
   '''
@@ -418,7 +419,7 @@ def _create_log_stat_str_for_expr(
       f'Expression "{matched_ast_str}" is unverifiable due to '
       f'parse error in log statement "{log_stat_str}".')
     for trule in matcher_group:
-      ruleset.update_unverifiable_rules(matched_ast_str, trule)
+      ruleset.update_unverifiable_rules(matched_ast_encoded, trule)
     raise ExprLogStatHasParseError()
 
   '''
@@ -442,7 +443,7 @@ def _create_log_stat_str_for_expr(
       f'Expression "{matched_ast_str}" is unverifiable due to '
       f'tree non-isomorphism in log statement "{log_stat_str}".')
     for trule in matcher_group:
-      ruleset.update_unverifiable_rules(matched_ast_str, trule)
+      ruleset.update_unverifiable_rules(matched_ast_encoded, trule)
     raise ExprLogStatContextError()
 
   return log_stat_str
@@ -505,19 +506,19 @@ def _get_rules_that_handle_range_cursor_rec(
   TODO This can/should be optimized.
   '''
   trules : List[p_ruleset.TRuleBase] = []
-  range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+  range_cursor_encoded = d_ast_parse.range_cursor_encode(
     range_cursor, dgann, src_main_code)
-  if ruleset.verified_rule_exists(range_cursor_unparsed):
-    trules.append(ruleset.get_verified_rule(range_cursor_unparsed))
-  if ruleset.unverifiable_rules_exist(range_cursor_unparsed):
-    trules.extend(ruleset.get_unverifiable_rules(range_cursor_unparsed))
+  if ruleset.verified_rule_exists(range_cursor_encoded):
+    trules.append(ruleset.get_verified_rule(range_cursor_encoded))
+  if ruleset.unverifiable_rules_exist(range_cursor_encoded):
+    trules.extend(ruleset.get_unverifiable_rules(range_cursor_encoded))
 
   # base case: no rule for range cursor not found
   if len(trules) == 0:
     return None
 
-  assert ruleset.verified_rule_exists(range_cursor_unparsed) != \
-    ruleset.unverifiable_rules_exist(range_cursor_unparsed), \
+  assert ruleset.verified_rule_exists(range_cursor_encoded) != \
+    ruleset.unverifiable_rules_exist(range_cursor_encoded), \
     'Expected either verified or unverifiable rules to exist, but not both.'
 
   # get all slot cursors of range cursor
@@ -580,9 +581,9 @@ def _check_for_base_rules(
   for st_trule in starting_ruleset.rules:
     if st_trule == matching_rule:
       logger.debug(f'Matched rule appears in the starting ruleset: {matching_rule}')
-      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+      range_cursor_encoded = d_ast_parse.range_cursor_encode(
         matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_unparsed, st_trule)
+      ruleset.update_verified_rules(range_cursor_encoded, st_trule)
       return True
 
   return False
@@ -661,9 +662,9 @@ async def _validate_matcher_group_no_intersection(
     try:
       tar_program_plausible, translate_dbg_history = \
         await prapp.apply_translation_rules(expr_subject)
-      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+      range_cursor_encoded = d_ast_parse.range_cursor_encode(
         matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_unparsed, rule)
+      ruleset.update_verified_rules(range_cursor_encoded, rule)
       logger.debug(
         f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
         f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
@@ -744,9 +745,9 @@ async def _validate_matcher_group_single_intersection(
     try:
       tar_program_plausible, translate_dbg_history = \
         await prapp.apply_translation_rules(expr_subject)
-      range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+      range_cursor_encoded = d_ast_parse.range_cursor_encode(
         matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_unparsed, rule)
+      ruleset.update_verified_rules(range_cursor_encoded, rule)
       logger.debug(
         f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
         f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
@@ -1203,7 +1204,8 @@ def _filter_range_cursors(
     if not _is_excluded_range_cursor(range_cursor, dgann, src_main_code):
       result.append(range_cursor)
       continue
-    unparsed_range_cursor = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)
+    range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)
+    range_cursor_encoded = d_ast_parse.range_cursor_encode(range_cursor, dgann, src_main_code)
 
     # if we reach here, it means the range cursor is excluded
     # matcher_group is a list of rules that share the same matcher
@@ -1217,10 +1219,10 @@ def _filter_range_cursors(
       # that match the range_cursor
       logger.debug(
         f'Updating unverifiable rules for range cursor: '
-        f'{unparsed_range_cursor}')
+        f'{range_cursor_unparsed}')
       for rule in matcher_group:
         ruleset.update_unverifiable_rules(
-          unparsed_range_cursor,
+          range_cursor_encoded,
           rule
         )
 
@@ -1274,12 +1276,12 @@ async def get_readonly_choices_list(
     Verified or unverifiable rules may already contain rules that can handle
     the choicable_range_cursor. If so, we skip processing it.
     '''
-    choicable_range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(
+    choicable_range_cursor_encoded = d_ast_parse.range_cursor_encode(
       choicable_range_cursor, dgann, src_main_code)
-    if ruleset.verified_rule_exists(choicable_range_cursor_unparsed):
+    if ruleset.verified_rule_exists(choicable_range_cursor_encoded):
       logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by verified rules.')
       continue
-    if ruleset.unverifiable_rules_exist(choicable_range_cursor_unparsed):
+    if ruleset.unverifiable_rules_exist(choicable_range_cursor_encoded):
       logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by unverifiable rules.')
       continue
 
