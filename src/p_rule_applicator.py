@@ -629,9 +629,8 @@ async def _run_tests(
       assert len(error_lines) > 0, 'error lines must be non-empty'
       raise TraceMismatchError(error_lines)
 
-    assert src_trace_size > tar_trace_size, \
-      'NOT SUPPORTED: src_trace must be strictly longer than tar_trace'
-
+    if src_trace_size <= tar_trace_size:
+      logger.warning('src_trace is not longer than tar_trace')
     tar_error_dict = p_code_runner.extract_err_from_stderr_JS(tar_std_error, subject.tar_lang)
     raise TarTestScriptRunError(tar_error_dict)
   else:
