@@ -274,37 +274,37 @@ class Ruleset:
     return [rule for rule in self.rules if isinstance(rule, StatementOverfittedTRule)]
 
   # VERIFIED RULES RELATED
-  def update_verified_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+  def update_verified_rules(self, encoded_ast: str, rule: TRuleBase) -> None:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
     assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
     assert self.get_rule_ref(rule) is not None, \
       'Rule must be in self.rules to be added to verified rules'
 
     '''
-    Check if a verified rule for unparsed_ast already exists.
+    Check if a verified rule for encoded_ast already exists.
     Current policy, if it exists and is different, log a warning and ignore the new rule.
     TODO policy: update only if different ASTs?
     '''
-    if unparsed_ast in self._verified_rules:
-      existing_vrf_rule = self._verified_rules[unparsed_ast]
+    if encoded_ast in self._verified_rules:
+      existing_vrf_rule = self._verified_rules[encoded_ast]
       # the existing verified rule is different from the new one
       if existing_vrf_rule != rule:
-        logger.warning(f'Verified rule for "{unparsed_ast}" was about to be updated.')
+        logger.warning(f'Verified rule for "{encoded_ast}" was about to be updated.')
         logger.warning(f'Old rule: {existing_vrf_rule}')
         logger.warning(f'New rule: {rule}')
         # raise RuntimeError('Verified rule is being changed')
         return
 
-    self._verified_rules[unparsed_ast] = rule
+    self._verified_rules[encoded_ast] = rule
 
-  def get_verified_rule(self, unparsed_ast: str) -> TRuleBase:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
-    assert unparsed_ast in self._verified_rules, f'No verified rule for "{unparsed_ast}"'
-    return self._verified_rules[unparsed_ast]
+  def get_verified_rule(self, encoded_ast: str) -> TRuleBase:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
+    assert encoded_ast in self._verified_rules, f'No verified rule for "{encoded_ast}"'
+    return self._verified_rules[encoded_ast]
 
-  def verified_rule_exists(self, unparsed_ast: str) -> bool:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
-    return unparsed_ast in self._verified_rules
+  def verified_rule_exists(self, encoded_ast: str) -> bool:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
+    return encoded_ast in self._verified_rules
 
   def merge_verified_rules_from(self, ruleset_serialized: dict) -> None:
     '''
@@ -315,46 +315,46 @@ class Ruleset:
     rules that we have.
     '''
     assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
-    for unparsed_ast, serialized_trule in \
+    for encoded_ast, serialized_trule in \
       ruleset_serialized.get('verified_rules', {}).items():
       other_rule = TRuleBase.from_dict(serialized_trule)
       rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
       if rule:
-        self.update_verified_rules(unparsed_ast, rule)
+        self.update_verified_rules(encoded_ast, rule)
       else:
-        logger.warning(f'Ignoring verified rule for "{unparsed_ast}" because it is not in self.rules.')
+        logger.warning(f'Ignoring verified rule for "{encoded_ast}" because it is not in self.rules.')
 
   # UNVERIFIABLE RULES RELATED
-  def update_unverifiable_rules(self, unparsed_ast: str, rule: TRuleBase) -> None:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
+  def update_unverifiable_rules(self, encoded_ast: str, rule: TRuleBase) -> None:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
     assert isinstance(rule, TRuleBase), f'Unexpected type {type(rule)}'
     assert self.get_rule_ref(rule) is not None, \
       'Rule must be in self.rules to be added to unverifiable rules'
-    self._unverifiable_rules.setdefault(unparsed_ast, []).append(rule)
+    self._unverifiable_rules.setdefault(encoded_ast, []).append(rule)
 
-  def get_unverifiable_rules(self, unparsed_ast: str) -> List[TRuleBase]:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
-    assert unparsed_ast in self._unverifiable_rules, f'No unverifiable rules for "{unparsed_ast}"'
-    return self._unverifiable_rules[unparsed_ast]
+  def get_unverifiable_rules(self, encoded_ast: str) -> List[TRuleBase]:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
+    assert encoded_ast in self._unverifiable_rules, f'No unverifiable rules for "{encoded_ast}"'
+    return self._unverifiable_rules[encoded_ast]
 
-  def unverifiable_rules_exist(self, unparsed_ast: str) -> bool:
-    assert isinstance(unparsed_ast, str), f'Unexpected type {type(unparsed_ast)}'
-    return unparsed_ast in self._unverifiable_rules
+  def unverifiable_rules_exist(self, encoded_ast: str) -> bool:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
+    return encoded_ast in self._unverifiable_rules
 
   def merge_unverifiable_rules_from(self, ruleset_serialized: dict) -> None:
     '''
     Check docs for merge_verified_rules_from().
     '''
     assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
-    for unparsed_ast, serialized_trules in \
+    for encoded_ast, serialized_trules in \
       ruleset_serialized.get('unverifiable_rules', {}).items():
       for serialized_trule in serialized_trules:
         other_rule = TRuleBase.from_dict(serialized_trule)
         rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
         if rule:
-          self.update_unverifiable_rules(unparsed_ast, rule)
+          self.update_unverifiable_rules(encoded_ast, rule)
         else:
-          logger.warning(f'Ignoring unverifiable rule for "{unparsed_ast}" because it is not in self.rules.')
+          logger.warning(f'Ignoring unverifiable rule for "{encoded_ast}" because it is not in self.rules.')
 
   # OTHER METHODS
   def get_rule_idx_in_matcher_group(self, rule: TRuleBase) -> int:
@@ -409,9 +409,9 @@ class Ruleset:
       choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
       all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
       for range_cursor in all_range_cursors:
-        range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, code)
-        if range_cursor_unparsed in self._verified_rules:
-          rule = self._verified_rules[range_cursor_unparsed]
+        range_cursor_encoded = d_ast_parse.range_cursor_encode(range_cursor, dgann, code)
+        if range_cursor_encoded in self._verified_rules:
+          rule = self._verified_rules[range_cursor_encoded]
           rule_idx_in_matcher_group = self.get_rule_idx_in_matcher_group(rule)
           choice_identifier = d_ast_parse.range_cursor_to_choice_identifier(range_cursor)
           choices.append((choice_identifier, rule_idx_in_matcher_group))
