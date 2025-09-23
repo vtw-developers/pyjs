@@ -1,0 +1,67 @@
+{
+  "template_id": 3,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "mat[i][j] = mat[i][j - 1] + mat[i - 1][j - 1]",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "subscript",
+  "problematic_node_id": 9,
+  "problematic_node_path": [
+    0,
+    2,
+    0
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.subscript"
+        ],
+        [
+          "py.binary_operator",
+          "py.subscript"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown"
+        ],
+        [
+          "js.binary_expression",
+          "js.subscript_expression"
+        ],
+        [
+          "js.assignment_expression"
+        ],
+        [
+          "js.expression_statement"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "mat[i][j] = pirel_replace_var + pirel_dummy_var;",
+  "src_program": "mat[i][j] = mat[i][j - 1] + mat[i - 1][j - 1]",
+  "tsps": [
+    [
+      "mat[i][j] = id_kyc[id_wbr] + mat[i - 1][j - 1]",
+      "mat[i][j] = id_dni[6164] + mat[i - 1][j - 1]"
+    ],
+    [
+      "mat[i][j] = id_nbph[id_ame][id_qnhz - 914] + mat[i - 1][j - 1]",
+      "mat[i][j] = id_bvgx[id_adb][id_cvpu - id_vmof] + mat[i - 1][j - 1]"
+    ],
+    [
+      "mat[i][j] = id_gtl[id_iwy][id_vbm - 4120] + mat[i - 1][j - 1]",
+      "mat[i][j] = id_svf[id_imdc][id_nay - 8936] + mat[i - 1][j - 1]"
+    ]
+  ]
+}
