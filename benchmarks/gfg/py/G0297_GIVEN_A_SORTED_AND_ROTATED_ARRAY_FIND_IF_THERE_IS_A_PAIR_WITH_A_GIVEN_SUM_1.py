@@ -6,12 +6,13 @@ def test():
     result = f_gold(* parameters_set)
 "-----------------"
 def f_gold(arr, n, x):
-    i = 0
+    k = 0
     for i in range(n):
         if arr[i] > arr[i + 1]:
             break
-    l = (i + 1) % n
-    r = i
+        k = i
+    l = (k + 1) % n
+    r = k
     cnt = 0
     while l != r:
         if arr[l] + arr[r] == x:
