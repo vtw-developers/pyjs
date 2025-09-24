@@ -4,6 +4,7 @@ import math
 import random
 import sys
 from collections.abc import Iterable
+from copy import deepcopy
 from typing import Union
 
 _default_print = print
@@ -45,7 +46,8 @@ def serialize_set(arg: set):
   return ["set", len(arg), serialized_vals]
 
 def serialize_dict(arg: dict):
-  keys = list(arg.keys())
+  argcp = deepcopy(arg)
+  keys = list(argcp.keys())
   # convert int and float keys to strings
   # since JS object keys are always strings
   for key in keys:
@@ -53,15 +55,15 @@ def serialize_dict(arg: dict):
       continue
     if isinstance(key, (int, float)):
       new_key = str(key)
-      arg[new_key] = arg[key]
-      del arg[key]
+      argcp[new_key] = argcp[key]
+      del argcp[key]
       continue
     raise NotImplementedError
   serialized_key_value_pairs = []
-  sorted_keys = sorted(arg.keys())
+  sorted_keys = sorted(argcp.keys())
   for key in sorted_keys:
-    serialized_key_value_pairs.append(serialize([key, arg[key]]))
-  return ["dict", len(arg), serialized_key_value_pairs]
+    serialized_key_value_pairs.append(serialize([key, argcp[key]]))
+  return ["dict", len(argcp), serialized_key_value_pairs]
 
 def serialize(arg):
   if arg is None:
