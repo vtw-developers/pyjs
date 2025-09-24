@@ -381,14 +381,6 @@ def Cosine(param_0):
         ### --- BLOCK END 19
     
     
-    
-    def similarity_profiles(profile0, profile1):
-        ### --- BLOCK BEGIN 20
-        return class_var._dot_product(profile0, profile1) / (class_var._norm(profile0) * class_var._norm(profile1))
-        ### --- BLOCK END 20
-    
-    
-    
     def _dot_product(profile0, profile1):
         ### --- BLOCK BEGIN 21
         small = profile1
@@ -422,7 +414,6 @@ def Cosine(param_0):
     class_var.__init__ = __init__
     class_var.distance = distance
     class_var.similarity = similarity
-    class_var.similarity_profiles = similarity_profiles
     class_var._dot_product = _dot_product
     class_var._norm = _norm
     __init__(param_0)
