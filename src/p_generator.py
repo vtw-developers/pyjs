@@ -98,6 +98,11 @@ def is_force_identifiers_PY(
   irregardless of the alternative node types. For example,
   grammar rule for `call` allows integers as function names.
   We will check such cases and force using identifiers only.
+
+  NOTE be cautious when adding new patterns here, e.g.
+  `if 4394 in 3487:` feels tempting to replace `3487` with an identifier,
+  but if replaced, the rule won't match the original
+  `if arr[i] in Hash.keys():`.
   '''
   def _pattern_1_mapped_node_is_identifier(mapped_node: pds.DuoGlotNode) -> bool:
     if mapped_node.get_ts_node_type() != 'identifier':
