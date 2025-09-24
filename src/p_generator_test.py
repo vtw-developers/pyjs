@@ -91,8 +91,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
       has_int_as_arg_ord_builtin_fn = self._pre_order(root_node, _pattern_6_arg_ord_builtin_fn_is_integer)
       self.assertFalse(has_int_as_arg_ord_builtin_fn, f'Argument of ord() being an integer found in "{snippet}"')
 
+      # Check for str.join() method having an integer as argument
+      has_int_as_arg_str_join = self._pre_order(root_node, _pattern_7_str_join_arg_is_integer)
+      self.assertFalse(has_int_as_arg_str_join, f'Argument of str.join() being an integer found in "{snippet}"')
+
   def test_all_general(self):
-    NUM_TESTS = 64
+    NUM_TESTS = 65
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -286,6 +290,49 @@ def _pattern_6_arg_ord_builtin_fn_is_integer(node: pds.DuoGlotNode) -> bool:
     return False
   # the single non-terminal child must be integer
   arg_node = second_child.get_nt_children()[0]
+  if arg_node.get_ts_node_type() != 'integer':
+    return False
+  return True
+
+
+def _pattern_7_str_join_arg_is_integer(node: pds.DuoGlotNode) -> bool:
+  '''
+  RETURN True if the node is an integer that is used as the argument of str.join() method.
+  For example, `"".join(1234)`
+  '''
+  # using `join` as anchor
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must be identifier
+  if node.get_ts_node_type() != 'identifier':
+    return False
+  # node text must be 'join'
+  if node.children[0].get_type() != 'join':
+    return False
+  # parent must be attribute
+  if node.get_parent() is None:
+    return False
+  parent = node.get_parent()
+  if parent.get_ts_node_type() != 'attribute':
+    return False
+  # grandparent must be call
+  if parent.get_parent() is None:
+    return False
+  grandparent = parent.get_parent()
+  if grandparent.get_ts_node_type() != 'call':
+    return False
+  # second non-terminal child of grandparent must be argument_list
+  if grandparent.get_num_nt_children() < 2:
+    return False
+  second_nt_child = grandparent.get_nt_children()[1]
+  if second_nt_child.get_ts_node_type() != 'argument_list':
+    return False
+  # argument_list must have exactly one non-terminal child
+  if second_nt_child.get_num_nt_children() != 1:
+    return False
+  # the single non-terminal child must be integer
+  arg_node = second_nt_child.get_nt_children()[0]
   if arg_node.get_ts_node_type() != 'integer':
     return False
   return True
