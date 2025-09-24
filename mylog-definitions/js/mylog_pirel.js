@@ -117,12 +117,14 @@ function serialize(arg) {
   return ["unknown", str_result.length, str_result];
 }
 
+let _trace_idx = 0;  // for debugging
 function myexactlog(...args) {
   let info_list = ["MYLOGEX:"];
   for (let i = 0; i < args.length; i++) {
     info_list.push(serialize(args[i]));
   }
   _default_console_log(JSON.stringify(info_list));
+  _trace_idx += 1
 }
 
 function mylog(...args) {
