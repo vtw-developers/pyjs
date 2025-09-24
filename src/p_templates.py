@@ -253,9 +253,16 @@ def _validate_template(
     error = 'template origin has a parse error when parsed as it is'
   elif len(reference_template_tree.get_root_node().get_children()) > 1:
     error = 'template origin root node contains multiple children nodes'
-  elif not context_node.is_type_isomorphic_to(reference_template_tree.get_root_node().get_children()[0]):
-    error = 'template origin is not type-isomorphic to the context node'
-    template_origin_node_type = reference_template_tree.get_root_node().get_children()[0].get_type()
+  else:
+    reference_template_root_node = reference_template_tree.get_root_node()
+    assert len(reference_template_root_node.get_children()) == 1
+    reference_template_trunk_node = \
+      reference_template_root_node.get_children()[0]
+    if not any(context_node.is_type_isomorphic_to(node)
+               for node in (reference_template_root_node,
+                            reference_template_trunk_node)):
+      error = 'template origin is not type-isomorphic to the context node'
+      template_origin_node_type = reference_template_trunk_node.get_type()
 
   # template is good
   if error is None:
