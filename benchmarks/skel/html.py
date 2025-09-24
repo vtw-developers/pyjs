@@ -559,16 +559,6 @@ def ParserBase():
             )
         ### --- BLOCK END 16
     
-    
-    
-    # To be overridden -- handlers for unknown objects
-    def unknown_decl(data):
-        ### --- BLOCK BEGIN 17
-        pass
-        ### --- BLOCK END 17
-    
-    
-    
     class_var = type('ParserBase', (), {'_class_name': 'ParserBase'})()
     class_var.__init__ = __init__
     class_var.getpos = getpos
@@ -582,7 +572,6 @@ def ParserBase():
     class_var._parse_doctype_notation = _parse_doctype_notation
     class_var._parse_doctype_entity = _parse_doctype_entity
     class_var._scan_name = _scan_name
-    class_var.unknown_decl = unknown_decl
     __init__()
     return class_var
 
