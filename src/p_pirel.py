@@ -235,7 +235,7 @@ async def _get_not_implemented_id(module: str,
     return None
   lines = stderr.splitlines()
   assert proc.returncode == 1
-  assert lines and lines[-1].startswith('NotImplementedError: PiREL: '), breakpoint()
+  assert lines and lines[-1].startswith('NotImplementedError: PiREL: ')
   if any(line.startswith(f'  File "<string>", line {n+2}, in ')
          for n in node_lines for line in lines):
     return int(lines[-1].removeprefix('NotImplementedError: PiREL: '))
@@ -295,7 +295,8 @@ async def _get_statement_nodes_eot(
     if _can_be_context_node(node, lang):
       if node.get_ts_node_type() == 'function_definition':
         continue
-      nodes.append(node)
+      if node not in nodes:
+        nodes.append(node)
       cmt = f'  # PiREL: {node.get_id()}'
       node_text = node.get_text() + '\n'
       assert not node_text.endswith('\n\n')
@@ -303,12 +304,15 @@ async def _get_statement_nodes_eot(
       src_with_cmt = src_program.replace(node_text, commented_text)
       lines = [i for i, line in enumerate(src_with_cmt.splitlines(), start=1)
                if cmt in line]
-      fn_id = await _get_not_implemented_id(src_with_cmt, lines)
+      fn_id = await _get_not_implemented_id(src_program, lines)
       if fn_id is not None:  # switch context
         fn_node, before, after = restore.pop(fn_id)  # once per function
         src_program = src_program.replace(after, before)
         stack.extend(reversed(fn_node.get_children()))
+        if await _get_not_implemented_id(src_program, lines) is not None:
+          stack.append(node)
     stack.extend(reversed(node.get_children()))
+  assert not restore, 'not all functions have been executed'
   return nodes
 
 
