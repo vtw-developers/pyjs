@@ -517,13 +517,6 @@ def RedBlackTree(param_0, param_1, param_2, param_3, param_4):
     
     
     
-    def __bool__():
-        ### --- BLOCK BEGIN 21
-        return True
-        ### --- BLOCK END 21
-    
-    
-    
     def __len__():
         """
             Return the number of nodes in this tree.
@@ -606,7 +599,6 @@ def RedBlackTree(param_0, param_1, param_2, param_3, param_4):
     class_var.sibling = sibling
     class_var.is_left = is_left
     class_var.is_right = is_right
-    class_var.__bool__ = __bool__
     class_var.__len__ = __len__
     class_var.preorder_traverse = preorder_traverse
     class_var.inorder_traverse = inorder_traverse
