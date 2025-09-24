@@ -223,8 +223,87 @@ def _can_be_context_node(
   return True
 
 
-async def _get_not_implemented_id(module: str,
-                                  node_lines: list[int]) -> int | None:
+def _replace_ancentral_text(
+  restore: dict[int, tuple[pds.NTTextNode, str, str]],
+  node: pds.NTTextNode,
+  old: str,
+  new: str,
+  src_program: str,
+) -> str:
+  '''
+  Subsititute old substring with new in the source program
+  and restoration snippets.
+  '''
+  while node.has_parent():
+    node = node.get_parent()
+    if node.get_ts_node_type() != 'function_definition':
+      continue
+    fn_id = node.get_id()
+    if fn_id in restore:
+      fn_node, before, after = restore.pop(fn_id)
+      assert fn_node is node and old in before and old in after
+      new_after = after.replace(old, new)
+      restore[fn_id] = fn_node, before.replace(old, new), new_after
+      old, new = after, new_after
+  assert old in src_program
+  return src_program.replace(old, new)
+
+
+def _instrument_with_not_implemented(
+  src_program: str,
+  top_level_nodes: list[pds.PirelNode],
+) -> tuple[str, dict[int, tuple[pds.NTTextNode, str, str]]]:
+  '''Make all functions raise NotImplementedError with their node ID.'''
+  restore = {}
+  stack = top_level_nodes[:]
+  while stack:
+    node = stack.pop()
+    if node.is_terminal():
+      continue
+    children = node.get_children()
+    stack.extend(children)
+    if node.get_ts_node_type() != 'function_definition':
+      continue
+    node_id = node.get_id()
+    exc_text = f'raise NotImplementedError("PiREL: {node_id}")'
+    fn_text = node.get_text()
+    fn_body = children[-1]
+    assert fn_body.get_ts_node_type() == 'block'
+    fn_body_text = fn_body.get_text().strip()
+    rest, frags = fn_body_text, []
+    for child in fn_body.get_children():
+      child_text = child.get_text().strip()
+      i = rest.index(child_text)
+      if i > 0:
+        frags.append(rest[:i])
+      if (child.is_terminal()
+          or child.get_ts_node_type() == 'function_definition'):
+        frags.append(child_text)
+      else:
+        for frag in reversed(frags):
+          if not frag.strip():  # whitespace
+            continue
+          if frag == exc_text:
+            assert not frags[-1].strip()
+            frags.pop()
+            break
+        else:
+          frags.append(exc_text)
+      rest = rest[i+len(child_text):]
+    frags.append(rest)
+    fn_not_implemented_text = fn_text.replace(fn_body_text, ''.join(frags))
+    restore[node_id] = node, fn_text, fn_not_implemented_text
+    src_program = _replace_ancentral_text(restore, node, fn_text,
+                                          fn_not_implemented_text, src_program)
+  return src_program, restore
+
+
+async def _get_not_implemented_id(module: str, node_text: str,
+                                  node_id: int) -> int | None:
+  '''
+  Run the module and return the node ID of the function
+  called by the given node if it raises a NotImplementedError.
+  '''
   workdir = fspath(p_consts.BENCHMARK_CONFIGS['skel']['benchmark_dir'])  # FIXME
   module = f'from os import chdir\nchdir({workdir!r})\n{module}'
   proc = await asyncio.create_subprocess_exec(executable, '-c', module,
@@ -233,10 +312,16 @@ async def _get_not_implemented_id(module: str,
   await proc.wait()
   if proc.returncode == 0:
     return None
-  lines = stderr.splitlines()
   assert proc.returncode == 1
+
+  comment = f'  # PiREL: {node_id}'
+  commented_text = node_text.replace('\n', comment+'\n')
+  loc_with_comment = module.replace(node_text, commented_text).splitlines()
+  node_lines = [i for i, line in enumerate(loc_with_comment, start=1)
+                if comment in line]
+  lines = stderr.splitlines()
   assert lines and lines[-1].startswith('NotImplementedError: PiREL: ')
-  if any(line.startswith(f'  File "<string>", line {n+2}, in ')
+  if any(line.startswith(f'  File "<string>", line {n}, in ')
          for n in node_lines for line in lines):
     return int(lines[-1].removeprefix('NotImplementedError: PiREL: '))
   return None  # call happens after given lines
@@ -248,48 +333,9 @@ async def _get_statement_nodes_eot(
   top_level_nodes: list[pds.PirelNode],
 ) -> list[pds.PirelNode]:
   '''Return a list of statement nodes for execution-order transaltion.'''
-  restore = {}
-  stack = [*top_level_nodes]
-  while stack:
-    node = stack.pop()
-    if node.is_terminal():
-      continue
-    children = node.get_children()
-    stack.extend(children)
-    if node.get_ts_node_type() == 'function_definition':
-      node_id = node.get_id()
-      exc_text = f'raise NotImplementedError("PiREL: {node_id}")'
-      fn_text = node.get_text()
-      fn_body = children[-1]
-      assert fn_body.get_ts_node_type() == 'block'
-      fn_body_text = fn_body.get_text().strip()
-      rest, frags = fn_body_text, []
-      for child in fn_body.get_children():
-        child_text = child.get_text().strip()
-        i = rest.index(child_text)
-        if i > 0:
-          frags.append(rest[:i])
-        if (child.is_nonterminal()
-            and child.get_ts_node_type() != 'function_definition'):
-          frags.append(exc_text)
-        else:
-          frags.append(child_text)
-        rest = rest[i+len(child_text):]
-      frags.append(rest)
-      fn_not_implemented_text = fn_text.replace(fn_body_text, ''.join(frags))
-      restore[node_id] = node, fn_text, fn_not_implemented_text
-      src_program = src_program.replace(fn_text, fn_not_implemented_text)
-      while node.has_parent():
-        node = node.get_parent()
-        node_id = node.get_id()
-        if node_id in restore:
-          _, before, after = restore[node_id]
-          before = before.replace(fn_text, fn_not_implemented_text)
-          after = after.replace(fn_text, fn_not_implemented_text)
-          restore[node_id] = node, before, after
-
-  nodes = []
-  stack.extend(reversed(top_level_nodes))
+  src_program, restore = _instrument_with_not_implemented(src_program,
+                                                          top_level_nodes)
+  nodes, stack = [], [*reversed(top_level_nodes)]
   while stack:
     node = stack.pop()
     if _can_be_context_node(node, lang):
@@ -297,20 +343,18 @@ async def _get_statement_nodes_eot(
         continue
       if node not in nodes:
         nodes.append(node)
-      cmt = f'  # PiREL: {node.get_id()}'
-      node_text = node.get_text() + '\n'
-      assert not node_text.endswith('\n\n')
-      commented_text = node_text.replace('\n', cmt+'\n')
-      src_with_cmt = src_program.replace(node_text, commented_text)
-      lines = [i for i, line in enumerate(src_with_cmt.splitlines(), start=1)
-               if cmt in line]
-      fn_id = await _get_not_implemented_id(src_program, lines)
-      if fn_id is not None:  # switch context
-        fn_node, before, after = restore.pop(fn_id)  # once per function
-        src_program = src_program.replace(after, before)
-        stack.extend(reversed(fn_node.get_children()))
-        if await _get_not_implemented_id(src_program, lines) is not None:
-          stack.append(node)
+      node_text, node_id = node.get_text()+'\n', node.get_id()
+      fn_id = await _get_not_implemented_id(src_program, node_text, node_id)
+      if fn_id is None:
+        continue
+      # switch context
+      fn_node, before, after = restore.pop(fn_id)  # once per function
+      assert after in src_program
+      src_program = src_program.replace(after, before)
+      stack.extend(reversed(fn_node.get_children()))
+      if await _get_not_implemented_id(src_program, node_text,
+                                       node_id) is not None:
+        stack.append(node)  # execute again after the discovered function
     stack.extend(reversed(node.get_children()))
   assert not restore, 'not all functions have been executed'
   return nodes
