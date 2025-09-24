@@ -87,16 +87,16 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
       has_int_rhs_for_in_clause = self._pre_order(root_node, _pattern_5_rhs_for_in_clause_is_integer)
       self.assertFalse(has_int_rhs_for_in_clause, f'RHS of for_in_clause being an integer found in "{snippet}"')
 
-      # Check for ord() builtin function having an integer as argument
-      has_int_as_arg_ord_builtin_fn = self._pre_order(root_node, _pattern_6_arg_ord_builtin_fn_is_integer)
-      self.assertFalse(has_int_as_arg_ord_builtin_fn, f'Argument of ord() being an integer found in "{snippet}"')
+      # Check for functions with single argument being an integer
+      has_int_as_single_arg_fn = self._pre_order(root_node, _pattern_6_single_arg_fn_is_integer, template_dict['src_lang'])
+      self.assertFalse(has_int_as_single_arg_fn, f'Argument of single-argument function being an integer found in "{snippet}"')
 
       # Check for str.join() method having an integer as argument
       has_int_as_arg_str_join = self._pre_order(root_node, _pattern_7_str_join_arg_is_integer)
       self.assertFalse(has_int_as_arg_str_join, f'Argument of str.join() being an integer found in "{snippet}"')
 
   def test_all_general(self):
-    NUM_TESTS = 65
+    NUM_TESTS = 66
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -262,11 +262,12 @@ def _pattern_5_rhs_for_in_clause_is_integer(node: pds.DuoGlotNode) -> bool:
   return node.get_ts_node_type() == 'integer'
 
 
-def _pattern_6_arg_ord_builtin_fn_is_integer(node: pds.DuoGlotNode) -> bool:
+def _pattern_6_single_arg_fn_is_integer(node: pds.DuoGlotNode, src_lang: str) -> bool:
   '''
-  RETURN True if the node is an integer that is used as the argument of ord() builtin function.
-  For example, `ord(1234)`
+  RETURN True if the node is an integer that is used as the only
+  argument for some functions. For example, `ord(1234)`, `len(5678)`.
   '''
+  # anchor on call node
   # node must be non-terminal
   if node.is_terminal():
     return False
@@ -277,9 +278,9 @@ def _pattern_6_arg_ord_builtin_fn_is_integer(node: pds.DuoGlotNode) -> bool:
   first_child = node.get_children()[0]
   if first_child.get_ts_node_type() != 'identifier':
     return False
-  # function name must be ord
+  # function name must be one of
   fn_name = first_child.get_children()[0].node_type
-  if fn_name != 'ord':
+  if fn_name not in p_consts.FN_NAMES_FORCE_SINGLE_ARG_TO_IDENTIFIER[src_lang]:
     return False
   # second child must be argument_list
   second_child = node.get_children()[1]
