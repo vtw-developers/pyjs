@@ -83,11 +83,14 @@ def serialize(arg):
   str_result = str(arg)
   return ["unknown", len(str_result), str_result]
 
+_trace_idx = 0  # for debugging
 def myexactlog(*args):
+  global _trace_idx
   info_list = ["MYLOGEX:"]
   for arg in args:
     info_list.append(serialize(arg))
   _default_print(json.dumps(info_list))
+  _trace_idx += 1
 
 def mylog(*args):
   myexactlog(*args)
