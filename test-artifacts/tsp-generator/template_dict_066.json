@@ -1,0 +1,66 @@
+{
+  "template_id": 3,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "for j in range(0, len(m[i])):\n    pass",
+  "context_node_type": "for_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "call",
+  "problematic_node_id": 7,
+  "problematic_node_path": [
+    3,
+    1,
+    3
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.call",
+          "py.integer"
+        ],
+        [
+          "py.argument_list",
+          "py.identifier"
+        ],
+        [
+          "py.call",
+          "py.identifier"
+        ],
+        [
+          "py.for_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.binary_expression"
+        ],
+        [
+          "js.expression_statement",
+          "js.lexical_declaration"
+        ],
+        [
+          "js.for_statement"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "for (let j = 0; j < pirel_replace_var; j++) {}",
+  "src_program": "for j in range(0, len(m[i])):\n    pass",
+  "tsps": [
+    [
+      "for j in range(0, len(id_znb)):\n    pass",
+      "for j in range(0, len(4208)):\n    pass"
+    ],
+    [
+      "for j in range(0, len(id_wkj[id_mnp])):\n    pass",
+      "for j in range(0, len(id_wln[id_axq])):\n    pass"
+    ]
+  ]
+}

@@ -134,6 +134,14 @@ BASIC_NODE_TYPES = {
 # if the `mapped_node` is of type `identifier`.
 IS_FORCE_IDENTIFIERS = True
 
+# Built-in functions, when invoked with a single argument,
+# are forced to have that argument as an identifier.
+FN_NAMES_FORCE_SINGLE_ARG_TO_IDENTIFIER = {
+  'py': [
+    'int', 'sorted', 'len', 'ord', 'list', 'sum'
+  ]
+}
+
 NON_DESCENDABLE_NODES = {
   'py': ['string']
 }
@@ -142,7 +150,7 @@ FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST = {
   'py': [
     'abs', 'all', 'any', 'chr', 'divmod', 'enumerate', 'float', 'len',
     'min', 'max','ord', 'pow', 'range', 'reversed', 'round', 'sorted', 'sum'
-    ]
+  ]
 }
 
 REMOVE_FROM_FUZZ_NODE_GROUPS_NODE_TYPES = {

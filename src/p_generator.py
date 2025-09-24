@@ -159,7 +159,7 @@ def is_force_identifiers_PY(
       f'"{mapped_node.children[0].node_type}"')
     return True
 
-  def _pattern_5_arg_ord_builtin_fn(mapped_node: pds.DuoGlotNode) -> bool:
+  def _pattern_5_fn_single_arg(mapped_node: pds.DuoGlotNode) -> bool:
     '''
     Exclude cases such as `ord(123)`
                                ^^^
@@ -177,7 +177,7 @@ def is_force_identifiers_PY(
       return False
     # function name is `ord`
     fnname = prevs.children[0].node_type
-    if fnname != 'ord':
+    if fnname not in p_consts.FN_NAMES_FORCE_SINGLE_ARG_TO_IDENTIFIER['py']:
       return False
     logger.debug(
       f'Forcing identifiers: mapped_node is an argument of a builtin function `ord`'
@@ -218,7 +218,7 @@ def is_force_identifiers_PY(
     lambda: _pattern_2_call_attribute(mapped_node),
     lambda: _pattern_3_int_as_value_of_subscript(mapped_node),
     lambda: _pattern_4_rhs_for_in_clause(mapped_node),
-    lambda: _pattern_5_arg_ord_builtin_fn(mapped_node),
+    lambda: _pattern_5_fn_single_arg(mapped_node),
     lambda: _pattern_6_arg_str_join(mapped_node),
   ]
 
