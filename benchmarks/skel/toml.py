@@ -7,18 +7,8 @@
 # SPDX-FileCopyrightText: 2019 Filippo Broggini
 # SPDX-License-Identifier: MIT
 
-import copy
 import datetime
-import datetime
-import io
 import re
-import re
-import sys
-import sys
-from collections import OrderedDict
-from datetime import tzinfo, timedelta
-from decimal import Decimal
-from os import linesep
 
 
 def user_check_type(obj, _type):
@@ -1422,12 +1412,12 @@ def TomlTz(param_0):
     
     def utcoffset(dt):
         ### --- BLOCK BEGIN 71
-        return class_var._sign * timedelta(hours=class_var._hours, minutes=class_var._minutes)
+        return class_var._sign * datetime.timedelta(hours=class_var._hours, minutes=class_var._minutes)
         ### --- BLOCK END 71
     
     
     
-    class_var = SkelClass('TomlTz', tzinfo)
+    class_var = SkelClass('TomlTz', datetime.tzinfo)
     class_var.__init__ = __init__
     class_var.utcoffset = utcoffset
     __init__(param_0)

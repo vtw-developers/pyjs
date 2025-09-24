@@ -11,8 +11,6 @@ To run an example:
 python binary_search_tree_recursive.py
 """
 
-from collections.abc import Iterator
-
 
 def Node(param_0, param_1):
     def __init__(label, parent):
