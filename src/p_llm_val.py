@@ -353,6 +353,14 @@ def _tp1_cand_gather_stats(
   # actually remove comments from tp1_cand after checking for parse errors
   tp1_cand = pvjs.CommentsRemover.remove_comments(tp1_cand).strip()
   return_dict['tp1_cand'] = tp1_cand
+  # remove_comments() may introduce parse errors, e.g.
+  # `var retval_2 = 4325 .__lshift__(id_xowp);`  // good
+  # `var retval_2 = 4325.__lshift__(id_xowp);`  // bad
+  if p_utils.does_have_parse_error(tp1_cand, tar_lang):
+    logger.debug(f'BAD: TP1 candidate has a parse error')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = True
+    return return_dict
 
   # criteria 2
   # the TP1 candidate should not be a comment-only string
@@ -493,6 +501,14 @@ def _tp2_cand_gather_stats(
   # actually remove comments from tp2_cand after checking for parse errors
   tp2_cand = pvjs.CommentsRemover.remove_comments(tp2_cand).strip()
   return_dict['tp2_cand'] = tp2_cand
+  # remove_comments() may introduce parse errors, e.g.
+  # `var retval_2 = 4325 .__lshift__(id_xowp);`  // good
+  # `var retval_2 = 4325.__lshift__(id_xowp);`  // bad
+  if p_utils.does_have_parse_error(tp2_cand, tar_lang):
+    logger.debug(f'BAD: TP2 candidate has a parse error')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = True
+    return return_dict
 
   # criteria 2
   # the TP2 candidate should not be a comment-only string
@@ -806,6 +822,14 @@ def _get_ref_trans_cand_gather_stats(
   # actually remove comments from ref_trans_cand after checking for parse errors
   ref_trans_cand = pvjs.CommentsRemover.remove_comments(ref_trans_cand).strip()
   return_dict['ref_trans_cand'] = ref_trans_cand
+  # remove_comments() may introduce parse errors, e.g.
+  # `var retval_2 = 4325 .__lshift__(id_xowp);`  // good
+  # `var retval_2 = 4325.__lshift__(id_xowp);`  // bad
+  if p_utils.does_have_parse_error(ref_trans_cand, tar_lang):
+    logger.debug(f'BAD: generated reference translation candidate has a parse error')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = True
+    return return_dict
 
   # criteria 2
   # the reference translation should not be a comment-only string
