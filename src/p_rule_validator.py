@@ -384,7 +384,8 @@ async def check_trules_test_based(
     val_subject.get_src_main_code(),
     val_subject.get_src_test_code(),
     val_subject.translation_rules_test_code,
-    current_ruleset
+    current_ruleset,
+    val_subject.name
   )
   val_subject.readonly_choices_list = readonly_choices_list
   logger.debug('~~ Saved readonly choices list')
