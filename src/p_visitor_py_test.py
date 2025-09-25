@@ -5973,19 +5973,29 @@ class TestFunctionInvocationReplacer(unittest.TestCase):
     self.maxDiff = None
 
   def get_snippets(self, snippet_id: str) -> Tuple[str, str]:
-    snippet = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_in.py')
-    gold = p_utils.read_text(self.fixtures_dir_path / f'snippet_{snippet_id}_out.py')
+    snippet = p_utils.read_text(self.fixtures_dir_path / f'{snippet_id}_in.py')
+    gold = p_utils.read_text(self.fixtures_dir_path / f'{snippet_id}_out.py')
     return snippet, gold
 
-  def test_001(self):
-    snippet, gold_snippet = self.get_snippets('001')
-    replaced = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
-    self.assertEqual(replaced, gold_snippet)
+  def test_all_int(self):
+    NUM_TESTS = 47
+    for i in range(1, NUM_TESTS + 1):
+      snippet_id = f'int88888888_{i:03d}'
+      with self.subTest(snippet_id=snippet_id):
+        snippet, gold_snippet = self.get_snippets(snippet_id)
+        replaced, replacement_done = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold', 'f_gold', 88888888)
+        self.assertTrue(replacement_done)
+        self.assertEqual(replaced, gold_snippet)
 
-  def test_002(self):
-    snippet, gold_snippet = self.get_snippets('002')
-    replaced = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold')
-    self.assertEqual(replaced, gold_snippet)
+  def test_all_true(self):
+    NUM_TESTS = 47
+    for i in range(1, NUM_TESTS + 1):
+      snippet_id = f'true_{i:03d}'
+      with self.subTest(snippet_id=snippet_id):
+        snippet, gold_snippet = self.get_snippets(snippet_id)
+        replaced, replacement_done = pvpy.FunctionInvocationReplacer.replace_function_invocations(snippet, 'f_gold', 'f_gold', True)
+        self.assertTrue(replacement_done)
+        self.assertEqual(replaced, gold_snippet)
 
 
 class TestTreeGetNidNodeMap(unittest.TestCase):

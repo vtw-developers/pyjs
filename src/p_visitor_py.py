@@ -2652,65 +2652,119 @@ class DefinedFunctionNameExtractor(pvis.Visitor):
 
 class FunctionInvocationReplacer(pvis.Visitor):
   '''
-  Replace a list of given function invocations with `secret_fun_4071()`
-  For example, if the following script:
+  Replace function invocations with literal values to prevent
+  recursion or type errors. This visitor is used in rule applicator.
+  For example, the following code:
   ```
   def f_gold(a, b):
       if a > b:
           return f_gold(a - 1, b)
-      return 0
   ```
   can be replaced with:
   ```
   def f_gold(a, b):
       if a > b:
-          return secret_fun_4071()
-      return 0
+          return 1
   ```
-  This visitor is used in rule validation.
   '''
-  def __init__(self, function_names: List[str]):
+  def __init__(self, defined_fn: str, invoked_fn: str, lit_value: Union[int, bool]):
     super().__init__()
-    self.function_names = function_names
+    assert isinstance(lit_value, (int, bool)), 'lit_value must be an int or a bool'
+    self.defined_fn = defined_fn
+    self.invoked_fn = invoked_fn
+    self.lit_value = lit_value
+    self.replacement_done = False
 
   # VISIT METHODS
   def visit_CallNode(self, node: CallNode) -> None:
-    '''
-    If there is a list of nested calls, consider the outermost one.
-    '''
-    fn_name_id = node.function
-
     # function name must be an IdentifierNode (i.e. not a method call)
-    if not isinstance(fn_name_id, IdentifierNode):
+    if not isinstance(node.function, IdentifierNode):
+      self.default_visit(node)  # might be nested inside another call
       return
 
-    # function name must be in the list of function names
-    if fn_name_id.val() not in self.function_names:
+    # function name must be self.invoked_fn
+    if node.function.val() != self.invoked_fn:
+      self.default_visit(node)  # might be nested inside another call
       return
 
-    # replace the function name with `secret_fun_4071()`
-    secret_fn_name = IdentifierNode.build(p_consts.GENERIC_SECRET_FN)
-    secret_fn_args = ArgumentListNode.build([])  # no arguments
-    node.function = secret_fn_name
-    node.arguments = secret_fn_args
-    node.children = [secret_fn_name, secret_fn_args]
-    secret_fn_name.set_parent(node)
-    secret_fn_args.set_parent(node)
+    # replace the function name with a literal value
+    if type(self.lit_value) is int:
+      lit_node = IntegerNode.build(self.lit_value)
+    elif type(self.lit_value) is bool:
+      lit_node = TrueNode.build() if self.lit_value else FalseNode.build()
+    else:
+      raise ValueError('lit_value must be an int or a bool')
+
+    parent = node.get_parent()
+    assert parent is not None, 'parent must not be None'
+    idx = parent.children.index(node)
+    parent.children[idx] = lit_node
+    lit_node.set_parent(parent)
+
+    # detach the old node for PrettyPrinter to work correctly
+    if isinstance(node.parent, (ReturnStatementNode, ExpressionStatementNode,
+                                ArgumentListNode, ListNode)):
+      node.set_parent(None)
+    elif isinstance(node.parent, AssignmentNode):
+      node.parent.right = lit_node
+      node.set_parent(None)
+    elif isinstance(node.parent, BinaryOperatorNode):
+      if node.parent.left is node:
+        node.parent.left = lit_node
+      elif node.parent.right is node:
+        node.parent.right = lit_node
+      else:
+        raise ValueError('node must be a child of its parent')
+      node.set_parent(None)
+    elif isinstance(node.parent, BooleanOperatorNode):
+      if node.parent.left is node:
+        node.parent.left = lit_node
+      elif node.parent.right is node:
+        node.parent.right = lit_node
+      else:
+        raise ValueError('node must be a child of its parent')
+      node.set_parent(None)
+    elif isinstance(node.parent, UnaryOperatorNode):
+      if node.parent.argument is node:
+        node.parent.argument = lit_node
+      else:
+        raise ValueError('node must be a child of its parent')
+      node.set_parent(None)
+    else:
+      raise NotImplementedError(f'node.parent is {node.parent.__class__.__name__}')
+
+    self.replacement_done = True
+
+  def visit_FunctionDefinitionNode(self, node: FunctionDefinitionNode) -> None:
+    '''
+    Visit only the function definition with the name `self.defined_fn`.
+    '''
+    assert isinstance(node.name, IdentifierNode), 'function name must be an IdentifierNode'
+    if node.name.val() != self.defined_fn:
+      return
+    for child in node.children:
+      self.visit(child)
 
   @classmethod
-  def replace_function_invocations(cls, snippet: str, function_names: List[str]) -> str:
+  def replace_function_invocations(
+    cls,
+    code: str,
+    defined_fn: str,
+    invoked_fn: str,
+    lit_value: Union[int, bool]
+  ) -> str:
     '''
-    Replace function invocations in the given snippet with `secret_fun_4071()`.
+    Replace function invocations in the given snippet with literal values.
     The snippet is expected to be a body of a Python script.
     '''
     src_parser = p_consts.PARSER_DICT['py']
-    ts_tree = src_parser.parse(bytes(snippet, 'utf-8'))
+    ts_tree = src_parser.parse(bytes(code, 'utf-8'))
     tree = Tree.from_ts_tree(ts_tree)
-    replacer = cls(function_names)
+    replacer = cls(defined_fn, invoked_fn, lit_value)
     replacer.visit(tree.root_node)
     pretty_printer = PrettyPrinter(indent_with='    ')
     code = pretty_printer.visit(tree.root_node)
-    return code.strip()
+    return code.strip(), replacer.replacement_done
 
 
 class ChoicableNodeExtractor(pvis.Visitor):

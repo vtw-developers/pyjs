@@ -751,14 +751,6 @@ def _create_src_program_for_stat_val(
     return snv_src_main_code
 
   '''
-  Replace possible recursive calls with a dummy function
-  to avoid infinite recursion or type errors,
-  e.g. `def f_gold(r, l, arr, x):` and invocation `f_gold(arr, l, mid - 1, x)`
-  '''
-  # defined_fns = pvpy.DefinedFunctionNameExtractor.get_defined_function_names(snv_src_main_code)
-  # snv_src_main_code = pvpy.FunctionInvocationReplacer.replace_function_invocations(snv_src_main_code, defined_fns)
-
-  '''
   Test call code is a simple hard-coded `test()` string
   '''
   snv_test_call_code = 'test()'
