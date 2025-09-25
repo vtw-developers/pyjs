@@ -233,11 +233,9 @@ def _run_benchmark_init() -> Tuple[str, ptlog.Benchmark, List[p_subject.PirelSub
       if Config.is_three_split:
         src_test_code, src_main_code, src_test_call_code = src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
         src_main_code = p_utils.remove_comments_and_docstrings_py(src_main_code)
-        src_main_code = p_utils.remove_empty_lines(src_main_code)
         src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code, src_main_code, src_test_call_code])
       else:
         src_program = p_utils.remove_comments_and_docstrings_py(src_program)
-        src_program = p_utils.remove_empty_lines(src_program)
 
       if Config.benchmark_name == 'gfg':
         subject_name = subject_fpath.stem[:5]
