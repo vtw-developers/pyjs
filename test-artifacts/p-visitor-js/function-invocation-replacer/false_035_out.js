@@ -1,0 +1,12 @@
+function f_gold(arr, l, r, x) {
+    if (r < l) {
+        return -1;
+    }
+    if (arr[l] === x) {
+        return l;
+    }
+    if (arr[r] === x) {
+        return r;
+    }
+    return false;
+}

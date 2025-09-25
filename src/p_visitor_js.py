@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import jsbeautifier
 import tree_sitter
-from typing import Dict
+from typing import Dict, Union
 
 import p_consts
 import p_utils
@@ -642,6 +642,93 @@ class CommentsRemover(pvis.Visitor):
     pp = PrettyPrinter()
     code = pp.visit(tree.root_node)
     return code
+
+
+class FunctionInvocationReplacer(pvis.Visitor):
+  '''
+  Replace function invocations with literal values to prevent
+  recursion or type errors. This visitor is used in rule applicator.
+  For example, the following code:
+  ```
+  function foo(a) {
+      if (a == 0) return foo(a - 1);
+  }
+  ```
+  can be replaced with:
+  ```
+  function foo(a) {
+      if (a == 0) return 1;
+  }
+  ```
+  '''
+  def __init__(self, defined_fn: str, invoked_fn: str, lit_value: Union[int, bool]):
+    super().__init__()
+    assert isinstance(lit_value, (int, bool)), 'lit_value must be an int or a bool'
+    self.defined_fn = defined_fn
+    self.invoked_fn = invoked_fn
+    self.lit_value = lit_value
+    self.replacement_done = False
+
+  # VISIT METHODS
+  def visit_CallExpressionNode(self, node: CallExpressionNode) -> None:
+    # function name must be an IdentifierNode (i.e. not a method call)
+    fn_name_id = node.children[0]
+    if not isinstance(fn_name_id, IdentifierNode):
+      self.default_visit(node)  # might be nested inside another call
+      return
+
+    # function name must be self.invoked_fn
+    if fn_name_id.val() != self.invoked_fn:
+      self.default_visit(node)  # might be nested inside another call
+      return
+
+    # replace the function name with a literal value
+    if type(self.lit_value) is int:
+      lit_node = NumberNode.build(self.lit_value)
+    elif type(self.lit_value) is bool:
+      lit_node = TrueNode.build() if self.lit_value else FalseNode.build()
+    else:
+      raise ValueError('lit_value must be an int or a bool')
+
+    parent = node.get_parent()
+    assert parent is not None, 'parent must not be None'
+    idx = parent.children.index(node)
+    parent.children[idx] = lit_node
+    lit_node.set_parent(parent)
+    node.set_parent(None)
+
+    self.replacement_done = True
+
+  def visit_FunctionDeclarationNode(self, node: FunctionDeclarationNode) -> None:
+    '''
+    Visit only the function declaration with the name `self.defined_fn`.
+    '''
+    assert isinstance(node.name, IdentifierNode), 'function name must be an IdentifierNode'
+    if node.name.val() != self.defined_fn:
+      return
+    for child in node.children:
+      self.visit(child)
+
+  @classmethod
+  def replace_function_invocations(
+    cls,
+    code: str,
+    defined_fn: str,
+    invoked_fn: str,
+    lit_value: Union[int, bool]
+  ) -> str:
+    '''
+    Replace function invocations in the given snippet with literal values.
+    The snippet is expected to be a body of a JavaScript code.
+    '''
+    src_parser = p_consts.PARSER_DICT['js']
+    ts_tree = src_parser.parse(bytes(code, 'utf-8'))
+    tree = Tree.from_ts_tree(ts_tree)
+    replacer = cls(defined_fn, invoked_fn, lit_value)
+    replacer.visit(tree.root_node)
+    pretty_printer = PrettyPrinter()
+    code = pretty_printer.visit(tree.root_node)
+    return code.strip(), replacer.replacement_done
 
 
 # TEST HARNESSES
