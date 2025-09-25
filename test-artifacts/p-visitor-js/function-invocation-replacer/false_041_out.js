@@ -1,0 +1,14 @@
+function f_gold(arr, l, h) {
+    if (l >= h) return;
+    if (arr[l] > arr[h]) {
+        let t = arr[l];
+        arr[l] = arr[h];
+        arr[h] = t;
+    }
+    if (h - l + 1 > 2) {
+        let t = Math.floor((h - l + 1) / 3);
+        false;
+        false;
+        false;
+    }
+}
