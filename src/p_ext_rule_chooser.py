@@ -1521,11 +1521,23 @@ def get_next_unique_choices(
   Updated and fixed version. Exhaustively checks all possible choices.
   '''
 
+  # uncomment when using test harness
+  # rel_alt_step_infos = {
+  #   k: {
+  #     'next_choices_count': v['next_choices_count'],
+  #     'current_choose_idx': v['current_choose_idx'],
+  #     'current_range_info': tuple(v['current_range_info'])
+  #   } for k, v in rel_alt_step_infos.items()
+  # }
+
   '''
   `rel_alt_step_infos` contains information about all the possible
   translation rules that can be applied to obtain a different translation.
   '''
   rasis_values = list(rel_alt_step_infos.values())
+
+  # sort: earlier nodes appear first
+  rasis_values.sort(key=lambda elem: elem['current_range_info'], reverse=True)
 
   '''
   `choices_list` contains current choices of rules at certain AST nodes.
