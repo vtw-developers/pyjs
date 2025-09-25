@@ -307,14 +307,15 @@ def _get_trace_mismatch_idx(
     return __get_trace_mismatch_idx_src_trace_larger(src_trace_entries, tar_trace_entries)
 
 
-def _get_log_statement_idx(
+def _get_log_statement_idxs(
   src_trace: list,
   tar_trace: list,
   trace_idx: int
-) -> int:
+) -> Tuple[int, int]:
   '''
   Given two traces and a trace index, find the log statement index under that trace index.
   Log statement indices are 1-based. trace_idx is 0-based.
+  RETURN the log statement indices for both src and tar traces.
 
   Sample trace:
   ["list", 1,
@@ -327,8 +328,6 @@ def _get_log_statement_idx(
       ]                                     |
     ]
   ]
-
-  NOTE both src_trace and tar_trace are used to cross-check the log statement index.
   '''
 
   src_trace_entries = src_trace[2]
@@ -352,20 +351,20 @@ def _get_log_statement_idx(
 
   src_trace_args = src_trace_entry[2]
   tar_trace_args = tar_trace_entry[2]
-  src_trace_arg1 = src_trace_args[0]
-  tar_trace_arg1 = tar_trace_args[0]
+  src_trace_arg1 = src_trace_args[0]  # contains src log statement index
+  tar_trace_arg1 = tar_trace_args[0]  # contains tar log statement index
   src_trace_arg1_type = src_trace_arg1[0]
   tar_trace_arg1_type = tar_trace_arg1[0]
   assert src_trace_arg1_type == 'number' and tar_trace_arg1_type == 'number', \
     'trace entry first argument must be a number'
 
-  src_trace_arg1_value = src_trace_arg1[1]
-  tar_trace_arg1_value = tar_trace_arg1[1]
+  src_trace_arg1_value = src_trace_arg1[1]  # src log statement index
+  tar_trace_arg1_value = tar_trace_arg1[1]  # tar log statement index
   assert isinstance(src_trace_arg1_value, int) and isinstance(tar_trace_arg1_value, int), \
     'trace entry first argument must be an int'
 
-  src_trace_arg2 = src_trace_args[1]
-  tar_trace_arg2 = tar_trace_args[1]
+  _src_trace_arg2 = src_trace_args[1]
+  _tar_trace_arg2 = tar_trace_args[1]
 
   if src_trace_arg1_value != tar_trace_arg1_value:
     logger.warning(
@@ -375,12 +374,12 @@ def _get_log_statement_idx(
       f'trace_idx: {trace_idx}')
   else:
     logger.warning(
-      f'Expected "{src_trace_arg2}" at log statement #{src_trace_arg1_value}, got "{tar_trace_arg2}".\n'
+      f'Expected "{_src_trace_arg2}" at log statement #{src_trace_arg1_value}, got "{_tar_trace_arg2}".\n'
       f'src_trace_entry: {src_trace_entry}\n'
       f'tar_trace_entry: {tar_trace_entry}\n'
       f'trace_idx: {trace_idx}')
 
-  return tar_trace_arg1_value
+  return (src_trace_arg1_value, tar_trace_arg1_value)
 
 
 def _get_log_statement_idx_subsumed(
@@ -423,10 +422,13 @@ def _get_log_statement_idx_subsumed(
   return trace_arg1_value
 
 
-def _get_mismatched_log_statement_idx(
+def _get_mismatched_log_statement_idxs(
   src_trace: list,
   tar_trace: list
-) -> int:
+) -> Tuple[int, int]:
+  '''
+  RETURN the mismatched log statement indices for both src and tar traces.
+  '''
 
   if not does_trace_subsume_another(src_trace, tar_trace):
     '''
@@ -440,16 +442,16 @@ def _get_mismatched_log_statement_idx(
     the trace mismatch. Log statement indices are 1-based.
     trace_mismatch_idx is 0-based.
     '''
-    mismatched_log_stat_idx = _get_log_statement_idx(src_trace, tar_trace, trace_mismatch_idx)
+    mismatched_log_stat_idxs = _get_log_statement_idxs(src_trace, tar_trace, trace_mismatch_idx)
 
-    return mismatched_log_stat_idx
+    return mismatched_log_stat_idxs
 
   else:
     '''
     If one trace subsumes another, it means that there is a missing or extra loop iteration.
     '''
     mismatched_log_stat_idx = _get_log_statement_idx_subsumed(src_trace, tar_trace)
-    return mismatched_log_stat_idx
+    return (mismatched_log_stat_idx, mismatched_log_stat_idx)
 
 
 def _indentation(line: str) -> int:
@@ -518,8 +520,14 @@ def _extract_err_lines_from_trace_mismatch(
   Error lines is a dictionary where keys are line numbers (0-based) and values
   are the lines of the tar program that caused the trace mismatch.
   '''
-  mismatched_log_stat_idx = _get_mismatched_log_statement_idx(src_trace, tar_trace)
-  error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idx)
+  mismatched_log_stat_idxs = _get_mismatched_log_statement_idxs(src_trace, tar_trace)
+  src_mmls_idx, tar_mmls_idx = mismatched_log_stat_idxs
+
+  if src_mmls_idx != tar_mmls_idx:
+    error_lines = _get_error_lines(tar_program_instr, src_mmls_idx)
+    error_lines.update(_get_error_lines(tar_program_instr, tar_mmls_idx))
+  else:
+    error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idxs)
   assert len(error_lines) > 0, 'error lines must be non-empty'
 
   return error_lines
