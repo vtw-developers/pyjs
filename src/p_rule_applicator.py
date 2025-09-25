@@ -840,6 +840,7 @@ def _check_and_update_choices(
           'current_choose_idx': current_choose_idx,
           'current_range_info': current_range_info
         }
+      rel_alt_step_infos = p_ext_rule_chooser.rel_alt_step_info_remove_duplicates(rel_alt_step_infos)
       try:
         current_choices = p_ext_rule_chooser.get_next_unique_choices(
           rel_alt_step_infos, choices_list_stack, [])

@@ -1366,6 +1366,27 @@ async def get_readonly_choices_list(
 
 
 # GENERATING NEW CHOICES LIST BASED ON ERRORS
+def rel_alt_step_info_remove_duplicates(
+  rel_alt_step_infos: dict
+) -> dict:
+  '''
+  For some unknown reason, DuoGlot translator includes duplicate
+  entries in translate_dbg_history structure. Duplicate entries
+  have the same range_info. Having duplicates causes
+  duplicate choices in the generated choices list.
+  '''
+  seen = set()
+  result = dict()
+  for alt_step, entries in rel_alt_step_infos.items():
+    current_range_info = entries['current_range_info']
+    if current_range_info in seen:
+      logger.debug(f'removing duplicate entry for alt_step for range: {current_range_info}')
+      continue
+    seen.add(current_range_info)
+    result[alt_step] = entries
+  return result
+
+
 def are_choices_lists_equal(
   gen_choices_list: List[tuple],
   actual_choices_list: List[tuple]
@@ -1727,6 +1748,7 @@ def get_proposed_choices_based_on_line_idxs(
   if len(rel_alt_step_infos) == 0:
     raise RuleCombinationsExhaustedError('No alternative rules found for the error line')
 
+  rel_alt_step_infos = rel_alt_step_info_remove_duplicates(rel_alt_step_infos)
   new_choices = get_next_unique_choices(rel_alt_step_infos, choices_list_stack, readonly_choices_list)
   return new_choices
 
