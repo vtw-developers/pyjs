@@ -168,7 +168,15 @@ class ExpressionStatementNode(pvis.AbstractNode):
     node.add_child(child_node)
     child_node.set_parent(node)
     return node
-class FalseNode(pvis.AbstractNode): pass
+class FalseNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls) -> FalseNode:
+    '''Build a false node'''
+    node = cls('false')
+    tnode = pvis.TerminalNode('False')
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class FinallyClauseNode(pvis.AbstractNode): pass
 class FloatNode(pvis.AbstractNode):
   def val(self) -> str:
@@ -242,6 +250,14 @@ class IntegerNode(pvis.AbstractNode):
     assert len(self.children) == 1, 'sanity check'
     assert isinstance(self.children[0], pvis.TerminalNode), 'sanity check'
     return self.children[0].node_type
+  @classmethod
+  def build(cls, value: int) -> IntegerNode:
+    '''Build an integer node from an integer'''
+    node = cls('integer')
+    tnode = pvis.TerminalNode(str(value))
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class InterpolationNode(pvis.AbstractNode): pass
 class KeywordArgumentNode(pvis.AbstractNode):
   def __init__(self, node_type):
@@ -315,7 +331,15 @@ class SubscriptNode(pvis.AbstractNode):
     super().__init__(node_type)
     self.value : pvis.AbstractNode = None
     self.subscript : pvis.AbstractNode = None
-class TrueNode(pvis.AbstractNode): pass
+class TrueNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls) -> TrueNode:
+    '''Build a true node'''
+    node = cls('true')
+    tnode = pvis.TerminalNode('True')
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class TryStatementNode(pvis.AbstractNode): pass
 class TupleNode(pvis.AbstractNode): pass
 class TuplePatternNode(pvis.AbstractNode): pass
