@@ -10,6 +10,8 @@ import p_ext_rule_chooser
 import p_pirel
 import p_subject
 import p_utils
+import p_visitor_js as pvjs
+import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
@@ -839,6 +841,40 @@ def _check_and_update_choices(
         raise SrcTestScriptProblematicNodeError(msg)
 
 
+def _check_for_rec_fn_calls(
+  src_program_instr: str,
+  tar_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, str]:
+  '''
+  Replace recursive function calls in src_program_instr and tar_program_instr
+  '''
+  repl_dict = p_utils.read_json(p_consts.MYLOG_DEFINITIONS_DIR / 'rec_call_replacements.json')
+
+  if subject.name not in repl_dict:
+    logger.debug(f'No recursive function call replacements for subject "{subject.name}".')
+    return src_program_instr, tar_program_instr
+
+  logger.debug('Replacing recursive function calls in src and tar programs.')
+  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
+
+  subject_repl = repl_dict[subject.name]
+  for defined_fn, invoked_fns_dict in subject_repl.items():
+    for invoked_fn, lit_values_dict in invoked_fns_dict.items():
+      assert subject.src_lang in lit_values_dict, 'sanity check'
+      assert subject.tar_lang in lit_values_dict, 'sanity check'
+      src_lit_value = lit_values_dict[subject.src_lang]
+      tar_lit_value = lit_values_dict[subject.tar_lang]
+      src_program_instr, src_repl_done = pvpy.FunctionInvocationReplacer.replace_function_invocations(
+        src_program_instr, defined_fn, invoked_fn, src_lit_value)
+      tar_program_instr, tar_repl_done = pvjs.FunctionInvocationReplacer.replace_function_invocations(
+        tar_program_instr, defined_fn, invoked_fn, tar_lit_value)
+      assert src_repl_done == tar_repl_done, 'sanity check'
+
+  return src_program_instr, tar_program_instr
+
+
 # API
 async def apply_translation_rules(
   subject: p_subject.PirelSubject
@@ -909,6 +945,9 @@ async def apply_translation_rules(
       _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
     tar_program_instr = \
       _program_parts_concatenate(tar_test_code, tar_main_code_instr, tar_test_call_code, subject)
+
+    src_program_instr, tar_program_instr = \
+      _check_for_rec_fn_calls(src_program_instr, tar_program_instr, subject)
 
     try:
       await _run_tests(src_program_instr, tar_program_instr, subject)
