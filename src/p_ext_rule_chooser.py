@@ -454,7 +454,8 @@ def _create_subject_for_expr(
   is_three_split: bool,
   translation_rules_test_code: str,
   rules_w_str: str,
-  ruleset: p_ruleset.Ruleset
+  ruleset: p_ruleset.Ruleset,
+  subject_name: str,
 ) -> p_subject.PirelSubject:
   '''
   Create a subject for validating a rule for expression.
@@ -462,7 +463,7 @@ def _create_subject_for_expr(
 
   # all attributes of PirelSubject instance set explicitly
   benchmark_name = 'n/a'
-  name = 'expr'
+  name = subject_name
   src_program = src_test_script
   src_lang = 'py'
   tar_lang = 'js'
@@ -599,6 +600,7 @@ async def _validate_matcher_group_no_intersection(
   dgann: dict,
   src_main_code: str,
   is_three_split: bool,
+  subject_name: str,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
@@ -652,8 +654,8 @@ async def _validate_matcher_group_no_intersection(
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
     expr_subject = _create_subject_for_expr(
-      test_script_str, is_three_split,
-      translation_rules_test_code, rules_w_str, ruleset)
+      test_script_str, is_three_split, translation_rules_test_code,
+      rules_w_str, ruleset, subject_name)
 
     '''
     If this translation succeeds, it means that the rule is plausible
@@ -691,6 +693,7 @@ async def _validate_matcher_group_single_intersection(
   dgann: dict,
   src_main_code: str,
   is_three_split: bool,
+  subject_name: str,
 ) -> None:
   '''
   PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
@@ -735,8 +738,8 @@ async def _validate_matcher_group_single_intersection(
     rules_w = rules_wo + [rule]
     rules_w_str = '\n\n'.join([str(r) for r in rules_w])
     expr_subject = _create_subject_for_expr(
-      test_script_str, is_three_split,
-      translation_rules_test_code, rules_w_str, ruleset)
+      test_script_str, is_three_split, translation_rules_test_code,
+      rules_w_str, ruleset, subject_name)
 
     '''
     If this translation succeeds, it means that the rule is plausible
@@ -775,6 +778,7 @@ async def validate_matcher_group(
   src_test_code: Optional[str],
   translation_rules_test_code: str,
   dgann: dict,
+  subject_name: str,
 ) -> None:
   '''
   Validating a matcher group means checking if the rules in the matcher group
@@ -841,6 +845,7 @@ async def validate_matcher_group(
       dgann,
       src_main_code,
       is_three_split,
+      subject_name,
     )
 
   elif len(reusable_rules) == 1:
@@ -854,6 +859,7 @@ async def validate_matcher_group(
       dgann,
       src_main_code,
       is_three_split,
+      subject_name,
     )
 
   else:
@@ -873,6 +879,7 @@ async def _process_match_obj(
   src_test_code: Optional[str],
   translation_rules_test_code: str,
   dgann: dict,
+  subject_name: str,
 ) -> None:
   '''
   Process the match object and log the information.
@@ -914,7 +921,8 @@ async def _process_match_obj(
       log_stat_str,
       src_test_code,
       translation_rules_test_code,
-      dgann
+      dgann,
+      subject_name
     )
     return
 
@@ -975,7 +983,8 @@ async def _process_match_obj(
     log_stat_str,
     src_test_code,
     translation_rules_test_code,
-    dgann
+    dgann,
+    subject_name
   )
 
   logger.debug('~~~ Ended match object processing')
@@ -991,6 +1000,7 @@ async def process_choicable_range_cursor(
   translation_rules_test_code: str,
   dgann: dict,
   processed_match_objs: Dict[str, list],
+  subject_name: str,
 ):
   '''
   PARAM matcher_group: a list of rules that have the same matcher signature.
@@ -1046,7 +1056,8 @@ async def process_choicable_range_cursor(
         pre_context,
         src_test_code,
         translation_rules_test_code,
-        dgann
+        dgann,
+        subject_name,
       )
       logger.debug('Successfully processed the match_obj.')
       processed_match_objs.setdefault(matcher_signature, []).append(
@@ -1233,7 +1244,8 @@ async def get_readonly_choices_list(
   src_main_code: str,
   src_test_code: Optional[str],
   translation_rules_test_code: str,
-  ruleset: p_ruleset.Ruleset
+  ruleset: p_ruleset.Ruleset,
+  subject_name: str
 ) -> list:
   '''
   Generate a readonly choices list for the given source code and rules.
@@ -1247,6 +1259,7 @@ async def get_readonly_choices_list(
   PARAM src_main_code (check p_pirel._create_src_program_for_stat_val()):
   - instrumented with log statements
   - break statements inserted
+  PARAM subject_name: to know what subject we are dealing with.
 
   NOTE This function should not add or remove rules from the ruleset.
   '''
@@ -1330,7 +1343,8 @@ async def get_readonly_choices_list(
           src_test_code,
           translation_rules_test_code,
           dgann,
-          processed_match_objs
+          processed_match_objs,
+          subject_name
         )
       except UnhandledRangeCursorExistsError as err:
         logger.debug(f'Moving the matcher group to the end of the queue')
@@ -1961,7 +1975,8 @@ def _test_get_readonly_choices_list():
     src_main_code: str,
     src_test_code: str,
     translation_rules_test_code: str,
-    ruleset: p_ruleset.Ruleset
+    ruleset: p_ruleset.Ruleset,
+    subject_name: str
   ) -> list:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_get_readonly_choices_list_config.yaml'
@@ -1972,12 +1987,14 @@ def _test_get_readonly_choices_list():
   src_test_code = args_dict['src_test_code']
   translation_rules_test_code = args_dict['translation_rules_test_code']
   ruleset = p_ruleset.Ruleset.from_dict(args_dict['ruleset'])
+  subject_name = args_dict['subject_name']
 
   readonly_choices_list = asyncio.run(get_readonly_choices_list(
     src_main_code,
     src_test_code,
     translation_rules_test_code,
-    ruleset
+    ruleset,
+    subject_name
   ))
 
 

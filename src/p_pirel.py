@@ -672,8 +672,8 @@ def _create_subject_for_stat_learn(
   '''
 
   # all attributes of PirelSubject instance set explicitly
-  benchmark_name = 'n/a'
-  name = 'stat-learn'
+  benchmark_name = 'stat-learn'
+  name = main_subject.name
   src_program = simple_ntext
   src_lang = main_subject.src_lang
   tar_lang = main_subject.tar_lang
@@ -765,13 +765,13 @@ def _create_subject_for_stat_val(
   pre_context: str,
   simple_ntext: str,
   current_ruleset: p_ruleset.Ruleset,
-):
+) -> p_subject.PirelSubject:
   '''
   Create a subject used during validation phase.
   '''
   # all attributes of PirelSubject instance set explicitly
-  benchmark_name = 'n/a'
-  name = 'stat-val'
+  benchmark_name = 'stat-val'
+  name = main_subject.name
   src_program = _create_src_program_for_stat_val(main_subject, pre_context, simple_ntext)
   src_lang = main_subject.src_lang
   tar_lang = main_subject.tar_lang
