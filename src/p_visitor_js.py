@@ -80,7 +80,17 @@ class ExportClauseNode(pvis.AbstractNode): pass
 class ExportStatementNode(pvis.AbstractNode): pass
 class ExpressionNode(pvis.AbstractNode): pass
 class ExpressionStatementNode(pvis.AbstractNode): pass
-class FalseNode(pvis.AbstractNode): pass
+class FalseNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls) -> FalseNode:
+    '''
+    Build a FalseNode.
+    '''
+    node = cls('false')
+    tnode = pvis.TerminalNode('false')
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class FieldDefinitionNode(pvis.AbstractNode): pass
 class FinallyClauseNode(pvis.AbstractNode): pass
 class ForInStatementNode(pvis.AbstractNode): pass
@@ -149,7 +159,17 @@ class NamespaceImportExportNode(pvis.AbstractNode): pass
 class NestedIdentifierNode(pvis.AbstractNode): pass
 class NewExpressionNode(pvis.AbstractNode): pass
 class NullNode(pvis.AbstractNode): pass
-class NumberNode(pvis.AbstractNode): pass
+class NumberNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls, value: Union[int, float]) -> NumberNode:
+    '''
+    Build a NumberNode from a numeric value.
+    '''
+    node = cls('number')
+    tnode = pvis.TerminalNode(str(value))
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class ObjectNode(pvis.AbstractNode): pass
 class ObjectAssignmentPatternNode(pvis.AbstractNode): pass
 class ObjectPatternNode(pvis.AbstractNode): pass
@@ -189,7 +209,17 @@ class TemplateSubstitutionNode(pvis.AbstractNode): pass
 class TernaryExpressionNode(pvis.AbstractNode): pass
 class ThisNode(pvis.AbstractNode): pass
 class ThrowStatementNode(pvis.AbstractNode): pass
-class TrueNode(pvis.AbstractNode): pass
+class TrueNode(pvis.AbstractNode):
+  @classmethod
+  def build(cls) -> TrueNode:
+    '''
+    Build a TrueNode.
+    '''
+    node = cls('true')
+    tnode = pvis.TerminalNode('true')
+    node.add_child(tnode)
+    tnode.set_parent(node)
+    return node
 class TryStatementNode(pvis.AbstractNode): pass
 class UnaryExpressionNode(pvis.AbstractNode): pass
 class UndefinedNode(pvis.AbstractNode): pass
