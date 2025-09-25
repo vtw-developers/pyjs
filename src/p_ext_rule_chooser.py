@@ -1844,41 +1844,17 @@ def get_proposed_choices_semantic_error(
   logger.debug(
     f'There are {len(error_lines)} error lines in the semantic error\n'
     f'{json.dumps(error_lines, indent=2)}')
-
   assert len(error_lines) > 0, 'there must be at least one semantic error line'
-  error_line_num = min(error_lines.keys())
-  assert (set(range(error_line_num, max(error_lines.keys())+1))
-          == set(error_lines)), 'error lines must be continuous'
-  error_line_content = error_lines[error_line_num]
 
   '''
-  error_line_num is 0-based line index of a trace mismatch in
+  line_num is 0-based line index of a trace mismatch in
   tar_program_instr, we need to get the 0-based line index in tar_main_code.
   '''
-  err_line_idx = get_err_line_idx_in_tar_main_code(
-    error_line_content, error_line_num + 1, tar_program_instr, tar_main_code)
-
-  '''
-  Depending on the locations of log statements (myexactlog), we may end up
-  in a situation where there are multiple lines in `error_lines`. For example:
-  {
-    21: "        break;",
-    22: "    }",
-    23: "    var x = (x && !m) || (!x && m);"
-  }
-  taken from:
-  ```js
-          // ...
-          myexactlog(4, m);
-          break;
-      }
-      var x = (x && !m) || (!x && m);
-      myexactlog(5, x);  // trace mismatch occurs here
-      // ...
-  ```
-  In this case, we pass all error lines to get_proposed_choices_based_on_line_idxs.
-  '''
-  err_line_idxs = list(range(err_line_idx, err_line_idx + len(error_lines)))
+  err_line_idxs = [
+    get_err_line_idx_in_tar_main_code(
+      line_content, line_num + 1, tar_program_instr, tar_main_code)
+    for line_num, line_content in error_lines.items()
+  ]
 
   new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
