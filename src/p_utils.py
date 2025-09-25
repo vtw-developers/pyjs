@@ -288,8 +288,13 @@ def write_file(
 def log_json(fname: str, obj: Any) -> None:
   write_file(p_consts.PIREL_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=False)
 
-def log_json_time(fname: str, obj: Any) -> None:
-  write_file(p_consts.PIREL_LOGS_DIR / fname, _json_dumps(obj), include_timestamp=True)
+def log_json_time(fname: str, obj: Any, is_inline: bool = False) -> None:
+  write_file(
+    p_consts.PIREL_LOGS_DIR / fname,
+    _json_dumps(obj),
+    include_timestamp=True,
+    is_inline=is_inline
+  )
 
 def log_file_time(fname: str, contents: str) -> None:
   write_file(p_consts.PIREL_LOGS_DIR / fname, contents, include_timestamp=True)
