@@ -396,11 +396,12 @@ def remove_comments_and_docstrings_py(source: str) -> str:
     if start_line > last_lineno:
       last_col = 0
     assert start_col >= last_col
-    # Don't keep whitespace before comments, which is now trailing.
-    if start_col > last_col and token_type != tokenize.COMMENT:
+    # Don't keep comments or decorative newlines (see comment below),
+    # or the trailing whitespace before them.
+    ignored_by_parser = token_type in (tokenize.COMMENT, tokenize.NL)
+    if start_col > last_col and not ignored_by_parser:
       out.append(" " * (start_col - last_col))
-    # Remove comments:
-    if token_type == tokenize.COMMENT:
+    if ignored_by_parser:
       pass
     elif token_type == tokenize.FSTRING_MIDDLE:
       if token_string.endswith('{'):
@@ -440,9 +441,6 @@ def remove_comments_and_docstrings_py(source: str) -> str:
     last_col = end_col
     last_lineno = end_line
   return ''.join(out)
-
-def remove_empty_lines(source: str) -> str:
-  return '\n'.join([line for line in source.splitlines() if line.strip()])
 
 
 # Send email notifications
