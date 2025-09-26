@@ -222,6 +222,7 @@ def deduplicate_range_cursors(
   deduped = []
   for rc in range_cursors:
     rc_id = (id(rc[0]), rc[1], rc[2])
+    # rc_id = range_cursor_to_choice_identifier(rc)  # as alternative?
     if rc_id not in seen:
       deduped.append(rc)
       seen.add(rc_id)
