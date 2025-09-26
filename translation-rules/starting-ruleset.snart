@@ -100,3 +100,8 @@
   (fragment ("py.import_statement" (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
   (fragment "*1")
 )
+
+(match_expand
+  (fragment ("py.attribute" ("py.identifier" (val "sys")) (str ".") ("py.identifier" (val "maxsize"))) "*")
+  (fragment ("js.number" (val "9223372036854776000")) "*1")
+)
