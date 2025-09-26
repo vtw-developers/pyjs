@@ -15,6 +15,7 @@ import p_tree_log as ptlog
 import p_utils
 import p_visitor as pvis
 import p_visitor_py as pvpy
+from p_config import Config
 
 
 logger = p_utils.setup_logger(__name__)
@@ -1646,7 +1647,8 @@ def get_next_unique_choices(
   rasis_values = list(rel_alt_step_infos.values())
 
   # sort: earlier nodes appear first
-  rasis_values.sort(key=lambda elem: elem['current_range_info'], reverse=True)
+  rasis_values.sort(key=lambda elem: elem['current_range_info'],
+                    reverse=Config.sort_new_choices_in_reverse)
 
   '''
   `choices_list` contains current choices of rules at certain AST nodes.
