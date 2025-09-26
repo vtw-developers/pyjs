@@ -527,7 +527,7 @@ def _extract_err_lines_from_trace_mismatch(
     error_lines = _get_error_lines(tar_program_instr, src_mmls_idx)
     error_lines.update(_get_error_lines(tar_program_instr, tar_mmls_idx))
   else:
-    error_lines = _get_error_lines(tar_program_instr, mismatched_log_stat_idxs)
+    error_lines = _get_error_lines(tar_program_instr, src_mmls_idx)
   assert len(error_lines) > 0, 'error lines must be non-empty'
 
   return error_lines
