@@ -20,8 +20,14 @@ import p_visitor_py as pvpy
 logger = p_utils.setup_logger(__name__)
 
 
-class NoRuleToHandleRangeCursorError(Exception): pass
-class UnhandledRangeCursorExistsError(Exception): pass
+class NoRuleToHandleRangeCursorError(Exception):
+  def __init__(self, range_cursor: tuple, *args):
+    super().__init__(*args)
+    self.range_cursor = range_cursor
+class UnhandledRangeCursorsExistError(Exception):
+  def __init__(self, unhandled_range_cursors: List[tuple], *args):
+    super().__init__(*args)
+    self.unhandled_range_cursors = unhandled_range_cursors
 class RuleCombinationsExhaustedError(RuntimeError): pass
 class AllRulesInMatcherGroupImplausibleError(RuntimeError): pass
 class ExprLogStatHasParseError(RuntimeError): pass
@@ -490,6 +496,71 @@ def _create_subject_for_expr(
     expr_subject.get_src_main_code())
 
   return expr_subject
+
+
+def _check_handled_by_verified_rules(
+  unhandled_range_cursor: tuple,
+  dgast: list,
+  ruleset: p_ruleset.Ruleset,
+) -> bool:
+  '''
+  Check if the unhandled range cursor is handled by any verified rules.
+  '''
+  # TODO
+  # check if parents of unhandled_range_cursor are handled by verified rules
+  # if none found, then go all the way to the root node?
+
+
+def _check_unhandled_range_cursors(
+  unhandled_range_cursors: List[Tuple[list, tuple]],
+  queue_matcher_groups: List[list],
+  dgast: list,
+  ruleset: p_ruleset.Ruleset,
+) -> None:
+  '''
+  PARAM unhandled_range_cursors: a list of tuples:
+  (matcher_group, range_cursor)
+  '''
+
+  def _process_urcs(unhandled_range_cursors: List[tuple]) -> dict:
+    processed = {}
+    for matcher_group, range_cursor in unhandled_range_cursors:
+      assert_matchers_match(matcher_group)
+      matcher_signature = matcher_group[0].get_matcher_signature()
+      if matcher_signature not in processed:
+        processed[matcher_signature] = (matcher_group, range_cursor)
+        continue
+      rec_mgr, rec_rc = processed[matcher_signature]
+      assert len(rec_mgr) == len(matcher_group), 'Expected same length of matcher groups'
+      assert d_ast_parse.range_cursor_to_choice_identifier(rec_rc) == \
+             d_ast_parse.range_cursor_to_choice_identifier(range_cursor), \
+             'Expected same range cursor choice identifier (might be too strict)'
+
+    for mgr in queue_matcher_groups:
+      assert_matchers_match(mgr)
+    queue_mgs_sigs = {mg[0].get_matcher_signature() for mg in queue_matcher_groups}
+
+    processed = {k:v for k,v in processed.items() if k in queue_mgs_sigs}
+    return processed
+
+  p_utils.log_json_time('args-check_unhandled_range_cursors.json', locals())
+
+  '''
+  processes contains matcher_group that got stuck in the queue,
+  alongside with one of the range cursors that it failed to validate.
+  '''
+  processed = _process_urcs(unhandled_range_cursors)
+  assert len(processed) > 0, 'Expected at least one unhandled range cursor'
+
+  assert len(processed) == 1, 'implement for multiple matcher groups'
+  matcher_group, unhandled_range_cursor = list(processed.values())[0]
+  assert_matchers_match(matcher_group)
+  _check_handled_by_verified_rules(
+    unhandled_range_cursor,
+    dgast,
+    ruleset,
+  )
+  # TODO finish implementation (debug-48 G0635)
 
 
 def _get_rules_that_handle_range_cursor_rec(
@@ -965,7 +1036,7 @@ async def _process_match_obj(
       it means we need to check the next matching rule group.
       '''
       if subtrees_rules is None:
-        raise NoRuleToHandleRangeCursorError
+        raise NoRuleToHandleRangeCursorError(sub_slot_cursor)
 
       logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_rules)}')
       subtrees_rules.extend(subtrees_rules)
@@ -1033,7 +1104,8 @@ async def process_choicable_range_cursor(
     return
 
   logger.debug(f'Number of range cursors that match the matcher: {len(match_objs)}')
-  flag_unhandled_exists = False
+  flag_unhandled_exist = False
+  unhandled_range_cursors = []
 
   '''
   Process each matched AST that matched the rule (matcher).
@@ -1063,9 +1135,10 @@ async def process_choicable_range_cursor(
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
 
-    except NoRuleToHandleRangeCursorError:
+    except NoRuleToHandleRangeCursorError as err:
       logger.debug('Not enough rules to handle the slot cursor. Continuing with the next match_obj.')
-      flag_unhandled_exists = True
+      flag_unhandled_exist = True
+      unhandled_range_cursors.append(err.range_cursor)
       continue
 
     except ExprLogStatHasParseError:
@@ -1085,8 +1158,8 @@ async def process_choicable_range_cursor(
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
 
-  if flag_unhandled_exists:
-    raise UnhandledRangeCursorExistsError
+  if flag_unhandled_exist:
+    raise UnhandledRangeCursorsExistError(unhandled_range_cursors)
 
 
 def _get_readonly_choices_list_init(
@@ -1323,6 +1396,14 @@ async def get_readonly_choices_list(
     logger.debug(f'Number of range cursors under choicable_range_cursor: {len(all_range_cursors)}')
 
     '''
+    Unhandled range cursors are range cursors that match some matcher,
+    but for the slot cursors of which we do not have verified rules.
+    They are one of the main reasons for QueueInfiniteLoopError.
+    NOTE Implemented halfway only. Check _check_unhandled_range_cursors().
+    '''
+    unhandled_range_cursors = []
+
+    '''
     Attempt to control the infinite loop that may arise from
     unchanging queue size.
     '''
@@ -1346,9 +1427,10 @@ async def get_readonly_choices_list(
           processed_match_objs,
           subject_name
         )
-      except UnhandledRangeCursorExistsError as err:
+      except UnhandledRangeCursorsExistError as err:
         logger.debug(f'Moving the matcher group to the end of the queue')
         queue_matcher_groups.append(matcher_group)
+        unhandled_range_cursors.extend((matcher_group, rc) for rc in err.unhandled_range_cursors)
 
       # prevent infinite loop
       if len(queue_matcher_groups) == prev_queue_size:
@@ -1358,6 +1440,12 @@ async def get_readonly_choices_list(
       prev_queue_size = len(queue_matcher_groups)
       if unchanged_count >= _MAX_QUEUE_UNCHANGED_COUNT:
         logger.error(f'Infinite loop detected. Stopping processing for matcher group: {matcher_group}')
+        _check_unhandled_range_cursors(
+          unhandled_range_cursors,
+          queue_matcher_groups,
+          dgast,
+          ruleset,
+        )
         raise QueueInfiniteLoopError('Infinite loop detected')
 
   logger.info('readonly-main: Finished generation of read-only choices list')
