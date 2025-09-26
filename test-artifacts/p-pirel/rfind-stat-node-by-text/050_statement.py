@@ -1,0 +1,1 @@
+string_0[i] = string_0[j]

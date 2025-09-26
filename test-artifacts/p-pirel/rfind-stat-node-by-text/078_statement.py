@@ -1,0 +1,1 @@
+ans = min(ans, 2 * abs(180 - _sum))

@@ -1,0 +1,1 @@
+count[i] = count[i - 1] + count[i - m]

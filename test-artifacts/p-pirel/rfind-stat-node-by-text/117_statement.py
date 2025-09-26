@@ -1,0 +1,1 @@
+vid[arr[right]] += 1

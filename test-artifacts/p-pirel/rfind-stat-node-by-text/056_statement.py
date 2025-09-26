@@ -1,0 +1,1 @@
+dp[i] = min(dp[i - 1] + insrt, dp[i // 2] + cpy)

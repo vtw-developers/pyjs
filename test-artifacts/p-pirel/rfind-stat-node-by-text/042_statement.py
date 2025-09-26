@@ -1,0 +1,1 @@
+msis[i] = msis[i - 1] + arr[i]

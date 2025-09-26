@@ -1,0 +1,1 @@
+maxval = maxval * arr[i]

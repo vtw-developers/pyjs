@@ -1,0 +1,1 @@
+abs_diff = abs(arr[i] - arr[j])

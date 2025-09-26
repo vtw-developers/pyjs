@@ -1,0 +1,1 @@
+res = max(res, goldTable[i][0])

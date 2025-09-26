@@ -1,0 +1,1 @@
+jumps[i] = float("inf")

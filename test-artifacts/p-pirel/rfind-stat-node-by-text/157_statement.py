@@ -1,0 +1,1 @@
+hash_map[curr_sum] = i

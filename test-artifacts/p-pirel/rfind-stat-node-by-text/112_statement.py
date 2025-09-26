@@ -1,0 +1,1 @@
+retval_2 = f_gold(arr, low, mid - 1)

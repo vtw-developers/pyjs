@@ -1,0 +1,1 @@
+sum2 -= stack2[top2]

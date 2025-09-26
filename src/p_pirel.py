@@ -21,6 +21,7 @@ import p_subject
 import p_translators
 import p_tree_log as ptlog
 import p_utils
+import p_visitor as pvis
 import p_visitor_js as pvjs
 import p_visitor_py as pvpy
 
@@ -696,6 +697,92 @@ def _create_subject_for_stat_learn(
   return stat_learn_subject
 
 
+def _rfind_statement_nid_by_text(
+  src_main_code: str,
+  statement: str
+) -> int:
+  '''
+  Return the node_id in the AST of src_main_code whose text is statement.
+  If there are multiple such nodes, return the rightmost one.
+  If there multiple nodes with the same text, return the furthest one
+  from the root.
+  PRE: statement is not empty and appears in src_main_code.
+  '''
+
+  def _pp_node(node: pvis.AbstractNode) -> str:
+    pp = pvpy.PrettyPrinter(indent_with='    ')
+    result = pp.visit(node)
+    if result is not None:  # statements write to pp.lines and return None
+      return result
+    return '\n'.join(pp.lines)
+
+  def _rec_rfind(node: pvis.AbstractNode) -> Optional[pvis.AbstractNode]:
+    nonlocal statement
+    node_text = _pp_node(node)
+    if node_text == statement:
+      # found matching node, but its child may have the same text
+      # e.g. block -> expression_statement
+      # need to return the smallest matching node
+      all_children_result = [_rec_rfind(child) for child in node.get_nt_children()]
+      if all(c is None for c in all_children_result):
+        return node
+      child_res = [c for c in all_children_result if c is not None]
+      assert len(child_res) == 1, 'should not happen: multiple children with the same text'
+      return child_res[0]
+    for child in reversed(node.get_nt_children()):
+      res = _rec_rfind(child)
+      if res is not None:
+        return res
+    return None
+
+  assert statement.strip() != '', 'should not happen: statement is empty'
+  assert src_main_code.strip() != '', 'should not happen: src_main_code is empty'
+
+  tree = pvpy.Tree.from_str(src_main_code)
+  root_node = tree.root_node
+
+  stat_node = _rec_rfind(root_node)
+  assert stat_node is not None, 'should not happen: could not find statement node'
+
+  nid_node_map = root_node.get_nid_node_map()
+  nids = [k for k, v in nid_node_map.items() if v is stat_node]
+  assert len(nids) == 1, 'should not happen: multiple nodes with the same text'
+  return nids[0]
+
+
+def _instrument_with_break_statements(
+  src_main_code: str,
+  statement: str
+) -> str:
+  '''
+  Insert break statements in loops to avoid infinite loops.
+  Break statements are inserted only in loops that are ancestors
+  of the statement node or the statement node itself.
+  PRE: statement is not empty and appears in src_main_code.
+  '''
+  stat_nid = _rfind_statement_nid_by_text(src_main_code, statement)
+  tree = pvpy.Tree.from_str(src_main_code)
+  root_node = tree.root_node
+
+  nid_node_map = root_node.get_nid_node_map()
+  assert stat_nid in nid_node_map, 'should not happen: stat_nid not in nid_node_map'
+  stat_node = nid_node_map[stat_nid]
+
+  cursor_node = stat_node
+  while cursor_node is not None:
+    if not isinstance(cursor_node, (pvpy.ForStatementNode, pvpy.WhileStatementNode)):
+      cursor_node = cursor_node.get_parent()
+      continue
+    break_statement = pvpy.BreakStatementNode('break_statement')
+    cursor_node.body.children.append(break_statement)
+    break_statement.set_parent(cursor_node.body)
+    cursor_node = cursor_node.get_parent()
+
+  pp = pvpy.PrettyPrinter(indent_with='    ')
+  pp.visit(root_node)
+  return '\n'.join(pp.lines)
+
+
 def _create_src_main_code_for_val(
   src_main_code: str,
   pre_context: str,
@@ -717,18 +804,14 @@ def _create_src_main_code_for_val(
     fn_header = function_headers[0].strip()
     assert fn_header.endswith('):')
     stmt_in_ctx = f'{fn_header}\n{p_utils.indent(stmt_in_ctx, 4)}'
+    stmt_in_ctx = _instrument_with_break_statements(stmt_in_ctx, statement)
     stmt_in_ctx = pvpy.LogStatementInserter.insert_log_statements(stmt_in_ctx)
     stmt_in_ctx = pvpy.LogStatementsIndexer.index_log_statements(stmt_in_ctx)
   else:
+    stmt_in_ctx = _instrument_with_break_statements(stmt_in_ctx, statement)
     stmt_in_ctx = pvpy.LogInserterNo3Split.insert_log_statements(stmt_in_ctx)
     stmt_in_ctx = pvpy.LogIndexerNo3Split.index_log_statements(stmt_in_ctx)
 
-  # insert break statements in loops to avoid infinite loops.
-  if p_consts.PRE_CTX_INSERT_BREAK_IN_LOOPS:
-    tree = pvpy.Tree.from_str(stmt_in_ctx)
-    break_inserter = pvpy.BreakStatementInserter()  # TODO: only while?
-    break_inserter.visit(tree.root_node)
-    stmt_in_ctx = pvpy.PrettyPrinter(indent_with='    ').visit(tree.root_node)
   return stmt_in_ctx
 
 
