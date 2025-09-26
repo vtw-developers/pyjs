@@ -11,7 +11,8 @@ def f_gold(n):
     while n % 2 == 0:
         maxPrime = 2
         n >>= 1
-    for i in range(3, int(math.sqrt(n)) + 1, 2):
+    upto = int(math.sqrt(n))
+    for i in range(3, upto + 1, 2):
         while n % i == 0:
             maxPrime = i
             n = n / i

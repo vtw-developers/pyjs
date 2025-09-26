@@ -10,7 +10,8 @@ def f_gold(n):
     res = 1
     while n % 2 == 0:
         n = n // 2
-    for i in range(3, int(math.sqrt(n) + 1)):
+    upto = int(math.sqrt(n) + 1)
+    for i in range(3, upto):
         count = 0
         curr_sum = 1
         curr_term = 1
