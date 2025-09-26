@@ -20,6 +20,8 @@ class Config:
 
   is_email_report: bool = None
 
+  sort_new_choices_in_reverse: bool = True
+
 
 def load_configs(args):
   Config.benchmark_name = args.benchmark_name
