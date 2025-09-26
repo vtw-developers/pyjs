@@ -1137,7 +1137,7 @@ def _get_readonly_choices_list_init(
     src_main_code, exclude_statement_nodes_ids=list(overfitted_stat_nids))
   logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
 
-  chable_rc_prectxs = []  # choices range cursors with pre-context
+  chable_rc_prectxs = []  # choicable range cursors with pre-context
   dgast, dgann = d_ast_parse.parse_text_dbg(src_main_code, 'py')
 
   for i, choicable_node in enumerate(choicable_nodes, start=1):
@@ -1156,7 +1156,7 @@ def _get_readonly_choices_list_init(
       f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"\n'
       f'pre_context:\n{pre_context}')
 
-  return chable_rc_prectxs, dgann
+  return chable_rc_prectxs, dgast, dgann
 
 
 def _is_excluded_range_cursor(
@@ -1276,7 +1276,7 @@ async def get_readonly_choices_list(
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  chable_rc_prectxs, dgann = _get_readonly_choices_list_init(
+  chable_rc_prectxs, dgast, dgann = _get_readonly_choices_list_init(
     src_main_code, ruleset, src_test_code is not None)
 
   for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
