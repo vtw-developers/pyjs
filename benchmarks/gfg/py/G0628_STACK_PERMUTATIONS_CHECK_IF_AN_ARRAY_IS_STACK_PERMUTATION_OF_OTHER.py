@@ -5,12 +5,12 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-from queue import Queue
+import queue
 def f_gold(ip, op, n):
-    Input = Queue()
+    Input = queue.Queue()
     for i in range(n):
         Input.put(ip[i])
-    output = Queue()
+    output = queue.Queue()
     for i in range(n):
         output.put(op[i])
     tempStack = []

@@ -5,9 +5,9 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-from math import floor
+import math
 def f_gold(a, b):
-    retval_1 = floor((a + b) / 2)
+    retval_1 = math.floor((a + b) / 2)
     return retval_1
 "-----------------"
 test()
