@@ -1623,6 +1623,38 @@ async def learn_trans_rules_for_subject(
 
 
 # TEST HARNESSES
+def _test_stat_node_validate_trules():
+  '''
+  async def stat_node_validate_trules(
+    simple_nchoices: dict,
+    simple_ntext: str,
+    stat_learn_subject: p_subject.PirelSubject,
+    stat_val_subject: p_subject.PirelSubject,
+    current_ruleset: p_ruleset.Ruleset,
+    lstat_node_val: Optional[ptlog.StatNodeVal] = None,
+  ) -> p_ruleset.Ruleset:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_stat_node_validate_trules_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  simple_nchoices = args_dict['simple_nchoices']
+  simple_ntext = args_dict['simple_ntext']
+  stat_learn_subject = p_subject.PirelSubject.from_dict(args_dict['stat_learn_subject'])
+  stat_val_subject = p_subject.PirelSubject.from_dict(args_dict['stat_val_subject'])
+  current_ruleset = p_ruleset.Ruleset.from_dict(args_dict['current_ruleset'])
+
+  ruleset = asyncio.run(stat_node_validate_trules(
+    simple_nchoices,
+    simple_ntext,
+    stat_learn_subject,
+    stat_val_subject,
+    current_ruleset
+  ))
+
+  print(ruleset.to_str_ruleset())
+
+
 def _test_stat_node_main_learn_validate_trules():
   '''
   async def stat_node_main_learn_validate_trules(
@@ -1779,8 +1811,9 @@ def _test_get_pre_context():
 
 
 if __name__ == '__main__':
+  _test_stat_node_validate_trules()
   # _test_stat_node_main_learn_validate_trules()
-  _test_learn_trans_rules_for_prob_node()
+  # _test_learn_trans_rules_for_prob_node()
   # _test_stat_node_learn_trules_recovery()
   # _test_duoglot_translate_wrapper()
   # _test_duoglot_translate_wrapper_quick()
