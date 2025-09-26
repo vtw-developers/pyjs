@@ -1434,6 +1434,25 @@ async def stat_node_main_learn_validate_trules(
           lrule_learn_rec,
         )
 
+      except PartialProgramGenerationError as err:
+        logger.warning(
+          f'stat-main: statement node (nid={stat_nid}): '
+          f'PartialProgramGenerationError:\n'
+          'Could not generate a partial program for the statement node. '
+          'Will start the RECOVERY rule learning procedure.')
+
+        lstat_node_val.success = False
+        lstat_node_val.reason = 'Could not generate a partial program for a node.'
+        lstat_node_val.etms = p_utils.current_time_sec()
+        lrule_learn_rec = ptlog.RuleLearnRec()
+        lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
+
+        learned_overfitted_trules = await stat_node_learn_trules_recovery(
+          simple_ntext,
+          stat_learn_subject.src_lang,
+          stat_learn_subject.tar_lang,
+        )
+
     except p_ext_rule_chooser.RuleCombinationsExhaustedError as err:
       logger.warning(
         f'stat-main: statement node (nid={stat_nid}): '
@@ -1483,25 +1502,6 @@ async def stat_node_main_learn_validate_trules(
 
       lstat_node_val.success = False
       lstat_node_val.reason = 'All rules in a matcher group are implausible.'
-      lstat_node_val.etms = p_utils.current_time_sec()
-      lrule_learn_rec = ptlog.RuleLearnRec()
-      lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
-
-      learned_overfitted_trules = await stat_node_learn_trules_recovery(
-        simple_ntext,
-        stat_learn_subject.src_lang,
-        stat_learn_subject.tar_lang,
-      )
-
-    except PartialProgramGenerationError as err:
-      logger.warning(
-        f'stat-main: statement node (nid={stat_nid}): '
-        f'PartialProgramGenerationError:\n'
-        'Could not generate a partial program for the statement node. '
-        'Will start the RECOVERY rule learning procedure.')
-
-      lstat_node_val.success = False
-      lstat_node_val.reason = 'Could not generate a partial program for a node.'
       lstat_node_val.etms = p_utils.current_time_sec()
       lrule_learn_rec = ptlog.RuleLearnRec()
       lstat_node_iter.stat_node_learn_rec = lrule_learn_rec
