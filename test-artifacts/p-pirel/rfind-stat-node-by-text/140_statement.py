@@ -1,0 +1,1 @@
+ans = ans + (h[i] * (h[i] - 1) * h[rem] / 2)

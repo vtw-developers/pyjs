@@ -1,0 +1,15 @@
+if i == 0 or j == 0:
+    myexactlog(4, 0)
+    T[i][j] = 0
+    myexactlog(5, T)
+elif i < j:
+    myexactlog(6, 0)
+    T[i][j] = 0
+    myexactlog(7, T)
+elif j == 1:
+    myexactlog(8, 1)
+    T[i][j] = i
+    myexactlog(9, T)
+else:
+    myexactlog(10, 0)
+    pass

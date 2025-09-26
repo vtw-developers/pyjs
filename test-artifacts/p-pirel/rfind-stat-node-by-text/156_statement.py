@@ -1,0 +1,1 @@
+carry = int(sum_0 / 10)

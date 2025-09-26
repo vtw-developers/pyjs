@@ -1,0 +1,1 @@
+dp[i] = max(dp[i], dp[i - 2] + arr[i] + arr[i - 1])

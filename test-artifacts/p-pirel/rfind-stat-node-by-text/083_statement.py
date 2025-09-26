@@ -1,0 +1,1 @@
+second = arr[i]

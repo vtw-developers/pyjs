@@ -1,0 +1,1 @@
+sorted1[d] = arr1[i]

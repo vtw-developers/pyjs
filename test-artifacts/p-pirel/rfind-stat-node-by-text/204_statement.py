@@ -1,0 +1,1 @@
+dict_0[arr[i]] = dict_0[arr[i]] + 1

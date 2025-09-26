@@ -1,0 +1,1 @@
+arr[i + x] = True

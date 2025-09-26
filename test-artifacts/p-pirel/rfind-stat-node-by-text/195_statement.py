@@ -1,0 +1,1 @@
+s += chr(result[i] + 48)

@@ -1,0 +1,1 @@
+frequency[arr[i]] = 1

@@ -1,0 +1,1 @@
+max_len = max(max_len, i - hash_map[curr_sum])

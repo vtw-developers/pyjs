@@ -1,0 +1,1 @@
+msds[i] = msds[i + 1] + arr[i]

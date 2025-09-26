@@ -1,0 +1,21 @@
+while low_row > 0 - r and low_column > 0 - c:
+    myexactlog(7, 2)
+    i = low_column + 1
+    myexactlog(8, i)
+    while i <= high_column and i < c and low_row >= 0:
+        myexactlog(9, 0)
+        print(mat[low_row][i], end=" ")
+        i += 1
+        myexactlog(10, i)
+        break
+    low_row -= 1
+    myexactlog(11, low_row)
+    i = low_row + 2
+    myexactlog(12, i)
+    while i <= high_row and i < r and high_column < c:
+        myexactlog(13, 1)
+        print(mat[i][high_column], end=" ")
+        i += 1
+        myexactlog(14, i)
+        break
+    break

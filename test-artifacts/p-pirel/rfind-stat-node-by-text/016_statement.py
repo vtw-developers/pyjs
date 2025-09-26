@@ -1,0 +1,1 @@
+input_0 = int(input_0 / 10)
