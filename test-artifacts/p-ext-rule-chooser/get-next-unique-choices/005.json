@@ -20,6 +20,8 @@
   "new_choices": {
     "type": "ASTNODE",
     "choices_list": [
+      [[23, 2, 3], 1],
+      [[19, 4, 5], 3],
       [[11, 3, 5], 1]
     ]
   }
