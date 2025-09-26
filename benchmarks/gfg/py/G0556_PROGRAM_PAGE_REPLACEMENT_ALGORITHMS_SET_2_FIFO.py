@@ -5,10 +5,10 @@ def test():
     idx = i
     result = f_gold(* parameters_set)
 "-----------------"
-from queue import Queue
+import queue
 def f_gold(pages, n, capacity):
     s = set()
-    indexes = Queue()
+    indexes = queue.Queue()
     page_faults = 0
     for i in range(n):
         if len(s) < capacity:
