@@ -1,6 +1,6 @@
 def test():
   "--- test function ---"
-  param =[(27,),(72,),(13,),(83,),(75,),(33,),(57,),(51,),(10,),(1,)]
+  param =[(2,),(3,),(4,),(5,),(6,),(7,),(8,),(9,),(10,),(11,)]
   for i, parameters_set in enumerate(param):
     idx = i
     result = f_gold(* parameters_set)
