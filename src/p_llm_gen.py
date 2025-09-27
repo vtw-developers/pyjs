@@ -513,7 +513,13 @@ class BaseTranslateSP2Task(BasePirelTask):
     self.sp2 = sp2
 
   def get_system_message(self) -> BaseMessage:
-    return SystemMessage(p_llm_templates.TranslateAny.System.GENERIC)
+    system_message = SystemMessagePromptTemplate.from_template(
+      p_llm_templates.TranslateAny.System.MODERNIZED
+    ).format(
+      src_language = p_consts.LANG_DICT[self.subject.src_lang],
+      tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
+    )
+    return system_message
 
   def get_few_shot_messages(self) -> List[BaseMessage]:
     return []
