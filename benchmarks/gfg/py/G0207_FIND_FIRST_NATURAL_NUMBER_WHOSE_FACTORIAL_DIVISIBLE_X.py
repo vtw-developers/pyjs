@@ -9,10 +9,10 @@ def f_gold(x):
     k = 1
     fact = 1
     for i in range(1, x):
+        k = i
         fact = fact * i
         if fact % x == 0:
             break
-        k = i
     return k
 "-----------------"
 test()

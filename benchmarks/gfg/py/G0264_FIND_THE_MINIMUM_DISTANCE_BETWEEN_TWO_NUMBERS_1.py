@@ -8,18 +8,20 @@ def test():
 import sys
 def f_gold(arr, n, x, y):
     min_dist = sys.maxsize
+    k = 0
     for i in range(n):
+        k = i
         if arr[i] == x or arr[i] == y:
             prev = i
             break
-    while i < n:
-        if arr[i] == x or arr[i] == y:
-            if arr[prev] != arr[i] and (i - prev) < min_dist:
-                min_dist = i - prev
-                prev = i
+    while k < n:
+        if arr[k] == x or arr[k] == y:
+            if arr[prev] != arr[k] and (k - prev) < min_dist:
+                min_dist = k - prev
+                prev = k
             else:
-                prev = i
-        i += 1
+                prev = k
+        k += 1
     return min_dist
 "-----------------"
 test()
