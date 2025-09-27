@@ -357,7 +357,7 @@ def filter_translation_rules(
 
 
 async def check_trules_test_based(
-  val_subject: p_subject.PirelSubject,
+  stat_val_subject: p_subject.PirelSubject,
   current_ruleset: p_ruleset.Ruleset,
   lstat_node_val: Optional[ptlog.StatNodeVal] = None
 ) -> None:
@@ -365,7 +365,7 @@ async def check_trules_test_based(
   A valid ruleset is one that can translate the source program
   plausibly, i.e. both source and target programs behave
   the same on the tests.
-  NOTE it is assumed that val_subject.src_main_code is instrumented.
+  NOTE it is assumed that stat_val_subject.src_main_code is instrumented.
   '''
 
   p_utils.log_json_time(f'args-check_trules_test_based.json', locals())
@@ -381,13 +381,13 @@ async def check_trules_test_based(
   '''
   logger.debug('stat-val: getting readonly choices list before applying translation rules')
   readonly_choices_list = await p_ext_rule_chooser.get_readonly_choices_list(
-    val_subject.get_src_main_code(),
-    val_subject.get_src_test_code(),
-    val_subject.translation_rules_test_code,
+    stat_val_subject.get_src_main_code(),
+    stat_val_subject.get_src_test_code(),
+    stat_val_subject.translation_rules_test_code,
     current_ruleset,
-    val_subject.name
+    stat_val_subject.name
   )
-  val_subject.readonly_choices_list = readonly_choices_list
+  stat_val_subject.readonly_choices_list = readonly_choices_list
   logger.debug('stat-val: saved readonly choices list')
 
   lstat_node_val.v2_expr_valid_ok = True
@@ -396,8 +396,8 @@ async def check_trules_test_based(
 
   logger.debug('stat-val: applying translation rules to get the target program')
   tar_program_plausible, translate_dbg_history = \
-    await prapp.apply_translation_rules(val_subject)
-  val_subject.readonly_choices_list = []  # reset
+    await prapp.apply_translation_rules(stat_val_subject)
+  stat_val_subject.readonly_choices_list = []  # reset
   logger.debug('stat-val: finished applying translation rules')
 
   lstat_node_val.v3_rule_apply_ok = True
@@ -433,17 +433,17 @@ def _test_is_valid_translation_rule_syntactic():
 async def _test_check_trules_test_based():
   '''
   async def check_trules_test_based(
-    val_subject: p_subject.PirelSubject,
+    stat_val_subject: p_subject.PirelSubject,
   ) -> None:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_check_trules_test_based_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
-  val_subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
+  stat_val_subject = p_subject.PirelSubject.from_dict(args_dict['stat_val_subject'])
 
   await check_trules_test_based(
-    val_subject,
+    stat_val_subject,
   )
 
 
