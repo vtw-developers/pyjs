@@ -8,16 +8,18 @@ def test():
 def f_gold(arr, n, k):
     count_map = {}
     for i in range(0, n):
-        if arr[i] in count_map.keys():
-            count_map[arr[i]] += 1
+        m = i
+        if arr[m] in count_map.keys():
+            count_map[arr[m]] += 1
         else:
-            count_map[arr[i]] = 1
-        i += 1
+            count_map[arr[m]] = 1
+        m += 1
     for i in range(0, n):
-        if count_map[arr[i]] == k:
-            retval_1 = arr[i]
+        m = i
+        if count_map[arr[m]] == k:
+            retval_1 = arr[m]
             return retval_1
-        i += 1
+        m += 1
     retval_2 = -1
     return retval_2
 "-----------------"

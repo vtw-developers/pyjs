@@ -18,12 +18,13 @@ def f_gold(num):
     sum_0 = 0
     p = 1
     for i in range(length - 1, -1, -1):
+        k = i
         group = 0
-        group += ord(num[i]) - ord("0")
-        i -= 1
-        group += (ord(num[i]) - ord("0")) * 10
-        i -= 1
-        group += (ord(num[i]) - ord("0")) * 100
+        group += ord(num[k]) - ord("0")
+        k -= 1
+        group += (ord(num[k]) - ord("0")) * 10
+        k -= 1
+        group += (ord(num[k]) - ord("0")) * 100
         sum_0 = sum_0 + group * p
         p *= -1
     sum_0 = abs(sum_0)
