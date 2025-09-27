@@ -379,7 +379,7 @@ async def check_trules_test_based(
   2. ruleset_serialized contains verified rules that can be copied
      to current_ruleset
   '''
-  logger.debug('~~ Getting readonly choices list before applying translation rules')
+  logger.debug('stat-val: getting readonly choices list before applying translation rules')
   readonly_choices_list = await p_ext_rule_chooser.get_readonly_choices_list(
     val_subject.get_src_main_code(),
     val_subject.get_src_test_code(),
@@ -388,17 +388,17 @@ async def check_trules_test_based(
     val_subject.name
   )
   val_subject.readonly_choices_list = readonly_choices_list
-  logger.debug('~~ Saved readonly choices list')
+  logger.debug('stat-val: saved readonly choices list')
 
   lstat_node_val.v2_expr_valid_ok = True
   lstat_node_val.v2_expr_valid_etms = p_utils.current_time_msec()
   lstat_node_val.v3_rule_apply_stms = p_utils.current_time_msec()
 
-  logger.debug('~~ Applying translation rules to get the target program')
+  logger.debug('stat-val: applying translation rules to get the target program')
   tar_program_plausible, translate_dbg_history = \
     await prapp.apply_translation_rules(val_subject)
   val_subject.readonly_choices_list = []  # reset
-  logger.debug('~~ Finished applying translation rules')
+  logger.debug('stat-val: finished applying translation rules')
 
   lstat_node_val.v3_rule_apply_ok = True
   lstat_node_val.v3_rule_apply_etms = p_utils.current_time_msec()
