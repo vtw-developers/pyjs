@@ -20,18 +20,19 @@ def test():
 def f_gold(mat, r, c):
     result = 0
     for i in range(r):
-        j = 0
+        k = 0
         for j in range(c - 1):
+            k = j
             if mat[i][j + 1] <= mat[i][j]:
                 break
-        if j == c - 2:
+        if k == c - 2:
             result += 1
     for i in range(0, r):
         k = 0
         for j in range(c - 1, 0, -1):
+            k = j
             if mat[i][j - 1] <= mat[i][j]:
                 break
-            k = j
         if c > 1 and k == 1:
             result += 1
     return result
