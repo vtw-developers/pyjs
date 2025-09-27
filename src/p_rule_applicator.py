@@ -866,6 +866,61 @@ def _check_and_update_choices(
         raise SrcTestScriptProblematicNodeError(msg)
 
 
+def _check_for_instrumented_log_statements(
+  src_program_instr: str,
+  tar_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, str]:
+  '''
+  This function does string-level post-processing on
+  src_program_instr and tar_program_instr for certain subjects.
+  '''
+  conf_data = {
+    # In G0326, change the 2nd argument of myexactlog()
+    # from 'heapq' to 'Q' in both src and tar programs
+    # because 'heapq' is a Python module name, while 'Q' is
+    # an object on which a function of 'heapq' is called.
+    # Alternatively, LogStatementInserter can be modified.
+    'G0326': {
+      'py': {
+        'src': r'^(\s+)myexactlog\((\d+), heapq\)\s*$',
+        'rpl': r'\1myexactlog(\2, Q)'
+      },
+      'js': {
+        'src': r'^(\s+)myexactlog\((\d+), heapq\);\s*$',
+        'rpl': r'\1myexactlog(\2, Q);'
+      }
+    }
+  }
+
+  if subject.name not in conf_data:
+    return src_program_instr, tar_program_instr
+
+  logger.debug('Post-processing instrumented log statements in src and tar programs.')
+  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
+
+  subject_conf = conf_data[subject.name]
+  assert subject.src_lang in subject_conf
+  assert subject.tar_lang in subject_conf
+
+  src_conf = subject_conf[subject.src_lang]
+  tar_conf = subject_conf[subject.tar_lang]
+  assert 'src' in src_conf and 'rpl' in src_conf
+  assert 'src' in tar_conf and 'rpl' in tar_conf
+
+  src_pattern = re.compile(src_conf['src'], flags=re.MULTILINE)
+  tar_pattern = re.compile(tar_conf['src'], flags=re.MULTILINE)
+  src_repl = src_conf['rpl']
+  tar_repl = tar_conf['rpl']
+
+  after_src_program_instr, src_count = src_pattern.subn(src_repl, src_program_instr)
+  after_tar_program_instr, tar_count = tar_pattern.subn(tar_repl, tar_program_instr)
+  assert src_count == tar_count, 'sanity check'
+  logger.debug(f'Replaced {src_count} instrumented log statements in src and tar programs.')
+  return after_src_program_instr, after_tar_program_instr
+
+
 def _check_for_rec_fn_calls(
   src_program_instr: str,
   tar_program_instr: str,
@@ -973,6 +1028,8 @@ async def apply_translation_rules(
 
     src_program_instr, tar_program_instr = \
       _check_for_rec_fn_calls(src_program_instr, tar_program_instr, subject)
+    src_program_instr, tar_program_instr = \
+      _check_for_instrumented_log_statements(src_program_instr, tar_program_instr, subject)
 
     try:
       await _run_tests(src_program_instr, tar_program_instr, subject)
