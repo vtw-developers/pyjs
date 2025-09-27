@@ -524,8 +524,24 @@ def _extract_err_lines_from_trace_mismatch(
   src_mmls_idx, tar_mmls_idx = mismatched_log_stat_idxs
 
   if src_mmls_idx != tar_mmls_idx:
-    error_lines = _get_error_lines(tar_program_instr, src_mmls_idx)
-    error_lines.update(_get_error_lines(tar_program_instr, tar_mmls_idx))
+    '''
+    If src and tar scripts go to different log statements,
+    then we need to choose the smallest log statement index.
+    Consider the following example:
+    ```                                 ```
+    if Sum in mp.keys():                if (Array.from(Object.keys(mp)).includes(Sum)) {
+        myexactlog(10, 2)                   myexactlog(10, 2);
+        pass                            }
+    mp[Sum] = mp.get(Sum, 0) + 1        mp[Sum] = (Object.prototype.hasOwnProperty.call(mp, Sum) ? mp[Sum] : 0) + 1;
+    myexactlog(12, mp)                  myexactlog(12, mp);
+    ```                                 ```
+    If src enters 10, but tar goes to 12, then the issue at tar is at 10,
+    i.e. it should have also entered 10.
+    If src goes to 12, but tar enters 10, then the issue at tar is also at 10,
+    i.e. it should not have entered 10.
+    Thus we always select the smaller log statement index.
+    '''
+    error_lines = _get_error_lines(tar_program_instr, min(tar_mmls_idx, src_mmls_idx))
   else:
     error_lines = _get_error_lines(tar_program_instr, src_mmls_idx)
   assert len(error_lines) > 0, 'error lines must be non-empty'
