@@ -4,49 +4,12 @@ GUIDELINES:
 '''
 
 
-class SimplifyTemplate:
-  class System:
-    FILLIN_GENERIC = (
-      'You are a world-class software engineer.\n'
-      '\n'
-      'Your task is to generate SYNTACTICALLY VALID {language} programs as follows:\n'
-      '1. I will give you a template\n'
-      '2. A template is a {language} program with holes\n'
-      '3. A hole is a missing part of a program. Usually, it is a missing identifier or a literal value\n'
-      '4. A hole is denoted with double underscores (i.e. `__`)\n'
-      '5. Your task is to fill in every hole in such a way that the resulting program is a SYNTACTICALLY VALID {language} program\n'
-      '6. You should modify ONLY holes (double underscores `__`). DO NOT change other parts of the template\n'
-      '7. Your output should contain ONLY the {language} program with its holes filled in\n'
-      '8. Surround the code blocks with triple backticks (```)\n'
-    )
-
-  class Prompt:
-    FILLIN_GENERIC = (
-      'Remember:\n'
-      'A hole is denoted with double underscores `__`.\n'
-      'Generate a syntactically valid {language} program.\n'
-      'Replace `__` only, and DO NOT change the rest of the code.\n'
-      '\n'
-      'Fill in the holes in the following {language} program:\n'
-      '```\n'
-      '{template}\n'
-      '```\n'
-      '\n'
-      '1. Provide {num_variants} different variants to fill in the holes.\n'
-      '2. Fill in the holes with the simplest possible code.\n'
-      '3. Only holes should be filled in, rest of the template MUST STAY UNCHANGED.\n'
-      '4. Put each variant in a separate code block.\n'
-    )
-
 class TranslateAny:
   class System:
     GENERIC = (
       'You are a world-class software engineer.\n'
-      '\n'
       'Your task is to correctly translate programs from one programming language to another.\n'
-      '\n'
       'You must precisely follow the provided instructions while completing the translation task.\n'
-      '\n'
     )
 
     # by Jinwoo for GPT-5
@@ -491,48 +454,6 @@ class TranslateSP2:
       'Provide all valid ways to translate `{snippet_to_translate_sp2}` (if any), and put each translation in a separate code block.\n'
     )
 
-class CheckTSP:
-  class System:
-    GENERIC = (
-      'Act as an expert {src_language} software engineer with deep knowledge of {src_language} language\'s syntax, semantics, and idiomatic patterns.\n'
-      'Your task is to identify syntactic errors within provided {src_language} code snippets in a step-by-step manner, ensuring accuracy and clarity.\n'
-      '\n'
-      'Follow these steps:\n'
-      '1. Analyze the given {src_language} code snippet to understand its purpose and logic.\n'
-      '2. Identify syntactic errors if any.\n'
-      '3. Identify unconventional uses of language constructs for cases when code snippets are syntactically correct.\n'
-    )
-
-  class Prompt:
-    GENERIC = (
-      'Do these two snippets of {src_language} code have syntactic errors?\n'
-      '\n'
-      '{src_language} snippet #1\n'
-      '```{src_lang}\n'
-      '{sp1}\n'
-      '```\n'
-      '\n'
-      '{src_language} snippet #2\n'
-      '```{src_lang}\n'
-      '{sp2}\n'
-      '```\n'
-      '\n'
-      'Your output should be as follows:\n'
-      '1. **Step-by-Step Explanation**:\n'
-      'Provide a detailed reasoning process for identifying syntactic errors, explaining key decisions.\n'
-      '2. **A JSON object containing your verdict**:\n'
-      'Your response should be a formatted json as below:\n'
-      '```json\n'
-      '{{\n'
-      '  "snippet1": <val>,\n'
-      '  "snippet2": <val>\n'
-      '}}\n'
-      '```\n'
-      'where `<val>` is `"incorrect"` if a snippet is syntactically incorrect, and `"correct"` if a snippet is syntactically correct.\n'
-      'Constraints:\n'
-      'Only the final JSON object containing your response should be in ```triple backticks format```. Otherwise, use only `one backtick format` when needed.\n'
-    )
-
 class GenTestFunction:
   '''
   Contains templates for generating test functions for
@@ -684,16 +605,3 @@ class GetReferenceTranslation:
       '   The translation must match the structure of the original code exactly.'
       '\n'
     )
-
-    # TODO complete
-    NEGATIVE_EXAMPLES = ('')
-
-  class Feedback:
-
-    # TODO complete
-    class ParseError:
-      CAND_DESC = ('')
-
-    # TODO complete
-    class NegSampleMatched:
-      CAND_DESC = ('')
