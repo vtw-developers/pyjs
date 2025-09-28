@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import copy
 import tree_sitter
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import p_consts
 import p_utils
@@ -2727,7 +2727,7 @@ class FunctionInvocationReplacer(pvis.Visitor):
     defined_fn: str,
     invoked_fn: str,
     lit_value: Union[int, bool]
-  ) -> str:
+  ) -> Tuple[str, bool]:
     '''
     Replace function invocations in the given snippet with literal values.
     The snippet is expected to be a body of a Python script.
