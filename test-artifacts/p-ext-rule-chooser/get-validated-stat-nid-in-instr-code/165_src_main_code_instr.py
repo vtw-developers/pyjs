@@ -1,0 +1,5 @@
+def f_gold(x, y, n):
+    dp = [0 for i in range(n + 1)]
+    myexactlog(1, dp)
+    dp[0] = False
+    myexactlog(2, dp)

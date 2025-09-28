@@ -4,14 +4,12 @@ from itertools import chain
 from typing import Dict, List, Optional, Tuple, Set
 
 import d_ast_parse
-import d_grammar_rules
 import p_consts
-import p_llm_gen
+import p_data_structures as pds
 import p_pirel
 import p_ruleset
 import p_rule_applicator as prapp
 import p_subject
-import p_tree_log as ptlog
 import p_utils
 import p_visitor as pvis
 import p_visitor_py as pvpy
@@ -1090,26 +1088,130 @@ async def process_choicable_range_cursor(
     raise UnhandledRangeCursorExistsError
 
 
-def _get_readonly_choices_list_init(
+async def _get_validated_stat_nid_in_instr_code(
   src_main_code: str,
-  ruleset: p_ruleset.Ruleset,
-  is_three_split: bool,
-) -> tuple:
+  simple_ntext: str,
+  all_stat_nids: List[int],
+) -> int:
   '''
-  Given a duoglot-style AST, collect all nodes under AST,
-  for which we should "cleverly" generate choices that
-  result in a plausible translation.
-  RETURN a list of tuples (range cursor, pre-context).
+  PARAM src_main_code: instrumented source code prepared for rule applicator.
+  RETURN the node id of the statement rules of which are
+  to be validated.
   '''
 
+  _GFG_STAT_NTYPES = [
+    pvpy.ImportFromStatementNode,
+    pvpy.ImportStatementNode,
+    pvpy.BreakStatementNode,
+    pvpy.ContinueStatementNode,
+    pvpy.ReturnStatementNode,
+    pvpy.ExpressionStatementNode,
+    pvpy.IfStatementNode,
+    pvpy.WhileStatementNode,
+    pvpy.ForStatementNode,
+    pvpy.TryStatementNode,
+    pvpy.PassStatementNode,  # never used in f_gold, but added by instrumentation
+  ]
+
+  tree = pvpy.Tree.from_str(src_main_code)
+  root_node = tree.root_node
+  nid_node_map = root_node.get_nid_node_map()
+
+  simple_ntree = pvpy.Tree.from_str(simple_ntext)
+  assert len(simple_ntree.root_node.get_nt_children()) == 1, 'Expected exactly one statement node'
+  simple_node = simple_ntree.root_node.get_nt_children()[0]
+
   '''
-  First we collect all nodes that match the overfitted rules.
-  Then we pass their node ids to ChoicableNodeExtractor.
+  Need to ignore all statements that were added as
+  part of instrumentation: break statements, log statements,
+  pass statements.
+  TODO with break statements, it's a bit tricky; for now, just return
+  the latest break statement node id even if it's inserted by instrumentation,
+  because it has "no" effect on p_ext_rule_chooser.get_readonly_choices_list().
+  '''
+  pp = pvpy.PrettyPrinter(indent_with='    ')
+  for stat_nid in reversed(all_stat_nids):
+    stat_node = nid_node_map[stat_nid]
+    assert isinstance(stat_node, tuple(_GFG_STAT_NTYPES)), \
+      f'unexpected type: {stat_node.__class__.__name__}'
+
+    # skip if statement types do not match
+    if type(stat_node) != type(simple_node):
+      continue
+
+    # skip myexactlog(...) statements
+    if isinstance(stat_node, pvpy.ExpressionStatementNode):
+      assert len(stat_node.get_nt_children()) == 1, 'sanity check'
+      child = stat_node.get_nt_children()[0]
+      if isinstance(child, pvpy.CallNode):
+        unparsed_child : str = pp.visit(child)
+        if unparsed_child.lstrip().startswith('myexactlog('):
+          continue
+
+    return stat_nid
+
+  raise ValueError('No statement node found that matches the simple_ntext statement node.')
+
+
+async def _get_all_stat_nids(
+  src_main_code: str,
+  is_three_split: bool
+) -> List[int]:
+  stat_nodes = await p_pirel._get_statement_nodes(
+    src_main_code, 'py', is_three_split)
+  assert len(stat_nodes) > 0, 'sanity check'
+  for node in stat_nodes:
+    assert isinstance(node, pds.NTTextNode), 'sanity check'
+  stat_nids = [node.get_id() for node in stat_nodes]
+  return stat_nids
+
+
+async def _get_stat_nids_in_pre_context(
+  src_main_code: str,
+  simple_ntext: str,
+  is_three_split: bool,
+) -> List[int]:
+  '''
+  RETURN a list of statement node ids that appear in pre_context.
+  '''
+  all_stat_nids = await _get_all_stat_nids(src_main_code, is_three_split)
+  assert all_stat_nids == sorted(all_stat_nids), 'Expected all_stat_nids to be sorted in ascending order'
+
+  val_stat_nid = await _get_validated_stat_nid_in_instr_code(
+    src_main_code, simple_ntext, all_stat_nids)
+
+  stat_nids_pre_context = [nid for nid in all_stat_nids if nid < val_stat_nid]
+  return stat_nids_pre_context
+
+
+async def _get_exluded_stat_nids(
+  src_main_code: str,
+  simple_ntext: str,
+  ruleset: p_ruleset.Ruleset,
+  is_three_split: bool,
+) -> List[int]:
+  '''
+  RETURN a list of statement node ids that should be excluded
+  from consideration when generating choices for translation.
+  These are statement nodes that appear in pre_context
+  and statement nodes that match overfitted rules.
+  '''
+  excluded_stat_nids = set()
+
+  '''
+  Nodes in pre context are excluded since they are already processed.
+  '''
+  stat_nids_pre_context = await _get_stat_nids_in_pre_context(
+    src_main_code, simple_ntext, is_three_split)
+  excluded_stat_nids.update(stat_nids_pre_context)
+
+  '''
+  Nodes that match overfitted rules are excluded.
   '''
   rc_src_main_code, dgann = d_ast_parse.parse_text_to_range_cursor(src_main_code, 'py')
   if is_three_split:
     assert rc_src_main_code[1] + 1 == rc_src_main_code[2], \
-      'range cursor must specify just one node'
+      'range cursor must specify just one node (function f_gold)'
     all_range_cursors = d_ast_parse.get_all_range_cursors_under(
       rc_src_main_code)
   else:
@@ -1133,9 +1235,29 @@ def _get_readonly_choices_list_init(
         f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"\n'
         f'since it matches overfitted rule:\n{rule.to_rule_str()}')
       overfitted_stat_nids.add(stat_nid)
+  excluded_stat_nids.update(overfitted_stat_nids)
+
+  excluded_stat_nids = sorted(excluded_stat_nids)
+  return excluded_stat_nids
+
+
+async def _get_readonly_choices_list_init(
+  src_main_code: str,
+  ruleset: p_ruleset.Ruleset,
+  is_three_split: bool,
+  simple_ntext: str,
+) -> tuple:
+  '''
+  Given a duoglot-style AST, collect all nodes under AST,
+  for which we should "cleverly" generate choices that
+  result in a plausible translation.
+  RETURN a list of tuples (range cursor, pre-context).
+  '''
+  excluded_stat_nids = await _get_exluded_stat_nids(
+    src_main_code, simple_ntext, ruleset, is_three_split)
 
   choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
-    src_main_code, exclude_statement_nodes_ids=list(overfitted_stat_nids))
+    src_main_code, exclude_statement_nodes_ids=excluded_stat_nids)
   logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
 
   chable_rc_prectxs = []  # choicable range cursors with pre-context
@@ -1246,6 +1368,7 @@ async def get_readonly_choices_list(
   src_test_code: Optional[str],
   translation_rules_test_code: str,
   ruleset: p_ruleset.Ruleset,
+  simple_ntext: str,
   subject_name: str
 ) -> list:
   '''
@@ -1277,8 +1400,8 @@ async def get_readonly_choices_list(
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  chable_rc_prectxs, dgast, dgann = _get_readonly_choices_list_init(
-    src_main_code, ruleset, src_test_code is not None)
+  chable_rc_prectxs, dgast, dgann = await _get_readonly_choices_list_init(
+    src_main_code, ruleset, src_test_code is not None, simple_ntext)
 
   for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
 
@@ -1988,6 +2111,7 @@ def _test_get_readonly_choices_list():
     src_test_code: str,
     translation_rules_test_code: str,
     ruleset: p_ruleset.Ruleset,
+    simple_ntext: str,
     subject_name: str
   ) -> list:
   '''
@@ -1999,6 +2123,7 @@ def _test_get_readonly_choices_list():
   src_test_code = args_dict['src_test_code']
   translation_rules_test_code = args_dict['translation_rules_test_code']
   ruleset = p_ruleset.Ruleset.from_dict(args_dict['ruleset'])
+  simple_ntext = args_dict['simple_ntext']
   subject_name = args_dict['subject_name']
 
   readonly_choices_list = asyncio.run(get_readonly_choices_list(
@@ -2006,8 +2131,11 @@ def _test_get_readonly_choices_list():
     src_test_code,
     translation_rules_test_code,
     ruleset,
+    simple_ntext,
     subject_name
   ))
+
+  print(f'Readonly choices list: {json.dumps(readonly_choices_list, indent=2)}')
 
 
 if __name__ == '__main__':
