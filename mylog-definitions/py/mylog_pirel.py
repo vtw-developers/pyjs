@@ -84,6 +84,8 @@ def serialize(arg):
     return serialize_dict(arg)
   if isinstance(arg, Iterable):
     return serialize_list(list(arg))
+  if isinstance(arg, queue.Queue):
+    return serialize_list(list(arg.queue))
   if callable(arg):
     return ["function"]
   str_result = str(arg)
