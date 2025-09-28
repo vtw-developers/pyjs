@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import jsbeautifier
 import tree_sitter
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 import p_consts
 import p_utils
@@ -716,7 +716,7 @@ class FunctionInvocationReplacer(pvis.Visitor):
     defined_fn: str,
     invoked_fn: str,
     lit_value: Union[int, bool]
-  ) -> str:
+  ) -> Tuple[str, bool]:
     '''
     Replace function invocations in the given snippet with literal values.
     The snippet is expected to be a body of a JavaScript code.
