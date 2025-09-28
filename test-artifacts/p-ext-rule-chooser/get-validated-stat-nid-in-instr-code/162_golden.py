@@ -1,0 +1,1 @@
+retval_2 = arr[last] - arr[first]

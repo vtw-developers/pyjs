@@ -1,0 +1,1 @@
+retval_1 = math.floor((a + b) / 2)

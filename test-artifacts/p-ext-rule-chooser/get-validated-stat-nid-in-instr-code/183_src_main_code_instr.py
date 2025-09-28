@@ -1,0 +1,15 @@
+def f_gold(s):
+    if len(s) == 0:
+        myexactlog(1, 0)
+        myexactlog(2, 0)
+        return 0
+    ans = 0
+    myexactlog(3, ans)
+    o = 0
+    myexactlog(4, o)
+    c = 0
+    myexactlog(5, c)
+    for i in range(len(s)):
+        myexactlog(6, 0)
+        pass
+        break

@@ -359,6 +359,7 @@ def filter_translation_rules(
 async def check_trules_test_based(
   stat_val_subject: p_subject.PirelSubject,
   current_ruleset: p_ruleset.Ruleset,
+  simple_ntext: str,
   lstat_node_val: Optional[ptlog.StatNodeVal] = None
 ) -> None:
   '''
@@ -385,6 +386,7 @@ async def check_trules_test_based(
     stat_val_subject.get_src_test_code(),
     stat_val_subject.translation_rules_test_code,
     current_ruleset,
+    simple_ntext,
     stat_val_subject.name
   )
   stat_val_subject.readonly_choices_list = readonly_choices_list
@@ -434,6 +436,9 @@ async def _test_check_trules_test_based():
   '''
   async def check_trules_test_based(
     stat_val_subject: p_subject.PirelSubject,
+    current_ruleset: p_ruleset.Ruleset,
+    simple_ntext: str,
+    lstat_node_val: Optional[ptlog.StatNodeVal] = None
   ) -> None:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_check_trules_test_based_config.yaml'
@@ -441,9 +446,14 @@ async def _test_check_trules_test_based():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   stat_val_subject = p_subject.PirelSubject.from_dict(args_dict['stat_val_subject'])
+  current_ruleset = p_ruleset.Ruleset.from_dict(args_dict['current_ruleset'])
+  simple_ntext = args_dict['simple_ntext']
 
   await check_trules_test_based(
     stat_val_subject,
+    current_ruleset,
+    simple_ntext,
+    None
   )
 
 

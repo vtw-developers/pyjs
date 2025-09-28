@@ -1368,6 +1368,7 @@ async def stat_node_validate_trules(
   await p_rule_validator.check_trules_test_based(
     stat_val_subject,
     current_ruleset,
+    simple_ntext,
     lstat_node_val,
   )
 

@@ -1,7 +1,9 @@
+import asyncio
 import json
 import unittest
 from typing import Tuple
 
+import d_ast_parse
 import p_consts
 import p_ext_rule_chooser
 import p_utils
@@ -53,7 +55,32 @@ class TestGetNextUniqueChoices(unittest.TestCase):
       choices_list_stack,
       []
     )
-    
+
+
+class TestGetValidatedStatNidInInstrCode(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-ext-rule-chooser' / 'get-validated-stat-nid-in-instr-code'
+    self.maxDiff = None
+
+  def load_fixture(self, test_id: str) -> Tuple[str, str, int]:
+    src_main_code = p_utils.read_text(self.fixtures_dir_path / f'{test_id}_src_main_code_instr.py')
+    simple_ntext = p_utils.read_text(self.fixtures_dir_path / f'{test_id}_simple_ntext.py')
+    golden = p_utils.read_text(self.fixtures_dir_path / f'{test_id}_golden.py')
+    return src_main_code, simple_ntext, golden
+
+  def test_all_common_gfg(self):
+    NUM_TESTS = 200
+    for i in range(1, NUM_TESTS + 1):
+      test_id = f'{i:03d}'
+      with self.subTest(test_id=test_id):
+        src_main_code, simple_ntext, golden = self.load_fixture(test_id)
+        all_stat_nids = asyncio.run(p_ext_rule_chooser._get_all_stat_nids(
+          src_main_code, True))
+        val_stat_nid = asyncio.run(p_ext_rule_chooser._get_validated_stat_nid_in_instr_code(
+          src_main_code, simple_ntext, all_stat_nids))
+        stat_text = d_ast_parse.node_id_pretty_print(src_main_code, 'py', val_stat_nid)
+        self.assertEqual(stat_text, golden)
+
 
 if __name__ == '__main__':
   unittest.main()

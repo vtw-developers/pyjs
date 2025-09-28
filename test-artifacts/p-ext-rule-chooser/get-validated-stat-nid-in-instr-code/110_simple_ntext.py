@@ -1,0 +1,2 @@
+if index == n:
+    pass

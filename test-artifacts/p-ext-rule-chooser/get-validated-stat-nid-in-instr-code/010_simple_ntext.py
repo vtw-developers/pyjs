@@ -1,0 +1,1 @@
+num1 = "".join(num)

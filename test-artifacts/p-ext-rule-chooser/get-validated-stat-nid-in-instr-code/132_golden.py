@@ -1,0 +1,1 @@
+res = bool(placeAdd or placeMinus)
