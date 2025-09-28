@@ -549,6 +549,264 @@ def _extract_err_lines_from_trace_mismatch(
   return error_lines
 
 
+def _check_for_possible_loop_semantic_diff(
+  src_program_instr: str,
+  tar_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, str]:
+  '''
+  This function checks for possible loop semantic differences
+  between src_program_instr and tar_program_instr.
+  For example, iterating over a Python dictionary
+  and a JavaScript object may lead to different
+  order of iterations.
+  '''
+  conf_data = {
+    # In G0143, 'um' is a dictionary in Python and an object in JavaScript.
+    # The order of iteration over the keys of a dictionary are different
+    # in Python and JavaScript.
+    'G0143': {
+      'py': {
+        'src': r'^(\s+)for itr in um:\s*$',
+        'rpl': r'\1for itr in sorted(um.keys()):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) itr of Object.keys\(um\)\) {\s*$',
+        'rpl': r'\1for (\2 itr of Object.keys(um).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    },
+    # In G0153, 'm' is a dictionary in Python and an object in JavaScript.
+    # The order of iteration over the values of a dictionary are different
+    # in Python and JavaScript.
+    'G0153': {
+      'py': {
+        'src': r'^(\s+)for i in m.values\(\):\s*$',
+        'rpl': r'\1for i in sorted(m.values()):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) i of Object.values\(m\)\) {\s*$',
+        'rpl': r'\1for (\2 i of Object.values(m).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    },
+    # In G0255, 's' is a set in Python and a Set in JavaScript.
+    # The order of iteration over the elements of a set are different
+    # in Python and JavaScript.
+    'G0255': {
+      'py': {
+        'src': r'^(\s+)for i in s:\s*$',
+        'rpl': r'\1for i in sorted(s):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) i of s\) {\s*$',
+        'rpl': r'\1for (\2 i of Array.from(s).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    },
+    # In G0268, 'Hash' is a dictionary in Python and an object in JavaScript.
+    # The order of iteration over the keys of a dictionary are different
+    # in Python and JavaScript.
+    'G0268': {
+      'py': {
+        'src': r'^(\s+)for i in Hash:\s*$',
+        'rpl': r'\1for i in sorted(Hash.keys()):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) i of Object.keys\(Hash\)\) {\s*$',
+        'rpl': r'\1for (\2 i of Object.keys(Hash).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    },
+    # In G0289, 'Hash' is a dictionary in Python and an object in JavaScript.
+    # The order of iteration over the keys of a dictionary are different
+    # in Python and JavaScript.
+    'G0289': {
+      'py': {
+        'src': r'^(\s+)for i in Hash:\s*$',
+        'rpl': r'\1for i in sorted(Hash.keys()):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) i of Object.keys\(Hash\)\) {\s*$',
+        'rpl': r'\1for (\2 i of Object.keys(Hash).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    },
+    # In G0587, 'countA' is a dictionary in Python and an object in JavaScript.
+    # The order of iteration over the keys of a dictionary are different
+    # in Python and JavaScript.
+    'G0587': {
+      'py': {
+        'src': r'^(\s+)for x in countA:\s*$',
+        'rpl': r'\1for x in sorted(countA.keys()):'
+      },
+      'js': {
+        'src': r'^(\s+)for \((\w+) x of Object.keys\(countA\)\) {\s*$',
+        'rpl': r'\1for (\2 x of Object.keys(countA).sort((a, b) => Number(a) - Number(b))) {'
+      },
+      'num_replacements': 1
+    }
+  }
+
+  if subject.name not in conf_data:
+    return src_program_instr, tar_program_instr
+
+  logger.debug('Checking for possible loop semantic differences in src and tar programs.')
+
+  subject_conf = conf_data[subject.name]
+  assert subject.src_lang in subject_conf
+  assert subject.tar_lang in subject_conf
+
+  src_conf = subject_conf[subject.src_lang]
+  tar_conf = subject_conf[subject.tar_lang]
+  assert 'src' in src_conf and 'rpl' in src_conf, 'sanity check'
+  assert 'src' in tar_conf and 'rpl' in tar_conf, 'sanity check'
+
+  src_pattern = re.compile(src_conf['src'], flags=re.MULTILINE)
+  tar_pattern = re.compile(tar_conf['src'], flags=re.MULTILINE)
+  src_repl = src_conf['rpl']
+  tar_repl = tar_conf['rpl']
+
+  after_src_program_instr, src_count = src_pattern.subn(src_repl, src_program_instr)
+  after_tar_program_instr, tar_count = tar_pattern.subn(tar_repl, tar_program_instr)
+
+  if src_count != tar_count:
+    logger.debug(
+      f'Number of replacements differ between src and tar programs. '
+      f'Probably not found in tar_program_instr. Skipping replacement.')
+    return src_program_instr, tar_program_instr
+
+  exp_num_repls = conf_data[subject.name]['num_replacements']
+  if src_count != exp_num_repls:
+    logger.warning(
+      f'Number of replacements ({src_count}) differ from expected ({exp_num_repls}). '
+      f'Should not normally happen. Skipping replacement.')
+    return src_program_instr, tar_program_instr
+
+  logger.debug(f'Replaced {src_count} loop semantic difference(s) in src and tar programs.')
+  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
+  p_utils.log_file_time(f'after_src_program_instr.py', after_src_program_instr)
+  p_utils.log_file_time(f'after_tar_program_instr.js', after_tar_program_instr)
+  return after_src_program_instr, after_tar_program_instr
+
+
+def _check_for_instrumented_log_statements(
+  src_program_instr: str,
+  tar_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, str]:
+  '''
+  This function modifies log statements for certain subjects.
+  The modification is done on a string level using regex.
+  '''
+  conf_data = {
+    # In G0289, change the 2nd argument of myexactlog()
+    # from 'res' to 'int(res)' in src program
+    # and from 'res' to 'Number(res)' in tar program
+    # because 'res' is string in tar program.
+    'G0289': {
+      'py': {
+        'src': r'^(\s+)myexactlog\((\d+), res\)\s*$',
+        'rpl': r'\1myexactlog(\2, int(res))'
+      },
+      'js': {
+        'src': r'^(\s+)myexactlog\((\d+), res\);\s*$',
+        'rpl': r'\1myexactlog(\2, Number(res));'
+      }
+    },
+    # In G0326, change the 2nd argument of myexactlog()
+    # from 'heapq' to 'Q' in both src and tar programs
+    # because 'heapq' is a Python module name, while 'Q' is
+    # an object on which a function of 'heapq' is called.
+    # Alternatively, LogStatementInserter can be modified.
+    'G0326': {
+      'py': {
+        'src': r'^(\s+)myexactlog\((\d+), heapq\)\s*$',
+        'rpl': r'\1myexactlog(\2, Q)'
+      },
+      'js': {
+        'src': r'^(\s+)myexactlog\((\d+), heapq\);\s*$',
+        'rpl': r'\1myexactlog(\2, Q);'
+      }
+    }
+  }
+
+  if subject.name not in conf_data:
+    return src_program_instr, tar_program_instr
+
+  logger.debug('Post-processing instrumented log statements in src and tar programs.')
+
+  subject_conf = conf_data[subject.name]
+  assert subject.src_lang in subject_conf
+  assert subject.tar_lang in subject_conf
+
+  src_conf = subject_conf[subject.src_lang]
+  tar_conf = subject_conf[subject.tar_lang]
+  assert 'src' in src_conf and 'rpl' in src_conf, 'sanity check'
+  assert 'src' in tar_conf and 'rpl' in tar_conf, 'sanity check'
+
+  src_pattern = re.compile(src_conf['src'], flags=re.MULTILINE)
+  tar_pattern = re.compile(tar_conf['src'], flags=re.MULTILINE)
+  src_repl = src_conf['rpl']
+  tar_repl = tar_conf['rpl']
+
+  after_src_program_instr, src_count = src_pattern.subn(src_repl, src_program_instr)
+  after_tar_program_instr, tar_count = tar_pattern.subn(tar_repl, tar_program_instr)
+
+  if src_count != tar_count:
+    logger.warning(
+      f'Number of replacements differ between src and tar programs. '
+      f'Should not normally happen. Skipping replacement.')
+    return src_program_instr, tar_program_instr
+
+  logger.debug(f'Replaced {src_count} instrumented log statements in src and tar programs.')
+  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
+  p_utils.log_file_time(f'after_src_program_instr.py', after_src_program_instr)
+  p_utils.log_file_time(f'after_tar_program_instr.js', after_tar_program_instr)
+  return after_src_program_instr, after_tar_program_instr
+
+
+def _check_for_rec_fn_calls(
+  src_program_instr: str,
+  tar_program_instr: str,
+  subject: p_subject.PirelSubject
+) -> Tuple[str, str]:
+  '''
+  This function replaces recursive function calls with literal values
+  to avoid hitting recursion limits or type errors.
+  Most common case that this function handles is
+  when a recursive call is part of a larger expression, and the
+  returned value is None, e.g. `x = rec_fn(...) + 1`.
+  '''
+  repl_dict = p_utils.read_json(p_consts.MYLOG_DEFINITIONS_DIR / 'rec_call_replacements.json')
+
+  if subject.name not in repl_dict:
+    return src_program_instr, tar_program_instr
+
+  logger.debug('Replacing recursive function calls in src and tar programs.')
+  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
+
+  subject_repl = repl_dict[subject.name]
+  for defined_fn, invoked_fns_dict in subject_repl.items():
+    for invoked_fn, lit_values_dict in invoked_fns_dict.items():
+      assert subject.src_lang in lit_values_dict, 'sanity check'
+      assert subject.tar_lang in lit_values_dict, 'sanity check'
+      src_lit_value = lit_values_dict[subject.src_lang]
+      tar_lit_value = lit_values_dict[subject.tar_lang]
+      src_program_instr, src_repl_done = pvpy.FunctionInvocationReplacer.replace_function_invocations(
+        src_program_instr, defined_fn, invoked_fn, src_lit_value)
+      tar_program_instr, tar_repl_done = pvjs.FunctionInvocationReplacer.replace_function_invocations(
+        tar_program_instr, defined_fn, invoked_fn, tar_lit_value)
+      assert src_repl_done == tar_repl_done, 'sanity check'
+
+  p_utils.log_file_time(f'after_src_program_instr.py', src_program_instr)
+  p_utils.log_file_time(f'after_tar_program_instr.js', tar_program_instr)
+  return src_program_instr, tar_program_instr
+
+
 async def _run_tests(
   src_program_instr: str,
   tar_program_instr: str,
@@ -562,8 +820,20 @@ async def _run_tests(
   p_utils.log_json_time(f'args-run_tests.json', locals())
   logger.debug('~~~ Starting to run source and target test scripts.')
 
+  '''
+  Pre-process `src_program_instr` and `tar_program_instr`
+  to handle special cases. If modifications are made,
+  tests are run on the modified programs.
+  '''
+  mod_src_program_instr, mod_tar_program_instr = \
+    _check_for_rec_fn_calls(src_program_instr, tar_program_instr, subject)
+  mod_src_program_instr, mod_tar_program_instr = \
+    _check_for_instrumented_log_statements(mod_src_program_instr, mod_tar_program_instr, subject)
+  mod_src_program_instr, mod_tar_program_instr = \
+    _check_for_possible_loop_semantic_diff(mod_src_program_instr, mod_tar_program_instr, subject)
+
   # 1. run `src_program_instr` and collect output trace
-  src_trace, src_stderr = await p_code_runner.run_src_test_script(src_program_instr, subject)
+  src_trace, src_stderr = await p_code_runner.run_src_test_script(mod_src_program_instr, subject)
   assert is_valid_trace(src_trace), 'src_trace must be a valid trace'
 
   # there is an error in running src test script
@@ -575,7 +845,7 @@ async def _run_tests(
     logger.debug('GOOD No errors running src test script.')
 
   # 2. run `tar_program_instr` and collect output trace
-  tar_trace, tar_std_error = await p_code_runner.run_tar_test_script(tar_program_instr, subject)
+  tar_trace, tar_std_error = await p_code_runner.run_tar_test_script(mod_tar_program_instr, subject)
   assert is_valid_trace(tar_trace), 'tar_trace must be a valid trace'
 
   '''
@@ -866,95 +1136,6 @@ def _check_and_update_choices(
         raise SrcTestScriptProblematicNodeError(msg)
 
 
-def _check_for_instrumented_log_statements(
-  src_program_instr: str,
-  tar_program_instr: str,
-  subject: p_subject.PirelSubject
-) -> Tuple[str, str]:
-  '''
-  This function does string-level post-processing on
-  src_program_instr and tar_program_instr for certain subjects.
-  '''
-  conf_data = {
-    # In G0326, change the 2nd argument of myexactlog()
-    # from 'heapq' to 'Q' in both src and tar programs
-    # because 'heapq' is a Python module name, while 'Q' is
-    # an object on which a function of 'heapq' is called.
-    # Alternatively, LogStatementInserter can be modified.
-    'G0326': {
-      'py': {
-        'src': r'^(\s+)myexactlog\((\d+), heapq\)\s*$',
-        'rpl': r'\1myexactlog(\2, Q)'
-      },
-      'js': {
-        'src': r'^(\s+)myexactlog\((\d+), heapq\);\s*$',
-        'rpl': r'\1myexactlog(\2, Q);'
-      }
-    }
-  }
-
-  if subject.name not in conf_data:
-    return src_program_instr, tar_program_instr
-
-  logger.debug('Post-processing instrumented log statements in src and tar programs.')
-  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
-  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
-
-  subject_conf = conf_data[subject.name]
-  assert subject.src_lang in subject_conf
-  assert subject.tar_lang in subject_conf
-
-  src_conf = subject_conf[subject.src_lang]
-  tar_conf = subject_conf[subject.tar_lang]
-  assert 'src' in src_conf and 'rpl' in src_conf
-  assert 'src' in tar_conf and 'rpl' in tar_conf
-
-  src_pattern = re.compile(src_conf['src'], flags=re.MULTILINE)
-  tar_pattern = re.compile(tar_conf['src'], flags=re.MULTILINE)
-  src_repl = src_conf['rpl']
-  tar_repl = tar_conf['rpl']
-
-  after_src_program_instr, src_count = src_pattern.subn(src_repl, src_program_instr)
-  after_tar_program_instr, tar_count = tar_pattern.subn(tar_repl, tar_program_instr)
-  assert src_count == tar_count, 'sanity check'
-  logger.debug(f'Replaced {src_count} instrumented log statements in src and tar programs.')
-  return after_src_program_instr, after_tar_program_instr
-
-
-def _check_for_rec_fn_calls(
-  src_program_instr: str,
-  tar_program_instr: str,
-  subject: p_subject.PirelSubject
-) -> Tuple[str, str]:
-  '''
-  Replace recursive function calls in src_program_instr and tar_program_instr
-  '''
-  repl_dict = p_utils.read_json(p_consts.MYLOG_DEFINITIONS_DIR / 'rec_call_replacements.json')
-
-  if subject.name not in repl_dict:
-    logger.debug(f'No recursive function call replacements for subject "{subject.name}".')
-    return src_program_instr, tar_program_instr
-
-  logger.debug('Replacing recursive function calls in src and tar programs.')
-  p_utils.log_file_time(f'before_src_program_instr.py', src_program_instr)
-  p_utils.log_file_time(f'before_tar_program_instr.js', tar_program_instr)
-
-  subject_repl = repl_dict[subject.name]
-  for defined_fn, invoked_fns_dict in subject_repl.items():
-    for invoked_fn, lit_values_dict in invoked_fns_dict.items():
-      assert subject.src_lang in lit_values_dict, 'sanity check'
-      assert subject.tar_lang in lit_values_dict, 'sanity check'
-      src_lit_value = lit_values_dict[subject.src_lang]
-      tar_lit_value = lit_values_dict[subject.tar_lang]
-      src_program_instr, src_repl_done = pvpy.FunctionInvocationReplacer.replace_function_invocations(
-        src_program_instr, defined_fn, invoked_fn, src_lit_value)
-      tar_program_instr, tar_repl_done = pvjs.FunctionInvocationReplacer.replace_function_invocations(
-        tar_program_instr, defined_fn, invoked_fn, tar_lit_value)
-      assert src_repl_done == tar_repl_done, 'sanity check'
-
-  return src_program_instr, tar_program_instr
-
-
 # API
 async def apply_translation_rules(
   subject: p_subject.PirelSubject
@@ -1025,11 +1206,6 @@ async def apply_translation_rules(
       _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
     tar_program_instr = \
       _program_parts_concatenate(tar_test_code, tar_main_code_instr, tar_test_call_code, subject)
-
-    src_program_instr, tar_program_instr = \
-      _check_for_rec_fn_calls(src_program_instr, tar_program_instr, subject)
-    src_program_instr, tar_program_instr = \
-      _check_for_instrumented_log_statements(src_program_instr, tar_program_instr, subject)
 
     try:
       await _run_tests(src_program_instr, tar_program_instr, subject)
@@ -1118,6 +1294,5 @@ def _test_run_tests():
 
 
 if __name__ == '__main__':
-  # usage_apply_translation_rules()
   _test_apply_translation_rules()
   # _test_run_tests()
