@@ -859,7 +859,7 @@ def _check_and_update_choices(
       rel_alt_step_infos = p_ext_rule_chooser.rel_alt_step_info_remove_duplicates(rel_alt_step_infos)
       try:
         current_choices = p_ext_rule_chooser.get_next_unique_choices(
-          rel_alt_step_infos, choices_list_stack, [])
+          rel_alt_step_infos, choices_list_stack, subject.readonly_choices_list)
       except p_ext_rule_chooser.RuleCombinationsExhaustedError:
         msg = 'No rule to handle a node in source code.'
         logger.warning(msg)
