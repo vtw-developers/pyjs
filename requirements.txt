@@ -1,3 +1,4 @@
+aiohttp==3.13.2
 apted==1.0.3
 debugpy==1.6.7
 jsbeautifier==1.14.7
