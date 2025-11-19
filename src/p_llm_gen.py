@@ -32,6 +32,7 @@ NOTE on adding a new task class:
 '''
 
 
+import aiohttp
 import asyncio
 import copy
 import json
@@ -263,7 +264,7 @@ class BasePirelTask(ABC):
   async def _query_llm(self) -> str:
     assert self.chat_history[-1].type == 'human', 'chat history must end with a human prompt'
     self._log_file(langchain_msgs_to_md(self.chat_history), f'llm-messages.md')
-    raw_response, query_stats = await query_llm(self.chat_history, **self.model_params)
+    raw_response, query_stats = await query_llm_qwen_vtw(self.chat_history, **self.model_params)
     self.llm_query_stats.append(query_stats)
     self._log_file(raw_response, f'llm-raw-response.md')
     return raw_response
@@ -823,6 +824,64 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
   return chat_result.content, query_stats
 
 
+async def query_llm_qwen_vtw(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
+  '''
+  RETURN a tuple of (raw_response, query_stats)
+  '''
+  json_msgs = langchain_msgs_to_json(messages)
+
+  # Prepare request payload
+  payload = {
+    "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    "messages": json_msgs,
+    "temperature": kwargs.get("temperature", 1),
+    "max_tokens": kwargs.get("max_tokens", 4000)
+  }
+
+  url = "http://121.65.128.115:8001/v1/chat/completions"
+  headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer dummy-key"
+  }
+
+  query_stats = {}
+  query_stats['stms'] = p_utils.current_time_msec()
+
+  excs = []
+  response_json = None
+  for i in range(7):
+    try:
+      async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, json=payload) as resp:
+          response_json = await resp.json()
+          if resp.status != 200:
+            raise RuntimeError(f"HTTP {resp.status}: {response_json}")
+    except Exception as e:
+      logger.warning(e)
+      excs.append(e)
+      await asyncio.sleep(2**i)
+    else:
+      break
+  else:
+    raise OpenAIErrors('Repeated API failures', excs)
+
+  query_stats['etms'] = p_utils.current_time_msec()
+  # Extract token usage if available
+  usage = response_json.get('usage', {})
+  query_stats['num_tokens_prompt'] = usage.get('prompt_tokens', None)
+  query_stats['num_tokens_completion'] = usage.get('completion_tokens', None)
+  query_stats['num_tokens_total'] = usage.get('total_tokens', None)
+
+  # Extract content from response
+  choices = response_json.get('choices', [])
+  if choices and 'message' in choices[0]:
+    content = choices[0]['message'].get('content', '')
+  else:
+    content = ''
+
+  return content, query_stats
+
+
 def extract_code_blocks(raw_response: str) -> List[str]:
 
   def _pre_process_raw_response(raw_response: str) -> str:
@@ -854,6 +913,30 @@ def langchain_msgs_to_md(messages: List[BaseMessage]) -> str:
   for msg in messages:
     result_md += f'# {msg.type}\n\n{msg.content}\n\n\n'
   return result_md.strip()
+
+
+def langchain_msgs_to_json(
+  messages: List[BaseMessage],
+  system_role_name: str = 'system',
+  human_role_name: str = 'user',
+  ai_role_name: str = 'assistant',
+) -> List[dict]:
+  '''
+  Convert langchain messages to JSON format.
+  '''
+  json_msgs = []
+  for msg in messages:
+    json_msg = {'content': msg.content}
+    if isinstance(msg, SystemMessage):
+      json_msg['role'] = system_role_name
+    elif isinstance(msg, HumanMessage):
+      json_msg['role'] = human_role_name
+    elif isinstance(msg, AIMessage):
+      json_msg['role'] = ai_role_name
+    else:
+      raise ValueError(f'Unsupported message type: {type(msg)}')
+    json_msgs.append(json_msg)
+  return json_msgs
 
 
 def _extract_snippet(program: str, lang: str, node_path: List[int]) -> str:
