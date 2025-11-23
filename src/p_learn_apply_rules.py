@@ -157,6 +157,7 @@ async def learn_and_application_phases_on_subject(
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_success.yaml', asdict(lsubject))
 
   except Exception as exc:
+    print(f'FAIL Rule learning phase for "{subject.name}" failed.')
     logger.critical(f'FAIL Rule learning phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
     lrule_learn_phase.success = False
@@ -190,8 +191,10 @@ async def learn_and_application_phases_on_subject(
     p_utils.llog_json(f'{subject.name}_validated_rules.json', starting_ruleset.to_dict())
     p_utils.llog_text(f'{subject.name}_tar_main_code_plausible.{subject.tar_lang}', tar_main_code_plausible)
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_success.yaml', asdict(lsubject))
+    print(f'SUCCESS Rule application phase for "{subject.name}" succeeded.')
 
   except Exception as exc:
+    print(f'FAIL Rule application phase for "{subject.name}" failed.')
     logger.critical(f'FAIL Rule application phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
     lrule_application_phase.success = False
