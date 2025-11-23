@@ -1707,14 +1707,17 @@ class DelimitedParser():
           if self._check_should_skip_symbol(symbol_name):
             if not d_grammar.grm_is_external_NT(self.grammar, symbol_name):
               real_prod = d_grammar.grm_get_prod(self.grammar, symbol_name)
-              self._inlined_prod_tail(
-                cur_loop_det_list + [symbol_name],  # loop_det_list
-                cur_ex_contin,  # expan_continuation
-                grm_nt_depth,  # grm_nt_depth
-                par_node_id,  # par_node_id
-                real_prod,  # real_prod
-                next_grm_contin  # next_grm_continuation
-              )
+              if symbol_name in cur_loop_det_list:
+                self._set_grm_back_tracking(ex_nt_depth, f"# Detected left-recursion on symbol: {symbol_name} BACKTRACKING...")
+              else:
+                self._inlined_prod_tail(
+                  cur_loop_det_list + [symbol_name],  # loop_det_list
+                  cur_ex_contin,  # expan_continuation
+                  grm_nt_depth,  # grm_nt_depth
+                  par_node_id,  # par_node_id
+                  real_prod,  # real_prod
+                  next_grm_contin  # next_grm_continuation
+                )
             else:
               external_state_id, external_str = d_grammar.grm_external_NT_pretty_string(self.grammar, None, symbol_name)
               # TODO: handle external_state_id
@@ -1759,14 +1762,17 @@ class DelimitedParser():
       elif prod_type == "SYMBOL_JUMP":
         if self._VERBOSE > 0: print("meet SYMBOL_JUMP. prod name:", prod['name'])
         jump_prod = d_grammar.grm_get_prod(self.grammar, prod['name'])
-        self._inlined_prod_tail(
-          cur_loop_det_list + [prod['name']],  # loop_det_list
-          cur_ex_contin,  # expan_continuation
-          grm_nt_depth,  # grm_nt_depth
-          par_node_id,  # par_node_id
-          jump_prod,  # real_prod
-          next_grm_contin  # next_grm_continuation
-        )
+        if prod['name'] in cur_loop_det_list:
+          self._set_grm_back_tracking(ex_nt_depth, f"# Detected left-recursion on SYMBOL_JUMP: {prod['name']} BACKTRACKING...")
+        else:
+          self._inlined_prod_tail(
+            cur_loop_det_list + [prod['name']],  # loop_det_list
+            cur_ex_contin,  # expan_continuation
+            grm_nt_depth,  # grm_nt_depth
+            par_node_id,  # par_node_id
+            jump_prod,  # real_prod
+            next_grm_contin  # next_grm_continuation
+          )
 
       # prod_type case 9
       elif prod_type == "STRING":
