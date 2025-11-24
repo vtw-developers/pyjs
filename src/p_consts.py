@@ -284,6 +284,7 @@ TEST_MAIN_CALL_DELIMITER = '"-----------------"'
 STARTING_RULESET_FPATH = TRANSLATION_RULES_DIR / 'starting-ruleset.snart'
 
 GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'gfg' / 'py'
+MINI_GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'mini-benchmark'
 GFG_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'gfg.snart'
 GFG_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'gfg.snart'
 
@@ -291,7 +292,7 @@ SKEL_BENCHMARK_DIR = BENCHMARKS_DIR / 'skel'
 
 BENCHMARK_CONFIGS = {
   'gfg': {
-    'benchmark_dir': GFG_BENCHMARK_DIR,
+    'benchmark_dir': MINI_GFG_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
     'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
   },
