@@ -22,6 +22,10 @@ class Config:
 
   sort_new_choices_in_reverse: bool = True
 
+  llm_api_url: str = None        # NOTE not set through CLI args
+  llm_model: str = None          # NOTE not set through CLI args
+  llm_temperature: float = None  # NOTE not set through CLI args
+
 
 def load_configs(args):
   Config.benchmark_name = args.benchmark_name

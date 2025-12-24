@@ -57,6 +57,7 @@ import p_llm_val
 import p_subject
 import p_tree_log as ptlog
 import p_utils
+from p_config import Config
 
 
 logger = p_utils.setup_logger(__name__)
@@ -264,6 +265,7 @@ class BasePirelTask(ABC):
   async def _query_llm(self) -> str:
     assert self.chat_history[-1].type == 'human', 'chat history must end with a human prompt'
     self._log_file(langchain_msgs_to_md(self.chat_history), f'llm-messages.md')
+    # NOTE plug in other LLM query functions here
     raw_response, query_stats = await query_llm_qwen_vtw(self.chat_history, **self.model_params)
     self.llm_query_stats.append(query_stats)
     self._log_file(raw_response, f'llm-raw-response.md')
@@ -828,17 +830,21 @@ async def query_llm_qwen_vtw(messages: List[BaseMessage], **kwargs) -> Tuple[str
   '''
   RETURN a tuple of (raw_response, query_stats)
   '''
+  _DEFAULT_API_URL = "http://121.65.128.115:8001/v1/chat/completions"
+  _DEFAULT_MODEL = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
+  _DEFAULT_TEMPERATURE = kwargs.get("temperature", 1)
+
   json_msgs = langchain_msgs_to_json(messages)
 
   # Prepare request payload
   payload = {
-    "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    "model": Config.llm_model or _DEFAULT_MODEL,  # fall back to default model if not set
     "messages": json_msgs,
-    "temperature": kwargs.get("temperature", 1),
+    "temperature": Config.llm_temperature or _DEFAULT_TEMPERATURE,  # fall back to default temperature if not set
     "max_tokens": kwargs.get("max_tokens", 4000)
   }
 
-  url = "http://121.65.128.115:8001/v1/chat/completions"
+  url = Config.llm_api_url or _DEFAULT_API_URL  # fall back to default URL if not set
   headers = {
     "Content-Type": "application/json",
     "Authorization": "Bearer dummy-key"
