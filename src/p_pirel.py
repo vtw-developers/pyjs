@@ -2,7 +2,7 @@ import asyncio
 import json
 from os import fspath
 from sys import executable
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union, Iterator
 
 import d_ast_parse
 import d_ast_pretty
@@ -27,6 +27,13 @@ import p_visitor_py as pvpy
 
 
 logger = p_utils.setup_logger(__name__)
+
+
+_EOT_MODULE_TEMPLATE = '''from os import chdir
+def myexactlog(*args, **kwargs): pass
+chdir({!r})
+{}
+'''
 
 
 class ProbNode_NoTRule_AllTSPsExhaustedError(RuntimeError): pass
@@ -328,36 +335,81 @@ async def _get_not_implemented_id(module: str, node_text: str,
   return None  # call happens after given lines
 
 
-async def _get_statement_nodes_eot(
+def _visitor_nodes_with_pirel_id_instrumentation(
+  visitor_nodes: list[pvis.AbstractNode],
+  pirel_nodes: list[pds.PirelNode],
+  lang: str,
+) -> Iterator[pvis.AbstractNode]:
+  assert len(visitor_nodes) == len(pirel_nodes), breakpoint()
+  for visitor_node, pirel_node in zip(visitor_nodes, pirel_nodes):
+    if (_can_be_context_node(pirel_node, lang)
+        and pirel_node.get_ts_node_type() != 'function_definition'):
+      print_stmt = f"print('PiREL', {pirel_node.get_id()})"
+      print_node, = pvpy.Tree.from_str(print_stmt).root_node.children
+      yield print_node
+    yield visitor_node
+
+
+def _instrument_visitor_node_with_pirel_node_id(
+  visitor_node: pvis.AbstractNode,
+  pirel_node: pds.PirelNode,
+  lang: str,
+) -> None:
+  if isinstance(visitor_node, pvpy.StringNode):
+    return  # FIXME: handle f-strings (short circuit here can be kept though)
+  visitor_children = visitor_node.children
+  pirel_children = pirel_node.get_children()
+  children = list(_visitor_nodes_with_pirel_id_instrumentation(
+    visitor_children, pirel_children, lang))
+  assert len(visitor_children) == len(pirel_children)
+  for visitor_child, pirel_child in zip(visitor_node.children,
+                                        pirel_node.get_children()):
+    _instrument_visitor_node_with_pirel_node_id(visitor_child,
+                                                pirel_child, lang)
+  visitor_node.children = children
+
+
+async def get_statement_nodes_eot(
   src_program: str,
   lang: str,
-  top_level_nodes: list[pds.PirelNode],
-) -> list[pds.PirelNode]:
-  '''Return a list of statement nodes for execution-order transaltion.'''
-  src_program, restore = _instrument_with_not_implemented(src_program,
-                                                          top_level_nodes)
-  nodes, stack = [], [*reversed(top_level_nodes)]
-  while stack:
-    node = stack.pop()
-    if _can_be_context_node(node, lang):
-      if node.get_ts_node_type() == 'function_definition':
-        continue
-      if node not in nodes:
-        nodes.append(node)
-      node_text, node_id = node.get_text()+'\n', node.get_id()
-      fn_id = await _get_not_implemented_id(src_program, node_text, node_id)
-      if fn_id is None:
-        continue
-      # switch context
-      fn_node, before, after = restore.pop(fn_id)  # once per function
-      assert after in src_program
-      src_program = src_program.replace(after, before)
-      stack.extend(reversed(fn_node.get_children()))
-      if await _get_not_implemented_id(src_program, node_text,
-                                       node_id) is not None:
-        stack.append(node)  # execute again after the discovered function
-    stack.extend(reversed(node.get_children()))
-  assert not restore, 'not all functions have been executed'
+  return_node_ids: bool = False,
+) -> list[pds.PirelNode|int]:
+  '''
+  Return a list of statement nodes for execution-order translation.
+
+  If node identifiers are requested, skip finding the PiREL nodes
+  from their ID, which is costly.
+  '''
+  workdir = fspath(p_consts.BENCHMARK_CONFIGS['skel']['benchmark_dir'])  # FIXME
+  pirel_root_node = pds.PirelTree.from_code_str(src_program,
+                                                lang).get_root_node()
+  visitor_root_node = pvpy.Tree.from_str(src_program).root_node
+  _instrument_visitor_node_with_pirel_node_id(visitor_root_node,
+                                              pirel_root_node, lang)
+  module = pvpy.PrettyPrinter(indent_with='    ').visit(visitor_root_node)
+  module = _EOT_MODULE_TEMPLATE.format(workdir, module)
+
+  logger.debug('Prepared instrumented module for EoT statement node extraction.')
+  p_utils.log_file_time('src_instrumented_eot.py', module)
+
+  proc = await asyncio.create_subprocess_exec(
+    executable, '-c', module,
+    stdout=asyncio.subprocess.PIPE,
+    stderr=asyncio.subprocess.PIPE
+  )
+  stdout = (await proc._read_stream(1)).decode()
+  stderr = (await proc._read_stream(2)).decode()
+  await proc.wait()
+  assert proc.returncode == 0, f'Error executing instrumented module:\n{stderr}'
+
+  nodes, visited = [], set()
+  for line in stdout.splitlines():
+    if line.startswith('PiREL '):
+      node_id = int(line.removeprefix('PiREL '))
+      if node_id not in visited:
+        visited.add(node_id)
+        nodes.append(node_id if return_node_ids
+                     else pirel_root_node.get_node_by_id(node_id))
   return nodes
 
 
@@ -365,11 +417,15 @@ async def _get_statement_nodes(
   src_main_code: str,
   lang: str,
   is_three_split: bool,
-) -> List[pds.PirelNode]:
+  return_node_ids: bool = False,
+) -> List[Union[pds.PirelNode, int]]:
   '''
   Statement nodes are primary units of code in the source code.
   In other words, a source code is a sequence of statement nodes.
   '''
+  if not is_three_split:
+    return await get_statement_nodes_eot(src_main_code, lang, return_node_ids)
+
   def __rec_pre_order(node: pds.PirelNode, lang: str) -> None:
     nonlocal nodes
     if _can_be_context_node(node, lang):
@@ -378,14 +434,12 @@ async def _get_statement_nodes(
       __rec_pre_order(child, lang)
 
   tree = pds.PirelTree.from_code_str(src_main_code, lang)
-  if not is_three_split:
-    return await _get_statement_nodes_eot(src_main_code+'\n', lang,
-                                          tree.get_root_node().get_children())
   nodes : List[pds.PirelNode] = []
   __rec_pre_order(tree.get_root_node(), lang)
 
   # hacky: remove function definitions as we have rules to translate their headers
-  nodes = [n for n in nodes if n.get_ts_node_type() != 'function_definition']
+  nodes = [n.get_id() if return_node_ids else n
+           for n in nodes if n.get_ts_node_type() != 'function_definition']
   return nodes
 
 

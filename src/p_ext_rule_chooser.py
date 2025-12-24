@@ -1174,8 +1174,13 @@ async def _get_stat_nids_in_pre_context(
   '''
   RETURN a list of statement node ids that appear in pre_context.
   '''
-  all_stat_nids = await _get_all_stat_nids(src_main_code, is_three_split)
-  assert all_stat_nids == sorted(all_stat_nids), 'Expected all_stat_nids to be sorted in ascending order'
+  if is_three_split:
+    all_stat_nids = await p_pirel._get_statement_nodes(
+      src_main_code, 'py', is_three_split, return_node_ids=True)
+    assert all_stat_nids == sorted(all_stat_nids)
+  else:
+    all_stat_nids = await p_pirel.get_statement_nodes_eot(
+      src_main_code, 'py', return_node_ids=True)
 
   val_stat_nid = await _get_validated_stat_nid_in_instr_code(
     src_main_code, simple_ntext, all_stat_nids)
