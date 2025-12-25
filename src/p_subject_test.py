@@ -59,7 +59,7 @@ test()
       is_three_split=False,
     )
     json_str = subject.to_json_str()
-    expected_json_str = '''{"auto_backward": true, "benchmark_name": "custom", "choices": {"choices_list": [], "type": "ASTNODE"}, "is_three_split": false, "name": "test_init_custom", "readonly_choices_list": [], "src_lang": "py", "src_program": "print()", "tar_lang": "js", "translation_rules_main_code": null, "translation_rules_test_code": null}'''
+    expected_json_str = '''{"auto_backward": true, "benchmark_name": "custom", "choices": {"choices_list": [], "type": "ASTNODE"}, "is_three_split": false, "name": "test_init_custom", "src_lang": "py", "src_program": "print()", "tar_lang": "js", "translation_rules_main_code": null, "translation_rules_test_code": null, "verified_choice_options": []}'''
     self.assertEqual(json_str, expected_json_str)
 
   def test_from_json_str(self):

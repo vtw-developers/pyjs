@@ -1,0 +1,18 @@
+{
+  "template_origin": "while len(pair[-1]) and (pair[-1][0] != ' ' and pair[-1][0] != '\\t' and pair[-1][0] != \"'\" and pair[-1][0] != '\"' and pair[-1][0] != '[' and pair[-1][0] != '{' and pair[-1].strip() != 'true' and pair[-1].strip() != 'false'):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "while_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1
+  ],
+  "problematic_node_type": "boolean_operator",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "while id_szub and id_zgi:\n    pass",
+      "while 1462 and 4024:\n    pass"
+    ]
+  ],
+  "problematic_node_id": 2
+}

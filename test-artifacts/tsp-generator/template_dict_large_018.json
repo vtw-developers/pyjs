@@ -1,0 +1,21 @@
+{
+  "template_origin": "if (t == \"str\" and isinstance(v, str) or t == \"list\" and isinstance(v, list) or t == \"bool\" and isinstance(v, bool) or t == \"int\" and isinstance(v, int) or t == \"float\" and isinstance(v, float) or t == \"CommentValue\" and user_check_type(v, CommentValue)):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1,
+    1,
+    0,
+    0
+  ],
+  "problematic_node_type": "boolean_operator",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "if (id_fdmn or id_pmge or t == \"float\" and isinstance(v, float) or t == \"CommentValue\" and user_check_type(v, CommentValue)):\n    pass",
+      "if (9303 or 2657 or t == \"float\" and isinstance(v, float) or t == \"CommentValue\" and user_check_type(v, CommentValue)):\n    pass"
+    ]
+  ],
+  "problematic_node_id": 5
+}

@@ -45,32 +45,40 @@
   "src_program": "dp = [[[0, 0] for __ in range(k + 1)] for _ in range(n + 1)]",
   "tsps": [
     [
-      "dp = [id_ype for id_qvmo in id_kyh]",
-      "dp = [5154 for id_qzl in id_vxiw]"
+      "dp = [id_qchl for id_hjsm in id_dgq]",
+      "dp = [8531 for id_lcri in id_vbnk]"
     ],
     [
-      "dp = [[id_uqo for id_wpkn in id_mxj] for id_gtru in id_whj]",
-      "dp = [[1766 for id_zeud in id_zprd] for id_hwv in id_fadm]"
+      "dp = [[id_axm for id_xzl in id_aure] for id_wbt in id_oyi]",
+      "dp = [[4138 for id_fyub in id_irku] for id_fckt in id_jszw]"
     ],
     [
-      "dp = [[[secret_fun_4071()] for id_nfj in id_exhi] for id_tag in id_rgm]",
-      "dp = [[[secret_fun_4071()] for id_aqxh in id_qcrw] for id_uvx in id_xgmb]"
+      "dp = [[[secret_fun_4071()] for id_jsh in id_tou] for id_vkjo in id_qhsf]",
+      "dp = [[[secret_fun_4071()] for id_qaf in id_alg] for id_vet in id_kop]"
     ],
     [
-      "dp = [[[secret_fun_4071()] for id_csk in range(k + 1)] for id_rnot in id_gdu]",
-      "dp = [[[secret_fun_4071()] for id_csa in range(k + 1)] for id_cdsl in id_pse]"
+      "dp = [[[secret_fun_4071()] for id_izat in range(k + 1)] for id_dzrl in id_kwh]",
+      "dp = [[[secret_fun_4071()] for id_mrzf in range(k + 1)] for id_qavm in id_yghd]"
     ],
     [
-      "dp = [[id_qbt for id_ubyk in id_dik] for id_rep in range(id_zkq)]",
-      "dp = [[3546 for id_nwod in id_jtq] for id_wal in range(6566)]"
+      "dp = [[id_pha for id_gitq in id_yzp] for id_gkhw in range(id_xkyf)]",
+      "dp = [[4832 for id_muyg in id_rqz] for id_ysf in range(9952)]"
     ],
     [
-      "dp = [[[secret_fun_4071()] for id_hpgs in id_akrs] for id_gbu in range(id_swi)]",
-      "dp = [[[secret_fun_4071()] for id_kfj in id_gyiq] for id_pmr in range(1377)]"
+      "dp = [[[secret_fun_4071()] for id_dsln in id_skfv] for id_aejt in range(id_zfg)]",
+      "dp = [[[secret_fun_4071()] for id_lvd in id_cmjn] for id_rby in range(3064)]"
     ],
     [
-      "dp = [[[secret_fun_4071()] for id_ncue in range(k + 1)] for id_jvko in range(id_qjbl)]",
-      "dp = [[[secret_fun_4071()] for id_ahg in range(k + 1)] for id_rwuc in range(1746)]"
+      "dp = [[[secret_fun_4071()] for id_vwz in range(id_mkp)] for id_bmz in range(id_rxoj)]",
+      "dp = [[[secret_fun_4071()] for id_fdoy in range(1505)] for id_wny in range(1725)]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_kug in id_ipqf] for id_rnwt in range(id_bjo + 1193)]",
+      "dp = [[[secret_fun_4071()] for id_mol in id_umaz] for id_pces in range(id_wvp + id_iwcu)]"
+    ],
+    [
+      "dp = [[[secret_fun_4071()] for id_pna in range(id_jzle)] for id_zgju in range(id_zygj + 7690)]",
+      "dp = [[[secret_fun_4071()] for id_ikpx in range(9397)] for id_wufo in range(id_mpj + id_lqth)]"
     ]
   ]
 }

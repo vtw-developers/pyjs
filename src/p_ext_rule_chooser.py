@@ -1,11 +1,9 @@
-import asyncio
 import json
-from itertools import chain
+import re
 from typing import Dict, List, Optional, Tuple, Set
 
 import d_ast_parse
 import p_consts
-import p_data_structures as pds
 import p_pirel
 import p_ruleset
 import p_rule_applicator as prapp
@@ -13,7 +11,6 @@ import p_subject
 import p_utils
 import p_visitor as pvis
 import p_visitor_py as pvpy
-from p_config import Config
 
 
 logger = p_utils.setup_logger(__name__)
@@ -22,14 +19,41 @@ logger = p_utils.setup_logger(__name__)
 class NoRuleToHandleRangeCursorError(Exception): pass
 class UnhandledRangeCursorExistsError(Exception): pass
 class RuleCombinationsExhaustedError(RuntimeError): pass
-class AllRulesInMatcherGroupImplausibleError(RuntimeError): pass
 class ExprLogStatHasParseError(RuntimeError): pass
 class ExprLogStatContextError(RuntimeError): pass
 class QueueInfiniteLoopError(RuntimeError): pass
 
+class AllRulesInMatcherGroupImplausibleError(RuntimeError):
+  def __init__(self, not_matching_rules_str: str, snippet: str):
+    '''
+    PARAM snippet: string repr of the node for which
+    there are no plausible rules in the matcher group.
+    PARAM not_matching_rules_str: ruleset without
+    the rules that match the snippet.
+    '''
+    self.not_matching_rules_str = not_matching_rules_str
+    self.snippet = snippet
+  def __str__(self):
+    return (f'All rules in the matcher group are implausible for the snippet {self.snippet!r}')
+
+class VerifiedRulesExhaustedError(RuntimeError):
+  def __init__(self, choice_identifier: Tuple[int, int, int]):
+    '''
+    PARAM choice_identifier: range info of the node for which
+    all existing verified rules have been exhausted.
+    FIELD no_choices_snippet: string repr of the node.
+    FIELD not_matching_rules_str: ruleset without
+    the rules that match the snippet.
+    '''
+    self.choice_identifier = choice_identifier
+    self.no_choices_snippet = None
+    self.not_matching_rules_str = None
+  def __str__(self):
+    return (f'None of the verified rules work for {self.no_choices_snippet!r} at {self.choice_identifier}')
+
 
 # GENERATING READONLY CHOICES LIST
-def match_rule_to_range_cursor(
+def _match_rule_to_range_cursor(
   matcher: list,
   range_cursor: tuple
 ) -> dict:
@@ -299,59 +323,6 @@ def match_rule_to_range_cursor(
   }
 
 
-def rules_contains(rules: List[p_ruleset.TRuleBase], rule: p_ruleset.TRuleBase) -> bool:
-  '''
-  Check if the rules list contains the rule.
-  '''
-  for r in rules:
-    if r == rule:
-      return True
-  return False
-
-
-def rules_deduplicate(rules: List[p_ruleset.TRuleBase]) -> List[p_ruleset.TRuleBase]:
-  '''
-  Deduplicate a list of translation rules.
-  '''
-  deduplicated = []
-  for rule in rules:
-    if not rules_contains(deduplicated, rule):
-      deduplicated.append(rule)
-  logger.debug(
-    f'Number of rules before deduplication: {len(rules)}\n'
-    f'Number of rules after deduplication: {len(deduplicated)}\n'
-    f'Number of deduplicated rules: {len(rules) - len(deduplicated)}')
-  return deduplicated
-
-
-def rules_intersection(
-  rules_a: List[p_ruleset.TRuleBase],
-  rules_b: List[p_ruleset.TRuleBase]
-) -> List[p_ruleset.TRuleBase]:
-  '''
-  Return a list of rules that are in both rules_a and rules_b.
-  '''
-  intersection = []
-  for rule_a in rules_a:
-    for rule_b in rules_b:
-      if rule_a == rule_b:
-        intersection.append(rule_a)
-  return intersection
-
-
-def rules_group_by_matcher(rules: List[p_ruleset.TRuleBase]) -> Dict[str, List[p_ruleset.TRuleBase]]:
-  '''
-  Group rules by their matcher signature.
-  '''
-  matcher_groups = {}
-  for rule in rules:
-    matcher_signature = rule.get_matcher_signature()
-    if matcher_signature not in matcher_groups:
-      matcher_groups[matcher_signature] = []
-    matcher_groups[matcher_signature].append(rule)
-  return matcher_groups
-
-
 def assert_matchers_match(matcher_group: List[p_ruleset.TRuleBase]) -> None:
   '''
   Assert that all rules in the list have the same matcher signature.
@@ -377,7 +348,9 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
     pvpy.ForStatementNode,
     pvpy.IfStatementNode,
     pvpy.ReturnStatementNode,
-    pvpy.WhileStatementNode
+    pvpy.WhileStatementNode,
+    pvpy.AssertStatementNode,
+    pvpy.DeleteStatementNode,
   )
   is_context_node = lambda node: \
     isinstance(node, _CONTEXT_NODE_TYPES)
@@ -388,6 +361,101 @@ def _choicable_node_get_context_node(node: pvis.AbstractNode) -> pvis.AbstractNo
       return cursor
     cursor = cursor.parent
   raise ValueError('No context node found')
+
+
+def _reset_expr_subject(
+  expr_subject: p_subject.PirelSubject,
+  test_scr_matched_rc_chid: Tuple[int, int, int],
+  rule_idx: int
+) -> None:
+  '''
+  Modifies expr_subject in-place to reset its choices and verified choice options.
+  '''
+  expr_subject.choices['choices_list'] = []
+
+  '''
+  Update the verified choice options with the new choice option.
+  '''
+  vrf_ch_opts_dict = {
+    chid: rule_idxs for chid, rule_idxs in expr_subject.verified_choice_options
+  }
+  vrf_ch_opts_dict[test_scr_matched_rc_chid] = [rule_idx]
+  vrf_ch_opts = list(vrf_ch_opts_dict.items())
+  vrf_ch_opts.sort(key=lambda x: x[0])  # sort by choice identifier
+
+  expr_subject.verified_choice_options = vrf_ch_opts
+
+
+def _find_logged_expr_in_test_script_str(
+  test_script_str: str,
+  test_script_ast: list,
+  test_script_ann: dict,
+  expr_str: str,
+) -> tuple:
+  '''
+  Find all range cursors in the test_script_str that match the expr_str.
+  PARAM test_script_str: instrumented script that is passed to the rule applicator
+  '''
+  re_expr = re.compile(rf'myexactlog\((\d+), ({re.escape(expr_str)})\)')
+  matches = re.finditer(re_expr, test_script_str)
+  matches = list(matches)
+
+  '''
+  There should be exactly one match for the logged expression.
+  '''
+  assert len(matches) == 1, 'Expected exactly one match for logged expression in test script'
+  expr_st_idx = matches[0].start(2)
+  expr_end_idx = matches[0].end(2)
+
+  # get the AST node id that correspond to the expr_str
+  for nid, (sidx, eidx, _, _) in test_script_ann.items():
+    if sidx == expr_st_idx and eidx == expr_end_idx:
+      range_cursor = d_ast_parse.get_range_cursor(test_script_ast, nid)
+      return range_cursor
+
+  raise ValueError('Should not happen: no range cursor found for logged expression')
+
+
+def _create_subject_for_expr(
+  src_test_script: str,
+  is_three_split: bool,
+  translation_rules_test_code: str,
+  ruleset: p_ruleset.Ruleset,
+  subject_name: str,
+) -> p_subject.PirelSubject:
+  '''
+  Create a subject for validating a rule for expression.
+  '''
+
+  # all attributes of PirelSubject instance set explicitly
+  benchmark_name = 'n/a'
+  name = subject_name
+  src_program = src_test_script
+  src_lang = 'py'
+  tar_lang = 'js'
+  translation_rules_main_code = \
+    ruleset.to_str_ruleset() + '\n\n' + \
+    p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH) + '\n\n' + \
+    p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
+  # translation_rules_test_code  # already set
+  auto_backward = True
+  choices = {'type': 'ASTNODE', 'choices_list': []}
+  verified_choice_options = []
+
+  # create a subject instance
+  expr_subject = p_subject.PirelSubject(
+    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
+  expr_subject.translation_rules_main_code = translation_rules_main_code
+  expr_subject.translation_rules_test_code = translation_rules_test_code
+  expr_subject.auto_backward = auto_backward
+  expr_subject.choices = choices
+  expr_subject.verified_choice_options = verified_choice_options
+
+  # override verified_choice_options with verified rules
+  expr_subject.verified_choice_options = ruleset.get_choice_options_from_verified_rules(
+    expr_subject.get_src_main_code())
+
+  return expr_subject
 
 
 def _create_log_stat_str_for_expr(
@@ -448,103 +516,56 @@ def _create_log_stat_str_for_expr(
   return log_stat_str
 
 
-def _create_subject_for_expr(
-  src_test_script: str,
+def _create_test_script_str_for_expr(
   is_three_split: bool,
-  translation_rules_test_code: str,
-  rules_w_str: str,
-  ruleset: p_ruleset.Ruleset,
-  subject_name: str,
-) -> p_subject.PirelSubject:
-  '''
-  Create a subject for validating a rule for expression.
-  '''
-
-  # all attributes of PirelSubject instance set explicitly
-  benchmark_name = 'n/a'
-  name = subject_name
-  src_program = src_test_script
-  src_lang = 'py'
-  tar_lang = 'js'
-  translation_rules_main_code = \
-    rules_w_str + '\n\n' + \
-    p_utils.read_text(p_consts.LOG_STAT_RULE_FPATH) + '\n\n' + \
-    p_utils.read_text(p_consts.RULE_VAL_EXTRA_RULES_FPATH)
-  # translation_rules_test_code  # already set
-  auto_backward = True
-  choices = {'type': 'ASTNODE', 'choices_list': []}
-  readonly_choices_list = []
-
-  # create a subject instance
-  expr_subject = p_subject.PirelSubject(
-    benchmark_name, name, src_program, src_lang, tar_lang, is_three_split)
-  expr_subject.translation_rules_main_code = translation_rules_main_code
-  expr_subject.translation_rules_test_code = translation_rules_test_code
-  expr_subject.auto_backward = auto_backward
-  expr_subject.choices = choices
-  expr_subject.readonly_choices_list = readonly_choices_list
-
-  # override readonly_choices_list with verified rules
-  expr_subject.readonly_choices_list = ruleset.get_choices_list_from_verified_rules(
-    expr_subject.get_src_main_code())
-
-  return expr_subject
-
-
-def _get_rules_that_handle_range_cursor_rec(
-  range_cursor: tuple,
-  ruleset: p_ruleset.Ruleset,
-  dgann: dict,
+  matched_range_cursor: tuple,
+  matcher_group: List[p_ruleset.TRuleBase],
+  src_test_code: Optional[str],
   src_main_code: str,
-) -> Optional[List[p_ruleset.TRuleBase]]:
+  pre_context: str,
+  dgann: dict,
+  ruleset: p_ruleset.Ruleset,
+) -> str:
   '''
-  Recursively retrieve both verified and unverifiable rules
-  that can handle the range cursor.
+  a = ((15 + (   7 * (math.sqrt(5))   )) / 4) * (math.pow(side, 3))
+                 ^^^^^^^^^^^^^^^^^^
 
-  NOTE returns ALL VERIFIED AND UNVERIFIABLE rules
-  which defeats the purpose of identifying the failing matcher group.
-  TODO This can/should be optimized.
+  myexactlog(7 * (math.sqrt(5)))
+
+  def test():
+    f_gold()
+  def f_gold():
+    myexactlog(7 * (math.sqrt(5)))
+  test()
+
+  NOTE We need to create a test script which combines
+  1. the test function - use the test function that we generated previously
+  2. the f_gold function
+  3. the test function call
   '''
-  trules : List[p_ruleset.TRuleBase] = []
-  range_cursor_encoded = d_ast_parse.range_cursor_encode(
-    range_cursor, dgann, src_main_code)
-  if ruleset.verified_rule_exists(range_cursor_encoded):
-    trules.append(ruleset.get_verified_rule(range_cursor_encoded))
-  if ruleset.unverifiable_rules_exist(range_cursor_encoded):
-    trules.extend(ruleset.get_unverifiable_rules(range_cursor_encoded))
+  log_stat_str = _create_log_stat_str_for_expr(
+    matched_range_cursor,
+    dgann,
+    src_main_code,
+    matcher_group,
+    ruleset
+  )
 
-  # base case: no rule for range cursor not found
-  if len(trules) == 0:
-    return None
+  expr_src_main_code = p_pirel._create_src_main_code_for_val(
+    src_main_code,
+    pre_context,
+    log_stat_str,
+    is_three_split
+  )
 
-  assert ruleset.verified_rule_exists(range_cursor_encoded) != \
-    ruleset.unverifiable_rules_exist(range_cursor_encoded), \
-    'Expected either verified or unverifiable rules to exist, but not both.'
+  if is_three_split:
+    test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
+      test_code=src_test_code,
+      main_code=expr_src_main_code,
+      test_call_code='test()')
+    return test_script_str
 
-  # get all slot cursors of range cursor
-  all_slot_cursors = []  # exist under the range_cursor
-  for trule in trules:
-    match_obj = match_rule_to_range_cursor(trule.rule_parsed['match'], range_cursor)
-    assert match_obj['is_matched'], 'Expected rule to match the range cursor'
-    all_slot_cursors.extend(match_obj['slot_cursors'])
-
-  all_slot_cursors = chain.from_iterable(map(d_ast_parse.range_cursor_split,
-                                             all_slot_cursors))
-  all_slot_cursors = d_ast_parse.range_cursors_remove_empty(all_slot_cursors)
-  all_slot_cursors = d_ast_parse.deduplicate_range_cursors(all_slot_cursors)
-
-  # base case: rule has no slot cursors
-  if len(all_slot_cursors) == 0:
-    return trules
-
-  # recursive case: rule has slot cursors
-  for slot_cursor in all_slot_cursors:
-    child_rules = _get_rules_that_handle_range_cursor_rec(
-      slot_cursor, ruleset, dgann, src_main_code)
-    if child_rules is not None:
-      trules.extend(child_rules)
-
-  return trules
+  return expr_src_main_code
 
 
 def _check_for_base_rules(
@@ -567,306 +588,29 @@ def _check_for_base_rules(
   STARTING_RULESET_STR = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
   starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(STARTING_RULESET_STR)
 
-  # base rules usually just single rules in their matcher group
-  # i.e. there is just a single way to translate a matched AST
-  # TODO this needs to be improved
-  if len(matcher_group) > 1:
-    logger.debug(
-      'The matcher group contains more than one rule. '
-      'The rules in this group are removed from consideration as base rules.')
+  '''
+  All rules from matcher_group must be present in starting_ruleset
+  to be considered base rules.
+  '''
+  flag_all_rules_in_starting_ruleset = True
+  for trule in matcher_group:
+    if trule not in starting_ruleset.rules:
+      flag_all_rules_in_starting_ruleset = False
+      break
+
+  if not flag_all_rules_in_starting_ruleset:
+    logger.debug('Not all rules in the matcher group are present in the starting ruleset.')
     return False
 
-  assert len(matcher_group) == 1, 'Expected exactly one matching rule for base rules'
-  matching_rule = matcher_group[0]
-  for st_trule in starting_ruleset.rules:
-    if st_trule == matching_rule:
-      logger.debug(f'Matched rule appears in the starting ruleset: {matching_rule}')
-      range_cursor_encoded = d_ast_parse.range_cursor_encode(
-        matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_encoded, st_trule)
-      return True
-
-  return False
-
-
-async def _validate_matcher_group_no_intersection(
-  matched_range_cursor: tuple,
-  matcher_group: List[p_ruleset.TRuleBase],
-  subtrees_rules: List[p_ruleset.TRuleBase],
-  ruleset: p_ruleset.Ruleset,
-  test_script_str: str,
-  translation_rules_test_code: str,
-  dgann: dict,
-  src_main_code: str,
-  is_three_split: bool,
-  subject_name: str,
-) -> None:
   '''
-  PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
-  PARAM matcher_group: a list of TRuleBase objects that matched the range cursor.
-  PARAM subtrees_rules: rules that handle the descending slot cursors
-  of the matched range cursor.
-
-  *_no_intersection in the name of this function implies that
-  there are no rules in subtrees_rules that handle the matched_range_cursor.
+  TODO instead of marking all rules as verified, consider checking them one by one.
   '''
+  for trule in matcher_group:
+    range_cursor_encoded = d_ast_parse.range_cursor_encode(
+      matched_range_cursor, dgann, src_main_code)
+    ruleset.update_verified_rules(range_cursor_encoded, trule)
 
-  logger.debug(f'~~~ starting _validate_matcher_group_no_intersection')
-  assert_matchers_match(matcher_group)
-  matcher_signature = matcher_group[0].get_matcher_signature()
-
-  '''
-  Check if the rule(s) in the matcher_group are base rules.
-  If so, we do not need to validate them, since they are already verified.
-  '''
-  flag_check_base_rule = _check_for_base_rules(
-    matcher_group,
-    matched_range_cursor,
-    ruleset,
-    dgann,
-    src_main_code
-  )
-  if flag_check_base_rule:
-    logger.debug('Validation is complete. Matcher group is a list of base rules.')
-    return
-
-  '''
-  From each matcher group, we keep only those that are in subtrees_rules.
-  '''
-  subtrees_matcher_groups = rules_group_by_matcher(subtrees_rules)
-  assert matcher_signature not in subtrees_matcher_groups, 'supposed to be no intersection'
-
-  '''
-  rules_wo contains all rules that can handle everything except
-  the matched_range_cursor. This is used to validate the matcher_group.
-  '''
-  joined_matcher_groups = {**subtrees_matcher_groups, **{matcher_signature: []}}
-  rules_wo = ruleset.add_all_rules_from_missing_matcher_groups(joined_matcher_groups)
-  logger.debug(f'len(rules_wo): {len(rules_wo)}')
-
-  '''
-  Add rules from matcher_group to rules_wo and validate them one by one.
-  '''
-  for idx, rule in enumerate(matcher_group, start=1):
-    logger.debug(f'validating rule {idx}/{len(matcher_group)}:\n{rule}')
-
-    rules_w = rules_wo + [rule]
-    rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-    expr_subject = _create_subject_for_expr(
-      test_script_str, is_three_split, translation_rules_test_code,
-      rules_w_str, ruleset, subject_name)
-
-    '''
-    If this translation succeeds, it means that the rule is plausible
-    with respect to the matched AST.
-    '''
-    try:
-      tar_program_plausible, translate_dbg_history = \
-        await prapp.apply_translation_rules(expr_subject)
-      range_cursor_encoded = d_ast_parse.range_cursor_encode(
-        matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_encoded, rule)
-      logger.debug(
-        f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
-        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
-      return
-
-    except Exception as err:
-      logger.warning(
-        f'Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
-        f'Rule {idx}/{len(matcher_group)} is not plausible with respect to the matched AST:\n{rule}\n'
-        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
-      continue
-
-  raise AllRulesInMatcherGroupImplausibleError(
-    'No plausible translation found for the matched AST with the given ruleset. This is not desired.')
-
-
-async def _validate_matcher_group_single_intersection(
-  matched_range_cursor: tuple,
-  matcher_group: List[p_ruleset.TRuleBase],
-  subtrees_rules: List[p_ruleset.TRuleBase],
-  ruleset: p_ruleset.Ruleset,
-  test_script_str: str,
-  translation_rules_test_code: str,
-  dgann: dict,
-  src_main_code: str,
-  is_three_split: bool,
-  subject_name: str,
-) -> None:
-  '''
-  PARAM matched_range_cursor: range cursor that was matched by the matcher_group.
-  PARAM matcher_group: a list of TRuleBase objects that matched the range cursor.
-  PARAM subtrees_rules: rules that handle the descending slot cursors
-  of the matched range cursor.
-
-  *_single_intersection in the name of this function implies that
-  there is exactly one rule in subtrees_rules that handle the matched_range_cursor.
-  '''
-
-  logger.debug(f'~~~ starting _validate_matcher_group_single_intersection')
-  assert_matchers_match(matcher_group)
-  matcher_signature = matcher_group[0].get_matcher_signature()
-
-  '''
-  From each matcher group, we keep only those that are in subtrees_rules.
-  '''
-  subtrees_matcher_groups = rules_group_by_matcher(subtrees_rules)
-  assert matcher_signature in subtrees_matcher_groups, 'supposed to be no intersection'
-  assert len(subtrees_matcher_groups[matcher_signature]) == 1, \
-    'expected exactly one rule in the matcher group'
-
-  intersect_rule = subtrees_matcher_groups[matcher_signature][0]
-  other_rules = [rule for rule in matcher_group if rule != intersect_rule]
-  del subtrees_matcher_groups[matcher_signature]
-
-  '''
-  rules_wo contains all rules that can handle everything except
-  the matched_range_cursor. This is used to validate the matcher_group.
-  '''
-  joined_matcher_groups = {**subtrees_matcher_groups, **{matcher_signature: []}}
-  rules_wo = ruleset.add_all_rules_from_missing_matcher_groups(joined_matcher_groups)
-  logger.debug(f'len(rules_wo): {len(rules_wo)}')
-
-  '''
-  Add rules from matcher_group to rules_wo and validate them one by one.
-  '''
-  for idx, rule in enumerate([intersect_rule] + other_rules, start=1):
-    logger.debug(f'validating rule {idx}/{len(other_rules) + 1}:\n{rule}')
-
-    rules_w = rules_wo + [rule]
-    rules_w_str = '\n\n'.join([str(r) for r in rules_w])
-    expr_subject = _create_subject_for_expr(
-      test_script_str, is_three_split, translation_rules_test_code,
-      rules_w_str, ruleset, subject_name)
-
-    '''
-    If this translation succeeds, it means that the rule is plausible
-    with respect to the matched AST.
-    '''
-    try:
-      tar_program_plausible, translate_dbg_history = \
-        await prapp.apply_translation_rules(expr_subject)
-      range_cursor_encoded = d_ast_parse.range_cursor_encode(
-        matched_range_cursor, dgann, src_main_code)
-      ruleset.update_verified_rules(range_cursor_encoded, rule)
-      logger.debug(
-        f'Rule {idx}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule}\n'
-        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
-      return
-
-    except Exception as err:
-      logger.warning(
-        f'Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
-        f'Rule {idx}/{len(matcher_group)} is not plausible with respect to the matched AST:\n{rule}\n'
-        f'Matched AST: "{d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)}"')
-      continue
-
-  raise AllRulesInMatcherGroupImplausibleError(
-    'No plausible translation found for the matched AST with the given ruleset. This is not desired.')
-
-
-async def validate_matcher_group(
-  matched_range_cursor: tuple,
-  matcher_group: List[p_ruleset.TRuleBase],
-  subtrees_rules: List[p_ruleset.TRuleBase],
-  ruleset: p_ruleset.Ruleset,
-  src_main_code: str,
-  pre_context: str,
-  log_stat_str: str,
-  src_test_code: Optional[str],
-  translation_rules_test_code: str,
-  dgann: dict,
-  subject_name: str,
-) -> None:
-  '''
-  Validating a matcher group means checking if the rules in the matcher group
-  can be applied to the matched range cursor and if they are plausible
-  with respect to the matched AST.
-
-  PARAM subtrees_rules: a list of rules that can handle (verified) slot cursors
-  under the matched range cursor.
-
-  a = ((15 + (   7 * (math.sqrt(5))   )) / 4) * (math.pow(side, 3))
-                 ^^^^^^^^^^^^^^^^^^
-
-  myexactlog(7 * (math.sqrt(5)))
-
-  def test():
-    f_gold()
-  def f_gold():
-    myexactlog(7 * (math.sqrt(5)))
-  test()
-
-  NOTE We need to create a test script which combines
-  1. the test function - use the test function that we generated previously
-  2. the f_gold function
-  3. the test function call
-  '''
-  logger.debug(f'~~~ starting validate_matcher_group')
-  assert_matchers_match(matcher_group)
-
-  is_three_split = src_test_code is not None
-  expr_src_main_code = p_pirel._create_src_main_code_for_val(
-    src_main_code, pre_context, log_stat_str, is_three_split)
-  if is_three_split:
-    # Create a f_gold() function for the matched AST.
-    test_script_str = p_consts.TEST_SCRIPT_TEMPLATE.format(
-      test_code=src_test_code,
-      main_code=expr_src_main_code,
-      test_call_code='test()')
-  else:
-    test_script_str = expr_src_main_code
-  logger.debug(f'test_script_str:\n{test_script_str}')
-
-  '''
-  We need to deduplicate the rules in subtrees_rules.
-  '''
-  subtrees_rules = rules_deduplicate(subtrees_rules)
-  logger.debug(f'Number of rules to handle sub-ASTs: {len(subtrees_rules)}')
-
-  '''
-  Check if subtrees_rules contains a rule from matcher_group.
-  In other words, a rule that handles one of the descending slot cursors,
-  can also handle the matched range cursor.
-  '''
-  reusable_rules = rules_intersection(matcher_group, subtrees_rules)
-  logger.debug(f'Number of rules handling sub-ASTs that can also handle the matched AST: {len(reusable_rules)}')
-
-  if len(reusable_rules) == 0:
-    await _validate_matcher_group_no_intersection(
-      matched_range_cursor,
-      matcher_group,
-      subtrees_rules,
-      ruleset,
-      test_script_str,
-      translation_rules_test_code,
-      dgann,
-      src_main_code,
-      is_three_split,
-      subject_name,
-    )
-
-  elif len(reusable_rules) == 1:
-    await _validate_matcher_group_single_intersection(
-      matched_range_cursor,
-      matcher_group,
-      subtrees_rules,
-      ruleset,
-      test_script_str,
-      translation_rules_test_code,
-      dgann,
-      src_main_code,
-      is_three_split,
-      subject_name,
-    )
-
-  else:
-    logger.critical(
-      f'The number of reusable rules is {len(reusable_rules)}. '
-      f'This case has not yet been implemented.')
-    p_utils.log_json_time('locals.json', locals())
-    raise NotImplementedError('consider this case')
+  return True
 
 
 async def _process_match_obj(
@@ -877,6 +621,7 @@ async def _process_match_obj(
   pre_context: str,
   src_test_code: Optional[str],
   translation_rules_test_code: str,
+  dgast: list,
   dgann: dict,
   subject_name: str,
 ) -> None:
@@ -890,106 +635,142 @@ async def _process_match_obj(
     'is_matched': is_matched,  # whether the matcher matches the range cursor
     'slot_cursors': slot_cursors  # list of slot cursors that match the range cursor
   }
+  PARAM src_main_code: pre_context + simple_ntext
   '''
+
   logger.debug('~~~ Starting match object processing')
+
   assert match_obj['is_matched'], 'Expected match_obj to be matched'
   matched_range_cursor = match_obj['range_cursor']
-  log_stat_str = _create_log_stat_str_for_expr(
-    matched_range_cursor, dgann, src_main_code, matcher_group, ruleset)
 
   '''
-  slot_cursors are range_cursors that appear under the range_cursor.
+  Check if the rule(s) in the matcher_group are base rules.
+  If so, we do not need to validate them, since they are already verified.
   '''
-  slot_cursors = match_obj['slot_cursors']
-  slot_cursors = d_ast_parse.range_cursors_remove_empty(slot_cursors)
-  logger.debug(f'Matched AST has {len(slot_cursors)} slots')
-
-  '''
-  BASE CASE
-  The rule is non-recursive (leaf rule). It might be a rule in the starting ruleset.
-  '''
-  if len(slot_cursors) == 0:
-    logger.debug('Matched rule is non-recursive. Validating matching rules.')
-    await validate_matcher_group(
-      matched_range_cursor,
-      matcher_group,
-      [],  # subtrees_rules
-      ruleset,
-      src_main_code,
-      pre_context,
-      log_stat_str,
-      src_test_code,
-      translation_rules_test_code,
-      dgann,
-      subject_name
-    )
+  flag_check_base_rule = _check_for_base_rules(
+    matcher_group,
+    matched_range_cursor,
+    ruleset,
+    dgann,
+    src_main_code
+  )
+  if flag_check_base_rule:
+    logger.debug('~~~~~ Validation is complete. Matcher group is a list of one base rule.')
     return
 
   '''
-  RECURSIVE CASE
-  The rule is recursive, i.e. it has at least one slot cursor under the matched range cursor.
-  Need to check if we can handle all slot cursors.
+  Prepare test script and subject for expression.
   '''
-  subtrees_rules = []
-  for idx, slot_cursor in enumerate(slot_cursors, start=1):
-    '''
-    Need to check if slot_cursor spans multiple AST nodes. That might be the case
-    if matching rule contains a "*" placeholder. For example,
-    (match_expand
-      (fragment ("py.list" (str "[") "*" (str "]")) "*")
-      (fragment ("js.array" (str "[") "*1" (str "]")) "*2")
-    )
-    that matches
-    `[1, 2, 3, 4]`
-    '''
-    sub_slot_cursors = list(d_ast_parse.range_cursor_split(slot_cursor))
-    if len(sub_slot_cursors) > 1:
-      logger.debug(
-        f'Slot cursor {idx}/{len(slot_cursors)} has {len(sub_slot_cursors)} '
-        f'sub-slot cursors. This is likely due to a "*" in the matcher.')
+  is_three_split = src_test_code is not None
 
-    for sub_idx, sub_slot_cursor in enumerate(sub_slot_cursors, start=1):
-      '''
-      We need to check if there are rules that plausibly translate the slot_cursors
-      under the matched range_cursor.
-      '''
-      subtrees_rules = _get_rules_that_handle_range_cursor_rec(
-        sub_slot_cursor, ruleset, dgann, src_main_code)
-      logger.debug(
-        f'Slot cursor {sub_idx}/{len(sub_slot_cursors)} {idx}/{len(slot_cursors)} AST: '
-        f'"{d_ast_parse.range_cursor_pretty_print(sub_slot_cursor, dgann, src_main_code)}"')
-
-      '''
-      If there is no rule that can handle the range_cursor,
-      it means we need to check the next matching rule group.
-      '''
-      if subtrees_rules is None:
-        raise NoRuleToHandleRangeCursorError
-
-      logger.debug(f'Number of rules that can handle the slot cursor: {len(subtrees_rules)}')
-      subtrees_rules.extend(subtrees_rules)
-
-  '''
-  This range_cursor is handled by the rule. Mark it as handled.
-  '''
-  await validate_matcher_group(
+  test_script_str = _create_test_script_str_for_expr(
+    is_three_split,
     matched_range_cursor,
     matcher_group,
-    subtrees_rules,
-    ruleset,
+    src_test_code,
     src_main_code,
     pre_context,
-    log_stat_str,
-    src_test_code,
-    translation_rules_test_code,
     dgann,
+    ruleset,
+  )
+
+  expr_subject = _create_subject_for_expr(
+    test_script_str,
+    is_three_split,
+    translation_rules_test_code,
+    ruleset,
     subject_name
   )
 
-  logger.debug('~~~ Ended match object processing')
+  '''
+  Need to find matched_range_cursor in test_script_str
+  '''
+  test_scr_ast, test_scr_ann = d_ast_parse.parse_text_dbg(test_script_str, 'py')
+
+  expr_str = d_ast_parse.range_cursor_pretty_print(matched_range_cursor, dgann, src_main_code)
+  test_scr_matched_rc = _find_logged_expr_in_test_script_str(
+    test_script_str,
+    test_scr_ast,
+    test_scr_ann,
+    expr_str
+  )
+
+  test_scr_matched_rc_chid = d_ast_parse.range_cursor_to_choice_identifier(test_scr_matched_rc)
+  test_scr_matched_rc_enc = d_ast_parse.range_cursor_encode(test_scr_matched_rc, test_scr_ann, test_script_str)
+  test_scr_matched_rc_pp = d_ast_parse.range_cursor_pretty_print(test_scr_matched_rc, test_scr_ann, test_script_str)
+
+  flag_vrf_rule_found = False
+  for rule_idx, rule_ut in enumerate(matcher_group):
+    logger.debug(f'~~~~~ Rule {rule_idx + 1}/{len(matcher_group)} in matcher group:\n{rule_ut}')
+    _reset_expr_subject(expr_subject, test_scr_matched_rc_chid, rule_idx)
+
+    '''
+    If this translation succeeds, it means that the rule is plausible
+    with respect to the matched AST.
+    '''
+    try:
+      tar_program_plausible, translate_dbg_history = \
+        await prapp.apply_translation_rules(expr_subject, raise_on_missing_vrf_rule=True)
+      ruleset.update_verified_rules(test_scr_matched_rc_enc, rule_ut)
+      flag_vrf_rule_found = True
+      logger.debug(
+        f'~~~~~ Rule {rule_idx + 1}/{len(matcher_group)} is plausible with respect to the matched AST:\n{rule_ut}\n'
+        f'Matched AST: "{test_scr_matched_rc_pp}"')
+
+    except VerifiedRulesExhaustedError as err:
+      logger.warning(
+        f'While verifying translation rules for a matched AST, stumbled upon '
+        f'an AST node that cannot be plausibly translated with any of the '
+        f'verified rules.')
+
+      # the node itself is missing a rule
+      if err.choice_identifier == test_scr_matched_rc_chid:
+        continue
+
+      no_choices_rc = d_ast_parse.choice_identifier_to_range_cursor(
+        err.choice_identifier, test_scr_ast)
+      no_choices_rc_encoded = d_ast_parse.range_cursor_encode(
+        no_choices_rc, dgann, src_main_code)
+      assert ruleset.verified_rules_exist(no_choices_rc_encoded), 'precondition failed'
+      ruleset.remove_verified_rules_for(no_choices_rc_encoded)
+      no_choices_snippet = d_ast_parse.range_cursor_pretty_print(
+        no_choices_rc, dgann, src_main_code)
+
+      not_matching_rules : List[p_ruleset.TRuleBase] = []
+      for matcher_group in ruleset.matcher_groups.values():
+        matcher = matcher_group[0].rule_parsed['match']
+        match_obj = _match_rule_to_range_cursor(matcher, no_choices_rc)
+        if match_obj['is_matched']:
+          continue
+        not_matching_rules.extend(matcher_group)
+      not_matching_rules_str = '\n\n'.join([r.to_rule_str() for r in not_matching_rules])
+
+      err.no_choices_snippet = no_choices_snippet
+      err.not_matching_rules_str = not_matching_rules_str
+      raise err
+
+    except Exception as err:
+      logger.warning(
+        f'~~~~~ Error while applying translation rules:\n{p_utils.exception_to_str(err)}\n'
+        f'Rule {rule_idx + 1}/{len(matcher_group)} is not plausible with respect to the matched AST:\n{rule_ut}\n'
+        f'Matched AST: "{test_scr_matched_rc_pp}"')
+      continue
+
+  if not flag_vrf_rule_found:
+    not_matching_rules : List[p_ruleset.TRuleBase] = []
+    for matcher_group in ruleset.matcher_groups.values():
+      matcher = matcher_group[0].rule_parsed['match']
+      match_obj = _match_rule_to_range_cursor(matcher, test_scr_matched_rc)
+      if match_obj['is_matched']:
+        continue
+      not_matching_rules.extend(matcher_group)
+    not_matching_rules_str = '\n\n'.join([r.to_rule_str() for r in not_matching_rules])
+    err_obj = AllRulesInMatcherGroupImplausibleError(
+      not_matching_rules_str, test_scr_matched_rc_pp)
+    raise err_obj
 
 
-async def process_choicable_range_cursor(
+async def _process_choicable_range_cursor(
   matcher_group: List[p_ruleset.TRuleBase],
   all_range_cursors: List[Tuple[list, int, int]],
   ruleset: p_ruleset.Ruleset,
@@ -997,6 +778,7 @@ async def process_choicable_range_cursor(
   pre_context: str,
   src_test_code: Optional[str],
   translation_rules_test_code: str,
+  dgast: list,
   dgann: dict,
   processed_match_objs: Dict[str, list],
   subject_name: str,
@@ -1010,12 +792,9 @@ async def process_choicable_range_cursor(
   we cannot get a range cursor from an AST node, because range cursors
   need a reference to the parent AST node.
   '''
-  logger.debug('~~~ starting process_choicable_range_cursor')
-
   assert_matchers_match(matcher_group)
   matcher = matcher_group[0].rule_parsed['match']
   matcher_signature = matcher_group[0].get_matcher_signature()
-  logger.debug(f'Matcher: {matcher}')
 
   '''
   Keep only those range cursors that have not been processed yet.
@@ -1024,14 +803,14 @@ async def process_choicable_range_cursor(
     rc for rc in all_range_cursors
     if d_ast_parse.range_cursor_to_choice_identifier(rc) not in processed_match_objs.get(matcher_signature, [])
   ]
-  match_objs = [match_rule_to_range_cursor(matcher, range_cursor) for range_cursor in all_range_cursors]
+  match_objs = [_match_rule_to_range_cursor(matcher, range_cursor) for range_cursor in all_range_cursors]
   match_objs = [match_obj for match_obj in match_objs if match_obj['is_matched']]
 
   if len(match_objs) == 0:
-    logger.debug('No range cursor matches the matcher. Matcher group will be removed from the queue.')
     return
 
-  logger.debug(f'Number of range cursors that match the matcher: {len(match_objs)}')
+  logger.debug(f'~~ Matcher: {matcher}')
+  logger.debug(f'~~ Number of range cursors that match the matcher: {len(match_objs)}')
   flag_unhandled_exists = False
 
   '''
@@ -1041,7 +820,7 @@ async def process_choicable_range_cursor(
 
     range_cursor = match_obj['range_cursor']
     logger.debug(
-      f'Processing match_obj {idx}/{len(match_objs)}:\n'
+      f'~~ Processing match_obj {idx}/{len(match_objs)}:\n'
       f'-> matcher signature: {matcher_signature}\n'
       f'-> matched AST: "{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
 
@@ -1055,21 +834,22 @@ async def process_choicable_range_cursor(
         pre_context,
         src_test_code,
         translation_rules_test_code,
+        dgast,
         dgann,
         subject_name,
       )
-      logger.debug('Successfully processed the match_obj.')
+      logger.debug('~~ Successfully processed the match_obj.')
       processed_match_objs.setdefault(matcher_signature, []).append(
         d_ast_parse.range_cursor_to_choice_identifier(range_cursor))
 
     except NoRuleToHandleRangeCursorError:
-      logger.debug('Not enough rules to handle the slot cursor. Continuing with the next match_obj.')
+      logger.debug('~~ Not enough rules to handle the slot cursor. Continuing with the next match_obj.')
       flag_unhandled_exists = True
       continue
 
     except ExprLogStatHasParseError:
       logger.debug(
-        'Logged expression has parse error. Unlinking the range cursor '
+        '~~ Logged expression has parse error. Unlinking the range cursor '
         'from matcher group (rules that match this range cursor):\n'
         f'{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
       processed_match_objs.setdefault(matcher_signature, []).append(
@@ -1077,7 +857,7 @@ async def process_choicable_range_cursor(
 
     except ExprLogStatContextError:
       logger.debug(
-        'Logged expression cannot be used as an argument to a log statement '
+        '~~ Logged expression cannot be used as an argument to a log statement '
         '(context issue).\nUnlinking the range cursor '
         'from matcher group (rules that match this range cursor):\n'
         f'{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}')
@@ -1086,6 +866,117 @@ async def process_choicable_range_cursor(
 
   if flag_unhandled_exists:
     raise UnhandledRangeCursorExistsError
+
+
+def _is_excluded_range_cursor(
+  root_range_cursor: tuple,
+  range_cursor: tuple,
+  dgann: dict,
+  src_main_code: str
+) -> bool:
+  '''
+  Check if the given range cursor is excluded from consideration.
+  PRE: range_cursor[1] + 1 == range_cursor[2]  # range_cursor specifies exactly one AST node
+  '''
+  def __pattern_1_recursive_call_to_f_gold(ast: list) -> bool:
+    '''
+    PARAM ast: duoglot-style AST
+    '''
+    # must be non-terminal
+    if not isinstance(ast, list):
+      return False
+    ntype = ast[0]
+    nid = ast[1]
+    assert isinstance(nid, int), 'sanity check'
+    if ntype != 'py.call':
+      return False
+    children = ast[2:]
+    ch1 = children[0]
+    ch1_type = ch1[0]
+    if ch1_type != 'py.identifier':
+      return False
+    assert len(ch1) == 3, 'sanity check'
+    ch_literal = ch1[2]
+    if ch_literal == '"f_gold"':
+      return True
+    return False
+
+  def __pattern_2_descendant_of_string(root_ast: list, ast: list, ann: dict) -> bool:
+    '''
+    Any nodes under string: string_content, interpolation, etc. since
+    we learn overfitted rules for f-strings (and alike).
+    PARAM ast: duoglot-style AST
+    '''
+    root_ast_ntype = root_ast[0]
+    if root_ast_ntype != 'py.string':
+      return False
+    root_ast_nid = root_ast[1]
+    rsidx, reidx, _, _ = ann[root_ast_nid]
+    ast_nid = ast[1]
+    asidx, aeidx, _, _ = ann[ast_nid]
+    assert rsidx <= asidx, 'start idx of root_ast <= start idx of ast'
+    assert reidx >= aeidx, 'end idx of root_ast >= end idx of ast'
+    if asidx == rsidx and aeidx == reidx:
+      return False
+    return True
+
+  ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
+  if __pattern_1_recursive_call_to_f_gold(ast):
+    logger.debug(
+      f'Excluding range cursor (recursive call to `f_gold`): '
+      f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
+    return True
+
+  root_ast = d_ast_parse.range_cursor_to_ast_node(root_range_cursor)
+  if __pattern_2_descendant_of_string(root_ast, ast, dgann):
+    logger.debug(
+      f'Excluding range cursor (descendant of string): '
+      f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
+    return True
+
+  return False
+
+
+def _filter_range_cursors(
+  range_cursors: list,
+  dgann: dict,
+  src_main_code: str,
+  ruleset: p_ruleset.Ruleset
+) -> list:
+  '''
+  Exclude some nodes from consideration.
+  All rules that match the removed range cursors must be
+  added to unverifiable rules.
+  '''
+  result = []
+  root_range_cursor = range_cursors[0]
+  for range_cursor in range_cursors:
+    if not _is_excluded_range_cursor(root_range_cursor, range_cursor, dgann, src_main_code):
+      result.append(range_cursor)
+      continue
+    range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)
+    range_cursor_encoded = d_ast_parse.range_cursor_encode(range_cursor, dgann, src_main_code)
+
+    # if we reach here, it means the range cursor is excluded
+    # matcher_group is a list of rules that share the same matcher
+    for matcher_sig, matcher_group in ruleset.matcher_groups.items():
+      assert_matchers_match(matcher_group)
+      matcher = matcher_group[0].rule_parsed['match']
+      match_obj = _match_rule_to_range_cursor(matcher, range_cursor)
+      if not match_obj['is_matched']:
+        continue
+      # if we reach here, it means that matcher_group contains rules
+      # that match the range_cursor
+      logger.debug(
+        f'Updating unverifiable rules for range cursor: '
+        f'{range_cursor_unparsed}')
+      for rule in matcher_group:
+        ruleset.update_unverifiable_rules(
+          range_cursor_encoded,
+          rule
+        )
+
+  return result
 
 
 async def _get_validated_stat_nid_in_instr_code(
@@ -1113,6 +1004,14 @@ async def _get_validated_stat_nid_in_instr_code(
     pvpy.PassStatementNode,  # never used in f_gold, but added by instrumentation
   ]
 
+  _SKEL_STAT_NTYPES = _GFG_STAT_NTYPES +[
+    pvpy.WithStatementNode,
+    pvpy.DeleteStatementNode,
+    pvpy.AssertStatementNode,
+    pvpy.NonlocalStatementNode,
+    pvpy.RaiseStatementNode,
+  ]
+
   tree = pvpy.Tree.from_str(src_main_code)
   root_node = tree.root_node
   nid_node_map = root_node.get_nid_node_map()
@@ -1127,12 +1026,12 @@ async def _get_validated_stat_nid_in_instr_code(
   pass statements.
   TODO with break statements, it's a bit tricky; for now, just return
   the latest break statement node id even if it's inserted by instrumentation,
-  because it has "no" effect on p_ext_rule_chooser.get_readonly_choices_list().
+  because it has "no" effect on p_ext_rule_chooser.stat_node_validate_exprs().
   '''
   pp = pvpy.PrettyPrinter(indent_with='    ')
   for stat_nid in reversed(all_stat_nids):
     stat_node = nid_node_map[stat_nid]
-    assert isinstance(stat_node, tuple(_GFG_STAT_NTYPES)), \
+    assert isinstance(stat_node, tuple(_SKEL_STAT_NTYPES)), \
       f'unexpected type: {stat_node.__class__.__name__}'
 
     # skip if statement types do not match
@@ -1151,19 +1050,6 @@ async def _get_validated_stat_nid_in_instr_code(
     return stat_nid
 
   raise ValueError('No statement node found that matches the simple_ntext statement node.')
-
-
-async def _get_all_stat_nids(
-  src_main_code: str,
-  is_three_split: bool
-) -> List[int]:
-  stat_nodes = await p_pirel._get_statement_nodes(
-    src_main_code, 'py', is_three_split)
-  assert len(stat_nodes) > 0, 'sanity check'
-  for node in stat_nodes:
-    assert isinstance(node, pds.NTTextNode), 'sanity check'
-  stat_nids = [node.get_id() for node in stat_nodes]
-  return stat_nids
 
 
 async def _get_stat_nids_in_pre_context(
@@ -1228,7 +1114,7 @@ async def _get_exluded_stat_nids(
   for rule in overfitted_rules:
     matcher = rule.rule_parsed['match']
     for range_cursor in all_range_cursors:
-      match_obj = match_rule_to_range_cursor(matcher, range_cursor)
+      match_obj = _match_rule_to_range_cursor(matcher, range_cursor)
       if not match_obj['is_matched']:
         continue
       matched_ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
@@ -1246,7 +1132,7 @@ async def _get_exluded_stat_nids(
   return excluded_stat_nids
 
 
-async def _get_readonly_choices_list_init(
+async def _stat_node_validate_exprs_init(
   src_main_code: str,
   ruleset: p_ruleset.Ruleset,
   is_three_split: bool,
@@ -1263,13 +1149,14 @@ async def _get_readonly_choices_list_init(
 
   choicable_nodes = pvpy.ChoicableNodeExtractor.extract_choicable_nodes(
     src_main_code, exclude_statement_nodes_ids=excluded_stat_nids)
-  logger.debug(f'There are {len(choicable_nodes)} choicable nodes in:\n{src_main_code}')
+  logger.debug(f'There are {len(choicable_nodes)} choicable nodes in src_main_code.')
+  p_utils.log_file_time('src_main_code.py', src_main_code)
 
   chable_rc_prectxs = []  # choicable range cursors with pre-context
   dgast, dgann = d_ast_parse.parse_text_dbg(src_main_code, 'py')
 
   for i, choicable_node in enumerate(choicable_nodes, start=1):
-    choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())
+    choicable_range_cursor = d_ast_parse.get_range_cursor(dgast, choicable_node.get_node_id())  # $$$$
     stat_node = _choicable_node_get_context_node(choicable_node)
     # For subject without the three-split format,
     # statements yet to be translated (by the order of execution)
@@ -1281,101 +1168,19 @@ async def _get_readonly_choices_list_init(
     chable_rc_prectxs.append((choicable_range_cursor, pre_context))
     logger.debug(
       f'-> Choicable_node {i}/{len(choicable_nodes)}: '
-      f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"\n'
-      f'pre_context:\n{pre_context}')
+      f'"{d_ast_parse.range_cursor_pretty_print(choicable_range_cursor, dgann, src_main_code)}"')
 
   return chable_rc_prectxs, dgast, dgann
 
 
-def _is_excluded_range_cursor(
-  range_cursor: tuple,
-  dgann: dict,
-  src_main_code: str
-) -> bool:
-  '''
-  Check if the given range cursor is excluded from consideration.
-  '''
-  def __pattern_1_recursive_call_to_f_gold(ast: list) -> bool:
-    '''
-    PARAM ast: duoglot-style AST
-    '''
-    # must be non-terminal
-    if not isinstance(ast, list):
-      return False
-    ntype = ast[0]
-    nid = ast[1]
-    assert isinstance(nid, int), 'sanity check'
-    if ntype != 'py.call':
-      return False
-    children = ast[2:]
-    ch1 = children[0]
-    ch1_type = ch1[0]
-    if ch1_type != 'py.identifier':
-      return False
-    assert len(ch1) == 3, 'sanity check'
-    ch_literal = ch1[2]
-    if ch_literal == '"f_gold"':
-      return True
-    return False
-
-  ast = d_ast_parse.range_cursor_to_ast_node(range_cursor)
-  if __pattern_1_recursive_call_to_f_gold(ast):
-    logger.debug(
-      f'Excluding range cursor (recursive call to `f_gold`): '
-      f'"{d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)}"')
-    return True
-  return False
-
-
-def _filter_range_cursors(
-  range_cursors: list,
-  dgann: dict,
-  src_main_code: str,
-  ruleset: p_ruleset.Ruleset
-) -> list:
-  '''
-  Exclude some nodes from consideration.
-  All rules that match the removed range cursors must be
-  added to unverifiable rules.
-  '''
-  result = []
-  for range_cursor in range_cursors:
-    if not _is_excluded_range_cursor(range_cursor, dgann, src_main_code):
-      result.append(range_cursor)
-      continue
-    range_cursor_unparsed = d_ast_parse.range_cursor_pretty_print(range_cursor, dgann, src_main_code)
-    range_cursor_encoded = d_ast_parse.range_cursor_encode(range_cursor, dgann, src_main_code)
-
-    # if we reach here, it means the range cursor is excluded
-    # matcher_group is a list of rules that share the same matcher
-    for matcher_sig, matcher_group in ruleset.matcher_groups.items():
-      assert_matchers_match(matcher_group)
-      matcher = matcher_group[0].rule_parsed['match']
-      match_obj = match_rule_to_range_cursor(matcher, range_cursor)
-      if not match_obj['is_matched']:
-        continue
-      # if we reach here, it means that matcher_group contains rules
-      # that match the range_cursor
-      logger.debug(
-        f'Updating unverifiable rules for range cursor: '
-        f'{range_cursor_unparsed}')
-      for rule in matcher_group:
-        ruleset.update_unverifiable_rules(
-          range_cursor_encoded,
-          rule
-        )
-
-  return result
-
-
-async def get_readonly_choices_list(
+async def stat_node_validate_exprs(
   src_main_code: str,
   src_test_code: Optional[str],
   translation_rules_test_code: str,
   ruleset: p_ruleset.Ruleset,
   simple_ntext: str,
   subject_name: str
-) -> list:
+) -> None:
   '''
   Generate a readonly choices list for the given source code and rules.
   Readonly choices list contains choices to validated rules that result
@@ -1393,8 +1198,8 @@ async def get_readonly_choices_list(
   NOTE This function should not add or remove rules from the ruleset.
   '''
 
-  p_utils.log_json_time('args-get_readonly_choices_list.json', locals())
-  logger.info('readonly-main: Starting generation of read-only choices list')
+  p_utils.log_json_time('args-stat_node_validate_exprs.json', locals())
+  logger.debug('readonly-main: Starting generation of read-only choices list')
 
   '''
   `choicable_range_cursors` - a list of range cursors
@@ -1405,7 +1210,7 @@ async def get_readonly_choices_list(
   if h < 0 or m < 0 or h > 12 or m > 60:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   '''
-  chable_rc_prectxs, dgast, dgann = await _get_readonly_choices_list_init(
+  chable_rc_prectxs, dgast, dgann = await _stat_node_validate_exprs_init(
     src_main_code, ruleset, src_test_code is not None, simple_ntext)
 
   for i, (choicable_range_cursor, pre_context) in enumerate(chable_rc_prectxs, start=1):
@@ -1420,7 +1225,7 @@ async def get_readonly_choices_list(
     '''
     choicable_range_cursor_encoded = d_ast_parse.range_cursor_encode(
       choicable_range_cursor, dgann, src_main_code)
-    if ruleset.verified_rule_exists(choicable_range_cursor_encoded):
+    if ruleset.verified_rules_exist(choicable_range_cursor_encoded):
       logger.debug('Skipping processing of choicable_range_cursor, since it is already handled by verified rules.')
       continue
     if ruleset.unverifiable_rules_exist(choicable_range_cursor_encoded):
@@ -1444,7 +1249,7 @@ async def get_readonly_choices_list(
     paramable_ids: a list of parameterable identifiers under choicable_range_cursor.
     test_fn_str: a test function string that will be used to validate translation rules.
     all_range_cursors: a list of all range cursors under choicable_range_cursor.
-    This includes the choicable_range_cursor itself and all its subtrees.
+    This includes the choicable_range_cursor itself (as the first elem) and all its subtrees.
     '''
     all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
     all_range_cursors = _filter_range_cursors(
@@ -1463,7 +1268,7 @@ async def get_readonly_choices_list(
       logger.debug(f'~ Queue size: {len(queue_matcher_groups)}')
       matcher_group = queue_matcher_groups.pop(0)
       try:
-        await process_choicable_range_cursor(
+        await _process_choicable_range_cursor(
           matcher_group,
           all_range_cursors,
           ruleset,
@@ -1471,6 +1276,7 @@ async def get_readonly_choices_list(
           pre_context,
           src_test_code,
           translation_rules_test_code,
+          dgast,
           dgann,
           processed_match_objs,
           subject_name
@@ -1489,12 +1295,114 @@ async def get_readonly_choices_list(
         logger.error(f'Infinite loop detected. Stopping processing for matcher group: {matcher_group}')
         raise QueueInfiniteLoopError('Infinite loop detected')
 
-  logger.info('readonly-main: Finished generation of read-only choices list')
-  readonly_choices_list = ruleset.get_choices_list_from_verified_rules(src_main_code)
-  return readonly_choices_list
+  logger.debug('readonly-main: Finished generation of read-only choices list')
+  verified_choice_options = ruleset.get_choice_options_from_verified_rules(src_main_code)
+  return verified_choice_options
 
 
 # GENERATING NEW CHOICES LIST BASED ON ERRORS
+def _sanity_check_choices_list(
+  choices_list: List[Tuple[Tuple[int, int, int], int]]
+) -> None:
+  '''
+  Perform sanity checks on the choices list.
+  POST: choice identifiers are unique and sorted.
+  '''
+  seen = set()
+  prev_range_info = None
+  for range_info, choice_idx in choices_list:
+    assert range_info not in seen, f'duplicate choice identifier found in choices_list: {range_info}'
+    seen.add(range_info)
+    if prev_range_info is not None:
+      assert range_info > prev_range_info, f'choices list is not sorted: {choices_list}'
+    prev_range_info = range_info
+
+
+def _sanity_check_choice_options(
+  choice_options: List[Tuple[Tuple[int, int, int], List[int]]],
+  assert_uniq_choice_ids: bool = True,
+  assert_sorted: bool = True,
+) -> None:
+  '''
+  Perform sanity checks on the choice options.
+  POST: choice identifiers are unique and sorted.
+  '''
+  seen = set()
+  prev_range_info = None
+  for range_info, choice_idxs in choice_options:
+    if assert_uniq_choice_ids:
+      assert range_info not in seen, f'duplicate choice identifier found in choice_options: {range_info}'
+    seen.add(range_info)
+    if assert_sorted and prev_range_info is not None:
+      assert range_info > prev_range_info, f'choice options list is not sorted: {choice_options}'
+    prev_range_info = range_info
+
+
+def merge_choices_list_and_choice_options(
+  choices_list: List[Tuple[Tuple[int, int, int], int]],
+  choice_options: List[Tuple[Tuple[int, int, int], List[int]]],
+  raise_on_conflict: bool = False
+) -> List[Tuple[Tuple[int, int, int], int]]:
+  '''
+  Create a union of two choices lists.
+  If a choice exists in both lists and raise_on_conflict is True,
+  raise an error if the choice indices are different.
+  RETURN the merged choices list.
+  PRE: choice identifiers are unique and sorted.
+  '''
+  result = []
+  idx_li = 0
+  idx_op = 0
+  len_li = len(choices_list)
+  len_op = len(choice_options)
+
+  while idx_li < len_li and idx_op < len_op:
+    range_info_li, choice_idx_li = choices_list[idx_li]
+    range_info_op, choice_idxs_op = choice_options[idx_op]
+    assert len(choice_idxs_op) > 0, 'sanity check: choice options must have at least one choice idx'
+
+    if range_info_li < range_info_op:
+      result.append((range_info_li, choice_idx_li))
+      idx_li += 1
+    elif range_info_li > range_info_op:
+      result.append((range_info_op, choice_idxs_op[0]))  # take the first choice idx
+      idx_op += 1
+    else:
+      # range_info_a == range_info_b
+      if raise_on_conflict and choice_idx_li != choice_idxs_op[0]:
+        raise ValueError(
+          f'Conflict in choices lists for range_info {range_info_li}: '
+          f'choice_idx_li={choice_idx_li}, choice_idx_op={choice_idxs_op[0]}')
+      assert choice_idx_li in choice_idxs_op, 'choice_idx_li must be in choice_idxs_op'
+      result.append((range_info_li, choice_idx_li))
+      idx_li += 1
+      idx_op += 1
+
+  # append remaining choices from choices_list_a
+  while idx_li < len_li:
+    result.append(choices_list[idx_li])
+    idx_li += 1
+
+  # append remaining choices from choices_list_b
+  while idx_op < len_op:
+    range_info_op, choice_idxs_op = choice_options[idx_op]
+    assert len(choice_idxs_op) > 0, 'sanity check: choice options must have at least one choice idx'
+    result.append((range_info_op, choice_idxs_op[0]))  # take the first choice idx
+    idx_op += 1
+
+  return result
+
+
+def choices_list_sorted(
+  choices_list: List[Tuple[Tuple[int, int, int], int]],
+  reverse: bool = False
+) -> List[Tuple[Tuple[int, int, int], int]]:
+  '''
+  Sort the choices list by range_info.
+  '''
+  return sorted(choices_list, key=lambda x: x[0], reverse=reverse)
+
+
 def rel_alt_step_info_remove_duplicates(
   rel_alt_step_infos: dict
 ) -> dict:
@@ -1516,98 +1424,49 @@ def rel_alt_step_info_remove_duplicates(
   return result
 
 
-def are_choices_lists_equal(
-  gen_choices_list: List[tuple],
-  actual_choices_list: List[tuple]
-) -> bool:
+def _add_verified_choice_options(
+  all_choices_list: List[Tuple[Tuple[int, int, int], int]],
+  verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]]
+) -> List[Tuple[Tuple[int, int, int], int]]:
   '''
-  Choices lists may be of different lengths. For example,
-  [
-    ((11, 3, 5), 0),
-    ((19, 4, 5), 1)
-  ]
-  and
-  [
-    ((11, 3, 5), 0),
-    ((19, 4, 5), 1),
-    ((23, 2, 3), 0),
-    ((24, 3, 4), 0)
-  ]
-  In this case, we remove choices with choice_idx == 0
-  from both lists and compare the remaining choices.
-
-  PRE: choice identifiers are unique and sorted.
+  Add readonly choices to the all_choices_list.
   '''
-  list_a = _choices_list_remove_default_choice_idxs(gen_choices_list)
-  list_b = _choices_list_remove_default_choice_idxs(actual_choices_list)
-
-  # base case
-  if len(list_a) != len(list_b):
-    return False
-
-  for choice_a, choice_b in zip(list_a, list_b):
-    range_info_a, choice_idx_a = choice_a
-    range_info_b, choice_idx_b = choice_b
-    if range_info_a != range_info_b:
-      return False
-    if choice_idx_a != choice_idx_b:
-      return False
-  return True
+  _sanity_check_choices_list(all_choices_list)
+  _sanity_check_choice_options(verified_choice_options)
+  return merge_choices_list_and_choice_options(
+    all_choices_list,
+    verified_choice_options,
+    raise_on_conflict=False  # choice may have been made from verified choices
+  )
 
 
-def choices_stack_list_to_choices_list(
-  choices_list_stack: List[List[Tuple[Tuple[int], int]]]
-) -> List[Tuple[Tuple[int], int]]:
+def _choices_list_history_to_choices_list(
+  choices_list_history: List[List[Tuple[Tuple[int, int, int], int]]]
+) -> List[Tuple[Tuple[int, int, int], int]]:
   '''
-  Convert a stack of choices lists to a single choices list.
-  The stack is a list of lists, where each inner list is a choices list.
+  Convert a history of choices lists to a single choices list.
+  The history is a list of lists, where each inner list is a choices list.
   The function returns a single choices list that contains all the choices
-  from the stack, preserving the order of choices.
+  from the history, preserving the order of choices.
   '''
-  choices_list = []
-  for choices in choices_list_stack:
-    for choice in choices:
-      assert choice not in choices_list, f'duplicate choice found: {choice}'
-      choices_list.append(choice)
-  return choices_list
-
-
-def _choices_list_remove_default_choice_idxs(
-  choices_list: List[Tuple[Tuple[int], int]]
-) -> List[Tuple[Tuple[int], int]]:
-  '''
-  Remove choices with choice_idx == 0 from the choices_list.
-  '''
-  return [choice for choice in choices_list if choice[1] != 0]
-
-
-def _choices_list_get(
-  choices_list: List[Tuple[Tuple[int], int]],
-  range_info: Tuple[int, int, int]
-) -> Optional[int]:
-  '''
-  Get the choice index for the given range_info from the choices_list.
-  This is a generic function that can be used when choices_list
-  is a nested list of lists, or range_info is a list.
-  '''
-  for range_info_seq, choice_idx in choices_list:
-    assert len(range_info_seq) == 3, 'Expected range_info_seq to be a tuple of (node_id, start_idx, end_idx)'
-    if range_info_seq[0] == range_info[0] and \
-       range_info_seq[1] == range_info[1] and \
-       range_info_seq[2] == range_info[2]:
-      return choice_idx
-  return None
+  merged = {}
+  for choices_list in choices_list_history:
+    for choice in choices_list:
+      range_info, choice_idx = choice
+      merged[range_info] = choice_idx  # later ones overwrite earlier ones
+  merged_choices_list = [(range_info, choice_idx) for range_info, choice_idx in merged.items()]
+  return merged_choices_list
 
 
 def _get_new_choices_list_rec(
-  rasis_values: List[dict],
-  readonly_choices_list: List[Tuple[Tuple[int], int]]
+  choice_options: List[Tuple[Tuple[int], List[int]]],
+  vrf_range_infos: Set[Tuple[int, int, int]],
+  raise_on_missing_vrf_rule: bool = False,
 ) -> Tuple[Optional[list], bool]:
   '''
-  PARAM rasis_values: a list of dictionaries, each dictionary contains:
-    - 'next_choices_count': number of rules that can be applied
-    - 'current_choose_idx': index of the chosen rule
-    - 'current_range_info': range_info of the current alt object
+  PARAM choice_options: a list of tuples, each tuple contains:
+    - current_range_info: choice_identifier of the current node
+    - choice_idxs: list of possible choice indices at the current node
 
   RETURN a tuple of (new_choices_list, is_new_choice_created)
   '''
@@ -1617,109 +1476,119 @@ def _get_new_choices_list_rec(
   If there are no more choices at the lower level, choose the next
   combination one level up.
   '''
-  rasis_value = rasis_values[0]
-  next_choices_count = rasis_value['next_choices_count']
-  current_choose_idx = rasis_value['current_choose_idx']
-  current_range_info = rasis_value['current_range_info']
+  current_range_info, choice_idxs = choice_options[0]
 
   # base case
-  if len(rasis_values) == 1:
-    readonly_val = _choices_list_get(readonly_choices_list, current_range_info)
-    # the current range_info is in readonly_choices_list, we cannot change it
-    if readonly_val is not None:
-      node_choice = (current_range_info, readonly_val)
-      return [node_choice], False
-    # there are no choices left at this node
-    if current_choose_idx + 1 == next_choices_count:
+  if len(choice_options) == 1:
+    # no choices left at this node
+    if len(choice_idxs) == 1:
+      if raise_on_missing_vrf_rule and current_range_info in vrf_range_infos:
+        raise VerifiedRulesExhaustedError(current_range_info)
       return [], False
-    # make the next choice at the current node
-    node_choice = (current_range_info, current_choose_idx + 1)
+    node_choice = (current_range_info, choice_idxs[1])
     return [node_choice], True
 
   # recursive call
-  choices_down_the_line, is_new_choice_created = _get_new_choices_list_rec(rasis_values[1:], readonly_choices_list)
+  choices_down_the_line, is_new_choice_created = _get_new_choices_list_rec(
+    choice_options[1:],
+    vrf_range_infos,
+    raise_on_missing_vrf_rule,
+  )
 
   # if a new choice was created at the lower level,
   # we need to return it as a new choice at the current level
   if is_new_choice_created:
     assert len(choices_down_the_line) > 0, 'Expected choices_down_the_line to be non-empty'
     # repeat the same choice at the current level
-    node_choice = (current_range_info, current_choose_idx)
+    node_choice = (current_range_info, choice_idxs[0])
     return [node_choice] + choices_down_the_line, True
 
-  # the current range_info is in readonly_choices_list, we cannot change it
-  readonly_val = _choices_list_get(readonly_choices_list, current_range_info)
-  if readonly_val is not None:
-    node_choice = (current_range_info, readonly_val)
-    return [node_choice] + choices_down_the_line, False
-
-  # there are no choices left at this node
-  if current_choose_idx + 1 == next_choices_count:
+  # no choices left at this node
+  if len(choice_idxs) == 1:
+    if raise_on_missing_vrf_rule and current_range_info in vrf_range_infos:
+      raise VerifiedRulesExhaustedError(current_range_info)
     return choices_down_the_line, False
 
   # make the next choice at the current node
-  node_choice = (current_range_info, current_choose_idx + 1)
+  node_choice = (current_range_info, choice_idxs[1])
   return [node_choice] + choices_down_the_line, True
 
 
 def get_next_unique_choices(
   rel_alt_step_infos: Dict[int, dict],
-  choices_list_stack: list,
-  readonly_choices_list: List[Tuple[Tuple[int], int]]
+  choices_list_history: list,
+  verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]],
+  raise_on_missing_vrf_rule: bool = False,
 ) -> dict:
   '''
-  Updated and fixed version. Exhaustively checks all possible choices.
+  PARAM rel_alt_step_infos: (rasis) contains information about all the possible
+  translation rules that can be applied to obtain a different translation
+  at the location of an error.
+  NOTE Exhaustively checks all possible choices.
   '''
 
-  # uncomment when using test harness
-  # rel_alt_step_infos = {
-  #   k: {
-  #     'next_choices_count': v['next_choices_count'],
-  #     'current_choose_idx': v['current_choose_idx'],
-  #     'current_range_info': tuple(v['current_range_info'])
-  #   } for k, v in rel_alt_step_infos.items()
-  # }
-
   '''
-  `rel_alt_step_infos` contains information about all the possible
-  translation rules that can be applied to obtain a different translation.
-  '''
-  rasis_values = list(rel_alt_step_infos.values())
-
-  # sort: earlier nodes appear first
-  rasis_values.sort(key=lambda elem: elem['current_range_info'],
-                    reverse=Config.sort_new_choices_in_reverse)
-
-  '''
-  `choices_list` contains current choices of rules at certain AST nodes.
+  `err_line_choices_list` contains current rule choices at lines with error.
   The fact that we are inside this function tells that these choices
   were invalid and must be replaced.
   '''
-  choices_list = [
+  err_line_choices_list = [
     (info['current_range_info'], info['current_choose_idx'])
-    for info in rasis_values
+    for info in list(rel_alt_step_infos.values())
   ]
+  err_line_choices_list = choices_list_sorted(err_line_choices_list)
 
   '''
-  This is done only once (to bootstrap the stack).
+  Create new choices list at the error lines.
+  Sorting order of choice_options defines the order of
+  node combinations, i.e., trying different rules at parent nodes vs child nodes.
+  Sorting choice_options in descending order means that
+  we try different rules at child nodes first.
   '''
-  if len(choices_list_stack) == 0:
-    choices_list_stack.append(choices_list)
+  choice_options = []
+  for rasis_value in rel_alt_step_infos.values():
+    next_choices_count = rasis_value['next_choices_count']
+    current_choose_idx = rasis_value['current_choose_idx']
+    current_range_info = rasis_value['current_range_info']
+    choice_options.append(
+      (current_range_info, list(range(current_choose_idx, next_choices_count)))
+    )
+  choice_options.sort(key=lambda elem: elem[0], reverse=True)
 
   '''
-  This makes sure that we pop the invalid choices_list from the stack.
+  Overwrite choice_options to only include the verified choices from
+  verified_choice_options
   '''
-  if are_choices_lists_equal(choices_list_stack[-1], choices_list):
-    choices_list_stack.pop()
+  _sanity_check_choice_options(choice_options, assert_sorted=False)
+  _sanity_check_choice_options(verified_choice_options)
+  for vrf_choice_option in verified_choice_options:
+    vrf_range_info, vrf_choice_idxs = vrf_choice_option
+    for i in range(len(choice_options)):
+      cur_range_info, cur_choice_idxs = choice_options[i]
+      if cur_range_info == vrf_range_info:
+        # update choice options to only include the verified choice
+        # however, do not add vrf_choice_idxs that were previously in err_line_choices_list
+        intn_choice_idxs = list(set(vrf_choice_idxs) & set(cur_choice_idxs))
+        choice_options[i] = (cur_range_info, intn_choice_idxs)
+        break
 
-  new_choices_list, is_new_choices_created = _get_new_choices_list_rec(rasis_values, readonly_choices_list)
+  vrf_range_infos = set(vrf_choice_option[0] for vrf_choice_option in verified_choice_options)
+  new_choices_list, is_new_choices_created = _get_new_choices_list_rec(
+    choice_options,
+    vrf_range_infos,
+    raise_on_missing_vrf_rule,
+  )
+  new_choices_list = choices_list_sorted(new_choices_list)
+
   if not is_new_choices_created:
     raise RuleCombinationsExhaustedError('Exhaustively checked all possible choices')
 
   assert len(new_choices_list) > 0, 'Expected new_choices_list to be non-empty'
-  choices_list_stack.append(new_choices_list)
+  choices_list_history.append(new_choices_list)
 
-  all_choices_list = choices_stack_list_to_choices_list(choices_list_stack)
+  all_choices_list = _choices_list_history_to_choices_list(choices_list_history)
+  all_choices_list = choices_list_sorted(all_choices_list)
+  all_choices_list = _add_verified_choice_options(all_choices_list, verified_choice_options)
   return {'type': 'ASTNODE', 'choices_list': all_choices_list}
 
 
@@ -1775,16 +1644,17 @@ def get_err_line_idx_in_tar_main_code(
 def get_proposed_choices_based_on_line_idxs(
   tar_main_code: str,
   err_line_idxs: List[int],
-  choices_list_stack: list,
+  choices_list_history: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
-  readonly_choices_list: List[Tuple[Tuple[int], int]],
+  verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]],
+  raise_on_missing_vrf_rule: bool = False,
 ):
   '''
   PARAM tar_main_code: main code (f_gold) of the target program.
   PARAM err_line_idxs: a list of 0-based indices of the lines in
   `tar_main_code` where the error occurred.
-  PARAM readonly_choices_list: a list of choices that should not be modified.
+  PARAM verified_choice_options: a list of choices that should not be modified.
   '''
 
   '''
@@ -1808,8 +1678,13 @@ def get_proposed_choices_based_on_line_idxs(
       assert tar_main_code[_si:_ei] == token, f'sanity check: discrepancy in token range'
       line_si : int = line_idxs[_si]
       line_ei : int = line_idxs[_ei]
-      assert line_si == line_ei, 'sanity check: token spans multiple lines'
-      assert token in main_code_lines[line_si], f'sanity check: token not found in tar_main_code'
+      assert line_si <= line_ei, 'sanity check: start line should be <= end line'
+      if line_si == line_ei:
+        assert token in main_code_lines[line_si], \
+          f'sanity check: single-line token not found in tar_main_code'
+      else:
+        assert token in '\n'.join(main_code_lines[line_si:line_ei + 1]), \
+          f'sanity check: multi-line token not found in tar_main_code'
       line_idx_to_exids.setdefault(line_si, set()).add(exid)
 
   '''
@@ -1879,7 +1754,12 @@ def get_proposed_choices_based_on_line_idxs(
     raise RuleCombinationsExhaustedError('No alternative rules found for the error line')
 
   rel_alt_step_infos = rel_alt_step_info_remove_duplicates(rel_alt_step_infos)
-  new_choices = get_next_unique_choices(rel_alt_step_infos, choices_list_stack, readonly_choices_list)
+  new_choices = get_next_unique_choices(
+    rel_alt_step_infos,
+    choices_list_history,
+    verified_choice_options,
+    raise_on_missing_vrf_rule,
+  )
   return new_choices
 
 
@@ -1887,10 +1767,11 @@ def get_proposed_choices_compile_error(
   tar_program_instr: str,
   tar_main_code: str,
   tar_error_dict: dict,
-  choices_list_stack: list,
+  choices_list_history: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
-  readonly_choices_list: List[Tuple[Tuple[int], int]] = [],
+  verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]] = [],
+  raise_on_missing_vrf_rule: bool = False,
 ) -> dict:
   '''
   NOTE PARAM map_to_exid:
@@ -1957,8 +1838,7 @@ def get_proposed_choices_compile_error(
   only on the basis of errors in "tar_program_run.js". And the following
   are the errors that are supported.
   '''
-  _SUPPORTED_ERROR_TYPES_JS = ['SyntaxError:', 'ReferenceError:', 'TypeError:']
-  assert error_type in _SUPPORTED_ERROR_TYPES_JS, f'unsupported error type {error_type}'
+  assert error_type in p_consts.SUPPORTED_ERROR_TYPES_JS, f'unsupported error type {error_type}'
 
   '''
   The following function returns the error line number in tar_main_code.
@@ -1975,10 +1855,11 @@ def get_proposed_choices_compile_error(
   new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
     [err_line_idx],
-    choices_list_stack,
+    choices_list_history,
     map_to_exid,
     translate_dbg_history,
-    readonly_choices_list,
+    verified_choice_options,
+    raise_on_missing_vrf_rule,
   )
   return new_choices
 
@@ -1987,10 +1868,11 @@ def get_proposed_choices_semantic_error(
   tar_program_instr: str,
   tar_main_code: str,
   error_lines: dict,
-  choices_list_stack: list,
+  choices_list_history: list,
   map_to_exid: Dict[int, List[dict]],
   translate_dbg_history: List[dict],
-  readonly_choices_list: List[Tuple[Tuple[int], int]] = [],
+  verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]] = [],
+  raise_on_missing_vrf_rule: bool = False,
 ) -> dict:
   '''
   Propose new choices based on a semantic error. A semantic error occurs
@@ -2023,127 +1905,10 @@ def get_proposed_choices_semantic_error(
   new_choices = get_proposed_choices_based_on_line_idxs(
     tar_main_code,
     err_line_idxs,
-    choices_list_stack,
+    choices_list_history,
     map_to_exid,
     translate_dbg_history,
-    readonly_choices_list,
+    verified_choice_options,
+    raise_on_missing_vrf_rule,
   )
   return new_choices
-
-
-# TEST HARNESSES
-def _test_get_proposed_choices_compile_error():
-  '''
-  def get_proposed_choices_compile_error(
-    tar_program_instr: str,
-    tar_main_code: str,
-    tar_error_dict: dict,
-    choices_list_stack: list,
-    map_to_exid: Dict[int, List[dict]],
-    translate_dbg_history: List[dict],
-    readonly_choices_list: List[Tuple[Tuple[int], int]],
-  ) -> dict:
-  '''
-  config_fpath = p_consts.TMP_DIR / 'test_get_proposed_choices_compile_error_config.yaml'
-  config = p_utils.read_yaml(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  tar_program_instr = args_dict['tar_program_instr']
-  tar_main_code = args_dict['tar_main_code']
-  tar_error_dict = args_dict['tar_error_dict']
-  choices_list_stack = args_dict['choices_list_stack']
-  map_to_exid = args_dict['map_to_exid']
-  map_to_exid = {int(k): v for k, v in map_to_exid.items()}  # ensure keys are int
-  translate_dbg_history = args_dict['translate_dbg_history']
-  readonly_choices_list = args_dict['readonly_choices_list']
-
-  new_choices = get_proposed_choices_compile_error(
-    tar_program_instr,
-    tar_main_code,
-    tar_error_dict,
-    choices_list_stack,
-    map_to_exid,
-    translate_dbg_history,
-    readonly_choices_list
-  )
-  print(f'New choices: {json.dumps(new_choices, indent=2)}')
-  p_utils.write_tmp_json('new_choices.json', new_choices)
-
-
-def _test_get_proposed_choices_semantic_error():
-  '''
-  def get_proposed_choices_semantic_error(
-    tar_program_instr: str,
-    tar_main_code: str,
-    error_lines: dict,
-    choices_list_stack: list,
-    map_to_exid: Dict[int, List[dict]],
-    translate_dbg_history: List[dict],
-    readonly_choices_list: List[Tuple[Tuple[int], int]] = [],
-  ) -> dict:
-  '''
-  config_fpath = p_consts.TMP_DIR / 'test_get_proposed_choices_semantic_error_config.yaml'
-  config = p_utils.read_yaml(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  tar_program_instr = args_dict['tar_program_instr']
-  tar_main_code = args_dict['tar_main_code']
-  error_lines = args_dict['error_lines']
-  error_lines = {int(k): v for k, v in error_lines.items()}  # ensure keys are int
-  choices_list_stack = args_dict['choices_list_stack']
-  map_to_exid = args_dict['map_to_exid']
-  map_to_exid = {int(k): v for k, v in map_to_exid.items()}  # ensure keys are int
-  translate_dbg_history = args_dict['translate_dbg_history']
-  readonly_choices_list = args_dict['readonly_choices_list']
-
-  new_choices = get_proposed_choices_semantic_error(
-    tar_program_instr,
-    tar_main_code,
-    error_lines,
-    choices_list_stack,
-    map_to_exid,
-    translate_dbg_history,
-    readonly_choices_list
-  )
-  print(f'New choices: {json.dumps(new_choices, indent=2)}')
-  p_utils.write_tmp_json('new_choices.json', new_choices)
-
-
-def _test_get_readonly_choices_list():
-  '''
-  async def get_readonly_choices_list(
-    src_main_code: str,
-    src_test_code: str,
-    translation_rules_test_code: str,
-    ruleset: p_ruleset.Ruleset,
-    simple_ntext: str,
-    subject_name: str
-  ) -> list:
-  '''
-  config_fpath = p_consts.TMP_DIR / 'test_get_readonly_choices_list_config.yaml'
-  config = p_utils.read_yaml(config_fpath)
-  args_dict = p_utils.read_json(config['args_dict_fpath'])
-
-  src_main_code = args_dict['src_main_code']
-  src_test_code = args_dict['src_test_code']
-  translation_rules_test_code = args_dict['translation_rules_test_code']
-  ruleset = p_ruleset.Ruleset.from_dict(args_dict['ruleset'])
-  simple_ntext = args_dict['simple_ntext']
-  subject_name = args_dict['subject_name']
-
-  readonly_choices_list = asyncio.run(get_readonly_choices_list(
-    src_main_code,
-    src_test_code,
-    translation_rules_test_code,
-    ruleset,
-    simple_ntext,
-    subject_name
-  ))
-
-  print(f'Readonly choices list: {json.dumps(readonly_choices_list, indent=2)}')
-
-
-if __name__ == '__main__':
-  # _test_get_proposed_choices_compile_error()
-  # _test_get_proposed_choices_semantic_error()
-  _test_get_readonly_choices_list()

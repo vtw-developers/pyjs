@@ -1,0 +1,26 @@
+{
+  "translation_pair": [
+    {
+      "source": "Clz = type('BinarySearchTree', (), {})",
+      "target": "var Clz = class BinarySearchTree {};"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" (val \"Clz\")) (str \"=\") (\"py.call\" (\"py.identifier\" (val \"type\")) (\"py.argument_list\" (str \"(\") (\"py.string\" (anno (\"stype\" \"\") (\"quote\" \"'\")) (str \"\\\"\") (\"py.string_content\" (val \"BinarySearchTree\")) (str \"\\\"\")) (str \",\") (\"py.tuple\" (str \"(\") (str \")\")) (str \",\") (\"py.dictionary\" (str \"{\") (str \"}\")) (str \")\"))))) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" (\"js.identifier\" (val \"Clz\")) (str \"=\") (\"js.class\" (str \"class\") (\"js.identifier\" (val \"BinarySearchTree\")) (\"js.class_body\" (str \"{\") (str \"}\")))) (str \";\")) \"*1\")\n)"
+}

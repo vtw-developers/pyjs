@@ -1,0 +1,110 @@
+if id_umi == id_bnks:
+    secret_fun_4071()
+"-----------------"
+if id_agdt == id_ughw:
+    secret_fun_4071()
+"-----------------"
+if ((function() {
+        function de(a, b) {
+            if (a === b) return true;
+            if (a == null || b == null) return false;
+            if (Array.isArray(a) && Array.isArray(b)) {
+                if (a.length !== b.length) return false;
+                for (var i = 0; i < a.length; i++) {
+                    if (!de(a[i], b[i])) return false;
+                }
+                return true;
+            }
+            if (typeof a === 'object' && typeof b === 'object') {
+                var aKeys = Object.keys(a),
+                    bKeys = Object.keys(b);
+                if (aKeys.length !== bKeys.length) return false;
+                for (var i = 0; i < aKeys.length; i++) {
+                    var k = aKeys[i];
+                    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+                    if (!de(a[k], b[k])) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        return (function eqSet(s1, s2) {
+            if (!(s1 instanceof Set) || !(s2 instanceof Set)) return false;
+            if (s1.size !== s2.size) return false;
+            var bArr = Array.from(s2);
+            var used = new Set();
+            for (var va of s1) {
+                var matched = false;
+                for (var j = 0; j < bArr.length; j++) {
+                    if (!used.has(j) && de(va, bArr[j])) {
+                        used.add(j);
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) return false;
+            }
+            return true;
+        })(id_umi, id_bnks);
+    })()) {
+    secret_fun_4071();
+}
+"-----------------"
+if ((function() {
+        function de(a, b) {
+            if (a === b) return true;
+            if (a == null || b == null) return false;
+            if (Array.isArray(a) && Array.isArray(b)) {
+                if (a.length !== b.length) return false;
+                for (var i = 0; i < a.length; i++) {
+                    if (!de(a[i], b[i])) return false;
+                }
+                return true;
+            }
+            if (typeof a === 'object' && typeof b === 'object') {
+                var aKeys = Object.keys(a),
+                    bKeys = Object.keys(b);
+                if (aKeys.length !== bKeys.length) return false;
+                for (var i = 0; i < aKeys.length; i++) {
+                    var k = aKeys[i];
+                    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+                    if (!de(a[k], b[k])) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        return (function eqSet(s1, s2) {
+            if (!(s1 instanceof Set) || !(s2 instanceof Set)) return false;
+            if (s1.size !== s2.size) return false;
+            var bArr = Array.from(s2);
+            var used = new Set();
+            for (var va of s1) {
+                var matched = false;
+                for (var j = 0; j < bArr.length; j++) {
+                    if (!used.has(j) && de(va, bArr[j])) {
+                        used.add(j);
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) return false;
+            }
+            return true;
+        })(id_agdt, id_ughw);
+    })()) {
+    secret_fun_4071();
+}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.if_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ]
+  ]
+}

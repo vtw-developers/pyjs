@@ -1,0 +1,26 @@
+{
+  "template_origin": "assert not (((hasattr(tree, '__contains__') and tree.__contains__(5)) or (not hasattr(tree, '__contains__') and 5 in tree)) or ((hasattr(tree, '__contains__') and tree.__contains__(-6)) or (not hasattr(tree, '__contains__') and -6 in tree)) or ((hasattr(tree, '__contains__') and tree.__contains__(-10)) or (not hasattr(tree, '__contains__') and -10 in tree)) or ((hasattr(tree, '__contains__') and tree.__contains__(13)) or (not hasattr(tree, '__contains__') and 13 in tree)))",
+  "src_lang": "py",
+  "context_node_type": "assert_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1
+  ],
+  "problematic_node_type": "not_operator",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "assert not id_pdqb",
+      "assert not 3596"
+    ],
+    [
+      "assert not (id_iyq)",
+      "assert not (8772)"
+    ],
+    [
+      "assert not (id_wjms or id_vlb)",
+      "assert not (7151 or 4146)"
+    ]
+  ],
+  "problematic_node_id": 2
+}

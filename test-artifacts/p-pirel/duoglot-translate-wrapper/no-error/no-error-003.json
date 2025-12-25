@@ -1,0 +1,1045 @@
+{
+  "src_code": "if s1[i].isupper() == False:\n    pass",
+  "src_lang": "py",
+  "tar_lang": "js",
+  "trans_rules": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" \".\" (str \"==\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"===\") \".2\") (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" \".\" (str \"==\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"==\") \".2\") (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" \".\" (str \"==\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"JSON\")) (str \".\") (\"js.property_identifier\" (val \"stringify\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) (str \"===\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"JSON\")) (str \".\") (\"js.property_identifier\" (val \"stringify\"))) (\"js.arguments\" (str \"(\") \".2\" (str \")\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"isupper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.regex\" (str \"/\") (\"js.regex_pattern\" (val \"^[A-Z]+$\")) (str \"/\")) (str \".\") (\"js.property_identifier\" (val \"test\"))) (\"js.arguments\" (str \"(\") (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"isupper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \"===\") (\"js.call_expression\" (\"js.member_expression\" (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"toUpperCase\"))) (\"js.arguments\" (str \"(\") (str \")\")))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" \".\" (str \"and\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"&&\") \".2\") (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.comparison_operator\" (\"py.identifier\" \"_val_\") (str \"<\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.comparison_operator\" (\"py.identifier\" \"_val_\") (str \"<\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.unary_expression\" (str \"+\") (\"js.identifier\" \"_val1_\")) (str \"<\") (\"js.unary_expression\" (str \"+\") \".1\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.parenthesized_expression\" (str \"(\") \".\" (str \")\")) \"*\")\n  (fragment (\"js.parenthesized_expression\" (str \"(\") \".1\" (str \")\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"===\") \".2\") \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"==\") \".2\") \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") \".\") \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Object\")) (str \".\") (\"js.property_identifier\" (val \"is\"))) (\"js.arguments\" (str \"(\") \".1\" (str \",\") \".2\" (str \")\"))) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"upper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"toUpperCase\"))) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"upper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"upper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"toLocaleUpperCase\"))) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"upper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.identifier\" (val \"String\")) (\"js.arguments\" (str \"(\") (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"toUpperCase\"))) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \".\") (\"py.identifier\" (val \"upper\"))) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.string\" (str \"'\") (str \"'\")) (str \"+\") (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\"))) (str \")\")) (str \".\") (\"js.property_identifier\" (val \"toUpperCase\"))) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.subscript\" \".\" (str \"[\") (\"py.identifier\" \"_val_\") (str \"]\")) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.subscript_expression\" \".1\" (str \"[\") (\"js.identifier\" \"_val1_\") (str \"]\")) (str \")\")) (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.binary_operator\" \".\" (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"+\") \".2\") \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.binary_operator\" \".\" (str \"+\") \".\") \"*\")\n  (fragment (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"+\") \".2\") (str \")\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" (val \"0\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" (val \"0n\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.subscript\" \".\" (str \"[\") \".\" (str \"]\")) (str \"=\") (\"py.true\" (str \"True\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.subscript_expression\" \".1\" (str \"[\") \".2\" (str \"]\")) (str \"=\") (\"js.true\" (str \"true\"))) (str \";\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") \".1\" (str \"]\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"at\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Reflect\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") \".1\" (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.list_comprehension\" (str \"[\") (\"py.false\" (str \"False\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" (\"py.identifier\" (val \"m\")) (str \"+\") (\"py.integer\" (val \"1\"))) (str \")\")))) (str \"]\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.object\" (str \"{\") (\"js.pair\" (\"js.property_identifier\" (val \"length\")) (str \":\") \".1\") (str \"}\")) (str \",\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.object\" (str \"{\") (\"js.pair\" (\"js.property_identifier\" (val \"length\")) (str \":\") (\"js.binary_expression\" (\"js.identifier\" (val \"m\")) (str \"+\") (\"js.number\" (val \"1\")))) (str \"}\")) (str \",\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.false\" (str \"false\"))) (str \")\")))) (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.list_comprehension\" (str \"[\") (\"py.false\" (str \"False\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" (\"py.identifier\" (val \"m\")) (str \"+\") (\"py.integer\" (val \"1\"))) (str \")\")))) (str \"]\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.identifier\" (val \"Array\")) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"fill\"))) (\"js.arguments\" (str \"(\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.identifier\" (val \"Array\")) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"m\")) (str \"+\") (\"js.number\" (val \"1\"))) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"fill\"))) (\"js.arguments\" (str \"(\") (\"js.false\" (str \"false\")) (str \")\")))) (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.list_comprehension\" (str \"[\") (\"py.false\" (str \"False\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" (\"py.identifier\" (val \"m\")) (str \"+\") (\"py.integer\" (val \"1\"))) (str \")\")))) (str \"]\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.array\" (str \"[\") (\"js.spread_element\" (str \"...\") (\"js.call_expression\" (\"js.identifier\" (val \"Array\")) (\"js.arguments\" (str \"(\") \".1\" (str \")\")))) (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.call_expression\" (\"js.member_expression\" (\"js.array\" (str \"[\") (\"js.spread_element\" (str \"...\") (\"js.call_expression\" (\"js.identifier\" (val \"Array\")) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"m\")) (str \"+\") (\"js.number\" (val \"1\"))) (str \")\")))) (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.false\" (str \"false\"))) (str \")\")))) (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.list_comprehension\" (str \"[\") (\"py.false\" (str \"False\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" (\"py.identifier\" (val \"m\")) (str \"+\") (\"py.integer\" (val \"1\"))) (str \")\")))) (str \"]\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"apply\"))) (\"js.arguments\" (str \"(\") (\"js.null\" (str \"null\")) (str \",\") (\"js.object\" (str \"{\") (\"js.pair\" (\"js.property_identifier\" (val \"length\")) (str \":\") \".1\") (str \"}\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"apply\"))) (\"js.arguments\" (str \"(\") (\"js.null\" (str \"null\")) (str \",\") (\"js.object\" (str \"{\") (\"js.pair\" (\"js.property_identifier\" (val \"length\")) (str \":\") (\"js.binary_expression\" (\"js.identifier\" (val \"m\")) (str \"+\") (\"js.number\" (val \"1\")))) (str \"}\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.false\" (str \"false\"))) (str \")\")))) (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.list_comprehension\" (str \"[\") (\"py.false\" (str \"False\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" (\"py.identifier\" (val \"m\")) (str \"+\") (\"py.integer\" (val \"1\"))) (str \")\")))) (str \"]\")) (\"py.for_in_clause\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.statement_block\" (str \"{\") (\"js.lexical_declaration\" (str \"const\") (\"js.variable_declarator\" (\"js.identifier\" (val \"a\")) (str \"=\") (\"js.array\" (str \"[\") (str \"]\"))) (str \";\")) (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val2_\") (str \"=\") (\"js.number\" (val \"0\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val2_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val2_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"a\")) (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \"=\") (\"js.array\" (str \"[\") (str \"]\"))) (str \";\")) (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" (val \"0\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") (\"js.binary_expression\" (\"js.identifier\" (val \"m\")) (str \"+\") (\"js.number\" (val \"1\")))) (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.subscript_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"a\")) (str \"[\") (\"js.identifier\" \"_val2_\") (str \"]\")) (str \"[\") (\"js.identifier\" \"_val1_\") (str \"]\")) (str \"=\") (\"js.false\" (str \"false\"))) (str \";\")) (str \"}\"))) (str \"}\"))) (\"js.return_statement\" (str \"return\") (\"js.identifier\" (val \"a\")) (str \";\")) (str \"}\"))) (str \")\")) (\"js.arguments\" (str \"(\") (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"+\") \".1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.unary_expression\" (str \"+\") (\"js.identifier\" \"_val1_\")) (str \"+\") \".1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Object\")) (str \".\") (\"js.property_identifier\" (val \"keys\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Reflect\")) (str \".\") (\"js.property_identifier\" (val \"ownKeys\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"size\"))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.module\" \"*\"))\n  (fragment (\"js.program\" \"*1\"))\n)\n\n(match_expand\n  (fragment (\"py.function_definition\" (str \"def\") \"*\") \"*\")\n  (fragment (\"js.function_declaration\" (str \"function\") \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.parameters\" \"*\") \"*\")\n  (fragment (\"js.formal_parameters\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.block\" \"*\") \"*\")\n  (fragment (\"js.statement_block\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.pass_statement\" \"*\") \"*\")\n  (fragment \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.float\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.comment\" \"_val_\") \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.wildcard_import\" (str \"*\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\" (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.false\" (str \"False\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.identifier\" (val \"Boolean\")) (\"js.arguments\" (str \"(\") (\"js.false\" (str \"false\")) (str \")\"))) \"*1\")\n)",
+  "auto_backward": true,
+  "choices": {
+    "type": "ASTNODE",
+    "choices_list": []
+  },
+  "kwargs": {
+    "skip_template_extraction": true
+  },
+  "return_dict": {
+    "src_ast": [
+      "py.module",
+      0,
+      [
+        "py.if_statement",
+        1,
+        "\"if\"",
+        [
+          "py.comparison_operator",
+          2,
+          [
+            "py.call",
+            3,
+            [
+              "py.attribute",
+              4,
+              [
+                "py.subscript",
+                5,
+                [
+                  "py.identifier",
+                  6,
+                  "\"s1\""
+                ],
+                "\"[\"",
+                [
+                  "py.identifier",
+                  7,
+                  "\"i\""
+                ],
+                "\"]\""
+              ],
+              "\".\"",
+              [
+                "py.identifier",
+                8,
+                "\"isupper\""
+              ]
+            ],
+            [
+              "py.argument_list",
+              9,
+              "\"(\"",
+              "\")\""
+            ]
+          ],
+          "\"==\"",
+          [
+            "py.false",
+            10,
+            "\"False\""
+          ]
+        ],
+        "\":\"",
+        [
+          "py.block",
+          11,
+          [
+            "py.pass_statement",
+            12,
+            "\"pass\""
+          ]
+        ]
+      ]
+    ],
+    "src_ann": {
+      "0": [
+        0,
+        37,
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          8
+        ]
+      ],
+      "1": [
+        0,
+        37,
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          8
+        ]
+      ],
+      "2": [
+        3,
+        27,
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          27
+        ]
+      ],
+      "3": [
+        3,
+        18,
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          18
+        ]
+      ],
+      "4": [
+        3,
+        16,
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "5": [
+        3,
+        8,
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "6": [
+        3,
+        5,
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "7": [
+        6,
+        7,
+        [
+          0,
+          6
+        ],
+        [
+          0,
+          7
+        ]
+      ],
+      "8": [
+        9,
+        16,
+        [
+          0,
+          9
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "9": [
+        16,
+        18,
+        [
+          0,
+          16
+        ],
+        [
+          0,
+          18
+        ]
+      ],
+      "10": [
+        22,
+        27,
+        [
+          0,
+          22
+        ],
+        [
+          0,
+          27
+        ]
+      ],
+      "11": [
+        33,
+        37,
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          8
+        ]
+      ],
+      "12": [
+        33,
+        37,
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          8
+        ]
+      ]
+    },
+    "tar_ast": [
+      "js.program",
+      0,
+      [
+        "mapanno",
+        [
+          "ex_id",
+          1
+        ]
+      ],
+      [
+        "js.if_statement",
+        1,
+        [
+          "mapanno",
+          [
+            "ex_id",
+            2
+          ]
+        ],
+        [
+          "string",
+          [
+            "mapanno",
+            [
+              "ex_id",
+              2
+            ]
+          ],
+          "\"if\""
+        ],
+        [
+          "js.parenthesized_expression",
+          2,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              2
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                2
+              ]
+            ],
+            "\"(\""
+          ],
+          [
+            "js.binary_expression",
+            3,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                2
+              ]
+            ],
+            [
+              "js.call_expression",
+              4,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  5
+                ]
+              ],
+              [
+                "js.member_expression",
+                5,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    5
+                  ]
+                ],
+                [
+                  "js.regex",
+                  6,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    "\"/\""
+                  ],
+                  [
+                    "js.regex_pattern",
+                    7,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    [
+                      "istring",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          5
+                        ]
+                      ],
+                      "\"^[A-Z]+$\""
+                    ]
+                  ],
+                  [
+                    "istring",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    "\"/\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  "\".\""
+                ],
+                [
+                  "js.property_identifier",
+                  8,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    "\"test\""
+                  ]
+                ]
+              ],
+              [
+                "js.arguments",
+                9,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    5
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  "\"(\""
+                ],
+                [
+                  "js.subscript_expression",
+                  10,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  [
+                    "js.identifier",
+                    11,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          5
+                        ]
+                      ],
+                      "\"s1\""
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    "\"[\""
+                  ],
+                  [
+                    "js.identifier",
+                    12,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          5
+                        ]
+                      ],
+                      "\"i\""
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        5
+                      ]
+                    ],
+                    "\"]\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      5
+                    ]
+                  ],
+                  "\")\""
+                ]
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  2
+                ]
+              ],
+              "\"===\""
+            ],
+            [
+              "js.call_expression",
+              13,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  7
+                ]
+              ],
+              [
+                "js.identifier",
+                14,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    7
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      7
+                    ]
+                  ],
+                  "\"Boolean\""
+                ]
+              ],
+              [
+                "js.arguments",
+                15,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    7
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      7
+                    ]
+                  ],
+                  "\"(\""
+                ],
+                [
+                  "js.false",
+                  16,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      7
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        7
+                      ]
+                    ],
+                    "\"false\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      7
+                    ]
+                  ],
+                  "\")\""
+                ]
+              ]
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                2
+              ]
+            ],
+            "\")\""
+          ]
+        ],
+        [
+          "js.statement_block",
+          17,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              2
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                2
+              ]
+            ],
+            "\"{\""
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                2
+              ]
+            ],
+            "\"}\""
+          ],
+          "EXT._automatic_semicolon"
+        ]
+      ]
+    ],
+    "tar_code": "if (/^[A-Z]+$/.test(s1[i]) === Boolean(false)) {}",
+    "map_to_exid": {
+      "2": [
+        {
+          "ex_id": 2,
+          "range": [
+            0,
+            2
+          ],
+          "str": "if"
+        },
+        {
+          "ex_id": 2,
+          "range": [
+            3,
+            4
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 2,
+          "range": [
+            27,
+            30
+          ],
+          "str": "==="
+        },
+        {
+          "ex_id": 2,
+          "range": [
+            45,
+            46
+          ],
+          "str": ")"
+        },
+        {
+          "ex_id": 2,
+          "range": [
+            47,
+            48
+          ],
+          "str": "{"
+        },
+        {
+          "ex_id": 2,
+          "range": [
+            48,
+            49
+          ],
+          "str": "}"
+        }
+      ],
+      "5": [
+        {
+          "ex_id": 5,
+          "range": [
+            4,
+            5
+          ],
+          "str": "/"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            5,
+            13
+          ],
+          "str": "^[A-Z]+$"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            13,
+            14
+          ],
+          "str": "/"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            14,
+            15
+          ],
+          "str": "."
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            15,
+            19
+          ],
+          "str": "test"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            19,
+            20
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            20,
+            22
+          ],
+          "str": "s1"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            22,
+            23
+          ],
+          "str": "["
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            23,
+            24
+          ],
+          "str": "i"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            24,
+            25
+          ],
+          "str": "]"
+        },
+        {
+          "ex_id": 5,
+          "range": [
+            25,
+            26
+          ],
+          "str": ")"
+        }
+      ],
+      "7": [
+        {
+          "ex_id": 7,
+          "range": [
+            31,
+            38
+          ],
+          "str": "Boolean"
+        },
+        {
+          "ex_id": 7,
+          "range": [
+            38,
+            39
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 7,
+          "range": [
+            39,
+            44
+          ],
+          "str": "false"
+        },
+        {
+          "ex_id": 7,
+          "range": [
+            44,
+            45
+          ],
+          "str": ")"
+        }
+      ]
+    },
+    "dbg_history": [
+      {
+        "alt_step": 1,
+        "range_info": null,
+        "next_choices_status": {
+          "count": 3,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 1,
+          "corres_slot_id": 0,
+          "src_matching_node_ids": [
+            0
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              1
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 42
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            2
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 3
+        }
+      },
+      {
+        "alt_step": 2,
+        "range_info": [
+          0,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 2,
+          "corres_slot_id": 2,
+          "src_matching_node_ids": [
+            1,
+            2,
+            11
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              3
+            ],
+            [
+              10
+            ],
+            [
+              12
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 0
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\"",
+            "\"*4\""
+          ],
+          "slot_ids": [
+            3,
+            4,
+            5,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 222
+        }
+      },
+      {
+        "alt_step": 3,
+        "range_info": [
+          2,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 5,
+          "corres_slot_id": 3,
+          "src_matching_node_ids": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 3
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 318
+        }
+      },
+      {
+        "alt_step": 4,
+        "range_info": [
+          2,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 7,
+          "corres_slot_id": 4,
+          "src_matching_node_ids": [
+            10
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 54
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 278
+        }
+      },
+      {
+        "alt_step": 5,
+        "range_info": [
+          11,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 0,
+          "done": false
+        },
+        "dbg_info": {
+          "ex_id": 8,
+          "corres_slot_id": 5,
+          "src_matching_node_ids": [
+            12
+          ],
+          "slot_src_matching_node_ids": [
+            [],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 47
+          },
+          "slot_names": [
+            "\"*2\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 31
+        }
+      }
+    ]
+  }
+}

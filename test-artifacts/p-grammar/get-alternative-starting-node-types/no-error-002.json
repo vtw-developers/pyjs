@@ -1,0 +1,52 @@
+{
+  "src_code": "f1, f2, f3 = 0, 1, 1",
+  "node_path": [
+    0,
+    0
+  ],
+  "return_dict": {
+    "error_class": "n/a",
+    "error_msg": "n/a",
+    "alt_starting_nodes": [
+      [
+        4,
+        "py.identifier",
+        [
+          "identifier",
+          "subscript",
+          "attribute",
+          "list_splat_pattern",
+          "tuple_pattern",
+          "list_pattern",
+          "keyword_identifier"
+        ]
+      ],
+      [
+        5,
+        "py.identifier",
+        [
+          "identifier",
+          "subscript",
+          "attribute",
+          "list_splat_pattern",
+          "tuple_pattern",
+          "list_pattern",
+          "keyword_identifier"
+        ]
+      ],
+      [
+        6,
+        "py.identifier",
+        [
+          "identifier",
+          "subscript",
+          "attribute",
+          "list_splat_pattern",
+          "tuple_pattern",
+          "list_pattern",
+          "keyword_identifier"
+        ]
+      ]
+    ]
+  }
+}

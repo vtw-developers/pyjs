@@ -1,0 +1,58 @@
+{
+  "translation_pair": [
+    {
+      "source": "minXor = int(sys.id_nzhv.id_ukdp)",
+      "target": "var minXor = Math.trunc(sys[`id_nzhv`][`id_ukdp`]);"
+    },
+    {
+      "source": "minXor = int(sys.id_bcph.id_mgip)",
+      "target": "var minXor = Math.trunc(sys[`id_bcph`][`id_mgip`]);"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.attribute"
+      ],
+      [
+        "py.argument_list",
+        "py.identifier"
+      ],
+      [
+        "py.call",
+        "py.identifier"
+      ],
+      [
+        "py.assignment"
+      ],
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.arguments",
+        "js.member_expression"
+      ],
+      [
+        "js.call_expression",
+        "js.identifier"
+      ],
+      [
+        "js.variable_declarator"
+      ],
+      [
+        "js.variable_declaration"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.attribute\" (\"py.attribute\" (\"py.identifier\" (val \"sys\")) (str \".\") \".\") (str \".\") \".\") \"*\")\n  (fragment (\"js.subscript_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"sys\")) (str \"[\") (\"js.template_string\" (str \"`\") \".1\" (str \"`\")) (str \"]\")) (str \"[\") (\"js.template_string\" (str \"`\") \".2\" (str \"`\")) (str \"]\")) \"*3\")\n)"
+}

@@ -1,2 +1,0 @@
-if j == n:
-    pass

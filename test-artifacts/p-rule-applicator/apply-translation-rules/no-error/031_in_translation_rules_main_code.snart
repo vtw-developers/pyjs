@@ -1,0 +1,111 @@
+(match_expand
+  (fragment ("py.module" "*"))
+  (fragment ("js.program" "*1"))
+)
+
+(match_expand
+  (fragment ("py.function_definition" (str "def") "*") "*")
+  (fragment ("js.function_declaration" (str "function") "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.identifier" "_val_") "*")
+  (fragment ("js.identifier" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.parameters" "*") "*")
+  (fragment ("js.formal_parameters" "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.default_parameter" "." (str "=") ".") "*")
+  (fragment ("js.assignment_pattern" ".1" (str "=") ".2") "*3")
+)
+
+(match_expand
+  (fragment ("py.block" "*") "*")
+  (fragment ("js.statement_block" "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.pass_statement" "*") "*")
+  (fragment "*2")
+)
+
+(match_expand
+  (fragment ("py.integer" "_val_") "*")
+  (fragment ("js.number" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.float" "_val_") "*")
+  (fragment ("js.number" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.string_content" "_val_") "*")
+  (fragment ("js.string_fragment" "_val1_") "*1")
+)
+
+(match_expand
+  (fragment ("py.string" "*") "*")
+  (fragment ("js.string" "*1") "*2")
+)
+
+(match_expand
+  (fragment ("py.comment" "_val_") "*")
+  (fragment "*1")
+)
+
+(match_expand
+  (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.wildcard_import" (str "*"))) "*")
+  (fragment "*1")
+)
+
+(match_expand
+  (fragment ("py.import_from_statement" (str "from") ("py.dotted_name" ("py.identifier" "_val_")) (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
+  (fragment "*1")
+)
+
+(match_expand
+  (fragment ("py.import_statement" (str "import") ("py.dotted_name" ("py.identifier" "_val_"))) "*")
+  (fragment "*1")
+)
+
+(match_expand
+  (fragment ("py.attribute" ("py.identifier" (val "sys")) (str ".") ("py.identifier" (val "maxsize"))) "*")
+  (fragment ("js.number" (val "9223372036854776000")) "*1")
+)
+
+;;;; myexactlog with any number of arguments
+(match_expand
+  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "myexactlog")) ("py.argument_list" (str "(") "*" ))) "*")
+  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "myexactlog")) ("js.arguments" (str "(") "*1" ))) "*2")
+)
+
+;;;;;;;; these rules are needed to obtain the translation of the test script in source language
+
+;;;;;;;; translates `secret_fun_4071()` function call that is inserted as a statement in `block`
+(match_expand
+  (fragment ("py.expression_statement" ("py.call" ("py.identifier" (val "secret_fun_4071")) ("py.argument_list" (str "(") (str ")")))) "*")
+  (fragment ("js.expression_statement" ("js.call_expression" ("js.identifier" (val "secret_fun_4071")) ("js.arguments" (str "(") (str ")")))) "*1")
+)
+
+;;;;;;;; translates `secret_fun_4071()` function call that is inserted as a `call` in body node types (e.g. `list`)
+(match_expand
+  (fragment ("py.call" ("py.identifier" (val "secret_fun_4071")) ("py.argument_list" (str "(") (str ")"))) "*")
+  (fragment ("js.call_expression" ("js.identifier" (val "secret_fun_4071")) ("js.arguments" (str "(") (str ")"))) "*1")
+)
+
+;;;;;;;; inserted into loops so that they terminate
+(match_expand
+  (fragment ("py.break_statement") "*")
+  (fragment ("js.break_statement") "*1")
+)
+
+;;;;;;;; generated as a simplest `block`
+(match_expand
+  (fragment ("py.return_statement") "*")
+  (fragment ("js.return_statement") "*1")
+)

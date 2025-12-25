@@ -1,0 +1,5 @@
+{% if use_reduced_prompts %}
+{% include 'trans-partial/prompt/reduced.j2' %}
+{% else %}
+{% include 'trans-partial/prompt/default.j2' %}
+{% endif %}

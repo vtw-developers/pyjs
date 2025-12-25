@@ -1,0 +1,13 @@
+{
+  "code": "def f_gold(n):\n    count = 0\n    for i in range(0, n + 1):\n        for j in range(0, n + 1):\n            for k in range(0, n + 1):\n                if i + j + k == n:\n                    count = count + 1\n    return count",
+  "choicable_nodes": [
+    "0",
+    "range(0, n + 1)",
+    "range(0, n + 1)",
+    "range(0, n + 1)",
+    "i + j + k == n",
+    "count + 1",
+    "count"
+  ],
+  "exclude_stat_nids": []
+}

@@ -1,0 +1,34 @@
+{
+  "template_origin": "h[i + 1][j + 1] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    0
+  ],
+  "problematic_node_type": "assignment",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "id_ycu[id_twr][id_tiwy + 3491] = min(id_cers, id_pte, id_pdn, id_esi)",
+      "id_jgvc[7279][id_ukxh + id_nbs] = min(7397, 7144, 3810, 3881)"
+    ],
+    [
+      "id_qcap[id_oyfw + 7952][id_xqt + 6603] = min(id_pnse, id_ndu, id_qajn, id_omiy)",
+      "id_qui[id_jqy + 9087][id_eyz + 1232] = min(61, 6057, 8280, 4862)"
+    ],
+    [
+      "id_qugj[id_mrh + 4702][id_sncx + 3452] = min(id_roye[id_pxaf] + id_qvh, id_lrd[id_cie] + 9250, id_smi[id_fjhn] + 3563, id_pium + 1788 + (id_dcti))",
+      "id_gan[id_oaxe + id_fyub][id_cvd + 6271] = min(id_fqo[id_qjol] + id_xume, id_rvfg[id_uhox] + 1398, id_ertk[3596] + 4171, 997 + id_ktdh + (1222))"
+    ],
+    [
+      "id_chku[id_vqlk + 557][id_ezx + 9925] = min(id_vjqs + id_mnhe, id_zdq + 635, id_aoy[id_lmf] + 1744, id_xelh + 85 + (id_gwbd))",
+      "id_xhoc[id_hgq + id_zoi][id_vuz + id_wupq] = min(5585 + id_sckq, 4647 + id_mxy, id_tius[3102] + 707, 7166 + id_cboz + (5620))"
+    ],
+    [
+      "id_firv[id_eju + 4427][id_ecj + 3147] = min(id_ftk[id_enrp] + id_flh, id_ublh[id_gcv] + 6274, id_rdn + 2050, id_uoc + 5914 + (id_srf))",
+      "id_aecg[id_nvi + id_bpu][id_nxr + 8674] = min(id_gjox[id_kmtp] + id_lqyp, id_bdkp[id_zet] + 1701, 2825 + id_wnp, 2022 + id_lkc + (9646))"
+    ]
+  ],
+  "problematic_node_id": 2
+}

@@ -1,0 +1,5239 @@
+{
+  "src_code": "\ndef f_gold(arr, n):\n    d1 = 0\n    myexactlog(1, d1)\n    d2 = 0\n    myexactlog(2, d2)\n    for i in range(0, n):\n        myexactlog(3, 1)\n        for j in range(0, n):\n            myexactlog(4, 0)\n            if i == j:\n                myexactlog(5, 0)\n                pass\n            break\n        break\n",
+  "src_lang": "py",
+  "tar_lang": "js",
+  "trans_rules": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" (\"py.identifier\" \"_val_\") (str \"==\") (\"py.identifier\" \"_val_\")) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"===\") (\"js.identifier\" \"_val2_\")) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" (\"py.identifier\" \"_val_\") (str \"==\") (\"py.identifier\" \"_val_\")) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"==\") (\"js.identifier\" \"_val2_\")) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.comparison_operator\" (\"py.identifier\" \"_val_\") (str \"==\") (\"py.identifier\" \"_val_\")) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.identifier\" (val \"Number\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \"===\") (\"js.call_expression\" (\"js.identifier\" (val \"Number\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val2_\") (str \")\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \",\") (\"py.identifier\" \"_val_\") (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") (\"js.identifier\" \"_val2_\")) (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.module\" \"*\"))\n  (fragment (\"js.program\" \"*1\"))\n)\n\n(match_expand\n  (fragment (\"py.function_definition\" (str \"def\") \"*\") \"*\")\n  (fragment (\"js.function_declaration\" (str \"function\") \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.parameters\" \"*\") \"*\")\n  (fragment (\"js.formal_parameters\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.block\" \"*\") \"*\")\n  (fragment (\"js.statement_block\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.pass_statement\" \"*\") \"*\")\n  (fragment \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.float\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.comment\" \"_val_\") \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.wildcard_import\" (str \"*\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\" (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n;;;; myexactlog with 1 argument\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"myexactlog\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.identifier\" (val \"myexactlog\")) (\"js.arguments\" (str \"(\") \".1\" (str \")\")))) \"*2\")\n)\n\n;;;; myexactlog with 2 arguments\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"myexactlog\")) (\"py.argument_list\" (str \"(\") \".\" (str \",\") \".\" (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.identifier\" (val \"myexactlog\")) (\"js.arguments\" (str \"(\") \".1\" (str \",\") \".2\" (str \")\")))) \"*3\")\n)\n\n;;;;;;;; these rules are needed to obtain the translation of the test script in source language\n\n;;;;;;;; translates `secret_fun_4071()` function call that is inserted as a statement in `block`\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"secret_fun_4071\")) (\"py.argument_list\" (str \"(\") (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.identifier\" (val \"secret_fun_4071\")) (\"js.arguments\" (str \"(\") (str \")\")))) \"*1\")\n)\n\n;;;;;;;; translates `secret_fun_4071()` function call that is inserted as a `call` in body node types (e.g. `list`)\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"secret_fun_4071\")) (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.identifier\" (val \"secret_fun_4071\")) (\"js.arguments\" (str \"(\") (str \")\"))) \"*1\")\n)\n\n;;;;;;;; inserted into loops so that they terminate\n(match_expand\n  (fragment (\"py.break_statement\") \"*\")\n  (fragment (\"js.break_statement\") \"*1\")\n)\n\n;;;;;;;; generated as a simplest `block`\n(match_expand\n  (fragment (\"py.return_statement\") \"*\")\n  (fragment (\"js.return_statement\") \"*1\")\n)",
+  "auto_backward": true,
+  "choices": {
+    "type": "ASTNODE",
+    "choices_list": []
+  },
+  "kwargs": {
+    "skip_template_extraction": true
+  },
+  "return_dict": {
+    "src_ast": [
+      "py.module",
+      0,
+      [
+        "py.function_definition",
+        1,
+        "\"def\"",
+        [
+          "py.identifier",
+          2,
+          "\"f_gold\""
+        ],
+        [
+          "py.parameters",
+          3,
+          "\"(\"",
+          [
+            "py.identifier",
+            4,
+            "\"arr\""
+          ],
+          "\",\"",
+          [
+            "py.identifier",
+            5,
+            "\"n\""
+          ],
+          "\")\""
+        ],
+        "\":\"",
+        [
+          "py.block",
+          6,
+          [
+            "py.expression_statement",
+            7,
+            [
+              "py.assignment",
+              8,
+              [
+                "py.identifier",
+                9,
+                "\"d1\""
+              ],
+              "\"=\"",
+              [
+                "py.integer",
+                10,
+                "\"0\""
+              ]
+            ]
+          ],
+          [
+            "py.expression_statement",
+            11,
+            [
+              "py.call",
+              12,
+              [
+                "py.identifier",
+                13,
+                "\"myexactlog\""
+              ],
+              [
+                "py.argument_list",
+                14,
+                "\"(\"",
+                [
+                  "py.integer",
+                  15,
+                  "\"1\""
+                ],
+                "\",\"",
+                [
+                  "py.identifier",
+                  16,
+                  "\"d1\""
+                ],
+                "\")\""
+              ]
+            ]
+          ],
+          [
+            "py.expression_statement",
+            17,
+            [
+              "py.assignment",
+              18,
+              [
+                "py.identifier",
+                19,
+                "\"d2\""
+              ],
+              "\"=\"",
+              [
+                "py.integer",
+                20,
+                "\"0\""
+              ]
+            ]
+          ],
+          [
+            "py.expression_statement",
+            21,
+            [
+              "py.call",
+              22,
+              [
+                "py.identifier",
+                23,
+                "\"myexactlog\""
+              ],
+              [
+                "py.argument_list",
+                24,
+                "\"(\"",
+                [
+                  "py.integer",
+                  25,
+                  "\"2\""
+                ],
+                "\",\"",
+                [
+                  "py.identifier",
+                  26,
+                  "\"d2\""
+                ],
+                "\")\""
+              ]
+            ]
+          ],
+          [
+            "py.for_statement",
+            27,
+            "\"for\"",
+            [
+              "py.identifier",
+              28,
+              "\"i\""
+            ],
+            "\"in\"",
+            [
+              "py.call",
+              29,
+              [
+                "py.identifier",
+                30,
+                "\"range\""
+              ],
+              [
+                "py.argument_list",
+                31,
+                "\"(\"",
+                [
+                  "py.integer",
+                  32,
+                  "\"0\""
+                ],
+                "\",\"",
+                [
+                  "py.identifier",
+                  33,
+                  "\"n\""
+                ],
+                "\")\""
+              ]
+            ],
+            "\":\"",
+            [
+              "py.block",
+              34,
+              [
+                "py.expression_statement",
+                35,
+                [
+                  "py.call",
+                  36,
+                  [
+                    "py.identifier",
+                    37,
+                    "\"myexactlog\""
+                  ],
+                  [
+                    "py.argument_list",
+                    38,
+                    "\"(\"",
+                    [
+                      "py.integer",
+                      39,
+                      "\"3\""
+                    ],
+                    "\",\"",
+                    [
+                      "py.integer",
+                      40,
+                      "\"1\""
+                    ],
+                    "\")\""
+                  ]
+                ]
+              ],
+              [
+                "py.for_statement",
+                41,
+                "\"for\"",
+                [
+                  "py.identifier",
+                  42,
+                  "\"j\""
+                ],
+                "\"in\"",
+                [
+                  "py.call",
+                  43,
+                  [
+                    "py.identifier",
+                    44,
+                    "\"range\""
+                  ],
+                  [
+                    "py.argument_list",
+                    45,
+                    "\"(\"",
+                    [
+                      "py.integer",
+                      46,
+                      "\"0\""
+                    ],
+                    "\",\"",
+                    [
+                      "py.identifier",
+                      47,
+                      "\"n\""
+                    ],
+                    "\")\""
+                  ]
+                ],
+                "\":\"",
+                [
+                  "py.block",
+                  48,
+                  [
+                    "py.expression_statement",
+                    49,
+                    [
+                      "py.call",
+                      50,
+                      [
+                        "py.identifier",
+                        51,
+                        "\"myexactlog\""
+                      ],
+                      [
+                        "py.argument_list",
+                        52,
+                        "\"(\"",
+                        [
+                          "py.integer",
+                          53,
+                          "\"4\""
+                        ],
+                        "\",\"",
+                        [
+                          "py.integer",
+                          54,
+                          "\"0\""
+                        ],
+                        "\")\""
+                      ]
+                    ]
+                  ],
+                  [
+                    "py.if_statement",
+                    55,
+                    "\"if\"",
+                    [
+                      "py.comparison_operator",
+                      56,
+                      [
+                        "py.identifier",
+                        57,
+                        "\"i\""
+                      ],
+                      "\"==\"",
+                      [
+                        "py.identifier",
+                        58,
+                        "\"j\""
+                      ]
+                    ],
+                    "\":\"",
+                    [
+                      "py.block",
+                      59,
+                      [
+                        "py.expression_statement",
+                        60,
+                        [
+                          "py.call",
+                          61,
+                          [
+                            "py.identifier",
+                            62,
+                            "\"myexactlog\""
+                          ],
+                          [
+                            "py.argument_list",
+                            63,
+                            "\"(\"",
+                            [
+                              "py.integer",
+                              64,
+                              "\"5\""
+                            ],
+                            "\",\"",
+                            [
+                              "py.integer",
+                              65,
+                              "\"0\""
+                            ],
+                            "\")\""
+                          ]
+                        ]
+                      ],
+                      [
+                        "py.pass_statement",
+                        66,
+                        "\"pass\""
+                      ]
+                    ]
+                  ],
+                  [
+                    "py.break_statement",
+                    67,
+                    "\"break\""
+                  ]
+                ]
+              ],
+              [
+                "py.break_statement",
+                68,
+                "\"break\""
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "src_ann": {
+      "0": [
+        1,
+        306,
+        [
+          1,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "1": [
+        1,
+        305,
+        [
+          1,
+          0
+        ],
+        [
+          14,
+          13
+        ]
+      ],
+      "2": [
+        5,
+        11,
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          10
+        ]
+      ],
+      "3": [
+        11,
+        19,
+        [
+          1,
+          10
+        ],
+        [
+          1,
+          18
+        ]
+      ],
+      "4": [
+        12,
+        15,
+        [
+          1,
+          11
+        ],
+        [
+          1,
+          14
+        ]
+      ],
+      "5": [
+        17,
+        18,
+        [
+          1,
+          16
+        ],
+        [
+          1,
+          17
+        ]
+      ],
+      "6": [
+        25,
+        305,
+        [
+          2,
+          4
+        ],
+        [
+          14,
+          13
+        ]
+      ],
+      "7": [
+        25,
+        31,
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          10
+        ]
+      ],
+      "8": [
+        25,
+        31,
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          10
+        ]
+      ],
+      "9": [
+        25,
+        27,
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          6
+        ]
+      ],
+      "10": [
+        30,
+        31,
+        [
+          2,
+          9
+        ],
+        [
+          2,
+          10
+        ]
+      ],
+      "11": [
+        36,
+        53,
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          21
+        ]
+      ],
+      "12": [
+        36,
+        53,
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          21
+        ]
+      ],
+      "13": [
+        36,
+        46,
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          14
+        ]
+      ],
+      "14": [
+        46,
+        53,
+        [
+          3,
+          14
+        ],
+        [
+          3,
+          21
+        ]
+      ],
+      "15": [
+        47,
+        48,
+        [
+          3,
+          15
+        ],
+        [
+          3,
+          16
+        ]
+      ],
+      "16": [
+        50,
+        52,
+        [
+          3,
+          18
+        ],
+        [
+          3,
+          20
+        ]
+      ],
+      "17": [
+        58,
+        64,
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          10
+        ]
+      ],
+      "18": [
+        58,
+        64,
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          10
+        ]
+      ],
+      "19": [
+        58,
+        60,
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "20": [
+        63,
+        64,
+        [
+          4,
+          9
+        ],
+        [
+          4,
+          10
+        ]
+      ],
+      "21": [
+        69,
+        86,
+        [
+          5,
+          4
+        ],
+        [
+          5,
+          21
+        ]
+      ],
+      "22": [
+        69,
+        86,
+        [
+          5,
+          4
+        ],
+        [
+          5,
+          21
+        ]
+      ],
+      "23": [
+        69,
+        79,
+        [
+          5,
+          4
+        ],
+        [
+          5,
+          14
+        ]
+      ],
+      "24": [
+        79,
+        86,
+        [
+          5,
+          14
+        ],
+        [
+          5,
+          21
+        ]
+      ],
+      "25": [
+        80,
+        81,
+        [
+          5,
+          15
+        ],
+        [
+          5,
+          16
+        ]
+      ],
+      "26": [
+        83,
+        85,
+        [
+          5,
+          18
+        ],
+        [
+          5,
+          20
+        ]
+      ],
+      "27": [
+        91,
+        305,
+        [
+          6,
+          4
+        ],
+        [
+          14,
+          13
+        ]
+      ],
+      "28": [
+        95,
+        96,
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          9
+        ]
+      ],
+      "29": [
+        100,
+        111,
+        [
+          6,
+          13
+        ],
+        [
+          6,
+          24
+        ]
+      ],
+      "30": [
+        100,
+        105,
+        [
+          6,
+          13
+        ],
+        [
+          6,
+          18
+        ]
+      ],
+      "31": [
+        105,
+        111,
+        [
+          6,
+          18
+        ],
+        [
+          6,
+          24
+        ]
+      ],
+      "32": [
+        106,
+        107,
+        [
+          6,
+          19
+        ],
+        [
+          6,
+          20
+        ]
+      ],
+      "33": [
+        109,
+        110,
+        [
+          6,
+          22
+        ],
+        [
+          6,
+          23
+        ]
+      ],
+      "34": [
+        121,
+        305,
+        [
+          7,
+          8
+        ],
+        [
+          14,
+          13
+        ]
+      ],
+      "35": [
+        121,
+        137,
+        [
+          7,
+          8
+        ],
+        [
+          7,
+          24
+        ]
+      ],
+      "36": [
+        121,
+        137,
+        [
+          7,
+          8
+        ],
+        [
+          7,
+          24
+        ]
+      ],
+      "37": [
+        121,
+        131,
+        [
+          7,
+          8
+        ],
+        [
+          7,
+          18
+        ]
+      ],
+      "38": [
+        131,
+        137,
+        [
+          7,
+          18
+        ],
+        [
+          7,
+          24
+        ]
+      ],
+      "39": [
+        132,
+        133,
+        [
+          7,
+          19
+        ],
+        [
+          7,
+          20
+        ]
+      ],
+      "40": [
+        135,
+        136,
+        [
+          7,
+          22
+        ],
+        [
+          7,
+          23
+        ]
+      ],
+      "41": [
+        146,
+        291,
+        [
+          8,
+          8
+        ],
+        [
+          13,
+          17
+        ]
+      ],
+      "42": [
+        150,
+        151,
+        [
+          8,
+          12
+        ],
+        [
+          8,
+          13
+        ]
+      ],
+      "43": [
+        155,
+        166,
+        [
+          8,
+          17
+        ],
+        [
+          8,
+          28
+        ]
+      ],
+      "44": [
+        155,
+        160,
+        [
+          8,
+          17
+        ],
+        [
+          8,
+          22
+        ]
+      ],
+      "45": [
+        160,
+        166,
+        [
+          8,
+          22
+        ],
+        [
+          8,
+          28
+        ]
+      ],
+      "46": [
+        161,
+        162,
+        [
+          8,
+          23
+        ],
+        [
+          8,
+          24
+        ]
+      ],
+      "47": [
+        164,
+        165,
+        [
+          8,
+          26
+        ],
+        [
+          8,
+          27
+        ]
+      ],
+      "48": [
+        180,
+        291,
+        [
+          9,
+          12
+        ],
+        [
+          13,
+          17
+        ]
+      ],
+      "49": [
+        180,
+        196,
+        [
+          9,
+          12
+        ],
+        [
+          9,
+          28
+        ]
+      ],
+      "50": [
+        180,
+        196,
+        [
+          9,
+          12
+        ],
+        [
+          9,
+          28
+        ]
+      ],
+      "51": [
+        180,
+        190,
+        [
+          9,
+          12
+        ],
+        [
+          9,
+          22
+        ]
+      ],
+      "52": [
+        190,
+        196,
+        [
+          9,
+          22
+        ],
+        [
+          9,
+          28
+        ]
+      ],
+      "53": [
+        191,
+        192,
+        [
+          9,
+          23
+        ],
+        [
+          9,
+          24
+        ]
+      ],
+      "54": [
+        194,
+        195,
+        [
+          9,
+          26
+        ],
+        [
+          9,
+          27
+        ]
+      ],
+      "55": [
+        209,
+        273,
+        [
+          10,
+          12
+        ],
+        [
+          12,
+          20
+        ]
+      ],
+      "56": [
+        212,
+        218,
+        [
+          10,
+          15
+        ],
+        [
+          10,
+          21
+        ]
+      ],
+      "57": [
+        212,
+        213,
+        [
+          10,
+          15
+        ],
+        [
+          10,
+          16
+        ]
+      ],
+      "58": [
+        217,
+        218,
+        [
+          10,
+          20
+        ],
+        [
+          10,
+          21
+        ]
+      ],
+      "59": [
+        236,
+        273,
+        [
+          11,
+          16
+        ],
+        [
+          12,
+          20
+        ]
+      ],
+      "60": [
+        236,
+        252,
+        [
+          11,
+          16
+        ],
+        [
+          11,
+          32
+        ]
+      ],
+      "61": [
+        236,
+        252,
+        [
+          11,
+          16
+        ],
+        [
+          11,
+          32
+        ]
+      ],
+      "62": [
+        236,
+        246,
+        [
+          11,
+          16
+        ],
+        [
+          11,
+          26
+        ]
+      ],
+      "63": [
+        246,
+        252,
+        [
+          11,
+          26
+        ],
+        [
+          11,
+          32
+        ]
+      ],
+      "64": [
+        247,
+        248,
+        [
+          11,
+          27
+        ],
+        [
+          11,
+          28
+        ]
+      ],
+      "65": [
+        250,
+        251,
+        [
+          11,
+          30
+        ],
+        [
+          11,
+          31
+        ]
+      ],
+      "66": [
+        269,
+        273,
+        [
+          12,
+          16
+        ],
+        [
+          12,
+          20
+        ]
+      ],
+      "67": [
+        286,
+        291,
+        [
+          13,
+          12
+        ],
+        [
+          13,
+          17
+        ]
+      ],
+      "68": [
+        300,
+        305,
+        [
+          14,
+          8
+        ],
+        [
+          14,
+          13
+        ]
+      ]
+    },
+    "tar_ast": [
+      "js.program",
+      0,
+      [
+        "mapanno",
+        [
+          "ex_id",
+          1
+        ]
+      ],
+      [
+        "js.function_declaration",
+        1,
+        [
+          "mapanno",
+          [
+            "ex_id",
+            2
+          ]
+        ],
+        [
+          "string",
+          [
+            "mapanno",
+            [
+              "ex_id",
+              2
+            ]
+          ],
+          "\"function\""
+        ],
+        [
+          "js.identifier",
+          2,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              3
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                3
+              ]
+            ],
+            "\"f_gold\""
+          ]
+        ],
+        [
+          "js.formal_parameters",
+          3,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              4
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\"(\""
+          ],
+          [
+            "js.identifier",
+            4,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                5
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  5
+                ]
+              ],
+              "\"arr\""
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\",\""
+          ],
+          [
+            "js.identifier",
+            5,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                6
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  6
+                ]
+              ],
+              "\"n\""
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\",\""
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\")\""
+          ]
+        ],
+        [
+          "js.statement_block",
+          6,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              7
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\"{\""
+          ],
+          [
+            "js.variable_declaration",
+            7,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                8
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  8
+                ]
+              ],
+              "\"var\""
+            ],
+            [
+              "js.variable_declarator",
+              8,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  8
+                ]
+              ],
+              [
+                "js.identifier",
+                9,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    8
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      8
+                    ]
+                  ],
+                  "\"d1\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    8
+                  ]
+                ],
+                "\"=\""
+              ],
+              [
+                "js.number",
+                10,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    10
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      10
+                    ]
+                  ],
+                  "\"0\""
+                ]
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  8
+                ]
+              ],
+              "\";\""
+            ]
+          ],
+          [
+            "js.expression_statement",
+            11,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                11
+              ]
+            ],
+            [
+              "js.call_expression",
+              12,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  11
+                ]
+              ],
+              [
+                "js.identifier",
+                13,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    11
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      11
+                    ]
+                  ],
+                  "\"myexactlog\""
+                ]
+              ],
+              [
+                "js.arguments",
+                14,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    11
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      11
+                    ]
+                  ],
+                  "\"(\""
+                ],
+                [
+                  "js.number",
+                  15,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      12
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        12
+                      ]
+                    ],
+                    "\"1\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      11
+                    ]
+                  ],
+                  "\",\""
+                ],
+                [
+                  "js.identifier",
+                  16,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      13
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        13
+                      ]
+                    ],
+                    "\"d1\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      11
+                    ]
+                  ],
+                  "\")\""
+                ]
+              ]
+            ],
+            "EXT._automatic_semicolon"
+          ],
+          [
+            "js.variable_declaration",
+            17,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                14
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  14
+                ]
+              ],
+              "\"var\""
+            ],
+            [
+              "js.variable_declarator",
+              18,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  14
+                ]
+              ],
+              [
+                "js.identifier",
+                19,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    14
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      14
+                    ]
+                  ],
+                  "\"d2\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    14
+                  ]
+                ],
+                "\"=\""
+              ],
+              [
+                "js.number",
+                20,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    16
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      16
+                    ]
+                  ],
+                  "\"0\""
+                ]
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  14
+                ]
+              ],
+              "\";\""
+            ]
+          ],
+          [
+            "js.expression_statement",
+            21,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                17
+              ]
+            ],
+            [
+              "js.call_expression",
+              22,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  17
+                ]
+              ],
+              [
+                "js.identifier",
+                23,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    17
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      17
+                    ]
+                  ],
+                  "\"myexactlog\""
+                ]
+              ],
+              [
+                "js.arguments",
+                24,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    17
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      17
+                    ]
+                  ],
+                  "\"(\""
+                ],
+                [
+                  "js.number",
+                  25,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      18
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        18
+                      ]
+                    ],
+                    "\"2\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      17
+                    ]
+                  ],
+                  "\",\""
+                ],
+                [
+                  "js.identifier",
+                  26,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      19
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        19
+                      ]
+                    ],
+                    "\"d2\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      17
+                    ]
+                  ],
+                  "\")\""
+                ]
+              ]
+            ],
+            "EXT._automatic_semicolon"
+          ],
+          [
+            "js.for_statement",
+            27,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                20
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              "\"for\""
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              "\"(\""
+            ],
+            [
+              "js.lexical_declaration",
+              28,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\"let\""
+              ],
+              [
+                "js.variable_declarator",
+                29,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                [
+                  "js.identifier",
+                  30,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        20
+                      ]
+                    ],
+                    "\"i\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  "\"=\""
+                ],
+                [
+                  "js.number",
+                  31,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      21
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        21
+                      ]
+                    ],
+                    "\"0\""
+                  ]
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\";\""
+              ]
+            ],
+            [
+              "js.expression_statement",
+              32,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              [
+                "js.binary_expression",
+                33,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                [
+                  "js.identifier",
+                  34,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        20
+                      ]
+                    ],
+                    "\"i\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  "\"<\""
+                ],
+                [
+                  "js.identifier",
+                  35,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        20
+                      ]
+                    ],
+                    "\"n\""
+                  ]
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\";\""
+              ]
+            ],
+            [
+              "js.update_expression",
+              36,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              [
+                "js.identifier",
+                37,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  "\"i\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\"++\""
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              "\")\""
+            ],
+            [
+              "js.statement_block",
+              38,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  20
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\"{\""
+              ],
+              [
+                "js.expression_statement",
+                39,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    22
+                  ]
+                ],
+                [
+                  "js.call_expression",
+                  40,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      22
+                    ]
+                  ],
+                  [
+                    "js.identifier",
+                    41,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        22
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          22
+                        ]
+                      ],
+                      "\"myexactlog\""
+                    ]
+                  ],
+                  [
+                    "js.arguments",
+                    42,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        22
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          22
+                        ]
+                      ],
+                      "\"(\""
+                    ],
+                    [
+                      "js.number",
+                      43,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          23
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            23
+                          ]
+                        ],
+                        "\"3\""
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          22
+                        ]
+                      ],
+                      "\",\""
+                    ],
+                    [
+                      "js.number",
+                      44,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          24
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            24
+                          ]
+                        ],
+                        "\"1\""
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          22
+                        ]
+                      ],
+                      "\")\""
+                    ]
+                  ]
+                ],
+                "EXT._automatic_semicolon"
+              ],
+              [
+                "js.for_statement",
+                45,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    25
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  "\"for\""
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  "\"(\""
+                ],
+                [
+                  "js.lexical_declaration",
+                  46,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\"let\""
+                  ],
+                  [
+                    "js.variable_declarator",
+                    47,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    [
+                      "js.identifier",
+                      48,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            25
+                          ]
+                        ],
+                        "\"j\""
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      "\"=\""
+                    ],
+                    [
+                      "js.number",
+                      49,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          26
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            26
+                          ]
+                        ],
+                        "\"0\""
+                      ]
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\";\""
+                  ]
+                ],
+                [
+                  "js.expression_statement",
+                  50,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  [
+                    "js.binary_expression",
+                    51,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    [
+                      "js.identifier",
+                      52,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            25
+                          ]
+                        ],
+                        "\"j\""
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      "\"<\""
+                    ],
+                    [
+                      "js.identifier",
+                      53,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            25
+                          ]
+                        ],
+                        "\"n\""
+                      ]
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\";\""
+                  ]
+                ],
+                [
+                  "js.update_expression",
+                  54,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  [
+                    "js.identifier",
+                    55,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          25
+                        ]
+                      ],
+                      "\"j\""
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\"++\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  "\")\""
+                ],
+                [
+                  "js.statement_block",
+                  56,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      25
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\"{\""
+                  ],
+                  [
+                    "js.expression_statement",
+                    57,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        27
+                      ]
+                    ],
+                    [
+                      "js.call_expression",
+                      58,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          27
+                        ]
+                      ],
+                      [
+                        "js.identifier",
+                        59,
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            27
+                          ]
+                        ],
+                        [
+                          "string",
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              27
+                            ]
+                          ],
+                          "\"myexactlog\""
+                        ]
+                      ],
+                      [
+                        "js.arguments",
+                        60,
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            27
+                          ]
+                        ],
+                        [
+                          "string",
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              27
+                            ]
+                          ],
+                          "\"(\""
+                        ],
+                        [
+                          "js.number",
+                          61,
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              28
+                            ]
+                          ],
+                          [
+                            "string",
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                28
+                              ]
+                            ],
+                            "\"4\""
+                          ]
+                        ],
+                        [
+                          "string",
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              27
+                            ]
+                          ],
+                          "\",\""
+                        ],
+                        [
+                          "js.number",
+                          62,
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              29
+                            ]
+                          ],
+                          [
+                            "string",
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                29
+                              ]
+                            ],
+                            "\"0\""
+                          ]
+                        ],
+                        [
+                          "string",
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              27
+                            ]
+                          ],
+                          "\")\""
+                        ]
+                      ]
+                    ],
+                    "EXT._automatic_semicolon"
+                  ],
+                  [
+                    "js.if_statement",
+                    63,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        30
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          30
+                        ]
+                      ],
+                      "\"if\""
+                    ],
+                    [
+                      "js.parenthesized_expression",
+                      64,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          30
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            30
+                          ]
+                        ],
+                        "\"(\""
+                      ],
+                      [
+                        "js.binary_expression",
+                        65,
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            30
+                          ]
+                        ],
+                        [
+                          "js.identifier",
+                          66,
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              30
+                            ]
+                          ],
+                          [
+                            "string",
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                30
+                              ]
+                            ],
+                            "\"i\""
+                          ]
+                        ],
+                        [
+                          "string",
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              30
+                            ]
+                          ],
+                          "\"===\""
+                        ],
+                        [
+                          "js.identifier",
+                          67,
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              30
+                            ]
+                          ],
+                          [
+                            "string",
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                30
+                              ]
+                            ],
+                            "\"j\""
+                          ]
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            30
+                          ]
+                        ],
+                        "\")\""
+                      ]
+                    ],
+                    [
+                      "js.statement_block",
+                      68,
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          30
+                        ]
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            30
+                          ]
+                        ],
+                        "\"{\""
+                      ],
+                      [
+                        "js.expression_statement",
+                        69,
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            33
+                          ]
+                        ],
+                        [
+                          "js.call_expression",
+                          70,
+                          [
+                            "mapanno",
+                            [
+                              "ex_id",
+                              33
+                            ]
+                          ],
+                          [
+                            "js.identifier",
+                            71,
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                33
+                              ]
+                            ],
+                            [
+                              "string",
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  33
+                                ]
+                              ],
+                              "\"myexactlog\""
+                            ]
+                          ],
+                          [
+                            "js.arguments",
+                            72,
+                            [
+                              "mapanno",
+                              [
+                                "ex_id",
+                                33
+                              ]
+                            ],
+                            [
+                              "string",
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  33
+                                ]
+                              ],
+                              "\"(\""
+                            ],
+                            [
+                              "js.number",
+                              73,
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  34
+                                ]
+                              ],
+                              [
+                                "string",
+                                [
+                                  "mapanno",
+                                  [
+                                    "ex_id",
+                                    34
+                                  ]
+                                ],
+                                "\"5\""
+                              ]
+                            ],
+                            [
+                              "string",
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  33
+                                ]
+                              ],
+                              "\",\""
+                            ],
+                            [
+                              "js.number",
+                              74,
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  35
+                                ]
+                              ],
+                              [
+                                "string",
+                                [
+                                  "mapanno",
+                                  [
+                                    "ex_id",
+                                    35
+                                  ]
+                                ],
+                                "\"0\""
+                              ]
+                            ],
+                            [
+                              "string",
+                              [
+                                "mapanno",
+                                [
+                                  "ex_id",
+                                  33
+                                ]
+                              ],
+                              "\")\""
+                            ]
+                          ]
+                        ],
+                        "EXT._automatic_semicolon"
+                      ],
+                      [
+                        "string",
+                        [
+                          "mapanno",
+                          [
+                            "ex_id",
+                            30
+                          ]
+                        ],
+                        "\"}\""
+                      ],
+                      "EXT._automatic_semicolon"
+                    ]
+                  ],
+                  [
+                    "js.break_statement",
+                    75,
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        37
+                      ]
+                    ],
+                    [
+                      "string",
+                      [
+                        "mapanno",
+                        [
+                          "ex_id",
+                          null
+                        ]
+                      ],
+                      "\"break\""
+                    ],
+                    "EXT._automatic_semicolon"
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        25
+                      ]
+                    ],
+                    "\"}\""
+                  ],
+                  "EXT._automatic_semicolon"
+                ]
+              ],
+              [
+                "js.break_statement",
+                76,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    38
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      null
+                    ]
+                  ],
+                  "\"break\""
+                ],
+                "EXT._automatic_semicolon"
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                "\"}\""
+              ],
+              "EXT._automatic_semicolon"
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                null
+              ]
+            ],
+            "\"}\""
+          ],
+          "EXT._automatic_semicolon"
+        ],
+        "EXT._automatic_semicolon"
+      ]
+    ],
+    "tar_code": "function f_gold(arr, n, ) {\n    var d1 = 0;\n    myexactlog(1, d1);\n    var d2 = 0;\n    myexactlog(2, d2);\n    for (let i = 0; i < n; i++) {\n        myexactlog(3, 1);\n        for (let j = 0; j < n; j++) {\n            myexactlog(4, 0);\n            if (i === j) {\n                myexactlog(5, 0);\n            }\n            break;\n        }\n        break;\n    }\n}",
+    "map_to_exid": {
+      "2": [
+        {
+          "ex_id": 2,
+          "range": [
+            0,
+            8
+          ],
+          "str": "function"
+        }
+      ],
+      "3": [
+        {
+          "ex_id": 3,
+          "range": [
+            9,
+            15
+          ],
+          "str": "f_gold"
+        }
+      ],
+      "4": [
+        {
+          "ex_id": 4,
+          "range": [
+            15,
+            16
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 4,
+          "range": [
+            19,
+            20
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 4,
+          "range": [
+            22,
+            23
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 4,
+          "range": [
+            24,
+            25
+          ],
+          "str": ")"
+        }
+      ],
+      "5": [
+        {
+          "ex_id": 5,
+          "range": [
+            16,
+            19
+          ],
+          "str": "arr"
+        }
+      ],
+      "6": [
+        {
+          "ex_id": 6,
+          "range": [
+            21,
+            22
+          ],
+          "str": "n"
+        }
+      ],
+      "7": [
+        {
+          "ex_id": 7,
+          "range": [
+            26,
+            27
+          ],
+          "str": "{"
+        },
+        {
+          "ex_id": 7,
+          "range": [
+            359,
+            360
+          ],
+          "str": "}"
+        }
+      ],
+      "8": [
+        {
+          "ex_id": 8,
+          "range": [
+            32,
+            35
+          ],
+          "str": "var"
+        },
+        {
+          "ex_id": 8,
+          "range": [
+            36,
+            38
+          ],
+          "str": "d1"
+        },
+        {
+          "ex_id": 8,
+          "range": [
+            39,
+            40
+          ],
+          "str": "="
+        },
+        {
+          "ex_id": 8,
+          "range": [
+            42,
+            43
+          ],
+          "str": ";"
+        }
+      ],
+      "10": [
+        {
+          "ex_id": 10,
+          "range": [
+            41,
+            42
+          ],
+          "str": "0"
+        }
+      ],
+      "11": [
+        {
+          "ex_id": 11,
+          "range": [
+            48,
+            58
+          ],
+          "str": "myexactlog"
+        },
+        {
+          "ex_id": 11,
+          "range": [
+            58,
+            59
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 11,
+          "range": [
+            60,
+            61
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 11,
+          "range": [
+            64,
+            65
+          ],
+          "str": ")"
+        }
+      ],
+      "12": [
+        {
+          "ex_id": 12,
+          "range": [
+            59,
+            60
+          ],
+          "str": "1"
+        }
+      ],
+      "13": [
+        {
+          "ex_id": 13,
+          "range": [
+            62,
+            64
+          ],
+          "str": "d1"
+        }
+      ],
+      "14": [
+        {
+          "ex_id": 14,
+          "range": [
+            71,
+            74
+          ],
+          "str": "var"
+        },
+        {
+          "ex_id": 14,
+          "range": [
+            75,
+            77
+          ],
+          "str": "d2"
+        },
+        {
+          "ex_id": 14,
+          "range": [
+            78,
+            79
+          ],
+          "str": "="
+        },
+        {
+          "ex_id": 14,
+          "range": [
+            81,
+            82
+          ],
+          "str": ";"
+        }
+      ],
+      "16": [
+        {
+          "ex_id": 16,
+          "range": [
+            80,
+            81
+          ],
+          "str": "0"
+        }
+      ],
+      "17": [
+        {
+          "ex_id": 17,
+          "range": [
+            87,
+            97
+          ],
+          "str": "myexactlog"
+        },
+        {
+          "ex_id": 17,
+          "range": [
+            97,
+            98
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 17,
+          "range": [
+            99,
+            100
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 17,
+          "range": [
+            103,
+            104
+          ],
+          "str": ")"
+        }
+      ],
+      "18": [
+        {
+          "ex_id": 18,
+          "range": [
+            98,
+            99
+          ],
+          "str": "2"
+        }
+      ],
+      "19": [
+        {
+          "ex_id": 19,
+          "range": [
+            101,
+            103
+          ],
+          "str": "d2"
+        }
+      ],
+      "20": [
+        {
+          "ex_id": 20,
+          "range": [
+            110,
+            113
+          ],
+          "str": "for"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            114,
+            115
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            115,
+            118
+          ],
+          "str": "let"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            119,
+            120
+          ],
+          "str": "i"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            121,
+            122
+          ],
+          "str": "="
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            124,
+            125
+          ],
+          "str": ";"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            126,
+            127
+          ],
+          "str": "i"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            128,
+            129
+          ],
+          "str": "<"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            130,
+            131
+          ],
+          "str": "n"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            131,
+            132
+          ],
+          "str": ";"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            133,
+            134
+          ],
+          "str": "i"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            134,
+            136
+          ],
+          "str": "++"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            136,
+            137
+          ],
+          "str": ")"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            138,
+            139
+          ],
+          "str": "{"
+        },
+        {
+          "ex_id": 20,
+          "range": [
+            357,
+            358
+          ],
+          "str": "}"
+        }
+      ],
+      "21": [
+        {
+          "ex_id": 21,
+          "range": [
+            123,
+            124
+          ],
+          "str": "0"
+        }
+      ],
+      "22": [
+        {
+          "ex_id": 22,
+          "range": [
+            148,
+            158
+          ],
+          "str": "myexactlog"
+        },
+        {
+          "ex_id": 22,
+          "range": [
+            158,
+            159
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 22,
+          "range": [
+            160,
+            161
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 22,
+          "range": [
+            163,
+            164
+          ],
+          "str": ")"
+        }
+      ],
+      "23": [
+        {
+          "ex_id": 23,
+          "range": [
+            159,
+            160
+          ],
+          "str": "3"
+        }
+      ],
+      "24": [
+        {
+          "ex_id": 24,
+          "range": [
+            162,
+            163
+          ],
+          "str": "1"
+        }
+      ],
+      "25": [
+        {
+          "ex_id": 25,
+          "range": [
+            174,
+            177
+          ],
+          "str": "for"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            178,
+            179
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            179,
+            182
+          ],
+          "str": "let"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            183,
+            184
+          ],
+          "str": "j"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            185,
+            186
+          ],
+          "str": "="
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            188,
+            189
+          ],
+          "str": ";"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            190,
+            191
+          ],
+          "str": "j"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            192,
+            193
+          ],
+          "str": "<"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            194,
+            195
+          ],
+          "str": "n"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            195,
+            196
+          ],
+          "str": ";"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            197,
+            198
+          ],
+          "str": "j"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            198,
+            200
+          ],
+          "str": "++"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            200,
+            201
+          ],
+          "str": ")"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            202,
+            203
+          ],
+          "str": "{"
+        },
+        {
+          "ex_id": 25,
+          "range": [
+            336,
+            337
+          ],
+          "str": "}"
+        }
+      ],
+      "26": [
+        {
+          "ex_id": 26,
+          "range": [
+            187,
+            188
+          ],
+          "str": "0"
+        }
+      ],
+      "27": [
+        {
+          "ex_id": 27,
+          "range": [
+            216,
+            226
+          ],
+          "str": "myexactlog"
+        },
+        {
+          "ex_id": 27,
+          "range": [
+            226,
+            227
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 27,
+          "range": [
+            228,
+            229
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 27,
+          "range": [
+            231,
+            232
+          ],
+          "str": ")"
+        }
+      ],
+      "28": [
+        {
+          "ex_id": 28,
+          "range": [
+            227,
+            228
+          ],
+          "str": "4"
+        }
+      ],
+      "29": [
+        {
+          "ex_id": 29,
+          "range": [
+            230,
+            231
+          ],
+          "str": "0"
+        }
+      ],
+      "30": [
+        {
+          "ex_id": 30,
+          "range": [
+            246,
+            248
+          ],
+          "str": "if"
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            249,
+            250
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            250,
+            251
+          ],
+          "str": "i"
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            252,
+            255
+          ],
+          "str": "==="
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            256,
+            257
+          ],
+          "str": "j"
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            257,
+            258
+          ],
+          "str": ")"
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            259,
+            260
+          ],
+          "str": "{"
+        },
+        {
+          "ex_id": 30,
+          "range": [
+            307,
+            308
+          ],
+          "str": "}"
+        }
+      ],
+      "33": [
+        {
+          "ex_id": 33,
+          "range": [
+            277,
+            287
+          ],
+          "str": "myexactlog"
+        },
+        {
+          "ex_id": 33,
+          "range": [
+            287,
+            288
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 33,
+          "range": [
+            289,
+            290
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 33,
+          "range": [
+            292,
+            293
+          ],
+          "str": ")"
+        }
+      ],
+      "34": [
+        {
+          "ex_id": 34,
+          "range": [
+            288,
+            289
+          ],
+          "str": "5"
+        }
+      ],
+      "35": [
+        {
+          "ex_id": 35,
+          "range": [
+            291,
+            292
+          ],
+          "str": "0"
+        }
+      ],
+      "37": [
+        {
+          "ex_id": 37,
+          "range": [
+            321,
+            326
+          ],
+          "str": "break"
+        }
+      ],
+      "38": [
+        {
+          "ex_id": 38,
+          "range": [
+            346,
+            351
+          ],
+          "str": "break"
+        }
+      ]
+    },
+    "dbg_history": [
+      {
+        "alt_step": 1,
+        "range_info": null,
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 1,
+          "corres_slot_id": 0,
+          "src_matching_node_ids": [
+            0
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              1
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 6
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            2
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 3
+        }
+      },
+      {
+        "alt_step": 2,
+        "range_info": [
+          0,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 2,
+          "corres_slot_id": 2,
+          "src_matching_node_ids": [
+            1
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              2,
+              3,
+              6
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 7
+          },
+          "slot_names": [
+            "\"*1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            3,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 48
+        }
+      },
+      {
+        "alt_step": 3,
+        "range_info": [
+          1,
+          3,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 3,
+          "corres_slot_id": 3,
+          "src_matching_node_ids": [
+            2
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              3,
+              6
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 8
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            4
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 7
+        }
+      },
+      {
+        "alt_step": 4,
+        "range_info": [
+          1,
+          4,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 4,
+          "corres_slot_id": 4,
+          "src_matching_node_ids": [
+            3
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              4,
+              5
+            ],
+            [
+              6
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 9
+          },
+          "slot_names": [
+            "\"*1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            5,
+            6
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 6
+        }
+      },
+      {
+        "alt_step": 5,
+        "range_info": [
+          3,
+          2,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 5,
+          "corres_slot_id": 5,
+          "src_matching_node_ids": [
+            4
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              5
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 8
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            7
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 32
+        }
+      },
+      {
+        "alt_step": 6,
+        "range_info": [
+          3,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 6,
+          "corres_slot_id": 7,
+          "src_matching_node_ids": [
+            5
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 8
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 71
+        }
+      },
+      {
+        "alt_step": 7,
+        "range_info": [
+          1,
+          6,
+          7
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 7,
+          "corres_slot_id": 6,
+          "src_matching_node_ids": [
+            6
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              7,
+              11,
+              17,
+              21,
+              27
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 10
+          },
+          "slot_names": [
+            "\"*1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            8,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 15
+        }
+      },
+      {
+        "alt_step": 8,
+        "range_info": [
+          6,
+          2,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 8,
+          "corres_slot_id": 8,
+          "src_matching_node_ids": [
+            7,
+            8,
+            9
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              10
+            ],
+            [
+              11,
+              17,
+              21,
+              27
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 4
+          },
+          "slot_names": [
+            "\".1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            9,
+            10
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 86
+        }
+      },
+      {
+        "alt_step": 9,
+        "range_info": [
+          8,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 10,
+          "corres_slot_id": 9,
+          "src_matching_node_ids": [
+            10
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 70
+        }
+      },
+      {
+        "alt_step": 10,
+        "range_info": [
+          6,
+          3,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 11,
+          "corres_slot_id": 10,
+          "src_matching_node_ids": [
+            11,
+            12,
+            13,
+            14
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              15
+            ],
+            [
+              16
+            ],
+            [
+              17,
+              21,
+              27
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 19
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            11,
+            12,
+            13
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 186
+        }
+      },
+      {
+        "alt_step": 11,
+        "range_info": [
+          14,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 12,
+          "corres_slot_id": 11,
+          "src_matching_node_ids": [
+            15
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 65
+        }
+      },
+      {
+        "alt_step": 12,
+        "range_info": [
+          14,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 13,
+          "corres_slot_id": 12,
+          "src_matching_node_ids": [
+            16
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 8
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 39
+        }
+      },
+      {
+        "alt_step": 13,
+        "range_info": [
+          6,
+          4,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 14,
+          "corres_slot_id": 13,
+          "src_matching_node_ids": [
+            17,
+            18,
+            19
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              20
+            ],
+            [
+              21,
+              27
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 4
+          },
+          "slot_names": [
+            "\".1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            14,
+            15
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 89
+        }
+      },
+      {
+        "alt_step": 14,
+        "range_info": [
+          18,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 16,
+          "corres_slot_id": 14,
+          "src_matching_node_ids": [
+            20
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 70
+        }
+      },
+      {
+        "alt_step": 15,
+        "range_info": [
+          6,
+          5,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 17,
+          "corres_slot_id": 15,
+          "src_matching_node_ids": [
+            21,
+            22,
+            23,
+            24
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              25
+            ],
+            [
+              26
+            ],
+            [
+              27
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 19
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            16,
+            17,
+            18
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 186
+        }
+      },
+      {
+        "alt_step": 16,
+        "range_info": [
+          24,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 18,
+          "corres_slot_id": 16,
+          "src_matching_node_ids": [
+            25
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 65
+        }
+      },
+      {
+        "alt_step": 17,
+        "range_info": [
+          24,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 19,
+          "corres_slot_id": 17,
+          "src_matching_node_ids": [
+            26
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 8
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 39
+        }
+      },
+      {
+        "alt_step": 18,
+        "range_info": [
+          6,
+          6,
+          7
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 20,
+          "corres_slot_id": 18,
+          "src_matching_node_ids": [
+            27,
+            28,
+            29,
+            30,
+            31,
+            33,
+            34
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              32
+            ],
+            [
+              35,
+              41,
+              68
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 3
+          },
+          "slot_names": [
+            "\".1\"",
+            "\"*2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            19,
+            20,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 119
+        }
+      },
+      {
+        "alt_step": 19,
+        "range_info": [
+          31,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 21,
+          "corres_slot_id": 19,
+          "src_matching_node_ids": [
+            32
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 543
+        }
+      },
+      {
+        "alt_step": 20,
+        "range_info": [
+          34,
+          2,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 22,
+          "corres_slot_id": 20,
+          "src_matching_node_ids": [
+            35,
+            36,
+            37,
+            38
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              39
+            ],
+            [
+              40
+            ],
+            [
+              41,
+              68
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 19
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            21,
+            22,
+            23
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 171
+        }
+      },
+      {
+        "alt_step": 21,
+        "range_info": [
+          38,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 23,
+          "corres_slot_id": 21,
+          "src_matching_node_ids": [
+            39
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 65
+        }
+      },
+      {
+        "alt_step": 22,
+        "range_info": [
+          38,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 24,
+          "corres_slot_id": 22,
+          "src_matching_node_ids": [
+            40
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 59
+        }
+      },
+      {
+        "alt_step": 23,
+        "range_info": [
+          34,
+          3,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 25,
+          "corres_slot_id": 23,
+          "src_matching_node_ids": [
+            41,
+            42,
+            43,
+            44,
+            45,
+            47,
+            48
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              46
+            ],
+            [
+              49,
+              55,
+              67
+            ],
+            [
+              68
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 3
+          },
+          "slot_names": [
+            "\".1\"",
+            "\"*2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            24,
+            25,
+            26
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 104
+        }
+      },
+      {
+        "alt_step": 24,
+        "range_info": [
+          45,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 26,
+          "corres_slot_id": 24,
+          "src_matching_node_ids": [
+            46
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 543
+        }
+      },
+      {
+        "alt_step": 25,
+        "range_info": [
+          48,
+          2,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 27,
+          "corres_slot_id": 25,
+          "src_matching_node_ids": [
+            49,
+            50,
+            51,
+            52
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              53
+            ],
+            [
+              54
+            ],
+            [
+              55,
+              67
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 19
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            27,
+            28,
+            29
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 171
+        }
+      },
+      {
+        "alt_step": 26,
+        "range_info": [
+          52,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 28,
+          "corres_slot_id": 27,
+          "src_matching_node_ids": [
+            53
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 65
+        }
+      },
+      {
+        "alt_step": 27,
+        "range_info": [
+          52,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 3,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 29,
+          "corres_slot_id": 28,
+          "src_matching_node_ids": [
+            54
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 59
+        }
+      },
+      {
+        "alt_step": 28,
+        "range_info": [
+          48,
+          3,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 30,
+          "corres_slot_id": 29,
+          "src_matching_node_ids": [
+            55,
+            56,
+            57,
+            58,
+            59
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              60,
+              66
+            ],
+            [
+              67
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 0
+          },
+          "slot_names": [
+            "\"*1\"",
+            "\"*2\""
+          ],
+          "slot_ids": [
+            30,
+            31
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 341
+        }
+      },
+      {
+        "alt_step": 29,
+        "range_info": [
+          59,
+          2,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 33,
+          "corres_slot_id": 30,
+          "src_matching_node_ids": [
+            60,
+            61,
+            62,
+            63
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              64
+            ],
+            [
+              65
+            ],
+            [
+              66
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 19
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            32,
+            33,
+            34
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 171
+        }
+      },
+      {
+        "alt_step": 30,
+        "range_info": [
+          63,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 34,
+          "corres_slot_id": 32,
+          "src_matching_node_ids": [
+            64
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 65
+        }
+      },
+      {
+        "alt_step": 31,
+        "range_info": [
+          63,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 35,
+          "corres_slot_id": 33,
+          "src_matching_node_ids": [
+            65
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 12
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 59
+        }
+      },
+      {
+        "alt_step": 32,
+        "range_info": [
+          59,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 36,
+          "corres_slot_id": 34,
+          "src_matching_node_ids": [
+            66
+          ],
+          "slot_src_matching_node_ids": [
+            [],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 11
+          },
+          "slot_names": [
+            "\"*2\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 17
+        }
+      },
+      {
+        "alt_step": 33,
+        "range_info": [
+          48,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 37,
+          "corres_slot_id": 31,
+          "src_matching_node_ids": [
+            67
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 22
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 134
+        }
+      },
+      {
+        "alt_step": 34,
+        "range_info": [
+          34,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 0,
+          "done": false
+        },
+        "dbg_info": {
+          "ex_id": 38,
+          "corres_slot_id": 26,
+          "src_matching_node_ids": [
+            68
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 22
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 160
+        }
+      }
+    ]
+  }
+}

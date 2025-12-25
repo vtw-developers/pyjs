@@ -1,0 +1,68 @@
+{
+  "src_code": "if r == maxc:\n    secret_fun_4071()\nelif g == maxc:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+  "node_path": [],
+  "return_dict": {
+    "error_class": "n/a",
+    "error_msg": "n/a",
+    "alt_starting_nodes": [
+      [
+        2,
+        "py.comparison_operator",
+        [
+          "identifier",
+          "string",
+          "integer",
+          "float",
+          "comparison_operator",
+          "not_operator",
+          "boolean_operator",
+          "await",
+          "lambda",
+          "binary_operator",
+          "concatenated_string",
+          "unary_operator",
+          "attribute",
+          "subscript",
+          "call",
+          "list",
+          "list_comprehension",
+          "set",
+          "set_comprehension",
+          "tuple",
+          "parenthesized_expression",
+          "generator_expression",
+          "conditional_expression",
+          "named_expression",
+          "dictionary",
+          "dictionary_comprehension",
+          "keyword_identifier",
+          "true",
+          "false",
+          "none",
+          "ellipsis"
+        ]
+      ],
+      [
+        5,
+        "py.block",
+        [
+          "block"
+        ]
+      ],
+      [
+        10,
+        "py.elif_clause",
+        [
+          "elif_clause"
+        ]
+      ],
+      [
+        19,
+        "py.else_clause",
+        [
+          "else_clause"
+        ]
+      ]
+    ]
+  }
+}

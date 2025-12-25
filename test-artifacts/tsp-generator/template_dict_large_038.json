@@ -1,0 +1,24 @@
+{
+  "template_origin": "assert (((hasattr(tree, '__contains__') and tree.__contains__(11)) or (not hasattr(tree, '__contains__') and 11 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(12)) or (not hasattr(tree, '__contains__') and 12 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(-8)) or (not hasattr(tree, '__contains__') and -8 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(0)) or (not hasattr(tree, '__contains__') and 0 in tree)))",
+  "src_lang": "py",
+  "context_node_type": "assert_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "assert_statement",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "assert id_etbl",
+      "assert 4584"
+    ],
+    [
+      "assert (id_htgi)",
+      "assert (6691)"
+    ],
+    [
+      "assert (id_xbd and id_dcmk)",
+      "assert (9705 and 5847)"
+    ]
+  ],
+  "problematic_node_id": 1
+}

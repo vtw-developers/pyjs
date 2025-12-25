@@ -1,0 +1,7 @@
+{
+  "code": "def f_gold(x):\n    return -(~x)",
+  "choicable_nodes": [
+    "-(~x)"
+  ],
+  "exclude_stat_nids": []
+}

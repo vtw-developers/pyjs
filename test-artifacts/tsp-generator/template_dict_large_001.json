@@ -1,0 +1,35 @@
+{
+  "template_id": 0,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "if string_0[index] >= \"A\" and string_0[index] <= \"Z\":\n    pass\nelif string_0[index] == \" \":\n    pass\nelif string_0[index] >= \"a\" and string_0[index] <= \"z\":\n    pass\nelif string_0[index] == \".\":\n    pass",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "if_statement",
+  "problematic_node_id": 1,
+  "problematic_node_path": [],
+  "is_valid_template": true,
+  "is_insert_secret_fn": true,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.if_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "pirel_replace_var;",
+  "src_program": "if string_0[index] >= \"A\" and string_0[index] <= \"Z\":\n    pass\nelif string_0[index] == \" \":\n    pass\nelif string_0[index] >= \"a\" and string_0[index] <= \"z\":\n    pass\nelif string_0[index] == \".\":\n    pass",
+  "tsps": [
+    [
+      "if id_qmlj:\n    secret_fun_4071()\nelif id_hwu:\n    secret_fun_4071()\nelif id_ohwf:\n    secret_fun_4071()\nelif id_ogua:\n    secret_fun_4071()",
+      "if 6788:\n    secret_fun_4071()\nelif 8025:\n    secret_fun_4071()\nelif 3453:\n    secret_fun_4071()\nelif 242:\n    secret_fun_4071()"
+    ]
+  ]
+}

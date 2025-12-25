@@ -1,0 +1,4 @@
+{
+  "error": "RuleCombinationsExhaustedError",
+  "error_msg": "Exhaustively checked all possible choices"
+}

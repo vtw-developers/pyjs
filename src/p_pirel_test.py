@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 from typing import Tuple
 
@@ -64,7 +65,10 @@ class TestRFindStatNodeByText(unittest.TestCase):
     return src_main_code, stat_ntext, expected_stat_nid
 
   def test_all_common(self):
-    NUM_FIXTURES = 773
+    '''
+    774 is multiline statement with indentation
+    '''
+    NUM_FIXTURES = 774
     for i in range(1, NUM_FIXTURES + 1):
       test_id = f'{i:03}'
       with self.subTest(test_id=test_id):
@@ -95,6 +99,101 @@ class TestCreateSrcMainCodeForVal(unittest.TestCase):
         instrumented_code = p_pirel._create_src_main_code_for_val(
           src_main_code, pre_context, statement, True)
         self.assertEqual(instrumented_code.strip(), expected_instrumented_code.strip())
+
+
+class TestGetStatementNodesEOT(unittest.TestCase):
+  def setUp(self):
+    self.artifacts_dir = p_consts.TEST_ARTIFACTS_DIR / 'p-pirel' / 'get-statement-nodes-eot'
+    self.lang = 'py'
+    self.maxDiff = None
+    self.test_ids = ['bst_clean']
+
+  def read_fixture(self, test_id: str) -> Tuple[str, list[int]]:
+    src_main_code = p_utils.read_text(self.artifacts_dir / f'{test_id}.py').strip()
+    lines = p_utils.read_text(self.artifacts_dir / f'{test_id}_stat_nids.txt').strip().splitlines()
+    expected_eot_nids = [int(x.strip()) for x in lines if x.strip()]
+    return src_main_code, expected_eot_nids
+
+  def test_all(self):
+    for i, test_id in enumerate(self.test_ids, start=1):
+      with self.subTest(test_id=test_id):
+        src_main_code, expected_eot_nids = self.read_fixture(test_id)
+        eot_nids = asyncio.run(p_pirel.get_statement_nodes_eot(src_main_code, self.lang, return_node_ids=True))
+        self.assertEqual(len(eot_nids), len(set(eot_nids)), f'Duplicate nids in {eot_nids}')
+        self.assertEqual(eot_nids, expected_eot_nids)
+
+
+class TestDuoglotTranslateWrapper(unittest.TestCase):
+  def setUp(self):
+    self.fixtures_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-pirel' / 'duoglot-translate-wrapper'
+    self.maxDiff = None
+
+  def load_fixture(self, subdir: str, test_id: str) -> dict:
+    data = p_utils.read_json(self.fixtures_dir_path / f'{subdir}' / f'{test_id}.json')
+    return data
+
+  def test_no_error(self):
+    test_ids = sorted([p.stem for p in (self.fixtures_dir_path / 'no-error').glob('*.json')])
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        data = self.load_fixture('no-error', test_id)
+
+        src_code = data['src_code']
+        src_lang = data['src_lang']
+        tar_lang = data['tar_lang']
+        trans_rules = data['trans_rules']
+        auto_backward = data['auto_backward']
+        choices = data['choices']
+        kwargs = data['kwargs']
+
+        golden_return_dict = data['return_dict']
+        src_ann = {int(k): v for k, v in golden_return_dict['src_ann'].items()}
+        golden_return_dict['src_ann'] = src_ann
+        map_to_exid = {int(k): v for k, v in golden_return_dict['map_to_exid'].items()}
+        golden_return_dict['map_to_exid'] = map_to_exid
+
+        return_dict = p_pirel.duoglot_translate_wrapper(
+          src_code,
+          src_lang,
+          tar_lang,
+          trans_rules,
+          auto_backward,
+          choices,
+          **kwargs
+        )
+        eq, p, v1, v2 = p_utils.deep_json_diff(golden_return_dict, return_dict, coerce_types=True)
+        self.assertTrue(eq, f'diff: {p}, {v1}, {v2}')
+
+  def test_error(self):
+    test_ids = sorted([p.stem for p in (self.fixtures_dir_path / 'error').glob('*.json')])
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        data = self.load_fixture('error', test_id)
+
+        src_code = data['src_code']
+        src_lang = data['src_lang']
+        tar_lang = data['tar_lang']
+        trans_rules = data['trans_rules']
+        auto_backward = data['auto_backward']
+        choices = data['choices']
+        kwargs = data['kwargs']
+
+        error_class = data['error_class']
+        error_msg = data['error_msg']
+
+        try:
+          return_dict = p_pirel.duoglot_translate_wrapper(
+            src_code,
+            src_lang,
+            tar_lang,
+            trans_rules,
+            auto_backward,
+            choices,
+            **kwargs
+          )
+        except Exception as err:
+          self.assertEqual(err.__class__.__name__, error_class)
+          self.assertEqual(error_msg.lower(), str(err).lower())
 
 
 if __name__ == '__main__':

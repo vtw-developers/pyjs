@@ -1,0 +1,8 @@
+{
+  "code": "assert foo() == bar()\ndel d[k]",
+  "choicable_nodes": [
+    "foo() == bar()",
+    "d[k]"
+  ],
+  "exclude_stat_nids": []
+}

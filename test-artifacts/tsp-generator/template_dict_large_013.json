@@ -1,0 +1,16 @@
+{
+  "template_origin": "if v == 'true':\n    pass\nelif v.lower() == 'true':\n    pass\nelif v == 'false':\n    pass\nelif v.lower() == 'false':\n    pass\nelif v[0] == '\"' or v[0] == \"'\":\n    pass\nelif v[0] == '[':\n    pass\nelif v[0] == '{':\n    pass\nelif TIME_RE.match(v):\n    pass\nelse:\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "if_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "if id_qms:\n    secret_fun_4071()\nelif id_odcb:\n    secret_fun_4071()\nelif id_tpw:\n    secret_fun_4071()\nelif id_bdji:\n    secret_fun_4071()\nelif id_symv:\n    secret_fun_4071()\nelif id_qcf:\n    secret_fun_4071()\nelif id_lrjm:\n    secret_fun_4071()\nelif id_pikl:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+      "if 5328:\n    secret_fun_4071()\nelif 5449:\n    secret_fun_4071()\nelif 2550:\n    secret_fun_4071()\nelif 3772:\n    secret_fun_4071()\nelif 8456:\n    secret_fun_4071()\nelif 2516:\n    secret_fun_4071()\nelif 7916:\n    secret_fun_4071()\nelif 4781:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

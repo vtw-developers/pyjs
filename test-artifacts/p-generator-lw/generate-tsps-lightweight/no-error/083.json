@@ -1,0 +1,88 @@
+{
+  "tsps": [
+    [
+      "return [secret_fun_4071()]",
+      "return [secret_fun_4071()]"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 2,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "expected = [0.49999999999999994, 2.6090241078691177e-17, 4.940492459581946e-17]",
+    "context_node_type": "expression_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "list",
+    "problematic_node_id": 4,
+    "problematic_node_path": [
+      0,
+      2
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.list",
+            "py.identifier"
+          ],
+          [
+            "py.assignment"
+          ],
+          [
+            "py.expression_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown",
+            "js.identifier"
+          ],
+          [
+            "js.variable_declarator"
+          ],
+          [
+            "js.variable_declaration"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 2,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "return [secret_fun_4071()]",
+    "context_node_type": "return_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "list",
+    "problematic_node_id": 4,
+    "problematic_node_path": [
+      1
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.list"
+          ],
+          [
+            "py.return_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.return_statement"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "return pirel_replace_var;"
+  }
+}

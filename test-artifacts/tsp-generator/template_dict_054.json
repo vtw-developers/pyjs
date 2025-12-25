@@ -30,13 +30,7 @@
   "pre_context": "for i, v in enumerate(nums):\n    num = target - v\n    if num in helper:\n        return [helper[num], i]\n    pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "id_vhk = id_umjn",
-      "id_ydg [ id_iwb ] = id_knaw",
-      "id_sqo = id_azw"
-    ],
-    [
       "id_cmg[id_gpf] = id_dru",
-      "id_csd[id_yvx] = id_nqr",
       "id_hxnf[id_vdzc] = id_hdu"
     ]
   ]

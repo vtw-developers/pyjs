@@ -1,1 +1,0 @@
-count[next_missing] = 1

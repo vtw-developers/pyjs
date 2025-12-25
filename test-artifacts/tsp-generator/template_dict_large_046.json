@@ -1,0 +1,528 @@
+{
+  "template_origin": "h[i + 1][j + 1] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    0,
+    2,
+    1
+  ],
+  "problematic_node_type": "argument_list",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "h[i + 1][j + 1] = min(id_ejnv, id_fxyq, id_veo, id_wvq)",
+      "h[i + 1][j + 1] = min(4, 2039, 9743, 1002)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_bhy + id_aulw, id_xfd + 6637, id_iahv + 8677, id_cbgj + id_dxk)",
+      "h[i + 1][j + 1] = min(7865 + id_deg, 9200 + id_olyg, 1473 + id_qoh, 122 + 192)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_uky + id_vsc, id_nph + 242, id_siux[id_jkd] + 9570, id_ncd + id_svrg)",
+      "h[i + 1][j + 1] = min(9750 + id_hof, 9600 + id_inuz, id_dmac[2638] + 541, 57 + 9845)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hcw[id_bkt] + id_fze, id_cha + 143, id_fues[id_jgmq] + 7714, id_rpx + 979 + (id_rlh))",
+      "h[i + 1][j + 1] = min(id_ornz[id_niuk] + id_vfa, 4657 + id_wtqr, id_ano[5947] + 7308, 6581 + id_jdn + (6647))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_frq + id_ldzi, id_mhnp[id_fkg] + 81, id_pwk + 4659, id_acx + id_mbes)",
+      "h[i + 1][j + 1] = min(7811 + id_ulbq, id_msn[id_oakc] + 4872, 5389 + id_vrm, 3909 + 6580)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mpkh[id_xfzb] + id_kio, id_txc[id_lxg] + 2724, id_rdcw + 5184, id_zsba + 3650 + (id_vlzh))",
+      "h[i + 1][j + 1] = min(id_yijq[id_ihg] + id_xwkf, id_gxir[id_vqdi] + 7086, 4678 + id_aph, 3157 + id_wlu + (716))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_oxm + id_lzr, id_tik + 8174, id_czta + 769, id_gzx + id_itcd + 7850 + (id_qhbt))",
+      "h[i + 1][j + 1] = min(2267 + id_jlq, 9146 + id_dbu, 597 + id_twa, 3579 + 136 + 1122 + (9119))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jlge[id_gniq][id_jofs] + id_pqeu, id_egtf[id_iam][id_doy] + 914, id_dck + 4239, id_pcjh + id_ayzc + 7057 + (id_turd))",
+      "h[i + 1][j + 1] = min(id_rlaf[id_baci][id_mxg] + id_vjya, id_uby[975][id_shb] + 8682, 7363 + id_wnva, 7129 + 1912 + 7227 + (8905))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_oszx[id_gai][id_dvk] + id_hzlt, id_njp + 5598, id_mocz[id_gux] + 3682, id_yemd + 4643 + (id_rzx))",
+      "h[i + 1][j + 1] = min(id_uvo[id_xutd][id_vdnb] + id_eog, 8028 + id_xkrs, id_drfl[3505] + 1290, 6078 + id_crh + (8930))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_stc[id_anbi][id_hvc] + id_mcb, id_bgw[id_aqlp] + 6499, id_gnr + 2773, id_jypl + id_gax)",
+      "h[i + 1][j + 1] = min(id_dhi[id_wjx][id_qov] + id_cwjp, id_nmu[id_qrip] + 4446, 6909 + id_njaz, 4595 + 6542)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ktu + id_ypx, id_zel[id_vna] + 702, id_qai[id_mgoj][id_kdy + 9041] + 5940, id_yxwk + id_cwv)",
+      "h[i + 1][j + 1] = min(3559 + id_nej, id_ocnl[id_hir] + 994, id_wbsz[id_fakn][id_zjei + id_ajdg] + 7, 2562 + 1827)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_cvw + id_qnh, id_ewm[id_qdgn][id_yiuj] + 3534, id_bdm[id_wlb] + 6524, id_npmj + id_tumo)",
+      "h[i + 1][j + 1] = min(3539 + id_bof, id_qjm[5733][id_gmy] + 1797, id_qzg[5023] + 2427, 7088 + 7918)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ysr[id_igdc] + id_mpb, id_wgt[id_eulj][id_weul] + 3767, id_ewm + 8341, id_vtp + id_zca + 4181 + (id_dhc - 2971))",
+      "h[i + 1][j + 1] = min(id_zgtf[id_kjwr] + id_rcs, id_cxs[5573][id_qpc] + 3236, 3323 + id_yvu, 3816 + 9965 + 954 + (1491 - id_rezx))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_lmp + id_oyt, id_uwa[id_upl][id_sep] + 1870, id_bmsa[id_ijdv] + 6067, id_ekrd + 7236 + (id_gmek))",
+      "h[i + 1][j + 1] = min(7314 + id_xtv, id_baxw[1910][id_ofp] + 6538, id_nbjl[8130] + 3214, 950 + id_wies + (1585))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_tzc[id_jir] + id_pdlf, id_ptzv[id_mwj] + 2239, id_emk[id_dbiu] + 1791, id_cshl + id_pezn + 3098 + (id_asjn))",
+      "h[i + 1][j + 1] = min(id_brn[id_obef] + id_hbg, id_ibrz[id_qae] + 1029, id_irdl[2063] + 3229, 4288 + 7417 + 2994 + (5112))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ezag + id_rip, id_pbes[id_pvth][id_sxfl] + 9013, id_igo[id_rhv] + 8339, id_hikg + id_gvs + 3959 + (id_kmw))",
+      "h[i + 1][j + 1] = min(8209 + id_dln, id_bgi[884][id_ksyd] + 7508, id_xwsj[9629] + 8689, 1500 + 2154 + 6362 + (8907))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_yaqb + id_tau, id_tjbg + 2132, id_ftva[id_shbo][id_yeir + 7830] + 4596, id_atry + id_jtzu + 3182 + (id_vwhi - 2193))",
+      "h[i + 1][j + 1] = min(5299 + id_aso, 6314 + id_fja, id_dzc[id_hsfb][id_quzj + id_epd] + 616, 790 + 6031 + 8106 + (4575 - id_izu))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_qwo[id_loa][id_shom] + id_cgh, id_awol + 7538, id_yale[id_xdt] + 5708, id_grlo + id_euvm + 2996 + (id_emr - 8355))",
+      "h[i + 1][j + 1] = min(id_grjp[id_vrsx][id_ejva] + id_gtvo, 1372 + id_svdm, id_fxp[2441] + 6278, 9322 + 5040 + 6064 + (3009 - id_btcx))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_txr[id_ycpd] + id_umrh, id_gyz[id_flhs] + 6367, id_jiwf[id_qsu][id_rui + 6369] + 5623, id_uqj + id_omyj + 1963 + (id_tzsh))",
+      "h[i + 1][j + 1] = min(id_nmi[id_nysz] + id_uyi, id_tuf[id_vsb] + 4542, id_nevk[id_zexl][id_rpoi + id_tmos] + 7117, 3139 + 816 + 2693 + (14))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_opnl[id_met][id_dns] + id_xvy, id_mlds[id_vbxl][id_vgyk] + 2356, id_usrn[id_misg][id_rjx + 3432] + 8341, id_znf + id_ehbi + 3318 + (id_rkm))",
+      "h[i + 1][j + 1] = min(id_nbye[id_avk][id_wynm] + id_exkj, id_bnh[1341][id_jkcm] + 7724, id_wfyi[id_rtbv][id_twg + id_ckbv] + 4521, 6283 + 9306 + 9753 + (8164))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_czj[id_wsu][id_kmx] + id_qljw, id_xed[id_bfrl] + 2010, id_yxtf[id_wgdf][id_uat + 4540] + 5221, id_caxs + id_gkqr + 6000 + (id_nuh - 1968))",
+      "h[i + 1][j + 1] = min(id_tenb[id_uveb][id_laxn] + id_xhu, id_szap[id_gfb] + 8561, id_udcn[id_kilv][id_pfec + id_dste] + 9668, 5522 + 875 + 9554 + (4058 - id_syx))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_zejx[id_pgz][id_abwk] + id_ykf, id_aiz[id_tawy][id_gdo] + 1685, id_jil[id_yus][id_uwy + 8275] + 106, id_dkxv + 4642 + (id_yjcs))",
+      "h[i + 1][j + 1] = min(id_zfu[id_azrq][id_msy] + id_qxry, id_pve[4697][id_pth] + 7454, id_ixop[id_hpd][id_fxw + id_qzb] + 2841, 8823 + id_kzs + (5266))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hysn[id_kdoj] + id_wiyq, id_ced[id_xyiz] + 8690, id_thu + 8340, id_ybt + id_tyn + 6267 + (id_srz - 5129))",
+      "h[i + 1][j + 1] = min(id_yrz[id_umw] + id_frpx, id_zsdu[id_nbd] + 2033, 7089 + id_enp, 9136 + 5279 + 7541 + (1792 - id_wdp))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_zsn[id_wld][id_uxpy] + id_ojzl, id_jrm + 9651, id_ifj + 9326, id_rxlc + id_fwb + 6727 + (id_anoj))",
+      "h[i + 1][j + 1] = min(id_xnye[id_qvh][id_pml] + id_umk, 3914 + id_ale, 6521 + id_fsoq, 9672 + 706 + 2678 + (5336))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vrs[id_ogb][id_shda] + id_olc, id_bmcx[id_aehl] + 6615, id_yje[id_dlzi] + 9950, id_nsd + id_kozy + 5284 + (id_fzl - 7696))",
+      "h[i + 1][j + 1] = min(id_valb[id_foc][id_zsj] + id_oxth, id_ymwe[id_rot] + 8678, id_sdmy[2966] + 9175, 1610 + 969 + 6343 + (8271 - id_tbc))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_kraf[id_zpm] + id_iuk, id_uelo[id_itqe][id_nrh] + 8829, id_xol[id_cyqi][id_bjw + 1470] + 9949, id_gnub + id_umps + 7622 + (id_isnr - 3293))",
+      "h[i + 1][j + 1] = min(id_umve[id_rpgf] + id_aqd, id_xtjk[1814][id_tem] + 8832, id_xsy[id_adh][id_mgqb + id_fnjs] + 90, 3005 + 5839 + 483 + (5266 - id_kux))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_wlq[id_fsbg][id_bwkn] + id_tme, id_psal + 1926, id_ofm + 4565, id_eid + 7963 + (id_cvk - 8881))",
+      "h[i + 1][j + 1] = min(id_pxa[id_zqm][id_qykw] + id_pekb, 5587 + id_kvnf, 1837 + id_kdwo, 1830 + id_zah + (1636 - id_okgu))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_xuz[id_scpa] + id_gomr, id_jrml[id_nxt] + 3848, id_vyj[id_foht] + 3794, id_xjl + id_eza + 3044 + (id_rli - 7705))",
+      "h[i + 1][j + 1] = min(id_ahv[id_wuq] + id_omki, id_mfhc[id_qeki] + 8146, id_xhf[4920] + 6064, 8528 + 1705 + 3062 + (8894 - id_dtyu))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_qwr[id_zdm] + id_yql, id_kigv[id_cdj][id_xlor] + 6764, id_uer[id_shmb] + 126, id_dhv + id_byfq)",
+      "h[i + 1][j + 1] = min(id_tlp[id_xvj] + id_mgi, id_aow[4600][id_ave] + 7345, id_gtv[1908] + 9249, 4358 + 9272)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_omty[id_lum][id_yxa] + id_ultv, id_fonv[id_uzl] + 6405, id_hneq + 2665, id_umhy + 8586 + (id_hzgb - 5207))",
+      "h[i + 1][j + 1] = min(id_wbk[id_wup][id_ktv] + id_ltsf, id_lso[id_cogt] + 6508, 5098 + id_ceos, 8419 + id_kzyv + (5189 - id_hyw))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_dtus + id_uvq, id_hzr + 7860, id_efq[id_bmax][id_ljr + 9029] + 1118, id_xqs + id_ovhs + 501 + (id_zxnk))",
+      "h[i + 1][j + 1] = min(9057 + id_sqye, 412 + id_bea, id_wrn[id_eujm][id_wfa + id_rouy] + 3692, 9930 + 1722 + 2826 + (7987))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_onut[id_oysl] + id_gndi, id_diml[id_qan][id_lwgo] + 2751, id_mvoa[id_gap][id_sxky + 2104] + 6287, id_rwfc + id_gopn + 7077 + (id_nztb))",
+      "h[i + 1][j + 1] = min(id_ijwf[id_icej] + id_jhg, id_zxp[4208][id_ndpx] + 1002, id_rlsg[id_qapj][id_ihyr + id_zws] + 7211, 8723 + 7948 + 5866 + (8921))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_cqlj[id_ebm] + id_sga, id_rayh[id_azp][id_awv] + 8222, id_iyd[id_ahbk][id_dhc + 3621] + 886, id_oed + 6798 + (id_upd - 621))",
+      "h[i + 1][j + 1] = min(id_cil[id_clv] + id_exl, id_nhsu[8021][id_vytj] + 5674, id_yxwv[id_pavl][id_xyw + id_omiw] + 2730, 8253 + id_vgjk + (4446 - id_dmue))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_tvma[id_qly][id_gchx] + id_uzh, id_ijkb[id_bfpo][id_snt] + 3646, id_pjng[id_axt] + 9140, id_cilm + 8210 + (id_igv - 771))",
+      "h[i + 1][j + 1] = min(id_kfe[id_blwc][id_qipv] + id_juxf, id_pvuk[4692][id_rqna] + 22, id_nrw[7887] + 5185, 4957 + id_ubd + (680 - id_cye))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_eph + id_rtjx, id_vjx + 4224, id_eot + 9614, id_yawz + 2332 + (id_viyo - 5507))",
+      "h[i + 1][j + 1] = min(8233 + id_gtov, 6122 + id_nhgo, 7504 + id_pucb, 1986 + id_kgle + (2750 - id_rsa))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_xyrq[id_habf][id_qcdo] + id_iwt, id_yumt[id_kdo][id_cmi] + 9517, id_mrn[id_iak][id_suo + 4207] + 7152, id_tzsf + id_tky + 9075 + (id_umh - 5203))",
+      "h[i + 1][j + 1] = min(id_zyvk[id_pzy][id_lpr] + id_zks, id_qfrz[5846][id_xmy] + 4445, id_mzy[id_uwf][id_gohx + id_yojr] + 5557, 2666 + 8845 + 3897 + (7431 - id_afo))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_nvy[id_ibf][id_fid] + id_zcs, id_uqed + 1587, id_dem + 9355, id_xnt + 356 + (id_myx))",
+      "h[i + 1][j + 1] = min(id_khg[id_oefb][id_xqgs] + id_zjsh, 1833 + id_vehi, 5189 + id_nzck, 8049 + id_phk + (3634))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ozgm + id_yuzl, id_xei[id_ykx] + 8167, id_kya[id_qpj][id_ujxf + 8350] + 2928, id_mpc + id_fpzd + 5504 + (id_kbqx - 9625))",
+      "h[i + 1][j + 1] = min(4748 + id_olic, id_aux[id_ern] + 4218, id_ugl[id_itqg][id_wfsm + id_neyu] + 2422, 8998 + 4310 + 9509 + (5391 - id_exz))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_qjl + id_nmvj, id_vob[id_ibca][id_fqm] + 3495, id_nec[id_ycvf] + 2609, id_wlid + 8193 + (id_hvkq - 1865))",
+      "h[i + 1][j + 1] = min(1934 + id_dmq, id_ewjf[1274][id_ycv] + 1853, id_nbgf[2318] + 5555, 3004 + id_lza + (2985 - id_lhr))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_wtkm[id_omw] + id_pwx, id_qhna[id_njg] + 3820, id_wrqk + 4961, id_tfgy + 9915 + (id_vnst - 1023))",
+      "h[i + 1][j + 1] = min(id_jqyn[id_fpc] + id_kaxl, id_hsn[id_gwa] + 4207, 2366 + id_qche, 8357 + id_hgb + (6497 - id_xci))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_onxa[id_tca][id_wacl] + id_hal, id_yjp[id_tzxq][id_bse] + 5550, id_pgrz[id_fegm] + 4397, id_bds + id_laq + 8211 + (id_punt))",
+      "h[i + 1][j + 1] = min(id_zfbc[id_tspq][id_pakx] + id_ipy, id_btag[5246][id_ghz] + 3674, id_ufbq[6948] + 8950, 8417 + 2560 + 4201 + (1802))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ovuj[id_oag] + id_pdyw, id_pjt + 8205, id_xfb[id_iwtj][id_yfe + 6061] + 2480, id_aps + id_mhw + 6749 + (id_hwnm))",
+      "h[i + 1][j + 1] = min(id_hal[id_xah] + id_xzc, 7739 + id_lxvn, id_sxb[id_iug][id_wet + id_xbp] + 3659, 7962 + 9833 + 4818 + (7825))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_dlqc[id_vwae][id_jid] + id_qith, id_wspj[id_usor][id_jrof] + 5737, id_hnd + 2780, id_bzpw + 5771 + (id_ygf - 3476))",
+      "h[i + 1][j + 1] = min(id_vck[id_qntv][id_lqmg] + id_kxu, id_jsn[5922][id_sjg] + 3535, 1361 + id_zkei, 4163 + id_rudo + (7363 - id_satc))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_iqso + id_hzy, id_chw[id_uxw] + 9604, id_fjab[id_qrel][id_ymng + 7777] + 7872, id_gldf + id_kwa + 2251 + (id_yjsz))",
+      "h[i + 1][j + 1] = min(1214 + id_ipk, id_brz[id_ebp] + 6391, id_sfut[id_jvtg][id_gwp + id_yvuf] + 8289, 6724 + 8724 + 407 + (2286))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_svgy[id_yjv] + id_icjf, id_hvl[id_aev][id_xzr] + 7096, id_kgo[id_znp] + 3378, id_iqyg + 7150 + (id_nrjd - 7569))",
+      "h[i + 1][j + 1] = min(id_nglu[id_bvh] + id_lpe, id_jpn[4112][id_oafj] + 7321, id_rimc[114] + 3844, 204 + id_lsaf + (9321 - id_vzqs))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_otmf + id_zjo, id_nrcl[id_dft][id_ygft] + 1811, id_jrt + 7428, id_sxlm + id_lyv)",
+      "h[i + 1][j + 1] = min(1360 + id_bjv, id_tvxo[2335][id_fht] + 7772, 8784 + id_rfa, 7375 + 6442)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_sna[id_oqk][id_mdw] + id_wyvn, id_ouik[id_syp][id_ijsu] + 3507, id_xkva + 68, id_xzos + 8415 + (id_lyju))",
+      "h[i + 1][j + 1] = min(id_xzc[id_qbah][id_dvli] + id_byol, id_qiug[5077][id_tis] + 4786, 8807 + id_gbm, 6131 + id_tnd + (1526))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pwen[id_hzev] + id_okq, id_psy[id_wnhj + 1750][id_ymx] + 4101, id_adb[id_yxcw] + 6198, id_gha + 7971 + (id_evni))",
+      "h[i + 1][j + 1] = min(id_qgyc[id_jmt] + id_fgv, id_yte[id_fuyz + id_nvlw][id_reug] + 9311, id_necg[5232] + 2759, 3753 + id_xgj + (4607))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jvfi[id_ydz] + id_txnd, id_aru[id_hjpn][id_ubd] + 8521, id_zvh[id_vlqw][id_rbju + 9822] + 3352, id_lvug + id_wtrd + 2059 + (id_epoq - 3535))",
+      "h[i + 1][j + 1] = min(id_isq[id_gaob] + id_sbhf, id_dyp[984][id_vkfp] + 1020, id_ylav[id_jiro][id_uyp + 5285] + 809, 3000 + 1352 + 1309 + (6939 - id_znr))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mqb[id_edb][id_drbq] + id_zale, id_bha[id_gmoc] + 5654, id_deao[id_jwp][id_hyio + 599] + 1327, id_ajs + id_qag + 378 + (id_mjds))",
+      "h[i + 1][j + 1] = min(id_kiql[id_abv][id_skwv] + id_lbwk, id_idno[id_gbxj] + 3792, id_xki[id_qast][id_gnw + id_sayx] + 3555, 6589 + 8687 + 6931 + (1494))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ymp[id_egaq] + id_otks, id_yqzu[id_ebw] + 7649, id_bvt[id_zbdc][id_ypd + 6844] + 6791, id_edcw[id_swdj] + (id_mpg) + 9681 + (id_ywou - 6675))",
+      "h[i + 1][j + 1] = min(id_ahn[id_djit] + id_yinp, id_fpn[id_kos] + 4350, id_xtsk[id_hou][id_gjib + 7185] + 2974, id_eknr[id_xdhz] + (2292) + 8484 + (916 - id_fqms))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_wqd[id_wyem][id_own] + id_fwih, id_fsog[id_ubm + 3142][id_kdbi] + 1969, id_rca[id_joim][id_ksb + 455] + 6809, id_wmi[id_cay] + (id_jau) + 6207 + (id_bjik - id_ofk - 5462))",
+      "h[i + 1][j + 1] = min(id_gqm[id_riph][id_hqz] + id_covl, id_zyi[id_ltfo + id_oyq][id_jihb] + 2225, id_ifu[id_clwk][id_ikw + 3794] + 4483, id_htsi[id_yozu] + (4897) + 7317 + (id_yvg - id_akv - 1938))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_iyx[id_jteu] + id_cyhi, id_pym[id_qhi + 2018][id_ypnv] + 6859, id_uyka[id_ikgm][id_viey + 8504] + 1678, id_tnck[id_mfo] + (id_cxgv) + 8482 + (id_jzel))",
+      "h[i + 1][j + 1] = min(id_eziq[id_hlps] + id_bntw, id_tdag[id_kim + id_mwtu][id_kce] + 877, id_umet[id_qno][id_cir + 9023] + 9220, id_noe[id_kvod] + (1182) + 8369 + (3781))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_nsy[id_vqij][id_styg] + id_kopa, id_qcp[id_hyno][id_cwga] + 575, id_odtf[id_vpkx][id_yeka + 5973] + 8719, id_vlbj + id_ylrw + 1696 + (id_nczy))",
+      "h[i + 1][j + 1] = min(id_njc[id_wzgn][id_cyb] + id_col, id_qlb[8418][id_ilk] + 5268, id_vpl[id_rhq][id_iwsm + 8149] + 3304, 102 + 3444 + 8887 + (2061))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_dqw[id_ljyo][id_xej] + id_gro, id_nkx[id_zvql + 1840][id_ydo] + 9621, id_lpj[id_ngx][id_wyib + 316] + 280, id_afwy + id_chl + 1100 + (id_soh - id_ojd - 8290))",
+      "h[i + 1][j + 1] = min(id_rjyu[id_giks][id_rmi] + id_mol, id_lsi[id_jke + id_kqvy][id_mvo] + 4392, id_iaun[id_maz][id_xza + id_ekr] + 4994, 5244 + 4194 + 958 + (id_ouq - id_mbi - 6085))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_lre[id_ugrh][id_imal] + id_pco, id_zdcb[id_dzl][id_mqb] + 9096, id_dmf[id_fqsx][id_oqi + 6406] + 6231, id_zbtu[id_kbez] + (id_fde) + 4635 + (id_wojq - 3489))",
+      "h[i + 1][j + 1] = min(id_ilnt[id_vea][id_mpgz] + id_wsec, id_tbv[792][id_ndh] + 3068, id_szgi[id_gtz][id_swu + id_xtk] + 5217, id_vkp[id_ublm] + (1781) + 8531 + (6469 - id_updf))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_kcd[id_dic][id_hwe] + id_pmo, id_ckfq[id_xikg + 117][id_acj] + 9536, id_ufa[id_bltr][id_pzem + 112] + 5774, id_bqri + id_gsio + 3680 + (id_olfv - 2160))",
+      "h[i + 1][j + 1] = min(id_xvzq[id_lwo][id_qbft] + id_fwre, id_gdn[id_fqih + id_nih][id_fjx] + 688, id_atc[id_bvd][id_bozl + 7784] + 9194, 6965 + 4962 + 8004 + (8146 - id_tukm))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hrmc[id_bxf][id_xch] + id_teio, id_ims[id_npt][id_tyv] + 4788, id_gfhx[id_scu][id_byh + 3475] + 5866, id_tgz[id_igq] + (id_esnp) + 138 + (id_tznj))",
+      "h[i + 1][j + 1] = min(id_lza[id_xmrb][id_prgo] + id_ukj, id_ibj[3036][id_owjx] + 1130, id_jrz[id_jfkv][id_jmcb + id_qirl] + 4653, id_hgk[id_xtyh] + (3900) + 7264 + (9735))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_cwd[id_ioz][id_samy] + id_czwl, id_ukz[id_qrkj + 8583][id_abv] + 7040, id_jfg[id_gro][id_vbt + 1972] + 6503, id_tfw + 6995 + (id_dpq - 7083))",
+      "h[i + 1][j + 1] = min(id_kcb[id_ayup][id_vpj] + id_lpsy, id_iejv[id_vpi + id_ielb][id_meha] + 8683, id_lbxu[id_whej][id_nkz + id_loi] + 2977, 6354 + id_evxi + (3328 - id_wba))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pbn[id_yeg][id_ipo] + id_bduz, id_cdlt[id_tciq] + 4847, id_gvq[id_tsgz] + 9564, id_lqc[id_wjc] + (id_edg) + 1745 + (id_dyjg - 6179))",
+      "h[i + 1][j + 1] = min(id_zvuq[id_byzi][id_vlao] + id_iwze, id_kdl[id_eqwu] + 1271, id_qcfa[1375] + 4153, id_jehm[id_csfk] + (5731) + 2662 + (5345 - id_ifhu))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ekd[id_ywia][id_bzk] + id_smek, id_apq[id_tpyi + 8375][id_dypt] + 8061, id_str[id_frga][id_rykj + 4363] + 9405, id_zdn + id_vrqy + 4923 + (id_tris - 9969))",
+      "h[i + 1][j + 1] = min(id_zps[id_avwg][id_etlm] + id_afq, id_unb[id_jdw + id_rap][id_iyoz] + 4521, id_trns[id_wqez][id_vgdx + id_ulo] + 3682, 1552 + 2247 + 5265 + (7664 - id_uvqw))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ahx[id_hqsj][id_ulc] + id_lva, id_nvgs[id_jca] + 7916, id_sfwc[id_hgao][id_aig + 6317] + 8629, id_urw + 5350 + (id_jadm))",
+      "h[i + 1][j + 1] = min(id_uart[id_oxm][id_svpu] + id_xrak, id_fso[id_zqde] + 7552, id_iwb[id_drb][id_tmeq + 5124] + 3434, 6145 + id_sjg + (185))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vfak[id_byq][id_crwk] + id_odt, id_oxtn[id_aje] + 7693, id_pbl[id_bzok] + 8953, id_yet + id_tzq + 7857 + (id_riue - id_bcpk - 2612))",
+      "h[i + 1][j + 1] = min(id_lpbo[id_yuh][id_zpj] + id_tmxz, id_ncw[id_frhe] + 7566, id_uji[9190] + 4704, 5099 + 612 + 6882 + (id_afkq - id_bud - 8580))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_fhg[id_jzw] + id_ykm, id_csi[id_twc] + 9297, id_dvk[id_ojt][id_mcw + 7987] + 2001, id_qjn + id_ebwg + 6310 + (id_scgd - id_kewn - 6624))",
+      "h[i + 1][j + 1] = min(id_zkp[id_csi] + id_osxk, id_rxdq[id_tnl] + 6492, id_img[id_iwxe][id_ajo + 3700] + 4204, 7591 + 5698 + 5912 + (id_mue - id_tqk - 5095))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vzjs[id_zfe][id_hkp] + id_yhp, id_xnv[id_djes + 8758][id_hcky] + 624, id_orq[id_sxp][id_zdi + 294] + 8417, id_ygck[id_xdlf] + (id_tyx) + 559 + (id_ompz - 4019))",
+      "h[i + 1][j + 1] = min(id_gjmk[id_obm][id_jul] + id_xdmw, id_wgq[id_dqyg + id_mbv][id_wjd] + 8156, id_lzod[id_hjiy][id_gajy + id_nml] + 698, id_wgi[id_sphw] + (5084) + 8072 + (8248 - id_gezv))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mbnf[id_rbld][id_kbqt] + id_zyuo, id_rfv[id_lqr + 2682][id_royn] + 8726, id_oxd[id_jwm] + 426, id_ezvn + id_onk + 1012 + (id_kxz))",
+      "h[i + 1][j + 1] = min(id_aok[id_tvpi][id_wda] + id_bugn, id_hrgk[id_lwc + id_qpr][id_fdc] + 2079, id_dym[5609] + 6864, 6157 + 7197 + 8534 + (7554))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jgel[id_vntb][id_qxlw] + id_iea, id_uvho[id_bukf + 4015][id_uhz] + 5816, id_ahf[id_ptec][id_wym + 7961] + 8320, id_wyj + 4418 + (id_qpyz - 4884))",
+      "h[i + 1][j + 1] = min(id_gyr[id_lxi][id_ygs] + id_ptqj, id_olh[id_drk + id_eaxy][id_bpx] + 1761, id_ifav[id_hsqu][id_uwha + 7923] + 5628, 459 + id_jdoe + (4619 - id_zfbp))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ojkv[id_ehuo] + id_gdj, id_hvqx[id_mny + 5963][id_rdx] + 7393, id_bmc[id_dmcf][id_bjx + 9090] + 5353, id_fux[id_ocsm] + (id_luqw) + 4576 + (id_dzri))",
+      "h[i + 1][j + 1] = min(id_csm[id_trey] + id_rwmj, id_utq[id_qxa + id_avrw][id_dmln] + 4367, id_cvh[id_gjvw][id_kqz + id_xjpv] + 7384, id_fayp[id_viw] + (2704) + 7139 + (4099))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jgb[id_vnm][id_sqxv] + id_rnv, id_qetm[id_isxt + 4658][id_xzyu] + 1165, id_aidf[id_hlw][id_jwh + 3215] + 7585, id_vtsz + id_rclw + 4824 + (id_tfar - id_vslb - 400))",
+      "h[i + 1][j + 1] = min(id_bmup[id_iyqk][id_brgx] + id_lzhv, id_xagt[id_fso + id_sedq][id_gna] + 154, id_wpcv[id_knv][id_jnq + 1307] + 6201, 9665 + 1752 + 3056 + (id_kogh - id_jshk - 288))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mcqg[id_udoy][id_zdp] + id_rigz, id_gwya[id_bgu][id_yzb] + 4255, id_btw[id_zqkd][id_dxm + 4565] + 4330, id_bum + 1940 + (id_unr - 7462))",
+      "h[i + 1][j + 1] = min(id_zvsq[id_oqd][id_jng] + id_cyt, id_xogq[5170][id_pah] + 482, id_gmh[id_jert][id_ptr + 6491] + 8670, 6679 + id_qkne + (1017 - id_caz))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mluz[id_oeqm] + id_xun, id_avu[id_dhn][id_dfb] + 6088, id_ziy[id_uzr][id_qnr + 2388] + 8501, id_brq[id_tcr] + (id_gtcp) + 4831 + (id_pzq - id_tck - 4307))",
+      "h[i + 1][j + 1] = min(id_jkn[id_hrme] + id_gpy, id_ejz[5149][id_ycds] + 1131, id_ehwa[id_bos][id_bpgr + id_etqb] + 8054, id_chp[id_poys] + (2021) + 4872 + (id_ezi - id_qcz - 7612))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_cdrp[id_tvgj] + id_gvu, id_bdhv[id_kjpl] + 3724, id_guqw[id_kwhp][id_irn + 7711] + 1640, id_hgn + 1966 + (id_anq - id_srij - 2773))",
+      "h[i + 1][j + 1] = min(id_twv[id_fet] + id_ceb, id_yuwv[id_grta] + 312, id_pmeq[id_xydk][id_tie + id_bzq] + 8619, 4553 + id_eja + (id_msa - id_bgfy - 2885))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_nvsc[id_uxwh] + id_rsk, id_jyos[id_srg] + 7883, id_zhn[id_kor][id_sfb + 5657] + 6407, id_mykp + 8828 + (id_fyul - 3856))",
+      "h[i + 1][j + 1] = min(id_nty[id_ckg] + id_tek, id_ramt[id_fnvb] + 5389, id_qbi[id_unl][id_jeq + id_osn] + 2675, 6399 + id_qedh + (8641 - id_aost))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_okl[id_abn][id_kwod] + id_vdm, id_ecnt[id_hqd + 4373][id_ptgk] + 355, id_ipf[id_hzje][id_lcdq + 6645] + 1861, id_cfv + id_wya + 2884 + (id_cbv))",
+      "h[i + 1][j + 1] = min(id_xlmk[id_ywcl][id_msd] + id_dypl, id_arsg[id_xhtz + id_pka][id_jioc] + 2419, id_pydr[id_adz][id_oimh + id_rsnp] + 9048, 7557 + 6165 + 1065 + (7664))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ryc[id_qhp][id_hsc] + id_yilj, id_wrgn[id_bit][id_vyh] + 4400, id_bafz[id_aex] + 7392, id_tdbg + id_iof + 2822 + (id_uedj - id_gktd - 9050))",
+      "h[i + 1][j + 1] = min(id_tgrj[id_xbr][id_sork] + id_pyvr, id_jqk[5427][id_zsc] + 745, id_wzoj[380] + 7115, 3806 + 8114 + 3753 + (id_lkrw - id_qwob - 7778))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_qdwx[id_zduf][id_kduy] + id_gct, id_pby[id_mpr] + 8084, id_nof[id_zkg][id_mah + 3661] + 3703, id_pfq + id_dwoa + 5610 + (id_houx - id_wrc - 7355))",
+      "h[i + 1][j + 1] = min(id_lji[id_xaiw][id_fqyx] + id_ryld, id_rai[id_rjsp] + 3101, id_iaml[id_niwp][id_lzv + 5286] + 3839, 4901 + 1650 + 8932 + (id_oav - id_lef - 645))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hprn[id_jes] + id_lfdc, id_bhu[id_rgya][id_sdy] + 8911, id_xnd[id_acy][id_lszo + 1820] + 3102, id_iysq + 6519 + (id_shet))",
+      "h[i + 1][j + 1] = min(id_maj[id_rglk] + id_nurf, id_bpy[4366][id_tdnz] + 7619, id_sbh[id_vtw][id_vafl + 1937] + 8758, 6600 + id_muy + (9265))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jxfz[id_law][id_wjyt] + id_bke, id_wqte[id_frm] + 8562, id_bqh[id_gnt][id_ejcq + 7227] + 9371, id_ndu + id_uyz + 57 + (id_fwvj - 3241))",
+      "h[i + 1][j + 1] = min(id_szxe[id_xsn][id_hboy] + id_vql, id_xsp[id_dqxf] + 728, id_pne[id_dxwa][id_vei + 7436] + 2820, 9283 + 8372 + 4193 + (3928 - id_xtdq))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_zhv[id_vey] + id_gqjl, id_wabv[id_zhlr + 2918][id_mfhg] + 380, id_its[id_pxv][id_jika + 2536] + 9349, id_gkwo + 8411 + (id_hom - 6859))",
+      "h[i + 1][j + 1] = min(id_lxb[id_fnek] + id_yuo, id_ojlz[id_krad + id_rek][id_bwu] + 8020, id_noe[id_xfil][id_swoc + id_buef] + 1191, 5880 + id_adhg + (809 - id_auv))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_sri[id_vigc][id_drjk] + id_mdq, id_fkzb[id_bkri] + 8107, id_urxh[id_peqj][id_eabi + 5664] + 2885, id_kajs[id_kfab] + (id_zjm) + 2355 + (id_mwux))",
+      "h[i + 1][j + 1] = min(id_wuz[id_ohvs][id_dbn] + id_gquc, id_nka[id_tmv] + 1016, id_asn[id_lyu][id_hgeu + id_lmzf] + 3204, id_rhq[id_fhc] + (3402) + 9817 + (4223))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pus[id_wrf] + id_nyv, id_fewn[id_aqx] + 4886, id_mit[id_ger][id_tvs + 4360] + 520, id_dzm[id_reqg] + (id_eyls) + 6446 + (id_xrp))",
+      "h[i + 1][j + 1] = min(id_oqs[id_plxs] + id_phq, id_hxzy[id_fxvz] + 9594, id_lcty[id_vlu][id_lvcd + 1972] + 9689, id_lyiu[id_bwv] + (6305) + 2690 + (8797))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_xfg[id_udgm][id_oep] + id_pif, id_bhla[id_kful] + 5047, id_nfj[id_inp][id_zvwj + 8608] + 1277, id_tzx + 3228 + (id_ygx))",
+      "h[i + 1][j + 1] = min(id_ioz[id_btex][id_bjm] + id_gfh, id_ldn[id_uxmb] + 4150, id_sqxr[id_crb][id_ohq + id_ihe] + 1423, 557 + id_fvbp + (8039))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_tupo[id_gca][id_yfh] + id_qape, id_jbek[id_scb][id_kycw] + 3937, id_kaqn[id_gca][id_jfxs + 7606] + 5854, id_bwtj[id_niw] + (id_amzs) + 1206 + (id_eqg - id_yiwk - 1766))",
+      "h[i + 1][j + 1] = min(id_oje[id_xant][id_uirj] + id_jbi, id_zqk[2958][id_jadq] + 5709, id_uahk[id_rlz][id_mqxs + 2355] + 6716, id_wvf[id_yva] + (3603) + 2845 + (id_hga - id_ljeu - 6651))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_uwt[id_lkie][id_mxw] + id_kvhn, id_zdv[id_ibqc] + 8649, id_rbu[id_jdva][id_hyf + 8724] + 4866, id_pvr + 3773 + (id_cbx - 4857))",
+      "h[i + 1][j + 1] = min(id_xom[id_adlo][id_psk] + id_hrsx, id_ctnz[id_fqa] + 9668, id_mhc[id_mfr][id_wnch + 3594] + 5647, 6265 + id_uobf + (705 - id_qto))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_wty[id_skny] + id_fla, id_gov[id_ogrp][id_xfjp] + 3573, id_mtde[id_wlcn] + 2737, id_apw + id_ucw + 17 + (id_bweu - id_fbo - 9553))",
+      "h[i + 1][j + 1] = min(id_vwnz[id_gsah] + id_uzp, id_nwc[9738][id_fgsl] + 3985, id_ldu[28] + 685, 8309 + 2377 + 1807 + (id_yir - id_rvo - 2862))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_lmze[id_zwj] + id_qcd, id_amo[id_ntfe + 7128][id_dihb] + 4768, id_xrz[id_cbq][id_siwo + 963] + 1332, id_gcxa + id_qyjc + 7653 + (id_hjl - id_uzls - 7458))",
+      "h[i + 1][j + 1] = min(id_cnu[id_nber] + id_vhg, id_itao[id_gnp + id_upm][id_oxke] + 1172, id_sri[id_tphm][id_cda + id_izo] + 8003, 1400 + 4207 + 6096 + (id_ivzu - id_zld - 4465))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_guo[id_qfz][id_kxj] + id_wvy, id_iul[id_xqs + 3410][id_pctm] + 1268, id_rsbk[id_drz][id_fdb + 7897] + 4423, id_ihgp[id_frt] + (id_ocm) + 8072 + (id_oamg))",
+      "h[i + 1][j + 1] = min(id_ksnv[id_qtyz][id_daco] + id_iuc, id_bzh[id_xfwv + id_xlcy][id_fwz] + 3467, id_zhtu[id_eqz][id_yohw + id_eszm] + 8977, id_sorp[id_fbx] + (5192) + 4126 + (987))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_nexj[id_okzc] + id_aio, id_oqb[id_vby + 5861][id_hdnr] + 391, id_hcxs[id_dzke][id_lbif + 1676] + 9478, id_sklp + 3327 + (id_yvke))",
+      "h[i + 1][j + 1] = min(id_kwrg[id_abyh] + id_let, id_sqdi[id_uopm + id_jtcb][id_amid] + 8642, id_tar[id_xnqp][id_kzrl + id_uop] + 8456, 6961 + id_pbt + (7686))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_szo[id_ploe][id_djca] + id_ihuv, id_vbz[id_wyut + 3723][id_uebg] + 3968, id_bfk[id_qeyj][id_blhf + 9485] + 1284, id_pvn + 4967 + (id_acqt))",
+      "h[i + 1][j + 1] = min(id_hclr[id_njrf][id_uhcw] + id_rky, id_fcyi[id_ixw + id_wfa][id_fydb] + 4580, id_iwl[id_mjkt][id_ugy + 7569] + 5794, 5685 + id_hbya + (5967))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_bku[id_ndbm] + id_zlf, id_fbrq[id_wot] + 3247, id_vyp[id_txdn][id_yukb + 4444] + 8818, id_lbkj[id_tjxb] + (id_tyc) + 7492 + (id_jez - id_oysm - 6726))",
+      "h[i + 1][j + 1] = min(id_gow[id_utsj] + id_htq, id_rmb[id_vbiu] + 1344, id_maiz[id_vtol][id_gcay + id_ohn] + 3807, id_aht[id_vef] + (7252) + 6418 + (id_aut - id_spx - 5753))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_zvry[id_iay][id_bat] + id_rthm, id_ybu[id_gczy][id_knx] + 4102, id_npj[id_hcm][id_hes + 3799] + 7820, id_pvz + id_rmy + 9455 + (id_pzt - id_nxt - 9916))",
+      "h[i + 1][j + 1] = min(id_psl[id_ozs][id_ync] + id_nsvo, id_hbf[1823][id_pyi] + 9475, id_qcji[id_vdz][id_clfm + 1399] + 2876, 8063 + 5287 + 6329 + (id_tbs - id_qubl - 2864))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_mchk[id_pci][id_qjd] + id_ilkw, id_jmd[id_hzi] + 8240, id_onw[id_twph][id_ezm + 2264] + 1230, id_zhc[id_kwe] + (id_drtq) + 2336 + (id_biak - 9810))",
+      "h[i + 1][j + 1] = min(id_urmc[id_euqt][id_lkmv] + id_lzb, id_saz[id_xuv] + 1478, id_kca[id_hzg][id_rln + id_reh] + 807, id_hqjg[id_weh] + (1377) + 6054 + (3939 - id_bodg))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_dflj[id_rsx][id_nbk] + id_dln, id_vdmk[id_zcj] + 3967, id_okp[id_kcxg][id_nvj + 5938] + 1505, id_pkxb + id_txn + 2658 + (id_kjez))",
+      "h[i + 1][j + 1] = min(id_cto[id_rglu][id_tin] + id_zfj, id_yes[id_trxy] + 5517, id_vfk[id_esa][id_taqi + 5712] + 7397, 7785 + 9758 + 7956 + (1877))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hel[id_vlfb][id_iyp] + id_jngc, id_ukfg[id_xjoa] + 2853, id_wxb[id_tueo] + 5309, id_ide + 1465 + (id_uae))",
+      "h[i + 1][j + 1] = min(id_ytr[id_tpsm][id_hoxq] + id_lqc, id_tsyf[id_zeqk] + 6349, id_sltg[6486] + 333, 155 + id_pycd + (7904))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_gcv[id_fzld][id_zgm] + id_iudj, id_ihez[id_faix][id_nlpe] + 7796, id_dku[id_nic][id_ruot + 9577] + 383, id_fsn + id_aqp + 4341 + (id_kvw - 3852))",
+      "h[i + 1][j + 1] = min(id_dif[id_mdt][id_wgjr] + id_pyb, id_ohs[3661][id_psq] + 9080, id_ixnu[id_tzr][id_lqh + 9066] + 5955, 2311 + 8032 + 990 + (8002 - id_coma))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_emn[id_tiky] + id_niyf, id_tcey[id_xrd + 9586][id_vos] + 4167, id_mtfj[id_etx] + 2156, id_fnvo + id_poc + 8463 + (id_lywr - id_tcve - 8733))",
+      "h[i + 1][j + 1] = min(id_kgcj[id_kgyb] + id_xyg, id_niu[id_zbam + id_usz][id_gut] + 893, id_uqx[8050] + 5232, 856 + 7855 + 3810 + (id_gxl - id_kbr - 8282))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_lxas[id_tkeq] + id_ytfw, id_cng[id_farc] + 37, id_lun[id_ysi][id_how + 2443] + 1762, id_tsb + id_qjos + 4197 + (id_ibo - 4740))",
+      "h[i + 1][j + 1] = min(id_gid[id_qer] + id_kayu, id_poq[id_qxo] + 2457, id_mjta[id_feyr][id_rnc + id_dpfn] + 1501, 267 + 6173 + 5071 + (5596 - id_owc))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_jks[id_plq] + id_cqp, id_fwe[id_isre] + 9481, id_ckbz[id_ntyo][id_rlj + 1317] + 8030, id_deh + id_skij + 8721 + (id_ubk - 4026))",
+      "h[i + 1][j + 1] = min(id_xesg[id_klrd] + id_kcia, id_fgb[id_cyi] + 5926, id_nhm[id_apm][id_grqt + 1476] + 8395, 6546 + 2528 + 223 + (9596 - id_eqdf))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_lgtb[id_isrg] + id_vkst, id_tjmk[id_ags][id_svyb] + 5181, id_kxv[id_jxz][id_iyc + 4660] + 1962, id_fjg[id_lvqb] + (id_jmxw) + 5749 + (id_xgc))",
+      "h[i + 1][j + 1] = min(id_dvfh[id_pgd] + id_rvlj, id_xckw[1967][id_wvid] + 1649, id_uznm[id_yhl][id_jrv + id_ptn] + 7032, id_znd[id_hzqc] + (4924) + 4238 + (583))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ixf[id_xkr][id_xrf] + id_hupz, id_pfq[id_mwc] + 6024, id_wxm[id_acwf] + 388, id_jbr + 9858 + (id_dxin - id_aygf - 3466))",
+      "h[i + 1][j + 1] = min(id_lyke[id_whv][id_jsif] + id_qdvo, id_xdp[id_bua] + 2483, id_gut[4784] + 2623, 4085 + id_dzhq + (id_zkmd - id_qrpt - 7843))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_fdiv[id_kgnb][id_lscu] + id_mca, id_xtr[id_xen] + 3278, id_ndg[id_twh][id_kpz + 4416] + 7743, id_othd + 1598 + (id_egum - id_yzp - 7923))",
+      "h[i + 1][j + 1] = min(id_ymcl[id_rwp][id_jef] + id_rlhj, id_osq[id_has] + 853, id_dgy[id_ktfz][id_eps + id_ojb] + 8730, 6422 + id_bjxs + (id_xvk - id_hrtg - 6898))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_dsvt[id_qmu][id_okd] + id_tce, id_oayr[id_txi + 8778][id_wmkf] + 313, id_feh[id_negb][id_hui + 7587] + 8161, id_cfml[id_ack] + (id_xkqn) + 5784 + (id_qli))",
+      "h[i + 1][j + 1] = min(id_qtvr[id_onhb][id_guq] + id_jyxa, id_qtz[id_pgcj + id_tier][id_gil] + 4332, id_lzkw[id_imwx][id_ypkc + 9799] + 4199, id_kfo[id_vaw] + (385) + 1702 + (1590))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vbh[id_eox] + id_rvoe, id_iql[id_ywdp + 9186][id_jvie] + 852, id_qlpd[id_zehn] + 728, id_itq[id_xea] + (id_mkg) + 1861 + (id_hiz - id_cel - 8575))",
+      "h[i + 1][j + 1] = min(id_hix[id_yqtc] + id_vti, id_eqs[id_shac + id_rbyw][id_kuqa] + 3026, id_cxrb[5308] + 7475, id_zbxk[id_ugjm] + (5243) + 4323 + (id_mew - id_cqzk - 181))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_nbt[id_cid] + id_taer, id_vaml[id_ujs][id_amg] + 542, id_lvpi[id_mbe][id_ygrt + 1676] + 3492, id_tna + 217 + (id_wmia))",
+      "h[i + 1][j + 1] = min(id_glq[id_rpb] + id_tyn, id_glpu[7268][id_qhrp] + 1064, id_iscm[id_hjin][id_yxf + id_hmn] + 1419, 8905 + id_ehsw + (9666))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vimr[id_juh][id_ebq] + id_rfok, id_pxjl[id_rup] + 4064, id_mdl[id_tgi] + 8676, id_byld[id_fhg] + (id_rlab) + 8220 + (id_dqz - id_ueh - 5651))",
+      "h[i + 1][j + 1] = min(id_mwve[id_waui][id_ejv] + id_obl, id_sli[id_rkcy] + 1604, id_xibo[3452] + 7228, id_epf[id_zrqc] + (2694) + 387 + (id_arxz - id_vfdo - 2389))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_yxb[id_dzry][id_aehz] + id_uerz, id_gxaf[id_sejk] + 1848, id_kwdj[id_qeog][id_tqg + 9145] + 2384, id_asg + id_pej + 8944 + (id_fmte - id_mol - 5011))",
+      "h[i + 1][j + 1] = min(id_pdbf[id_yfs][id_zhj] + id_egqf, id_gxch[id_xhq] + 8234, id_ygu[id_csp][id_iqv + id_zfp] + 3705, 6197 + 1103 + 9091 + (id_azw - id_pyb - 2589))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_skr[id_qytg][id_kwen] + id_kug, id_pdky[id_qio + 5534][id_djbg] + 4610, id_gdwi[id_oxw][id_usf + 5202] + 6351, id_wan + id_gkwz + 4556 + (id_gzi))",
+      "h[i + 1][j + 1] = min(id_txry[id_oixt][id_avcj] + id_mqn, id_rjs[id_fwqe + id_mfly][id_qgyx] + 771, id_elh[id_nkfd][id_qzw + 2210] + 912, 1699 + 8054 + 1904 + (7236))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_fyhn[id_gxbe][id_bom] + id_ceqw, id_qcne[id_szl + 5893][id_bwh] + 9954, id_slc[id_vpk][id_xfa + 8338] + 7604, id_tbn[id_wob] + (id_pynd) + 2047 + (id_fbru - id_olz - 8039))",
+      "h[i + 1][j + 1] = min(id_qwz[id_qov][id_cvr] + id_emt, id_praz[id_cby + id_cyab][id_mul] + 8386, id_abje[id_dfm][id_qzf + id_kec] + 8200, id_pdho[id_fpam] + (5079) + 9163 + (id_meoy - id_fri - 4474))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_cdu[id_vyo][id_axkn] + id_hvb, id_xukc[id_iab] + 1230, id_fhb[id_pjmo] + 8228, id_exg[id_fdr] + (id_jxgo) + 8913 + (id_blx))",
+      "h[i + 1][j + 1] = min(id_ydm[id_tyd][id_snzo] + id_oaz, id_qmct[id_dtvb] + 9023, id_epf[2759] + 5051, id_imfx[id_mcy] + (6291) + 6478 + (4216))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_eqb[id_shy][id_svqb] + id_vdc, id_hgjr[id_hnj] + 1669, id_ygjt[id_nfy][id_vjhd + 3967] + 3873, id_yavb[id_ckzg] + (id_lzdm) + 3290 + (id_xkpb - id_ogis - 1299))",
+      "h[i + 1][j + 1] = min(id_nfw[id_ksg][id_wdb] + id_pnc, id_qbig[id_vhgz] + 1577, id_qbfa[id_ugjt][id_bcd + id_zsrh] + 4657, id_zlj[id_bcjy] + (7823) + 5477 + (id_nmy - id_tgkq - 2303))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pthn[id_aquw] + id_spa, id_oyst[id_nkoa + 636][id_hqyz] + 2487, id_ohzy[id_bitr][id_nilh + 9963] + 7416, id_dha[id_imjo] + (id_cfpe) + 4476 + (id_bmc - 7340))",
+      "h[i + 1][j + 1] = min(id_wtoh[id_oqvc] + id_owp, id_eor[id_ewxg + id_lnq][id_ikht] + 3732, id_nyu[id_szki][id_yjr + id_nod] + 2391, id_zea[id_zlx] + (9704) + 8691 + (1392 - id_vrmx))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_urci[id_szan][id_mnks] + id_mxq, id_nom[id_rtci + 8692][id_jpd] + 7971, id_pemi[id_zhms][id_lgr + 2881] + 1820, id_cigo + 9005 + (id_dui - id_hml - 2616))",
+      "h[i + 1][j + 1] = min(id_khuz[id_mxag][id_idzs] + id_xiyj, id_pwjy[id_junb + id_edc][id_wvhe] + 9155, id_pgy[id_nqgl][id_muvj + id_tkd] + 8516, 6972 + id_gtjl + (id_cln - id_nvoe - 8858))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_rmxc[id_ufwl][id_xweu] + id_wxf, id_udrl[id_xow] + 7426, id_vseq[id_hve][id_gud + 5793] + 6982, id_teu[id_fqh] + (id_bax) + 9143 + (id_lxph - id_bpwv - 31))",
+      "h[i + 1][j + 1] = min(id_cydv[id_olku][id_vrl] + id_ozya, id_cdu[id_ydsu] + 1787, id_euc[id_tfc][id_mvos + 1536] + 2105, id_mplk[id_ikoa] + (4006) + 1210 + (id_zabq - id_ilc - 6626))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_kmg[id_sgb][id_hpd] + id_mqsi, id_mnry[id_tch][id_buf] + 5327, id_gyp[id_osba] + 2939, id_zmo + 3169 + (id_wzxi - id_jstb - 9689))",
+      "h[i + 1][j + 1] = min(id_uot[id_yadt][id_ayn] + id_uic, id_tao[6814][id_iwg] + 9728, id_zgs[9763] + 3363, 3377 + id_tpoe + (id_hmw - id_vqhy - 8969))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_rnek[id_act][id_pswv] + id_fmur, id_eisv[id_heuy + 9377][id_skj] + 2951, id_umj[id_ztb][id_sey + 985] + 2363, id_wjlo + 6334 + (id_kiac))",
+      "h[i + 1][j + 1] = min(id_xok[id_tnuk][id_yeu] + id_sxm, id_zsmk[id_pyx + id_chsd][id_owxp] + 2284, id_gia[id_icsg][id_wxg + id_yhvo] + 5275, 3459 + id_nhv + (1422))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_wnd[id_vle][id_egrm] + id_fvtg, id_sye[id_azhn] + 4743, id_ojf[id_oesp][id_yqjk + 4679] + 7798, id_zxeh + 1561 + (id_tova - id_xpm - 2113))",
+      "h[i + 1][j + 1] = min(id_qjwh[id_mxj][id_yqv] + id_dwgu, id_qwmo[id_qhi] + 1991, id_bwm[id_mchb][id_tif + 4440] + 1187, 7083 + id_dvi + (id_hke - id_kmgs - 4069))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_csf[id_cndg] + id_oqbx, id_zugp[id_cbpi] + 952, id_lceq[id_hume] + 301, id_hwno + id_kqz + 8644 + (id_jnp - id_lwi - 218))",
+      "h[i + 1][j + 1] = min(id_pji[id_pzo] + id_azcu, id_bgl[id_nrji] + 3591, id_whqg[9123] + 3057, 1960 + 3960 + 6023 + (id_arpm - id_fbp - 9083))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pgd[id_xlm][id_kvqd] + id_dqa, id_enwk[id_mhgy][id_gty] + 8821, id_pyo[id_dyx] + 3906, id_svfl[id_izwj] + (id_zjsi) + 5648 + (id_qbp - 3495))",
+      "h[i + 1][j + 1] = min(id_sph[id_ghfs][id_gkl] + id_olpt, id_elzu[2635][id_wpl] + 7113, id_qba[3968] + 6710, id_ljn[id_rkce] + (7130) + 9220 + (812 - id_rpt))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_tcr[id_sbw] + id_jsz, id_vziw[id_wsgf + 1776][id_zned] + 2939, id_lin[id_bcf] + 6066, id_owc + 9605 + (id_phwr - id_lhgy - 8912))",
+      "h[i + 1][j + 1] = min(id_dvkn[id_fiy] + id_iyf, id_wnls[id_rasu + id_hklf][id_iyo] + 7289, id_rosa[3641] + 1578, 8615 + id_xjia + (id_vtou - id_buy - 6409))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_vjyh[id_xmz][id_ndt] + id_ybn, id_vbf[id_cjs][id_ahf] + 8499, id_jvqb[id_byh][id_bach + 5864] + 8422, id_vhpr + id_lkri + 2245 + (id_fblz - id_prsi - 288))",
+      "h[i + 1][j + 1] = min(id_gpr[id_agb][id_ucwk] + id_vzcl, id_pcni[8026][id_vun] + 9473, id_gfed[id_bzk][id_yjg + id_eok] + 7864, 7491 + 2805 + 8928 + (id_mgz - id_znte - 5356))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_usl[id_yic][id_kap] + id_srom, id_rzq[id_mzed][id_gmu] + 1624, id_auqz[id_zlsj][id_qdts + 7633] + 3103, id_byf + 6240 + (id_bhu - id_anr - 9330))",
+      "h[i + 1][j + 1] = min(id_imkz[id_cwlz][id_bhlz] + id_hvrp, id_cyb[4208][id_byv] + 9986, id_xuah[id_jbxu][id_kqd + id_djt] + 435, 853 + id_eauy + (id_vkde - id_hgpy - 833))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_qdeo[id_azjc][id_lpx] + id_vac, id_pbe[id_vewk][id_cenl] + 2577, id_erwb[id_xqf][id_ejk + 4579] + 7496, id_dzfh[id_zbj] + (id_efr) + 2388 + (id_cve - id_pqfh - 297))",
+      "h[i + 1][j + 1] = min(id_vndw[id_ralf][id_rqnx] + id_lpe, id_txbg[9174][id_kbw] + 8172, id_lqv[id_seq][id_hzc + id_qget] + 448, id_swz[id_esij] + (9490) + 8271 + (id_kse - id_seyh - 3496))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_gxp[id_glic] + id_zyem, id_knz[id_wkjl] + 5822, id_ybg[id_qay][id_lcfa + 8629] + 8505, id_omql + id_fbt + 2697 + (id_qvop))",
+      "h[i + 1][j + 1] = min(id_ikgh[id_armu] + id_oqp, id_xuey[id_ixwj] + 9135, id_rcs[id_atbi][id_blyk + 4516] + 1878, 4904 + 9036 + 2809 + (6200))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_pjog[id_wrgj][id_ysmk] + id_nheb, id_cbq[id_nmf] + 7051, id_cvi[id_roqi][id_fes + 6212] + 5941, id_jauo[id_irg] + (id_sov) + 6444 + (id_lenr - 9031))",
+      "h[i + 1][j + 1] = min(id_axr[id_tsub][id_poxt] + id_oyuz, id_pbcn[id_qfa] + 3742, id_sto[id_fgly][id_yfkx + 1260] + 1424, id_jgd[id_pvib] + (7607) + 5226 + (8553 - id_duma))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_xjy[id_zqf] + id_wvox, id_klfc[id_qkbw + 4914][id_gprn] + 3500, id_zfnh[id_freb][id_zkum + 6528] + 8142, id_coag + 4180 + (id_bzw - id_iyn - 3432))",
+      "h[i + 1][j + 1] = min(id_yqi[id_bvf] + id_ghu, id_ioc[id_agle + id_qtou][id_urlf] + 2895, id_ldt[id_tqe][id_jzr + id_ajct] + 8143, 9683 + id_vow + (id_jma - id_szxp - 7185))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_azu[id_oge] + id_lmjq, id_lhg[id_ieyv][id_xjb] + 3745, id_bmqo[id_tqe][id_bdze + 4505] + 1244, id_kzxn[id_udhv] + (id_ica) + 2862 + (id_flw - 4229))",
+      "h[i + 1][j + 1] = min(id_bcr[id_ytog] + id_sqmb, id_qorn[7732][id_nbar] + 15, id_nkwr[id_uhs][id_kwo + 5311] + 5700, id_iasx[id_gvln] + (2757) + 8896 + (4049 - id_ksq))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_zkv[id_axgw] + id_erg, id_kwc[id_rhoy + 6436][id_luc] + 8867, id_brnd[id_xlvj][id_wkby + 8990] + 4194, id_awk[id_igy] + (id_qbs) + 6261 + (id_hls - id_lio - 6687))",
+      "h[i + 1][j + 1] = min(id_egzf[id_zxnf] + id_vkfh, id_gui[id_hpig + id_qvd][id_hbw] + 3366, id_mwh[id_mcw][id_ruc + 4207] + 6820, id_wrhu[id_whtl] + (4328) + 5883 + (id_yir - id_uyst - 5008))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_flgc[id_osck] + id_tjpn, id_yqjr[id_ufnw] + 7726, id_uvyf[id_dspj][id_ehgr + 7414] + 4195, id_nxu + 4394 + (id_txn))",
+      "h[i + 1][j + 1] = min(id_ouz[id_jefl] + id_mqvc, id_qux[id_kua] + 1417, id_dlt[id_ebmv][id_yuv + id_vuih] + 2895, 4492 + id_ome + (4392))"
+    ]
+  ],
+  "problematic_node_id": 14
+}

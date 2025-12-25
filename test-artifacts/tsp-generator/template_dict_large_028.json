@@ -1,0 +1,22 @@
+{
+  "template_origin": "while (not class_var.bounded_string(ab) or (len(ab) > 2 and ab[0] == ab[1] == ab[2] and ab[-2] != ab[0] and ab[-3] != ab[0])):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "while_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1
+  ],
+  "problematic_node_type": "parenthesized_expression",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "while (id_crlm):\n    pass",
+      "while (909):\n    pass"
+    ],
+    [
+      "while (id_okj or id_kix):\n    pass",
+      "while (2847 or 8602):\n    pass"
+    ]
+  ],
+  "problematic_node_id": 2
+}

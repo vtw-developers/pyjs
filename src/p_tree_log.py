@@ -7,7 +7,7 @@ The information is stored in a tree-like structure.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import d_utils
 
@@ -592,6 +592,7 @@ class RuleApplicationPhase(BaseLogNode):
 
 @dataclass
 class RuleLearnRec(BaseLogNode):
+  __class_name__: str = 'RuleLearnRec'
   get_ref_trans: Optional[GetRefTrans] = None
   # stms: Optional[int] = None  # in BaseLogNode
   # etms: Optional[int] = None  # in BaseLogNode
@@ -755,7 +756,47 @@ class NodeTransIter(BaseLogNode):
 
 
 @dataclass
+class RuleLearnSnp(BaseLogNode):
+  __class_name__: str = 'RuleLearnSnp'
+  snippet: Optional[str] = None
+  tsps: List[TSP] = field(default_factory=list)
+  # stms: Optional[int] = None  # in BaseLogNode
+  # etms: Optional[int] = None  # in BaseLogNode
+  # success: Optional[bool] = None  # in BaseLogNode
+  # reason: Optional[str] = None  # in BaseLogNode
+
+  def get_num_input_tokens(self) -> int:
+    total_tokens = 0
+    for tsp in self.tsps:
+      total_tokens += tsp.get_num_input_tokens()
+    return total_tokens
+
+  def get_num_output_tokens(self) -> int:
+    total_tokens = 0
+    for tsp in self.tsps:
+      total_tokens += tsp.get_num_output_tokens()
+    return total_tokens
+
+  @classmethod
+  def from_dict(cls, obj: dict) -> 'RuleLearnStd':
+    snippet = obj.get('snippet', None)
+    tsps = []
+    for tsp_dict in obj.get('tsps', []):
+      tsp_obj = TSP.from_dict(tsp_dict)
+      tsps.append(tsp_obj)
+    # BaseLogNode
+    stms = obj.get('stms', None)
+    etms = obj.get('etms', None)
+    success = obj.get('success', None)
+    reason = obj.get('reason', None)
+    return cls(snippet=snippet, tsps=tsps,
+               success=success, reason=reason,
+               stms=stms, etms=etms)
+
+
+@dataclass
 class RuleLearnStd(BaseLogNode):
+  __class_name__: str = 'RuleLearnStd'
   node_trans_iters: List[NodeTransIter] = field(default_factory=list)
   # stms: Optional[int] = None  # in BaseLogNode
   # etms: Optional[int] = None  # in BaseLogNode
@@ -792,6 +833,7 @@ class RuleLearnStd(BaseLogNode):
 
 @dataclass
 class StatNodeVal(BaseLogNode):
+  __class_name__: str = 'StatNodeVal'
   v1_enough_rules: Optional[bool] = None
   v2_expr_valid_ok: Optional[bool] = None
   v2_expr_valid_stms: Optional[int] = None
@@ -828,56 +870,6 @@ class StatNodeVal(BaseLogNode):
                stms=stms, etms=etms,
                success=success, reason=reason)
 
-@dataclass
-class StatNodeIter(BaseLogNode):
-  id: Optional[int] = None
-  stat_node_val: Optional[StatNodeVal] = None
-  stat_node_learn_std: Optional[RuleLearnStd] = None
-  stat_node_learn_rec: Optional[RuleLearnRec] = None
-  # stms: Optional[int] = None  # in BaseLogNode
-  # etms: Optional[int] = None  # in BaseLogNode
-  # success: Optional[bool] = None  # in BaseLogNode
-  # reason: Optional[str] = None  # in BaseLogNode
-
-  def get_num_input_tokens(self) -> int:
-    total_tokens = 0
-    if self.stat_node_learn_std is not None:
-      total_tokens += self.stat_node_learn_std.get_num_input_tokens()
-    if self.stat_node_learn_rec is not None:
-      total_tokens += self.stat_node_learn_rec.get_num_input_tokens()
-    return total_tokens
-
-  def get_num_output_tokens(self) -> int:
-    total_tokens = 0
-    if self.stat_node_learn_std is not None:
-      total_tokens += self.stat_node_learn_std.get_num_output_tokens()
-    if self.stat_node_learn_rec is not None:
-      total_tokens += self.stat_node_learn_rec.get_num_output_tokens()
-    return total_tokens
-
-  @classmethod
-  def from_dict(cls, obj: dict) -> 'StatNodeIter':
-    id_ = obj.get('id', None)
-    stat_node_val = None
-    if 'stat_node_val' in obj:
-      stat_node_val = StatNodeVal.from_dict(obj['stat_node_val'])
-    stat_node_learn_std = None
-    if 'stat_node_learn_std' in obj:
-      stat_node_learn_std = RuleLearnStd.from_dict(obj['stat_node_learn_std'])
-    stat_node_learn_rec = None
-    if 'stat_node_learn_rec' in obj:
-      stat_node_learn_rec = RuleLearnRec.from_dict(obj['stat_node_learn_rec'])
-    # BaseLogNode
-    stms = obj.get('stms', None)
-    etms = obj.get('etms', None)
-    success = obj.get('success', None)
-    reason = obj.get('reason', None)
-    return cls(id=id_, stat_node_val=stat_node_val,
-               stat_node_learn_std=stat_node_learn_std,
-               stat_node_learn_rec=stat_node_learn_rec,
-               stms=stms, etms=etms,
-               success=success, reason=reason)
-
 
 @dataclass
 class StatNode(BaseLogNode):
@@ -886,7 +878,7 @@ class StatNode(BaseLogNode):
   node_text: Optional[str] = None
   pre_context: Optional[str] = None
   simple_ntext: Optional[str] = None
-  stat_node_iters: List[StatNodeIter] = field(default_factory=list)
+  val_learn_iters: List[Union[StatNodeVal, RuleLearnStd, RuleLearnRec, RuleLearnSnp]] = field(default_factory=list)
   # stms: Optional[int] = None  # in BaseLogNode
   # etms: Optional[int] = None  # in BaseLogNode
   # success: Optional[bool] = None  # in BaseLogNode
@@ -894,14 +886,24 @@ class StatNode(BaseLogNode):
 
   def get_num_input_tokens(self) -> int:
     total_tokens = 0
-    for stat_node_iter in self.stat_node_iters:
-      total_tokens += stat_node_iter.get_num_input_tokens()
+    for elem in self.val_learn_iters:
+      if isinstance(elem, RuleLearnStd):
+        total_tokens += elem.get_num_input_tokens()
+      elif isinstance(elem, RuleLearnRec):
+        total_tokens += elem.get_num_input_tokens()
+      elif isinstance(elem, RuleLearnSnp):
+        total_tokens += elem.get_num_input_tokens()
     return total_tokens
 
   def get_num_output_tokens(self) -> int:
     total_tokens = 0
-    for stat_node_iter in self.stat_node_iters:
-      total_tokens += stat_node_iter.get_num_output_tokens()
+    for elem in self.val_learn_iters:
+      if isinstance(elem, RuleLearnStd):
+        total_tokens += elem.get_num_output_tokens()
+      elif isinstance(elem, RuleLearnRec):
+        total_tokens += elem.get_num_output_tokens()
+      elif isinstance(elem, RuleLearnSnp):
+        total_tokens += elem.get_num_output_tokens()
     return total_tokens
 
   @classmethod
@@ -911,19 +913,30 @@ class StatNode(BaseLogNode):
     node_text = obj.get('node_text', None)
     pre_context = obj.get('pre_context', None)
     simple_ntext = obj.get('simple_ntext', None)
-    stat_node_iters = []
-    for sni_dict in obj.get('stat_node_iters', []):
-      sni_obj = StatNodeIter.from_dict(sni_dict)
-      stat_node_iters.append(sni_obj)
+    val_learn_iters = []
+    for vli_dict in obj.get('val_learn_iters', []):
+      # Determine the type of val_learn_iter and instantiate accordingly
+      if vli_dict['__class_name__'] == 'StatNodeVal':
+        vli_obj = StatNodeVal.from_dict(vli_dict)
+      elif vli_dict['__class_name__'] == 'RuleLearnSnp':
+        vli_obj = RuleLearnSnp.from_dict(vli_dict)
+      elif vli_dict['__class_name__'] == 'RuleLearnStd':
+        vli_obj = RuleLearnStd.from_dict(vli_dict)
+      elif vli_dict['__class_name__'] == 'RuleLearnRec':
+        vli_obj = RuleLearnRec.from_dict(vli_dict)
+      else:
+        raise ValueError('Unknown val_learn_iter type in StatNode')
+      val_learn_iters.append(vli_obj)
     # BaseLogNode
     stms = obj.get('stms', None)
     etms = obj.get('etms', None)
-    success = obj.get('success', False)
+    success = obj.get('success', None)
     reason = obj.get('reason', None)
     return cls(id=id_, node_id=node_id, node_text=node_text,
                pre_context=pre_context, simple_ntext=simple_ntext,
-               stat_node_iters=stat_node_iters,
-               stms=stms, etms=etms, success=success, reason=reason)
+               val_learn_iters=val_learn_iters,
+               stms=stms, etms=etms,
+               success=success, reason=reason)
 
 
 @dataclass

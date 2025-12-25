@@ -1,1 +1,0 @@
-l = int((length) / 2)

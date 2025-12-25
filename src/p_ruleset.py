@@ -8,6 +8,7 @@ import d_ast_parse
 import d_grammar_rules
 import p_visitor_py as pvpy
 import p_utils
+from p_config import Config
 
 
 logger = p_utils.setup_logger(__name__)
@@ -32,12 +33,13 @@ class TRuleBase(ABC):
     return self.to_rule_str()
 
   def __repr__(self):
+    # return repr(self.to_rule_str())  # for debugging
     return f'{self.__class__.__name__} {str(self.rule_parsed)}'
 
   def __eq__(self, obj) -> bool:
     if not isinstance(obj, TRuleBase):
       raise ValueError(f'Cannot use == with {type(obj)}')
-    return str(self.rule_parsed) == str(obj.rule_parsed)
+    return self.to_rule_str() == obj.to_rule_str()
 
   def get_matcher_signature(self) -> str:
     return str(self.rule_parsed['match'])
@@ -47,7 +49,7 @@ class TRuleBase(ABC):
     '''
     Parse a rule string into a rule_parsed dict.
     '''
-    rules_parsed, _ = d_grammar_rules.parse_analyze_rules(rule_str)
+    rules_parsed = d_grammar_rules.parse_analyze_rules_optim(rule_str)
     assert len(rules_parsed) == 1, f'Expected exactly one rule, got {len(rules_parsed)}'
     return rules_parsed[0]
 
@@ -202,7 +204,7 @@ class Ruleset:
     to be able to correctly translate a specific AST node.
     Verified rules are "guaranteed" to work for the matched AST.
     '''
-    self._verified_rules: Dict[str, TRuleBase] = {}
+    self._verified_rules: Dict[str, List[TRuleBase]] = {}
 
     '''
     Unverifiable rules are rules that could not be verified
@@ -281,28 +283,27 @@ class Ruleset:
       'Rule must be in self.rules to be added to verified rules'
 
     '''
-    Check if a verified rule for encoded_ast already exists.
-    Current policy, if it exists and is different, log a warning and ignore the new rule.
-    TODO policy: update only if different ASTs?
+    Store a set of verified rules for the given encoded_ast.
     '''
     if encoded_ast in self._verified_rules:
-      existing_vrf_rule = self._verified_rules[encoded_ast]
-      # the existing verified rule is different from the new one
-      if existing_vrf_rule != rule:
-        logger.warning(f'Verified rule for "{encoded_ast}" was about to be updated.')
-        logger.warning(f'Old rule: {existing_vrf_rule}')
-        logger.warning(f'New rule: {rule}')
-        # raise RuntimeError('Verified rule is being changed')
-        return
+      existing_vrf_rules = self._verified_rules[encoded_ast]
+      # add only if rule is not already present (avoid duplicates)
+      if rule not in existing_vrf_rules:
+        self._verified_rules[encoded_ast].append(rule)
+    else:
+      self._verified_rules[encoded_ast] = [rule]
 
-    self._verified_rules[encoded_ast] = rule
+  def remove_verified_rules_for(self, encoded_ast: str) -> None:
+    assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
+    assert encoded_ast in self._verified_rules, f'No verified rules for "{encoded_ast}"'
+    del self._verified_rules[encoded_ast]
 
-  def get_verified_rule(self, encoded_ast: str) -> TRuleBase:
+  def get_verified_rules(self, encoded_ast: str) -> TRuleBase:
     assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
     assert encoded_ast in self._verified_rules, f'No verified rule for "{encoded_ast}"'
     return self._verified_rules[encoded_ast]
 
-  def verified_rule_exists(self, encoded_ast: str) -> bool:
+  def verified_rules_exist(self, encoded_ast: str) -> bool:
     assert isinstance(encoded_ast, str), f'Unexpected type {type(encoded_ast)}'
     return encoded_ast in self._verified_rules
 
@@ -315,14 +316,14 @@ class Ruleset:
     rules that we have.
     '''
     assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
-    for encoded_ast, serialized_trule in \
-      ruleset_serialized.get('verified_rules', {}).items():
-      other_rule = TRuleBase.from_dict(serialized_trule)
-      rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
-      if rule:
-        self.update_verified_rules(encoded_ast, rule)
-      else:
-        logger.warning(f'Ignoring verified rule for "{encoded_ast}" because it is not in self.rules.')
+    for encoded_ast, serialized_trules in ruleset_serialized.get('verified_rules', {}).items():
+      for serialized_trule in serialized_trules:
+        other_rule = TRuleBase.from_dict(serialized_trule)
+        rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
+        if rule:
+          self.update_verified_rules(encoded_ast, rule)
+        else:
+          logger.warning(f'Ignoring verified rule for "{encoded_ast}" because it is not in self.rules.')
 
   # UNVERIFIABLE RULES RELATED
   def update_unverifiable_rules(self, encoded_ast: str, rule: TRuleBase) -> None:
@@ -346,8 +347,7 @@ class Ruleset:
     Check docs for merge_verified_rules_from().
     '''
     assert isinstance(ruleset_serialized, dict), f'Unexpected type {type(ruleset_serialized)}'
-    for encoded_ast, serialized_trules in \
-      ruleset_serialized.get('unverifiable_rules', {}).items():
+    for encoded_ast, serialized_trules in ruleset_serialized.get('unverifiable_rules', {}).items():
       for serialized_trule in serialized_trules:
         other_rule = TRuleBase.from_dict(serialized_trule)
         rule = self.get_rule_ref(other_rule)  # None if rule not in self.rules
@@ -391,10 +391,10 @@ class Ruleset:
         trules.extend(mat_gr_rules)
     return trules
 
-  def get_choices_list_from_verified_rules(
+  def get_choice_options_from_verified_rules(
     self,
     code: str
-  ) -> List[Tuple[Tuple[int, int, int], int]]:
+  ) -> List[Tuple[Tuple[int, int, int], List[int]]]:
     '''
     Given a code string, self.rules, and self._verified_rules
     return a list of choices for all choicable nodes in `code`
@@ -410,12 +410,20 @@ class Ruleset:
       all_range_cursors = d_ast_parse.get_all_range_cursors_under(choicable_range_cursor)
       for range_cursor in all_range_cursors:
         range_cursor_encoded = d_ast_parse.range_cursor_encode(range_cursor, dgann, code)
-        if range_cursor_encoded in self._verified_rules:
-          rule = self._verified_rules[range_cursor_encoded]
-          rule_idx_in_matcher_group = self.get_rule_idx_in_matcher_group(rule)
-          choice_identifier = d_ast_parse.range_cursor_to_choice_identifier(range_cursor)
-          choices.append((choice_identifier, rule_idx_in_matcher_group))
+        if range_cursor_encoded not in self._verified_rules:
+          continue
+        vrf_rules = self._verified_rules[range_cursor_encoded]
+        assert len(vrf_rules) > 0, 'There should be at least one verified rule'
+        if Config.prefer_shorter_rules:
+          vrf_rules.sort(key=lambda r: len(r.to_rule_str()))
+        choice_identifier = d_ast_parse.range_cursor_to_choice_identifier(range_cursor)
+        choice_idxs = []
+        for vrf_rule in vrf_rules:
+          rule_idx_in_matcher_group = self.get_rule_idx_in_matcher_group(vrf_rule)
+          choice_idxs.append(rule_idx_in_matcher_group)
+        choices.append((choice_identifier, choice_idxs))
 
+    choices = sorted(choices, key=lambda x: x[0])  # sort by choice identifier
     return choices
 
   # RULESET TO RULESET
@@ -442,7 +450,7 @@ class Ruleset:
     res = {
       'type': 'Ruleset',
       'rules': [rule.to_dict() for rule in self.rules],
-      'verified_rules': {k: v.to_dict() for k, v in self._verified_rules.items()},
+      'verified_rules': {enc: [vrf_rule.to_dict() for vrf_rule in vrf_rules] for enc, vrf_rules in self._verified_rules.items()},
       'unverifiable_rules': {
         k: [r.to_dict() for r in v] for k, v in self._unverifiable_rules.items()
       },
@@ -455,7 +463,7 @@ class Ruleset:
     Create a Ruleset from a plain string representation of starting rules.
     '''
     ruleset = cls()
-    rules_parsed, _ = d_grammar_rules.parse_analyze_rules(starting_ruleset)
+    rules_parsed = d_grammar_rules.parse_analyze_rules_optim(starting_ruleset)
     ruleset._extend_rules(map(StartingTRule, rules_parsed))
     return ruleset
 
@@ -469,8 +477,17 @@ class Ruleset:
     # ruleset.rules and ruleset.matcher_groups
     ruleset._extend_rules(map(TRuleBase.from_dict,
                               ruleset_serialized['rules']))
-    # ruleset.verified_rules
+    # ruleset._verified_rules
     ruleset.merge_verified_rules_from(ruleset_serialized)
     # ruleset._unverifiable_rules
     ruleset.merge_unverifiable_rules_from(ruleset_serialized)
     return ruleset
+
+  @classmethod
+  def format_str_ruleset(cls, ruleset_str: str) -> str:
+    '''
+    Format a string representation of a ruleset.
+    '''
+    rules_parsed, _ = d_grammar_rules.parse_analyze_rules(ruleset_str)
+    formatted_rules = [d_grammar_rules.pretty_rule(rule_parsed) for rule_parsed in rules_parsed]
+    return '\n\n'.join(formatted_rules)

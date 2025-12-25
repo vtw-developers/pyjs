@@ -1,3 +1,4 @@
+import json
 import unittest
 from typing import Tuple
 
@@ -99,6 +100,25 @@ class TestExtractCodeBlocks(unittest.TestCase):
     raw_response, gold = self.load_fixture('017')
     response = p_llm_gen.extract_code_blocks(raw_response)
     self.assertCountEqual(response, gold)
+
+
+class TestGetTP2Offline(unittest.TestCase):
+  def setUp(self):
+    self.maxDiff = None
+    self.fixtures_dir = p_consts.TEST_ARTIFACTS_DIR / 'p-llm-gen' / 'get-tp2-offline'
+
+  def load_fixture(self, test_id: str) -> Tuple[str, str, str, str, dict]:
+    fixture = p_utils.read_text(self.fixtures_dir / f'{test_id}.txt')
+    sp1, tp1, sp2, gold_tp2, context_str = fixture.split(f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n')
+    return sp1, tp1, sp2, gold_tp2, json.loads(context_str)
+
+  def test_all(self):
+    test_ids = sorted(f.stem for f in self.fixtures_dir.glob('*.txt'))
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        sp1, tp1, sp2, gold_tp2, context = self.load_fixture(test_id)
+        tp2 = p_llm_gen.get_tp2_offline(sp1, tp1, sp2, context)
+        self.assertEqual(tp2, gold_tp2)
 
 
 if __name__ == '__main__':

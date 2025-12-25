@@ -1,0 +1,34 @@
+if id_nvfa == 2654:
+    secret_fun_4071()
+elif id_gal:
+    secret_fun_4071()
+"-----------------"
+if 7677 == id_udwl:
+    secret_fun_4071()
+elif 874:
+    secret_fun_4071()
+"-----------------"
+if (id_nvfa == 2654) {
+    secret_fun_4071();
+} else if (id_gal) {
+    secret_fun_4071();
+}
+"-----------------"
+if (7677 == id_udwl) {
+    secret_fun_4071();
+} else if (874) {
+    secret_fun_4071();
+}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.if_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ]
+  ]
+}

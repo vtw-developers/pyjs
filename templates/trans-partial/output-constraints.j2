@@ -1,0 +1,11 @@
+CONSTRAINTS:
+{% if use_constraint_trans_equals_op %}
+{% include 'output-constraints/translating-equals-operator.j2' %}
+{% endif %}
+{% if use_constraint_trans_modulus_op %}
+{% include 'output-constraints/translating-modulus-operator.j2' %}
+{% endif %}
+{% if use_constraint_keep_parentheses %}
+{% include 'output-constraints/keep-parentheses-if-any.j2' %}
+{% endif %}
+{% include 'output-constraints/do-not-use-bigint.j2' %}'

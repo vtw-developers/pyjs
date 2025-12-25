@@ -1,0 +1,31 @@
+{
+  "translation_pair": [
+    {
+      "source": "var1 = var2",
+      "target": "var var1 = var2;"
+    },
+    {
+      "source": "pirel_var1 = pirel_var2",
+      "target": "var pirel_var1 = pirel_var2;"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "error_msg": "list index out of range",
+  "error_class": "IndexError"
+}

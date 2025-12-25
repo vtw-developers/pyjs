@@ -298,6 +298,20 @@ class PairNode(pvis.AbstractNode):
     super().__init__(node_type)
     self.key : pvis.AbstractNode = None
     self.value : pvis.AbstractNode = None
+  @classmethod
+  def build(cls, key: pvis.AbstractNode, value: pvis.AbstractNode) -> PairNode:
+    '''Build a pair node from a key and a value'''
+    node = cls('pair')
+    node.add_child(key)
+    key.set_parent(node)
+    node.key = key
+    colon = pvis.TerminalNode(':')
+    node.add_child(colon)
+    colon.set_parent(node)
+    node.add_child(value)
+    value.set_parent(node)
+    node.value = value
+    return node
 class ParameterNode(pvis.AbstractNode): pass
 class ParametersNode(pvis.AbstractNode): pass
 class ParenthesizedExpressionNode(pvis.AbstractNode): pass
@@ -995,6 +1009,12 @@ class PrettyPrinter(pvis.Visitor):
     self.visit(node.body)
     self.level -= 1
 
+  def visit_EscapeInterpolationNode(self, node: EscapeInterpolationNode) -> str:
+    assert len(node.children) == 1, 'sanity check'
+    child = node.children[0]
+    assert child.is_terminal(), 'sanity check'
+    return self.visit(child)
+
   def visit_EscapeSequenceNode(self, node: EscapeSequenceNode) -> str:
     res = ''
     for child in node.children:
@@ -1394,12 +1414,21 @@ class PrettyPrinter(pvis.Visitor):
     self.level -= 1
 
   def visit_YieldNode(self, node: YieldNode) -> None:
-    children = node.get_nt_children()
-    if children:
-      assert len(children) == 1
-      return f'yield {self.visit(*children)}'
-    else:
+    assert node.children[0].node_type == 'yield'
+    if len(node.children) == 1:
       return 'yield'
+    else:  # yield something or yield from something
+      *terminals, expression = node.children
+      assert all(isinstance(t, pvis.TerminalNode) for t in terminals)
+      prefix = ' '.join(t.node_type for t in terminals)
+      return f'{prefix} {self.visit(expression)}'
+
+  @classmethod
+  def pretty_print(cls, code: str, indent_with: str = '    ') -> str:
+    tree = Tree.from_str(code)
+    printer = cls(indent_with=indent_with)
+    pp_code = printer.visit(tree.root_node).strip()
+    return pp_code
 
 
 class ParametrizableVariablesCollector(pvis.Visitor):
@@ -2571,7 +2600,7 @@ class LoggableIdentifierExtractor(pvis.Visitor):
       self.visit(node.value)
 
 
-class StatementNodeSimplifier(pvis.Visitor):
+class CompStatNodeSimplifier(pvis.Visitor):
   '''
   This visitor simplifies the statement nodes.
   If a statement node is a compound statement (involves BlockNode as a child),
@@ -2747,7 +2776,7 @@ class ChoicableNodeExtractor(pvis.Visitor):
   Extract all choicable nodes from a given AST.
   Choicable nodes are nodes for which we need to create
   initial choices list.
-  Refer to p_ext_rule_chooser.get_readonly_choices_list
+  Refer to p_ext_rule_chooser.stat_node_validate_exprs
   for more details.
   '''
   def __init__(
@@ -2777,6 +2806,20 @@ class ChoicableNodeExtractor(pvis.Visitor):
     raise ValueError('node must be in nid_node_map')
 
   # VISIT METHODS
+  def visit_AssertStatementNode(self, node: AssertStatementNode) -> None:
+    '''
+    Parent of assert_statement is a block node.
+    block node is a statement node.
+    '''
+    nid = self.nid_reverse_lookup(node)
+    if nid not in self.exclude_statement_nodes_ids:
+      for child in node.get_nt_children():
+        self.add_choicable_node(child)
+    else:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding assert statement node: '
+        f'"{self.pp.visit(node)}"')
+
   def visit_AssignmentNode(self, node: AssignmentNode) -> None:
     '''
     Parent of assignment is an expression_statement node.
@@ -2810,6 +2853,36 @@ class ChoicableNodeExtractor(pvis.Visitor):
         f'augmented assignment node: "{self.pp.visit(node)}"')
       return
     self.add_choicable_node(node.right)
+
+  def visit_CallNode(self, node: CallNode) -> None:
+    '''
+    Appears as a child of an expression_statement node.
+    '''
+    parent_nid = self.nid_reverse_lookup(node.get_parent())
+    if parent_nid in self.exclude_statement_nodes_ids:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding arguments of '
+        f'call node: "{self.pp.visit(node)}"')
+      return
+    for arg in node.arguments.get_nt_children():
+      if isinstance(arg, KeywordArgumentNode):
+        self.add_choicable_node(arg.value)
+      else:
+        self.add_choicable_node(arg)
+
+  def visit_DeleteStatementNode(self, node: DeleteStatementNode) -> None:
+    '''
+    Appears as a child of a block node.
+    block node is a statement node.
+    '''
+    nid = self.nid_reverse_lookup(node)
+    if nid not in self.exclude_statement_nodes_ids:
+      for target in node.get_nt_children():
+        self.add_choicable_node(target)
+    else:
+      logger.debug(
+        f'ChoicableNodeExtractor: excluding delete statement node: '
+        f'"{self.pp.visit(node)}"')
 
   def visit_ElifClauseNode(self, node: ElifClauseNode) -> None:
     '''
@@ -2921,7 +2994,7 @@ class ChoicableNodeExtractor(pvis.Visitor):
     return choicable_nodes
 
 
-class SecretFunctionInserter(pvis.Visitor):
+class BlockSecretFunInserter(pvis.Visitor):
   '''
   Replace body of "blocky" node types as p_consts.BODY_NODE_TYPES and
   p_consts.SPECIAL_TREATMENT_BODY_NODE_TYPES with a call to
@@ -2953,6 +3026,31 @@ class SecretFunctionInserter(pvis.Visitor):
     pretty_printer = PrettyPrinter(indent_with='    ')
     code = pretty_printer.visit(tree.root_node)
     return code.strip()
+
+
+class SecretFunInserter(BlockSecretFunInserter):
+  '''
+  Extended support for "list" and "dictionary" nodes.
+  '''
+  def visit_ListNode(self, node: ListNode) -> None:
+    # replace all children with a call to secret function
+    secret_fn_name = IdentifierNode.build(p_consts.GENERIC_SECRET_FN)
+    secret_fn_args = ArgumentListNode.build([])  # no arguments
+    call_node = CallNode.build(secret_fn_name, secret_fn_args)
+    node.children = [node.children[0]] + [call_node] + [node.children[-1]]
+    call_node.set_parent(node)
+
+  def visit_DictionaryNode(self, node: DictionaryNode) -> None:
+    # replace all children with a call to secret function
+    secret_fn_name = IdentifierNode.build(p_consts.GENERIC_SECRET_FN)
+    secret_fn_args = ArgumentListNode.build([])  # no arguments
+    call_node = CallNode.build(secret_fn_name, secret_fn_args)
+    pair_node = PairNode.build(
+      key=IdentifierNode.build('foo'),
+      value=call_node
+    )
+    node.children = [node.children[0]] + [pair_node] + [node.children[-1]]
+    pair_node.set_parent(node)
 
 
 # TEST HARNESSES

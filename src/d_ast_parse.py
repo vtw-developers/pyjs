@@ -7,24 +7,47 @@ import p_data_structures as pds
 from tree_sitter import Language, Node, Parser, Tree
 
 
-def _anno_func_py_string(ann, context: str):
-  startpos = ann[0]
-  endpos = ann[1]
-  subs = context[startpos:endpos]
-  stype = ""
-  if subs.startswith("f"): stype = "f"
-  elif subs.startswith("r"): stype = "r"
-  elif subs.startswith("b"): stype = "b"
-  else:
-    if not (subs.startswith('"') or subs.startswith("'")):
-      print("_anno_func_py_string UNEXPECTED:", subs)
-      assert "parse_error" == 0 or (subs.startswith('"') or subs.startswith("'"))
+_STR_TYPES = [
+  'r', 'R',
+  'u', 'U',
+  'b', 'B',
+  'f', 'F',
+  'fr', 'FR', 'fR', 'Fr',
+  'rf', 'RF', 'rF', 'Rf',
+  'br', 'BR', 'bR', 'Br',
+  'rb', 'RB', 'rB', 'Rb',
+]
+_STR_QUOTES = [
+  """'""",  # '
+  '''"''',  # "
+  '''"""''',  # """
+  """'''""",  # '''
+]
+
+
+def _anno_func_py_string(ann: list, context: str) -> list:
+  '''
+  Function for annotate Python string nodes.
+  '''
+  startpos, endpos = ann[0], ann[1]
+  str_lit = context[startpos:endpos]
+
+  stype = ''
+  for t in reversed(_STR_TYPES):
+    if str_lit.startswith(t):
+      stype = t
+      break
+
+  assert str_lit[len(stype):].startswith(tuple(_STR_QUOTES)), "py.string does not start with valid quote"
+  assert str_lit.endswith(tuple(_STR_QUOTES)), "py.string does not end with valid quote"
+
   quote = None
-  if subs.endswith('\"\"\"'): quote = '\"\"\"'
-  elif subs.endswith("\'\'\'"): quote = "\'\'\'"
-  elif subs.endswith('\"'): quote = '\"'
-  elif subs.endswith("\'"): quote = "\'"
-  else: assert 0 == "py.string does not endswith ' or \""
+  for q in reversed(_STR_QUOTES):
+    if str_lit[len(stype):].startswith(q) and str_lit.endswith(q):
+      quote = q
+      break
+  assert quote is not None, "py.string quote type not found"
+
   return ["anno", ['"stype"', f'"{stype}"'], ['"quote"', f'{json.dumps(quote)}']]
 
 
@@ -132,14 +155,16 @@ def is_elem_non_terminal(elem) -> bool:
   return True
 
 
-def get_nid_ntype_map(ast: list) -> Dict[int, str]:
+def get_nid_ntype_map(ast: list, with_text: bool = False) -> Dict[int, str]:
   '''
   Get mapping of node IDs to their node types obtained
   from parse_text_dbg.
+  PARAM ast: duoglot-style AST node
+  PARAM with_text: whether or not AST was parsed with keep_text=True
   '''
   nid_ntype_map = {}
   def _traverse(node) -> None:
-    nonlocal nid_ntype_map
+    nonlocal nid_ntype_map, with_text
     # base case: terminal node
     if not isinstance(node, list):
       return
@@ -147,7 +172,11 @@ def get_nid_ntype_map(ast: list) -> Dict[int, str]:
     # if the second element is an int, it's an ID
     # unlike e.g. string nodes (check parsed ASTs to confirm)
     if isinstance(node[1], int):
-      nid_ntype_map[node[1]] = node[0].split('.')[1]  # strip 'py.' prefix
+      if not with_text:
+        node_type = node[0].split('.')[1]  # strip 'py.' prefix
+      else:
+        node_type = node[0][0].split('.')[1]  # strip 'py.' prefix
+      nid_ntype_map[node[1]] = node_type
     for child in node[2:]:
       _traverse(child)
   _traverse(ast)
@@ -180,6 +209,7 @@ def get_range_cursor(ast: list, nid: int) -> Tuple[list, int, int]:
   '''
   Given an DuoGlot-style AST and a node id, return the range cursor to the node.
   Range cursor is a tuple of (list, start_idx, end_idx).
+  POST: start_idx + 1 == end_idx
   RAISE ValueError if the node id is not found.
   '''
   def __is_child_that_we_need(child, nid: int) -> bool:
@@ -247,7 +277,8 @@ def range_cursor_seq_descending_from_ast(ast: list) -> list:
   '''
   Given a duoglot-style AST, generate a sequence of range cursors
   in pre-order traversal.
-  POST: Sequence does not include the AST itself, only the subtrees.
+  POST1: Sequence does not include the AST itself, only the subtrees.
+  POST2: range cursors specify exactly one AST node.
   '''
   assert is_elem_non_terminal(ast), 'expected non-terminal node'
   result = []
@@ -271,6 +302,8 @@ def get_all_range_cursors_under(
   Need to add itself, because range_cursor_seq_descending_from_ast()
   will include only the subtrees. all_range_cursors are all possible
   range cursors under the range_cursor.
+  PRE: range_cursor[1] + 1 == range_cursor[2]  # range_cursor specifies exactly one AST node
+  POST: range cursors specify exactly one AST node.
   '''
   choicable_ast = range_cursor_to_ast_node(range_cursor)
   all_range_cursors = [range_cursor]  # include itself
@@ -335,7 +368,7 @@ def range_cursor_to_ast_node(range_cursor: tuple) -> list:
   '''
   Convert a range cursor to an AST node.
   range_cursor: Tuple[ List[src_ast] , int , int ]
-  PRE: range_cursor specifies exactly one AST node
+  PRE: range_cursor[1] + 1 == range_cursor[2]  # range_cursor specifies exactly one AST node
   '''
   assert isinstance(range_cursor, tuple) and len(range_cursor) == 3
   assert isinstance(range_cursor[0], list)
@@ -348,6 +381,38 @@ def range_cursor_to_ast_node(range_cursor: tuple) -> list:
   child_ast_idx = range_cursor[1]
   child_ast = parent_ast[child_ast_idx]
   return child_ast
+
+
+def choice_identifier_to_range_cursor(
+  choice_identifier: Tuple[int, int, int],
+  ast: list
+) -> tuple:
+  '''
+  Choice identifier is a tuple of (node_id, start_idx, end_idx).
+  It is used for identifying the node in the AST for which a rule
+  choice is made. It is used in choices_list.
+  '''
+  node_id, start_idx, end_idx = choice_identifier
+  # find the parent AST node with the given node_id
+  def _traverse(node: list) -> Optional[list]:
+    # base case: terminal node
+    if not isinstance(node, list):
+      return None
+    assert len(node) >= 2, 'non-terminals are at least length 2'
+    # if the second element is an int, it's an ID
+    if isinstance(node[1], int) and node[1] == node_id:
+      return node
+    for child in node[2:]:
+      result = _traverse(child)
+      if result is not None:
+        return result
+    return None
+
+  parent_ast = _traverse(ast)
+  if parent_ast is None:
+    raise ValueError(f'Node id {node_id} not found in AST')
+  range_cursor = (parent_ast, start_idx, end_idx)
+  return range_cursor
 
 
 def range_cursor_to_choice_identifier(range_cursor: tuple) -> tuple:
@@ -369,6 +434,7 @@ def range_cursor_pretty_print(range_cursor: tuple, ann: dict, src_code: str) -> 
   PARAM range_cursor: Tuple[ List[src_ast] , int , int ]
   PARAM ann: annotation dict from parse_text_dbg
   PARAM src_code: original source code
+  PRE: range_cursor[1] + 1 == range_cursor[2]  # range_cursor specifies exactly one AST node
   '''
   ast = range_cursor_to_ast_node(range_cursor)
   if ast[0] == 'py.string_content':
@@ -385,6 +451,7 @@ def range_cursor_encode(range_cursor: tuple, ann: dict, src_code: str) -> str:
   PARAM range_cursor: Tuple[ List[src_ast] , int , int ]
   PARAM ann: annotation dict from parse_text_dbg
   PARAM src_code: original source code
+  PRE: range_cursor[1] + 1 == range_cursor[2]  # range_cursor specifies exactly one AST node
   '''
   unparsed = range_cursor_pretty_print(range_cursor, ann, src_code)
   ast = range_cursor_to_ast_node(range_cursor)
@@ -416,7 +483,6 @@ def node_id_pretty_print(src_code: str, src_lang: str, node_id: int) -> str:
   PARAM node_id: node id
   '''
   tree = pds.PirelTree.from_code_str(src_code, src_lang)
-  tree._fix_indentation()
   node = tree.get_node_with_id(node_id)
   assert node is not None, f'node id {node_id} not found in the AST'
   return node.get_text()

@@ -1,0 +1,16 @@
+{
+  "code": "def f_gold(start, end, arr):\n    frequency = dict()\n    for i in range(start, end + 1):\n        if arr[i] in frequency.keys():\n            frequency[arr[i]] += 1\n        else:\n            frequency[arr[i]] = 1\n    count = 0\n    for x in frequency:\n        if x == frequency[x]:\n            count += 1\n    return count",
+  "choicable_nodes": [
+    "dict()",
+    "range(start, end + 1)",
+    "arr[i] in frequency.keys()",
+    "1",
+    "1",
+    "0",
+    "frequency",
+    "x == frequency[x]",
+    "1",
+    "count"
+  ],
+  "exclude_stat_nids": []
+}

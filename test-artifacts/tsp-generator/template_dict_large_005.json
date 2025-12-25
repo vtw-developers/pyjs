@@ -1,0 +1,16 @@
+{
+  "template_origin": "if item.isspace():\n    pass\nelif item == '.':\n    pass\nelif item.isalnum() or item == '_' or item == '-':\n    pass\nelif (dottedkey and sl[i - 1] == '.' and (item == '\"' or item == \"'\")):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "if_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "if id_hxc:\n    secret_fun_4071()\nelif id_ilh:\n    secret_fun_4071()\nelif id_mzh:\n    secret_fun_4071()\nelif id_kzpv:\n    secret_fun_4071()",
+      "if 9497:\n    secret_fun_4071()\nelif 5971:\n    secret_fun_4071()\nelif 6685:\n    secret_fun_4071()\nelif 5469:\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

@@ -95,8 +95,12 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
       has_int_as_arg_str_join = self._pre_order(root_node, _pattern_7_str_join_arg_is_integer)
       self.assertFalse(has_int_as_arg_str_join, f'Argument of str.join() being an integer found in "{snippet}"')
 
+      # Check for block without secret_fun_4071() call when is_insert_secret_fn flag is on
+      has_block_without_secretfn_call = self._pre_order(root_node, _pattern_8_has_block_without_secretfn_call_secretfn_flag_on, template_dict)
+      self.assertFalse(has_block_without_secretfn_call, f'Block without secret_fun_4071() call found in "{snippet}"')
+
   def test_all_general(self):
-    NUM_TESTS = 66
+    NUM_TESTS = 69
     for i in range(1, NUM_TESTS + 1):
       test_name = str(i).zfill(3)
       with self.subTest(test_name=test_name):
@@ -106,36 +110,21 @@ class TestGenerateTspsWithGenerator(unittest.TestCase):
         self.assertEqual(len(tsps), len(template_dict['tsps']))
         self.assertPatterns(tsps, template_dict)
 
-  def test_flaky_01(self):
-    '''
-    This is a special case due to changes to the TSP generation algorithm.
-    Please refer to p_generator.py::_gen_seq_fuzz_node_group()
-    ``indices = sample(range(image_norm), p_consts.MAX_FUZZ_GROUP_LEN)`` line.
-    '''
-    template_dict = self.load_template_dict('flaky_01')
-    self._log(template_dict, 'flaky_01')
-    tsps = p_generator.generate_tsps_with_generator(template_dict)
-    self.assertTrue(abs(len(tsps) - len(template_dict['tsps'])) <= 10)
-    self.assertPatterns(tsps, template_dict)
-
-  def test_flaky_02(self):
-    '''
-    This is a special case due to changes to the TSP generation algorithm.
-    Please refer to p_generator.py::_gen_seq_fuzz_node_group()
-    ``indices = sample(range(image_norm), p_consts.MAX_FUZZ_GROUP_LEN)`` line.
-    '''
-    template_dict = self.load_template_dict('flaky_02')
-    self._log(template_dict, 'flaky_02')
-    tsps = p_generator.generate_tsps_with_generator(template_dict)
-    self.assertTrue(abs(len(tsps) - len(template_dict['tsps'])) <= 20)
-    self.assertPatterns(tsps, template_dict)
-
-  def test_flaky_03(self):
-    template_dict = self.load_template_dict('flaky_03')
-    self._log(template_dict, 'flaky_03')
-    tsps = p_generator.generate_tsps_with_generator(template_dict)
-    self.assertTrue(abs(len(tsps) - len(template_dict['tsps'])) <= 10)
-    self.assertPatterns(tsps, template_dict)
+  def test_all_large_and_flaky(self):
+    NUM_TESTS = 46
+    # for flaky tests, "image_norm > p_consts.MAX_FUZZ_GROUP_LEN is True"
+    FLAKY_TESTS = [20, 21, 22, 23, 43, 44, 45, 46]
+    for i in range(1, NUM_TESTS + 1):
+      test_name = f'large_{i:03d}'
+      with self.subTest(test_name=test_name):
+        template_dict = self.load_template_dict(test_name)
+        self._log(template_dict, test_name)
+        tsps = p_generator.generate_tsps_with_generator(template_dict)
+        if i in FLAKY_TESTS:
+          self.assertAlmostEqual(len(tsps[0]), len(template_dict['tsps'][0]), delta=30)
+        else:
+          self.assertEqual(len(tsps), len(template_dict['tsps']))
+        self.assertPatterns(tsps, template_dict)
 
 
 def _pattern_1_has_integer_as_function_name(node: pds.DuoGlotNode) -> bool:
@@ -162,7 +151,7 @@ def _pattern_2_has_block_with_ret_stat_secretfn_flag_on(node: pds.DuoGlotNode, t
   '''
   RETURN True if the snippet contains a block with a return statement
   when is_insert_secret_fn flag is turned on.
-  NOTE Generator may miss putting `secret_fn_4071()` in the `block` when it's necessary.
+  NOTE Generator may miss putting `secret_fun_4071()` in the `block` when it's necessary.
   '''
   # is_insert_secret_fn must be turned on
   if not template_dict['is_insert_secret_fn']:
@@ -337,6 +326,41 @@ def _pattern_7_str_join_arg_is_integer(node: pds.DuoGlotNode) -> bool:
   if arg_node.get_ts_node_type() != 'integer':
     return False
   return True
+
+
+def _pattern_8_has_block_without_secretfn_call_secretfn_flag_on(node: pds.DuoGlotNode, template_dict: dict) -> bool:
+  '''
+  RETURN True if the snippet contains a block without a secret_fun_4071() call
+  when is_insert_secret_fn flag is turned on.
+  NOTE Generator may miss putting `secret_fun_4071()` in the `block` when it's necessary.
+  '''
+  # is_insert_secret_fn must be turned on
+  if not template_dict['is_insert_secret_fn']:
+    return False
+  # node must be non-terminal
+  if node.is_terminal():
+    return False
+  # node must be block
+  if node.get_ts_node_type() != 'block':
+    return False
+  # must have a single non-terminal child
+  if node.get_num_nt_children() != 1:
+    return False
+
+  # child must be an expression_statement of secret_fun_4071() call
+  first_child = node.get_nt_children()[0]
+  if first_child.get_ts_node_type() != 'expression_statement':
+    return True
+  call_node = first_child.get_children()[0]
+  if call_node.get_ts_node_type() != 'call':
+    return True
+  call_name_node = call_node.get_children()[0]
+  if call_name_node.get_ts_node_type() != 'identifier':
+    return True
+  call_name = call_name_node.get_children()[0].node_type
+  if call_name != p_consts.GENERIC_SECRET_FN:
+    return True
+  return False
 
 
 if __name__ == '__main__':

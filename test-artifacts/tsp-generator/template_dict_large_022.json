@@ -1,0 +1,99 @@
+{
+  "template_origin": "d = datetime.datetime(int(val[:4]), int(val[5:7]), int(val[8:10]), int(val[11:13]), int(val[14:16]), int(val[17:19]), microsecond, tz)",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "problematic_node_type": "call",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "d = datetime.datetime(id_ipd, id_cin, id_kzrg, id_pbe, id_bpn, id_hjnt, id_oshn, id_bfv)",
+      "d = datetime.datetime(7286, 776, 9211, 4877, 1758, 823, id_eky, id_svkb)"
+    ],
+    [
+      "d = datetime.datetime(int(val[:4]), int(id_vtj), int(id_pwji), int(id_gxw), int(id_sin), int(val[17:19]), id_gkb, id_pyd)",
+      "d = datetime.datetime(int(val[:4]), int(id_yxi), int(id_nje), int(id_bwh), int(id_rtie), int(val[17:19]), id_gckm, id_kyuc)"
+    ],
+    [
+      "d = datetime.datetime(int(id_xpd), int(val[5:7]), int(id_vlfy), int(id_zlfy), int(id_byzd), int(id_drbi), id_ynck, id_mykq)",
+      "d = datetime.datetime(int(id_djyl), int(val[5:7]), int(id_fxa), int(id_wpaf), int(id_uwem), int(id_pyuq), id_fesr, id_mdg)"
+    ],
+    [
+      "d = datetime.datetime(int(id_mfc), int(id_kyf), int(val[8:10]), int(val[11:13]), int(id_lykn), int(id_pqtl), id_brek, id_qodl)",
+      "d = datetime.datetime(int(id_hbxe), int(id_nbhg), int(val[8:10]), int(val[11:13]), int(id_qpso), int(id_wst), id_pcy, id_msc)"
+    ],
+    [
+      "d = datetime.datetime(int(id_jyd), int(id_igv), int(id_racu), int(id_kip), int(id_vmf), int(id_ovf), id_nit, id_qnt)",
+      "d = datetime.datetime(int(id_zas), int(id_wzv), int(id_hkzq), int(id_pxl), int(id_zvcm), int(id_gpe), id_olk, id_lgwv)"
+    ],
+    [
+      "d = datetime.datetime(int(val[:4]), int(val[5:7]), int(id_pdx), int(id_taj[11:13]), int(id_qiv[14:16]), int(val[17:19]), id_bnw, id_xgq)",
+      "d = datetime.datetime(int(val[:4]), int(val[5:7]), int(id_hbuw), int(id_dqx[11:13]), int(id_yjv[14:16]), int(val[17:19]), id_dafg, id_xkvg)"
+    ],
+    [
+      "d = datetime.datetime(int(id_ugai), int(id_takw), int(val[8:10]), int(id_gjm[11:13]), int(id_kds), int(val[17:19]), id_vqy, id_qhfd)",
+      "d = datetime.datetime(int(id_pgnq), int(id_twc), int(val[8:10]), int(id_ghx[11:13]), int(id_vqed), int(val[17:19]), id_ptc, id_yph)"
+    ],
+    [
+      "d = datetime.datetime(int(id_ijw[:4]), int(val[5:7]), int(id_odn[8:10]), int(id_rzy[11:13]), int(id_jnw), int(id_azy), id_pivb, id_laft)",
+      "d = datetime.datetime(int(id_yov[:4]), int(val[5:7]), int(id_izjv[8:10]), int(id_tdw[11:13]), int(id_btco), int(id_djo), id_lqdz, id_tbsc)"
+    ],
+    [
+      "d = datetime.datetime(int(id_twb), int(id_kvl[5:7]), int(id_kqb[8:10]), int(val[11:13]), int(id_zysw[14:16]), int(id_gtl[17:19]), id_ofv, id_kms)",
+      "d = datetime.datetime(int(id_afld), int(id_nxzk[5:7]), int(id_swn[8:10]), int(val[11:13]), int(id_ghxl[14:16]), int(id_ecrl[17:19]), id_hlif, id_awk)"
+    ],
+    [
+      "d = datetime.datetime(int(id_dslr[:4]), int(id_nlgm), int(id_uzv), int(id_bmr[11:13]), int(val[14:16]), int(id_nqh), id_bwrs, id_tgum)",
+      "d = datetime.datetime(int(id_mcgn[:4]), int(id_osbn), int(id_led), int(id_jeab[11:13]), int(val[14:16]), int(id_tluz), id_ycah, id_lbrg)"
+    ],
+    [
+      "d = datetime.datetime(int(id_hvg), int(val[5:7]), int(id_xzq), int(id_njw[11:13]), int(id_vjmn), int(id_rnhx[17:19]), id_ckh, id_obl)",
+      "d = datetime.datetime(int(id_gba), int(val[5:7]), int(id_yso), int(id_oflw[11:13]), int(id_fke), int(id_gfd[17:19]), id_xswz, id_gxta)"
+    ],
+    [
+      "d = datetime.datetime(int(id_qyw), int(id_zfj), int(id_fyn[8:10]), int(id_gkm), int(id_smij[14:16]), int(val[17:19]), id_pyxc, id_ybla)",
+      "d = datetime.datetime(int(id_fgnm), int(id_bzv), int(id_zeg[8:10]), int(id_fgdq), int(id_htw[14:16]), int(val[17:19]), id_mkl, id_qiko)"
+    ],
+    [
+      "d = datetime.datetime(int(id_dfbn[:4]), int(id_xeu), int(val[8:10]), int(val[11:13]), int(id_ekl), int(id_mih[17:19]), id_mehc, id_kgvd)",
+      "d = datetime.datetime(int(id_kaf[:4]), int(id_tmy), int(val[8:10]), int(val[11:13]), int(id_kcro), int(id_cxdz[17:19]), id_bfv, id_thr)"
+    ],
+    [
+      "d = datetime.datetime(int(id_xzt[:4]), int(id_qxy), int(id_bhux[8:10]), int(id_safc), int(id_lpsc), int(val[17:19]), id_emfg, id_rdn)",
+      "d = datetime.datetime(int(id_lwum[:4]), int(id_gsdj), int(id_hjin[8:10]), int(id_jxi), int(id_jvt), int(val[17:19]), id_odws, id_xno)"
+    ],
+    [
+      "d = datetime.datetime(int(id_fhiy[:4]), int(id_kez), int(id_hwpa), int(id_unsw), int(id_omd[14:16]), int(id_pxbu), id_hwzf, id_ukva)",
+      "d = datetime.datetime(int(id_dsy[:4]), int(id_fkps), int(id_utdz), int(id_idl), int(id_muln[14:16]), int(id_qlza), id_moyx, id_jrf)"
+    ],
+    [
+      "d = datetime.datetime(int(val[:4]), int(id_gbds[5:7]), int(id_sjco[8:10]), int(id_moe[11:13]), int(id_lufd[14:16]), int(val[17:19]), id_zsbj, id_cokt)",
+      "d = datetime.datetime(int(val[:4]), int(id_ohjk[5:7]), int(id_bil[8:10]), int(id_qlkh[11:13]), int(id_rsz[14:16]), int(val[17:19]), id_qrwp, id_dku)"
+    ],
+    [
+      "d = datetime.datetime(int(id_fqz[:4]), int(id_gih[5:7]), int(id_zqji), int(id_bli[11:13]), int(id_npu), int(id_lyo[17:19]), id_jlr, id_wjvq)",
+      "d = datetime.datetime(int(id_dkz[:4]), int(id_ctqm[5:7]), int(id_iygt), int(id_otg[11:13]), int(id_opi), int(id_pmtc[17:19]), id_jegm, id_tygi)"
+    ],
+    [
+      "d = datetime.datetime(int(id_pmj[:4]), int(val[5:7]), int(id_qjel[8:10]), int(id_wsaq[11:13]), int(id_kfl[14:16]), int(id_wyrl), id_yiu, id_yfcp)",
+      "d = datetime.datetime(int(id_pbjg[:4]), int(val[5:7]), int(id_dtrg[8:10]), int(id_azg[11:13]), int(id_cml[14:16]), int(id_sep), id_goaz, id_dcvw)"
+    ],
+    [
+      "d = datetime.datetime(int(val[:4]), int(id_dpj), int(val[8:10]), int(id_yqjw[11:13]), int(id_tgsv[14:16]), int(id_gup), id_fpth, id_hvs)",
+      "d = datetime.datetime(int(val[:4]), int(id_ohyq), int(val[8:10]), int(id_nayf[11:13]), int(id_yxg[14:16]), int(id_ihv), id_tcx, id_nad)"
+    ],
+    [
+      "d = datetime.datetime(int(id_oabe[:4]), int(id_mxw[5:7]), int(val[8:10]), int(id_pug), int(id_jmn), int(id_ojlp), id_dbsf, id_qgps)",
+      "d = datetime.datetime(int(id_umzw[:4]), int(id_wkq[5:7]), int(val[8:10]), int(id_wlpc), int(id_tps), int(id_owve), id_hpt, id_bgx)"
+    ],
+    [
+      "d = datetime.datetime(int(val[:4]), int(id_agon), int(id_nxr), int(id_vwaj[11:13]), int(id_xfm), int(id_zunf), id_zqr, id_amk)",
+      "d = datetime.datetime(int(val[:4]), int(id_ixtu), int(id_bluw), int(id_gfl[11:13]), int(id_cmq), int(id_gjb), id_jid, id_ozri)"
+    ]
+  ],
+  "problematic_node_id": 4
+}

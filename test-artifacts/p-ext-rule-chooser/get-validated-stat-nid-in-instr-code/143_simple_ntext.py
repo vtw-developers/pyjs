@@ -1,1 +1,0 @@
-return count_zero

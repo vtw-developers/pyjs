@@ -1,10 +1,130 @@
+import asyncio
 import json
 import unittest
-from typing import Tuple
+from typing import List, Tuple
 
 import p_consts
 import p_code_runner
 import p_rule_applicator as prapp
+import p_subject
+import p_utils
+
+
+class TestApplyTranslationRules(unittest.TestCase):
+  '''
+  Test cases for apply_translation_rules function in p_rule_applicator.py
+  '''
+  def setUp(self):
+    self.maxDiff = None
+    self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'apply-translation-rules'
+    self.error_subdirs = sorted([
+      d for d in self.fixture_dir_path.iterdir() if d.is_dir() and d.name != 'no-error'
+    ])
+
+  def get_args(self, subdir: str, test_id: str) -> Tuple[p_subject.PirelSubject, bool]:
+    args_dict = p_utils.read_json(self.fixture_dir_path / subdir / f'{test_id}_in_args.json')
+    src_program = p_utils.read_text(self.fixture_dir_path / subdir / f'{test_id}_in_src_program.py')
+    translation_rules_main_code = p_utils.read_text(self.fixture_dir_path / subdir / f'{test_id}_in_translation_rules_main_code.snart')
+
+    # arg 1
+    subject = p_subject.PirelSubject(
+      benchmark_name=args_dict['subject']['benchmark_name'],
+      name=args_dict['subject']['name'],
+      src_program=src_program,
+      src_lang=args_dict['subject']['src_lang'],
+      tar_lang=args_dict['subject']['tar_lang'],
+      is_three_split=args_dict['subject']['is_three_split']
+    )
+    subject.translation_rules_main_code = translation_rules_main_code
+    subject.translation_rules_test_code = args_dict['subject']['translation_rules_test_code']
+    subject.is_three_split = args_dict['subject']['is_three_split']
+    subject.choices = args_dict['subject']['choices']
+    subject.verified_choice_options = args_dict['subject']['verified_choice_options']
+
+    # arg 2
+    raise_on_missing_vrf_rule = args_dict['raise_on_missing_vrf_rule']
+    return subject, raise_on_missing_vrf_rule
+
+  def get_result_no_error(self, test_id: str) -> Tuple[str, list]:
+    tar_program_plausible = p_utils.read_text(self.fixture_dir_path / 'no-error' / f'{test_id}_out_tar_program_plausible.js')
+    translate_dbg_history = p_utils.read_json(self.fixture_dir_path / 'no-error' / f'{test_id}_out_translate_dbg_history.json')
+    return tar_program_plausible, translate_dbg_history
+
+  def get_result_error(self, subdir: str, test_id: str) -> Tuple[str, str]:
+    error_data = p_utils.read_json(self.fixture_dir_path / subdir / f'{test_id}_out_error.json')
+    return error_data['error'], error_data['error_msg']
+
+  def get_test_ids(self, subdir: str) -> List[str]:
+    test_inputs = (self.fixture_dir_path / subdir).glob(f'*_in_args.json')
+    test_ids = sorted([fpath.stem[:3] for fpath in test_inputs])
+    return test_ids
+
+  def test_no_error(self):
+    subdir = 'no-error'
+    test_ids = self.get_test_ids(subdir)
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        subject, raise_on_missing_vrf_rule = self.get_args(subdir, test_id)
+        ref_tar_program_plausible, ref_translate_dbg_history = self.get_result_no_error(test_id)
+        tar_program_plausible, translate_dbg_history = asyncio.run(prapp.apply_translation_rules(
+          subject,
+          raise_on_missing_vrf_rule
+        ))
+        self.assertEqual(tar_program_plausible, ref_tar_program_plausible, 'tar_program_plausible does not match')
+        eq, p, v1, v2 = p_utils.deep_json_diff(
+          translate_dbg_history,
+          ref_translate_dbg_history,
+          coerce_types=True,
+        )
+        self.assertTrue(eq, f'translate_dbg_history does not match: {p}\n{v1}\n{v2}')
+
+  def test_all_error(self):
+    for err_subdir in self.error_subdirs:
+      test_ids = self.get_test_ids(err_subdir.name)
+      for test_id in test_ids:
+        with self.subTest(subdir=err_subdir.name, test_id=test_id):
+          subject, raise_on_missing_vrf_rule = self.get_args(err_subdir.name, test_id)
+          ref_error, ref_error_msg = self.get_result_error(err_subdir.name, test_id)
+          error, error_msg = '', ''
+          try:
+            _ = asyncio.run(prapp.apply_translation_rules(
+              subject,
+              raise_on_missing_vrf_rule
+            ))
+          except Exception as e:
+            error = e.__class__.__name__
+            error_msg = str(e)
+          self.assertEqual(error_msg, ref_error_msg, 'error message does not match')
+          self.assertEqual(error, ref_error, 'error type does not match')
+
+
+class TestMyExactlogSerialize(unittest.TestCase):
+  '''
+  Test cases for serialize() in mylog_pirel.py and mylog_pirel.js
+  '''
+  def setUp(self):
+    self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-rule-applicator' / 'myexactlog-serialize'
+
+  def get_fixture(self, test_id: str) -> Tuple[str, str]:
+    src_program_instr = (self.fixture_dir_path / f'{test_id}.py').read_text()
+    tar_program_instr = (self.fixture_dir_path / f'{test_id}.js').read_text()
+    return src_program_instr, tar_program_instr
+
+  def test_all(self):
+    '''
+    If prapp._run_tests runs without errors, it means that the serialized traces match.
+    If the serializer functions produce inconsistent outputs, the traces will not match,
+    and it will result in test failure.
+    '''
+    test_inputs = self.fixture_dir_path.glob('*.py')
+    test_ids = sorted([fpath.stem for fpath in test_inputs])
+    subject = type('PirelSubject', (), {
+      'src_lang': 'py', 'tar_lang': 'js', 'name': 'myexactlog-serialize'
+    })()
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        src_program_instr, tar_program_instr = self.get_fixture(test_id)
+        asyncio.run(prapp._run_tests(src_program_instr, tar_program_instr, subject))
 
 
 class TestCompareTraces(unittest.TestCase):

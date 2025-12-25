@@ -1,9 +1,0 @@
-def f_gold(str_0):
-    zeros = 0
-    myexactlog(1, zeros)
-    ones = 0
-    myexactlog(2, ones)
-    for i in range(0, len(str_0)):
-        myexactlog(3, 0)
-        pass
-        break

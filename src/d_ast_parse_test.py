@@ -56,18 +56,11 @@ def f_gold(x):
 class TestAreNodesEqual(unittest.TestCase):
   def setUp(self):
     self.maxDiff = None
-    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'py' / 'TestPrettyPrinter'
+    self.snippets_dir = p_consts.TEST_ARTIFACTS_DIR / 'd-ast-parse' / 'are-nodes-equal'
 
-  def test_all_gfg(self):
-    for fpath in sorted(self.snippets_dir.glob('G*.py')):
-      subject_name = fpath.stem[:5]
-      with self.subTest(subject_name=subject_name):
-        code = fpath.read_text()
-        ast, _ = d_ast_parse.parse_text_dbg(code, 'py')
-        self.assertTrue(d_ast_parse.are_nodes_equal(ast, ast))
-
-  def test_all_leetcode(self):
-    for fpath in sorted(self.snippets_dir.glob('L*.py')):
+  def test_all(self):
+    fixture_fpaths = sorted(self.snippets_dir.glob('*.py'))
+    for fpath in fixture_fpaths:
       subject_name = fpath.stem[:5]
       with self.subTest(subject_name=subject_name):
         code = fpath.read_text()

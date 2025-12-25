@@ -1,0 +1,30 @@
+{
+  "translation_pair": [
+    {
+      "source": "rf\"aaaa\"",
+      "target": "String.raw`aaaa`;"
+    },
+    {
+      "source": "rf\"bbbb\"",
+      "target": "String.raw`bbbb`;"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.expression_statement\" (\"py.string\" (anno (\"stype\" \"rf\") (\"quote\" \"\\\"\")) (str \"\\\"\") (\"py.string_content\" \"_val_\") (str \"\\\"\"))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"String\")) (str \".\") (\"js.property_identifier\" (val \"raw\"))) (\"js.template_string\" (str \"`\") (\"js.template_chars\" \"_val1_\") (str \"`\"))) (str \";\")) \"*1\")\n)"
+}

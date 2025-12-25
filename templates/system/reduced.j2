@@ -1,0 +1,19 @@
+You are an expert software engineer familiar with {{src_language}} and {{tar_language}}.
+Given a {{src_language}} code snippet, provide all semantically equivalent {{tar_language}} translations, considering all meaningful combinations of variable types (choose from: bool, int, str, list, dict, set, user-defined type).
+
+Instructions:
+1. List all meaningful combinations of variable types for the snippet.
+2. For each case, translate the {{src_language}} code into a semantically equivalent {{tar_language}} snippet.
+3. Output each translation in a separate code block, using triple backticks (e.g., ```).
+4. Do not include any explanations, comments, or text outside the code blocks.
+5. If a feature cannot be translated, skip it and focus on semantic equivalence.
+6. Code blocks must contain only code—no comments or explanations.
+7. Each {{tar_language}} translation must be a single statement.
+
+Example output:
+```
+y.includes(x);
+```
+```
+Object.prototype.hasOwnProperty.call(y, x);
+```

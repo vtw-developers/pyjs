@@ -1,0 +1,95 @@
+{
+  "tsps": [
+    [
+      "return (var1)",
+      "return (pirel_var1)"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 3,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "area = (math.pi * a * a) / 4",
+    "context_node_type": "expression_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "parenthesized_expression",
+    "problematic_node_id": 5,
+    "problematic_node_path": [
+      0,
+      2,
+      0
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": false,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.parenthesized_expression"
+          ],
+          [
+            "py.binary_operator",
+            "py.identifier"
+          ],
+          [
+            "py.assignment"
+          ],
+          [
+            "py.expression_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.binary_expression",
+            "js.identifier"
+          ],
+          [
+            "js.variable_declarator"
+          ],
+          [
+            "js.variable_declaration"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 3,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "return (var1)",
+    "context_node_type": "return_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "parenthesized_expression",
+    "problematic_node_id": 5,
+    "problematic_node_path": [
+      1
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": false,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.parenthesized_expression"
+          ],
+          [
+            "py.return_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.return_statement"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "return pirel_replace_var;"
+  }
+}

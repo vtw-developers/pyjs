@@ -18,6 +18,7 @@ class _CannotGenerateProgramPairError(RuntimeError): pass
 
 
 def is_invalid_pattern_before_gen_mapped_node_PY(
+  node_type: str,
   mapped_node: pds.DuoGlotNode,
   template_dict: dict,
 ) -> bool:
@@ -77,9 +78,62 @@ def is_invalid_pattern_before_gen_mapped_node_PY(
     logger.debug(f'Invalid pattern detected: generating keyword_argument')
     return True
 
+  def _pattern_4_pattern_list(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as `id_alic , = 5674` to avoid
+    generating a pattern_list with a single element.
+    '''
+    # mapped_node must be a pattern_list
+    if mapped_node.get_ts_node_type() != 'pattern_list':
+      return False
+    logger.debug(f'Invalid pattern detected: generating pattern_list')
+    return True
+
+  def _pattern_5_subscript(mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude generating a subscript as LHS of an assignment.
+    '''
+    # mapped_node must be a subscript
+    if mapped_node.get_ts_node_type() != 'subscript':
+      return False
+    parent = mapped_node.get_parent()
+    assert parent is not None, 'subscript must have a parent'
+    if parent.get_ts_node_type() not in ['assignment', 'augmented_assignment']:
+      return False
+    idx_self = parent.children.index(mapped_node)
+    if idx_self != 0:
+      return False
+    logger.debug(f'Invalid pattern detected: generating subscript as LHS of an assignment')
+    return True
+
+  def _pattern_6_rhs_in_comparison_operator(node_type: str, mapped_node: pds.DuoGlotNode) -> bool:
+    '''
+    Exclude cases such as `return 4394 in 3487`
+                                          ^^^^
+    '''
+    # parent of mapped_node must be a comparison_operator
+    parent = mapped_node.get_parent()
+    if parent.get_ts_node_type() != 'comparison_operator':
+      return False
+    # mapped_node is the last child of parent
+    if parent.children[-1] != mapped_node:
+      return False
+    operator = parent.children[1]
+    if operator.get_type() not in ['in', 'not in']:
+      return False
+    if node_type != 'integer':
+      return False
+    logger.debug(
+      f'Invalid pattern detected: generating integer as rhs of `in` comparison operator'
+      f'"{mapped_node.children[0].node_type}"')
+    return True
+
   pattern_callbacks = [
     lambda: _pattern_1_block_without_secret_fn_turned_on(mapped_node, template_dict),
     lambda: _pattern_3_keyword_argument(mapped_node),
+    lambda: _pattern_4_pattern_list(mapped_node),
+    lambda: _pattern_5_subscript(mapped_node),
+    lambda: _pattern_6_rhs_in_comparison_operator(node_type, mapped_node),
   ]
   for ntype in p_consts.FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST[template_dict['src_lang']]:
     pattern_callbacks.append(lambda ntype=ntype: _pattern_2_argument_list_for_fn(mapped_node, ntype))
@@ -386,7 +440,7 @@ def generate_tsps_manually_PY(
 
   # case 1: add (`template_origin`, `template_origin`) as a TSP for some cases such as `string`, `int`, etc.
   if template_dict['problematic_node_type'] in p_consts.DO_NOT_GENERATE_TSPS_FOR_NODE_TYPES[template_dict['src_lang']]:
-    logger.warning(f'problematic_node_type is "{template_dict["problematic_node_type"]}": manual TSP generation')
+    logger.debug(f'problematic_node_type is "{template_dict["problematic_node_type"]}": manual TSP generation')
     tsps = [(template_dict['template_origin'], template_dict['template_origin'])]
     logger.debug(f'Using `(template_origin, template_origin)` as a TSP: {json.dumps(tsps, indent=2)}')
     return tsps
@@ -436,7 +490,12 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   ]
 
   NOTE this function should be vocal about important errors
-  NOTE this function returns a third sample that is used during trans.rule validation
+  NOTE `template_dict` must include:
+  - template_origin: str
+  - src_lang: str
+  - problematic_node_path: List[int]
+  - problematic_node_type: str
+  - is_insert_secret_fn: bool
   '''
 
   p_utils.log_json_time('args-generate_tsps_with_generator.json', locals())
@@ -477,7 +536,6 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
     node, because it itself is templatized, i.e. it is a child of a fuzz node.
 
     NOTE writes to `template_dict`.
-    TODO should we reset "template_dict['is_insert_secret_fn']" to False?
     '''
     # a valid fuzz node has to be non-terminal
     if node.is_terminal():
@@ -573,8 +631,11 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
     NOTE
     1. When a node reaches Python 'block' node, it stops (just like at `identifier`, `integer`, etc.).
-    This allows us to use custom generation strategies for `block` nodes.
-    2. Generates all possible fuzz node group combinations.
+       This allows us to use custom generation strategies for `block` nodes.
+    2. Generates almost all possible fuzz node group combinations.
+       Sometimes, especially when the expression is complex, the number of combinations
+       can be huge. In that case, we randomly sample a subset of combinations.
+       The number of combinations is controlled by `p_consts.MAX_FUZZ_GROUP_LEN`.
     3. This function is language specific (hacky).
     4. A fuzz node group may contain both valid fuzz nodes AND nodes like `integer`, `float`, etc.
     '''
@@ -583,10 +644,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       '''
       Base conditions to stop descending down the tree.
       '''
-      if node.is_terminal():
-        return False
-
-      # `string` is a literal node, however it needs a special treatment unlike e.g. `integer`
+      # controls depth of recursion
       if node.get_ts_node_type() in p_consts.NON_DESCENDABLE_NODES[template_dict['src_lang']]:
         return False
 
@@ -596,20 +654,32 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
       return True
 
-    def __rec_descend(start_node: pds.DuoGlotNode, template_dict: dict) -> List[List[pds.DuoGlotNode]]:
+    def __rec_descend(
+      start_node: pds.DuoGlotNode,
+      template_dict: dict
+    ) -> Optional[List[List[pds.DuoGlotNode]]]:
       '''
       Recursively get fuzz node group combinations for children nodes,
       make their cartesian product, add the node itself, and return.
       '''
-      # base case
+      # base case: ignore terminal nodes
+      if start_node.is_terminal():
+        return None
+
+      # base case: cannot descend further
       if not __can_descend(start_node, template_dict):
         return [[start_node]]
 
-      # collect children groups
+      # recursive case: collect children groups
       children_generations = []
-      for child in start_node.get_children():
+      for child in start_node.get_nt_children():
         child_generation = __rec_descend(child, template_dict)
-        children_generations.append(child_generation)
+        if child_generation is not None:
+          children_generations.append(child_generation)
+
+      # base case: no children groups
+      if len(children_generations) == 0:
+        return [[start_node]]
 
       # add start_node itself, and then add cartesian product of children
       all_generations = [[start_node]]
@@ -617,6 +687,9 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       image_norm = reduce(int.__mul__, map(len, children_generations))
       if image_norm > p_consts.MAX_FUZZ_GROUP_LEN:
         indices = sample(range(image_norm), p_consts.MAX_FUZZ_GROUP_LEN)
+        logger.warning(
+          f'Number of combinations of fuzz node groups is {image_norm}, '
+          f'randomly sampling {p_consts.MAX_FUZZ_GROUP_LEN} combinations')
       else:
         indices = range(image_norm)
       for d in indices:
@@ -768,7 +841,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
   ) -> str:
     '''NOTE the generated code may have semantic errors'''
 
-    if is_invalid_pattern_before_gen_mapped_node_PY(mapped_node, template_dict):
+    if is_invalid_pattern_before_gen_mapped_node_PY(node_type, mapped_node, template_dict):
       raise _CannotGenerateProgramPairError('Invalid pattern detected')
 
     if p_consts.ENABLE_SPECIAL_TREATMENT_FOR_BODY_NODE_TYPES and template_dict['is_insert_secret_fn']:
@@ -797,7 +870,7 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
 
     def __choose_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
       '''
-      return a node type from `basic_ntypes_subset` that is ranked higher
+      Return a node type from `basic_ntypes_subset` that is ranked higher
       in the list of basic node types.
       '''
       basic_ntypes = p_consts.BASIC_NODE_TYPES[template_dict['src_lang']]
@@ -1007,12 +1080,41 @@ def generate_tsps_with_generator(template_dict: dict) -> List[Tuple[str, str]]:
       filtered_program_pairs.append(program_pair)
     return filtered_program_pairs
 
+  def _special_treatment_if_statement(
+    problematic_node: pds.DuoGlotNode,
+    grammar: p_grammar.TreeSitterGrammar,
+    template_dict: dict
+  ) -> List[Tuple[str, str]]:
+    '''
+    Special treatment for `if_statement` nodes in Python.
+    '''
+    # alternative node types for conditions
+    all_alt_starting_nodes : List[Tuple[pds.DuoGlotNode, List[str]]] = []
+    nt_children = problematic_node.get_nt_children()
+    all_alt_starting_nodes.append((nt_children[0], ['identifier', 'integer']))  # if condition
+    all_alt_starting_nodes.append((nt_children[1], ['block']))  # if body
+    for nt_child in nt_children[1:]:
+      if nt_child.get_ts_node_type() == 'elif_clause':
+        elif_nt_children = nt_child.get_nt_children()
+        all_alt_starting_nodes.append((elif_nt_children[0], ['identifier', 'integer']))  # elif condition
+        all_alt_starting_nodes.append((elif_nt_children[1], ['block']))  # elif body
+      elif nt_child.get_ts_node_type() == 'else_clause':
+        else_nt_children = nt_child.get_nt_children()
+        all_alt_starting_nodes.append((else_nt_children[0], ['block']))  # else body
+    # generate a program pair
+    template_dict['is_insert_secret_fn'] = True
+    gen_src_prog_1, gen_src_prog_2 = _gen_program_pair(all_alt_starting_nodes, grammar, template_dict)
+    return [(gen_src_prog_1, gen_src_prog_2)]
+
   logger.info('gen-tsp: starting generator based TSP generation.')
 
   # INPUTS TO THE GENERATOR
   lang = template_dict['src_lang']
   grammar = p_grammar.TreeSitterGrammar.from_dict(p_consts.GRAMMAR_DICT_READONLY[lang])
   problematic_node = _init_problematic_node(template_dict)
+
+  if problematic_node.get_ts_node_type() == 'if_statement':
+    return _special_treatment_if_statement(problematic_node, grammar, template_dict)
 
   # before automatic generation, check if we can use manually generated TSPs
   # specific to Python
@@ -1083,6 +1185,17 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
   can be simplified to
   `m = id1 if a > b else id2`
   where `a > b` is problematic.
+
+  NOTE writes to `template_dict`.
+  The following keys must be present:
+  - `template_origin`
+  - `src_lang`
+  - `problematic_node_path`
+  The following keys are updated/written:
+  - `problematic_node_id`
+  - `template_origin`
+  The following keys are created:
+  - `template_origin_before_simpl_w_gen`
 
   NOTE the idea is very similar to `generate_tsps_with_generator`.
   '''
@@ -1189,19 +1302,19 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
   def _gen_code_for_node(
     mapped_node: pds.DuoGlotNode,
     alt_node_types: List[str],
-    template_dict: dict,
+    src_lang: str,
     grammar: p_grammar.TreeSitterGrammar
   ) -> Optional[str]:
     '''
     RETURN a simplified code, else None
     '''
 
-    def __choose_ranked(basic_ntypes_subset: Set[str], template_dict: dict) -> str:
+    def __choose_ranked(basic_ntypes_subset: Set[str], src_lang: str) -> str:
       '''
       return a node type from `basic_ntypes_subset` that is ranked higher
       in the list of basic node types.
       '''
-      basic_ntypes = p_consts.BASIC_NODE_TYPES[template_dict['src_lang']]
+      basic_ntypes = p_consts.BASIC_NODE_TYPES[src_lang]
       assert set(basic_ntypes).issuperset(basic_ntypes_subset), 'sanity check failed'
 
       for ntype in basic_ntypes:
@@ -1210,7 +1323,7 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
 
       raise RuntimeError('should not reach here')
 
-    def __get_alt_node_types(mapped_node: pds.DuoGlotNode, alt_node_types: List[str], template_dict: dict) -> Optional[str]:
+    def __get_alt_node_types(mapped_node: pds.DuoGlotNode, alt_node_types: List[str], src_lang: str) -> Optional[str]:
       '''
       Given a mapped node and a list of alternative node types,
       return one alternative node type that can be used to generate
@@ -1219,7 +1332,7 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
       TODO is this always True -> `mapped_node.get_ts_node_type() in alt_node_types`
       '''
       mapped_ntype = mapped_node.get_ts_node_type()
-      basic_ntypes = set(p_consts.BASIC_NODE_TYPES[template_dict['src_lang']])
+      basic_ntypes = set(p_consts.BASIC_NODE_TYPES[src_lang])
       alt_ntypes = set(alt_node_types)
 
       # alternatives from basic node types including mapped_ntype
@@ -1232,7 +1345,7 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
       # case 2: mapped_node is not a basic type, but
       # can choose an alternative from basic types
       if len(basic_alts) > 0:
-        alt_ntype = __choose_ranked(basic_alts, template_dict)
+        alt_ntype = __choose_ranked(basic_alts, src_lang)
         return alt_ntype
 
       # case 3: no basic types in the intersection: use mapped_ntype itself
@@ -1245,13 +1358,13 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
     if _is_call_attribute_PY(mapped_node):
       return None
 
-    alt_ntype = __get_alt_node_types(mapped_node, alt_node_types, template_dict)
+    alt_ntype = __get_alt_node_types(mapped_node, alt_node_types, src_lang)
     if alt_ntype is None:
       return None
     code = _gen_code_for_node_type(alt_ntype, grammar)
     return code
 
-  def _apply_alt_codes(alternative_codes: Dict[int, str], template_dict: dict) -> str:
+  def _apply_alt_codes(alternative_codes: Dict[int, str], template_origin: str, src_lang: str) -> str:
     '''
     Given alternative codes (code blocks) for particular nodes,
     return an updated code with alternative codes applied.
@@ -1259,9 +1372,7 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
     PARAM alternative_code: keys are `node_id`s, values are alternative codes.
     '''
     # We need PirelTree as it supports `text` attribute that we rely on.
-    template_origin = template_dict['template_origin']
-    lang = template_dict['src_lang']
-    ast_text, ann = d_ast_parse.parse_text_dbg(template_origin, lang, keep_text=True)
+    ast_text, ann = d_ast_parse.parse_text_dbg(template_origin, src_lang, keep_text=True)
     tree = pds.PirelTree(ast_text, annotation=ann)
     tree._fix_indentation()
     # `root_node` of `tree` should have only a single child, which is a `context_node`
@@ -1282,17 +1393,18 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
   def _gen_program(
     all_alt_starting_nodes: List[Tuple[pds.DuoGlotNode, List[str]]],
     grammar: p_grammar.TreeSitterGrammar,
-    template_dict: dict
+    template_origin: str,
+    src_lang: str,
   ) -> str:
     alternative_codes = {}
     # `alt_node_types` is a list of all alternative nodes including `mapped_node.get_type()`
     for mapped_node, alt_node_types in all_alt_starting_nodes:
-      code = _gen_code_for_node(mapped_node, alt_node_types, template_dict, grammar)
+      code = _gen_code_for_node(mapped_node, alt_node_types, src_lang, grammar)
       # cannot/no need to simplify the `mapped_node`
       if code is None:
         continue
       alternative_codes[int(mapped_node.get_id())] = code
-    gen_src_prog = _apply_alt_codes(alternative_codes, template_dict)
+    gen_src_prog = _apply_alt_codes(alternative_codes, template_origin, src_lang)
     return gen_src_prog
 
   logger.debug('~~~ Starting generator based snippet simplification')
@@ -1317,7 +1429,7 @@ def simplify_template_with_generator(template_dict: dict) -> dict:
       alt_ntypes = _get_alt_ntypes_for_child(child, alt_starting_nodes)
       all_alt_starting_nodes.append((child, alt_ntypes))
 
-  simplified_template = _gen_program(all_alt_starting_nodes, grammar, template_dict)
+  simplified_template = _gen_program(all_alt_starting_nodes, grammar, template_dict['template_origin'], template_dict['src_lang'])
 
   # NOTE problematic_node_path must be the same, since we haven't removed any nodes
   upd_context_node, upd_problematic_node = _get_context_problematic_nodes(
@@ -1344,6 +1456,7 @@ def _test_generate_tsps_with_generator():
   - template_origin: str
   - src_lang: str
   - problematic_node_path: List[int]
+  - problematic_node_type: str
   - is_insert_secret_fn: bool
   '''
   config_fpath = p_consts.TMP_DIR / 'test_generate_tsps_with_generator.yaml'

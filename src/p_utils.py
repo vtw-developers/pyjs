@@ -377,7 +377,7 @@ def compilable_py(code: str, mode: str = "exec") -> bool:
   except (SyntaxError, ValueError):
     return False
 
-def remove_comments_and_docstrings_py(source: str) -> str:
+def _remove_comments_and_docstrings_py(source: str) -> str:
   """
   As per https://stackoverflow.com/a/2962727/1852634
   https://stackoverflow.com/questions/1769332/script-to-remove-python-comments-docstrings#comment1653880_1769362
@@ -446,6 +446,12 @@ def remove_comments_and_docstrings_py(source: str) -> str:
     last_col = end_col
     last_lineno = end_line
   return ''.join(out)
+
+def remove_comments_and_docstrings_py(source: str) -> str:
+  # need to call twice to remove empty lines
+  source = _remove_comments_and_docstrings_py(source)
+  source = _remove_comments_and_docstrings_py(source)
+  return source
 
 
 # Send email notifications
@@ -552,3 +558,54 @@ def are_equal_numbers(
   assert isinstance(num2, (int, float)), f'Expected int or float, got {type(num2)}'
   max_delta = max(abs(num1), abs(num2)) * eps_percentage / 100
   return abs(num1 - num2) <= max_delta
+
+def deep_json_diff(obj1, obj2, path=None, coerce_types=False):
+  '''
+  Deeply compare two JSON-serializable objects (dicts, lists, primitives).
+  RETURN (are_equal, path_to_difference, value_in_obj1, value_in_obj2)
+  where:
+    - are_equal is a boolean indicating if the objects are equal
+    - path_to_difference is a list of keys/indices leading to the first difference
+    - value_in_obj1 is the value from obj1 at the point of difference
+    - value_in_obj2 is the value from obj2 at the point of difference
+  PARAM coerce_types: If True, treat lists and tuples as equivalent and compare their contents.
+  '''
+  if path is None:
+    path = []
+  # Type coercion for lists/tuples
+  if coerce_types:
+    if isinstance(obj1, (list, tuple)) and isinstance(obj2, (list, tuple)):
+      obj1_seq = list(obj1)
+      obj2_seq = list(obj2)
+      if len(obj1_seq) != len(obj2_seq):
+        return False, path + ['len'], len(obj1_seq), len(obj2_seq)
+      for i, (a, b) in enumerate(zip(obj1_seq, obj2_seq)):
+        eq, p, v1, v2 = deep_json_diff(a, b, path + [i], coerce_types=coerce_types)
+        if not eq:
+          return eq, p, v1, v2
+      return True, path, None, None
+    # If types differ and not both are list/tuple, fail
+    if type(obj1) != type(obj2):
+      return False, path, obj1, obj2
+  else:
+    if type(obj1) != type(obj2):
+      return False, path, obj1, obj2
+  if isinstance(obj1, dict):
+    if obj1.keys() != obj2.keys():
+      return False, path + ['keys'], list(obj1.keys()), list(obj2.keys())
+    for k in obj1:
+      eq, p, v1, v2 = deep_json_diff(obj1[k], obj2[k], path + [k], coerce_types=coerce_types)
+      if not eq:
+        return eq, p, v1, v2
+    return True, path, None, None
+  if isinstance(obj1, (list, tuple)):
+    if len(obj1) != len(obj2):
+      return False, path + ['len'], len(obj1), len(obj2)
+    for i, (a, b) in enumerate(zip(obj1, obj2)):
+      eq, p, v1, v2 = deep_json_diff(a, b, path + [i], coerce_types=coerce_types)
+      if not eq:
+        return eq, p, v1, v2
+    return True, path, None, None
+  if obj1 != obj2:
+    return False, path, obj1, obj2
+  return True, path, None, None

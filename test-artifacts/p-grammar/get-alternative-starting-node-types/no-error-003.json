@@ -1,0 +1,50 @@
+{
+  "src_code": "arr = [[0 for x in range(n)] for y in range(n)]",
+  "node_path": [
+    0,
+    2
+  ],
+  "return_dict": {
+    "error_class": "n/a",
+    "error_msg": "n/a",
+    "alt_starting_nodes": [
+      [
+        5,
+        "py.list_comprehension",
+        [
+          "identifier",
+          "string",
+          "integer",
+          "float",
+          "binary_operator",
+          "concatenated_string",
+          "unary_operator",
+          "attribute",
+          "subscript",
+          "call",
+          "list",
+          "list_comprehension",
+          "set",
+          "set_comprehension",
+          "tuple",
+          "parenthesized_expression",
+          "generator_expression",
+          "dictionary",
+          "dictionary_comprehension",
+          "keyword_identifier",
+          "true",
+          "false",
+          "none",
+          "ellipsis"
+        ]
+      ],
+      [
+        13,
+        "py.for_in_clause",
+        [
+          "for_in_clause"
+        ]
+      ]
+    ]
+  }
+}

@@ -2,6 +2,15 @@
 const crypto = require("crypto");
 let _default_console_log = console.log;
 
+
+function isUserDefinedClass(obj) {
+  if (typeof obj !== 'object' || obj === null)
+    return false;
+  // Exclude plain objects
+  return obj.constructor && obj.constructor !== Object;
+}
+
+
 function serializeNull() {
   return ["null"];
 }
@@ -22,11 +31,15 @@ function serializeNum(arg) {
   if (Number.isNaN(arg))
     return serializeString("nan");
   if (arg >= Number.MIN_SAFE_INTEGER && arg <= Number.MAX_SAFE_INTEGER) {
+    if (Math.abs(arg) <= 1e-9) {
+      return ["number", 0];
+    }
     // force whole numbers to be int type
     if (arg % 1 === 0) {
       return ["number", Math.round(arg)];
     }
-    return ["number", arg];
+    const srlzd = String(arg.toExponential(6));
+    return serializeString(srlzd);
   }
   return serializeString(String(arg.toExponential(6)));
 }
@@ -57,11 +70,10 @@ function serializeSet(arg) {
   return ["set", sortedVals.length, serializedVals];
 }
 
-function _isStringNumber(str) {
-  return str.trim() !== "" && !isNaN(str);
-}
-
 function serializeObject(arg) {
+  if (isUserDefinedClass(arg)) {
+    return serializeDefinedInMain(arg);
+  }
   const sortedKeys = Object.keys(arg).sort();
   let serializedKeyValuePairs = [];
   for (const key of sortedKeys) {
@@ -92,6 +104,14 @@ function serializeMap(arg) {
   return ["dict", sortedKeys.length, serializedKeyValuePairs];
 }
 
+function serializeCallable(arg) {
+  return ["function"];
+}
+
+function serializeDefinedInMain(arg) {
+  return ["defined_in_main", arg.constructor.name];
+}
+
 function serialize(arg) {
   if (arg === null || typeof arg === "undefined")
     return serializeNull();
@@ -112,7 +132,7 @@ function serialize(arg) {
   if (typeof arg === "bigint")
     return serializeNum(Number(arg));
   if (arg instanceof Function)
-    return ["function"]
+    return serializeCallable(arg);
   let str_result = String(arg);
   return ["unknown", str_result.length, str_result];
 }
@@ -139,4 +159,11 @@ console.log = function () {
 // this function is inserted into body node types' `block`
 function secret_fun_4071() {
   return 0;
+}
+
+class Exception extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "Exception";
+  }
 }

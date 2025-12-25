@@ -1,0 +1,17 @@
+{
+  "code": "def f_gold(arr, n):\n    arr.sort()\n    i = 0\n    j = n - 1\n    while i < j:\n        print(arr[j], end=\" \")\n        j -= 1\n        print(arr[i], end=\" \")\n        i += 1\n    if n % 2 != 0:\n        print(arr[i])",
+  "choicable_nodes": [
+    "0",
+    "n - 1",
+    "i < j",
+    "arr[j]",
+    "\" \"",
+    "1",
+    "arr[i]",
+    "\" \"",
+    "1",
+    "n % 2 != 0",
+    "arr[i]"
+  ],
+  "exclude_stat_nids": []
+}

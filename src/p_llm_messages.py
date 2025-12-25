@@ -96,7 +96,7 @@ class BaseTranslateSP1Factory(BaseMessageFactory):
     st_tp1_cand_descs = ''
     for tp1c_err in tp1_cands_w_error:
       tp1_cand_ast_current = pds.DuoGlotTree.from_code_str(tp1c_err, self.tar_lang).tree_as_str()
-      st_tp1_cand_desc = p_llm_templates.TranslateSP1.Feedback.MissingContext.ST_TP1_CAND_DESC.format(
+      st_tp1_cand_desc = p_llm_templates.TranslateSP1.PartialProgram.Feedback.MissingContext.ST_TP1_CAND_DESC.format(
         tar_language=self.tar_language,
         tp1_cand=tp1c_err,
         src_language=self.src_language,
@@ -107,11 +107,11 @@ class BaseTranslateSP1Factory(BaseMessageFactory):
 
     # st_grammar_cands_number
     if len(tp1_cands_w_error) > 1:
-      st_grammar_cands_number = p_llm_templates.TranslateSP1.Feedback.MissingContext.StGrammar_CandsNumber.PLURAL.format(
+      st_grammar_cands_number = p_llm_templates.TranslateSP1.PartialProgram.Feedback.MissingContext.StGrammar_CandsNumber.PLURAL.format(
         tar_language=self.tar_language
       )
     else:
-      st_grammar_cands_number = p_llm_templates.TranslateSP1.Feedback.MissingContext.StGrammar_CandsNumber.SINGULAR.format(
+      st_grammar_cands_number = p_llm_templates.TranslateSP1.PartialProgram.Feedback.MissingContext.StGrammar_CandsNumber.SINGULAR.format(
         tar_language=self.tar_language
       )
 
@@ -121,7 +121,7 @@ class BaseTranslateSP1Factory(BaseMessageFactory):
 
     # MESSAGE
     feedback_message = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateSP1.Feedback.MissingContext.MAIN
+      p_llm_templates.TranslateSP1.PartialProgram.Feedback.MissingContext.MAIN
     ).format(
       st_tp1_cand_descs=st_tp1_cand_descs,
       st_grammar_cands_number=st_grammar_cands_number,
@@ -165,6 +165,28 @@ class BaseTranslateSP1Factory(BaseMessageFactory):
       )
       return feedback_message
     self._log('common case 3: some/all tp1_cands are not comment-only strings')
+
+    # common case 4: checking if all tp1_cands have multiple statements
+    self._log('common case 4: checking if all tp1_cands have multiple statements')
+    if self.val.all_have_multiple_statements():
+      self._log('all tp1_cands have multiple statements')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        'Please make sure that the generated translation(s) is a single statement.'
+      )
+      return feedback_message
+    self._log('common case 4: some/all tp1_cands have a single statement/expression')
+
+    # common case 5: checking if all tp1_cands are compound statements without curly braces
+    self._log('common case 5: checking if all tp1_cands are compound statements without curly braces')
+    if self.val.all_comp_stat_no_curly_braces():
+      self._log('all tp1_cands are compound statements without curly braces')
+      self._log('returning the feedback message')
+      feedback_message = HumanMessage(
+        f'Please make sure that the generated {self.tar_language} translation uses curly braces for the statement block.'
+      )
+      return feedback_message
+    self._log('common case 5: some/all tp1_cands are not compound statements without curly braces')
 
     self._log('finished checking for common cases')
 

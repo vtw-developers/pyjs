@@ -1,1 +1,0 @@
-group += ord(num[i]) - ord("0")

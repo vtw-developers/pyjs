@@ -1,2 +1,0 @@
-if str_0[j] != "b":
-    pass

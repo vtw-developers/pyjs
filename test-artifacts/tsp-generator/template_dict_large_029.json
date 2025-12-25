@@ -1,0 +1,19 @@
+{
+  "template_origin": "while (not class_var.bounded_string(ab) or (len(ab) > 2 and ab[0] == ab[1] == ab[2] and ab[-2] != ab[0] and ab[-3] != ab[0])):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "while_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1,
+    1
+  ],
+  "problematic_node_type": "boolean_operator",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "while (id_xlsa or id_cgip):\n    pass",
+      "while (422 or 1490):\n    pass"
+    ]
+  ],
+  "problematic_node_id": 3
+}

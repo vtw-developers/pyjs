@@ -1,0 +1,42 @@
+l = int(id_jyg)
+"-----------------"
+l = int(id_tdxk)
+"-----------------"
+var l = (function(s) {
+    s = String(s).trim();
+    if (!/^[+-]?\d+$/.test(s)) throw new Error();
+    return Number(s);
+})(id_jyg);
+"-----------------"
+var l = (function(s) {
+    s = String(s).trim();
+    if (!/^[+-]?\d+$/.test(s)) throw new Error();
+    return Number(s);
+})(id_tdxk);
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.call",
+      "py.identifier"
+    ],
+    [
+      "py.assignment"
+    ],
+    [
+      "py.expression_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown",
+      "js.identifier"
+    ],
+    [
+      "js.variable_declarator"
+    ],
+    [
+      "js.variable_declaration"
+    ]
+  ]
+}

@@ -1,0 +1,11 @@
+{% if use_reduced_prompts %}
+Translate the following {{src_language}} statement into a semantically equivalent {{tar_language}} statement:
+```
+{{statement_to_translate}}
+```
+{% else %}
+Translate the following {{src_language}} statement into a semantically equivalent {{tar_language}} statement:
+```{{src_language}}
+{{statement_to_translate}}
+```
+{% endif %}

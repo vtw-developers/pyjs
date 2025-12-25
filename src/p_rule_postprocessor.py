@@ -978,76 +978,44 @@ class TranslationRule:
 
     return src_trimmed_pattern, tar_trimmed_pattern
 
+  def convert_ident_captures_to_dot_phs(self) -> Union[None, Tuple[list, list]]:
+    '''
+    Convert all identifier captures in both source and target patterns to dot placeholders.
+    For example,
+    (fragment ("py.expression_statement" ("py.assignment" ("py.identifier" "_val_") (str "=") ("py.identifier" "_val_"))) "*")
+    becomes
+    (fragment ("py.expression_statement" ("py.assignment" "."                       (str "=") "."                      )) "*")
+    '''
 
-# TODO update paths to `temporary_*` files
-def test_replace_secret_with_placeholder():
-  with open('temporary_source-unified-pattern.json') as fin:
-    srcpat = json.loads(fin.read())
-  with open('temporary_target-unified-pattern.json') as fin:
-    tarpat = json.loads(fin.read())
+    # TODO this is done on ALL identifier captures, might want to limit only to specific ones
+    src_id_captures = [ph for ph in self.S if isinstance(ph, SourceValPhNode) and ph.get_parent().get_type() == '"py.identifier"']
 
-  # def foo(node: Node):
-  #   nt = node.get_text()
-  #   if '\n' in nt:
-  #     print(node)
-  #     print()
-  #   for ch in node.children:
-  #     foo(ch)
+    for src_id_capture in src_id_captures:
+      tar_id_captures = self._get_mapping_of(src_id_capture)
 
-  tree = TranslationRule(srcpat, tarpat)
-  tree.debug_print()
+      src_idnode = src_id_capture.get_parent()
+      src_dot_ph_parent = src_idnode.get_parent()
+      src_idnode_idx = src_idnode.get_index_as_child()
+      src_idnode.set_parent(None)
+      src_dot_ph = SourceDotStarPhNode('"."', src_dot_ph_parent, self.src_dot_star_next_phid)
+      self.src_dot_star_next_phid += 1
+      src_dot_ph_parent.get_children()[src_idnode_idx] = src_dot_ph
 
-  with open('temporary_source_pattern_tree_back.json', 'w') as fout:
-    res = tree.src_as_s_expression()
-    fout.write(json.dumps(res))
+      for tar_id_capture in tar_id_captures:
+        tar_idnode = tar_id_capture.get_parent()
+        tar_dot_ph_parent = tar_idnode.get_parent()
+        tar_idnode_idx = tar_idnode.get_index_as_child()
+        tar_idnode.set_parent(None)
+        tar_dot_ph = TargetDotStarPhNode(f'".{src_dot_ph.get_phid()}"', tar_dot_ph_parent, src_dot_ph.get_phid())
+        tar_dot_ph_parent.get_children()[tar_idnode_idx] = tar_dot_ph
 
-  with open('temporary_target_pattern_tree_back.json', 'w') as fout:
-    res = tree.tar_as_s_expression()
-    fout.write(json.dumps(res))
+    self._update_placeholder_sets()
+    self.STmap_val, self.TSmap_val, \
+      self.STmap_str, self.TSmap_str, \
+        self.STmap_dotstar, self.TSmap_dotstar = \
+          self._get_placeholder_mappings()
+    self._recalculate_phids_and_remap([], [])
 
-  tree.replace_secret_with_placeholder('some_secret_fn_4071')
-  with open('temporary_source_pattern_tree_reduced.json', 'w') as fout:
-    res = tree.src_as_s_expression()
-    fout.write(json.dumps(res))
-  with open('temporary_target_pattern_tree_reduced.json', 'w') as fout:
-    res = tree.tar_as_s_expression()
-    fout.write(json.dumps(res))
-
-
-# TODO update paths to `temporary_*` files
-def test_trim_context():
-  with open('temporary_source-unified-pattern.json') as fin:
-    srcpat = json.loads(fin.read())
-  with open('temporary_target-unified-pattern.json') as fin:
-    tarpat = json.loads(fin.read())
-  with open('temporary_contexts.json') as fin:
-    contexts = json.loads(fin.read())
-
-  template_contexts = []
-  for context in contexts:
-    source_context = context['source_context']
-    target_context = context['target_context']
-
-    source_context_prev_siblings = source_context[0][1:]
-    # source_context_parents = source_context[1:1+template_id]
-    source_context_parents = list(map(lambda x: x[0], source_context[1:1+2]))
-    target_context_prev_siblings = target_context[0][1:]
-    # target_context_parents = target_context[1:1+template_id]
-    target_context_parents = list(map(lambda x: x[0], target_context[1:1+2]))
-
-    template_contexts.append({
-      'source_context': {'siblings': source_context_prev_siblings, 'parents': source_context_parents},
-      'target_context': {'siblings': target_context_prev_siblings, 'parents': target_context_parents},
-    })
-
-  tree = TranslationRule(srcpat, tarpat)
-  newsrcpat, newtarpat = tree.trim_context(template_contexts)
-
-  with open('temporary_source_pattern_tree_trimmed.json', 'w') as fout:
-    fout.write(json.dumps(newsrcpat))
-  with open('temporary_target_pattern_tree_trimmed.json', 'w') as fout:
-    fout.write(json.dumps(newtarpat))
-
-
-if __name__ == '__main__':
-  test_trim_context()
+    src_pattern = self._rec_build_s_expression(self.src_root_node)
+    tar_pattern = self._rec_build_s_expression(self.tar_root_node)
+    return src_pattern, tar_pattern

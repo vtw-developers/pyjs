@@ -1,0 +1,14 @@
+{
+  "code": "def f_gold(arr1, arr2, m, n):\n    i = 0\n    j = 0\n    for i in range(n):\n        for j in range(m):\n            if arr2[i] == arr1[j]:\n                break\n        else:\n            return 0\n    return 1",
+  "choicable_nodes": [
+    "0",
+    "0",
+    "arr2[i] == arr1[j]",
+    "0",
+    "1"
+  ],
+  "exclude_stat_nids": [
+    17,
+    24
+  ]
+}

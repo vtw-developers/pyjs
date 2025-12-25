@@ -18,6 +18,9 @@ import p_utils
 logger = p_utils.setup_logger(__name__)
 
 
+class RulesExistNoneValid(RuntimeError): pass
+
+
 def get_used_translation_rule_ids(
   dbg_history: List[dict]
 ) -> List[int]:
@@ -37,13 +40,9 @@ def _process_used_rules(
   ltrule_syntax_val_res: Optional[ptlog.TRuleSyntaxValRes] = None
 ) -> bool:
 
-  logger.debug('~~ checking rule under test based on the rule ids used')
-  logger.debug(f'rule_ids_before: {rule_ids_before}')
-  logger.debug(f'rule_ids_after: {rule_ids_after}')
   ltrule_syntax_val_res = ltrule_syntax_val_res or ptlog.TRuleSyntaxValRes()
 
   # number of rules used after must be strictly greater than the number of rules used before
-  logger.debug('~ checking if the number of rules used after is greater than before')
   if not (len(rule_ids_after) > len(rule_ids_before)):
     msg = (
       f'Translation rule is BAD:\n'
@@ -54,10 +53,8 @@ def _process_used_rules(
     ltrule_syntax_val_res.is_valid = False
     ltrule_syntax_val_res.reason = msg
     return False
-  logger.debug('~ [good] the number of rules used after is greater than before')
 
   # used rule id's before must be identical to the first rule id's after
-  logger.debug('~ checking if the used rule ids after are prefixed with the rule ids before')
   for i in range(len(rule_ids_before)):
     if rule_ids_before[i] != rule_ids_after[i]:
       msg = (
@@ -70,14 +67,12 @@ def _process_used_rules(
       ltrule_syntax_val_res.is_valid = False
       ltrule_syntax_val_res.reason = msg
       return False
-  logger.debug('~ [good] used rule ids after are prefixed with the rule ids before')
 
   # id of the first rule used must be of rule under test
   # `rule_ids_before = [3, 10, 4, 5, 6, 0]`
   # `rule_ids_after  = [3, 10, 4, 5, 6, 0, 17, 8, 7]`
   # as in the example above, `17` must be id of the rule under test
-  logger.debug('~ checking if rule under test is used for the problematic node')
-  existing_rules_list, _ = d_grammar_rules.parse_analyze_rules(current_ruleset)
+  existing_rules_list = d_grammar_rules.parse_analyze_rules_optim(current_ruleset)
   num_rules_in_before_ruleset = len(existing_rules_list)
   # this will be id of the rule under test
   rule_under_test_idx_in_after_ruleset = num_rules_in_before_ruleset
@@ -94,7 +89,6 @@ def _process_used_rules(
     ltrule_syntax_val_res.is_valid = False
     ltrule_syntax_val_res.reason = msg
     return False
-  logger.debug('~ [good] rule under test is used for the problematic node')
 
   logger.debug('translation rule is syntactically valid')
   ltrule_syntax_val_res.is_valid = True
@@ -115,16 +109,15 @@ def is_valid_translation_rule_syntactic(
   '''
 
   p_utils.log_json_time(f'args-is_valid_translation_rule_syntactic.json', locals())
-  logger.debug(
-    f'~~ Checking if translation rule is syntactically valid:\n'
-    f'Rule hash value: {ltrule.hash}\n{translation_rule}')
   ltrule = ltrule or ptlog.TRule.from_str(translation_rule)
   ltrule_syntax_val_res = ptlog.TRuleSyntaxValRes()
   ltrule.syntax_val_res = ltrule_syntax_val_res
+  logger.debug(
+    f'~~ Checking if translation rule is syntactically valid:\n'
+    f'Rule hash value: {ltrule.hash}\n{translation_rule}')
 
   # ~~~ FIRST, CHECK IF THE MAPPINGS IN THE TRANSLATION RULE ARE CORRECT
-  logger.debug('~ checking if the mappings in the translation rule are correct')
-  expansion_programs, _ = d_grammar_rules.parse_analyze_rules(translation_rule)
+  expansion_programs = d_grammar_rules.parse_analyze_rules_optim(translation_rule)
   assert len(expansion_programs) == 1, 'should not happen: there must be exactly one translation rule'
   match_pattern, expand_pattern = expansion_programs[0]['match'], expansion_programs[0]['expand']
   try:
@@ -139,11 +132,9 @@ def is_valid_translation_rule_syntactic(
     ltrule_syntax_val_res.is_valid = False
     ltrule_syntax_val_res.reason = msg
     return False
-  logger.debug('~ the mappings in the translation rule are correct')
 
   # ~~~ SECOND, CHECK IF THE TRANSLATION RULE REALLY TRANSLATES THE PROBLEMATIC NODE
   # ~~ get the translation result with the existing ruleset
-  logger.debug('~ checking translation with the existing ruleset')
   dbg_history_before = None
   try:
     _ = p_pirel.duoglot_translate_wrapper(
@@ -156,7 +147,6 @@ def is_valid_translation_rule_syntactic(
       skip_template_extraction=True
     )
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    logger.debug('[expected] Existing ruleset fails to translate as expected')
     # NOTE dbg_history should have been set in duoglot_translate_wrapper
     dbg_history_before = exc.dbg_history
   except:
@@ -176,7 +166,6 @@ def is_valid_translation_rule_syntactic(
     return False
 
   # ~~ get the translation result with the (existing ruleset + rule under test)
-  logger.debug('~ checking translation with the (existing ruleset + rule under test)')
   dbg_history_after = None
   try:
     _ = p_pirel.duoglot_translate_wrapper(
@@ -197,10 +186,7 @@ def is_valid_translation_rule_syntactic(
     ltrule_syntax_val_res.is_valid = True
     return True
   except d_grammar_expand.TranslationRuleNotFoundException as exc:
-    msg = (
-      '[expected] (existing ruleset + rule under test) failed to translate the code.\n'
-      'Will further check the rule ids used before and after the translation'
-    )
+    # expected: will further check the rule ids used before and after the translation
     # NOTE dbg_history should have been set in duoglot_translate_wrapper
     dbg_history_after = exc.dbg_history
   except Exception as exc:
@@ -288,7 +274,7 @@ def is_invalid_pattern_detected(
       return True
     return False
 
-  parsed_rules, _ = d_grammar_rules.parse_analyze_rules(trule_str)
+  parsed_rules = d_grammar_rules.parse_analyze_rules_optim(trule_str)
   assert len(parsed_rules) == 1, 'should not happen: there must be exactly one translation rule'
   match_pattern, expand_pattern = parsed_rules[0]['match'], parsed_rules[0]['expand']
   trule = prpp.TranslationRule(match_pattern, expand_pattern)
@@ -328,7 +314,7 @@ def filter_translation_rules(
 
   syn_cor_trules = []
   for idx, trule in enumerate(trules_list, start=1):
-    logger.debug(f'Checking translation rule {idx}/{len(trules_list)}:\n{trule}')
+    logger.debug(f'Checking translation rule {idx}/{len(trules_list)}')
     ltrule = ptlog.TRule.from_str(trule)
     lprule_filter_log.trules_all.append(ltrule)
 
@@ -356,7 +342,7 @@ def filter_translation_rules(
   return syn_cor_trules
 
 
-async def check_trules_test_based(
+async def stat_node_validate_trules_test_based(
   stat_val_subject: p_subject.PirelSubject,
   current_ruleset: p_ruleset.Ruleset,
   simple_ntext: str,
@@ -369,7 +355,7 @@ async def check_trules_test_based(
   NOTE it is assumed that stat_val_subject.src_main_code is instrumented.
   '''
 
-  p_utils.log_json_time(f'args-check_trules_test_based.json', locals())
+  p_utils.log_json_time(f'args-stat_node_validate_trules_test_based.json', locals())
   logger.debug('~~ Starting test-based validation of translation rules')
 
   lstat_node_val = lstat_node_val or ptlog.StatNodeVal()
@@ -380,8 +366,8 @@ async def check_trules_test_based(
   2. ruleset_serialized contains verified rules that can be copied
      to current_ruleset
   '''
-  logger.debug('stat-val: getting readonly choices list before applying translation rules')
-  readonly_choices_list = await p_ext_rule_chooser.get_readonly_choices_list(
+  logger.debug('--stat-val--: getting readonly choices list before applying translation rules')
+  await p_ext_rule_chooser.stat_node_validate_exprs(
     stat_val_subject.get_src_main_code(),
     stat_val_subject.get_src_test_code(),
     stat_val_subject.translation_rules_test_code,
@@ -389,18 +375,26 @@ async def check_trules_test_based(
     simple_ntext,
     stat_val_subject.name
   )
-  stat_val_subject.readonly_choices_list = readonly_choices_list
-  logger.debug('stat-val: saved readonly choices list')
+  verified_choice_options = current_ruleset.get_choice_options_from_verified_rules(
+    stat_val_subject.get_src_main_code())
+  stat_val_subject.verified_choice_options = verified_choice_options
+  logger.debug('--stat-val--: saved readonly choices list')
 
   lstat_node_val.v2_expr_valid_ok = True
   lstat_node_val.v2_expr_valid_etms = p_utils.current_time_msec()
   lstat_node_val.v3_rule_apply_stms = p_utils.current_time_msec()
 
-  logger.debug('stat-val: applying translation rules to get the target program')
-  tar_program_plausible, translate_dbg_history = \
-    await prapp.apply_translation_rules(stat_val_subject)
-  stat_val_subject.readonly_choices_list = []  # reset
-  logger.debug('stat-val: finished applying translation rules')
+  logger.debug('--stat-val--: applying translation rules to get the target program')
+  try:
+    tar_program_plausible, translate_dbg_history = \
+      await prapp.apply_translation_rules(stat_val_subject)
+  except d_grammar_expand.NormalException as exc:
+    msg = str(exc)
+    if msg == 'Automatic backwarding failed to find alternative choices. (back limit)':
+      raise RulesExistNoneValid from exc
+    raise exc
+  stat_val_subject.verified_choice_options = []  # reset
+  logger.debug('--stat-val--: finished applying translation rules')
 
   lstat_node_val.v3_rule_apply_ok = True
   lstat_node_val.v3_rule_apply_etms = p_utils.current_time_msec()
@@ -432,16 +426,16 @@ def _test_is_valid_translation_rule_syntactic():
   print(is_valid)
 
 
-async def _test_check_trules_test_based():
+def _test_stat_node_validate_trules_test_based():
   '''
-  async def check_trules_test_based(
+  async def stat_node_validate_trules_test_based(
     stat_val_subject: p_subject.PirelSubject,
     current_ruleset: p_ruleset.Ruleset,
     simple_ntext: str,
     lstat_node_val: Optional[ptlog.StatNodeVal] = None
   ) -> None:
   '''
-  config_fpath = p_consts.TMP_DIR / 'test_check_trules_test_based_config.yaml'
+  config_fpath = p_consts.TMP_DIR / 'test_stat_node_validate_trules_test_based_config.yaml'
   config = p_utils.read_yaml(config_fpath)
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
@@ -449,14 +443,14 @@ async def _test_check_trules_test_based():
   current_ruleset = p_ruleset.Ruleset.from_dict(args_dict['current_ruleset'])
   simple_ntext = args_dict['simple_ntext']
 
-  await check_trules_test_based(
+  asyncio.run(stat_node_validate_trules_test_based(
     stat_val_subject,
     current_ruleset,
     simple_ntext,
     None
-  )
+  ))
 
 
 if __name__ == '__main__':
   # _test_is_valid_translation_rule_syntactic()
-  asyncio.run(_test_check_trules_test_based())
+  _test_stat_node_validate_trules_test_based()

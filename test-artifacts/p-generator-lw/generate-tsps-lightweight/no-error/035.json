@@ -1,0 +1,63 @@
+{
+  "tsps": [
+    [
+      "var1 = var2",
+      "pirel_var1 = pirel_var2"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "carry = x & y",
+    "context_node_type": "expression_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "expression_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": false,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.expression_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "var1 = var2",
+    "context_node_type": "expression_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "expression_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": false,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.expression_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "pirel_replace_var;"
+  }
+}

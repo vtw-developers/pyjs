@@ -468,17 +468,18 @@ class Tree:
         text : str = ts_node.text.decode('utf-8')
         type_ : str = ts_node.type
 
-        # terminal node
-        if type_ == text:
-          return pvis.TerminalNode(text)
-
         # literal node
-        NodeCls = NODE_TYPES_CLASSES[type_]
-        literal_node = NodeCls(type_)
-        tnode = pvis.TerminalNode(text)
-        literal_node.add_child(tnode)
-        tnode.set_parent(literal_node)
-        return literal_node
+        if type_ in NODE_TYPES_CLASSES:
+          NodeCls = NODE_TYPES_CLASSES[type_]
+          literal_node = NodeCls(type_)
+          tnode = pvis.TerminalNode(text)
+          literal_node.add_child(tnode)
+          tnode.set_parent(literal_node)
+          return literal_node
+
+        # terminal node
+        assert type_ == text, 'sanity check: leaf node is a terminal node'
+        return pvis.TerminalNode(text)
 
       # special case: nodes with fields
       # NOTE might as well do this for all nodes
@@ -509,6 +510,16 @@ class Tree:
       child_node.set_parent(root_node)
 
     tree = Tree(root_node)
+    return tree
+
+  @classmethod
+  def from_str(cls, code: str) -> Tree:
+    '''
+    Construct a Tree from a string
+    '''
+    parser = p_consts.PARSER_DICT['js']
+    ts_tree = parser.parse(bytes(code, 'utf8'))
+    tree = Tree.from_ts_tree(ts_tree)
     return tree
 
 

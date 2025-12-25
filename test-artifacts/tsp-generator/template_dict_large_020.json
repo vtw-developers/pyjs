@@ -1,0 +1,20 @@
+{
+  "template_origin": "d = datetime.datetime(int(val[:4]), int(val[5:7]), int(val[8:10]), int(val[11:13]), int(val[14:16]), int(val[17:19]), microsecond, tz)",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "expression_statement",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "id_owg = id_okf",
+      "id_ctla = 3042"
+    ],
+    [
+      "id_qxhw = datetime.datetime(id_tpr, id_vlh, id_gyfl, id_nyx, id_ymg, id_muw, id_eib, id_fpj)",
+      "id_ciws = datetime.datetime(3293, 5548, 1129, 8235, 817, 1456, id_qvh, id_brik)"
+    ]
+  ],
+  "problematic_node_id": 1
+}

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 
@@ -7,12 +8,11 @@ class Config:
   tar_lang: str = None
   is_three_split: bool = None
 
-  overriding_rulesets: List[str] = None
+  overriding_rulesets: List[Path] = None
 
   max_concurrent_subjects: int = None
   reuse_translation_rules: bool = None
 
-  sample_randomize: bool = None
   sample_size: int = None
   sample_start_idx: int = None
   sample_only: List[str] = None
@@ -20,11 +20,11 @@ class Config:
 
   is_email_report: bool = None
 
-  sort_new_choices_in_reverse: bool = True
+  use_reduced_prompts: bool = False
 
-  llm_api_url: str = None        # NOTE not set through CLI args
-  llm_model: str = None          # NOTE not set through CLI args
-  llm_temperature: float = None  # NOTE not set through CLI args
+  generator: str = 'lightweight'
+
+  prefer_shorter_rules: bool = True
 
 
 def load_configs(args):
@@ -38,10 +38,13 @@ def load_configs(args):
   Config.max_concurrent_subjects = args.max_concurrent_subjects
   Config.reuse_translation_rules = args.reuse_translation_rules
 
-  Config.sample_randomize = args.sample_randomize
   Config.sample_size = args.sample_size
   Config.sample_start_idx = args.sample_start_idx
   Config.sample_only = args.sample_only
   Config.sample_exclude = args.sample_exclude
 
   Config.is_email_report = args.is_email_report
+
+  Config.use_reduced_prompts = args.use_reduced_prompts
+
+  Config.generator = args.generator

@@ -1,0 +1,8 @@
+{
+  "code": "import math\ndef f_gold(a):\n    area = (math.pi * a * a) / 4\n    return area",
+  "choicable_nodes": [
+    "(math.pi * a * a) / 4",
+    "area"
+  ],
+  "exclude_stat_nids": []
+}

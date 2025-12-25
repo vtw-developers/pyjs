@@ -2,6 +2,7 @@ import copy
 import json
 import sys
 
+import d_ast_parse
 import d_consts
 import d_grammar
 import d_utils
@@ -38,7 +39,8 @@ class Slot:
     '''
     self.slot_id = slot_id
     self.belong_ex_id = belong_ex_id
-    self.range_cursor = range_cursor
+    # self.range_cursor = range_cursor
+    self.range_cursor = self.process_range_cursor(range_cursor)
     self.slot_node_ids = _get_node_ids_from_range_cursor(range_cursor)
     if d_consts.DEBUG_VERBOSE > -10: print("# Slot create:", self.slot_id, " belong_ex_id:", self.belong_ex_id)
 
@@ -58,6 +60,26 @@ class Slot:
       'range_cursor': self.range_cursor,
       'slot_node_ids': self.slot_node_ids
     }
+
+  def process_range_cursor(self, range_cursor: tuple) -> tuple:
+    '''
+    If range cursor points to multiple non-terminal node,
+    make sure that `start_idx + 1 == end_idx`
+    '''
+    # root range cursor is special (assume slot_id is set)
+    if self.slot_id == 0:
+      return range_cursor
+    _, sidx, eidx = range_cursor
+    # already points to a single non-terminal node
+    if sidx + 1 == eidx:
+      return range_cursor
+    split_rcs = list(d_ast_parse.range_cursor_split(range_cursor))
+    assert len(split_rcs) >= 1, 'sanity check'
+    # if it points to multiple non-terminal nodes, return as is.
+    if len(split_rcs) > 1:
+      return range_cursor
+    single_rc = split_rcs[0]
+    return single_rc
 
 
 class Expansion:
@@ -392,7 +414,8 @@ class DelimitedParser():
     # added by @satbekmyrza: entire tail stack
     # for i in range(0, len(self._tail_stack)):
     # original: last 20 elements
-    # for i in range(len(self._tail_stack) - 20, len(self._tail_stack)):
+    # last_n = min(20, len(self._tail_stack))
+    # for i in range(len(self._tail_stack) - last_n, len(self._tail_stack)):
     #   print(self._pretty_frame_short(i, self._tail_stack[i]))
     pass
 
@@ -402,9 +425,9 @@ class DelimitedParser():
     assert ex_id is not None
     assert corres_id is not None
     if ex_id in self._expansion_dict:
-      assert self._expansion_dict[ex_id] is expansion
+      assert self._expansion_dict[ex_id] is expansion, f'Expansion id {ex_id} already exists.'
     else:
-      assert corres_id not in self._slot_id_to_expansion_dict
+      assert corres_id not in self._slot_id_to_expansion_dict, f'Slot id {corres_id} already has expansion assigned.'
       self._expansion_dict[ex_id] = expansion
       self._slot_id_to_expansion_dict[corres_id] = expansion
 

@@ -1,0 +1,71 @@
+dp = [[0 for j in range(27)] for i in range(id_awg + 1383)]
+"-----------------"
+dp = [[0 for j in range(27)] for i in range(id_oie + id_bepl)]
+"-----------------"
+var dp = Array.from({
+    length: id_awg + 1383n
+}, () => Array.from({
+    length: 27
+}, () => 0));
+"-----------------"
+var dp = Array.from({
+    length: id_oie + id_bepl
+}, () => Array.from({
+    length: 27
+}, () => 0));
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.binary_operator"
+    ],
+    [
+      "py.argument_list",
+      "py.identifier"
+    ],
+    [
+      "py.call",
+      "py.identifier"
+    ],
+    [
+      "py.for_in_clause",
+      "py.list_comprehension"
+    ],
+    [
+      "py.list_comprehension",
+      "py.identifier"
+    ],
+    [
+      "py.assignment"
+    ],
+    [
+      "py.expression_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown",
+      "js.property_identifier"
+    ],
+    [
+      "js.pair"
+    ],
+    [
+      "js.object"
+    ],
+    [
+      "js.arguments",
+      "js.member_expression"
+    ],
+    [
+      "js.call_expression",
+      "js.identifier"
+    ],
+    [
+      "js.variable_declarator"
+    ],
+    [
+      "js.variable_declaration"
+    ]
+  ]
+}

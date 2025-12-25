@@ -1,0 +1,26 @@
+while id_wnic and id_prdc:
+    secret_fun_4071()
+"-----------------"
+while 4886 and 5165:
+    secret_fun_4071()
+"-----------------"
+while (((x => (x != null && (typeof x === 'boolean' ? x : typeof x === 'number' ? x !== 0 : typeof x === 'bigint' ? x !== 0 : typeof x === 'string' ? x.length !== 0 : Array.isArray(x) ? x.length !== 0 : (x instanceof Map || x instanceof Set) ? x.size !== 0 : typeof x === 'object' ? Object.keys(x).length !== 0 : true)))(id_wnic)) && ((x => (x != null && (typeof x === 'boolean' ? x : typeof x === 'number' ? x !== 0 : typeof x === 'bigint' ? x !== 0 : typeof x === 'string' ? x.length !== 0 : Array.isArray(x) ? x.length !== 0 : (x instanceof Map || x instanceof Set) ? x.size !== 0 : typeof x === 'object' ? Object.keys(x).length !== 0 : true)))(id_prdc))) {
+    secret_fun_4071();
+}
+"-----------------"
+while (((x => (x != null && (typeof x === 'boolean' ? x : typeof x === 'number' ? x !== 0 : typeof x === 'bigint' ? x !== 0 : typeof x === 'string' ? x.length !== 0 : Array.isArray(x) ? x.length !== 0 : (x instanceof Map || x instanceof Set) ? x.size !== 0 : typeof x === 'object' ? Object.keys(x).length !== 0 : true)))(4886)) && ((x => (x != null && (typeof x === 'boolean' ? x : typeof x === 'number' ? x !== 0 : typeof x === 'bigint' ? x !== 0 : typeof x === 'string' ? x.length !== 0 : Array.isArray(x) ? x.length !== 0 : (x instanceof Map || x instanceof Set) ? x.size !== 0 : typeof x === 'object' ? Object.keys(x).length !== 0 : true)))(5165))) {
+    secret_fun_4071();
+}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.while_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ]
+  ]
+}

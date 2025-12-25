@@ -1,0 +1,13 @@
+{
+  "code": "def f_gold(arr, l, r, x):\n    if r >= l:\n        mid = l + (r - l) // 2\n        if arr[mid] == x:\n            return mid\n        elif arr[mid] > x:\n            return f_gold(arr, l, mid - 1, x)\n        else:\n            return f_gold(arr, mid + 1, r, x)\n    else:\n        return -1",
+  "choicable_nodes": [],
+  "exclude_stat_nids": [
+    65,
+    53,
+    41,
+    32,
+    25,
+    14,
+    9
+  ]
+}

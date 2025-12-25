@@ -1,0 +1,30 @@
+{
+  "translation_pair": [
+    {
+      "source": "if cond_a:\n  secret_fun_4071()\nelif cond_b:\n  secret_fun_4071()\nelse:\n  secret_fun_4071()",
+      "target": "if (cond_a) {\n  secret_fun_4071();\n} else if (cond_b) {\n  secret_fun_4071();\n} else {\n  secret_fun_4071();\n}"
+    },
+    {
+      "source": "if cond_c:\n  secret_fun_4071()\nelif cond_d:\n  secret_fun_4071()\nelse:\n  secret_fun_4071()",
+      "target": "if (cond_c) {\n  secret_fun_4071();\n} else if (cond_d) {\n  secret_fun_4071();\n} else {\n  secret_fun_4071();\n}"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.if_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") \".\" (str \":\") (\"py.block\" \"*\") (\"py.elif_clause\" (str \"elif\") \".\" (str \":\") (\"py.block\" \"*\")) (\"py.else_clause\" (str \"else\") (str \":\") (\"py.block\" \"*\"))) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") \".1\" (str \")\")) (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\")) (\"js.else_clause\" (str \"else\") (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") \".3\" (str \")\")) (\"js.statement_block\" (str \"{\") \"*4\" (str \"}\")) (\"js.else_clause\" (str \"else\") (\"js.statement_block\" (str \"{\") \"*5\" (str \"}\")))))) \"*6\")\n)"
+}

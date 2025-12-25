@@ -48,7 +48,7 @@ class PirelSubject:
     self.translation_rules_test_code = None
     self.auto_backward = True
     self.choices = {'type': 'ASTNODE', 'choices_list': []}
-    self.readonly_choices_list: List[Tuple[Tuple[int, int, int], int]] = []
+    self.verified_choice_options: List[Tuple[Tuple[int, int, int], List[int]]] = []
 
     # some additional checks and initializations
     if benchmark_name in p_consts.BENCHMARK_CONFIGS:
@@ -184,6 +184,13 @@ class PirelSubject:
     # choices
     if 'choices' in obj:
       pirel_subject.choices = obj['choices']
+
+    # verified_choice_options
+    if 'verified_choice_options' in obj:
+      pirel_subject.verified_choice_options = [
+        (tuple(choice_ident_as_list), choice_idxs)
+        for choice_ident_as_list, choice_idxs in obj['verified_choice_options']
+      ]
 
     return pirel_subject
 

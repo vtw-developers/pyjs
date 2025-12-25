@@ -1,0 +1,17 @@
+{
+  "code": "def f_gold(h, m):\n    if h < 0 or m < 0 or h > 12 or m > 60:\n        print(\"Wrong input\")\n    if h == 12:\n        h = 0\n    if m == 60:\n        m = 0\n    hour_angle = 0.5 * (h * 60 + m)\n    minute_angle = 6 * m\n    angle = abs(hour_angle - minute_angle)\n    angle = min(360 - angle, angle)\n    return angle",
+  "choicable_nodes": [
+    "h < 0 or m < 0 or h > 12 or m > 60",
+    "\"Wrong input\"",
+    "h == 12",
+    "0",
+    "m == 60",
+    "0",
+    "0.5 * (h * 60 + m)",
+    "6 * m",
+    "abs(hour_angle - minute_angle)",
+    "min(360 - angle, angle)",
+    "angle"
+  ],
+  "exclude_stat_nids": []
+}

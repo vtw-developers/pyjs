@@ -1,2 +1,0 @@
-if index == n:
-    pass

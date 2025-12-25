@@ -1,0 +1,16 @@
+{
+  "template_origin": "if ((value[0] == value[-1] and value[0] in ('\"', \"'\")) or (value[0] in '-0123456789' or value in ('true', 'false') or (value[0] == \"[\" and value[-1] == \"]\") or (value[0] == '{' and value[-1] == '}'))):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "if_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "if id_dka:\n    secret_fun_4071()\nelif id_ludc:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+      "if 4314:\n    secret_fun_4071()\nelif 3359:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

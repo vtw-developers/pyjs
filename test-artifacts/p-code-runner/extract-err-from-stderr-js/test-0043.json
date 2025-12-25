@@ -1,0 +1,10 @@
+{
+  "tar_std_error": "/tmp/pirel_code_runner/f4517000.js:180\n        var 0 = ((a) => (a[0] = 0, a))([]);\n            ^\n\nSyntaxError: Unexpected number\n    at wrapSafe (node:internal/modules/cjs/loader:1472:18)\n    at Module._compile (node:internal/modules/cjs/loader:1501:20)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)\n    at Module.load (node:internal/modules/cjs/loader:1275:32)\n    at Module._load (node:internal/modules/cjs/loader:1096:12)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)\n    at node:internal/main/run_main_module:28:49\n\nNode.js v20.19.3\n",
+  "tar_error_dict": {
+    "error_type": "SyntaxError",
+    "error_msg": "Unexpected number",
+    "file_path": "/tmp/pirel_code_runner/f4517000.js",
+    "line_num": 11,
+    "line_content": "var 0 = ((a) => (a[0] = 0, a))([]);"
+  }
+}

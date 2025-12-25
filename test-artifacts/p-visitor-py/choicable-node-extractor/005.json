@@ -1,0 +1,11 @@
+{
+  "code": "def f_gold(arr, n, x):\n    j = 0\n    for i in range(j, n):\n        if arr[i] == x:\n            return i\n    return -1",
+  "choicable_nodes": [
+    "0",
+    "range(j, n)",
+    "arr[i] == x",
+    "i",
+    "-1"
+  ],
+  "exclude_stat_nids": []
+}

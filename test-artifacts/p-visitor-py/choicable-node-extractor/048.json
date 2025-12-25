@@ -1,0 +1,29 @@
+{
+  "code": "def f_gold(str1, str2):\n    if len(str1) > len(str2):\n        t = str1\n        str1 = str2\n        str2 = t\n    str_0 = \"\"\n    n1 = len(str1)\n    n2 = len(str2)\n    str1 = str1[::-1]\n    str2 = str2[::-1]\n    carry = 0\n    for i in range(n1):\n        sum_0 = (ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)\n        str_0 += chr(sum_0 % 10 + 48)\n        carry = int(sum_0 / 10)\n    for i in range(n1, n2):\n        sum_0 = (ord(str2[i]) - 48) + carry\n        str_0 += chr(sum_0 % 10 + 48)\n        carry = int(sum_0 / 10)\n    if carry:\n        str_0 += chr(carry + 48)\n    str_0 = str_0[::-1]\n    return str_0",
+  "choicable_nodes": [
+    "str1",
+    "str2",
+    "t",
+    "\"\"",
+    "len(str1)",
+    "len(str2)",
+    "str1[::-1]",
+    "str2[::-1]",
+    "0",
+    "range(n1)",
+    "(ord(str1[i]) - 48) + ((ord(str2[i]) - 48) + carry)",
+    "chr(sum_0 % 10 + 48)",
+    "int(sum_0 / 10)",
+    "range(n1, n2)",
+    "(ord(str2[i]) - 48) + carry",
+    "chr(sum_0 % 10 + 48)",
+    "int(sum_0 / 10)",
+    "carry",
+    "chr(carry + 48)",
+    "str_0[::-1]",
+    "str_0"
+  ],
+  "exclude_stat_nids": [
+    7
+  ]
+}

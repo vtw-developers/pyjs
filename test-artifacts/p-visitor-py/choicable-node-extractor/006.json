@@ -1,0 +1,7 @@
+{
+  "code": "import math\ndef f_gold(s):\n    return (3 * math.sqrt(3) * (s * s)) / 2",
+  "choicable_nodes": [
+    "(3 * math.sqrt(3) * (s * s)) / 2"
+  ],
+  "exclude_stat_nids": []
+}

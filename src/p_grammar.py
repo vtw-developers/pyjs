@@ -26,8 +26,8 @@ ERR_INVRULE = 'invalid rule type'
 def PY_gen_identifier() -> str:
   '''Generate an identifier according to Python grammar'''
   size = random.randint(3, 4)
-  chars = list(string.ascii_lowercase)
-  sample = random.sample(population=chars, k=size)
+  # Use random.choices for efficiency and avoid list conversion
+  sample = random.choices(string.ascii_lowercase, k=size)
   # prepend `id_` to make sure that we don't return a reserved word like `if`
   return 'id_' + ''.join(sample)
 
@@ -50,7 +50,7 @@ def PY_gen_float() -> str:
 def PY_gen_string() -> str:
   '''Generate a string literal according to Python grammar'''
   size = 5
-  value = ''.join(random.sample(string.ascii_lowercase, size))
+  value = ''.join(random.choices(string.ascii_lowercase, k=size))
   return f'"{value}"'
 
 
@@ -90,8 +90,11 @@ class TreeSitterGrammar():
   Composite rule types: sep1, commaSep1, optional
   '''
 
-  # cache use id `self.get_production_paths_deprecated`
-  get_production_paths_cache_deprecated = {}
+  # cache use id `self.get_production_paths`
+  get_production_paths_cache = {}
+
+  # cache used in `generate_simplest_ast`
+  generate_simplest_ast_cache = {}
 
   def __init__(self, name, rules, extras, precedences, externals, inline, conflicts, supertypes) -> None:
     self.name : str = name
@@ -182,9 +185,10 @@ class TreeSitterGrammar():
     '''
     return rule_name in self.supertypes
 
-  def is_comma_sep1(self, rule: Rule) -> bool:
+  def is_comma_sep1(self, rule: Rule) -> Optional[Rule]:
     '''
-    Return True if `rule` is commaSep1 rule, False otherwise
+    Return None if `rule` is not a commaSep1 rule.
+    Return `repeating_rule` otherwise.
     commaSep1 appears in tree-sitter grammars as a convenience function (grammar.js)
 
     seq:
@@ -193,13 +197,16 @@ class TreeSitterGrammar():
         - seq:
           - String(",")
           - $.rule
-
-    NOTE TODO we may not need this method, as `self.is_sep1` would be sufficient.
     '''
     result = self.is_sep1(rule)
-    return result is not None and result[1] == ','
+    if result is None:
+      return None
+    rep_rule, separator = result
+    if separator != ',':
+      return None
+    return rep_rule
 
-  def is_sep1(self, rule: Rule) -> Union[None, Tuple[Rule, str]]:
+  def is_sep1(self, rule: Rule) -> Optional[Tuple[Rule, str]]:
     '''
     Return None if `rule` is not a sep1 rule.
     Return Tuple[repeating_rule, separator] otherwise.
@@ -247,7 +254,7 @@ class TreeSitterGrammar():
     rep_rule = rule.members[0]
     return rep_rule, separator
 
-  def is_optional(self, rule: Rule) -> Union[None, Rule]:
+  def is_optional(self, rule: Rule) -> Optional[Rule]:
     '''
     Return None if `rule` is not an optional rule.
     Return `optional_rule` otherwise.
@@ -295,7 +302,7 @@ class TreeSitterGrammar():
     optional_rule = rule.members[0]
     return optional_rule
 
-  def get_production_paths_deprecated(self, from_rule: str, to_rule: str) -> List[List[str]]:
+  def get_production_paths(self, from_rule: str, to_rule: str) -> List[List[str]]:
     '''
     Uses tree search algorithm (recursive).
     Raises PP_UnreachableError if path is not found.
@@ -333,14 +340,14 @@ class TreeSitterGrammar():
         raise PP_UnreachableError
       return paths
 
-    if (from_rule, to_rule) in TreeSitterGrammar.get_production_paths_cache_deprecated:
-      return TreeSitterGrammar.get_production_paths_cache_deprecated[(from_rule, to_rule)]
+    if (from_rule, to_rule) in TreeSitterGrammar.get_production_paths_cache:
+      return TreeSitterGrammar.get_production_paths_cache[(from_rule, to_rule)]
     paths = _get_production_paths_rec(from_rule, to_rule, [])
-    TreeSitterGrammar.get_production_paths_cache_deprecated[(from_rule, to_rule)] = paths
+    TreeSitterGrammar.get_production_paths_cache[(from_rule, to_rule)] = paths
 
     return paths
 
-  def generate_simplest_ast(self, root_node: str) -> list:
+  def _generate_simplest_ast(self, root_node: str) -> list:
     '''
     Given a starting node type return the simplest randomly generated DuoGlot-style AST.
     This method is a starting point for constraint-based generation.
@@ -376,6 +383,53 @@ class TreeSitterGrammar():
     else:
       ast.append(simplest_ast)
     return ast
+
+  def _mutate_terminals_in_gen_ast(self, ast: list) -> list:
+    '''
+    Given a DuoGlot-style AST, mutate its terminal nodes.
+    This is useful when we want to cache generated ASTs,
+    but want to have different terminal values each time.
+    '''
+    if not isinstance(ast, list):
+      return ast
+    if len(ast) < 2:
+      return ast
+
+    node_type = ast[0]
+    if node_type in PY_GEN:
+      # generate a new terminal value
+      gen_func = PY_GEN[node_type]
+      new_value = gen_func()
+      return [node_type, new_value]
+
+    # recursively mutate children
+    new_ast = [node_type]
+    for child in ast[1:]:
+      new_child = self._mutate_terminals_in_gen_ast(child)
+      new_ast.append(new_child)
+    return new_ast
+
+  def generate_simplest_ast(
+    self,
+    root_node: str,
+    enable_cache: bool = True,
+    mutate_terminals: bool = True,
+  ) -> list:
+    '''
+    Given a starting node type return the simplest randomly generated DuoGlot-style AST.
+    If `mutate_terminals` is True, then terminal nodes in the generated AST
+    are mutated to have different values each time.
+    '''
+    if enable_cache and (root_node in TreeSitterGrammar.generate_simplest_ast_cache):
+      cached_ast = TreeSitterGrammar.generate_simplest_ast_cache[root_node]
+      if not mutate_terminals:
+        return cached_ast
+      mut_cached_ast = self._mutate_terminals_in_gen_ast(cached_ast)
+      return mut_cached_ast
+    simplest_ast = self._generate_simplest_ast(root_node)
+    if enable_cache:
+      TreeSitterGrammar.generate_simplest_ast_cache[root_node] = simplest_ast
+    return simplest_ast
 
   def get_symbols_under(self, rule_name: str) -> Set[str]:
     '''
@@ -561,9 +615,11 @@ class AliasRule(Rule):
   def get_ast_mapping(self, nodes: List[pds.DuoGlotNode], grammar: TreeSitterGrammar) -> List[Tuple]:
     if len(nodes) == 1:
       node = nodes[0]
-      # TODO what to do in else case of this if statement?
       if node.is_nonterminal() and node.get_ts_node_type() == self.value:
         return [(node, self, Rule.stack_ast_mapping[:])]
+      # alias matched a terminal node
+      if node.is_terminal() and node.node_type == self.value:
+        return []
     return self.content.get_ast_mapping(nodes, grammar)
 
   # overrides an abstract method
@@ -1070,6 +1126,13 @@ class SeqRule(Rule):
         else:
           raise AM_UnmappableError
 
+      if isinstance(rule, AliasRule) \
+        and isinstance(rule.content, SymbolRule) \
+        and rule.content.name == '_string_start' \
+        and rule.value == '"' \
+        and len(nodes) == 13:
+        pass
+
       # Starting from a `span` of 1, try to match first `span` elements of nodes by `rule`
       largest_span_mapping = None
       largest_span = 0
@@ -1512,7 +1575,11 @@ def simplify_template(template_dict: dict) -> dict:
   For more documentation, refer to `p_grammar.simplify_program_context_usage`.
 
   NOTE writes to `template_dict`.
-  The following keys are updated:
+  The following keys must be present:
+  - `template_origin`
+  - `src_lang`
+  - `problematic_node_path`
+  The following keys are updated/written:
   - `problematic_node_id`
   - `problematic_node_path`
   - `template_origin`
@@ -1526,7 +1593,8 @@ def simplify_template(template_dict: dict) -> dict:
   4. simplify by removing nodes
 
   NOTE when we are simplifying the program context,
-  `problematic_node_id` and `problematic_node_path` must be preserved.  '''
+  `problematic_node_id` and `problematic_node_path` must be preserved.
+  '''
 
   # GENERIC FUNCTIONS
   def _get_context_problematic_nodes_context_tree(
@@ -1623,6 +1691,7 @@ def simplify_template(template_dict: dict) -> dict:
     problematic_node: pds.DuoGlotNode,
     context_tree: pds.PirelTree,
     orig_text: str,
+    src_lang: str,
     nodes_can_be_simplified_dict: Dict[int, Dict[int, bool]],
     pot_simplifiable_nodes: Dict[int, pds.DuoGlotNode],
     grammar: p_grammar.TreeSitterGrammar,
@@ -1678,8 +1747,8 @@ def simplify_template(template_dict: dict) -> dict:
 
       # need to adjust the `problematic_node_id`
       if parent_node.get_id() < problematic_node.get_id():
-        num_nt_nodes_before = _get_num_nt_nodes(orig_text, template_dict['src_lang'])
-        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, template_dict['src_lang'])
+        num_nt_nodes_before = _get_num_nt_nodes(orig_text, src_lang)
+        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, src_lang)
         upd_prob_nid -= (num_nt_nodes_before - num_nt_nodes_after)
 
       orig_text = simplified_code
@@ -1853,8 +1922,8 @@ def simplify_template(template_dict: dict) -> dict:
     problematic_node: pds.DuoGlotNode,
     context_tree: pds.PirelTree,
     orig_text: str,
+    src_lang: str,
     individually_simplifiable_nodes: List[pds.DuoGlotNode],
-    template_dict: dict,
     grammar: p_grammar.TreeSitterGrammar,
     is_simplify_nodes_before_prob_node: bool = False,
     is_simplify_nodes_after_prob_node: bool = False
@@ -1884,12 +1953,12 @@ def simplify_template(template_dict: dict) -> dict:
 
     logger.debug('Starting context simplification using strategy 3')
 
-    def __simplify_node(
+    def __simplify_node_strat3(
       orig_text: str,
+      src_lang: str,
       node: pds.DuoGlotNode,
       context_tree: pds.PirelTree,
       individually_simplifiable_nodes: List[pds.DuoGlotNode],
-      template_dict: dict,
       grammar: p_grammar.TreeSitterGrammar
     ) -> Optional[Tuple[str, dict]]:
       '''
@@ -1907,13 +1976,13 @@ def simplify_template(template_dict: dict) -> dict:
       simplified_code = orig_text[:start_point] + simplified_node_code + orig_text[end_point:]
 
       # check for parse errors
-      has_parse_error = p_utils.does_have_parse_error(simplified_code, template_dict['src_lang'])
+      has_parse_error = p_utils.does_have_parse_error(simplified_code, src_lang)
       if has_parse_error:
         return None
 
       # check if the generated code is simpler than the existing code
-      num_nt_nodes_before = _get_num_nt_nodes(orig_text, template_dict['src_lang'])
-      num_nt_nodes_after = _get_num_nt_nodes(simplified_code, template_dict['src_lang'])
+      num_nt_nodes_before = _get_num_nt_nodes(orig_text, src_lang)
+      num_nt_nodes_after = _get_num_nt_nodes(simplified_code, src_lang)
       if num_nt_nodes_before <= num_nt_nodes_after:
         return None
 
@@ -1938,7 +2007,7 @@ def simplify_template(template_dict: dict) -> dict:
     upd_prob_nid = problematic_node.get_id()
 
     for node in individually_simplifiable_nodes:
-      node_simpl_res = __simplify_node(orig_text, node, context_tree, individually_simplifiable_nodes, template_dict, grammar)
+      node_simpl_res = __simplify_node_strat3(orig_text, src_lang, node, context_tree, individually_simplifiable_nodes, grammar)
 
       # skip `node` which we can't simplify
       if node_simpl_res is None:
@@ -1956,14 +2025,14 @@ def simplify_template(template_dict: dict) -> dict:
 
         # the difference in the number of non-terminal nodes tells us
         # how much node id of the problematic node has shifted
-        num_nt_nodes_before = _get_num_nt_nodes(orig_text, template_dict['src_lang'])
-        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, template_dict['src_lang'])
+        num_nt_nodes_before = _get_num_nt_nodes(orig_text, src_lang)
+        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, src_lang)
         upd_prob_nid -= (num_nt_nodes_before - num_nt_nodes_after)
 
       # `node` appears after the `problematic_node`
       if node.get_id() > problematic_node.get_id():
         if not is_simplify_nodes_after_prob_node:
-          if node.get_ts_node_type() not in p_consts.BODY_NODE_TYPES[template_dict['src_lang']]:
+          if node.get_ts_node_type() not in p_consts.BODY_NODE_TYPES[src_lang]:
             logger.debug(f'Context simplification using strategy 3 not possible for (appears after prob.node): {node}')
             continue
 
@@ -1977,8 +2046,8 @@ def simplify_template(template_dict: dict) -> dict:
     problematic_node: pds.DuoGlotNode,
     context_tree: pds.PirelTree,
     orig_text: str,
+    src_lang: str,
     individually_simplifiable_nodes: List[pds.DuoGlotNode],
-    template_dict: dict
   ) -> Tuple[str, int]:
     '''
     Simplify by removing `elif_clause`, `else_clause` nodes.
@@ -2024,12 +2093,12 @@ def simplify_template(template_dict: dict) -> dict:
 
     logger.debug('Starting context simplification using strategy 4')
 
-    def __simplify_node(
+    def __simplify_node_strat4(
       orig_text: str,
+      src_lang: str,
       node: pds.DuoGlotNode,
       context_tree: pds.PirelTree,
       individually_simplifiable_nodes: List[pds.DuoGlotNode],
-      template_dict: dict
     ) -> Optional[Tuple[str, dict]]:
       '''
       RETURN None if
@@ -2045,7 +2114,7 @@ def simplify_template(template_dict: dict) -> dict:
       simplified_code = orig_text[:start_point] + simplified_node_code + orig_text[end_point:]
 
       # check for parse errors
-      has_parse_error = p_utils.does_have_parse_error(simplified_code, template_dict['src_lang'])
+      has_parse_error = p_utils.does_have_parse_error(simplified_code, src_lang)
       if has_parse_error:
         return None
 
@@ -2076,7 +2145,7 @@ def simplify_template(template_dict: dict) -> dict:
     return orig_text, upd_prob_nid
 
     for node in individually_simplifiable_nodes:
-      node_simpl_res = __simplify_node(orig_text, node, context_tree, individually_simplifiable_nodes, template_dict)
+      node_simpl_res = __simplify_node_strat4(orig_text, src_lang, node, context_tree, individually_simplifiable_nodes)
 
       # skip `node` which we can't simplify
       if node_simpl_res is None:
@@ -2090,8 +2159,8 @@ def simplify_template(template_dict: dict) -> dict:
       if node.get_id() < problematic_node.get_id():
         # the difference in the number of non-terminal nodes tells us
         # how much node id of the problematic node has shifted
-        num_nt_nodes_before = _get_num_nt_nodes(orig_text, template_dict['src_lang'])
-        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, template_dict['src_lang'])
+        num_nt_nodes_before = _get_num_nt_nodes(orig_text, src_lang)
+        num_nt_nodes_after = _get_num_nt_nodes(simplified_code, src_lang)
         upd_prob_nid -= (num_nt_nodes_before - num_nt_nodes_after)
 
       orig_text = simplified_code
@@ -2116,7 +2185,6 @@ def simplify_template(template_dict: dict) -> dict:
   pot_simplifiable_nodes_strat1, nodes_can_be_simplified_dict_strat1 = _get_simplification_metadata(
     ctx_node_strat1,
     prob_node_strat1,
-    template_dict,
     grammar
   )
 
@@ -2125,6 +2193,7 @@ def simplify_template(template_dict: dict) -> dict:
     prob_node_strat1,
     ctx_tree_strat1,
     template_origin,
+    src_lang,
     nodes_can_be_simplified_dict_strat1,
     pot_simplifiable_nodes_strat1,
     grammar,
@@ -2142,7 +2211,6 @@ def simplify_template(template_dict: dict) -> dict:
   pot_simplifiable_nodes_strat2, nodes_can_be_simplified_dict_strat2 = _get_simplification_metadata(
     ctx_node_strat2,
     prob_node_strat2,
-    template_dict,
     grammar
   )
 
@@ -2166,7 +2234,6 @@ def simplify_template(template_dict: dict) -> dict:
   pot_simplifiable_nodes_strat3, nodes_can_be_simplified_dict_strat3 = _get_simplification_metadata(
     ctx_node_strat3,
     prob_node_strat3,
-    template_dict,
     grammar
   )
 
@@ -2180,8 +2247,8 @@ def simplify_template(template_dict: dict) -> dict:
     prob_node_strat3,
     ctx_tree_strat3,
     upd_text_strat2,
+    src_lang,
     individually_simplifiable_nodes,
-    template_dict,
     grammar,
     is_simplify_nodes_before_prob_node=False,
     is_simplify_nodes_after_prob_node=False
@@ -2198,7 +2265,6 @@ def simplify_template(template_dict: dict) -> dict:
   pot_simplifiable_nodes_strat4, nodes_can_be_simplified_dict_strat4 = _get_simplification_metadata(
     ctx_node_strat4,
     prob_node_strat4,
-    template_dict,
     grammar
   )
 
@@ -2212,8 +2278,8 @@ def simplify_template(template_dict: dict) -> dict:
     prob_node_strat4,
     ctx_tree_strat4,
     upd_text_strat3,
+    src_lang,
     individually_simplifiable_nodes,
-    template_dict
   )
   logger.debug(f'before simplification using strategy 4:\n{upd_text_strat3}')
   logger.debug(f'after simplification using strategy 4:\n{upd_text_strat4}')
@@ -2231,10 +2297,10 @@ def simplify_template(template_dict: dict) -> dict:
 
   return template_dict
 
+
 def _get_potential_simplifiable_nodes(
   context_node: pds.DuoGlotNode,
   problematic_node: pds.DuoGlotNode,
-  template_dict: dict
 ) -> Dict[int, pds.DuoGlotNode]:
   '''
   RETURN a sequence of nodes that can "potentially" be simplified/removed
@@ -2245,7 +2311,6 @@ def _get_potential_simplifiable_nodes(
   def __is_potential_simplifiable_node(
     node: pds.DuoGlotNode,
     problematic_node: pds.DuoGlotNode,
-    template_dict: dict
   ) -> bool:
     if node.is_terminal():
       return False
@@ -2271,26 +2336,25 @@ def _get_potential_simplifiable_nodes(
     at_node: pds.DuoGlotNode,
     context_node: pds.DuoGlotNode,
     problematic_node: pds.DuoGlotNode,
-    template_dict: dict,
     container: dict
   ):
     '''
     Writes to `container`
     '''
-    if __is_potential_simplifiable_node(at_node, problematic_node, template_dict):
+    if __is_potential_simplifiable_node(at_node, problematic_node):
       container[at_node.get_id()] = at_node
     for child in at_node.get_children():
-      __rec_pre_order_collect_potential_simplifiable_nodes(child, context_node, problematic_node, template_dict, container)
+      __rec_pre_order_collect_potential_simplifiable_nodes(child, context_node, problematic_node, container)
 
   simplifiable_nodes = {}
   __rec_pre_order_collect_potential_simplifiable_nodes(
     context_node,
     context_node,
     problematic_node,
-    template_dict,
     simplifiable_nodes
   )
   return simplifiable_nodes
+
 
 def _process_potential_simplifiable_node_w_grammar(
   pot_simplifiable_node: pds.DuoGlotNode,
@@ -2377,10 +2441,10 @@ def _process_potential_simplifiable_node_w_grammar(
   assert pot_simplifiable_node.get_id() in can_be_simplified_dict, 'sanity check: simplifiable node must be present'
   return can_be_simplified_dict
 
+
 def _get_simplification_metadata(
   context_node: pds.DuoGlotNode,
   problematic_node: pds.DuoGlotNode,
-  template_dict: dict,
   grammar: TreeSitterGrammar
 ) -> Tuple[Dict[int, pds.DuoGlotNode], Dict[int, Dict[int, bool]]]:
   '''
@@ -2410,7 +2474,7 @@ def _get_simplification_metadata(
     return can_be_simplified_dict
 
   # ~~~ artifact 1
-  pot_simplifiable_nodes = _get_potential_simplifiable_nodes(context_node, problematic_node, template_dict)
+  pot_simplifiable_nodes = _get_potential_simplifiable_nodes(context_node, problematic_node)
 
   # ~~~ artifact 2
   nodes_can_be_simplified_dict : Dict[int, Dict[int, bool]] = {}

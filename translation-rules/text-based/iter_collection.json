@@ -1,0 +1,47 @@
+{
+  "G0010": {
+    "type": "for_key_in_dict_int_cast",
+    "item_var": "x",
+    "cont_var": "frequency"
+  },
+  "G0099": {
+    "type": "for_key_in_dict",
+    "item_var": "it",
+    "cont_var": "mp"
+  },
+  "G0143": {
+    "type": "for_key_in_dict",
+    "item_var": "itr",
+    "cont_var": "um"
+  },
+  "G0153": {
+    "type": "for_value_in_dict_values",
+    "item_var": "i",
+    "cont_var": "m"
+  },
+  "G0255": {
+    "type": "for_item_in_set",
+    "item_var": "i",
+    "cont_var": "s"
+  },
+  "G0257": {
+    "type": "for_key_in_dict",
+    "item_var": "x",
+    "cont_var": "m"
+  },
+  "G0268": {
+    "type": "for_key_in_dict",
+    "item_var": "i",
+    "cont_var": "Hash"
+  },
+  "G0289": {
+    "type": "for_key_in_dict",
+    "item_var": "i",
+    "cont_var": "Hash"
+  },
+  "G0587": {
+    "type": "for_key_in_dict",
+    "item_var": "x",
+    "cont_var": "countA"
+  }
+}

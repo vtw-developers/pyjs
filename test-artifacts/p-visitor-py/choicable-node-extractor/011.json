@@ -1,0 +1,9 @@
+{
+  "code": "def f_gold(a, b):\n    if a == 0:\n        return b\n    return f_gold(b % a, a)",
+  "choicable_nodes": [
+    "a == 0",
+    "b",
+    "f_gold(b % a, a)"
+  ],
+  "exclude_stat_nids": []
+}

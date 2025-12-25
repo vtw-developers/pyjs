@@ -1,0 +1,22 @@
+{
+  "template_origin": "if ((value[0] == value[-1] and value[0] in ('\"', \"'\")) or (value[0] in '-0123456789' or value in ('true', 'false') or (value[0] == \"[\" and value[-1] == \"]\") or (value[0] == '{' and value[-1] == '}'))):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1
+  ],
+  "problematic_node_type": "parenthesized_expression",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "if (id_fskd):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass",
+      "if (7134):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass"
+    ],
+    [
+      "if (id_dpe or id_fuqe):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass",
+      "if (6354 or 9110):\n    pass\nelif len(candidate_groups) > 0:\n    pass\nelse:\n    pass"
+    ]
+  ],
+  "problematic_node_id": 2
+}

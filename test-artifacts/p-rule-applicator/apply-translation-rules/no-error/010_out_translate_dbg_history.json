@@ -1,0 +1,2044 @@
+[
+  {
+    "alt_step": 1,
+    "range_info": null,
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 1,
+      "corres_slot_id": 0,
+      "src_matching_node_ids": [
+        0
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          1
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 29
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        2
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 3
+    }
+  },
+  {
+    "alt_step": 2,
+    "range_info": [
+      0,
+      2,
+      3
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 2,
+      "corres_slot_id": 2,
+      "src_matching_node_ids": [
+        1
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          2,
+          3,
+          6
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 30
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        3,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 48
+    }
+  },
+  {
+    "alt_step": 3,
+    "range_info": [
+      1,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 3,
+      "corres_slot_id": 3,
+      "src_matching_node_ids": [
+        2
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          3,
+          6
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        4
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 7
+    }
+  },
+  {
+    "alt_step": 4,
+    "range_info": [
+      1,
+      4,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 4,
+      "corres_slot_id": 4,
+      "src_matching_node_ids": [
+        3
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          4,
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 32
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        5,
+        6
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 6
+    }
+  },
+  {
+    "alt_step": 5,
+    "range_info": [
+      3,
+      2,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 5,
+      "corres_slot_id": 5,
+      "src_matching_node_ids": [
+        4
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          5
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        7
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 32
+    }
+  },
+  {
+    "alt_step": 6,
+    "range_info": [
+      3,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 6,
+      "corres_slot_id": 7,
+      "src_matching_node_ids": [
+        5
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 71
+    }
+  },
+  {
+    "alt_step": 7,
+    "range_info": [
+      1,
+      6,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 7,
+      "corres_slot_id": 6,
+      "src_matching_node_ids": [
+        6
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          7,
+          26
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 34
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        8,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 15
+    }
+  },
+  {
+    "alt_step": 8,
+    "range_info": [
+      6,
+      2,
+      4
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 8,
+      "corres_slot_id": 8,
+      "src_matching_node_ids": [
+        7,
+        8,
+        9,
+        11
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          10
+        ],
+        [
+          12,
+          18,
+          24
+        ],
+        [
+          26
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 28
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\"",
+        "\"*3\""
+      ],
+      "slot_ids": [
+        9,
+        10,
+        11
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 270
+    }
+  },
+  {
+    "alt_step": 9,
+    "range_info": [
+      8,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 9,
+      "corres_slot_id": 9,
+      "src_matching_node_ids": [
+        10
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 107
+    }
+  },
+  {
+    "alt_step": 10,
+    "range_info": [
+      11,
+      2,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 10,
+      "corres_slot_id": 10,
+      "src_matching_node_ids": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          16,
+          17
+        ],
+        [
+          18,
+          24
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        12,
+        13
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 171
+    }
+  },
+  {
+    "alt_step": 11,
+    "range_info": [
+      15,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 11,
+      "corres_slot_id": 12,
+      "src_matching_node_ids": [
+        16
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          17
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        14
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 12,
+    "range_info": [
+      15,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 12,
+      "corres_slot_id": 14,
+      "src_matching_node_ids": [
+        17
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 71
+    }
+  },
+  {
+    "alt_step": 13,
+    "range_info": [
+      11,
+      3,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 13,
+      "corres_slot_id": 13,
+      "src_matching_node_ids": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          22,
+          23
+        ],
+        [
+          24
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        15,
+        16
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 182
+    }
+  },
+  {
+    "alt_step": 14,
+    "range_info": [
+      21,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 14,
+      "corres_slot_id": 15,
+      "src_matching_node_ids": [
+        22
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          23
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        17
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 15,
+    "range_info": [
+      21,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 15,
+      "corres_slot_id": 17,
+      "src_matching_node_ids": [
+        23
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 71
+    }
+  },
+  {
+    "alt_step": 16,
+    "range_info": [
+      11,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 16,
+      "corres_slot_id": 16,
+      "src_matching_node_ids": [
+        24
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          25
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 27
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        18,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 117
+    }
+  },
+  {
+    "alt_step": 17,
+    "range_info": [
+      24,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 17,
+      "corres_slot_id": 18,
+      "src_matching_node_ids": [
+        25
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 76
+    }
+  },
+  {
+    "alt_step": 18,
+    "range_info": [
+      6,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 18,
+      "corres_slot_id": 11,
+      "src_matching_node_ids": [
+        26,
+        27,
+        28,
+        30,
+        63,
+        64
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          29
+        ],
+        [
+          31,
+          37,
+          49,
+          55,
+          61
+        ],
+        [
+          65,
+          71,
+          81,
+          87,
+          93
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 26
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\"",
+        "\"*3\"",
+        "\"*4\""
+      ],
+      "slot_ids": [
+        19,
+        20,
+        21,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 280
+    }
+  },
+  {
+    "alt_step": 19,
+    "range_info": [
+      27,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 19,
+      "corres_slot_id": 19,
+      "src_matching_node_ids": [
+        29
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 107
+    }
+  },
+  {
+    "alt_step": 20,
+    "range_info": [
+      30,
+      2,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 20,
+      "corres_slot_id": 20,
+      "src_matching_node_ids": [
+        31,
+        32,
+        33,
+        34
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          35,
+          36
+        ],
+        [
+          37,
+          49,
+          55,
+          61
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        22,
+        23
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 171
+    }
+  },
+  {
+    "alt_step": 21,
+    "range_info": [
+      34,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 21,
+      "corres_slot_id": 22,
+      "src_matching_node_ids": [
+        35
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          36
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        24
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 22,
+    "range_info": [
+      34,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 2,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 22,
+      "corres_slot_id": 24,
+      "src_matching_node_ids": [
+        36
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 71
+    }
+  },
+  {
+    "alt_step": 23,
+    "range_info": [
+      30,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 3,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 23,
+      "corres_slot_id": 23,
+      "src_matching_node_ids": [
+        37,
+        38,
+        39
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          40
+        ],
+        [
+          49,
+          55,
+          61
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 6
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        25,
+        26
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 79
+    }
+  },
+  {
+    "alt_step": 24,
+    "range_info": [
+      38,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 14,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 25,
+      "corres_slot_id": 25,
+      "src_matching_node_ids": [
+        40,
+        41
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          42
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 8
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        27,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 181
+    }
+  },
+  {
+    "alt_step": 25,
+    "range_info": [
+      40,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 28,
+      "corres_slot_id": 27,
+      "src_matching_node_ids": [
+        42,
+        43,
+        44,
+        45
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          46
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 11
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        28,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 183
+    }
+  },
+  {
+    "alt_step": 26,
+    "range_info": [
+      44,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 42,
+      "corres_slot_id": 28,
+      "src_matching_node_ids": [
+        46,
+        47
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          48
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 25
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        29,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 181
+    }
+  },
+  {
+    "alt_step": 27,
+    "range_info": [
+      46,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 43,
+      "corres_slot_id": 29,
+      "src_matching_node_ids": [
+        48
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 89
+    }
+  },
+  {
+    "alt_step": 28,
+    "range_info": [
+      30,
+      4,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 44,
+      "corres_slot_id": 26,
+      "src_matching_node_ids": [
+        49,
+        50,
+        51,
+        52
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          53,
+          54
+        ],
+        [
+          55,
+          61
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        30,
+        31
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 171
+    }
+  },
+  {
+    "alt_step": 29,
+    "range_info": [
+      52,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 45,
+      "corres_slot_id": 30,
+      "src_matching_node_ids": [
+        53
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          54
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        32
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 30,
+    "range_info": [
+      52,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 46,
+      "corres_slot_id": 32,
+      "src_matching_node_ids": [
+        54
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 31,
+    "range_info": [
+      30,
+      5,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 47,
+      "corres_slot_id": 31,
+      "src_matching_node_ids": [
+        55,
+        56,
+        57,
+        58
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          59,
+          60
+        ],
+        [
+          61
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        33,
+        34
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 182
+    }
+  },
+  {
+    "alt_step": 32,
+    "range_info": [
+      58,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 48,
+      "corres_slot_id": 33,
+      "src_matching_node_ids": [
+        59
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          60
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        35
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 33,
+    "range_info": [
+      58,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 49,
+      "corres_slot_id": 35,
+      "src_matching_node_ids": [
+        60
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 34,
+    "range_info": [
+      30,
+      6,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 50,
+      "corres_slot_id": 34,
+      "src_matching_node_ids": [
+        61
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          62
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 27
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        36,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 117
+    }
+  },
+  {
+    "alt_step": 35,
+    "range_info": [
+      61,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 51,
+      "corres_slot_id": 36,
+      "src_matching_node_ids": [
+        62
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 116
+    }
+  },
+  {
+    "alt_step": 36,
+    "range_info": [
+      64,
+      2,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 52,
+      "corres_slot_id": 21,
+      "src_matching_node_ids": [
+        65,
+        66,
+        67,
+        68
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          69,
+          70
+        ],
+        [
+          71,
+          81,
+          87,
+          93
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        37,
+        38
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 171
+    }
+  },
+  {
+    "alt_step": 37,
+    "range_info": [
+      68,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 53,
+      "corres_slot_id": 37,
+      "src_matching_node_ids": [
+        69
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          70
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        39
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 38,
+    "range_info": [
+      68,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 2,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 54,
+      "corres_slot_id": 39,
+      "src_matching_node_ids": [
+        70
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 71
+    }
+  },
+  {
+    "alt_step": 39,
+    "range_info": [
+      64,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 6,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 55,
+      "corres_slot_id": 38,
+      "src_matching_node_ids": [
+        71,
+        72,
+        73
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          74
+        ],
+        [
+          81,
+          87,
+          93
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 6
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        40,
+        41
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 79
+    }
+  },
+  {
+    "alt_step": 40,
+    "range_info": [
+      72,
+      4,
+      5
+    ],
+    "next_choices_status": {
+      "count": 14,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 57,
+      "corres_slot_id": 40,
+      "src_matching_node_ids": [
+        74
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          75
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 0
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        42,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 150
+    }
+  },
+  {
+    "alt_step": 41,
+    "range_info": [
+      74,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 6,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 63,
+      "corres_slot_id": 42,
+      "src_matching_node_ids": [
+        75,
+        76,
+        77,
+        78
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          79
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 11
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        43,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 183
+    }
+  },
+  {
+    "alt_step": 42,
+    "range_info": [
+      77,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 77,
+      "corres_slot_id": 43,
+      "src_matching_node_ids": [
+        79
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          80
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 0
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        44,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 150
+    }
+  },
+  {
+    "alt_step": 43,
+    "range_info": [
+      79,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 83,
+      "corres_slot_id": 44,
+      "src_matching_node_ids": [
+        80
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 69
+    }
+  },
+  {
+    "alt_step": 44,
+    "range_info": [
+      64,
+      4,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 84,
+      "corres_slot_id": 41,
+      "src_matching_node_ids": [
+        81,
+        82,
+        83,
+        84
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          85,
+          86
+        ],
+        [
+          87,
+          93
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        45,
+        46
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 171
+    }
+  },
+  {
+    "alt_step": 45,
+    "range_info": [
+      84,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 85,
+      "corres_slot_id": 45,
+      "src_matching_node_ids": [
+        85
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          86
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        47
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 46,
+    "range_info": [
+      84,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 86,
+      "corres_slot_id": 47,
+      "src_matching_node_ids": [
+        86
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 47,
+    "range_info": [
+      64,
+      5,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 87,
+      "corres_slot_id": 46,
+      "src_matching_node_ids": [
+        87,
+        88,
+        89,
+        90
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          91,
+          92
+        ],
+        [
+          93
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 45
+      },
+      "slot_names": [
+        "\"*1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        48,
+        49
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 182
+    }
+  },
+  {
+    "alt_step": 48,
+    "range_info": [
+      90,
+      3,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 88,
+      "corres_slot_id": 48,
+      "src_matching_node_ids": [
+        91
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          92
+        ]
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 36
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        50
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 49,
+    "range_info": [
+      90,
+      5,
+      6
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 89,
+      "corres_slot_id": 50,
+      "src_matching_node_ids": [
+        92
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 51
+    }
+  },
+  {
+    "alt_step": 50,
+    "range_info": [
+      64,
+      6,
+      7
+    ],
+    "next_choices_status": {
+      "count": 1,
+      "done": true
+    },
+    "dbg_info": {
+      "ex_id": 90,
+      "corres_slot_id": 49,
+      "src_matching_node_ids": [
+        93
+      ],
+      "slot_src_matching_node_ids": [
+        [
+          94
+        ],
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 27
+      },
+      "slot_names": [
+        "\".1\"",
+        "\"*2\""
+      ],
+      "slot_ids": [
+        51,
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 117
+    }
+  },
+  {
+    "alt_step": 51,
+    "range_info": [
+      93,
+      3,
+      4
+    ],
+    "next_choices_status": {
+      "count": 0,
+      "done": false
+    },
+    "dbg_info": {
+      "ex_id": 91,
+      "corres_slot_id": 51,
+      "src_matching_node_ids": [
+        94
+      ],
+      "slot_src_matching_node_ids": [
+        []
+      ],
+      "notes": {
+        "choose_idx": 0,
+        "rule_id": 31
+      },
+      "slot_names": [
+        "\"*1\""
+      ],
+      "slot_ids": [
+        null
+      ],
+      "outcome": "AC",
+      "elem_list_info_id": null,
+      "loop_count": 92
+    }
+  }
+]

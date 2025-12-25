@@ -93,6 +93,11 @@ def are_traces_equal_rec(
     val1, val2 = src_trace[1], tar_trace[1]
     return p_utils.are_equal_numbers(val1, val2, eps_percentage=p_consts.EPS_PERCENTAGE)
 
+  # base case: types are defined_in_main
+  if type1 == 'defined_in_main':
+    class_name1, class_name2 = src_trace[1], tar_trace[1]
+    return class_name1 == class_name2
+
   # recurse
   if type1 in ['list', 'set', 'dict']:
     len1, len2 = src_trace[1], tar_trace[1]
@@ -561,111 +566,73 @@ def _check_for_possible_loop_semantic_diff(
   and a JavaScript object may lead to different
   order of iterations.
   '''
-  conf_data = {
-    # In G0143, 'um' is a dictionary in Python and an object in JavaScript.
-    # The order of iteration over the keys of a dictionary are different
-    # in Python and JavaScript.
-    'G0143': {
-      'py': {
-        'src': r'^(\s+)for itr in um:\s*$',
-        'rpl': r'\1for itr in sorted(um.keys()):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) itr of Object.keys\(um\)\) {\s*$',
-        'rpl': r'\1for (\2 itr of Object.keys(um).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    },
-    # In G0153, 'm' is a dictionary in Python and an object in JavaScript.
-    # The order of iteration over the values of a dictionary are different
-    # in Python and JavaScript.
-    'G0153': {
-      'py': {
-        'src': r'^(\s+)for i in m.values\(\):\s*$',
-        'rpl': r'\1for i in sorted(m.values()):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) i of Object.values\(m\)\) {\s*$',
-        'rpl': r'\1for (\2 i of Object.values(m).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    },
-    # In G0255, 's' is a set in Python and a Set in JavaScript.
-    # The order of iteration over the elements of a set are different
-    # in Python and JavaScript.
-    'G0255': {
-      'py': {
-        'src': r'^(\s+)for i in s:\s*$',
-        'rpl': r'\1for i in sorted(s):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) i of s\) {\s*$',
-        'rpl': r'\1for (\2 i of Array.from(s).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    },
-    # In G0268, 'Hash' is a dictionary in Python and an object in JavaScript.
-    # The order of iteration over the keys of a dictionary are different
-    # in Python and JavaScript.
-    'G0268': {
-      'py': {
-        'src': r'^(\s+)for i in Hash:\s*$',
-        'rpl': r'\1for i in sorted(Hash.keys()):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) i of Object.keys\(Hash\)\) {\s*$',
-        'rpl': r'\1for (\2 i of Object.keys(Hash).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    },
-    # In G0289, 'Hash' is a dictionary in Python and an object in JavaScript.
-    # The order of iteration over the keys of a dictionary are different
-    # in Python and JavaScript.
-    'G0289': {
-      'py': {
-        'src': r'^(\s+)for i in Hash:\s*$',
-        'rpl': r'\1for i in sorted(Hash.keys()):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) i of Object.keys\(Hash\)\) {\s*$',
-        'rpl': r'\1for (\2 i of Object.keys(Hash).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    },
-    # In G0587, 'countA' is a dictionary in Python and an object in JavaScript.
-    # The order of iteration over the keys of a dictionary are different
-    # in Python and JavaScript.
-    'G0587': {
-      'py': {
-        'src': r'^(\s+)for x in countA:\s*$',
-        'rpl': r'\1for x in sorted(countA.keys()):'
-      },
-      'js': {
-        'src': r'^(\s+)for \((\w+) x of Object.keys\(countA\)\) {\s*$',
-        'rpl': r'\1for (\2 x of Object.keys(countA).sort((a, b) => Number(a) - Number(b))) {'
-      },
-      'num_replacements': 1
-    }
+
+  _MPY = {
+    'fiic':
+    r'^(\s+)for {item_var} in {cont_var}:\s*$',
+    'fiicv':
+    r'^(\s+)for {item_var} in {cont_var}.values\(\):\s*$',
+  }
+  _MJS = {
+    'fiookc':
+    r'^(\s+)for \((\w+) {item_var} of Object.keys\({cont_var}\)\) {{\s*$',
+    'fioovc':
+    r'^(\s+)for \((\w+) {item_var} of Object.values\({cont_var}\)\) {{\s*$',
+    'fioc':
+    r'^(\s+)for \((\w+) {item_var} of {cont_var}\) {{\s*$',
+  }
+  _RPY = {
+    'fiisc':
+    r'\1for {item_var} in sorted({cont_var}):',
+    'fiiscv':
+    r'\1for {item_var} in sorted({cont_var}.values()):'
+  }
+  _RJS = {
+    'fiookcsn':
+    r'\1for (\2 {item_var} of Object.keys({cont_var}).sort((a, b) => Number(a) - Number(b))) {{',
+    'fiookccnsn':
+    r'\1for (\2 {item_var} of Object.keys({cont_var}).map(k => Number(k)).sort((a, b) => a - b)) {{',
+    'fioovcsn':
+    r'\1for (\2 {item_var} of Object.values({cont_var}).sort((a, b) => Number(a) - Number(b))) {{',
+    'fioafcsn':
+    r'\1for (\2 {item_var} of Array.from({cont_var}).sort((a, b) => Number(a) - Number(b))) {{'
   }
 
-  if subject.name not in conf_data:
+  repl_dict = p_utils.read_json(p_consts.TRANSLATION_RULES_DIR / 'text-based' / 'iter_collection.json')
+  if subject.name not in repl_dict:
     return src_program_instr, tar_program_instr
-
   logger.debug('Checking for possible loop semantic differences in src and tar programs.')
+  subject_conf = repl_dict[subject.name]
+  repl_type = subject_conf['type']
+  cont_var = subject_conf['cont_var']
+  item_var = subject_conf['item_var']
 
-  subject_conf = conf_data[subject.name]
-  assert subject.src_lang in subject_conf
-  assert subject.tar_lang in subject_conf
+  if repl_type == 'for_key_in_dict':
+    src_pattern = re.compile(_MPY['fiic'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    tar_pattern = re.compile(_MJS['fiookc'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    src_repl = _RPY['fiisc'].format(item_var=item_var, cont_var=cont_var)
+    tar_repl = _RJS['fiookcsn'].format(item_var=item_var, cont_var=cont_var)
 
-  src_conf = subject_conf[subject.src_lang]
-  tar_conf = subject_conf[subject.tar_lang]
-  assert 'src' in src_conf and 'rpl' in src_conf, 'sanity check'
-  assert 'src' in tar_conf and 'rpl' in tar_conf, 'sanity check'
+  elif repl_type == 'for_key_in_dict_int_cast':
+    src_pattern = re.compile(_MPY['fiic'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    tar_pattern = re.compile(_MJS['fiookc'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    src_repl = _RPY['fiisc'].format(item_var=item_var, cont_var=cont_var)
+    tar_repl = _RJS['fiookccnsn'].format(item_var=item_var, cont_var=cont_var)
 
-  src_pattern = re.compile(src_conf['src'], flags=re.MULTILINE)
-  tar_pattern = re.compile(tar_conf['src'], flags=re.MULTILINE)
-  src_repl = src_conf['rpl']
-  tar_repl = tar_conf['rpl']
+  elif repl_type == 'for_value_in_dict_values':
+    src_pattern = re.compile(_MPY['fiicv'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    tar_pattern = re.compile(_MJS['fioovc'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    src_repl = _RPY['fiiscv'].format(item_var=item_var, cont_var=cont_var)
+    tar_repl = _RJS['fioovcsn'].format(item_var=item_var, cont_var=cont_var)
+
+  elif repl_type == 'for_item_in_set':
+    src_pattern = re.compile(_MPY['fiic'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    tar_pattern = re.compile(_MJS['fioc'].format(item_var=item_var, cont_var=cont_var), flags=re.MULTILINE)
+    src_repl = _RPY['fiisc'].format(item_var=item_var, cont_var=cont_var)
+    tar_repl = _RJS['fioafcsn'].format(item_var=item_var, cont_var=cont_var)
+
+  else:
+    raise NotImplementedError(f'Unknown repl_type: {repl_type}')
 
   after_src_program_instr, src_count = src_pattern.subn(src_repl, src_program_instr)
   after_tar_program_instr, tar_count = tar_pattern.subn(tar_repl, tar_program_instr)
@@ -674,13 +641,6 @@ def _check_for_possible_loop_semantic_diff(
     logger.debug(
       f'Number of replacements differ between src and tar programs. '
       f'Probably not found in tar_program_instr. Skipping replacement.')
-    return src_program_instr, tar_program_instr
-
-  exp_num_repls = conf_data[subject.name]['num_replacements']
-  if src_count != exp_num_repls:
-    logger.warning(
-      f'Number of replacements ({src_count}) differ from expected ({exp_num_repls}). '
-      f'Should not normally happen. Skipping replacement.')
     return src_program_instr, tar_program_instr
 
   logger.debug(f'Replaced {src_count} loop semantic difference(s) in src and tar programs.')
@@ -780,7 +740,7 @@ def _check_for_rec_fn_calls(
   when a recursive call is part of a larger expression, and the
   returned value is None, e.g. `x = rec_fn(...) + 1`.
   '''
-  repl_dict = p_utils.read_json(p_consts.MYLOG_DEFINITIONS_DIR / 'rec_call_replacements.json')
+  repl_dict = p_utils.read_json(p_consts.TRANSLATION_RULES_DIR / 'text-based' / 'rec_call_replacements.json')
 
   if subject.name not in repl_dict:
     return src_program_instr, tar_program_instr
@@ -816,6 +776,11 @@ async def _run_tests(
   RAISE `SrcTestScriptRunError` if there is an error when running src test script.
   RAISE `TarTestScriptRunError` if there is an error when running tar test script.
   RAISE `TraceMismatchError` if there is a trace mismatch between src and tar test scripts.
+
+  NOTE `subject` must contain the following fields:
+  - name
+  - src_lang
+  - tar_lang
   '''
   p_utils.log_json_time(f'args-run_tests.json', locals())
   logger.debug('~~~ Starting to run source and target test scripts.')
@@ -1077,7 +1042,16 @@ def _check_and_update_choices(
   assert subject.translation_rules_main_code is not None, \
     'translation rules for main code must be provided'
 
-  choices_list_stack = []
+  '''
+  Need to check if subject.verified_choice_options is set.
+  '''
+  if len(subject.verified_choice_options) > 0:
+    current_choices_list = p_ext_rule_chooser.merge_choices_list_and_choice_options(
+      current_choices['choices_list'], subject.verified_choice_options
+    )
+    current_choices['choices_list'] = current_choices_list
+
+  choices_list_history = []
 
   '''
   The loop breaks in two cases:
@@ -1091,13 +1065,14 @@ def _check_and_update_choices(
   iter_count = 0
   while True:
     iter_count += 1
+    logger.debug(f'_check_and_update_choices() iteration {iter_count} starts')
     if iter_count > _MAX_ITER_COUNT:
       msg = f'Exceeded max iteration count {_MAX_ITER_COUNT} in _check_and_update_choices().'
       logger.critical(msg)
       raise NotImplementedError(msg)
 
     try:
-      duoglot_translate_result = p_pirel.duoglot_translate_wrapper(
+      _ = p_pirel.duoglot_translate_wrapper(
         src_code=src_main_code_instr,
         src_lang=subject.src_lang,
         tar_lang=subject.tar_lang,
@@ -1129,7 +1104,11 @@ def _check_and_update_choices(
       rel_alt_step_infos = p_ext_rule_chooser.rel_alt_step_info_remove_duplicates(rel_alt_step_infos)
       try:
         current_choices = p_ext_rule_chooser.get_next_unique_choices(
-          rel_alt_step_infos, choices_list_stack, subject.readonly_choices_list)
+          rel_alt_step_infos,
+          choices_list_history,
+          subject.verified_choice_options,
+          raise_on_missing_vrf_rule=False,
+        )
       except p_ext_rule_chooser.RuleCombinationsExhaustedError:
         msg = 'No rule to handle a node in source code.'
         logger.warning(msg)
@@ -1138,7 +1117,8 @@ def _check_and_update_choices(
 
 # API
 async def apply_translation_rules(
-  subject: p_subject.PirelSubject
+  subject: p_subject.PirelSubject,
+  raise_on_missing_vrf_rule: bool = False,
 ) -> Tuple[str, List[dict]]:
   '''
   Apply the translation rules to the source program.
@@ -1157,7 +1137,7 @@ async def apply_translation_rules(
   '''
 
   p_utils.log_json_time(f'args-apply_translation_rules.json', locals())
-  logger.info('rule-app: starting rule applicator')
+  logger.info('--rule-app--: starting rule applicator')
 
   src_program_instr = subject.src_program
   src_test_code, src_main_code_instr, src_test_call_code = \
@@ -1170,7 +1150,7 @@ async def apply_translation_rules(
   '''
   This is a stack of choice options for each error line.
   '''
-  choices_list_stack = []
+  choices_list_history = []
 
   '''
   This is an object that is passed to the translator that tells it
@@ -1200,7 +1180,7 @@ async def apply_translation_rules(
   iteration = 0
   while True:
     iteration += 1
-    logger.debug(f'rule-app: iteration {iteration} starts')
+    logger.debug(f'--rule-app--: iteration {iteration} starts')
 
     tar_main_code_instr, map_to_exid, translate_dbg_history = \
       _get_tar_main_code_instr(src_main_code_instr, current_choices, subject)
@@ -1228,16 +1208,17 @@ async def apply_translation_rules(
         tar_program_instr,
         tar_main_code_instr,
         tar_error_dict,
-        choices_list_stack,
+        choices_list_history,
         map_to_exid,
         translate_dbg_history,
-        subject.readonly_choices_list
+        subject.verified_choice_options,
+        raise_on_missing_vrf_rule,
       )
 
       current_choices = proposed_choices
 
     except TraceMismatchError as err:
-      logger.critical('There is a trace mismatch between src and tar test scripts.')
+      logger.warning('There is a trace mismatch between src and tar test scripts.')
       error_lines = err.error_lines
 
       # May raise
@@ -1246,22 +1227,24 @@ async def apply_translation_rules(
         tar_program_instr,
         tar_main_code_instr,
         error_lines,
-        choices_list_stack,
+        choices_list_history,
         map_to_exid,
         translate_dbg_history,
-        subject.readonly_choices_list
+        subject.verified_choice_options,
+        raise_on_missing_vrf_rule,
       )
 
       current_choices = proposed_choices
 
-    logger.debug(f'rule-app: iteration {iteration} ended')
+    logger.debug(f'--rule-app--: iteration {iteration} ended')
 
 
 # TEST HARNESSES
 def _test_apply_translation_rules():
   '''
   async def apply_translation_rules(
-    subject: p_subject.PirelSubject
+    subject: p_subject.PirelSubject,
+    raise_on_missing_vrf_rule: bool = False,
   ) -> str:
   '''
   config_fpath = p_consts.TMP_DIR / 'test_apply_translation_rules_config.yaml'
@@ -1269,8 +1252,12 @@ def _test_apply_translation_rules():
   args_dict = p_utils.read_json(config['args_dict_fpath'])
 
   subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
-  tar_program_plausible, translate_dbg_history = \
-    asyncio.run(apply_translation_rules(subject))
+  raise_on_missing_vrf_rule = args_dict['raise_on_missing_vrf_rule']
+
+  tar_program_plausible, translate_dbg_history = asyncio.run(apply_translation_rules(
+    subject,
+    raise_on_missing_vrf_rule,
+  ))
   print(f'Plausible target program:\n{tar_program_plausible}')
 
 

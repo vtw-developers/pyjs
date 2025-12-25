@@ -105,7 +105,7 @@ def _create_subject_for_apply_phase(
   translation_rules_test_code = main_subject.translation_rules_test_code
   auto_backward = True
   choices = main_subject.choices
-  readonly_choices_list = []
+  verified_choice_options = []
 
   # create a subject instance
   apply_phase_subject = p_subject.PirelSubject(
@@ -114,10 +114,10 @@ def _create_subject_for_apply_phase(
   apply_phase_subject.translation_rules_test_code = translation_rules_test_code
   apply_phase_subject.auto_backward = auto_backward
   apply_phase_subject.choices = choices
-  apply_phase_subject.readonly_choices_list = readonly_choices_list
+  apply_phase_subject.verified_choice_options = verified_choice_options
 
-  # override readonly_choices_list with verified rules
-  apply_phase_subject.readonly_choices_list = current_ruleset.get_choices_list_from_verified_rules(
+  # override verified_choice_options with verified rules
+  apply_phase_subject.verified_choice_options = current_ruleset.get_choice_options_from_verified_rules(
     apply_phase_subject.get_src_main_code())
 
   return apply_phase_subject
@@ -125,18 +125,17 @@ def _create_subject_for_apply_phase(
 
 async def learn_and_application_phases_on_subject(
   subject: p_subject.PirelSubject,
-  starting_ruleset_str: str,
+  starting_ruleset: p_ruleset.Ruleset,
   semaphore: asyncio.Semaphore,
   lock: asyncio.Lock,
   shared_cnt_fin: List[int],
   lsubject: ptlog.Subject,
   lbenchmark: ptlog.Benchmark,
-) -> Optional[str]:
+) -> Optional[p_ruleset.Ruleset]:
   '''
   Wrapper function to run both rule learning and application phases.
   RETURN validated ruleset or None on failure.
   '''
-  starting_ruleset = p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset_str)
   logger.debug(f'Starting ruleset size: {len(starting_ruleset.rules)}')
 
   # rule learning phase
@@ -158,7 +157,6 @@ async def learn_and_application_phases_on_subject(
     p_utils.llog_yaml(f'{subject.name}_tree_log_learn_phase_success.yaml', asdict(lsubject))
 
   except Exception as exc:
-    print(f'FAIL Rule learning phase for "{subject.name}" failed.')
     logger.critical(f'FAIL Rule learning phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
     lrule_learn_phase.success = False
@@ -192,10 +190,8 @@ async def learn_and_application_phases_on_subject(
     p_utils.llog_json(f'{subject.name}_validated_rules.json', starting_ruleset.to_dict())
     p_utils.llog_text(f'{subject.name}_tar_main_code_plausible.{subject.tar_lang}', tar_main_code_plausible)
     p_utils.llog_yaml(f'{subject.name}_tree_log_apply_phase_success.yaml', asdict(lsubject))
-    print(f'SUCCESS Rule application phase for "{subject.name}" succeeded.')
 
   except Exception as exc:
-    print(f'FAIL Rule application phase for "{subject.name}" failed.')
     logger.critical(f'FAIL Rule application phase for "{subject.name}" failed.')
     logger.critical(p_utils.exception_to_str(exc))
     lrule_application_phase.success = False
@@ -207,10 +203,10 @@ async def learn_and_application_phases_on_subject(
 
   logger.info(f'SUCCESS Both learn and apply phases for "{subject.name}" succeeded.')
   await _run_benchmark_subject_finish(lsubject, lbenchmark, lock, shared_cnt_fin)
-  return starting_ruleset.to_str_ruleset()
+  return starting_ruleset
 
 
-def _run_benchmark_init() -> Tuple[str, ptlog.Benchmark, List[p_subject.PirelSubject]]:
+def _run_benchmark_init() -> Tuple[p_ruleset.Ruleset, ptlog.Benchmark, List[p_subject.PirelSubject]]:
 
   def _load_benchmark_sample() -> List[Tuple[str, str]]:
     '''
@@ -219,65 +215,61 @@ def _run_benchmark_init() -> Tuple[str, ptlog.Benchmark, List[p_subject.PirelSub
     `src_program` is contents of the program in the benchmark
     NOTE removes comments and docstrings from src_main_code.
     '''
-    def _exclude(sample: List[Tuple[str, str]], exclude_list: List[str]) -> List[Tuple[str, str]]:
-      return list(filter(lambda x: x[0] not in exclude_list, sample))
 
+    def _exclude(sample: List[Path], exclude_list: List[str]) -> List[Path]:
+      return list(filter(lambda x: _get_subject_name(x) not in exclude_list, sample))
+
+    assert Config.benchmark_name in p_consts.BENCHMARK_CONFIGS, \
+      f'Unsupported benchmark: {Config.benchmark_name}'
     benchmark_conf = p_consts.BENCHMARK_CONFIGS[Config.benchmark_name]
     benchmark_dir = benchmark_conf['benchmark_dir']
 
+    _get_subject_name = (lambda p: p.stem[:5]) if Config.benchmark_name == 'gfg' else (lambda p: p.stem)
     subject_fpaths : List[Path] = list(sorted(benchmark_dir.glob(f"*.{Config.src_lang}")))
-    dataset : List[Tuple[str, str]] = []
+    if len(Config.sample_only) > 0:
+      subject_fpaths = [p for p in subject_fpaths if _get_subject_name(p) in Config.sample_only]
+      subject_fpaths = _exclude(subject_fpaths, Config.sample_exclude)
+    else:
+      subject_fpaths = subject_fpaths[Config.sample_start_idx: Config.sample_start_idx + Config.sample_size]
+      subject_fpaths = _exclude(subject_fpaths, Config.sample_exclude)
 
-    # LOAD ALL SUBJECTS
+    dataset : List[Tuple[str, str]] = []
     for subject_fpath in subject_fpaths:
       src_program = p_utils.read_text(subject_fpath)
-
-      # NOTE remove comments, docstrings, and empty lines from main_code (not extensively tested)
       if Config.is_three_split:
         src_test_code, src_main_code, src_test_call_code = src_program.split(p_consts.TEST_MAIN_CALL_DELIMITER)
         src_main_code = p_utils.remove_comments_and_docstrings_py(src_main_code)
+        src_program = pvpy.PrettyPrinter.pretty_print(src_program)
         src_program = f'\n{p_consts.TEST_MAIN_CALL_DELIMITER}\n'.join([src_test_code, src_main_code, src_test_call_code])
       else:
         src_program = p_utils.remove_comments_and_docstrings_py(src_program)
+        src_program = pvpy.PrettyPrinter.pretty_print(src_program)
+      dataset.append((_get_subject_name(subject_fpath), src_program))
+    return dataset
 
-      if Config.benchmark_name == 'gfg':
-        subject_name = subject_fpath.stem[:5]
-      elif Config.benchmark_name == 'skel':
-        subject_name = subject_fpath.stem
-      dataset.append((subject_name, src_program))
-
-    # GO OVER THE SAMPLE LOADING OPTIONS
-    # 1. `sample_only` has the highest priority
-    if len(Config.sample_only) > 0:
-      sample = list(filter(lambda x: x[0] in Config.sample_only, dataset))
-      return _exclude(sample, Config.sample_exclude)
-
-    # 2. `sample_randomize` has the second highest priority
-    if Config.sample_randomize:
-      dataset = _exclude(dataset, Config.sample_exclude)
-      sample = sorted(random.sample(dataset, Config.sample_size))
-      return sample
-
-    # 3. slice the dataset
-    start_idx = Config.sample_start_idx
-    end_idx = start_idx + Config.sample_size
-    sample = dataset[start_idx:end_idx]
-    return _exclude(sample, Config.sample_exclude)
-
-  def _load_starting_ruleset() -> str:
+  def _load_starting_ruleset() -> p_ruleset.Ruleset:
     '''
     RETURN the starting ruleset for the learning phase from
     the configuration file or the default starting ruleset.
     '''
     if len(Config.overriding_rulesets) > 0:
-      overriding_ruleset = ''
+      starting_ruleset = p_ruleset.Ruleset()
       for fpath in Config.overriding_rulesets:
         assert fpath.exists(), f'Overriding ruleset file does not exist: {fpath}'
-        overriding_ruleset += p_utils.read_text(fpath).strip() + '\n\n'
-      return overriding_ruleset.strip()
-    return p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
+        if fpath.suffix == '.snart':
+          ruleset = p_ruleset.Ruleset.from_starting_ruleset(p_utils.read_text(fpath))
+          starting_ruleset.extend(ruleset)
+        elif fpath.suffix == '.json':
+          ruleset = p_ruleset.Ruleset.from_dict(p_utils.read_json(fpath))
+          starting_ruleset.extend(ruleset)
+        else:
+          raise ValueError(f'Unsupported overriding ruleset file type: {fpath}')
+      return starting_ruleset
+    else:
+      starting_ruleset_str = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
+      return p_ruleset.Ruleset.from_starting_ruleset(starting_ruleset_str)
 
-  starting_ruleset_str = _load_starting_ruleset()
+  starting_ruleset = _load_starting_ruleset()
   benchmark_sample = _load_benchmark_sample()
   logger.debug(f'Loaded {len(benchmark_sample)} programs for translation rule learning phase.')
   assert len(benchmark_sample) > 0, 'No subjects were loaded'
@@ -306,11 +298,11 @@ def _run_benchmark_init() -> Tuple[str, ptlog.Benchmark, List[p_subject.PirelSub
     subject_list.append(subject)
     lbenchmark.subjects.append(lsubject)
 
-  return starting_ruleset_str, lbenchmark, subject_list
+  return starting_ruleset, lbenchmark, subject_list
 
 
 async def _run_benchmark_sequential(
-  starting_ruleset_str: str,
+  starting_ruleset: p_ruleset.Ruleset,
   subject_list: List[p_subject.PirelSubject],
   semaphore: asyncio.Semaphore,
   lock: asyncio.Lock,
@@ -318,22 +310,22 @@ async def _run_benchmark_sequential(
   lbenchmark: ptlog.Benchmark,
 ) -> None:
   logger.debug('Running benchmark sequentially')
-  current_ruleset_str = starting_ruleset_str
+  current_ruleset = starting_ruleset
   for subject, lsubject in zip(subject_list, lbenchmark.subjects):
     async with ForgivingTaskGroup() as tg:
       coroutine = learn_and_application_phases_on_subject(
-        subject, current_ruleset_str,
+        subject, current_ruleset,
         semaphore, lock, shared_cnt_fin,
         lsubject, lbenchmark)
       task = tg.create_task(coroutine, name=subject.name)
-    latest_learned_rules = task.result()
-    if latest_learned_rules is not None and Config.reuse_translation_rules:
+    latest_ruleset = task.result()
+    if latest_ruleset is not None and Config.reuse_translation_rules:
       logger.info('Reusing learned translation rules for the next subject')
-      current_ruleset_str = latest_learned_rules
+      current_ruleset = latest_ruleset
 
 
 async def _run_benchmark_concurrent(
-  starting_ruleset_str: str,
+  starting_ruleset: p_ruleset.Ruleset,
   subject_list: List[p_subject.PirelSubject],
   semaphore: asyncio.Semaphore,
   lock: asyncio.Lock,
@@ -344,7 +336,7 @@ async def _run_benchmark_concurrent(
   async with ForgivingTaskGroup() as tg:
     for subject, lsubject in zip(subject_list, lbenchmark.subjects):
       coroutine = learn_and_application_phases_on_subject(
-        subject, starting_ruleset_str,
+        subject, starting_ruleset,
         semaphore, lock, shared_cnt_fin,
         lsubject, lbenchmark)
       tg.create_task(coroutine, name=subject.name)
@@ -354,7 +346,7 @@ async def run_benchmark() -> None:
   '''
   Run PiREL to learn and apply translation rules for a given benchmark.
   '''
-  starting_ruleset_str, lbenchmark, subject_list = _run_benchmark_init()
+  starting_ruleset, lbenchmark, subject_list = _run_benchmark_init()
   num_concurrent_subjects = min(lbenchmark.sample_size, Config.max_concurrent_subjects)
   semaphore = asyncio.Semaphore(num_concurrent_subjects)
   lock = asyncio.Lock()
@@ -362,11 +354,11 @@ async def run_benchmark() -> None:
 
   if Config.max_concurrent_subjects == 1:
     await _run_benchmark_sequential(
-      starting_ruleset_str, subject_list,
+      starting_ruleset, subject_list,
       semaphore, lock, shared_cnt_fin, lbenchmark)
   else:
     await _run_benchmark_concurrent(
-      starting_ruleset_str, subject_list,
+      starting_ruleset, subject_list,
       semaphore, lock, shared_cnt_fin, lbenchmark)
 
 
@@ -407,10 +399,6 @@ def get_args() -> argparse.Namespace:
                                ' with `--max-concurrent-subjects 1`.'
                                ' (default: False)'))
 
-  argparser.add_argument('--sample-randomize', '-R',
-                         action='store_true',
-                         help=('Whether to randomize the sample'
-                               ' (default: False)'))
   argparser.add_argument('--sample-size', '-N', metavar='N',
                          type=int, default=1,
                          help='Size of the sample (default: 1)')
@@ -429,6 +417,15 @@ def get_args() -> argparse.Namespace:
                          action='store_true',
                          help=('Whether to email the report after '
                                ' each subject finishes (default: False)'))
+
+  argparser.add_argument('--use-reduced-prompts',
+                         action='store_true',
+                         help=('Whether to use reduced prompts to be more economical '
+                               'with token usage (default: False)'))
+
+  argparser.add_argument('--generator', type=str, default='lightweight',
+                         choices=['lightweight', 'default'],
+                         help=('Generator to use (default: lightweight)'))
 
   args = argparser.parse_args()
 
@@ -450,8 +447,7 @@ def get_args() -> argparse.Namespace:
     assert args.max_concurrent_subjects == 1, \
       f'When reuse_translation_rules is set, max_concurrent_subjects must be 1'
 
-  # sample_randomize, sample_size, sample_start_idx, sample_only, sample_exclude
-  assert isinstance(args.sample_randomize, bool), f'sample_randomize must be boolean'
+  # sample_size, sample_start_idx, sample_only, sample_exclude
   assert isinstance(args.sample_size, int) and args.sample_size > 0, f'sample_size must be a positive integer'
   assert isinstance(args.sample_start_idx, int) and args.sample_start_idx >= 0, f'sample_start_idx must be a non-negative integer'
   assert isinstance(args.sample_only, list), f'sample_only must be a list'
@@ -459,6 +455,12 @@ def get_args() -> argparse.Namespace:
 
   # is_email_report
   assert isinstance(args.is_email_report, bool), f'is_email_report must be boolean'
+
+  # use_reduced_prompts
+  assert isinstance(args.use_reduced_prompts, bool), f'use_reduced_prompts must be boolean'
+
+  # generator
+  assert args.generator in ['lightweight', 'default'], f'Unsupported generator: {args.generator}'
 
   return args
 

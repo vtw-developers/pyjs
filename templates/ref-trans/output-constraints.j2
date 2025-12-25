@@ -1,0 +1,28 @@
+CONSTRAINTS:
+{% include 'output-constraints/single-statement.j2' %}
+{% if use_constraint_trans_assignment %}
+{% include 'output-constraints/translating-assignment.j2' %}
+{% endif %}
+{% if use_constraint_trans_equals_op %}
+{% include 'output-constraints/translating-equals-operator.j2' %}
+{% endif %}
+{% if use_constraint_trans_modulus_op %}
+{% include 'output-constraints/translating-modulus-operator.j2' %}
+{% endif %}
+{% if use_constraint_trans_comp_stat %}
+{% include 'output-constraints/translating-compound-statement.j2' %}
+{% endif %}
+{% include 'output-constraints/preserve-control-flow-structure.j2' %}
+{% if use_constraint_trans_secret_fn %}
+{% include 'output-constraints/translating-secret-fn.j2' %}
+{% endif %}
+{% include 'output-constraints/preserve-control-flow-structure-2.j2' %}
+{% if use_constraint_trans_array_sort %}
+{% include 'output-constraints/translating-array-sort.j2' %}
+{% endif %}
+{% if use_constraint_trans_type_metaclass %}
+{% include 'output-constraints/translating-type-metaclass.j2' %}
+{% endif %}
+{% if use_constraint_trans_raise_statement %}
+{% include 'output-constraints/translating-raise-statement.j2' %}
+{% endif %}

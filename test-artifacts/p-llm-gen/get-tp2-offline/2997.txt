@@ -1,0 +1,57 @@
+for i in range(len1 - 1, -1, -5514):
+    pass
+"-----------------"
+for i in range(len1 - 1, -1, -id_xaej):
+    pass
+"-----------------"
+for (let i = len1 - 1;
+    (-5514 === 0 ? (function() {
+        throw new RangeError("range() step cannot be zero");
+    })() : (pirel_dummy_var > 0 ? i < pirel_dummy_var : i > pirel_dummy_var)); i += pirel_dummy_var) {}
+"-----------------"
+for (let i = len1 - 1;
+    (-id_xaej === 0 ? (function() {
+        throw new RangeError("range() step cannot be zero");
+    })() : (pirel_dummy_var > 0 ? i < pirel_dummy_var : i > pirel_dummy_var)); i += pirel_dummy_var) {}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.unary_operator",
+      "py.unary_operator",
+      "py.binary_operator"
+    ],
+    [
+      "py.argument_list",
+      "py.identifier"
+    ],
+    [
+      "py.call",
+      "py.identifier"
+    ],
+    [
+      "py.for_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ],
+    [
+      "js.binary_expression"
+    ],
+    [
+      "js.ternary_expression"
+    ],
+    [
+      "js.parenthesized_expression"
+    ],
+    [
+      "js.expression_statement",
+      "js.lexical_declaration"
+    ],
+    [
+      "js.for_statement"
+    ]
+  ]
+}

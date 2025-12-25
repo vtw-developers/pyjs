@@ -1,0 +1,108 @@
+{
+  "choices_list_history": [
+    [
+      [
+        [
+          6,
+          3,
+          5
+        ],
+        3
+      ],
+      [
+        [
+          42,
+          2,
+          3
+        ],
+        2
+      ]
+    ]
+  ],
+  "verified_choice_options": [
+    [
+      [
+        8,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        8,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        19,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        21,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        35,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        42,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ]
+  ],
+  "rel_alt_step_infos": {
+    "23": {
+      "next_choices_count": 4,
+      "current_choose_idx": 3,
+      "current_range_info": [
+        6,
+        3,
+        5
+      ]
+    },
+    "27": {
+      "next_choices_count": 3,
+      "current_choose_idx": 2,
+      "current_range_info": [
+        42,
+        2,
+        3
+      ]
+    }
+  },
+  "new_choices": {
+    "type": "ASTNODE",
+    "choices_list": []
+  }
+}

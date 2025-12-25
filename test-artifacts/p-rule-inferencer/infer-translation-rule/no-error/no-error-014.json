@@ -1,0 +1,26 @@
+{
+  "translation_pair": [
+    {
+      "source": "if string_0[i] == string_0[j] and string_0[i] != \"*\":\n    secret_fun_4071()\nelif string_0[i] == string_0[j] and string_0[i] == \"*\":\n    secret_fun_4071()\nelif string_0[i] == \"*\":\n    secret_fun_4071()\nelif string_0[j] == \"*\":\n    secret_fun_4071()",
+      "target": "if (string_0.get(i) === string_0.get(j) || string_0.get(i) === \"*\" || string_0.get(j) === \"*\") {\n    secret_fun_4071();\n}"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.if_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"i\")) (str \"]\")) (str \"==\") (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"j\")) (str \"]\"))) (str \"and\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"i\")) (str \"]\")) (str \"!=\") (\"py.string\" (anno (\"stype\" \"\") (\"quote\" \"\\\"\")) (str \"\\\"\") (\"py.string_content\" (val \"*\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\") (\"py.elif_clause\" (str \"elif\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"i\")) (str \"]\")) (str \"==\") (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"j\")) (str \"]\"))) (str \"and\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"i\")) (str \"]\")) (str \"==\") (\"py.string\" (anno (\"stype\" \"\") (\"quote\" \"\\\"\")) (str \"\\\"\") (\"py.string_content\" (val \"*\")) (str \"\\\"\")))) (str \":\") (\"py.block\" (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"secret_fun_4071\")) (\"py.argument_list\" (str \"(\") (str \")\")))))) (\"py.elif_clause\" (str \"elif\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"i\")) (str \"]\")) (str \"==\") (\"py.string\" (anno (\"stype\" \"\") (\"quote\" \"\\\"\")) (str \"\\\"\") (\"py.string_content\" (val \"*\")) (str \"\\\"\"))) (str \":\") (\"py.block\" (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"secret_fun_4071\")) (\"py.argument_list\" (str \"(\") (str \")\")))))) (\"py.elif_clause\" (str \"elif\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"string_0\")) (str \"[\") (\"py.identifier\" (val \"j\")) (str \"]\")) (str \"==\") (\"py.string\" (anno (\"stype\" \"\") (\"quote\" \"\\\"\")) (str \"\\\"\") (\"py.string_content\" (val \"*\")) (str \"\\\"\"))) (str \":\") (\"py.block\" (\"py.expression_statement\" (\"py.call\" (\"py.identifier\" (val \"secret_fun_4071\")) (\"py.argument_list\" (str \"(\") (str \")\"))))))) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"string_0\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \")\"))) (str \"===\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"string_0\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"j\")) (str \")\")))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"string_0\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"*\")) (str \"\\\"\")))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"string_0\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"j\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"*\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)"
+}

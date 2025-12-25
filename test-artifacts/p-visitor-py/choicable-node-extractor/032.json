@@ -1,0 +1,19 @@
+{
+  "code": "def f_gold(a, n):\n    count = dict()\n    for i in range(n):\n        if count.get(a[i]):\n            count[a[i]] += 1\n        else:\n            count[a[i]] = 1\n    next_missing = 1\n    for i in range(n):\n        if count[a[i]] != 1 or a[i] > n or a[i] < 1:\n            count[a[i]] -= 1\n            while count.get(next_missing):\n                next_missing += 1\n            a[i] = next_missing\n            count[next_missing] = 1",
+  "choicable_nodes": [
+    "dict()",
+    "range(n)",
+    "count.get(a[i])",
+    "1",
+    "1",
+    "1",
+    "range(n)",
+    "count[a[i]] != 1 or a[i] > n or a[i] < 1",
+    "1",
+    "count.get(next_missing)",
+    "1",
+    "next_missing",
+    "1"
+  ],
+  "exclude_stat_nids": []
+}

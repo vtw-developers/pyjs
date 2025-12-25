@@ -1,1 +1,0 @@
-res = placeAdd or placeMinus

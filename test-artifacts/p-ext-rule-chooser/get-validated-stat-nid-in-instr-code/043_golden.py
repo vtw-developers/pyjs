@@ -1,1 +1,0 @@
-retval_1 = zeros == 1 or ones == 1

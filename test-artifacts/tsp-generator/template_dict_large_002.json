@@ -1,0 +1,109 @@
+{
+  "template_id": 2,
+  "src_lang": "py",
+  "tar_lang": "js",
+  "template_origin": "midVal1 = nums1[i + k // 2 - 1] if i + k // 2 - 1 < m else float('inf')",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_type": "conditional_expression",
+  "problematic_node_id": 4,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "is_valid_template": true,
+  "is_insert_secret_fn": false,
+  "contexts": [
+    {
+      "source_context": [
+        [
+          "py.conditional_expression",
+          "py.identifier"
+        ],
+        [
+          "py.assignment"
+        ],
+        [
+          "py.expression_statement"
+        ]
+      ],
+      "target_context": [
+        [
+          "unknown",
+          "js.identifier"
+        ],
+        [
+          "js.variable_declarator"
+        ],
+        [
+          "js.lexical_declaration"
+        ]
+      ]
+    }
+  ],
+  "partial_program": "let midVal1 = pirel_replace_var;",
+  "src_program": "\nimport math\nfrom math import inf\nfrom typing import *\ndef f_gold(nums1: List[int], nums2: List[int]) -> float:\n    def findKth(i, j, k):\n        if i >= m:\n            return nums2[j + k - 1]\n        if j >= n:\n            return nums1[i + k - 1]\n        if k == 1:\n            return min(nums1[i], nums2[j])\n        midVal1 = nums1[i + k // 2 - 1] if i + k // 2 - 1 < m else float('inf')\n        midVal2 = nums2[j + k // 2 - 1] if j + k // 2 - 1 < n else float('inf')\n        if midVal1 < midVal2:\n            return findKth(i + k // 2, j, k - k // 2)\n        return findKth(i, j + k // 2, k - k // 2)\n    m, n = len(nums1), len(nums2)\n    left, right = (m + n + 1) // 2, (m + n + 2) // 2\n    return (findKth(0, 0, left) + findKth(0, 0, right)) / 2\n",
+  "pre_context": "if i >= m:\n    return nums2[j + k - 1]\nif j >= n:\n    return nums1[i + k - 1]\nif k == 1:\n    return min(nums1[i], nums2[j])\npirel_pre_ctx_spec_identifier",
+  "tsps": [
+    [
+      "midVal1 = id_dzv if id_lhfb else id_myw",
+      "midVal1 = 6835 if 3377 else 5877"
+    ],
+    [
+      "midVal1 = id_grhj[id_ebo] if id_afi < id_ycrv else float('inf')",
+      "midVal1 = id_gro[2541] if 7472 < id_yle else float('inf')"
+    ],
+    [
+      "midVal1 = id_kicg[id_ich - 2618] if id_igao < id_sbtm else float('inf')",
+      "midVal1 = id_merz[1270 - id_nbaz] if 3647 < id_umo else float('inf')"
+    ],
+    [
+      "midVal1 = id_xnf[id_vxkt] if id_qic - 6267 < id_yjq else float('inf')",
+      "midVal1 = id_cxz[918] if 2964 - id_aov < id_exi else float('inf')"
+    ],
+    [
+      "midVal1 = id_ehs[id_xkz - 8240] if id_uhcw - 5531 < id_iyp else float('inf')",
+      "midVal1 = id_nig[9634 - id_jgkv] if 3214 - id_twnh < id_uaq else float('inf')"
+    ],
+    [
+      "midVal1 = id_wndy[id_whue + id_ofby - 8518] if id_ghy < id_obrj else float('inf')",
+      "midVal1 = id_vncz[id_cbp + 8449 - 2324] if 9952 < id_lpe else float('inf')"
+    ],
+    [
+      "midVal1 = id_eryd[id_clhr + id_zqte - 813] if id_jor - 9435 < id_xafp else float('inf')",
+      "midVal1 = id_mqka[id_egq + 7517 - 6010] if 1964 - id_ncu < id_pjrd else float('inf')"
+    ],
+    [
+      "midVal1 = id_pyk[id_ycev] if id_gvlu + id_vax - 182 < id_xzv else float('inf')",
+      "midVal1 = id_xwls[9729] if id_rciz + 2487 - 1276 < id_uojz else float('inf')"
+    ],
+    [
+      "midVal1 = id_nit[id_tgj - 1806] if id_utoq + id_mex - 9768 < id_fbi else float('inf')",
+      "midVal1 = id_fdaz[8749 - id_aucd] if id_wpqx + 5470 - 3819 < id_rnzb else float('inf')"
+    ],
+    [
+      "midVal1 = id_gtvs[id_vgxr + id_wni - 7135] if id_giz + id_ydif - 1658 < id_ykc else float('inf')",
+      "midVal1 = id_bqak[id_eoym + 3369 - 9465] if id_fuva + 3301 - 7664 < id_ydx else float('inf')"
+    ],
+    [
+      "midVal1 = id_fod[id_zfj + id_nlb // 5952 - 3445] if id_iuz - 8917 < id_adru else float('inf')",
+      "midVal1 = id_muv[id_xzf + id_jzv // id_hft - 1610] if 6688 - id_gwj < id_reb else float('inf')"
+    ],
+    [
+      "midVal1 = id_fbtk[id_lmk + id_ihr // 5212 - 7839] if id_sjm + id_axgz - 6613 < id_vsw else float('inf')",
+      "midVal1 = id_nvmq[id_ptb + id_oly // id_jxwc - 587] if id_znpu + 981 - 1223 < id_vpa else float('inf')"
+    ],
+    [
+      "midVal1 = id_chwo[id_vuiz - 1230] if id_fedr + id_eyat // 6425 - 2075 < id_yxv else float('inf')",
+      "midVal1 = id_zmj[5910 - id_agd] if id_cop + id_pfjc // id_zhx - 7564 < id_jdi else float('inf')"
+    ],
+    [
+      "midVal1 = id_wlmu[id_kdvl + id_slj - 5155] if id_uco + id_tfsk // 8737 - 2293 < id_jnp else float('inf')",
+      "midVal1 = id_glk[id_mgxy + 3558 - 873] if id_znf + id_ytra // id_ito - 2966 < id_envu else float('inf')"
+    ],
+    [
+      "midVal1 = id_vcok[id_dve + id_tuf // 6586 - 8232] if id_qxck + id_qsr // 6118 - 3358 < id_zhk else float('inf')",
+      "midVal1 = id_dma[id_zsq + id_ieds // id_polb - 550] if id_oip + id_ydw // id_wmo - 9861 < id_szk else float('inf')"
+    ]
+  ]
+}

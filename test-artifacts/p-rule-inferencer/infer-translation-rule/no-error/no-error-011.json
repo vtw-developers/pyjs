@@ -1,0 +1,36 @@
+{
+  "translation_pair": [
+    {
+      "source": "return {foo: secret_fun_4071()}",
+      "target": "return {\n    [foo]: secret_fun_4071()\n};"
+    },
+    {
+      "source": "return {foo: secret_fun_4071()}",
+      "target": "return {\n    [foo]: secret_fun_4071()\n};"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.dictionary"
+      ],
+      [
+        "py.return_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.return_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.dictionary\" (str \"{\") \"*\" (str \"}\")) \"*\")\n  (fragment (\"js.object\" (str \"{\") \"*1\" (str \"}\")) \"*2\")\n)"
+}

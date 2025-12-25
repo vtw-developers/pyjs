@@ -1,0 +1,20 @@
+{
+  "template_origin": "return ((hasattr(class_var.left, '__eq__') and class_var.left.__eq__(other.left)) or (not hasattr(class_var.left, '__eq__') and class_var.left == other.left)) and ((hasattr(class_var.right, '__eq__') and class_var.right.__eq__(other.right)) or (not hasattr(class_var.right, '__eq__') and class_var.right == other.right))",
+  "src_lang": "py",
+  "context_node_type": "return_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "return_statement",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "return id_vka",
+      "return 9887"
+    ],
+    [
+      "return id_pxun and id_dcj",
+      "return 9308 and 9234"
+    ]
+  ],
+  "problematic_node_id": 1
+}

@@ -1,0 +1,53 @@
+{
+  "translation_pair": [
+    {
+      "source": "for i in range(0, len(id_zysd)):\n    pass",
+      "target": "for (let i = i; i < id_zysd.length; i++) {}"
+    },
+    {
+      "source": "for i in range(0, len(id_ygc)):\n    pass",
+      "target": "for (let i = i; i < id_ygc.length; i++) {}"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.call",
+        "pirel_anynode"
+      ],
+      [
+        "py.argument_list",
+        "py.identifier"
+      ],
+      [
+        "py.call",
+        "py.identifier"
+      ],
+      [
+        "py.for_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown",
+        "js.identifier"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.expression_statement",
+        "js.lexical_declaration"
+      ],
+      [
+        "js.for_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "translation_rule": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" \".1\" (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*2\")\n)"
+}

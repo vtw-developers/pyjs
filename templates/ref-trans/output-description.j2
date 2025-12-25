@@ -1,0 +1,7 @@
+{% if not use_reduced_prompts %}
+YOUR OUTPUT SHOULD BE AS FOLLOWS:
+{% include 'output-description/step-by-step-explanation.j2' %}
+{% include 'output-description/syntactically-semantically-valid.j2' %}
+{% include 'output-description/output-format.j2' %}
+{% include 'output-description/no-comments-in-code-blocks.j2' %}
+{% endif %}

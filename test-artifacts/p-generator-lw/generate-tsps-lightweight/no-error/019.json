@@ -1,0 +1,82 @@
+{
+  "tsps": [
+    [
+      "return var1 != var2",
+      "return pirel_var1 != pirel_var2"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 1,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "while y != 0:\n    pass",
+    "context_node_type": "while_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "comparison_operator",
+    "problematic_node_id": 2,
+    "problematic_node_path": [
+      1
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.comparison_operator"
+          ],
+          [
+            "py.while_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.parenthesized_expression"
+          ],
+          [
+            "js.while_statement"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 1,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "return var1 != var2",
+    "context_node_type": "return_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "comparison_operator",
+    "problematic_node_id": 2,
+    "problematic_node_path": [
+      1
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": false,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.comparison_operator"
+          ],
+          [
+            "py.return_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.return_statement"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "return pirel_replace_var;"
+  }
+}

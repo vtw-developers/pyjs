@@ -1,0 +1,20 @@
+{
+  "template_origin": "assert (((hasattr(tree, '__contains__') and tree.__contains__(11)) or (not hasattr(tree, '__contains__') and 11 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(12)) or (not hasattr(tree, '__contains__') and 12 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(-8)) or (not hasattr(tree, '__contains__') and -8 in tree)) and ((hasattr(tree, '__contains__') and tree.__contains__(0)) or (not hasattr(tree, '__contains__') and 0 in tree)))",
+  "src_lang": "py",
+  "context_node_type": "assert_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    1,
+    1,
+    0
+  ],
+  "problematic_node_type": "boolean_operator",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "assert (id_okli and id_refu and ((hasattr(tree, '__contains__') and tree.__contains__(0)) or (not hasattr(tree, '__contains__') and 0 in tree)))",
+      "assert (7727 and 3920 and ((hasattr(tree, '__contains__') and tree.__contains__(0)) or (not hasattr(tree, '__contains__') and 0 in tree)))"
+    ]
+  ],
+  "problematic_node_id": 4
+}

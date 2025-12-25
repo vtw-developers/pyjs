@@ -101,7 +101,6 @@ def _grm_preprocess_hack_js(grammar):
   }
 
 
-# TODO what does this function do?
 def grm_preprocess(lang_prefix, grammar):
 
   # 1 hack the grammars (language specific)

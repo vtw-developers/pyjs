@@ -28,6 +28,11 @@
 )
 
 (match_expand
+  (fragment ("py.list_splat_pattern" (str "*") ".") "*")
+  (fragment ("js.rest_pattern" (str "...") ".1") "*2")
+)
+
+(match_expand
   (fragment ("py.block" "*") "*")
   (fragment ("js.statement_block" "*1") "*2")
 )
@@ -63,13 +68,23 @@
 )
 
 (match_expand
-  (fragment ("py.string_content" "_val_") "*")
-  (fragment ("js.string_fragment" "_val1_") "*1")
+  (fragment ("py.string" (str "\"") ("py.string_content" "_val_") (str "\"")) "*")
+  (fragment ("js.string" (str "'") ("js.string_fragment" "_val1_") (str "'")) "*1")
 )
 
 (match_expand
-  (fragment ("py.string" "*") "*")
-  (fragment ("js.string" "*1") "*2")
+  (fragment ("py.string" (str "\"") ("py.escape_sequence" "_val_") (str "\"")) "*")
+  (fragment ("js.string" (str "\"") ("js.escape_sequence" "_val1_") (str "\"")) "*1")
+)
+
+(match_expand
+  (fragment ("py.string" (str "\"") (str "\"")) "*")
+  (fragment ("js.string" (str "\"") (str "\"")) "*1")
+)
+
+(match_expand
+  (fragment ("py.identifier" "_val_") "*")
+  (fragment ("js.property_identifier" "_val1_") "*1")
 )
 
 

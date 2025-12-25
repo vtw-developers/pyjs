@@ -1,0 +1,67 @@
+{
+  "translation_pair": [
+    {
+      "source": "return (id_unqa) / (4.0 * (n * n) - 1)",
+      "target": "return (() => {\n    const a = Number(id_unqa);\n    const b = Number(pirel_dummy_var);\n    if (b === 0) {\n        throw new Error(\"ZeroDivisionError\");\n    }\n    return a / b;\n})();"
+    },
+    {
+      "source": "return (108) / (4.0 * (n * n) - 1)",
+      "target": "return (() => {\n    const a = Number(108);\n    const b = Number(pirel_dummy_var);\n    if (b === 0) {\n        throw new Error(\"ZeroDivisionError\");\n    }\n    return a / b;\n})();"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.parenthesized_expression"
+      ],
+      [
+        "py.binary_operator"
+      ],
+      [
+        "py.return_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.arguments",
+        "js.identifier"
+      ],
+      [
+        "js.call_expression",
+        "js.identifier"
+      ],
+      [
+        "js.variable_declarator"
+      ],
+      [
+        "js.lexical_declaration"
+      ],
+      [
+        "js.statement_block",
+        "js.formal_parameters"
+      ],
+      [
+        "js.arrow_function"
+      ],
+      [
+        "js.parenthesized_expression"
+      ],
+      [
+        "js.call_expression"
+      ],
+      [
+        "js.return_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "error_msg": "context not found",
+  "error_class": "ContextNotFoundError"
+}

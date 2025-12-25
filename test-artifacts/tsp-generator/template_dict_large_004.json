@@ -1,0 +1,16 @@
+{
+  "template_origin": "if isinstance(value, dict):\n    pass\nelif isinstance(value, list):\n    pass\nelif isinstance(value, str):\n    pass\nelif isinstance(value, bool):\n    pass\nelif isinstance(value, int):\n    pass\nelif isinstance(value, float):\n    pass\nelif user_check_type(value, datetime.datetime):\n    pass\nelif user_check_type(value, datetime.date):\n    pass\nelif user_check_type(value, datetime.time):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "if_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "if id_prmt:\n    secret_fun_4071()\nelif id_gsuo:\n    secret_fun_4071()\nelif id_pvq:\n    secret_fun_4071()\nelif id_kfyp:\n    secret_fun_4071()\nelif id_ift:\n    secret_fun_4071()\nelif id_doih:\n    secret_fun_4071()\nelif id_jnvr:\n    secret_fun_4071()\nelif id_pdhb:\n    secret_fun_4071()\nelif id_vfpm:\n    secret_fun_4071()",
+      "if 9186:\n    secret_fun_4071()\nelif 5018:\n    secret_fun_4071()\nelif 3513:\n    secret_fun_4071()\nelif 819:\n    secret_fun_4071()\nelif 6252:\n    secret_fun_4071()\nelif 3496:\n    secret_fun_4071()\nelif 6694:\n    secret_fun_4071()\nelif 3326:\n    secret_fun_4071()\nelif 1884:\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

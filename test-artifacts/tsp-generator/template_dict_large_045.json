@@ -1,0 +1,35 @@
+{
+  "template_origin": "h[i + 1][j + 1] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    0,
+    2
+  ],
+  "problematic_node_type": "call",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "h[i + 1][j + 1] = min(id_wopb, id_bwr, id_phdl, id_suvj)",
+      "h[i + 1][j + 1] = min(3748, 3588, 3409, 4009)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ibpd[id_wnt] + id_hap, id_vgzq + 3350, id_bxt[id_eigx] + 3350, id_agyc + 9771 + (id_okbc))",
+      "h[i + 1][j + 1] = min(id_amk[id_plqm] + id_rdqo, 4851 + id_mfi, id_yjqo[7657] + 9549, 7841 + id_bmuq + (3232))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_ktql[id_tpgk] + id_vno, id_yuvl[id_xeo] + 5247, id_wzv + 3943, id_hxjo + 8325 + (id_iaun))",
+      "h[i + 1][j + 1] = min(id_usth[id_nzef] + id_oux, id_nfm[id_ybk] + 4138, 6822 + id_pwal, 427 + id_azu + (431))"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_xawm + id_cst, id_ykq[id_vgl] + 7718, id_jmn + 321, id_ugoz + id_lces)",
+      "h[i + 1][j + 1] = min(6530 + id_uih, id_oqvb[id_wjzy] + 1856, 7901 + id_tvm, 5047 + 8024)"
+    ],
+    [
+      "h[i + 1][j + 1] = min(id_hcn[id_yntw] + id_hvp, id_pta + 4250, id_vxw + 5140, id_slh + id_ecf)",
+      "h[i + 1][j + 1] = min(id_gld[id_shdx] + id_rfe, 7051 + id_xgew, 3119 + id_xcz, 7125 + 2281)"
+    ]
+  ],
+  "problematic_node_id": 12
+}

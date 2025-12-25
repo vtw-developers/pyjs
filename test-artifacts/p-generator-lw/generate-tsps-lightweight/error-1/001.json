@@ -1,0 +1,71 @@
+{
+  "tsps": [
+    [
+      "for var1, var2 in var3:\n    secret_fun_4071()",
+      "for pirel_var1, pirel_var2 in pirel_var3:\n    secret_fun_4071()"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 1,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "for a, b in zip(iter1, iter2):\n    pass",
+    "context_node_type": "for_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "pattern_list",
+    "problematic_node_id": 2,
+    "problematic_node_path": [
+      1
+    ],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.pattern_list"
+          ],
+          [
+            "py.for_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ],
+          [
+            "js.for_in_statement"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 1,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "for var1, var2 in var3:\n    secret_fun_4071()",
+    "context_node_type": "for_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "for_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.for_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "pirel_replace_var;"
+  }
+}

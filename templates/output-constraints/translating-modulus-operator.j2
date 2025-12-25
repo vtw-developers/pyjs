@@ -1,0 +1,4 @@
+* When translating `%` (modulus) operator from Python to JavaScript, provide exactly two translations
+  by preserving its behavior with respect to negative numbers:
+  i. Standard translation using `%` for positive numbers (e.g. `a % b`)
+  ii. Custom translation to handle negative dividends correctly (e.g. `((a % b) + b) % b`)

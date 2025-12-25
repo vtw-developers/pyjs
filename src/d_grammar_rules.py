@@ -1,3 +1,4 @@
+import re
 from typing import List, Tuple
 
 import d_consts
@@ -68,7 +69,57 @@ def parse_analyze_rules(code_str, show_disable=False) -> Tuple[List[dict], dict]
   return expansion_programs, dbg_info
 
 
-def pretty_s_expr(s_expr):
+def parse_analyze_rules_optim(
+  trules_str: str,
+  show_disable: bool = False
+) -> List[dict]:
+  '''
+  Optimized version of parse_analyze_rules that only returns the parsed translation rules.
+  '''
+  # Preprocess to remove comments and blank lines
+  trules_str = '\n'.join([
+    x for x in trules_str.split('\n')
+    if not (x.strip().startswith(';') or x.strip() == '')
+  ])
+
+  # Split the ruleset into individual rules for optimized parsing
+  split_indices = [m.start() for m in re.finditer(r'\((?:match_expand|ext_match_expand)', trules_str)]
+  trules_list = []
+  for i, idx in enumerate(split_indices):
+      end = split_indices[i+1] if i+1 < len(split_indices) else len(trules_str)
+      trules_list.append(trules_str[idx:end])
+
+  trules_parsed = []
+  for trule in trules_list:
+    sexpr_list, _, err = d_utils.parse_sexpr_list(trule)
+    assert sexpr_list is not None, 'Translation rule parsing error: ' + str(err)
+    assert len(sexpr_list) == 1, 'Each rule should parse to a single s-expression.'
+    sexpr = sexpr_list[0]
+    decl_name = sexpr[0]
+    assert decl_name in ['match_expand', 'ext_match_expand'], f'Unknown declarator name: {decl_name}'
+    if decl_name == 'match_expand':
+      assert len(sexpr) == 3, 'match_expand expected length 3'
+      trules_parsed.append({
+        'type': 'match_expand',
+        'match': sexpr[1],
+        'expand': sexpr[2]
+      })
+    else:
+      assert len(sexpr) == 4, 'ext_match_expand expected length 4'
+      assert sexpr[3][0] == 'flags', 'ext_match_expand should have flags'
+      flags = {x: True for x in sexpr[3][1:]}
+      if '"disabled"' not in flags or show_disable:
+        trules_parsed.append({
+          'type': 'ext_match_expand',
+          'match': sexpr[1],
+          'expand': sexpr[2],
+          'flags': flags
+        })
+
+  return trules_parsed
+
+
+def pretty_s_expr(s_expr) -> str:
   '''
   `sExpr` has a very similar structure to DuoGlot style AST's.
   This function returns a string version of it which is THE version
@@ -87,7 +138,7 @@ def pretty_s_expr(s_expr):
     return str(s_expr)
 
 
-def pretty_rule(rule):
+def pretty_rule(rule: dict) -> str:
   '''
   Pretty-prints a translation rule to the standard format.
   Refer to p_rule_inferencer.py for more information.
@@ -101,3 +152,24 @@ def pretty_rule(rule):
     f'({rule_type}\n' \
     f'  {pretty_s_expr(match)}\n' \
     f'  {pretty_s_expr(expand)}\n)'
+
+
+def pretty_s_expr_tree_like(s_expr, indent_size=2, global_indent='  ') -> str:
+  def _rec(s_expr, indent_level, indent_size, global_indent):
+    # terminal
+    if isinstance(s_expr, str):
+      return global_indent + (' ' * (indent_size * indent_level)) + s_expr
+    # non-terminal with single terminal child
+    if isinstance(s_expr, list) and len(s_expr) == 2 and isinstance(s_expr[0], str) and isinstance(s_expr[1], str):
+      return global_indent + (' ' * (indent_size * indent_level)) + '(' + s_expr[0] + ' ' + s_expr[1] + ')'
+    # nostr
+    if isinstance(s_expr, list) and len(s_expr) == 1:
+      return global_indent + (' ' * (indent_size * indent_level)) + '(' + s_expr[0] + ')'
+    result = global_indent + (' ' * (indent_size * indent_level)) + '('
+    result += s_expr[0]
+    for i in range(1, len(s_expr)):
+      result += '\n' + _rec(s_expr[i], indent_level+1, indent_size, global_indent)
+    result += '\n' + global_indent + (' ' * (indent_size * indent_level)) + ')'
+    return result
+  result = _rec(s_expr, 0, indent_size, global_indent)
+  return result

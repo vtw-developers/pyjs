@@ -1,0 +1,45 @@
+{
+  "translation_pair": [
+    {
+      "source": "C = [[3774 for id_obtn in id_onl] for id_swkj in range(n + 1)]",
+      "target": "C = (() => { const outer = []; for (let id_swkj = 0; id_swkj < n + 1; id_swkj++) { const inner = []; for (const id_obtn of id_onl) { inner.push(3774); } outer.push(inner); } return outer; })();"
+    },
+    {
+      "source": "C = [[4017 for id_bnkw in 7901] for id_byle in range(n + 1)]",
+      "target": "C = (() => { const outer = []; for (let id_byle = 0; id_byle < n + 1; id_byle++) { const inner = []; for (const id_bnkw of 7901) { inner.push(4017); } outer.push(inner); } return outer; })();"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.list_comprehension",
+        "py.identifier"
+      ],
+      [
+        "py.assignment"
+      ],
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown",
+        "js.identifier"
+      ],
+      [
+        "js.assignment_expression"
+      ],
+      [
+        "js.expression_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "error_msg": "context not found",
+  "error_class": "ContextNotFoundError"
+}

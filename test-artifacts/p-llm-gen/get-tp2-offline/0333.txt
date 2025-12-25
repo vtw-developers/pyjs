@@ -1,0 +1,58 @@
+if arr[m] in id_osu.keys( ):
+    pass
+else:
+    pass
+"-----------------"
+if arr[m] in id_wxnq.keys( ):
+    pass
+else:
+    pass
+"-----------------"
+if (Object.prototype.hasOwnProperty.call((() => {
+        const o = Object.create(null);
+        for (const k of id_osu.keys()) {
+            o[k] = true;
+        }
+        return o;
+    })(), pirel_dummy_var)) {} else {}
+"-----------------"
+if (Object.prototype.hasOwnProperty.call((() => {
+        const o = Object.create(null);
+        for (const k of id_wxnq.keys()) {
+            o[k] = true;
+        }
+        return o;
+    })(), pirel_dummy_var)) {} else {}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.call",
+      "py.subscript"
+    ],
+    [
+      "py.comparison_operator"
+    ],
+    [
+      "py.if_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ],
+    [
+      "js.arguments",
+      "js.member_expression"
+    ],
+    [
+      "js.call_expression"
+    ],
+    [
+      "js.parenthesized_expression"
+    ],
+    [
+      "js.if_statement"
+    ]
+  ]
+}

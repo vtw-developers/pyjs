@@ -1,0 +1,5 @@
+{% if use_reduced_prompts %}
+{% include 'system/reduced.j2' %}
+{% else %}
+{% include 'system/default.j2' %}
+{% endif %}

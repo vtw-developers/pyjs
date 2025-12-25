@@ -5,15 +5,22 @@ import itertools
 import json
 import math
 import random
+import re
 import sys
 import queue
 from collections.abc import Iterable
 from copy import deepcopy
 from typing import Union
 
+
 _default_print = print
 JS_MAX_SAFE_INTEGER = 9_007_199_254_740_991
 JS_MIN_SAFE_INTEGER = -9_007_199_254_740_991
+
+
+def is_defined_in_main(obj):
+  return getattr(obj, '__module__', None) == '__main__'
+
 
 def serialize_none():
   return ["null"]
@@ -32,10 +39,15 @@ def serialize_num(arg: Union[int, float]):
   if math.isnan(arg):
     return serialize_str("nan")
   if JS_MIN_SAFE_INTEGER <= arg <= JS_MAX_SAFE_INTEGER:
+    if abs(arg) <= 1e-9:
+      return ["number", 0]
     # force whole numbers to be int type
     if arg % 1 == 0:
       return ["number", int(arg)]
-    return ["number", arg]
+    srlzd = '{:.6e}'.format(float(arg))
+    # remove leading zeros in exponent
+    srlzd = re.sub(r'e([+-])0*(\d+)', r'e\1\2', srlzd)
+    return serialize_str(srlzd)
   return serialize_str('{:.6e}'.format(float(arg)))
 
 def serialize_list(arg: Iterable):
@@ -69,6 +81,12 @@ def serialize_dict(arg: dict):
     serialized_key_value_pairs.append(serialize([key, argcp[key]]))
   return ["dict", len(argcp), serialized_key_value_pairs]
 
+def serialize_callable(arg):
+  return ["function"]
+
+def serialize_defined_in_main(arg):
+  return ["defined_in_main", arg.__class__.__name__]
+
 def serialize(arg):
   if arg is None:
     return serialize_none()
@@ -87,7 +105,9 @@ def serialize(arg):
   if isinstance(arg, queue.Queue):
     return serialize_list(list(arg.queue))
   if callable(arg):
-    return ["function"]
+    return serialize_callable(arg)
+  if is_defined_in_main(arg):
+    return serialize_defined_in_main(arg)
   str_result = str(arg)
   return ["unknown", len(str_result), str_result]
 

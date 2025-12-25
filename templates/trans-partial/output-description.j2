@@ -1,0 +1,10 @@
+YOUR OUTPUT SHOULD BE AS FOLLOWS:
+{% if not use_reduced_prompts %}
+{% include 'output-description/all-possible-snippets.j2' %}
+{% include 'output-description/ordering.j2' %}
+{% include 'output-description/output-format.j2' %}
+{% include 'output-description/no-comments-in-code-blocks.j2' %}
+{% include 'output-description/context-preservation.j2' %}
+{% else %}
+{% include 'output-description/ordering.j2' %}
+{% endif %}

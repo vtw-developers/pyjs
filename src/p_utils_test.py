@@ -1,6 +1,7 @@
 import unittest
 from typing import Dict
 
+import p_consts
 import p_utils
 
 
@@ -135,14 +136,20 @@ class TestToCamelCase(unittest.TestCase):
       self.assertEqual(p_utils.to_camel_case(k), v)
 
 
-class TestCodeNormalization(unittest.TestCase):
-  def test_remove_comments_and_docstrings_py(self):
-    self.assertEqual(
-      p_utils.remove_comments_and_docstrings_py(
-        'def hoare(p, c, q):\n'
-        '    """Format the given Hoare triple."""\n'
-        '    return f"{{{p}}}{c}{{{q}}}"  # wow, much readability!\n'),
-      'def hoare(p, c, q):\n    \n    return f"{{{p}}}{c}{{{q}}}"\n')
+class TestRemoveCommentsAndDocstringsPy(unittest.TestCase):
+  def setUp(self):
+    self.maxDiff = None
+    self.fixtures_dir = p_consts.TEST_ARTIFACTS_DIR / 'p-utils' / 'remove-comments-and-docstrings-py'
+
+  def test_all_skel(self):
+    skel_subjects_fpaths = p_consts.SKEL_BENCHMARK_DIR.glob('*.py')
+    for subject_fpath in skel_subjects_fpaths:
+      subject_name = subject_fpath.stem
+      with self.subTest(subject_name=subject_name):
+        source = p_utils.read_text(subject_fpath)
+        cleaned_source = p_utils.remove_comments_and_docstrings_py(source)
+        golden_cleaned_source = p_utils.read_text(self.fixtures_dir / f'{subject_name}_clean.py')
+        self.assertEqual(cleaned_source, golden_cleaned_source)
 
 
 if __name__ == '__main__':

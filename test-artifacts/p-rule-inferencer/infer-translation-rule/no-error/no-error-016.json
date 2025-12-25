@@ -1,0 +1,62 @@
+{
+  "translation_pair": [
+    {
+      "source": "if (k - len(str1) - len(str2) + 5476 * id_bldh) % 2 == 0:\n    pass",
+      "target": "if (Number(Number(k)) + 0+5476*id_bldh % 2 === 0) {}"
+    },
+    {
+      "source": "if (k - len(str1) - len(str2) + 8959 * id_uhtv) % 2 == 0:\n    pass",
+      "target": "if (Number(Number(k)) + 0+8959*id_uhtv % 2 === 0) {}"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.binary_operator",
+        "py.binary_operator"
+      ],
+      [
+        "py.binary_operator"
+      ],
+      [
+        "py.parenthesized_expression"
+      ],
+      [
+        "py.binary_operator"
+      ],
+      [
+        "py.comparison_operator"
+      ],
+      [
+        "py.if_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown",
+        "js.call_expression"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.parenthesized_expression"
+      ],
+      [
+        "js.if_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "translation_rule": "(match_expand\n  (fragment (\"py.binary_operator\" (\"py.integer\" \"_val_\") (str \"*\") \".\") \"*\")\n  (fragment (\"js.number\" (val \"0\")) \"*2\")\n)"
+}

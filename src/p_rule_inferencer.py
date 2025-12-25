@@ -3,18 +3,20 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import d_ast_match
 import d_ast_parse
+import d_grammar_rules
 import d_utils
 import p_consts
 import p_rule_postprocessor as prpp
-import p_subject
 import p_tree_log as ptlog
 import p_utils
+from p_config import Config
 
 
 logger = p_utils.setup_logger(__name__)
 
 
 class ContextNotFoundError(RuntimeError): pass
+class UnificationError(RuntimeError): pass
 
 
 # INTERNAL FUNCTIONS
@@ -145,7 +147,7 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
   is_ignore_str: ?
   '''
 
-  def _hacky_should_insert_nostr_after_strs(node_type):
+  def _hacky_should_insert_nostr_after_strs_JS(node_type):
     '''
     hacky function for js used in `_ruleInfInternal_ns.astToSExpr`
     previous function name: SHOULD_INSERT_NOSTR_AFTER_STRS
@@ -161,9 +163,12 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
 
   def _hacky_is_parent_name_valchild(node_type: str):
     '''
+    Return True if a terminal node is a literal value, False otherwise (other terminals)
     hacky function used in `_ruleInfInternal_ns.astToSExpr`
     previous function name: IS_PARNAME_VALCHILD
-    TODO generalize?
+
+    NOTE TODO can be generalized by checking the number of children of a parent.
+    If a parent has a single terminal child, then should return True.
     '''
     if 'py.comment' in node_type:
       return True
@@ -185,6 +190,8 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
       return True
     if 'escape_sequence' in node_type:
       return True
+    if node_type == 'js.template_chars':
+      return True
     return False
 
   def _s_expr_rec(_node, _parent_name: str, _current_depth: int):
@@ -205,7 +212,7 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
 
       # string annotation node
       elif _node_type == 'anno':
-        ret_arr = ['anno ']
+        ret_arr = ['anno']
         # children
         for i in range(1, len(_node)):
           _child_type = _node[i][0]
@@ -216,10 +223,11 @@ def ast_to_s_expr(node: list, depth_val: int, is_ignore_str: bool):
       # all remaining node types (NT & T)
       else:
         ret_arr = ['"' + _node_type + '"']
-        nostr_tbd = _hacky_should_insert_nostr_after_strs(_node_type)
+        nostr_tbd = _hacky_should_insert_nostr_after_strs_JS(_node_type)
         # iterate children, skip node_id
         for i in range(2, len(_node)):
           # special treatment for js: nostr
+          # inserts nostr before first non-terminal child
           if nostr_tbd and not isinstance(_node[i], str):
             ret_arr.append(['nostr'])
             nostr_tbd = False
@@ -264,127 +272,118 @@ def unify_ast_fragments(
   `sExpr`:
   AST-like structure (refer to logs)
   '''
-  fragments = list(map(lambda ast: ['fragment', ast], asts))
-  s_exprs = list(map(lambda fragment: ast_to_s_expr(fragment, depth_val=100, is_ignore_str=False), fragments))
 
-  # log (uncomment for debugging)
-  for i in range(0, len(s_exprs)):
-    segment_text = 'source' if are_source_segments else 'target'
-    # p_utils.log_json_time(f'{segment_text}-ast-to-s-expr-logs-seg{i}.json', s_expr_log_results[i][1])
-    # p_utils.log_json_time(f'{segment_text}-ast-to-unify-seg{i}.json', fragments[i])
-    # p_utils.log_json_time(f'{segment_text}-s-expression-seg{i}.json', s_exprs[i])
+  def _is_nonterminal(node_type: str) -> bool:
+    return node_type.startswith('"') and node_type.find('.') > 0
 
-  # the main unifying recursive function
-  def _common_root_tree(s_exprs):
-    _node_types = list(map(lambda x: x[0], s_exprs))
-    # node types for all `s_exprs` have to be identical
-    for name in _node_types:
-      if name != _node_types[0]:
-        return ['ERROR_DIFF_NAME']
-    # at this point, node types are identical
-    _common_node_type = _node_types[0]
-    # common node type is `str`
-    if _common_node_type == 'str':
-      common_val = s_exprs[0][1]
-      for s_expr in s_exprs:
-        if len(s_expr) != 2:
-          return ['ERROR_STR_NODE_LENGTH']
-        if s_expr[1] != common_val:
+  def _common_root_tree_rec(s_exprs: list) -> list:
+    '''
+    Goes over `s_exprs` in parallel.
+    '''
+    seg_all_ntypes = list(map(lambda x: x[0], s_exprs))
+    seg_0_ntype = seg_all_ntypes[0]
+
+    # base case: node types differ
+    if any(nt != seg_0_ntype for nt in seg_all_ntypes):
+      raise UnificationError('node types should be identical')
+
+    assert all(seg_0_ntype == nt for nt in seg_all_ntypes), 'all node types should be identical here'
+
+    # base case: common node type is `str`
+    if seg_0_ntype == 'str':
+      seg_0_str_val = s_exprs[0][1]
+      for seg_i in s_exprs:
+        if len(seg_i) != 2:
+          raise UnificationError('str should have a single child')
+        seg_i_str_val = seg_i[1]
+        if seg_i_str_val != seg_0_str_val:
           return wildcard_ph_func('_str_', s_exprs, mutable_phs, mutable_tuple_phs)
-      return ['str', common_val]
-    # common node type is `val`
-    elif _common_node_type == 'val':
-      common_val = s_exprs[0][1]
-      for s_expr in s_exprs:
-        if len(s_expr) != 2:
-          return ['ERROR_VAL_NODE_LENGTH']
-        if str(s_expr[1]) != str(common_val):
+      return ['str', seg_0_str_val]
+
+    # base case: common node type is `val`
+    if seg_0_ntype == 'val':
+      seg_0_val_val = s_exprs[0][1]
+      for seg_i in s_exprs:
+        if len(seg_i) != 2:
+          raise UnificationError('val should have a single child')
+        seg_i_val_val = seg_i[1]
+        if str(seg_i_val_val) != str(seg_0_val_val):
           return wildcard_ph_func('_val_', s_exprs, mutable_phs, mutable_tuple_phs)
-      return ['val', common_val]
-    # common node type is neither `str` nor `val`
-    else:
-      _is_nonterminal = lambda node_type: node_type.startswith('"') and node_type.find('.') > 0
-      is_nt = _is_nonterminal(_common_node_type)
-      is_fragment = _common_node_type == 'fragment'
-      is_nostr = _common_node_type == 'nostr'
+      return ['val', seg_0_val_val]
 
-      # @satbek: unify string `anno`s
-      # NOTE potentially buggy: unifies different types of strings (i.e. r'' with b'', etc.)
-      # NOTE experimental: might be problematic with programs with complex strings
-      is_anno = _common_node_type.strip() == 'anno'
-      if is_anno:
-        return None
+    # base case: common node type is `anno`
+    if seg_0_ntype == 'anno':
+      ntypes = list(map(lambda x: x[0], s_exprs))
+      stypes_0 = list(map(lambda x: x[1][0], s_exprs))
+      stypes_1 = list(map(lambda x: x[1][1], s_exprs))
+      quotes_0 = list(map(lambda x: x[2][0], s_exprs))
+      quotes_1 = list(map(lambda x: x[2][1], s_exprs))
+      assert all(nt == 'anno' for nt in ntypes), 'all node types should be anno here'
+      assert all(st == '"stype"' for st in stypes_0), 'all stypes 1 should be stype here'
+      assert all(qt == '"quote"' for qt in quotes_0), 'all quotes 1 should be quote here'
+      seg_0_stype_val = s_exprs[0][1][1]
+      if any(seg_0_stype_val != seg_i_stype_val for seg_i_stype_val in stypes_1):
+        return UnificationError('string types differ in anno')
+      seg_0_quote_val = s_exprs[0][2][1]
+      if any(seg_0_quote_val != seg_i_quote_val for seg_i_quote_val in quotes_1):
+        return UnificationError('quote types differ in anno')
+      return ['anno', ['"stype"', seg_0_stype_val], ['"quote"', seg_0_quote_val]]
 
-      if not is_nt and not is_fragment and not is_nostr:
-        return ['ERROR_NT_OR_FRAGMENT_EXPECTED']
+    # common node type must be one of: non-terminal, `fragment`, `nostr`
+    if not (_is_nonterminal(seg_0_ntype) or seg_0_ntype == 'fragment' or seg_0_ntype == 'nostr'):
+      raise UnificationError('common node type should be non-terminal, fragment, or nostr')
 
-      common_root = [_common_node_type]
-      i = 0
-      while True:
-        i += 1
-        # the expression `(x[i:i+1] or [None])[0]`
-        # returns the element if it exists in the list, None otherwise
-        # https://stackoverflow.com/questions/2492087/how-to-get-the-nth-element-of-a-python-list-or-a-default-if-not-available
-        ith_children = list(map(lambda x: (x[i:i+1] or [None])[0], s_exprs))
-        # the types of i-th children may differ
-        # fix on the i-th child of the first segment
-        s_expr_ith_child_segment1 = ith_children[0]
-        if s_expr_ith_child_segment1 is None:
-          if any(map(lambda x: x is not None, ith_children)):
-            common_root.append(wildcard_ph_func('*', s_exprs, mutable_phs, mutable_tuple_phs))
-          break
-        # i-th child has to be a list
-        if isinstance(s_expr_ith_child_segment1, (str, int)):
-          common_root.append('ERROR_UNEXPECTED_STRING_OR_NUMBER')
-          return common_root
-        if not isinstance(s_expr_ith_child_segment1, list):
-          common_root.append('ERROR_UNEXPECTED_NON_ARRAY_CHILD')
-          return common_root
-        # compare i-th child of the first segment
-        # to the i-th children of the remaining segments
-        to_be_common_is_nt = _is_nonterminal(s_expr_ith_child_segment1[0])
-        to_be_common_node_type = s_expr_ith_child_segment1[0]
-        name_diff_found = False
-        all_nt = to_be_common_is_nt
-        # iterate over i-th children of the remaining segments (j -> 1 ..)
-        for j in range(1, len(ith_children)):
-          s_expr_ith_child_segment_j = ith_children[j]
-          # i-th child has to be an array
-          if not isinstance(s_expr_ith_child_segment_j, list):
-            common_root.append('ERROR_UNEXPECTED_NON_ARRAY_CHILD')
-            return common_root
-          # types of i-th children are different (thus need to be made into holes)
-          if to_be_common_node_type != s_expr_ith_child_segment_j[0]:
-            name_diff_found = True
-          # all of the i-th children are non-terminals (need for distinguishing b/w `.` and '*)
-          if to_be_common_is_nt and not _is_nonterminal(s_expr_ith_child_segment_j[0]):
-            all_nt = False
-        # i-th children are non-terminals (recurse down)
-        if all_nt:
-          if name_diff_found:
-            common_root.append(wildcard_ph_func('.', ith_children, mutable_phs, mutable_tuple_phs))
-          else:
-            common_root_tree_var = _common_root_tree(ith_children)
+    common_root = [seg_0_ntype]
+    i = 0
+    while True:
+      i += 1
 
-            # @satbek: None check due to `anno` check above
-            # should not result in regression errors
-            if common_root_tree_var is not None:
-              common_root.append(common_root_tree_var)
-        # i-th children are a mix of non-terminals and terminals (recurse right)
+      # the expression `(x[i:i+1] or [None])[0]`
+      # returns the element if it exists in the list, None otherwise
+      # https://stackoverflow.com/questions/2492087/how-to-get-the-nth-element-of-a-python-list-or-a-default-if-not-available
+      ith_children = list(map(lambda x: (x[i:i+1] or [None])[0], s_exprs))
+      assert all(isinstance(ith_child, list) or ith_child is None for ith_child in ith_children), \
+        f'ith_children should be lists or None: {ith_children}'
+
+      # the types of i-th children may differ
+      # fix on the i-th child of the first segment
+      seg_0_ith_child : Optional[list] = ith_children[0]
+
+      # iteration is over for s_exprs[0]
+      if seg_0_ith_child is None:
+        # check if iteration is not over for other segments
+        if any(map(lambda x: x is not None, ith_children)):
+          common_root.append(wildcard_ph_func('*', s_exprs, mutable_phs, mutable_tuple_phs))
+        break
+
+      assert all(isinstance(ith_child, list) for ith_child in ith_children), \
+        'ith_children should all be lists here'
+
+      # compare i-th child of the first segment
+      # to the i-th children of the remaining segments
+      seg_0_ith_child_ntype = seg_0_ith_child[0]
+      has_ntype_difference = any(seg_0_ith_child_ntype != ith_child[0] for ith_child in ith_children)
+      are_all_nts = all(_is_nonterminal(ith_child[0]) for ith_child in ith_children)
+
+      if are_all_nts:
+        if has_ntype_difference:
+          common_root.append(wildcard_ph_func('.', ith_children, mutable_phs, mutable_tuple_phs))
         else:
-          if name_diff_found:
-            common_root.append(wildcard_ph_func('*', s_exprs, mutable_phs, mutable_tuple_phs))
-            break
-          else:
-            common_root_tree_var = _common_root_tree(ith_children)
+          common_root_tree_var = _common_root_tree_rec(ith_children)
+          common_root.append(common_root_tree_var)
+      else:
+        if has_ntype_difference:
+          common_root.append(wildcard_ph_func('*', s_exprs, mutable_phs, mutable_tuple_phs))
+          break
+        else:
+          common_root_tree_var = _common_root_tree_rec(ith_children)
+          common_root.append(common_root_tree_var)
 
-            # @satbek: None check due to `anno` check above
-            # should not result in regression errors
-            if common_root_tree_var is not None:
-              common_root.append(common_root_tree_var)
-      return common_root
+    return common_root
 
-  unified = _common_root_tree(s_exprs)
+  fragments = list(map(lambda ast: ['fragment', ast], asts))
+  s_exprs = list(map( lambda fragment: ast_to_s_expr(fragment, depth_val=100, is_ignore_str=False), fragments))
+  unified = _common_root_tree_rec(s_exprs)
   unified.append(wildcard_ph_func('*', 'TAIL', mutable_phs, mutable_tuple_phs))
   return unified
 
@@ -405,7 +404,6 @@ def src_wildcard_ph_func(
     mutable_src_tuple_phs[x].append([x, diffing_s_exprs])
   else:
     raise RuntimeError('Should not happen. Please refer to the original code')
-  # unreachable return? TODO debug
   return '"' + x + '"'
 
 
@@ -467,50 +465,6 @@ def set_ph(pattern, search_ph, replace_ph):
   return pattern
 
 
-def pretty_s_expr_tree_like(s_expr, indent_size=2, global_indent='  '):
-  '''
-  This function is a supplementary to `_ruleInfInternal_ns.prettySExpr`
-  Allows printing translation rules as tree-like that might be used for debugging.
-  This function has no functional importance for Pirel.
-  The default `_ruleInfInternal_ns.prettySExpr` is enough.
-
-  `globalIndent`: custom prefix for all lines of the output
-  '''
-  def _rec(s_expr, indent_level, indent_size, global_indent):
-    # base cases
-    if isinstance(s_expr, str):
-      return global_indent + (' ' * (indent_size * indent_level)) + s_expr
-    if isinstance(s_expr, list) and len(s_expr) == 2 and isinstance(s_expr[0], str) and isinstance(s_expr[1], str):
-      return global_indent + (' ' * (indent_size * indent_level)) + s_expr[0] + ' ' + s_expr[1]
-
-    result = global_indent + (' ' * (indent_size * indent_level)) + '('
-    result += s_expr[0]
-    for i in range(1, len(s_expr)):
-      result += '\n' + _rec(s_expr[i], indent_level+1, indent_size, global_indent)
-    result += '\n' + global_indent + (' ' * (indent_size * indent_level)) + ')'
-    return result
-  result = _rec(s_expr, 0, indent_size, global_indent)
-  return result
-
-
-def pretty_s_expr(s_expr):
-  '''
-  `sExpr` has a very similar structure to DuoGlot style AST's.
-  This function returns a string version of it which is THE version
-  that is parsed by the DuoGlot transpiler.
-  '''
-  if isinstance(s_expr, list):
-    result = ['(']
-    for i in range(0, len(s_expr)):
-      result.append(pretty_s_expr(s_expr[i]))
-      if i < len(s_expr) - 1:
-        result.append(' ')
-    result.append(')')
-    return ''.join(result)
-  else:
-    return str(s_expr)
-
-
 def pretty_rule(match, expand, tree_like):
   '''
   Pretty-prints a translation rule to the standard format.
@@ -519,12 +473,12 @@ def pretty_rule(match, expand, tree_like):
   if tree_like:
     return \
       f'({rule_type}\n\n' \
-      f'{pretty_s_expr_tree_like(match)}\n\n' \
-      f'{pretty_s_expr_tree_like(expand)}\n\n)'
+      f'{d_grammar_rules.pretty_s_expr_tree_like(match)}\n\n' \
+      f'{d_grammar_rules.pretty_s_expr_tree_like(expand)}\n\n)'
   return \
     f'({rule_type}\n' \
-    f'  {pretty_s_expr(match)}\n' \
-    f'  {pretty_s_expr(expand)}\n)'
+    f'  {d_grammar_rules.pretty_s_expr(match)}\n' \
+    f'  {d_grammar_rules.pretty_s_expr(expand)}\n)'
 
 
 def _is_context_empty(context: dict) -> bool:
@@ -696,6 +650,9 @@ def infer_translation_rule(
   # NOTE Creating an instance of `TranslationRule` might raise `prpp.RuleMappingError`
   # It is good to be vocal about errors in translation rules.
   translation_rule = prpp.TranslationRule(src_unified_pattern, tar_unified_pattern)
+  if Config.generator == 'lightweight':
+    src_unified_pattern, tar_unified_pattern = translation_rule.convert_ident_captures_to_dot_phs()
+
   if not _is_context_empty(context):
     result = translation_rule.trim_context(context)
     if result is None:
@@ -737,8 +694,8 @@ def infer_translation_rule_wrapper(
   '''
   p_utils.log_json_time(f'args-infer_translation_rule_wrapper.json', locals())
 
-  logger.debug(f'Translation pair:\n{json.dumps(translation_pair, indent=2)}')
-  logger.debug(f'Context:\n{json.dumps(context, indent=2)}')
+  # logger.debug(f'Translation pair:\n{json.dumps(translation_pair, indent=2)}')
+  # logger.debug(f'Context:\n{json.dumps(context, indent=2)}')
 
   translation_rule = infer_translation_rule(
     translation_pair,
@@ -770,7 +727,7 @@ def infer_translation_rules(
   '''
   p_utils.log_json_time(f'args-infer_translation_rules.json', locals())
   lprule_inf_log = lprule_inf_log or ptlog.PRuleInfLog()
-  lprule_inf_log.stms = p_utils.current_time_sec()
+  lprule_inf_log.stms = p_utils.current_time_msec()
 
   contexts : List[Dict[str, List[List[str]]]] = template_dict['contexts']
   src_lang = template_dict['src_lang']
@@ -841,10 +798,10 @@ def infer_translation_rules(
             logger.debug(msg)
             lrule_inf_comb.reason = msg
 
-          logger.debug(f'the number of translation rules so far is {len(trules_list)}')
+          logger.debug(f'the number of translation rules so far is --> {len(trules_list)}')
 
   lprule_inf_log.success = True
-  lprule_inf_log.etms = p_utils.current_time_sec()
+  lprule_inf_log.etms = p_utils.current_time_msec()
   if len(trules_list) == 0:
     logger.warning('No translation rules were inferred from the given translation pairs and contexts.')
   logger.debug(f'rule-inf: inferred {len(trules_list)} translation rules in total')

@@ -1,1 +1,0 @@
-a[i] = next_missing

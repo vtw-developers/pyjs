@@ -1,0 +1,76 @@
+{
+  "src_code": "if (arr1[l] + arr2[r]) == x:\n    pass\nelif (arr1[l] + arr2[r]) < x:\n    pass\nelse:\n    pass",
+  "node_path": [
+    4,
+    1,
+    0,
+    1,
+    2
+  ],
+  "return_dict": {
+    "error_class": "n/a",
+    "error_msg": "n/a",
+    "alt_starting_nodes": [
+      [
+        22,
+        "py.identifier",
+        [
+          "identifier",
+          "string",
+          "integer",
+          "float",
+          "binary_operator",
+          "concatenated_string",
+          "unary_operator",
+          "attribute",
+          "subscript",
+          "call",
+          "list",
+          "list_comprehension",
+          "set",
+          "set_comprehension",
+          "tuple",
+          "parenthesized_expression",
+          "generator_expression",
+          "dictionary",
+          "dictionary_comprehension",
+          "keyword_identifier",
+          "true",
+          "false",
+          "none",
+          "ellipsis"
+        ]
+      ],
+      [
+        23,
+        "py.identifier",
+        [
+          "identifier",
+          "string",
+          "integer",
+          "float",
+          "binary_operator",
+          "concatenated_string",
+          "unary_operator",
+          "attribute",
+          "subscript",
+          "call",
+          "list",
+          "list_comprehension",
+          "set",
+          "set_comprehension",
+          "tuple",
+          "parenthesized_expression",
+          "generator_expression",
+          "dictionary",
+          "dictionary_comprehension",
+          "keyword_identifier",
+          "true",
+          "false",
+          "none",
+          "ellipsis"
+        ]
+      ]
+    ]
+  }
+}

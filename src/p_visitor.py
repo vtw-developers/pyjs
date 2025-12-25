@@ -11,7 +11,7 @@ Classes:
 from __future__ import annotations
 
 from abc import ABC
-from typing import final, Any, List, Union
+from typing import final, Any, List, Optional, Union
 
 
 class Visitor(ABC):
@@ -47,6 +47,9 @@ class AbstractNode(ABC):
     self.parent = None
 
   def __repr__(self) -> str:
+    return self.node_type
+
+  def get_type(self) -> str:
     return self.node_type
 
   def add_child(self, child: AbstractNode):
@@ -189,6 +192,78 @@ class AbstractNode(ABC):
       if id(node) == id(self):
         return nid
     raise ValueError('Node not found in its own tree, should not happen')
+
+  def find_node_under_context(self, context: List[List[str]]) -> Optional[AbstractNode]:
+    '''
+    NOTE this method is copied from p_llm_val._context_exists()
+    '''
+    nt_children = self.get_nt_children()
+    if len(nt_children) == 0:
+      return None
+
+    siblings_and_child = list(reversed(context[-1]))
+    assert len(siblings_and_child) >= 1, 'sanity check'
+
+    # base case
+    if len(context) == 1:
+      siblings = siblings_and_child[:-1]
+      for i in range(len(siblings)):
+        _sibi = siblings[i]
+        _sibi = _sibi.split('.')[-1]  # remove lang prefix, i.e. "py.*"
+        _ntci = nt_children[i]
+
+        # NOTE `p_data_structures.PatternNode.get_path_to_root_source._get_path`
+        # refer to the function above for more information on why check for `pirel_anynode`.
+        # `pirel_anynode` refers to a "." placeholder in match fragment of a translation rule
+        # that is not used in the expand fragment, and can match any non-terminal node.
+        if _sibi == 'pirel_anynode':
+          continue
+
+        if _sibi != _ntci.get_type():
+          return None
+      return nt_children[len(siblings)]
+
+    # for ntype in reversed(context_elem):
+    for i in range(len(siblings_and_child)):
+      _saci = siblings_and_child[i]
+      _saci = _saci.split('.')[-1]  # remove lang prefix, i.e. "py.*"
+      _ntci = nt_children[i]
+      assert _saci != 'pirel_anynode', 'consider this case'
+
+      if _saci != _ntci.get_type():
+        return None
+      # last matching element
+      if i == len(siblings_and_child) - 1:
+        result = _ntci.find_node_under_context(context[:-1])
+        if result is None:
+          return None
+        else:
+          return result
+
+  def is_literal_node(self) -> bool:
+    '''
+    Literal nodes are terminal nodes that represent literals,
+    e.g. string literals, numeric literals, boolean literals, etc.
+    This method can be overridden in subclasses for more accuracy.
+    As a default implementation, we consider all nodes with single
+    terminal child as literal nodes.
+    '''
+    if self.is_terminal():
+      return False
+    if len(self.children) == 1 and self.children[0].is_terminal():
+      return True
+    return False
+
+  def collect_literal_nodes(self) -> List[AbstractNode]:
+    '''
+    Collect all literal nodes under `self` (including `self` if it is a literal node).
+    '''
+    literal_nodes = []
+    if self.is_literal_node():
+      literal_nodes.append(self)
+    for child in self.children:
+      literal_nodes.extend(child.collect_literal_nodes())
+    return literal_nodes
 
 
 class TerminalNode(AbstractNode):

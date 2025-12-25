@@ -1,0 +1,26 @@
+while not id_wyet:
+    secret_fun_4071()
+"-----------------"
+while not 9243:
+    secret_fun_4071()
+"-----------------"
+while (!id_wyet) {
+    secret_fun_4071();
+}
+"-----------------"
+while (!9243) {
+    secret_fun_4071();
+}
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.while_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ]
+  ]
+}

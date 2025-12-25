@@ -1,1 +1,0 @@
-placeMinus = f_gold(n, index + 1, modulo - arr[index], M, arr, dp)

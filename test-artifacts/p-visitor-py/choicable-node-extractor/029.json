@@ -1,0 +1,13 @@
+{
+  "code": "def f_gold(text, s):\n    result = \"\"\n    for i in range(len(text)):\n        char = text[i]\n        if char.isupper():\n            result += chr((ord(char) + s - 65) % 26 + 65)\n        else:\n            result += chr((ord(char) + s - 97) % 26 + 97)\n    return result",
+  "choicable_nodes": [
+    "\"\"",
+    "range(len(text))",
+    "text[i]",
+    "char.isupper()",
+    "chr((ord(char) + s - 65) % 26 + 65)",
+    "chr((ord(char) + s - 97) % 26 + 97)",
+    "result"
+  ],
+  "exclude_stat_nids": []
+}

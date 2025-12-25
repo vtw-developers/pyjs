@@ -10,8 +10,9 @@ For manipulating translation rules, classes in p_rule_postprocessor.py are used.
 p_rule_postprocessor.py data structures are a bit different than DuoGlot-style AST's.
 '''
 
+import json
 import re
-from typing import Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 import d_ast_parse
 import d_grammar_dlmparser as gdp
@@ -40,85 +41,78 @@ class DuoGlotTree:
   def __init__(self, full_ast) -> None:
     '''
     `full_ast`: AST as parsed by d_ast_parse.parse_text()
-
     Raises TreeConstructionError.
     '''
     self.full_ast = full_ast
-    root_node_type, root_node_id, children_ast = self.parse_ast(full_ast)
+    root_node_type, root_node_id, children_ast = self._parse_ast(full_ast)
     self.root_node = NTNode(root_node_type, None, root_node_id)
     for child_ast in children_ast:
       self._rec_construct_at(self.root_node, child_ast)
 
-  def __str__(self) -> str:
-    return str(self.tree_as_list())
+  def _parse_ast(self, ast: list) -> Tuple[str, int, list]:
+    '''
+    Given a DuoGlot-style AST, parse it and return
+    node_type, node_id, children_ast as a tuple.
+
+    ["py.module", 0, ["py.return_statement", 1, "\"return\"", [...] ] ]
+    '''
+    node_type, node_id, children_ast = ast[0], ast[1], ast[2:]
+    parts = node_type.split('.')
+    assert len(parts) == 2, 'node types in "ast" should be of the form "<lang>.<node_type_in_lang>"'
+    if parts[1] == 'ERROR':
+      raise TreeConstructionError('cannot construct a tree with error nodes')
+    return (node_type, node_id, children_ast)
+
+  def _is_annotated_node(self, ast: Union[list, str]) -> bool:
+    '''
+    Some nodes such as string are annotated with extra information.
+
+    ["py.string", 2,
+      ["anno", ["\"stype\"", "\"\""], ["\"quote\"", "\"'\""]],
+      "\"\\\"\"",
+      "\"\\\"\""
+    ]
+    '''
+    # terminal node
+    if isinstance(ast, str):
+      return False
+    _, _, children_ast = self._parse_ast(ast)
+    if len(children_ast) == 0:
+      return False
+    first_child = children_ast[0]  # annotation node
+    if not isinstance(first_child, list):
+      return False
+    if first_child[0] == 'anno':
+      return True
+    return False
 
   def _rec_construct_at(self, parent_node: 'NTNode', ast: Union[list, str]) -> None:
-    # special treatment of string nodes in DuoGlot-style AST
-    # for more info, refer to the json-formatted output of AST
-    if isinstance(ast, list) and isinstance(ast[2], list) and ast[2][0] == 'anno':
-      self._special_treatment_strings(parent_node, ast)
-      return
     # base case: terminal node
-    is_terminal = isinstance(ast, str)
-    if is_terminal:
-      node_type = ast.strip('"')  # terminals in ast_text come in double quotes
+    if isinstance(ast, str):
+      node_type = json.loads(ast)  # json.dumps() is used in d_ast_parse.parse_text_dbg()
       node = TNode(node_type, parent_node)
       parent_node.add_child(node)
       return
+    # base case: annotated non-terminal node
+    if self._is_annotated_node(ast):
+      node_type, node_id, children_ast = self._parse_ast(ast)
+      annotation, actual_children = children_ast[0], children_ast[1:]
+      node = AnnotatedNTNode(node_type, parent_node, node_id, annotation)
+      parent_node.add_child(node)
+      # recurse children
+      for ast_child in actual_children:
+        self._rec_construct_at(node, ast_child)
+      return
     # non-terminal node
-    node_type, node_id, children_ast = self.parse_ast(ast)
+    node_type, node_id, children_ast = self._parse_ast(ast)
     node = NTNode(node_type, parent_node, node_id)
     parent_node.add_child(node)
     # recurse children
     for ast_child in children_ast:
       self._rec_construct_at(node, ast_child)
 
-  # TODO needs refactoring for programs with complex string usage
-  def _special_treatment_strings(self, parent: 'NTNode', ast: list) -> None:
-    '''Treat strings specially'''
-    # create the root string node
-    strnode_type, strnode_id, strnode_children = self.parse_ast(ast)
-    strnode = NTNode(strnode_type, parent, strnode_id)
-    parent.add_child(strnode)
-    # string type (i.e. b'', f'', etc) and quote type (i.e. ''', """, ', ")
-    str_type = strnode_children[0][1][1].strip('"')
-    quote_type = strnode_children[0][2][1][1:-1].replace('\\', '')
-    # create string type node, if any (i.e. byte string or regex string, etc.)
-    if str_type != '':
-      str_type_node = TNode(str_type, strnode)
-      strnode.add_child(str_type_node)
-    # create left quote node
-    left_quote_node = TNode(quote_type, strnode)
-    strnode.add_child(left_quote_node)
-    # create string content node and its child if not empty string
-    if len(strnode_children) == 4:  # empty strings have 3 child nodes (anno, open quotes, close quotes)
-      content_node_type, content_node_id, content_children = self.parse_ast(strnode_children[2])
-      content_node = NTNode(content_node_type, strnode, content_node_id)
-      strnode.add_child(content_node)
-      # child of string content
-      # TODO there should be a better way to handle string contents
-      assert len(content_children) == 1
-      content_child_node = TNode(content_children[0][1:-1].replace('\\', ''), content_node)
-      content_node.add_child(content_child_node)
-    # create right quote node
-    right_quote_node = TNode(quote_type, strnode)
-    strnode.add_child(right_quote_node)
-
-  def parse_ast(self, ast: list) -> Tuple[str, int, list]:
-    '''
-    Given a DuoGlot-style AST, parse it and return
-    node_type, node_id, children_ast as a tuple.
-    '''
-    # the block of code below is for sanity check:
-    # we don't allow creating DuoGlotTree from `ast`
-    # that contains 'ERROR' nodes when parsed by TreeSitter.
-    parts = ast[0].split('.')
-    assert len(parts) == 2, 'DuoGlotTree._parse_ast(): should not happen, debugging needed'
-    lang_prefix, node_type_in_lang = parts[0], parts[1]
-    if node_type_in_lang == 'ERROR':
-      raise TreeConstructionError('Pirel._parse_ast(): cannot construct a tree with error nodes')
-
-    return (ast[0], ast[1], ast[2:])
+  def __str__(self) -> str:
+    return str(self.tree_as_list())
 
   def _pre_order(self, start_node: 'DuoGlotNode', visit_fn: Callable) -> None:
     def _rec_pre_order(node: 'DuoGlotNode', visit_fn: Callable):
@@ -603,6 +597,21 @@ class DuoGlotNode():
     # if we reach here, all checks passed
     return True
 
+  def get_type_encoding(self, except_literals: bool = True) -> str:
+    # base case
+    if self.is_terminal():
+      # literals do not have siblings
+      if self.get_num_siblings() == 0:
+        return '0' if except_literals else self.get_type()
+      else:
+        return self.get_type()
+    children_encoding = ''
+    for child in self.get_children():
+      children_encoding += child.get_type_encoding(
+        except_literals=except_literals) + ' '
+    children_encoding = children_encoding.strip()
+    return f'({self.get_type()} {children_encoding})'
+
   # abstract methods
   def is_terminal(self) -> bool:
     raise NotImplementedError
@@ -661,6 +670,18 @@ class NTNode(DuoGlotNode):
     self.node_id = new_id
 
 
+class AnnotatedNTNode(NTNode):
+  def __init__(self, node_type: str, parent: DuoGlotNode, node_id: int, annotation: Any):
+    '''
+    The type of annotation is defined in d_ast_parse, e.g. _anno_func_py_string()
+    '''
+    super().__init__(node_type, parent, node_id)
+    self.annotation = annotation
+
+  def __repr__(self):
+    return f'AnnotatedNTNode({self.node_type}, node_id={self.node_id})'
+
+
 # PIREL-STYLE AST
 class PirelTree:
   '''
@@ -669,7 +690,8 @@ class PirelTree:
   def __init__(self, full_ast_text, annotation=None) -> None:
     '''
     PRE: `full_ast_text` does not have ERROR nodes when parsed by Tree-sitter
-    annotation: second object returned from d_ast_parse.parse_text_dbg()
+    PARAM annotation: second object returned from d_ast_parse.parse_text_dbg().
+          It contains a mapping of node_ids to node boundaries within the code.
     '''
     self.full_ast_text = full_ast_text
     root_node_type, root_node_id, root_node_text, children_ast = self._parse_ast(full_ast_text)
@@ -678,34 +700,59 @@ class PirelTree:
       self._rec_construct_at(self.root_node, child_ast)
     self.annotation = annotation
 
+  def _is_annotated_node(self, ast_text: Union[list, str]) -> bool:
+    '''
+    Some nodes such as string are annotated with extra information.
+
+    [["py.string", "''"], 2,
+      ["anno", ["\"stype\"", "\"\""], ["\"quote\"", "\"'\""]],
+      "'",
+      "'"
+    ]
+    '''
+    # terminal node
+    if isinstance(ast_text, str):
+      return False
+    _, _, _, children_ast = self._parse_ast(ast_text)
+    if len(children_ast) == 0:
+      return False
+    first_child = children_ast[0]  # annotation node
+    if not isinstance(first_child, list):
+      return False
+    if first_child[0] == 'anno':
+      return True
+    return False
+
   def _parse_ast(self, ast: list) -> Tuple[str, int, list]:
     '''
     Given a Pirel-style AST, parse it and return
     node_type, node_id, node_text, children_ast as a tuple.
+    For more info, refer to DuoGlotTree._parse_ast().
     '''
-    # the block of code below is for sanity check:
-    # we don't allow creating PirelTree from `ast`
-    # that contains 'ERROR' nodes when parsed by TreeSitter.
+    node_type_text, node_id, children_ast = ast[0], ast[1], ast[2:]
+    node_type, node_text = node_type_text[0], node_type_text[1]
     parts = ast[0][0].split('.')
-    assert len(parts) == 2, 'PirelTree._parse_ast(): should not happen, debugging needed'
-    lang_prefix, node_type_in_lang = parts[0], parts[1]
-    if node_type_in_lang == 'ERROR':
-      raise TreeConstructionError('Pirel._parse_ast(): cannot construct a tree with error nodes')
-
-    return (ast[0][0], ast[1], ast[0][1], ast[2:])
+    assert len(parts) == 2, 'node types in "ast" should be of the form "<lang>.<node_type_in_lang>"'
+    if parts[1] == 'ERROR':
+      raise TreeConstructionError('cannot construct a tree with error nodes')
+    return (node_type, node_id, node_text, children_ast)
 
   def _rec_construct_at(self, parent_node: 'NTTextNode', ast_text: Union[list, str]) -> None:
-    # special treatment of string nodes in DuoGlot-style AST
-    # for more info, refer to the json-formatted output of AST
-    if isinstance(ast_text, list) and isinstance(ast_text[2], list) and ast_text[2][0] == 'anno':
-      self._special_treatment_strings(parent_node, ast_text)
-      return
     # base case: terminal node
-    is_terminal = isinstance(ast_text, str)
-    if is_terminal:
-      node_type = ast_text.strip('"')  # terminals in ast_text come in double quotes
+    if isinstance(ast_text, str):
+      node_type = json.loads(ast_text)  # json.dumps() is used in d_ast_parse.parse_text_dbg()
       node = TTextNode(node_type, parent_node, node_type)
       parent_node.add_child(node)
+      return
+    # base case: annotated non-terminal node
+    if self._is_annotated_node(ast_text):
+      node_type, node_id, node_text, children_ast = self._parse_ast(ast_text)
+      annotation, actual_children = children_ast[0], children_ast[1:]
+      node = AnnotatedNTTextNode(node_type, parent_node, node_text, node_id, annotation)
+      parent_node.add_child(node)
+      # recurse children
+      for ast_child in actual_children:
+        self._rec_construct_at(node, ast_child)
       return
     # non-terminal node
     node_type, node_id, node_text, children_ast = self._parse_ast(ast_text)
@@ -714,38 +761,6 @@ class PirelTree:
     # recurse children
     for ast_child in children_ast:
       self._rec_construct_at(node, ast_child)
-
-  # TODO needs refactoring for programs with complex string usage
-  def _special_treatment_strings(self, parent: 'PirelNode', ast_text: list) -> None:
-    '''Treat strings specially'''
-    # create the root string node
-    strnode_type, strnode_id, strnode_text, strnode_children = self._parse_ast(ast_text)
-    string_node = NTTextNode(strnode_type, parent, strnode_text, strnode_id)
-    parent.add_child(string_node)
-    # string type (i.e. b'', f'', etc) and quote type (i.e. ''', """, ', ")
-    str_type = strnode_children[0][1][1].strip('"')
-    quote_type = strnode_children[0][2][1][1:-1].replace('\\', '')
-    # create string type node, if any (i.e. byte string or regex string, etc.)
-    if str_type != '':
-      str_type_node = TTextNode(str_type, string_node, str_type)
-      string_node.add_child(str_type_node)
-    # create left quote node
-    left_quote_node = TTextNode(quote_type, string_node, quote_type)
-    string_node.add_child(left_quote_node)
-    # create string content node and its child if not empty string
-    if len(strnode_children) == 4:  # empty strings have 3 child nodes (anno, open quotes, close quotes)
-      content_node_type, content_node_id, content_node_text, content_children = self._parse_ast(strnode_children[2])
-      content_node = NTTextNode(content_node_type, string_node, content_node_text, content_node_id)
-      string_node.add_child(content_node)
-      # child of string content
-      # TODO there should be a better way to handle string contents
-      assert len(content_children) == 1
-      the_actual_string = content_children[0][1:-1].replace('\\', '')
-      content_child_node = TTextNode(the_actual_string, content_node, the_actual_string)
-      content_node.add_child(content_child_node)
-    # create right quote node
-    right_quote_node = TTextNode(quote_type, string_node, quote_type)
-    string_node.add_child(right_quote_node)
 
   def _pre_order(self, start_node: 'PirelNode', visit_fn: Callable) -> None:
     def _rec_pre_order(node: 'PirelNode', visit_fn: Callable):
@@ -892,6 +907,9 @@ class PirelNode():
 
   def get_children(self) -> List['PirelNode']:
     return self.children
+
+  def get_nonterminal_children(self) -> List['PirelNode']:
+    return [child for child in self.children if child.is_nonterminal()]
 
   def set_children(self, children: List['PirelNode']) -> None:
     self.children = children
@@ -1214,23 +1232,34 @@ class NTTextNode(PirelNode):
     self.node_id = new_id
 
 
+class AnnotatedNTTextNode(NTTextNode):
+  def __init__(self, node_type: str, parent: DuoGlotNode, node_text: str, node_id: int, annotation: Any):
+    '''
+    The type of annotation is defined in d_ast_parse, e.g. _anno_func_py_string()
+    '''
+    super().__init__(node_type, parent, node_text, node_id)
+    self.annotation = annotation
+
+  def __repr__(self):
+    return f'AnnotatedNTTextNode({self.node_type}, node_id={self.node_id})'
+
+
 # PATTERN TREE
 class PatternTree:
   '''
-  A read-only tree class.
-
-  A simplified representation of a pattern.
-  That is, a fragment, rule, etc.
-  Initially designed for parsing translation
-  rule fragments during context extraction
-  in d_grammar_expand.pirel_get_all_contexts().
+  A read-only tree class that represents a parsed translation rule.
   '''
   def __init__(self, pattern: list, lang: str) -> None:
     self.pattern = pattern
     self.lang = lang
     self.re_dotstar_num = re.compile(r'^"([\.\*])(\d+)"$')
+    self.re_str_num = re.compile(r'^"_str(\d+)_"$')
+    self.re_val_num = re.compile(r'^"_val(\d+)_"$')
     self.re_dotstar_only = re.compile(r'^"[\.\*]"$')
     self.dotstar_counter = 1
+    self.str_counter = 1
+    self.val_counter = 1
+    assert not self._is_annotated_pattern(pattern), 'root node cannot be annotated'
     root_node_type, root_children = self._parse_pattern(pattern)
     self.root_node = PatternNode(root_node_type, None)
     for child_pattern in root_children:
@@ -1239,55 +1268,137 @@ class PatternTree:
   def __repr__(self) -> str:
     return f'PatternTree[{repr(self.root_node)}]'
 
-  def _parse_pattern(self, pattern: Union[list, str]) -> Tuple[str, Union[list, str]]:
+  def _parse_pattern(self, pattern: Union[list, str]) -> Tuple[str, list]:
     assert isinstance(pattern, (list, str))
     # terminal node
     if isinstance(pattern, str):
       return pattern, []
-    node_type = pattern[0]
-    children = pattern[1:]
+    node_type, children = pattern[0], pattern[1:]
     return node_type, children
 
-  def _rec_construct_at(self, parent_node: 'PatternNode', pattern: Union[list, str]) -> None:
-    node_type, children = self._parse_pattern(pattern)
+  # METHODS FOR DISTINGUISHING DIFFERENT PATTERN TYPES
+  # all patterns are mutually exclusive, i.e. a pattern can only be one of the following types
+  def _is_terminal_pattern(self, pattern: Union[list, str]) -> bool:
+    return isinstance(pattern, str)
 
-    # disambiguate terminals such as `"*"`, `"."` from placeholders
-    if node_type in ['str', 'val'] and len(children) == 1:
-      self._disambugate_terminals_and_phs(node_type, children, parent_node)
+  def _is_nostr_pattern(self, pattern: Union[list, str]) -> bool:
+    '''
+    Appears as (nostr) in translation rules.
+    '''
+    return pattern == ['nostr']
+
+  def _is_annotated_pattern(self, pattern: Union[list, str]) -> bool:
+    '''
+    Some patterns such as string are annotated with extra information.
+    '''
+    if self._is_terminal_pattern(pattern):
+      return False
+    if self._is_nostr_pattern(pattern):
+      return False
+    _, children = self._parse_pattern(pattern)
+    if len(children) == 0:
+      return False
+    first_child = children[0]  # annotation node
+    if not isinstance(first_child, list):
+      return False
+    if first_child[0] == 'anno':
+      return True
+    return False
+
+  def _is_nonterminal_pattern(self, pattern: Union[list, str]) -> bool:
+    if self._is_terminal_pattern(pattern):
+      return False
+    if self._is_nostr_pattern(pattern):
+      return False
+    if self._is_annotated_pattern(pattern):
+      return False
+    return True
+
+  # METHODS FOR CONSTRUCTING PATTERN NODES
+  def _create_t_node(self, node_type: str, parent_node: 'PatternNode') -> None:
+    assert isinstance(node_type, str), 't_node type must be a string'
+    # regular terminal
+    if parent_node.node_type in ['str', 'val']:
+      term_node = PatternNode(node_type, parent_node)
+      parent_node.add_child(term_node)
       return
-
-    new_node = self._new_node(node_type, children, parent_node)
-    parent_node.add_child(new_node)
-    for child_pattern in children:
-      self._rec_construct_at(new_node, child_pattern)
-
-  def _new_node(self, node_type: str, children_pattern: list, parent_node: 'PatternNode') -> 'PatternNode':
-    # NT node
-    if len(children_pattern) > 0:
-      new_node = PatternNode(node_type, parent_node)
-      return new_node
-
-    # T node
-    dotstar_num_match = self.re_dotstar_num.match(node_type)
+    # ./* placeholder in src pattern
     if node_type in ['"."', '"*"']:
       new_node = PhNode(node_type, parent_node, self.dotstar_counter)
       self.dotstar_counter += 1
-    elif dotstar_num_match:
+      parent_node.add_child(new_node)
+      return
+    # _str_ placeholder in src pattern
+    if node_type == '"_str_"':
+      new_node = PhNode(node_type, parent_node, self.str_counter)
+      self.str_counter += 1
+      parent_node.add_child(new_node)
+      return
+    # _val_ placeholder in src pattern
+    if node_type == '"_val_"':
+      new_node = PhNode(node_type, parent_node, self.val_counter)
+      self.val_counter += 1
+      parent_node.add_child(new_node)
+      return
+    # ./* placeholder in tar pattern
+    dotstar_num_match = self.re_dotstar_num.match(node_type)
+    if dotstar_num_match:
       new_node = PhNode(node_type, parent_node, int(dotstar_num_match.group(2)))
-    else:
-      new_node = PatternNode(node_type, parent_node)
-    return new_node
+      parent_node.add_child(new_node)
+      return
+    # _strN_ placeholder in tar pattern
+    str_num_match = self.re_str_num.match(node_type)
+    if str_num_match:
+      new_node = PhNode(node_type, parent_node, int(str_num_match.group(1)))
+      parent_node.add_child(new_node)
+      return
+    # _valN_ placeholder in tar pattern
+    val_num_match = self.re_val_num.match(node_type)
+    if val_num_match:
+      new_node = PhNode(node_type, parent_node, int(val_num_match.group(1)))
+      parent_node.add_child(new_node)
+      return
+    raise ValueError(f'unknown terminal node type: {node_type}')
 
-  def _disambugate_terminals_and_phs(self, node_type: str, children_pattern: list, parent_node: 'PatternNode') -> None:
-    assert isinstance(node_type, str)
-    assert len(children_pattern) == 1
-    child_pattern = children_pattern[0]
-    # single terminal child denotes a terminal node
-    assert isinstance(child_pattern, str), '`str`, should have a single terminal child'
-    str_node = PatternNode(node_type, parent_node)
-    parent_node.add_child(str_node)
-    term_node = PatternNode(child_pattern, str_node)
-    str_node.add_child(term_node)
+  def _create_nt_node(self, node_type: str, parent_node: 'PatternNode', children_pattern: list) -> None:
+    new_node = PatternNode(node_type, parent_node)
+    parent_node.add_child(new_node)
+    for child_pattern in children_pattern:
+      self._rec_construct_at(new_node, child_pattern)
+
+  def _create_anno_nt_node(self, node_type: str, parent_node: 'PatternNode', children_pattern: list) -> None:
+    assert len(children_pattern) > 1, 'Annotated NT node must have at least one child (the annotation)'
+    annotation = children_pattern[0]  # annotation node
+    actual_children = children_pattern[1:]
+    new_node = AnnotatedPatternNode(node_type, parent_node, annotation)
+    parent_node.add_child(new_node)
+    for child_pattern in actual_children:
+      self._rec_construct_at(new_node, child_pattern)
+
+  # OTHER METHODS
+  def _rec_construct_at(self, parent_node: 'PatternNode', pattern: Union[list, str]) -> None:
+    assert sum([
+      self._is_terminal_pattern(pattern),
+      self._is_nostr_pattern(pattern),
+      self._is_annotated_pattern(pattern),
+      self._is_nonterminal_pattern(pattern),
+    ]) == 1, 'only one of the pattern types should be true'
+
+    # terminal node
+    if self._is_terminal_pattern(pattern):
+      self._create_t_node(pattern, parent_node)
+      return
+    # nostr node
+    if self._is_nostr_pattern(pattern):
+      # do nothing
+      return
+    node_type, children = self._parse_pattern(pattern)
+    # annotated NT node
+    if self._is_annotated_pattern(pattern):
+      self._create_anno_nt_node(node_type, parent_node, children)
+      return
+    # NT node
+    self._create_nt_node(node_type, parent_node, children)
 
   def _pre_order(self, start_node: 'PatternNode', visit_fn: Callable) -> None:
     def _rec_pre_order(node: 'PatternNode', visit_fn: Callable):
@@ -1349,6 +1460,8 @@ class PatternTree:
     def _pre_order(node: PatternNode, level: int) -> Union[str, None]:
       nonlocal indentation_size
       if node.is_terminal():
+        if include_terminals:
+          return node.get_type()
         return None
       # node itself
       result_str = node.get_type()
@@ -1383,14 +1496,8 @@ class PatternNode():
     return self.node_type
 
   def __repr__(self) -> str:
-    category = None
-    if len(self.children) > 0:
-      category = 'NT'
-    elif isinstance(self, PhNode):
-      category = 'PH'
-    else:
-      category = 'T'
-    return '{category}({node_type})'.format(category=category, node_type=self.node_type)
+    tornt = 'T' if self.is_terminal() else 'NT'
+    return f'{tornt}({self.node_type})'
 
   def get_type(self) -> str:
     return self.node_type
@@ -1566,29 +1673,22 @@ class PhNode(PatternNode):
   def __str__(self) -> str:
     return super().__str__() + f' {self.phid}'
 
+  def __repr__(self):
+    return f'PH({self.node_type}-{self.phid})'
+
   def get_phid(self) -> int:
     return self.phid
 
 
-# TODO paths should be updated (p_consts.CWD)
-def _test_pattern_tree_class():
-  import p_consts
-  import p_utils
-  config_fpath = p_consts.CWD / 'temporary_test_pattern_tree_class_config.json'
-  config = p_utils.read_json(config_fpath)
-  match_pattern = p_utils.read_json(config['match_pattern_fpath'])
-  expand_pattern = p_utils.read_json(config['expand_pattern_fpath'])
-  src_lang = config['src_lang']
-  tar_lang = config['tar_lang']
+class AnnotatedPatternNode(PatternNode):
+  def __init__(self, node_type: str, parent: PatternNode, annotation: Any) -> None:
+    super().__init__(node_type, parent)
+    self.annotation = annotation
 
-  src_pat_tree = PatternTree(match_pattern, src_lang)
-  tar_pat_tree = PatternTree(expand_pattern, tar_lang)
-
-  print('SRC PATTERN TREE')
-  src_pat_tree.debug_print()
-  print('TAR PATTERN TREE')
-  tar_pat_tree.debug_print()
+  def __repr__(self) -> str:
+    return f'NT-Anno({self.node_type})'
 
 
-if __name__ == '__main__':
-  _test_pattern_tree_class()
+class NostrNode():
+  def __repr__(self) -> str:
+    return 'NOSTR'

@@ -1,0 +1,1036 @@
+{
+  "src_main_code": "def f_gold(N):\n    length = len(N)\n    myexactlog(1, length)\n    l = int((length) / 2)\n    myexactlog(2, l)\n    count = 0\n    myexactlog(3, count)\n    for i in range(l + 1):\n        myexactlog(4, 0)\n        s = N[0:0 + i]\n        myexactlog(5, s)\n        l1 = len(s)\n        myexactlog(6, l1)\n        t = N[i:l1 + i]\n        myexactlog(7, t)\n        try:\n            if s[0] == \"0\" or t[0] == \"0\":\n                myexactlog(8, 0)\n                pass\n        except:\n            pass\n        break",
+  "src_test_code": "def test():\n  \"--- test function ---\"\n  param =[('ZCoQhuM',),('2674377254',),('11',),('LbuGlvRyWAPBpo',),('26382426486138',),('111010111010',),('hUInqJXNdbfP',),('5191',),('1110101101',),('2202200',)]\n  for i, parameters_set in enumerate(param):\n    idx = i\n    result = f_gold(* parameters_set)",
+  "translation_rules_test_code": "(match_expand \n  (fragment (\"py.module\" \"*\"))\n  (fragment (\"js.program\" \"*1\")))\n\n(ext_match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" (val \"param\")) \".\")) \"*\")\n  (fragment (\"js.lexical_declaration\"  (\"js.variable_declarator\" (\"js.identifier\" (val \"param\")) (\"js.call_expression\" (\"js.identifier\" (val \"SOURCE_AST_IDX\")) (\"js.arguments\"  (\"js.number\" (val_ast_id \"@.1\")))))) \"*2\")\n  (flags \"disabled\" \"paramhack\")\n)\n\n(match_expand  \n  (fragment (\"py.expression_statement\" (\"py.assignment\" \".\"  (\"py.list_comprehension\" \".\" (\"py.for_in_clause\"  \".\"  \".\")))) \"*\")\n  (fragment \n    (\"js.lexical_declaration\"  (\"js.variable_declarator\" \".1\" (\"js.array\")))\n    (\"js.for_in_statement\" (str \"for\") (str \"(\") (str \"let\") \".3\" (str \"of\") \".4\" (\"js.statement_block\" (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" \".1\" (\"js.property_identifier\" (val \"push\"))) (\"js.arguments\"  \".2\"))))) \n  \"*5\")\n)\n\n(match_expand  \n  (fragment (\"py.expression_statement\" (\"py.assignment\" \".\"  (\"py.list_comprehension\" \".\" (\"py.for_in_clause\"  \".\"  \".\")))) \"*\")\n  (fragment \n    (\"js.lexical_declaration\"  (\"js.variable_declarator\" \".1\" (\"js.array\")))\n    (\"js.for_in_statement\" (str \"for\") (str \"(\") (str \"let\") \".3\" (str \"of\") \".4\" (\"js.statement_block\" \".2\" (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" \".1\" (\"js.property_identifier\" (val \"push\"))) (\"js.arguments\" (\"js.identifier\" (val \"temp\")))))))\n  \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.list_splat\" \".\") \"*\")\n  (fragment (\"js.spread_element\" \".1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.list_comprehension\" \".\" (\"py.for_in_clause\"  \".\"  \".\")) \"*\")\n  (fragment \n    (\"js.lexical_declaration\" (\"js.variable_declarator\" (\"js.identifier\" (val \"temp\")) (\"js.array\")))\n    (\"js.for_in_statement\" (str \"for\") (str \"(\") (str \"let\") \".2\" (str \"of\") \".3\" (\"js.statement_block\" (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"temp\")) (\"js.property_identifier\" (val \"push\"))) (\"js.arguments\"  \".1\"))))) \n  \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.augmented_assignment\" \".\" \"_str_\" \".\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.augmented_assignment_expression\" \".1\" \"_str1_\" \".2\")) \"*3\"))\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" \".\" (\"py.assignment\" \".\" \".\"))) \"*\")\n  (fragment (\"js.lexical_declaration\"  (\"js.variable_declarator\" \".2\" \".3\")) (\"js.lexical_declaration\"  (\"js.variable_declarator\" \".1\" \".2\")) \"*4\"))\n\n(match_expand\n  (fragment (\"py.expression_statement\" \"*\") \"*\")\n  (fragment (\"js.lexical_declaration\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.expression_statement\" \"*\") \"*\")\n  (fragment (\"js.expression_statement\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.assignment\" (\"py.pattern_list\" \"*\")  (\"py.expression_list\" \"*\")) \"*\")\n  (fragment (\"js.variable_declarator\" (\"js.array_pattern\" \"*1\")  (\"js.array\" \"*2\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.assignment\" (\"py.pattern_list\" \"*\")  (\"py.expression_list\" \"*\")) \"*\")\n  (fragment (\"js.assignment_expression\" (\"js.array_pattern\" \"*1\")  (\"js.array\" \"*2\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.assignment\" \"*\") \"*\")\n  (fragment (\"js.variable_declarator\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.assignment\" \"*\") \"*\")\n  (fragment (\"js.assignment_expression\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.identifier\" (val \"max\")) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" (val \"Math\"))  (\"js.property_identifier\" (val \"max\"))) \"*1\"))\n\n(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.float\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.if_statement\" (\"py.parenthesized_expression\" \".\") \"*\") \"*\")\n  (fragment (\"js.if_statement\" (\"js.parenthesized_expression\" \".1\") \"*2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.elif_clause\" \".\" \".\") (\"py.else_clause\" \".\"))\n  (fragment (\"js.else_clause\" (\"js.if_statement\" (\"js.parenthesized_expression\" \".1\") \".2\" (\"js.else_clause\" \".3\"))))\n)\n\n(match_expand\n  (fragment (\"py.elif_clause\" \".\" \".\") \"*\")\n  (fragment (\"js.else_clause\" (\"js.if_statement\"  (\"js.parenthesized_expression\" \".1\") \".2\")) \"*3\"))\n\n(match_expand\n  (fragment (\"py.else_clause\" \".\"))\n  (fragment (\"js.else_clause\" \".1\")))\n\n(match_expand\n  (fragment (\"py.if_statement\" \".\" \"*\") \"*\")\n  (fragment (\"js.if_statement\" (\"js.parenthesized_expression\" \".1\") \"*2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.while_statement\" (\"py.parenthesized_expression\" \".\") \"*\") \"*\")\n  (fragment (\"js.while_statement\" (\"js.parenthesized_expression\" \".1\") \"*2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.while_statement\" \".\" \"*\") \"*\")\n  (fragment (\"js.while_statement\" (\"js.parenthesized_expression\" \".1\") \"*2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.return_statement\" \".\") \"*\")\n  (fragment (\"js.return_statement\" \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.return_statement\") \"*\")\n  (fragment (\"js.return_statement\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.parenthesized_expression\" \"*\") \"*\")\n  (fragment (\"js.parenthesized_expression\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.keyword_argument\" (\"py.identifier\" (val \"end\")) \".\") \"*\")\n  (fragment \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.argument_list\" \"*\") \"*\")\n  (fragment (\"js.arguments\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"===\") \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.comparison_operator\" \".\" \"_str_\" \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" \"_str1_\" \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.block\" \"*\") \"*\")\n  (fragment (\"js.statement_block\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.binary_operator\" \".\" \"_str_\" \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" \"_str1_\" \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.boolean_operator\" \".\" (str \"and\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"&&\") \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.boolean_operator\" \".\" (str \"or\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"||\") \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.unary_operator\" \"_str_\" \".\") \"*\")\n  (fragment (\"js.unary_expression\" \"_str1_\" \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.for_statement\"  (\"py.pattern_list\" \".\" \".\")  (\"py.call\" (\"py.identifier\" (val \"enumerate\")) (\"py.argument_list\" \".\"))  (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\"  \n      (\"js.lexical_declaration\"  (\"js.variable_declarator\"\".1\"  (\"js.number\" (val \"0\"))) ) \n      (\"js.expression_statement\" (\"js.binary_expression\" \".1\" (str \"<\") (\"js.member_expression\" \".3\" (\"js.property_identifier\" (val \"length\"))))) \n      (\"js.update_expression\" \".1\")  \n      (\"js.statement_block\"  \n        (\"js.lexical_declaration\"  (\"js.variable_declarator\" \".2\" (\"js.subscript_expression\" \".3\" (str \"[\") \".1\")) ) \n        \"*4\")) \n      \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.for_statement\" \".\" \n    (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" \".\")) \"*\") \"*\")\n  (fragment (\"js.for_statement\" \n    (\"js.lexical_declaration\" (\"js.variable_declarator\" \".1\" (\"js.number\" (val 0)))) \n    (\"js.expression_statement\" (\"js.binary_expression\" \".1\" (str \"<\") \".2\")) \n    (\"js.update_expression\" \".1\") \"*3\") \"*4\"))\n\n(match_expand\n  (fragment (\"py.for_statement\" \".\" \n    (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" \".\" \".\")) \"*\") \"*\")\n  (fragment (\"js.for_statement\" \n    (\"js.lexical_declaration\" (\"js.variable_declarator\" \".1\" \".2\")) \n    (\"js.expression_statement\" (\"js.binary_expression\" \".1\" (str \"<\") \".3\")) \n    (\"js.update_expression\" \".1\") \"*4\") \"*5\"))\n\n(match_expand\n  (fragment (\"py.for_statement\" \".\" \n    (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" \".\" \".\" (\"py.unary_operator\" (str \"-\") \".\"))) \"*\") \"*\")\n  (fragment (\"js.for_statement\" \n    (\"js.lexical_declaration\" (\"js.variable_declarator\" \".1\" \".2\")) \n    (\"js.expression_statement\" (\"js.binary_expression\" \".1\" (str \">\") \".3\")) \n    (\"js.augmented_assignment_expression\" \".1\" (str \"-=\") \".4\") \"*5\") \"*6\"))\n\n(match_expand\n  (fragment (\"py.for_statement\"  \".\" \".\" \".\") \"*\")\n  (fragment (\"js.for_in_statement\" (str \"for\") (str \"(\") (str \"let\") \".1\" (str \"of\") \".2\" \".3\") \"*4\")\n)\n\n(match_expand\n  (fragment (\"py.subscript\" \".\" (str \"[\") (nostr) \".\") \"*\")\n  (fragment (\"js.subscript_expression\" \".1\" (str \"[\") (nostr) \".2\") \"*3\"))\n\n(match_expand\n  (fragment (\"py.attribute\" (\"py.identifier\" (val \"math\"))  (\"py.identifier\" (val \"pi\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" (val \"Math\"))  (\"js.property_identifier\" (val \"PI\"))) \"*1\"))\n\n(match_expand\n  (fragment (\"py.attribute\" \".\" (\"py.identifier\" \"_val_\")) \"*\")\n  (fragment (\"js.member_expression\" \".1\" (\"js.property_identifier\" \"_val1_\")) \"*2\"))\n\n; -----------------\n\n(match_expand\n  (fragment (\"py.true\") \"*\")\n  (fragment (\"js.true\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.false\") \"*\")\n  (fragment (\"js.false\") \"*1\"))\n\n\n; (match_expand\n;   (fragment (\"py.string\" \"*\") \"*\")\n;   (fragment (\"js.string\" (str \"'\") \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.string\" \"*\") \"*\")\n  (fragment (\"js.string\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.list\" \"*\") \"*\")\n  (fragment (\"js.array\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.tuple\" \"*\") \"*\")\n  (fragment (\"js.array\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.string_content\" \"_val_\") \"*\")\n  (fragment (\"js.string_fragment\" \"_val1_\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.function_definition\" (str \"def\") \"*\") \"*\")\n  (fragment (\"js.function_declaration\" (str \"function\") \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.parameters\" \"*\") \"*\")\n  (fragment (\"js.formal_parameters\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.pass_statement\") \"*\")\n  (fragment \"*1\"))\n\n(match_expand\n  (fragment (\"py.none\") \"*\")\n  (fragment (\"js.null\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.continue_statement\") \"*\")\n  (fragment (\"js.continue_statement\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.break_statement\") \"*\")\n  (fragment (\"js.break_statement\") \"*1\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" \".\")) \"*\")\n  (fragment (\"js.member_expression\" \".1\" (\"js.property_identifier\" (val \"length\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"print\")) \".\") \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"console\"))  (\"js.property_identifier\" (val \"log\"))) \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"str\")) (\"py.argument_list\" \".\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" \".1\" (\"js.property_identifier\" (val \"toString\"))) (\"js.arguments\")) \"*2\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"Exception\")) \".\") \"*\")\n  (fragment (\"js.call_expression\" (\"js.identifier\" (val \"Error\")) \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) \".\") \"*\")\n  (fragment (\"js.call_expression\" (\"js.identifier\" (val \"parseInt\")) \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"abs\")) \".\") \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Math\"))  (\"js.property_identifier\" (val \"abs\"))) \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"dict\")) (\"py.argument_list\")) \"*\")\n  (fragment (\"js.object\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.call\" \"*\") \"*\")\n  (fragment (\"js.call_expression\" \"*1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.try_statement\" \".\" (\"py.except_clause\" (\"py.identifier\" (val \"Exception\")) \".\" \".\")) \"*\")\n  (fragment (\"js.try_statement\" \".1\" (\"js.catch_clause\" \".2\" \".3\")) \"*4\"))\n\n(match_expand\n  (fragment (\"py.raise_statement\" \".\") \"*\")\n  (fragment (\"js.throw_statement\" \".1\") \"*2\"))\n\n(match_expand\n  (fragment (\"py.escape_sequence\" \"_val_\") \"*\")\n  (fragment (\"js.escape_sequence\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\"  (\"py.dotted_name\" (\"py.identifier\" (val \"math\")))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\"  (\"py.dotted_name\" (\"py.identifier\" (val \"sys\")))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\" (str \"import\") (\"py.dotted_name\" (\"py.identifier\" (val \"itertools\")))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\"  (\"py.dotted_name\" (\"py.identifier\" (val \"math\")))  (\"py.dotted_name\" (\"py.identifier\" (val \"floor\")))) \"*\")\n  (fragment (\"js.lexical_declaration\"  (\"js.variable_declarator\" (\"js.identifier\" (val \"floor\"))  (\"js.member_expression\" (\"js.identifier\" (val \"Math\"))  (\"js.property_identifier\" (val \"floor\"))))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\"  (\"py.dotted_name\" (\"py.identifier\" (val \"math\")))  (\"py.dotted_name\" (\"py.identifier\" (val \"sqrt\")))) \"*\")\n  (fragment (\"js.lexical_declaration\"  (\"js.variable_declarator\" (\"js.identifier\" (val \"sqrt\"))  (\"js.member_expression\" (\"js.identifier\" (val \"Math\"))  (\"js.property_identifier\" (val \"sqrt\"))))) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.dictionary\" \"*\") \"*\")\n  (fragment (\"js.object\" \"*1\") \"*2\")\n)\n\n; examples: \"\\n##### Translate this function from Python into JavaScript\\n### Python\\n\\n{\\\"a\\\": 0}\\n{3: \\\"c\\\"}\\n\\n### JavaScript\\n\\n{\\\"a\\\": 0};\\n{3: \\\"c\\\"};\\n\\n\"\n; mark: {\"source\":[[4,1,4,7],[5,1,5,7]],\"target\":[[9,1,9,7],[10,1,10,7]]}\n(match_expand \n  (fragment (\"py.pair\" \".\" (str \":\") \".\") \"*\")\n  (fragment (\"js.pair\" \".1\" (str \":\") \".2\") \"*3\")\n)\n",
+  "ruleset": {
+    "type": "Ruleset",
+    "rules": [
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"s\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"t\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"s\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"t\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"s\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"t\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"s\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"t\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"s\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"t\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"s\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"t\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"s\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"t\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StatementOverfittedTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"s\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) (str \"or\") (\"py.comparison_operator\" (\"py.subscript\" (\"py.identifier\" (val \"t\")) (str \"[\") (\"py.integer\" (val \"0\")) (str \"]\")) (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\")))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.subscript_expression\" (\"js.identifier\" (val \"s\")) (str \"[\") (\"js.number\" (val \"0\")) (str \"]\")) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) (str \"||\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"t\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \")\"))) (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" \".\" (str \"or\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"||\") \".2\") (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" \".\" (str \"or\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" \".1\" (str \"!==\") (\"js.number\" (val \"0\"))) (str \"||\") (\"js.binary_expression\" \".2\" (str \"!==\") (\"js.number\" (val \"0\")))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.if_statement\" (str \"if\") (\"py.boolean_operator\" \".\" (str \"or\") \".\") (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.call_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.function\" (str \"function\") (\"js.formal_parameters\" (str \"(\") (\"js.identifier\" (val \"a\")) (str \",\") (\"js.identifier\" (val \"b\")) (str \")\")) (\"js.statement_block\" (str \"{\") (\"js.lexical_declaration\" (str \"const\") (\"js.variable_declarator\" (\"js.identifier\" (val \"pyTruthy\")) (str \"=\") (\"js.arrow_function\" (nostr) (\"js.identifier\" (val \"x\")) (str \"=>\") (\"js.statement_block\" (str \"{\") (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"==\") (\"js.null\" (str \"null\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.false\" (str \"false\")) (str \";\"))) (\"js.lexical_declaration\" (str \"const\") (\"js.variable_declarator\" (\"js.identifier\" (val \"t\")) (str \"=\") (\"js.unary_expression\" (str \"typeof\") (\"js.identifier\" (val \"x\")))) (str \";\")) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"t\")) (str \"===\") (\"js.string\" (str \"'\") (\"js.string_fragment\" (val \"boolean\")) (str \"'\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.identifier\" (val \"x\")) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"t\")) (str \"===\") (\"js.string\" (str \"'\") (\"js.string_fragment\" (val \"number\")) (str \"'\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"!==\") (\"js.number\" (val \"0\"))) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"t\")) (str \"===\") (\"js.string\" (str \"'\") (\"js.string_fragment\" (val \"bigint\")) (str \"'\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"!==\") (\"js.number\" (val \"0n\"))) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"t\")) (str \"===\") (\"js.string\" (str \"'\") (\"js.string_fragment\" (val \"string\")) (str \"'\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"x\")) (str \".\") (\"js.property_identifier\" (val \"length\"))) (str \">\") (\"js.number\" (val \"0\"))) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"isArray\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"x\")) (str \")\"))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"x\")) (str \".\") (\"js.property_identifier\" (val \"length\"))) (str \">\") (\"js.number\" (val \"0\"))) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"instanceof\") (\"js.identifier\" (val \"Set\"))) (str \"||\") (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"instanceof\") (\"js.identifier\" (val \"Map\")))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"x\")) (str \".\") (\"js.property_identifier\" (val \"size\"))) (str \">\") (\"js.number\" (val \"0\"))) (str \";\"))) (\"js.if_statement\" (str \"if\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" (\"js.identifier\" (val \"x\")) (str \"&&\") (\"js.binary_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"x\")) (str \".\") (\"js.property_identifier\" (val \"constructor\"))) (str \"===\") (\"js.identifier\" (val \"Object\")))) (str \")\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Object\")) (str \".\") (\"js.property_identifier\" (val \"keys\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"x\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) (str \">\") (\"js.number\" (val \"0\"))) (str \";\"))) (\"js.return_statement\" (str \"return\") (\"js.true\" (str \"true\")) (str \";\")) (str \"}\")))) (str \";\")) (\"js.return_statement\" (str \"return\") (\"js.binary_expression\" (\"js.call_expression\" (\"js.identifier\" (val \"pyTruthy\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"a\")) (str \")\"))) (str \"||\") (\"js.call_expression\" (\"js.identifier\" (val \"pyTruthy\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"b\")) (str \")\")))) (str \";\")) (str \"}\"))) (str \")\")) (\"js.arguments\" (str \"(\") \".1\" (str \",\") \".2\" (str \")\"))) (str \")\")) (\"js.statement_block\" (str \"{\") \"*3\" (str \"}\"))) \"*4\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"==\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.comparison_operator\" \".\" (str \"==\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"0\")) (str \"\\\"\"))) \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"===\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"0\")) (str \"\\\"\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.subscript_expression\" (\"js.identifier\" \"_val1_\") (str \"[\") \".1\" (str \"]\")) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)",
+        "stat_nid": 65,
+        "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.try_statement\" (str \"try\") (str \":\") (\"py.block\" \"*\") (\"py.except_clause\" (str \"except\") (str \":\") (\"py.block\" \"*\"))) \"*\")\n  (fragment (\"js.try_statement\" (str \"try\") (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\")) (\"js.catch_clause\" (str \"catch\") (str \"(\") (\"js.identifier\" (val \"e\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\")))) \"*3\")\n)",
+        "stat_nid": 63,
+        "simple_ntext": "try:\n    pass\nexcept:\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"join\"))) (\"js.arguments\" (str \"(\") (\"js.string\" (str \"'\") (str \"'\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.array\" (str \"[\") (\"js.spread_element\" (str \"...\") (\"js.identifier\" \"_val1_\")) (str \"]\")) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"join\"))) (\"js.arguments\" (str \"(\") (\"js.string\" (str \"'\") (str \"'\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"subarray\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Buffer\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"prototype\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"prototype\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 53,
+        "simple_ntext": "t = N[i:l1 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \",\") (\"js.binary_expression\" (\"js.number\" (val \"0\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \",\") (\"js.binary_expression\" (\"js.number\" (val \"0\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \",\") (\"js.identifier\" (val \"i\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \",\") (\"js.identifier\" (val \"i\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"prototype\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") (\"js.number\" (val \"0\")) (str \",\") (\"js.binary_expression\" (\"js.number\" (val \"0\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"prototype\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") (\"js.number\" (val \"0\")) (str \",\") (\"js.identifier\" (val \"i\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"prototype\"))) (str \".\") (\"js.property_identifier\" (val \"slice\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \",\") (\"js.number\" (val \"0\")) (str \",\") (\"js.identifier\" (val \"i\")) (str \")\"))) \"*1\")\n)",
+        "stat_nid": 36,
+        "simple_ntext": "s = N[0:0 + i]"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" (val \"0\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.object\" (str \"{\") (\"js.pair\" (\"js.property_identifier\" (val \"length\")) (str \":\") \".1\") (str \"}\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"forEach\"))) (\"js.arguments\" (str \"(\") (\"js.arrow_function\" (nostr) (\"js.formal_parameters\" (str \"(\") (str \")\")) (str \"=>\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) (str \")\"))) (str \";\")) \"*3\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" \"_val1_\")) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.for_statement\" (str \"for\") (\"py.identifier\" \"_val_\") (str \"in\") (\"py.call\" (\"py.identifier\" (val \"range\")) (\"py.argument_list\" (str \"(\") \".\" (str \")\"))) (str \":\") (\"py.block\" \"*\")) \"*\")\n  (fragment (\"js.for_statement\" (str \"for\") (str \"(\") (\"js.lexical_declaration\" (str \"let\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") (\"js.number\" (val \"0n\"))) (str \";\")) (\"js.expression_statement\" (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"<\") \".1\") (str \";\")) (\"js.update_expression\" (\"js.identifier\" \"_val1_\") (str \"++\")) (str \")\") (\"js.statement_block\" (str \"{\") \"*2\" (str \"}\"))) \"*3\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"+\") \".1\") \"*2\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.ternary_expression\" (\"js.identifier\" \"_val1_\") (str \"?\") (\"js.number\" (val \"1\")) (str \":\") (\"js.number\" (val \"0\"))) (str \")\")) (str \"+\") \".1\") \"*2\")\n)",
+        "stat_nid": 27,
+        "simple_ntext": "for i in range(l + 1):\n    pass"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Math\")) (str \".\") (\"js.property_identifier\" (val \"trunc\"))) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\"))) \"*3\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.ternary_expression\" (\"js.binary_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\")) (str \"<\") (\"js.number\" (val \"0\"))) (str \"?\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Math\")) (str \".\") (\"js.property_identifier\" (val \"ceil\"))) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\"))) (str \":\") (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Math\")) (str \".\") (\"js.property_identifier\" (val \"floor\"))) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\")))) \"*3\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.binary_expression\" (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\")) (str \"|\") (\"js.number\" (val \"0\"))) \"*3\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.unary_expression\" (str \"~\") (\"js.unary_expression\" (str \"~\") (\"js.parenthesized_expression\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\")))) \"*3\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.binary_expression\" \".1\" (str \"/\") \".2\") \"*3\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.parenthesized_expression\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\")) \"*\")\n  (fragment (\"js.parenthesized_expression\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\")) \"*1\")\n)",
+        "stat_nid": 13,
+        "simple_ntext": "l = int((length) / 2)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" \"_val_\") (str \"=\") \".\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.identifier\" \"_val1_\") (str \"=\") \".1\") (str \";\")) \"*2\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Array\")) (str \".\") (\"js.property_identifier\" (val \"from\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"size\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Object\")) (str \".\") (\"js.property_identifier\" (val \"keys\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Object\")) (str \".\") (\"js.property_identifier\" \"_val1_\")) (\"js.arguments\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StandardTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"byteLength\"))) \"*1\")\n)",
+        "stat_nid": 6,
+        "simple_ntext": "length = len(N)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.module\" \"*\"))\n  (fragment (\"js.program\" \"*1\"))\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.function_definition\" (str \"def\") \"*\") \"*\")\n  (fragment (\"js.function_declaration\" (str \"function\") \"*1\") \"*2\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.parameters\" \"*\") \"*\")\n  (fragment (\"js.formal_parameters\" \"*1\") \"*2\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.default_parameter\" \".\" (str \"=\") \".\") \"*\")\n  (fragment (\"js.assignment_pattern\" \".1\" (str \"=\") \".2\") \"*3\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.block\" \"*\") \"*\")\n  (fragment (\"js.statement_block\" \"*1\") \"*2\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.pass_statement\" \"*\") \"*\")\n  (fragment \"*2\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.float\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.string_content\" \"_val_\") \"*\")\n  (fragment (\"js.string_fragment\" \"_val1_\") \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.string\" \"*\") \"*\")\n  (fragment (\"js.string\" \"*1\") \"*2\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.comment\" \"_val_\") \"*\")\n  (fragment \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.wildcard_import\" (str \"*\"))) \"*\")\n  (fragment \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.import_statement\" (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)"
+      },
+      {
+        "type": "StartingTRule",
+        "rule_str": "(match_expand\n  (fragment (\"py.attribute\" (\"py.identifier\" (val \"sys\")) (str \".\") (\"py.identifier\" (val \"maxsize\"))) \"*\")\n  (fragment (\"js.number\" (val \"9223372036854776000\")) \"*1\")\n)"
+      }
+    ],
+    "verified_rules": {
+      "len(N)--[py.call [py.identifier \"len\"] [py.argument_list \"(\" [py.identifier \"N\"] \")\"]]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+          "stat_nid": 6,
+          "simple_ntext": "length = len(N)"
+        }
+      ],
+      "len--[py.identifier \"len\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "N--[py.identifier \"N\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "(length)--[py.parenthesized_expression \"(\" [py.identifier \"length\"] \")\"]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.parenthesized_expression\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\")) \"*\")\n  (fragment (\"js.parenthesized_expression\" (str \"(\") (\"js.identifier\" \"_val1_\") (str \")\")) \"*1\")\n)",
+          "stat_nid": 13,
+          "simple_ntext": "l = int((length) / 2)"
+        }
+      ],
+      "int--[py.identifier \"int\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "length--[py.identifier \"length\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "2--[py.integer \"2\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "int((length) / 2)--[py.call [py.identifier \"int\"] [py.argument_list \"(\" [py.binary_operator [py.parenthesized_expression \"(\" [py.identifier \"length\"] \")\"] \"/\" [py.integer \"2\"]] \")\"]]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"int\")) (\"py.argument_list\" (str \"(\") (\"py.binary_operator\" \".\" (str \"/\") \".\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Math\")) (str \".\") (\"js.property_identifier\" (val \"trunc\"))) (\"js.arguments\" (str \"(\") (\"js.binary_expression\" \".1\" (str \"/\") \".2\") (str \")\"))) \"*3\")\n)",
+          "stat_nid": 13,
+          "simple_ntext": "l = int((length) / 2)"
+        }
+      ],
+      "0--[py.integer \"0\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "range--[py.identifier \"range\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "l--[py.identifier \"l\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "1--[py.integer \"1\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "l + 1--[py.binary_operator [py.identifier \"l\"] \"+\" [py.integer \"1\"]]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"+\") \".1\") \"*2\")\n)",
+          "stat_nid": 27,
+          "simple_ntext": "for i in range(l + 1):\n    pass"
+        }
+      ],
+      "N[0:0 + i]--[py.subscript [py.identifier \"N\"] \"[\" [py.slice [py.integer \"0\"] \":\" [py.binary_operator [py.integer \"0\"] \"+\" [py.identifier \"i\"]]] \"]\"]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.integer\" (val \"0\")) (str \":\") (\"py.binary_operator\" (\"py.integer\" (val \"0\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.number\" (val \"0\")) (str \",\") (\"js.binary_expression\" (\"js.number\" (val \"0\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+          "stat_nid": 36,
+          "simple_ntext": "s = N[0:0 + i]"
+        }
+      ],
+      "i--[py.identifier \"i\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "len(s)--[py.call [py.identifier \"len\"] [py.argument_list \"(\" [py.identifier \"s\"] \")\"]]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.call\" (\"py.identifier\" (val \"len\")) (\"py.argument_list\" (str \"(\") (\"py.identifier\" \"_val_\") (str \")\"))) \"*\")\n  (fragment (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"length\"))) \"*1\")\n)",
+          "stat_nid": 6,
+          "simple_ntext": "length = len(N)"
+        }
+      ],
+      "s--[py.identifier \"s\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "N[i:l1 + i]--[py.subscript [py.identifier \"N\"] \"[\" [py.slice [py.identifier \"i\"] \":\" [py.binary_operator [py.identifier \"l1\"] \"+\" [py.identifier \"i\"]]] \"]\"]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") (\"py.slice\" (\"py.identifier\" (val \"i\")) (str \":\") (\"py.binary_operator\" (\"py.identifier\" (val \"l1\")) (str \"+\") (\"py.identifier\" (val \"i\")))) (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"slice\"))) (\"js.arguments\" (str \"(\") (\"js.identifier\" (val \"i\")) (str \",\") (\"js.binary_expression\" (\"js.identifier\" (val \"l1\")) (str \"+\") (\"js.identifier\" (val \"i\"))) (str \")\"))) \"*1\")\n)",
+          "stat_nid": 53,
+          "simple_ntext": "t = N[i:l1 + i]"
+        }
+      ],
+      "l1 + i--[py.binary_operator [py.identifier \"l1\"] \"+\" [py.identifier \"i\"]]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.binary_operator\" (\"py.identifier\" \"_val_\") (str \"+\") \".\") \"*\")\n  (fragment (\"js.binary_expression\" (\"js.identifier\" \"_val1_\") (str \"+\") \".1\") \"*2\")\n)",
+          "stat_nid": 27,
+          "simple_ntext": "for i in range(l + 1):\n    pass"
+        }
+      ],
+      "l1--[py.identifier \"l1\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "s[0]--[py.subscript [py.identifier \"s\"] \"[\" [py.integer \"0\"] \"]\"]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)",
+          "stat_nid": 65,
+          "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+        }
+      ],
+      "t[0]--[py.subscript [py.identifier \"t\"] \"[\" [py.integer \"0\"] \"]\"]": [
+        {
+          "type": "StandardTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.subscript\" (\"py.identifier\" \"_val_\") (str \"[\") \".\" (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" \"_val1_\") (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") \".1\" (str \")\"))) \"*2\")\n)",
+          "stat_nid": 65,
+          "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass"
+        }
+      ],
+      "t--[py.identifier \"t\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)"
+        }
+      ],
+      "\"0\"--[py.string \"\\\"\" [py.string_content \"0\"] \"\\\"\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.string\" \"*\") \"*\")\n  (fragment (\"js.string\" \"*1\") \"*2\")\n)"
+        }
+      ],
+      "8--[py.integer \"8\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)"
+        }
+      ]
+    },
+    "unverifiable_rules": {
+      "\"0\"--[py.string_content \"0\"]": [
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.string_content\" \"_val_\") \"*\")\n  (fragment (\"js.string_fragment\" \"_val1_\") \"*1\")\n)"
+        },
+        {
+          "type": "StartingTRule",
+          "rule_str": "(match_expand\n  (fragment (\"py.string_content\" \"_val_\") \"*\")\n  (fragment (\"js.string_fragment\" \"_val1_\") \"*1\")\n)"
+        }
+      ]
+    }
+  },
+  "simple_ntext": "if s[0] == \"0\" or t[0] == \"0\":\n    pass",
+  "subject_name": "G0016",
+  "verified_choice_options": [
+    [
+      [
+        7,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        9,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        11,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        16,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        16,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        20,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        22,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        25,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        25,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        26,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        32,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        32,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        36,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        47,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        49,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        50,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        50,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        57,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        61,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        63,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        65,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        67,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        67,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        73,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        77,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        79,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        81,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        86,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        90,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        92,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        94,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        94,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        96,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        96,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        102,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        109,
+        2,
+        3
+      ],
+      [
+        1
+      ]
+    ],
+    [
+      [
+        109,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        110,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        110,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        115,
+        2,
+        3
+      ],
+      [
+        1
+      ]
+    ],
+    [
+      [
+        115,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        116,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        116,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        125,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        125,
+        5,
+        6
+      ],
+      [
+        0
+      ]
+    ]
+  ]
+}

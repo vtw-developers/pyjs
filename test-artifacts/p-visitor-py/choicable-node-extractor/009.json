@@ -1,0 +1,19 @@
+{
+  "code": "def f_gold(a, n, k):\n    if k >= n - 1:\n        return n\n    best = 0\n    times = 0\n    for i in range(n):\n        if a[i] > best:\n            best = a[i]\n            if i != 0:\n                times = 1\n        else:\n            times += 1\n        if times >= k:\n            return best\n    return best",
+  "choicable_nodes": [
+    "k >= n - 1",
+    "n",
+    "0",
+    "0",
+    "range(n)",
+    "a[i] > best",
+    "a[i]",
+    "i != 0",
+    "1",
+    "1",
+    "times >= k",
+    "best",
+    "best"
+  ],
+  "exclude_stat_nids": []
+}

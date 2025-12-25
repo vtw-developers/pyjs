@@ -1,0 +1,58 @@
+{
+  "translation_pair": [
+    {
+      "source": "if (~id_nzpy & 1) == 1:\n    pass",
+      "target": "if (((-id_nzpy - 1) & 1) == 1) {}"
+    },
+    {
+      "source": "if (~id_bat & 1) == 1:\n    pass",
+      "target": "if (((-1 - id_bat) & 1) == 1) {}"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.unary_operator"
+      ],
+      [
+        "py.binary_operator"
+      ],
+      [
+        "py.parenthesized_expression"
+      ],
+      [
+        "py.comparison_operator"
+      ],
+      [
+        "py.if_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.parenthesized_expression"
+      ],
+      [
+        "js.binary_expression"
+      ],
+      [
+        "js.parenthesized_expression"
+      ],
+      [
+        "js.if_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "error_msg": "Placeholder id-s match, but `.` or `*` types do not",
+  "error_class": "RuleMappingError"
+}

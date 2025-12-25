@@ -15,6 +15,7 @@ BUILD_DIR = ROOT_DIR / 'build'
 EXPERIMENTS_DIR = ROOT_DIR / 'experiments'
 LOGS_DIR = ROOT_DIR / 'logs'
 MYLOG_DEFINITIONS_DIR = ROOT_DIR / 'mylog-definitions'
+TEMPLATES_DIR = ROOT_DIR / 'templates'
 TEST_ARTIFACTS_DIR = ROOT_DIR / 'test-artifacts'
 TMP_DIR = ROOT_DIR / 'tmp'
 TRANSLATION_RULES_DIR = ROOT_DIR / 'translation-rules'
@@ -100,8 +101,9 @@ PAR_PROG_DUMMY_IDENTIFIER = 'pirel_dummy_var'
 # Maximum number of TSPs from which some rules are learned
 MAX_NUM_USEFUL_TSPS = 1
 
-# Maximum number of AST node groups fuzzed for TSP generation
-MAX_FUZZ_GROUP_LEN = 1000
+# Maximum number of TSPs that do not produce any useful rules
+# before stopping the standard learning process
+MAX_NUM_SKIPPED_TSPS = 3
 
 # Maximum number of concurrent subjects to learn rules for
 MAX_CONCURRENT_SUBJECTS = 1000
@@ -109,6 +111,12 @@ MAX_CONCURRENT_SUBJECTS = 1000
 # When comparing traces, max percentage difference between two numbers
 # to be considered equal
 EPS_PERCENTAGE = 0.01
+
+# Maximum number of alternative rules to consider during translation
+# For example, if there are 50 rules that can be applied to a node,
+# and MAX_NUM_ALTERNATIVE_EXPANSIONS = 10, then only first 10 rules
+# (in the order they appear in the ruleset) will be considered.
+MAX_NUM_ALTERNATIVE_EXPANSIONS = 250
 
 
 ################################################################################################
@@ -130,6 +138,9 @@ BASIC_NODE_TYPES = {
   'py': ['identifier', 'integer', 'float']
 }
 
+# Maximum number of AST node groups fuzzed for TSP generation
+MAX_FUZZ_GROUP_LEN = 2000
+
 # When set to True, the generator will generate `identifier` node
 # if the `mapped_node` is of type `identifier`.
 IS_FORCE_IDENTIFIERS = True
@@ -143,7 +154,10 @@ FN_NAMES_FORCE_SINGLE_ARG_TO_IDENTIFIER = {
 }
 
 NON_DESCENDABLE_NODES = {
-  'py': ['string']
+  'py': [
+    'string',  # `string` is a literal node, however it needs a special treatment unlike e.g. `integer`
+    'boolean_operator',  # it is fairly easy to learn rules for it, no need to descend further
+  ]
 }
 
 FN_NAMES_WITH_NON_EMPTY_ARGUMENT_LIST = {
@@ -270,18 +284,19 @@ TEST_MAIN_CALL_DELIMITER = '"-----------------"'
 STARTING_RULESET_FPATH = TRANSLATION_RULES_DIR / 'starting-ruleset.snart'
 
 GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'gfg' / 'py'
-MINI_GFG_BENCHMARK_DIR = BENCHMARKS_DIR / 'mini-benchmark'
 GFG_TRULES_MAIN_FPATH = TRANSLATION_RULES_DIR / 'main' / 'gfg.snart'
 GFG_TRULES_TEST_FPATH = TRANSLATION_RULES_DIR / 'test' / 'gfg.snart'
 
+SKEL_BENCHMARK_DIR = BENCHMARKS_DIR / 'skel'
+
 BENCHMARK_CONFIGS = {
   'gfg': {
-    'benchmark_dir': MINI_GFG_BENCHMARK_DIR,
+    'benchmark_dir': GFG_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
     'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
   },
   'skel': {
-    'benchmark_dir': BENCHMARKS_DIR / 'skel',
+    'benchmark_dir': SKEL_BENCHMARK_DIR,
     'translation_rules_main_code_fpath': GFG_TRULES_MAIN_FPATH,
     'translation_rules_test_code_fpath': GFG_TRULES_TEST_FPATH,
   },
@@ -309,6 +324,10 @@ GEN_TEST_FN_LLM_FEEDBACKS = 3
 
 GET_REF_TRANS_LLM_NUM_ATTEMPTS = 3
 GET_REF_TRANS_LLM_FEEDBACKS = 3
+
+SUPPORTED_ERROR_TYPES_JS = [
+  'SyntaxError', 'ReferenceError', 'TypeError', 'Error', 'TypeError [ERR_INVALID_ARG_TYPE]',
+]
 
 
 ################################################################################################

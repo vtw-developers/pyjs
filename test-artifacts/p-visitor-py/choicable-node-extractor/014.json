@@ -1,0 +1,18 @@
+{
+  "code": "def f_gold(num1):\n    l = len(num1)\n    num = list(num1)\n    i = l - 1\n    while i >= 0:\n        if num[i] == \"0\":\n            num[i] = \"1\"\n            break\n        else:\n            num[i] = \"0\"\n        i -= 1\n    num1 = \"\".join(num)\n    if i < 0:\n        num1 = \"1\" + num1\n    return num1",
+  "choicable_nodes": [
+    "len(num1)",
+    "list(num1)",
+    "l - 1",
+    "i >= 0",
+    "num[i] == \"0\"",
+    "\"1\"",
+    "\"0\"",
+    "1",
+    "\"\".join(num)",
+    "i < 0",
+    "\"1\" + num1",
+    "num1"
+  ],
+  "exclude_stat_nids": []
+}

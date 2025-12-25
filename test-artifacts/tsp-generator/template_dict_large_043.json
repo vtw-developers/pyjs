@@ -1,0 +1,20 @@
+{
+  "template_origin": "h[i + 1][j + 1] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "expression_statement",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "id_rms[id_ehnp][id_jel + 7958] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))",
+      "id_ajby[174][id_vqj + id_olu] = min(h[i][j] + cost, h[i + 1][j] + 1, h[i][j + 1] + 1, h[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1))"
+    ],
+    [
+      "id_pejr[id_bjtm][id_qms + 5565] = min(id_uyfq, id_lms, id_ucx, id_uxn)",
+      "id_zsv[6941][id_ubqi + 4136] = min(1868, 3659, 4381, 6771)"
+    ]
+  ],
+  "problematic_node_id": 1
+}

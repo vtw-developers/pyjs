@@ -1,0 +1,23 @@
+* When translating a builtin function `type` with three arguments from Python to JavaScript, use the following guidelines:
+  i. `<var_name> = type('<ClassName>', (), {})`
+     should be translated to
+     `var <var_name> = class <ClassName> {};`
+     Here `<ClassName>` is a string literal in Python.
+  ii. `<var_name> = type(<ClassName>, (), {'<static_attr_key>': <static_attr_value>})`
+      should be translated to
+      ```js
+      var <var_name> = class {
+        static <static_attr_key> = <static_attr_value>;
+      }
+      Object.defineProperty(<var_name>, 'name', { value: <ClassName> });
+      ```
+      Here `<ClassName>` is a variable that holds the class name as a string.
+  iii. `<var_name = type(<ClassName>, (<SuperClass>, ), {'<static_attr_key>': <static_attr_value>})`
+       should be translated to
+       ```js
+       var <var_name> = class extends <SuperClass> {
+         static <static_attr_key> = <static_attr_value>;
+       }
+       Object.defineProperty(<var_name>, 'name', { value: <ClassName> });
+       ```
+       Here `<ClassName>` is a variable that holds the class name as a string, and `<SuperClass>` is a variable that holds the superclass.

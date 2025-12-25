@@ -7,6 +7,33 @@ import p_consts
 import p_utils
 
 
+logger = p_utils.setup_logger(__name__)
+
+
+class TestExtractErrFromStderrJS(unittest.TestCase):
+  '''
+  Test cases for the extract_err_from_stderr_JS function in p_code_runner.
+  '''
+  def setUp(self):
+    self.fixture_dir_path = p_consts.TEST_ARTIFACTS_DIR / 'p-code-runner' / 'extract-err-from-stderr-js'
+    self.maxDiff = None
+
+  def get_fixtures(self, test_id: str) -> Tuple[str, dict]:
+    data = p_utils.read_json(self.fixture_dir_path / f'{test_id}.json')
+    tar_std_error = data['tar_std_error']
+    tar_error_dict = data['tar_error_dict']
+    return tar_std_error, tar_error_dict
+
+  def test_all(self):
+    test_ids = sorted([p.stem for p in self.fixture_dir_path.glob('*.json')])
+    for test_id in test_ids:
+      with self.subTest(test_id=test_id):
+        tar_std_error, tar_error_dict = self.get_fixtures(test_id)
+        error_dict = p_code_runner.extract_err_from_stderr_JS(tar_std_error, 'js')
+        eq, p, v1, v2 = p_utils.deep_json_diff(tar_error_dict, error_dict)
+        self.assertTrue(eq, f'Expected error dicts to match for test {test_id}: {p}\nExpected: {v1}\nGot: {v2}')
+
+
 class TestExtractTraceFromStdout(unittest.TestCase):
   '''
   Test cases for the _extract_trace_from_stdout function in p_code_runner.

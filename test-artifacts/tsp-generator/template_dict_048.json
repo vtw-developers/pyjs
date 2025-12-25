@@ -30,14 +30,8 @@
   "pre_context": "pirel_pre_ctx_spec_identifier",
   "tsps": [
     [
-      "if id_grwa == 676:\n    secret_fun_4071()",
-      "if id_fpam == id_van:\n    secret_fun_4071()",
-      "if id_nyvm == id_xmsf:\n    secret_fun_4071()"
-    ],
-    [
-      "if id_fcqi == 1034:\n    secret_fun_4071()",
-      "if id_soc == 6786:\n    secret_fun_4071()",
-      "if id_svju == 4401:\n    secret_fun_4071()"
+      "if id_stwk:\n    secret_fun_4071()",
+      "if 4703:\n    secret_fun_4071()"
     ]
   ]
 }

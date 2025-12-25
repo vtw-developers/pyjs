@@ -1,1 +1,0 @@
-sum_0 = sum_0 + group * p

@@ -1,0 +1,1286 @@
+{
+  "src_code": "class_var.root = class_var._put(class_var.root, label, None)",
+  "src_lang": "py",
+  "tar_lang": "js",
+  "trans_rules": "(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" \".\" (str \".\") (\"py.identifier\" (val \"_put\"))) (\"py.argument_list\" (str \"(\") \".\" (str \",\") \".\" (str \",\") \".\" (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" \".1\" (str \".\") (\"js.property_identifier\" (val \"_put\"))) (\"js.arguments\" (str \"(\") \".2\" (str \",\") \".3\" (str \",\") \".4\" (str \")\"))) \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" \".\" (str \".\") (\"py.identifier\" (val \"_put\"))) (\"py.argument_list\" (str \"(\") \".\" (str \",\") \".\" (str \",\") \".\" (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.subscript_expression\" \".1\" (str \"[\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"_put\")) (str \"\\\"\")) (str \"]\")) (\"js.arguments\" (str \"(\") \".2\" (str \",\") \".3\" (str \",\") \".4\" (str \")\"))) \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" \".\" (str \".\") (\"py.identifier\" (val \"_put\"))) (\"py.argument_list\" (str \"(\") \".\" (str \",\") \".\" (str \",\") \".\" (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.member_expression\" \".1\" (str \".\") (\"js.property_identifier\" (val \"_put\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") \".1\" (str \",\") \".2\" (str \",\") \".3\" (str \",\") \".4\" (str \")\"))) \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.call\" (\"py.attribute\" \".\" (str \".\") (\"py.identifier\" (val \"_put\"))) (\"py.argument_list\" (str \"(\") \".\" (str \",\") \".\" (str \",\") \".\" (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" (\"js.call_expression\" (\"js.member_expression\" (\"js.identifier\" (val \"Reflect\")) (str \".\") (\"js.property_identifier\" (val \"get\"))) (\"js.arguments\" (str \"(\") \".1\" (str \",\") (\"js.string\" (str \"\\\"\") (\"js.string_fragment\" (val \"_put\")) (str \"\\\"\")) (str \")\"))) (str \".\") (\"js.property_identifier\" (val \"call\"))) (\"js.arguments\" (str \"(\") \".1\" (str \",\") \".2\" (str \",\") \".3\" (str \",\") \".4\" (str \")\"))) \"*5\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" (\"py.attribute\" \".\" (str \".\") (\"py.identifier\" (val \"put\"))) (\"py.argument_list\" (str \"(\") \".\" (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" (\"js.member_expression\" \".1\" (str \".\") (\"js.property_identifier\" (val \"put\"))) (\"js.arguments\" (str \"(\") \".2\" (str \")\"))) (str \";\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.return_statement\" (str \"return\") \".\") \"*\")\n  (fragment (\"js.return_statement\" (str \"return\") \".1\" (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.none\" (str \"None\")) \"*\")\n  (fragment (\"js.null\" (str \"null\")) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.attribute\" \".\" (str \".\") \".\") \"*\")\n  (fragment (\"js.member_expression\" \".1\" (str \".\") \".2\") \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" (val \"Clz\")) (str \"=\") (\"py.call\" (\"py.identifier\" (val \"type\")) (\"py.argument_list\" (str \"(\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"BinarySearchTree\")) (str \"\\\"\")) (str \",\") (\"py.tuple\" (str \"(\") (str \")\")) (str \",\") (\"py.dictionary\" (str \"{\") (str \"}\")) (str \")\"))))) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" (\"js.identifier\" (val \"Clz\")) (str \"=\") (\"js.class\" (str \"class\") (\"js.identifier\" (val \"BinarySearchTree\")) (\"js.class_body\" (str \"{\") (str \"}\")))) (str \";\")) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" (\"py.identifier\" (val \"Clz\")) (str \"=\") (\"py.call\" (\"py.identifier\" (val \"type\")) (\"py.argument_list\" (str \"(\") (\"py.string\" (str \"\\\"\") (\"py.string_content\" (val \"BinarySearchTree\")) (str \"\\\"\")) (str \",\") (\"py.tuple\" (str \"(\") (str \")\")) (str \",\") (\"py.dictionary\" (str \"{\") (str \"}\")) (str \")\"))))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" (\"js.identifier\" (val \"Clz\")) (str \"=\") (\"js.class\" (str \"class\") (\"js.identifier\" (val \"BinarySearchTree\")) (\"js.class_body\" (str \"{\") (str \"}\")))) (str \";\")) \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" \".\" (str \"=\") \".\")) \"*\")\n  (fragment (\"js.variable_declaration\" (str \"var\") (\"js.variable_declarator\" \".1\" (str \"=\") \".2\") (str \";\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.assignment\" \".\" (str \"=\") \".\")) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.assignment_expression\" \".1\" (str \"=\") \".2\") (str \";\")) \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.call\" \".\" (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.call_expression\" \".1\" (\"js.arguments\" (str \"(\") (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.call\" \".\" (\"py.argument_list\" (str \"(\") (str \")\"))) \"*\")\n  (fragment (\"js.new_expression\" (str \"new\") \".1\" (\"js.arguments\" (str \"(\") (str \")\"))) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" \".\" (\"py.argument_list\" (str \"(\") (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.call_expression\" \".1\" (\"js.arguments\" (str \"(\") (str \")\"))) (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.expression_statement\" (\"py.call\" \".\" (\"py.argument_list\" (str \"(\") (str \")\")))) \"*\")\n  (fragment (\"js.expression_statement\" (\"js.new_expression\" (str \"new\") \".1\" (\"js.arguments\" (str \"(\") (str \")\"))) (str \";\")) \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.module\" \"*\"))\n  (fragment (\"js.program\" \"*1\"))\n)\n\n(match_expand\n  (fragment (\"py.function_definition\" (str \"def\") \"*\") \"*\")\n  (fragment (\"js.function_declaration\" (str \"function\") \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.identifier\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.parameters\" \"*\") \"*\")\n  (fragment (\"js.formal_parameters\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.default_parameter\" \".\" (str \"=\") \".\") \"*\")\n  (fragment (\"js.assignment_pattern\" \".1\" (str \"=\") \".2\") \"*3\")\n)\n\n(match_expand\n  (fragment (\"py.block\" \"*\") \"*\")\n  (fragment (\"js.statement_block\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.pass_statement\" \"*\") \"*\")\n  (fragment \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.integer\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.float\" \"_val_\") \"*\")\n  (fragment (\"js.number\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.string_content\" \"_val_\") \"*\")\n  (fragment (\"js.string_fragment\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.string\" \"*\") \"*\")\n  (fragment (\"js.string\" \"*1\") \"*2\")\n)\n\n(match_expand\n  (fragment (\"py.identifier\" \"_val_\") \"*\")\n  (fragment (\"js.property_identifier\" \"_val1_\") \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.comment\" \"_val_\") \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.wildcard_import\" (str \"*\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_from_statement\" (str \"from\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\")) (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.import_statement\" (str \"import\") (\"py.dotted_name\" (\"py.identifier\" \"_val_\"))) \"*\")\n  (fragment \"*1\")\n)\n\n(match_expand\n  (fragment (\"py.attribute\" (\"py.identifier\" (val \"sys\")) (str \".\") (\"py.identifier\" (val \"maxsize\"))) \"*\")\n  (fragment (\"js.number\" (val \"9223372036854776000\")) \"*1\")\n)",
+  "auto_backward": true,
+  "choices": {
+    "type": "ASTNODE",
+    "choices_list": []
+  },
+  "kwargs": {},
+  "return_dict": {
+    "src_ast": [
+      "py.module",
+      0,
+      [
+        "py.expression_statement",
+        1,
+        [
+          "py.assignment",
+          2,
+          [
+            "py.attribute",
+            3,
+            [
+              "py.identifier",
+              4,
+              "\"class_var\""
+            ],
+            "\".\"",
+            [
+              "py.identifier",
+              5,
+              "\"root\""
+            ]
+          ],
+          "\"=\"",
+          [
+            "py.call",
+            6,
+            [
+              "py.attribute",
+              7,
+              [
+                "py.identifier",
+                8,
+                "\"class_var\""
+              ],
+              "\".\"",
+              [
+                "py.identifier",
+                9,
+                "\"_put\""
+              ]
+            ],
+            [
+              "py.argument_list",
+              10,
+              "\"(\"",
+              [
+                "py.attribute",
+                11,
+                [
+                  "py.identifier",
+                  12,
+                  "\"class_var\""
+                ],
+                "\".\"",
+                [
+                  "py.identifier",
+                  13,
+                  "\"root\""
+                ]
+              ],
+              "\",\"",
+              [
+                "py.identifier",
+                14,
+                "\"label\""
+              ],
+              "\",\"",
+              [
+                "py.none",
+                15,
+                "\"None\""
+              ],
+              "\")\""
+            ]
+          ]
+        ]
+      ]
+    ],
+    "src_ann": {
+      "0": [
+        0,
+        60,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "1": [
+        0,
+        60,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "2": [
+        0,
+        60,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "3": [
+        0,
+        14,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          14
+        ]
+      ],
+      "4": [
+        0,
+        9,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          9
+        ]
+      ],
+      "5": [
+        10,
+        14,
+        [
+          0,
+          10
+        ],
+        [
+          0,
+          14
+        ]
+      ],
+      "6": [
+        17,
+        60,
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "7": [
+        17,
+        31,
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          31
+        ]
+      ],
+      "8": [
+        17,
+        26,
+        [
+          0,
+          17
+        ],
+        [
+          0,
+          26
+        ]
+      ],
+      "9": [
+        27,
+        31,
+        [
+          0,
+          27
+        ],
+        [
+          0,
+          31
+        ]
+      ],
+      "10": [
+        31,
+        60,
+        [
+          0,
+          31
+        ],
+        [
+          0,
+          60
+        ]
+      ],
+      "11": [
+        32,
+        46,
+        [
+          0,
+          32
+        ],
+        [
+          0,
+          46
+        ]
+      ],
+      "12": [
+        32,
+        41,
+        [
+          0,
+          32
+        ],
+        [
+          0,
+          41
+        ]
+      ],
+      "13": [
+        42,
+        46,
+        [
+          0,
+          42
+        ],
+        [
+          0,
+          46
+        ]
+      ],
+      "14": [
+        48,
+        53,
+        [
+          0,
+          48
+        ],
+        [
+          0,
+          53
+        ]
+      ],
+      "15": [
+        55,
+        59,
+        [
+          0,
+          55
+        ],
+        [
+          0,
+          59
+        ]
+      ]
+    },
+    "tar_ast": [
+      "js.program",
+      0,
+      [
+        "mapanno",
+        [
+          "ex_id",
+          1
+        ]
+      ],
+      [
+        "js.expression_statement",
+        1,
+        [
+          "mapanno",
+          [
+            "ex_id",
+            3
+          ]
+        ],
+        [
+          "js.assignment_expression",
+          2,
+          [
+            "mapanno",
+            [
+              "ex_id",
+              3
+            ]
+          ],
+          [
+            "js.member_expression",
+            3,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                4
+              ]
+            ],
+            [
+              "js.identifier",
+              4,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  5
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    5
+                  ]
+                ],
+                "\"class_var\""
+              ]
+            ],
+            [
+              "string",
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  4
+                ]
+              ],
+              "\".\""
+            ],
+            [
+              "js.property_identifier",
+              5,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  8
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    8
+                  ]
+                ],
+                "\"root\""
+              ]
+            ]
+          ],
+          [
+            "string",
+            [
+              "mapanno",
+              [
+                "ex_id",
+                3
+              ]
+            ],
+            "\"=\""
+          ],
+          [
+            "js.call_expression",
+            6,
+            [
+              "mapanno",
+              [
+                "ex_id",
+                9
+              ]
+            ],
+            [
+              "js.member_expression",
+              7,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  9
+                ]
+              ],
+              [
+                "js.identifier",
+                8,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    13
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      13
+                    ]
+                  ],
+                  "\"class_var\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                "\".\""
+              ],
+              [
+                "js.property_identifier",
+                9,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      9
+                    ]
+                  ],
+                  "\"_put\""
+                ]
+              ]
+            ],
+            [
+              "js.arguments",
+              10,
+              [
+                "mapanno",
+                [
+                  "ex_id",
+                  9
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                "\"(\""
+              ],
+              [
+                "js.member_expression",
+                11,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    15
+                  ]
+                ],
+                [
+                  "js.identifier",
+                  12,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      16
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        16
+                      ]
+                    ],
+                    "\"class_var\""
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      15
+                    ]
+                  ],
+                  "\".\""
+                ],
+                [
+                  "js.property_identifier",
+                  13,
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      19
+                    ]
+                  ],
+                  [
+                    "string",
+                    [
+                      "mapanno",
+                      [
+                        "ex_id",
+                        19
+                      ]
+                    ],
+                    "\"root\""
+                  ]
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                "\",\""
+              ],
+              [
+                "js.identifier",
+                14,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    20
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      20
+                    ]
+                  ],
+                  "\"label\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                "\",\""
+              ],
+              [
+                "js.null",
+                15,
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    22
+                  ]
+                ],
+                [
+                  "string",
+                  [
+                    "mapanno",
+                    [
+                      "ex_id",
+                      22
+                    ]
+                  ],
+                  "\"null\""
+                ]
+              ],
+              [
+                "string",
+                [
+                  "mapanno",
+                  [
+                    "ex_id",
+                    9
+                  ]
+                ],
+                "\")\""
+              ]
+            ]
+          ]
+        ],
+        [
+          "string",
+          [
+            "mapanno",
+            [
+              "ex_id",
+              3
+            ]
+          ],
+          "\";\""
+        ]
+      ]
+    ],
+    "tar_code": "class_var.root = class_var._put(class_var.root, label, null);",
+    "map_to_exid": {
+      "5": [
+        {
+          "ex_id": 5,
+          "range": [
+            0,
+            9
+          ],
+          "str": "class_var"
+        }
+      ],
+      "4": [
+        {
+          "ex_id": 4,
+          "range": [
+            9,
+            10
+          ],
+          "str": "."
+        }
+      ],
+      "8": [
+        {
+          "ex_id": 8,
+          "range": [
+            10,
+            14
+          ],
+          "str": "root"
+        }
+      ],
+      "3": [
+        {
+          "ex_id": 3,
+          "range": [
+            15,
+            16
+          ],
+          "str": "="
+        },
+        {
+          "ex_id": 3,
+          "range": [
+            60,
+            61
+          ],
+          "str": ";"
+        }
+      ],
+      "13": [
+        {
+          "ex_id": 13,
+          "range": [
+            17,
+            26
+          ],
+          "str": "class_var"
+        }
+      ],
+      "9": [
+        {
+          "ex_id": 9,
+          "range": [
+            26,
+            27
+          ],
+          "str": "."
+        },
+        {
+          "ex_id": 9,
+          "range": [
+            27,
+            31
+          ],
+          "str": "_put"
+        },
+        {
+          "ex_id": 9,
+          "range": [
+            31,
+            32
+          ],
+          "str": "("
+        },
+        {
+          "ex_id": 9,
+          "range": [
+            46,
+            47
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 9,
+          "range": [
+            53,
+            54
+          ],
+          "str": ","
+        },
+        {
+          "ex_id": 9,
+          "range": [
+            59,
+            60
+          ],
+          "str": ")"
+        }
+      ],
+      "16": [
+        {
+          "ex_id": 16,
+          "range": [
+            32,
+            41
+          ],
+          "str": "class_var"
+        }
+      ],
+      "15": [
+        {
+          "ex_id": 15,
+          "range": [
+            41,
+            42
+          ],
+          "str": "."
+        }
+      ],
+      "19": [
+        {
+          "ex_id": 19,
+          "range": [
+            42,
+            46
+          ],
+          "str": "root"
+        }
+      ],
+      "20": [
+        {
+          "ex_id": 20,
+          "range": [
+            48,
+            53
+          ],
+          "str": "label"
+        }
+      ],
+      "22": [
+        {
+          "ex_id": 22,
+          "range": [
+            55,
+            59
+          ],
+          "str": "null"
+        }
+      ]
+    },
+    "dbg_history": [
+      {
+        "alt_step": 1,
+        "range_info": null,
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 1,
+          "corres_slot_id": 0,
+          "src_matching_node_ids": [
+            0
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              1
+            ]
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 16
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            2
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 3
+        }
+      },
+      {
+        "alt_step": 2,
+        "range_info": [
+          0,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 3,
+          "corres_slot_id": 2,
+          "src_matching_node_ids": [
+            1,
+            2
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              3
+            ],
+            [
+              6
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 1,
+            "rule_id": 11
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            3,
+            4,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 164
+        }
+      },
+      {
+        "alt_step": 3,
+        "range_info": [
+          2,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 4,
+          "corres_slot_id": 3,
+          "src_matching_node_ids": [
+            3
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              4
+            ],
+            [
+              5
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 7
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            5,
+            6,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 13
+        }
+      },
+      {
+        "alt_step": 4,
+        "range_info": [
+          3,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 5,
+          "corres_slot_id": 5,
+          "src_matching_node_ids": [
+            4
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 18
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 36
+        }
+      },
+      {
+        "alt_step": 5,
+        "range_info": [
+          3,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 4,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 8,
+          "corres_slot_id": 6,
+          "src_matching_node_ids": [
+            5
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 1,
+            "rule_id": 27
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 21
+        }
+      },
+      {
+        "alt_step": 6,
+        "range_info": [
+          2,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 9,
+          "corres_slot_id": 4,
+          "src_matching_node_ids": [
+            6,
+            7,
+            9,
+            10
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              8
+            ],
+            [
+              11
+            ],
+            [
+              14
+            ],
+            [
+              15
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 0
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\".3\"",
+            "\".4\"",
+            "\"*5\""
+          ],
+          "slot_ids": [
+            7,
+            8,
+            9,
+            10,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 120
+        }
+      },
+      {
+        "alt_step": 7,
+        "range_info": [
+          7,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 13,
+          "corres_slot_id": 7,
+          "src_matching_node_ids": [
+            8
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 18
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 55
+        }
+      },
+      {
+        "alt_step": 8,
+        "range_info": [
+          10,
+          3,
+          4
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 15,
+          "corres_slot_id": 8,
+          "src_matching_node_ids": [
+            11
+          ],
+          "slot_src_matching_node_ids": [
+            [
+              12
+            ],
+            [
+              13
+            ],
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 7
+          },
+          "slot_names": [
+            "\".1\"",
+            "\".2\"",
+            "\"*3\""
+          ],
+          "slot_ids": [
+            11,
+            12,
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 15
+        }
+      },
+      {
+        "alt_step": 9,
+        "range_info": [
+          11,
+          2,
+          3
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 16,
+          "corres_slot_id": 11,
+          "src_matching_node_ids": [
+            12
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 18
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 36
+        }
+      },
+      {
+        "alt_step": 10,
+        "range_info": [
+          11,
+          4,
+          5
+        ],
+        "next_choices_status": {
+          "count": 2,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 19,
+          "corres_slot_id": 12,
+          "src_matching_node_ids": [
+            13
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 1,
+            "rule_id": 27
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 31
+        }
+      },
+      {
+        "alt_step": 11,
+        "range_info": [
+          10,
+          5,
+          6
+        ],
+        "next_choices_status": {
+          "count": 1,
+          "done": true
+        },
+        "dbg_info": {
+          "ex_id": 20,
+          "corres_slot_id": 9,
+          "src_matching_node_ids": [
+            14
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 18
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 43
+        }
+      },
+      {
+        "alt_step": 12,
+        "range_info": [
+          10,
+          7,
+          8
+        ],
+        "next_choices_status": {
+          "count": 0,
+          "done": false
+        },
+        "dbg_info": {
+          "ex_id": 22,
+          "corres_slot_id": 10,
+          "src_matching_node_ids": [
+            15
+          ],
+          "slot_src_matching_node_ids": [
+            []
+          ],
+          "notes": {
+            "choose_idx": 0,
+            "rule_id": 6
+          },
+          "slot_names": [
+            "\"*1\""
+          ],
+          "slot_ids": [
+            null
+          ],
+          "outcome": "AC",
+          "elem_list_info_id": null,
+          "loop_count": 109
+        }
+      }
+    ]
+  }
+}

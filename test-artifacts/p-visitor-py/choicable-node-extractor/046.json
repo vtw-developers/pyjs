@@ -1,0 +1,20 @@
+{
+  "code": "def f_gold(a, arr_size):\n    lo = 0\n    hi = arr_size - 1\n    mid = 0\n    while mid <= hi:\n        if a[mid] == 0:\n            a[lo], a[mid] = a[mid], a[lo]\n            lo = lo + 1\n            mid = mid + 1\n        elif a[mid] == 1:\n            mid = mid + 1\n        else:\n            a[mid], a[hi] = a[hi], a[mid]\n            hi = hi - 1",
+  "choicable_nodes": [
+    "0",
+    "arr_size - 1",
+    "0",
+    "mid <= hi",
+    "a[mid] == 0",
+    "a[mid]",
+    "a[lo]",
+    "lo + 1",
+    "mid + 1",
+    "a[mid] == 1",
+    "mid + 1",
+    "a[hi]",
+    "a[mid]",
+    "hi - 1"
+  ],
+  "exclude_stat_nids": []
+}

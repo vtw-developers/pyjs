@@ -1,0 +1,7 @@
+{
+  "code": "def f_gold(r):\n    return 2 * r * r",
+  "choicable_nodes": [
+    "2 * r * r"
+  ],
+  "exclude_stat_nids": []
+}

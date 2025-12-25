@@ -1,0 +1,37 @@
+{
+  "translation_pair": [
+    {
+      "source": "return type(var1, var2, var3)",
+      "target": "return (() => {\n    const Base = Object;\n    const C = class extends Base {\n        constructor(...args) {\n            super(...args);\n            if (var3 && typeof var3.__init__ === 'function') {\n                var3.__init__.apply(this, args);\n            }\n        }\n    };\n    for (const [k, v] of Object.entries(var3 || {})) {\n        if (k === '__init__') continue;\n        if (typeof v === 'function') {\n            Object.defineProperty(C.prototype, k, {\n                value: v,\n                writable: true,\n                configurable: true\n            });\n        } else {\n            Object.defineProperty(C, k, {\n                value: v,\n                writable: true,\n                configurable: true\n            });\n        }\n    }\n    if (typeof var1 === 'string') {\n        try {\n            Object.defineProperty(C, 'name', {\n                value: var1,\n                configurable: true\n            });\n        } catch (e) {}\n    }\n    return C;\n})();"
+    },
+    {
+      "source": "return type(pirel_var1, pirel_var2, pirel_var3)",
+      "target": "return (() => {\n    const Base = Object;\n    const C = class extends Base {\n        constructor(...args) {\n            super(...args);\n            if (pirel_var3 && typeof pirel_var3.__init__ === 'function') {\n                pirel_var3.__init__.apply(this, args);\n            }\n        }\n    };\n    for (const [k, v] of Object.entries(pirel_var3 || {})) {\n        if (k === '__init__') continue;\n        if (typeof v === 'function') {\n            Object.defineProperty(C.prototype, k, {\n                value: v,\n                writable: true,\n                configurable: true\n            });\n        } else {\n            Object.defineProperty(C, k, {\n                value: v,\n                writable: true,\n                configurable: true\n            });\n        }\n    }\n    if (typeof pirel_var1 === 'string') {\n        try {\n            Object.defineProperty(C, 'name', {\n                value: pirel_var1,\n                configurable: true\n            });\n        } catch (e) {}\n    }\n    return C;\n})();"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.call"
+      ],
+      [
+        "py.return_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.return_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "error_msg": "should not happen",
+  "error_class": "RuntimeError"
+}

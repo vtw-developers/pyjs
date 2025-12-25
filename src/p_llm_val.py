@@ -75,6 +75,14 @@ class TranslateSP1ValidationResult(BaseValidationResult):
     flags = list(map(self.ad_has_context, self.tp1_cands_stats))
     return not any(flags)
 
+  def all_have_multiple_statements(self) -> bool:
+    flags = list(map(self.ad_multiple_statements, self.tp1_cands_stats))
+    return all(flags)
+
+  def all_comp_stat_no_curly_braces(self) -> bool:
+    flags = list(map(self.ad_comp_stat_no_curly_braces, self.tp1_cands_stats))
+    return all(flags)
+
   def all_violate_partial_program_affix(self, prefix: str, suffix: str) -> bool:
     flags = list(map(lambda tp2_stat: self.ad_is_parprog_affix_preserved(tp2_stat, prefix, suffix), self.tp1_cands_stats))
     return not any(flags)
@@ -100,6 +108,12 @@ class TranslateSP1ValidationResult(BaseValidationResult):
 
   def ad_has_context(self, tp1_stat: dict) -> bool:
     return tp1_stat['has_context'] is True
+
+  def ad_multiple_statements(self, tp1_stat: dict) -> bool:
+    return tp1_stat['multiple_statements'] is True
+
+  def ad_comp_stat_no_curly_braces(self, tp1_stat: dict) -> bool:
+    return tp1_stat['comp_stat_no_curly_braces'] is True
 
   # ABSTRACT METHOD IMPLEMENTATIONS
   def get_data(self) -> List[Dict[str, str]]:
@@ -338,10 +352,12 @@ def _tp1_cand_gather_stats(
     'has_parse_error': None,
     'is_comment_only': None,
     'has_context': None,
+    'multiple_statements': None,
+    'comp_stat_no_curly_braces': None,
   }
 
   logger.debug(f'Checking if TP1 candidate satisfies our criteria')
-  logger.debug(f'\nsp1:\n{repr(sp1)}\ntp1_cand:\n{repr(tp1_cand)}')
+  logger.debug(f'sp1:\n{repr(sp1)}\ntp1_cand:\n{repr(tp1_cand)}')
 
   # criteria 1
   if p_utils.does_have_parse_error(tp1_cand, tar_lang):
@@ -392,11 +408,54 @@ def _tp1_cand_gather_stats(
     return_dict['has_context'] = False
     return return_dict
 
+  # criteria 4
+  tp1_root_node = tp1_cand_tree.get_root_node()
+  if len(tp1_root_node.get_children()) > 1:
+    assert len(tp1_root_node.get_children()) == len(tp1_root_node.get_nt_children())
+    logger.debug(f'BAD: TP1 candidate has multiple statements at the top level')
+    return_dict['success'] = False
+    return_dict['has_parse_error'] = False
+    return_dict['is_comment_only'] = False
+    return_dict['has_context'] = True
+    return_dict['multiple_statements'] = True
+    return return_dict
+
+  # criteria 5
+  # if the tp1_cand is a compound statement, it must use curly braces
+  if tar_lang == 'js':
+    context_node = tp1_root_node.get_children()[0]
+    if context_node.get_ts_node_type() in [
+      'if_statement',
+      'switch_statement',
+      'for_statement',
+      'for_in_statement',
+      'while_statement',
+      'do_statement',
+      'try_statement',
+      'with_statement',
+    ]:
+      # statement_block must be one of direct children
+      statement_block_nodes = list(filter(
+        lambda node: node.is_nonterminal() and node.get_ts_node_type() == 'statement_block',
+        context_node.get_children()
+      ))
+      if not statement_block_nodes:
+        logger.debug(f'BAD: generated tp1 candidate is a compound statement without curly braces')
+        return_dict['success'] = False
+        return_dict['has_parse_error'] = False
+        return_dict['is_comment_only'] = False
+        return_dict['has_context'] = True
+        return_dict['multiple_statements'] = False
+        return_dict['comp_stat_no_curly_braces'] = True
+        return return_dict
+
   logger.debug('GOOD: TP1 candidate satisfies our criteria')
   return_dict['success'] = True
   return_dict['has_parse_error'] = False
   return_dict['is_comment_only'] = False
   return_dict['has_context'] = True
+  return_dict['multiple_statements'] = False
+  return_dict['comp_stat_no_curly_braces'] = False
   return return_dict
 
 

@@ -1,0 +1,24 @@
+{
+  "src_code": "try:\n    pass\nexcept:\n    pass",
+  "node_path": [],
+  "return_dict": {
+    "error_class": "n/a",
+    "error_msg": "n/a",
+    "alt_starting_nodes": [
+      [
+        2,
+        "py.block",
+        [
+          "block"
+        ]
+      ],
+      [
+        4,
+        "py.except_clause",
+        [
+          "except_clause"
+        ]
+      ]
+    ]
+  }
+}

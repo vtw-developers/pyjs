@@ -1,0 +1,20 @@
+id_uqdh += id_mblx
+"-----------------"
+id_azds += 5478
+"-----------------"
+id_uqdh += id_mblx;
+"-----------------"
+id_azds += 5478;
+"-----------------"
+{
+  "source_context": [
+    [
+      "py.expression_statement"
+    ]
+  ],
+  "target_context": [
+    [
+      "unknown"
+    ]
+  ]
+}

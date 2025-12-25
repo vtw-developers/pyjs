@@ -1,0 +1,70 @@
+{
+  "choices_list_history": [],
+  "verified_choice_options": [
+    [
+      [
+        7,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        17,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        27,
+        4,
+        5
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        29,
+        2,
+        3
+      ],
+      [
+        0
+      ]
+    ],
+    [
+      [
+        31,
+        3,
+        4
+      ],
+      [
+        0
+      ]
+    ]
+  ],
+  "rel_alt_step_infos": {
+    "16": {
+      "next_choices_count": 10,
+      "current_choose_idx": 0,
+      "current_range_info": [
+        27,
+        4,
+        5
+      ]
+    }
+  },
+  "new_choices": {
+    "type": "ASTNODE",
+    "choices_list": []
+  }
+}

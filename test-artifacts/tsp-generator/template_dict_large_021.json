@@ -1,0 +1,22 @@
+{
+  "template_origin": "d = datetime.datetime(int(val[:4]), int(val[5:7]), int(val[8:10]), int(val[11:13]), int(val[14:16]), int(val[17:19]), microsecond, tz)",
+  "src_lang": "py",
+  "context_node_type": "expression_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [
+    0
+  ],
+  "problematic_node_type": "assignment",
+  "is_insert_secret_fn": false,
+  "tsps": [
+    [
+      "id_omn = id_lojb",
+      "id_rtny = 1624"
+    ],
+    [
+      "id_iqe = datetime.datetime(int(val[:4]), int(val[5:7]), int(val[8:10]), int(val[11:13]), int(val[14:16]), int(val[17:19]), microsecond, tz)",
+      "id_rsih = datetime.datetime(int(val[:4]), int(val[5:7]), int(val[8:10]), int(val[11:13]), int(val[14:16]), int(val[17:19]), microsecond, tz)"
+    ]
+  ],
+  "problematic_node_id": 2
+}

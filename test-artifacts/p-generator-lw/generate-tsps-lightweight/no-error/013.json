@@ -1,0 +1,63 @@
+{
+  "tsps": [
+    [
+      "while var1:\n    secret_fun_4071()",
+      "while pirel_var1:\n    secret_fun_4071()"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "while x & m:\n    pass",
+    "context_node_type": "while_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "while_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.while_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "while var1:\n    secret_fun_4071()",
+    "context_node_type": "while_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "while_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.while_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "pirel_replace_var;"
+  }
+}

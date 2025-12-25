@@ -1,12 +1,11 @@
 import copy
-import sys
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import d_ast_parse
 import d_ast_pretty
-import d_consts
 import d_grammar_dlmparser as gdp
 import d_grammar_rules
+import p_consts
 import p_data_structures as pds
 import p_templates
 import p_utils
@@ -79,9 +78,6 @@ class TransSession():
     self.target_language_name = target_language_name
     self.target_grammar = target_grammar
     self.expansion_programs = []  # a list of expansion programs (~~~ a.k.a. translation rules)
-    self.program_dbg_info = {
-      'expansion_programs': []
-    }
 
     # internals
     self._optional_dbg_info_save_func = optional_dbg_info_save_func
@@ -392,7 +388,6 @@ class TransSession():
     Tuple[ AST , start_idx , end_idx ]
     '''
     logger.debug(f'Starting PiREL template extraction.')
-    used_translation_rules = self.pirel_get_used_translation_rules()
 
     try:
       contexts = self.pirel_get_all_contexts(slot_id)
@@ -432,36 +427,6 @@ class TransSession():
 
     logger.debug(f'PiREL template extraction is complete.')
     return templates_dict
-
-
-  def pirel_get_used_translation_rules(self) -> str:
-    '''return a list of translation rules used until stuck on problematic node'''
-
-    def _process_alt_tree_dict_elem(elem: dict) -> str:
-      '''
-      PRE: `elem` is not the zero'th element in `_alt_tree_dict`
-      '''
-      assert 'expansion' in elem, 'sanity check: self._alt_tree_dict must have `expansion` key'
-      expansion = elem['expansion']
-      assert expansion is not None, 'PRE: do not pass the zero-th element from self._alt_tree_dict'
-      notes = expansion.notes
-      assert 'rule_id' in notes, 'sanity check: notes object must have `rule_id` key'
-      rule_id = notes['rule_id']
-      assert isinstance(rule_id, int), 'sanity check: rule_id must be an integer'
-
-      start_idx, end_idx = self.program_dbg_info['expansion_programs']['rule_loc_dict'][rule_id]
-      used_translation_rule = self.translation_rules_str[start_idx:end_idx]
-
-      return f'% rule_id={rule_id}\n{used_translation_rule}'
-
-    used_translation_rules = []
-    for elem_idx, elem in self._alt_tree_dict.items():
-      # expansion of this elem is a bootstrap
-      if elem_idx == 0:
-        continue
-      used_rule = _process_alt_tree_dict_elem(elem)
-      used_translation_rules.append(used_rule)
-    return '\n\n'.join(used_translation_rules)
 
 
   def pirel_get_all_contexts(self, problematic_slot_id: int):
@@ -954,9 +919,8 @@ class TransSession():
       return None
 
     # 3 find all expansions
-    MAX_NUM_ALTERNATIVE_EXPANSIONS = 10
     try:
-      while len(expan_list) < idx + MAX_NUM_ALTERNATIVE_EXPANSIONS: # use +2
+      while len(expan_list) < idx + p_consts.MAX_NUM_ALTERNATIVE_EXPANSIONS:
         next_expansion: gdp.Expansion = next(iterobj)
         assert next_expansion is not None
         expan_list.append(next_expansion)
@@ -1011,42 +975,251 @@ class TransSession():
   # if successful, this function should return an expand object
   def _try_get_expansion_if_match_on_slot(
     self,
-    slot,
-    rule_id,
-    m_ruletype,
-    m_match,
-    m_expand,
-    m_flag_dict,
-    notes
+    slot: gdp.Slot,
+    rule_id: int,
+    m_ruletype: str,
+    m_match: list,
+    m_expand: list,
+    m_flag_dict: Optional[dict],
+    notes: dict
   ):
     '''
     PARAMETERS:
-    slot:       d_grammar_dlmparser.Slot
-    rule_id:    int (natural index of translation rule in the ruleset, a.k.a. expansion_programs)
-    m_ruletype: str (e.g. `match_expand`)
-    m_match:    list (a type+rule that is matched against source AST)
-    m_expand:   list (a type+rule that is matched against target AST)
+    slot:        d_grammar_dlmparser.Slot
+    rule_id:     int (natural index of translation rule in the ruleset, a.k.a. expansion_programs)
+    m_ruletype:  str (e.g. `match_expand`)
+    m_match:     list (a type+rule that is matched against source AST)
+    m_expand:    list (a type+rule that is matched against target AST)
+    m_flag_dict: dict (additional flags for the rule, only for `ext_match_expand` rules)
 
     LOCALS:
     m_matcher: a source AST matching rule itself -> ['"py.module"', '"*"']
-
-    ORIGINAL DOCS:
-    print("_try_get_expansion_if_match_on_slot:", slot, m_match, m_expand)
-    the range cursor is a cursor on a list of source nodes
     '''
 
-    # before starting anything, store the latest translation rule used
-    self._latest_rule_id = rule_id
+    def _try_match_rec_inner_fun(
+      range_cursor: tuple,
+      range_cursor_idx: int,
+      matcher: list,
+      matcher_idx: int
+    ) -> bool:
+      '''
+      PARAMETERS:
+      range_cursor:          Slot.range_cursor           Tuple[ List[src_ast] , int , int ]
+      range_cursor_idx:      int                         start index in the AST list
+      matcher:               list                        [['"py.argument_list"', '"*"'], '"*"']
+      matcher_idx:           int                         index in the matcher
 
-    is_ext_ruletype = m_ruletype == "ext_match_expand"
-    m_matcher = None
+      LOCALS:
+      cur_matcher_elem:      list                        ['"py.argument_list"', '"*"']
+      matcher_operator:      str                         '"py.argument_list"'  # with double quotes as in rules
+      cur_matcher_type:      str                         'py.argument_list'  # without double quotes
+
+      returns bool
+      '''
+
+      nonlocal flag_ext_rule
+      nonlocal matching_ids, slot_cursors, matching_values, matching_strs
+      nonlocal matching_anynts, matching_liststrs, matching_annos
+
+      rc_ast = range_cursor[0]
+      rc_start_idx = range_cursor[1]
+      rc_end_idx = range_cursor[2]
+
+      # base case: reached the end of cursor and matcher
+      if range_cursor_idx >= rc_end_idx and matcher_idx >= len(matcher):
+        return True
+
+      # base case: reached the end of matcher
+      # the rest of the cursor must all be terminals
+      if matcher_idx >= len(matcher):
+        for rc_idx in range(range_cursor_idx, rc_end_idx):
+          if not isinstance(rc_ast[rc_idx], str):
+            return False
+        return True
+
+      assert len(matcher) > 0, 'matcher is empty'
+      cur_matcher_elem = matcher[matcher_idx]
+
+      # base case: "*" matcher
+      if cur_matcher_elem == '"*"':
+        # all the rest is a cursor
+        slot_cursors.append((rc_ast, range_cursor_idx, rc_end_idx))
+        # nothing to update for matching ids
+        return True
+
+      # "." matcher
+      if cur_matcher_elem == '"."':
+        # everything until the next NT is a cursor
+        # everything after the next NT would be the rest to match
+        split_idx = None  # idx of node right after the NT
+        for rc_idx in range(range_cursor_idx, rc_end_idx):
+          if _is_elem_NT(rc_ast[rc_idx]):
+            split_idx = rc_idx + 1
+            break
+
+        # NT not found
+        if split_idx is None:
+          return False
+
+        # NT found, cursor ends with NT
+        slot_cursors.append((rc_ast, range_cursor_idx, split_idx))
+        return _try_match_rec_inner_fun(range_cursor, split_idx, matcher, matcher_idx + 1)
+
+      # "_val_" matcher
+      if cur_matcher_elem == '"_val_"':
+        assert len(matcher) == 1, '_val_ must be the only element in matcher'
+        assert len(rc_ast) == 3, 'range cursor must contain 3 elements for _val_ matcher'
+        assert (rc_end_idx - rc_start_idx) == 1, 'range cursor indices must be consecutive for _val_ matcher'
+        assert range_cursor_idx == 2, 'range cursor index must be 2 for _val_ matcher'
+        matching_values.append(rc_ast[2])
+        return True
+
+      # "_str_" matcher
+      if cur_matcher_elem == '"_str_"':
+        if range_cursor_idx >= rc_end_idx:
+          return False  # TODO out of length is failed to match
+        cur_range_elem = rc_ast[range_cursor_idx]
+        if not isinstance(cur_range_elem, str):
+          return False
+        matching_strs.append(cur_range_elem)
+        return _try_match_rec_inner_fun(range_cursor, range_cursor_idx + 1, matcher, matcher_idx + 1)
+
+      # "_liststr_" matcher
+      if cur_matcher_elem == '"_liststr_"':
+        assert flag_ext_rule, '_liststr_ can be used only in ext_match_expand rules'
+        tmp_rc_idx = range_cursor_idx
+        temp_liststr = []
+        while True:
+          if tmp_rc_idx >= rc_end_idx:
+            break
+          cur_range_elem = rc_ast[tmp_rc_idx]
+          if isinstance(cur_range_elem, str):
+            temp_liststr.append(cur_range_elem)
+            tmp_rc_idx += 1
+          else:
+            break
+        matching_liststrs.append(temp_liststr)
+        return _try_match_rec_inner_fun(range_cursor, tmp_rc_idx, matcher, matcher_idx + 1)
+
+      # "_anno_" matcher
+      if cur_matcher_elem == '"_anno_"':  # TODO "anno" ?
+        cur_range_elem = rc_ast[range_cursor_idx]
+        if not isinstance(cur_range_elem, list):
+          raise UnderstoodException("_anno_ meet none-annotation element: Not a list.")
+        if cur_range_elem[0] != "anno":
+          raise UnderstoodException("_anno_ meet none-annotation element: elem head: " + cur_range_elem[0])
+        matching_annos.append(cur_range_elem)
+        return _try_match_rec_inner_fun(range_cursor, range_cursor_idx + 1, matcher, matcher_idx + 1)
+
+      # at this point, checked all possible options for cur_matcher_elem being a string
+      # it must be a list now -> non-terminal
+      assert isinstance(cur_matcher_elem, list), 'cur_matcher_elem must be a list at this point'
+      matcher_operator = cur_matcher_elem[0]
+
+      # reached the end of range cursor
+      if range_cursor_idx >= rc_end_idx:
+        if matcher_operator == "val" or matcher_operator == "str" or matcher_operator.startswith('"'):
+          return False
+        if matcher_operator == "nostr":
+          return _try_match_rec_inner_fun(range_cursor, range_cursor_idx, matcher, matcher_idx + 1)
+        raise RuntimeError("UNEXPECTED range_cursor_idx out of length in _try_match_rec_inner_fun")
+
+      # e.g. ['val', '"max"']
+      if matcher_operator == "val":
+        assert len(cur_matcher_elem) == 2, 'val matcher must have exactly 2 elements'
+        assert len(rc_ast) == 3, 'range cursor must contain 3 elements for val matcher'
+        assert (rc_end_idx - rc_start_idx) == 1, 'range cursor indices must be consecutive for val matcher'
+        assert range_cursor_idx == 2, 'range cursor index must be 2 for val matcher'
+        rc_val_val = rc_ast[range_cursor_idx]
+        if not isinstance(rc_val_val, str) and not isinstance(rc_val_val, int) and not isinstance(rc_val_val, float):
+          return False
+        matcher_val_val = cur_matcher_elem[1]
+        if str(rc_val_val) == str(matcher_val_val):
+          return True
+        return False
+
+      # e.g. ['str', '"def"']
+      if matcher_operator == 'str':
+        assert len(cur_matcher_elem) == 2, 'str matcher must have exactly 2 elements'
+        rc_str_val = rc_ast[range_cursor_idx]
+
+        # @satbek: skip `anno` in range_cursor when it's matched by `str`
+        # when translation rule for string does not have "anno" but the source AST has it
+        if isinstance(rc_str_val, list) and len(rc_str_val) > 0 and rc_str_val[0] == 'anno':
+          return _try_match_rec_inner_fun(range_cursor, range_cursor_idx + 1, matcher, matcher_idx)
+
+        if not isinstance(rc_str_val, str):
+          return False
+        matcher_str_val = cur_matcher_elem[1]
+        if str(rc_str_val) != str(matcher_str_val):
+          return False
+        return _try_match_rec_inner_fun(range_cursor, range_cursor_idx + 1, matcher, matcher_idx + 1)
+
+      # e.g. ['nostr']
+      if matcher_operator == 'nostr':
+        assert len(cur_matcher_elem) == 1, 'nostr matcher must have exactly 1 element'
+        if isinstance(rc_ast[range_cursor_idx], str):
+          return False
+        return _try_match_rec_inner_fun(range_cursor, range_cursor_idx, matcher, matcher_idx + 1)
+
+      # e.g. ['anno' ['"stype"' '""'] ['"quote"' '"\'"']]
+      if matcher_operator == 'anno':
+        cur_range_elem = rc_ast[range_cursor_idx]
+        if not isinstance(cur_range_elem, list):
+          raise UnderstoodException('(anno ...) meet none-annotation element: Not a list.')
+        if cur_range_elem[0] != 'anno':
+          raise UnderstoodException('(anno ...) meet none-annotation element: elem head: ' + cur_range_elem[0])
+        if not self.is_anno_compatible(cur_matcher_elem, cur_range_elem):
+          return False
+        return _try_match_rec_inner_fun(range_cursor, range_cursor_idx + 1, matcher, matcher_idx + 1)
+
+      # not special operators, must be grammar NT constructs
+      assert matcher_operator.startswith('"'), 'matcher_operator must start with a double quote here'
+      cur_matcher_type = matcher_operator[1:-1]  # remove double quotes
+      assert cur_matcher_type != "fragment" and cur_matcher_type != "anno"
+
+      for rc_idx in range(range_cursor_idx, rc_end_idx):
+        rc_elem = rc_ast[rc_idx]
+
+        # rc_elem is a terminal, but we are matching against a nonterminal
+        if isinstance(rc_elem, str):
+          continue
+        # we are currently matching against NT, if anno wasn't captured earlier, it will be skipped
+        if rc_elem[0] == "anno":
+          continue
+
+        assert _is_elem_NT(rc_elem), 'rc_elem must be a non-terminal here'
+        rc_elem_type = rc_elem[0]
+        is_direct_match = rc_elem_type == cur_matcher_type
+        is_arbitrarynt_match = cur_matcher_type == "_anynt_"
+
+        # match
+        if is_direct_match or (is_arbitrarynt_match and flag_ext_rule):
+          if is_arbitrarynt_match:
+            assert flag_ext_rule, 'only ext_match_expand rules can use _anynt_ matcher'
+            matching_anynts.append(f'"{rc_elem_type}"')
+
+          # type match, add matching id
+          matching_ids.append(rc_elem[1])
+
+          # check if the matching element is matched
+          is_elem_matching = _try_match_rec_inner_fun((rc_elem, 2, len(rc_elem)), 2, cur_matcher_elem[1:], 0)
+          if not is_elem_matching:
+            return False
+          return _try_match_rec_inner_fun(range_cursor, rc_idx + 1, matcher, matcher_idx + 1)
+
+        return False
+
+      # no match or mismatch
+      return False
+
+    self._latest_rule_id = rule_id  # just for the record
+
+    flag_ext_rule = m_ruletype == "ext_match_expand"
     m_range_cursor = slot.range_cursor
-
+    m_matcher = [m_match]
     if m_match[0] == "fragment":
       m_matcher = m_match[1:]
-      # TODO: check if there's bug
-    else:
-      m_matcher = [m_match]
 
     matching_ids = []
     slot_cursors = []
@@ -1056,291 +1229,6 @@ class TransSession():
     matching_liststrs = []
     matching_annos = []
 
-    # change range cursor to be a tuple (ast_node, start_idx, end_idx) end_idx is the length if cursor is all.
-    def _try_match_rec_inner_fun(
-      range_cursor,
-      range_cursor_idx: int,
-      matcher,
-      matcher_idx: int
-    ) -> bool:
-      '''
-      PARAMETERS:
-      range_cursor:             Slot.range_cursor           Tuple[ List[src_ast] , int , int ]
-      range_cursor_idx:         int                         start index in the AST list
-      matcher:                  list                        [['"py.argument_list"', '"*"'], '"*"']
-      matcher_idx:              int                         index in the matcher
-
-      LOCALS:
-      current_matcher_elem:     list                        ['"py.argument_list"', '"*"']
-      matcher_operator:         str                         '"py.argument_list"'  # with double quotes as in rules
-      current_matcher_type:     str                         'py.argument_list'  # without double quotes
-
-      returns bool
-      '''
-
-      # assert range_cursor[2] <= len(range_cursor[0])
-      if range_cursor_idx >= range_cursor[2] and matcher_idx >= len(matcher):
-        return True
-
-      # 1 matcher element is empty
-      if matcher_idx >= len(matcher):
-        # the rest of the cursor must all be terminals
-        for visit_cur_idx in range(range_cursor_idx, range_cursor[2]):
-          visit_elem = range_cursor[0][visit_cur_idx]
-          if isinstance(visit_elem, str): continue
-          else: return False  # contains non terminal
-        return True  # loop done. All of them are terminals.
-
-      # 2 matcher element is not empty
-      assert len(matcher) > 0
-      current_matcher_elem = matcher[matcher_idx]
-
-      # case 1 current_matcher_elem
-      if current_matcher_elem == '"*"':
-        # all the rest is a cursor
-        slot_cursors.append((range_cursor[0], range_cursor_idx, range_cursor[2]))
-        # nothing to update for matching ids
-        return True
-
-      # case 2 current_matcher_elem
-      elif current_matcher_elem == '"."':
-        # everything until the next NT is a cursor
-        # everything after the next NT would be the rest to match
-        split_idx = None
-        for visit_cur_idx in range(range_cursor_idx, range_cursor[2]):
-          visit_elem = range_cursor[0][visit_cur_idx]
-          if _is_elem_NT(visit_elem):
-            split_idx = visit_cur_idx + 1
-            break
-
-        # NT not found
-        if split_idx is None:
-          return False
-
-        # NT found, cursor endswith NT
-        slot_cursors.append((range_cursor[0], range_cursor_idx, split_idx))
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          split_idx,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 3 current_matcher_elem
-      elif current_matcher_elem == '"_val_"':
-        assert len(matcher) == 1
-        is_invalid = len(range_cursor[0]) != 3 or (range_cursor[2] - range_cursor[1]) != 1 or range_cursor_idx != 2
-        if is_invalid:
-          print("# UNEXPECTED range_cursor for _val_ match: ", range_cursor, range_cursor_idx)
-          assert "UNEXPECTED range_cursor" == 0
-        matching_values.append(range_cursor[0][2])
-        return True
-
-      # case 4 current_matcher_elem
-      elif current_matcher_elem == '"_str_"':
-        if range_cursor_idx >= range_cursor[2]:
-          return False # TOCHECK: out of length is failed to match.
-        current_range_elem = range_cursor[0][range_cursor_idx]
-        if not isinstance(current_range_elem, str):
-          return False
-        matching_strs.append(current_range_elem)
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          range_cursor_idx + 1,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 5 current_matcher_elem
-      elif current_matcher_elem == '"_liststr_"':
-        assert is_ext_ruletype
-        temp_rgcursor_idx : int = range_cursor_idx
-        temp_liststr = []
-        while True:
-          if temp_rgcursor_idx >= range_cursor[2]:
-            break
-          current_range_elem = range_cursor[0][temp_rgcursor_idx]
-          if isinstance(current_range_elem, str):
-            temp_liststr.append(current_range_elem)
-            temp_rgcursor_idx += 1
-          else:
-            break
-        matching_liststrs.append(temp_liststr)
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          temp_rgcursor_idx,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 6 current_matcher_elem
-      elif current_matcher_elem == '"_anno_"':
-        current_range_elem = range_cursor[0][range_cursor_idx]
-        if not isinstance(current_range_elem, list):
-          raise UnderstoodException("_anno_ meet none-annotation element: Not a list.")
-        if current_range_elem[0] != "anno":
-          raise UnderstoodException("_anno_ meet none-annotation element: elem head: " + current_range_elem[0])
-        matching_annos.append(current_range_elem)
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          range_cursor_idx + 1,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 7 current_matcher_elem (non-terminal) not direct string, must be a list (all prev if's are False)
-      assert isinstance(current_matcher_elem, list)
-      matcher_operator = current_matcher_elem[0]
-
-      # case 7.1
-      if range_cursor_idx >= range_cursor[2]:
-        if matcher_operator == "val" or matcher_operator == "str" or matcher_operator.startswith('"'):
-          return False
-        elif matcher_operator == "nostr":
-          return _try_match_rec_inner_fun(
-            range_cursor,  # range_cursor
-            range_cursor_idx,  # range_cursor_idx
-            matcher,  # matcher
-            matcher_idx + 1  # matcher_idx
-          )
-        else:
-          print("UNEXPECTED range_cursor_idx out of length (range):", range_cursor_idx, range_cursor, file=sys.stderr)
-          print("UNEXPECTED range_cursor_idx out of length (matcher):", matcher_idx, matcher, file=sys.stderr)
-          assert "UNEXPECTED range_cursor_idx out of length" == 0
-
-      # case 7.2
-      if matcher_operator == "val":
-        assert len(current_matcher_elem) == 2
-        match_val = current_matcher_elem[1]
-        is_invalid = len(range_cursor[0]) != 3 or (range_cursor[2] - range_cursor[1]) != 1 or range_cursor_idx != 2
-        if is_invalid:
-          print("# UNEXPECTED range_cursor for val match: ", range_cursor, range_cursor_idx)
-          assert "UNEXPECTED range_cursor for val match" == 0
-        range_val = range_cursor[0][range_cursor_idx]
-        if not isinstance(range_val, str) and not isinstance(range_val, int) and not isinstance(range_val, float):
-          return False
-        if str(range_val) == str(match_val):
-          return True  # TODO: FUTURE OPTIMIZE
-        return False
-
-      # case 7.3
-      elif matcher_operator == 'str':
-        assert len(current_matcher_elem) == 2
-        match_val = current_matcher_elem[1]
-        should_be_str_val = range_cursor[0][range_cursor_idx]
-
-        # @satbek: skip `anno` in range_cursor when it's matched by `str`
-        # for reference: L0004 (leetcode), long rule
-        if isinstance(should_be_str_val, list) and len(should_be_str_val) > 0 and should_be_str_val[0] == 'anno':
-          return _try_match_rec_inner_fun(
-            range_cursor,  # range_cursor
-            range_cursor_idx + 1,  # range_cursor_idx
-            matcher,  # matcher
-            matcher_idx  # matcher_idx
-          )
-
-        if not isinstance(should_be_str_val, str):
-          return False
-        if str(should_be_str_val) != str(match_val):
-          return False # TODO: Future optimize
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          range_cursor_idx + 1,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 7.4
-      elif matcher_operator == "nostr":
-        assert len(current_matcher_elem) == 1
-        should_not_be_str_val = range_cursor[0][range_cursor_idx]
-        if isinstance(should_not_be_str_val, str):
-          return False
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          range_cursor_idx,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 7.5
-      elif matcher_operator == "anno":
-        should_be_anno = range_cursor[0][range_cursor_idx]
-        if not isinstance(should_be_anno, list):
-          raise UnderstoodException("(anno ...) meet none-annotation element: Not a list.")
-        if should_be_anno[0] != "anno":
-          raise UnderstoodException("(anno ...) meet none-annotation element: elem head: " + should_be_anno[0])
-        if not self.is_anno_compatible(current_matcher_elem, should_be_anno):
-          return False
-        return _try_match_rec_inner_fun(
-          range_cursor,  # range_cursor
-          range_cursor_idx + 1,  # range_cursor_idx
-          matcher,  # matcher
-          matcher_idx + 1  # matcher_idx
-        )
-
-      # case 7.6 not special operators, must be grammar NT constructs
-      if not matcher_operator.startswith('"'):
-        print("# Unknown operator in _try_match_rec_inner_fun. expecting NT constructs:", matcher_operator, file=sys.stderr)
-        assert False
-
-      current_matcher_type = matcher_operator[1:-1] # TODO: future optimize
-      assert current_matcher_type != "fragment" and current_matcher_type != "anno"
-
-      for visit_cur_idx in range(range_cursor_idx, range_cursor[2]):
-        visit_elem = range_cursor[0][visit_cur_idx]
-
-        # this is not an NT. It is a T. We are currently matching against an NT.
-        if isinstance(visit_elem, str):
-          continue
-        # we are currently matching against NT. anno if not caputured in earlier cases, in this case it will be skipped.
-        if visit_elem[0] == "anno":
-          continue
-
-        assert _is_elem_NT(visit_elem)
-        visit_type = _get_elem_NT_type(visit_elem)
-        is_direct_match = visit_type == current_matcher_type
-        is_arbitrarynt_match = current_matcher_type == "_anynt_"
-
-        # match
-        if is_direct_match or (is_arbitrarynt_match and is_ext_ruletype):
-          if is_direct_match and DEBUG_VERBOSE > 0: print("_try_match_rec_inner_fun MATCHED! nice.", visit_type)
-          if is_arbitrarynt_match:
-            assert is_ext_ruletype, "ONLY_EXT_RULES_SUPPORT_ARBITRARY_MATCH"
-            if DEBUG_VERBOSE > 0: print("_try_match_rec_inner_fun ARBITRARY MATCHED! nice.", visit_type)
-            matching_anynts.append(f'"{visit_type}"')
-
-          # type match. add matching id.
-          matching_ids.append(visit_elem[1])
-
-          # check if the matching element is matched
-          children_matcher = current_matcher_elem[1:] # TODO: optimize
-          is_elem_matching = _try_match_rec_inner_fun(
-            (visit_elem, 2, len(visit_elem)),  # range_cursor
-            2,  # range_cursor_idx
-            children_matcher,  # matcher
-            0  # matcher_idx
-          )
-
-          if not is_elem_matching:
-            return False
-
-          return _try_match_rec_inner_fun(
-            range_cursor,  # range_cursor
-            visit_cur_idx + 1,  # range_cursor_idx
-            matcher,  # matcher
-            matcher_idx + 1  # matcher_idx
-          )
-
-        # mismatch
-        if DEBUG_VERBOSE > 0: print("_try_match_rec_inner_fun mismatch:", visit_type, current_matcher_type)
-        return False
-
-      # no match or mismatch
-      return False
-    # end of _try_match_rec_inner_fun()
-
-    # try match rec
     is_matched = _try_match_rec_inner_fun(
       m_range_cursor,  # range_cursor
       m_range_cursor[1],  # range_cursor_idx
@@ -1348,9 +1236,6 @@ class TransSession():
       0  # matcher_idx
     )
 
-    if DEBUG_VERBOSE > -10 and is_matched: print("# _try_match_on_range_cursor MATCH: ", "   cursor: ", TransSession._pretty_range_cursor(m_range_cursor), "   matcher: ", m_matcher, file=sys.stderr)
-
-    # print("_try_match_on_range_cursor:", is_matched)
     if not is_matched:
       return None
 
@@ -1368,19 +1253,17 @@ class TransSession():
       matching_liststrs,  # matching_liststrs
       matching_annos,  # matching_annos
       new_notes  # notes
-    ) # notes (for human debugging) not implemented
+    )
 
 
-  def is_anno_compatible(self, matcher_anno, intree_anno):
-    # print("matcher_anno:", matcher_anno, file=sys.stderr)
-    # print("intree_anno:", intree_anno, file=sys.stderr)
-    # return True
-    # FUTURE TODO: improve performance
+  def is_anno_compatible(self, matcher_anno: list, range_anno: list) -> bool:
     matcher_anno_dict = {x[0]:x[1] for x in matcher_anno[1:]}
-    intree_anno_dict = {x[0]:x[1] for x in intree_anno[1:]}
+    range_anno_dict = {x[0]:x[1] for x in range_anno[1:]}
     for key in matcher_anno_dict:
-      if key not in intree_anno_dict: return False
-      if matcher_anno_dict[key] != intree_anno_dict[key]: return False
+      if key not in range_anno_dict:
+        return False
+      if matcher_anno_dict[key] != range_anno_dict[key]:
+        return False
     return True
 
   @classmethod
@@ -1639,13 +1522,9 @@ class TransSession():
   def _set_program_str(self, code_str):
     # parse the code, set self.expansion_programs
     # print(f"\n\n++++++++++++++++++++++++++++++++++++++++ _set_program_str. {len(code_str)} ++++++++++++++++++++++++++++++++++++++++\n")
-    expansion_programs, dbg_info = d_grammar_rules.parse_analyze_rules(code_str)
+    expansion_programs = d_grammar_rules.parse_analyze_rules_optim(code_str)
     self.expansion_programs = expansion_programs
-    self.program_dbg_info["expansion_programs"] = dbg_info
     # print("++++++++++++  set self.expansion_programs")
-
-  def get_session_dbg_info(self):
-    return {"program": self.program_dbg_info}
 
 
 # end of class `TransSession`
@@ -1657,6 +1536,3 @@ def _is_elem_NT(visit_elem) -> bool:
   assert visit_elem[0] != "fragment"
   assert isinstance(visit_elem[1], int)
   return True
-
-def _get_elem_NT_type(visit_elem):
-  return visit_elem[0]

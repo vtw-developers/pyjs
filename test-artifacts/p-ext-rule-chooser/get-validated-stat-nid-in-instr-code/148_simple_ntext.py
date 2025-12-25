@@ -1,2 +1,0 @@
-if n < m:
-    pass

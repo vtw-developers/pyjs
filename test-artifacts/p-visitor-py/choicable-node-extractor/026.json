@@ -1,0 +1,17 @@
+{
+  "code": "def f_gold(N):\n    length = len(N)\n    l = int((length) / 2)\n    count = 0\n    for i in range(l + 1):\n        s = N[0:0 + i]\n        l1 = len(s)\n        t = N[i:l1 + i]\n        try:\n            if s[0] == \"0\" or t[0] == \"0\":\n                continue\n        except:\n            continue\n        if s == t:\n            count += 1\n    return count",
+  "choicable_nodes": [
+    "len(N)",
+    "int((length) / 2)",
+    "0",
+    "range(l + 1)",
+    "N[0:0 + i]",
+    "len(s)",
+    "N[i:l1 + i]",
+    "s[0] == \"0\" or t[0] == \"0\"",
+    "s == t",
+    "1",
+    "count"
+  ],
+  "exclude_stat_nids": []
+}

@@ -1,0 +1,31 @@
+{
+  "translation_pair": [
+    {
+      "source": "return id_umvz",
+      "target": "// (Only one translation is needed; it is valid for all possible types of id_umvz)"
+    },
+    {
+      "source": "return 5040",
+      "target": "// (Only one translation is needed; it always returns the constant 5040)"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.return_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": false,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "error_msg": "There has to be a matching placeholder in S for every placeholder in T.",
+  "error_class": "RuleMappingError"
+}

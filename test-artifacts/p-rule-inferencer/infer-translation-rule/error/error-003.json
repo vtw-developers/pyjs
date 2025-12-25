@@ -1,0 +1,37 @@
+{
+  "translation_pair": [
+    {
+      "source": "return [secret_fun_4071()]",
+      "target": "return Array.of(secret_fun_4071());"
+    },
+    {
+      "source": "return [secret_fun_4071()]",
+      "target": "return Array.of(secret_fun_4071());"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.list"
+      ],
+      [
+        "py.return_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown"
+      ],
+      [
+        "js.return_statement"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": false,
+  "error_msg": "Did not find the secret node",
+  "error_class": "AssertionError"
+}

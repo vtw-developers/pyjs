@@ -1,1 +1,0 @@
-dp[index][modulo] = res

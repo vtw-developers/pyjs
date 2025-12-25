@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Tuple
@@ -66,77 +67,47 @@ def _extract_trace_from_stdout(stdout: str) -> list:
 def extract_err_from_stderr_JS(stderr: str, lang: str) -> dict:
   '''
   Parse the error message from the stderr of the JS code.
-
-  Sample stderr:
-  ```
-  /tmp/pirel_code_runner/706fcc78.js:177
-      if (id_px.has(id_shcx)) {
-                ^
-
-  TypeError: id_px.has is not a function
-      at f_gold (/tmp/pirel_code_runner/706fcc78.js:177:15)
-      at test (/tmp/pirel_code_runner/706fcc78.js:172:9)
-      at Object.<anonymous> (/tmp/pirel_code_runner/706fcc78.js:184:1)
-      at Module._compile (node:internal/modules/cjs/loader:1375:14)
-      at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)
-      at Module.load (node:internal/modules/cjs/loader:1206:32)
-      at Module._load (node:internal/modules/cjs/loader:1022:12)
-      at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:142:12)
-      at node:internal/main/run_main_module:28:49
-
-  Node.js v21.5.0
-  ```
+  Refer to tests for sample inputs and expected outputs.
   '''
-
-  def __get_error_type(stderr: str) -> str:
-    # works in conjuction with `p_ext_rule_chooser.get_proposed_choices_compile_error()`
-    _SUPPORTED_ERROR_TYPES_JS = [
-      'SyntaxError:',
-      'ReferenceError:',
-      'TypeError:'
-    ]
-
-    error_type = None
-    for _et in _SUPPORTED_ERROR_TYPES_JS:
-      if _et in stderr:
-        error_type = _et
-        break
-
-    # new error type identified
-    if error_type is None:
-      msg = f'extract_err_from_stderr_JS: Unknown error type in stderr: {stderr}'
-      logger.error(msg)
-      raise RuntimeError(msg)
-
-    return error_type
 
   logger.debug('Starting p_code_runner._extract_err_from_stderr')
   assert lang == 'js', f'Unsupported language: {lang}'
   assert str(TMP_DIR) in stderr, f'Expected "{TMP_DIR}" in stderr: {stderr}'
 
-  error_type = __get_error_type(stderr)
-  splits = stderr.split(error_type)
-  assert len(splits) == 2, f'Unexpected error format in stderr: {stderr}'
-  error_loc_lines = splits[0].strip().split('\n')
+  RE_FIRST_LINE = r'^(.+):(\d+)$'
+  RE_AT_LINE = r'^at(.*) \(?(.+):(\d+):(\d+)\)?$'
 
-  if error_loc_lines[0].startswith(str(TMP_DIR)):
+  lines = [line.strip() for line in stderr.split('\n')]
+  at_lines = [line for line in lines[5:]
+              if line.startswith('at ') and str(TMP_DIR) in line]
 
-    fpath_and_line_num = error_loc_lines[0].split(':')
-    line_content = error_loc_lines[1].strip()
-    assert len(fpath_and_line_num) == 2
-    file_path = fpath_and_line_num[0]
-    # line number in stderr is 1-based
-    line_num = int(fpath_and_line_num[1])
-
-    mylog_impl = get_mylog_impl(lang)
-    line_num_shift = len(mylog_impl.split('\n')) - 1
-    line_num = line_num - line_num_shift
-
+  if len(at_lines) == 0:
+    first_line = lines[0]
+    match = re.match(RE_FIRST_LINE, first_line)
+    assert match is not None, f'Expected match for first_line: {first_line}'
+    file_path = match.group(1)
+    line_num = int(match.group(2))
   else:
-    raise RuntimeError('Error location not found in stderr')
+    at_line = at_lines[0]
+    match = re.match(RE_AT_LINE, at_line)
+    assert match is not None, f'Expected match for at_line: {at_line}'
+    file_path = match.group(2)
+    line_num = int(match.group(3))
+  # adjust line_num to account for mylog implementation lines
+  mylog_impl = get_mylog_impl(lang)
+  line_num_shift = len(mylog_impl.split('\n')) - 1
+  line_num = line_num - line_num_shift
 
-  error_lines = splits[1].strip().split('\n')
-  error_msg = error_lines[0]
+  line_content = lines[1]
+  assert lines[2].strip('^') == '', f'Expected one or more hats "^" on line #3: {lines[2]}'
+  assert lines[3] == '', f'Expected nothing on line #4: {lines[3]}'
+
+  error_type_msg = [ch.strip() for ch in lines[4].split(':')]
+  assert len(error_type_msg) <= 2, f'Expected at most two chunks when splitting by ":": {lines[4]}'
+  error_type = error_type_msg[0]
+  assert error_type in p_consts.SUPPORTED_ERROR_TYPES_JS, f'Unsupported error type: {error_type}'
+  error_msg = error_type_msg[1] if len(error_type_msg) == 2 else ''
+
   return {
     'error_type': error_type,
     'error_msg': error_msg,
@@ -269,7 +240,7 @@ async def _test_run_src_test_script():
   src_program_instr = args_dict['src_program_instr']
   subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
-  result = await run_src_test_script(src_program_instr, subject)
+  result = asyncio.run(run_src_test_script(src_program_instr, subject))
   print(json.dumps(result, indent=2))
 
 
@@ -287,10 +258,10 @@ async def _test_run_tar_test_script():
   tar_program_instr = args_dict['tar_program_instr']
   subject = p_subject.PirelSubject.from_dict(args_dict['subject'])
 
-  result = await run_tar_test_script(tar_program_instr, subject)
+  result = asyncio.run(run_tar_test_script(tar_program_instr, subject))
   print(json.dumps(result, indent=2))
 
 
 if __name__ == '__main__':
-  asyncio.run(_test_run_src_test_script())
-  # asyncio.run(_test_run_tar_test_script())
+  _test_run_src_test_script()
+  # _test_run_tar_test_script()

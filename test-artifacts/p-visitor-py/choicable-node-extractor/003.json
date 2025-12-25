@@ -1,0 +1,11 @@
+{
+  "code": "def f_gold(x, y):\n    while y != 0:\n        carry = x & y\n        x = x ^ y\n        y = carry << 1\n    return x",
+  "choicable_nodes": [
+    "y != 0",
+    "x & y",
+    "x ^ y",
+    "carry << 1",
+    "x"
+  ],
+  "exclude_stat_nids": []
+}

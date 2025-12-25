@@ -1,1 +1,0 @@
-length = len(num)

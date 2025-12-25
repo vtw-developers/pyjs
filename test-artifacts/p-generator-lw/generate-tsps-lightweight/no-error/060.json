@@ -1,0 +1,63 @@
+{
+  "tsps": [
+    [
+      "if var1:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+      "if pirel_var1:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()"
+    ]
+  ],
+  "template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "if a[i] > best:\n    pass\nelse:\n    pass",
+    "context_node_type": "if_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "if_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.if_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ]
+  },
+  "updated_template_dict": {
+    "template_id": 0,
+    "src_lang": "py",
+    "tar_lang": "js",
+    "template_origin": "if var1:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+    "context_node_type": "if_statement",
+    "context_node_id": 1,
+    "problematic_node_type": "if_statement",
+    "problematic_node_id": 1,
+    "problematic_node_path": [],
+    "is_valid_template": true,
+    "is_insert_secret_fn": true,
+    "contexts": [
+      {
+        "source_context": [
+          [
+            "py.if_statement"
+          ]
+        ],
+        "target_context": [
+          [
+            "unknown"
+          ]
+        ]
+      }
+    ],
+    "partial_program": "pirel_replace_var;"
+  }
+}

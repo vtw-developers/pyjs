@@ -1,0 +1,16 @@
+{
+  "code": "def f_gold(a, b, x, y):\n    if a == 0:\n        x = 0\n        y = 1\n        return b\n    x1 = 1\n    y1 = 1\n    gcd = f_gold(b % a, a, x1, y1)\n    x = y1 - (b / a) * x1\n    y = x1\n    return gcd",
+  "choicable_nodes": [
+    "a == 0",
+    "0",
+    "1",
+    "b",
+    "1",
+    "1",
+    "f_gold(b % a, a, x1, y1)",
+    "y1 - (b / a) * x1",
+    "x1",
+    "gcd"
+  ],
+  "exclude_stat_nids": []
+}

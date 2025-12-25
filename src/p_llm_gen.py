@@ -9,7 +9,7 @@ Class diagram
                                               │    │
                                               │    │
                                               │    │
-                                              └──────────────────────►
+                                              ▼    └──────────────────────►
                                        BaseTranslateSP1Task         BaseTranslateSP2Task
                                           │  │                            │     │
                                           │  │                            │     │
@@ -32,7 +32,6 @@ NOTE on adding a new task class:
 '''
 
 
-import aiohttp
 import asyncio
 import copy
 import json
@@ -57,6 +56,9 @@ import p_llm_val
 import p_subject
 import p_tree_log as ptlog
 import p_utils
+import p_visitor as pvis
+import p_visitor_js as pvjs
+import p_visitor_py as pvpy
 from p_config import Config
 
 
@@ -265,8 +267,7 @@ class BasePirelTask(ABC):
   async def _query_llm(self) -> str:
     assert self.chat_history[-1].type == 'human', 'chat history must end with a human prompt'
     self._log_file(langchain_msgs_to_md(self.chat_history), f'llm-messages.md')
-    # NOTE plug in other LLM query functions here
-    raw_response, query_stats = await query_llm_qwen_vtw(self.chat_history, **self.model_params)
+    raw_response, query_stats = await query_llm(self.chat_history, **self.model_params)
     self.llm_query_stats.append(query_stats)
     self._log_file(raw_response, f'llm-raw-response.md')
     return raw_response
@@ -359,40 +360,31 @@ class BaseTranslateSP1Task(BasePirelTask):
     self.sp1 = sp1
 
   def get_system_message(self) -> BaseMessage:
-    system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.System.MODERNIZED
-    ).format(
+    system_message = SystemMessage(p_llm_templates.TemplateManager().render(
+      'system.j2',
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
-    )
+      use_reduced_prompts = Config.use_reduced_prompts
+    ))
     return system_message
 
   def get_few_shot_messages(self) -> List[BaseMessage]:
     return []
 
   def get_starting_prompt_message(self) -> HumanMessage:
-    # src_program is non-zero context for template_origin
-    if self.template_dict['template_origin'] != self.template_dict['src_program']:
-      starting_prompt = HumanMessagePromptTemplate.from_template(
-        p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE
-      ).format(
-        src_language = p_consts.LANG_DICT[self.subject.src_lang],
-        tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
-        program_to_translate = self.sp1,
-        template_origin = self.template_dict['template_origin'],
-        src_program = self.template_dict['src_program']
-      )
-      return starting_prompt
-
-    # template_origin is the same as context
-    starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_WITH_REFERENCE_SAME_CONTEXT
-    ).format(
+    starting_prompt = HumanMessage(p_llm_templates.TemplateManager().render(
+      'trans-sp1-direct.j2',
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
       program_to_translate = self.sp1,
-      template_origin = self.template_dict['template_origin'],
-    )
+      use_reduced_prompts = Config.use_reduced_prompts,
+      use_constraint_trans_assignment = '=' in self.sp1,
+      use_constraint_trans_equals_op = '==' in self.sp1,
+      use_constraint_trans_modulus_op = '%' in self.sp1,
+      use_constraint_trans_comp_stat = any(tok in self.sp1 for tok in ['if', 'while', 'for', 'try', 'with']),
+      use_constraint_trans_array_sort = '.sort(' in self.sp1,
+      use_constraint_trans_raise_statement = 'raise ' in self.sp1,
+    ))
     return starting_prompt
 
   def validate_code_blocks(self) -> p_llm_val.TranslateSP1ValidationResult:
@@ -442,17 +434,6 @@ class SP1_DirectTransG(BaseTranslateSP1Task):
   '''
   Ask for translation directly.
   '''
-  def get_system_message(self) -> BaseMessage:
-    src_language = p_consts.LANG_DICT[self.subject.src_lang]
-    tar_language = p_consts.LANG_DICT[self.subject.tar_lang]
-    system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.System.MODERNIZED
-    ).format(
-      src_language=src_language,
-      tar_language=tar_language,
-    )
-    return system_message
-
   def get_feedback_message(self, validation_result: p_llm_val.TranslateSP1ValidationResult) -> HumanMessage:
     self._log('initiating a feedback message factory')
     factory = p_llm_messages.SP1_DirectTransF(self.template_dict, self.subject, validation_result)
@@ -469,19 +450,21 @@ class SP1_PartialProgramG(BaseTranslateSP1Task):
     tar_lang = self.subject.tar_lang
     problematic_node_path = self.template_dict['problematic_node_path']
     partial_program = self.template_dict['partial_program']
-
     src_snippet_to_translate = _extract_snippet(self.sp1, src_lang, problematic_node_path)
 
-    starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateSP1.Prompt.PARTIAL_PROGRAM
-    ).format(
+    starting_prompt = HumanMessage(p_llm_templates.TemplateManager().render(
+      'trans-sp1-partial.j2',
       src_language = p_consts.LANG_DICT[src_lang],
       src_snippet_to_translate = src_snippet_to_translate,
       src_snippet_context = self.sp1,
       tar_language = p_consts.LANG_DICT[tar_lang],
       tar_partial_program = partial_program,
-      variable_to_replace = p_consts.PAR_PROG_PROB_NODE_REPLACE
-    )
+      variable_to_replace = p_consts.PAR_PROG_PROB_NODE_REPLACE,
+      use_reduced_prompts = Config.use_reduced_prompts,
+      use_constraint_trans_equals_op = '==' in src_snippet_to_translate,
+      use_constraint_trans_modulus_op = '%' in src_snippet_to_translate,
+      use_constraint_keep_parentheses = '(' in src_snippet_to_translate and ')' in src_snippet_to_translate,
+    ))
     return starting_prompt
 
   def get_feedback_message(self, validation_result: p_llm_val.TranslateSP1ValidationResult) -> HumanMessage:
@@ -517,7 +500,9 @@ class BaseTranslateSP2Task(BasePirelTask):
 
   def get_system_message(self) -> BaseMessage:
     system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.System.MODERNIZED
+      p_llm_templates.TranslateAny.System.REDUCED
+      if Config.use_reduced_prompts else
+      p_llm_templates.TranslateAny.System.DEFAULT
     ).format(
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
@@ -529,6 +514,8 @@ class BaseTranslateSP2Task(BasePirelTask):
 
   def get_starting_prompt_message(self) -> HumanMessage:
     starting_prompt = HumanMessagePromptTemplate.from_template(
+      p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS_REDUCED
+      if Config.use_reduced_prompts else
       p_llm_templates.TranslateAny.Prompt.DIRECT_TRANS
     ).format(
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
@@ -658,16 +645,20 @@ class GenTestFunction(BasePirelTask):
     self.f_gold_function = f_gold_function
 
   def get_system_message(self) -> BaseMessage:
-    system_message = SystemMessage(p_llm_templates.GenTestFunction.System.GENERIC_PY)
+    system_message = SystemMessage(
+      p_llm_templates.GenTestFunction_deprecated.System.GENERIC_PY
+    )
     return system_message
 
   def get_few_shot_messages(self) -> List[BaseMessage]:
-    context_message = HumanMessage(p_llm_templates.GenTestFunction.Context.GENERIC_PY)
+    context_message = HumanMessage(
+      p_llm_templates.GenTestFunction_deprecated.Context.GENERIC_PY
+    )
     return [context_message]
 
   def get_starting_prompt_message(self) -> HumanMessage:
     starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.GenTestFunction.Prompt.GENERIC_PY
+      p_llm_templates.GenTestFunction_deprecated.Prompt.GENERIC_PY
     ).format(
       f_gold_function=self.f_gold_function
     )
@@ -717,25 +708,33 @@ class GetReferenceTranslation(BasePirelTask):
     self.statement_str = statement_str
 
   def get_system_message(self) -> BaseMessage:
-    system_message = SystemMessagePromptTemplate.from_template(
-      p_llm_templates.TranslateAny.System.MODERNIZED
-    ).format(
+    system_message = SystemMessage(p_llm_templates.TemplateManager().render(
+      'system.j2',
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
-    )
+      use_reduced_prompts = Config.use_reduced_prompts
+    ))
     return system_message
 
   def get_few_shot_messages(self) -> List[BaseMessage]:
     return []
 
   def get_starting_prompt_message(self) -> HumanMessage:
-    starting_prompt = HumanMessagePromptTemplate.from_template(
-      p_llm_templates.GetReferenceTranslation.Prompt.GENERIC
-    ).format(
+    starting_prompt = HumanMessage(p_llm_templates.TemplateManager().render(
+      'get-ref-trans.j2',
       src_language = p_consts.LANG_DICT[self.subject.src_lang],
       tar_language = p_consts.LANG_DICT[self.subject.tar_lang],
       statement_to_translate = self.statement_str,
-    )
+      use_reduced_prompts = Config.use_reduced_prompts,
+      use_constraint_trans_assignment = '=' in self.statement_str,
+      use_constraint_trans_equals_op = '==' in self.statement_str,
+      use_constraint_trans_modulus_op = '%' in self.statement_str,
+      use_constraint_trans_comp_stat = any(tok in self.statement_str for tok in ['if', 'while', 'for', 'try', 'with']),
+      use_constraint_trans_secret_fn = p_consts.GENERIC_SECRET_FN_INVOCATION in self.statement_str,
+      use_constraint_trans_array_sort = '.sort(' in self.statement_str,
+      use_constraint_trans_type_metaclass = '= type(' in self.statement_str,
+      use_constraint_trans_raise_statement = 'raise ' in self.statement_str,
+    ))
     return starting_prompt
 
   def get_feedback_message(self, validation_result: p_llm_val.GetRefTransValidationResult) -> HumanMessage:
@@ -826,68 +825,6 @@ async def query_llm(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
   return chat_result.content, query_stats
 
 
-async def query_llm_qwen_vtw(messages: List[BaseMessage], **kwargs) -> Tuple[str, dict]:
-  '''
-  RETURN a tuple of (raw_response, query_stats)
-  '''
-  _DEFAULT_API_URL = "http://121.65.128.115:8001/v1/chat/completions"
-  _DEFAULT_MODEL = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
-  _DEFAULT_TEMPERATURE = kwargs.get("temperature", 1)
-
-  json_msgs = langchain_msgs_to_json(messages)
-
-  # Prepare request payload
-  payload = {
-    "model": Config.llm_model or _DEFAULT_MODEL,  # fall back to default model if not set
-    "messages": json_msgs,
-    "temperature": Config.llm_temperature or _DEFAULT_TEMPERATURE,  # fall back to default temperature if not set
-    "max_tokens": kwargs.get("max_tokens", 4000)
-  }
-
-  url = Config.llm_api_url or _DEFAULT_API_URL  # fall back to default URL if not set
-  headers = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer dummy-key"
-  }
-
-  query_stats = {}
-  query_stats['stms'] = p_utils.current_time_msec()
-
-  excs = []
-  response_json = None
-  for i in range(7):
-    try:
-      async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, json=payload) as resp:
-          response_json = await resp.json()
-          if resp.status != 200:
-            raise RuntimeError(f"HTTP {resp.status}: {response_json}")
-    except Exception as e:
-      logger.warning(e)
-      excs.append(e)
-      await asyncio.sleep(2**i)
-    else:
-      break
-  else:
-    raise OpenAIErrors('Repeated API failures', excs)
-
-  query_stats['etms'] = p_utils.current_time_msec()
-  # Extract token usage if available
-  usage = response_json.get('usage', {})
-  query_stats['num_tokens_prompt'] = usage.get('prompt_tokens', None)
-  query_stats['num_tokens_completion'] = usage.get('completion_tokens', None)
-  query_stats['num_tokens_total'] = usage.get('total_tokens', None)
-
-  # Extract content from response
-  choices = response_json.get('choices', [])
-  if choices and 'message' in choices[0]:
-    content = choices[0]['message'].get('content', '')
-  else:
-    content = ''
-
-  return content, query_stats
-
-
 def extract_code_blocks(raw_response: str) -> List[str]:
 
   def _pre_process_raw_response(raw_response: str) -> str:
@@ -919,30 +856,6 @@ def langchain_msgs_to_md(messages: List[BaseMessage]) -> str:
   for msg in messages:
     result_md += f'# {msg.type}\n\n{msg.content}\n\n\n'
   return result_md.strip()
-
-
-def langchain_msgs_to_json(
-  messages: List[BaseMessage],
-  system_role_name: str = 'system',
-  human_role_name: str = 'user',
-  ai_role_name: str = 'assistant',
-) -> List[dict]:
-  '''
-  Convert langchain messages to JSON format.
-  '''
-  json_msgs = []
-  for msg in messages:
-    json_msg = {'content': msg.content}
-    if isinstance(msg, SystemMessage):
-      json_msg['role'] = system_role_name
-    elif isinstance(msg, HumanMessage):
-      json_msg['role'] = human_role_name
-    elif isinstance(msg, AIMessage):
-      json_msg['role'] = ai_role_name
-    else:
-      raise ValueError(f'Unsupported message type: {type(msg)}')
-    json_msgs.append(json_msg)
-  return json_msgs
 
 
 def _extract_snippet(program: str, lang: str, node_path: List[int]) -> str:
@@ -1049,13 +962,13 @@ async def get_translation_pairs_from_tsp(
     return s.rstrip('\n')
 
   lpllm_gen_log = lpllm_gen_log or ptlog.PLLMGenLog()
-  lpllm_gen_log.stms = p_utils.current_time_sec()
+  lpllm_gen_log.stms = p_utils.current_time_msec()
   sp1, sp2 = tsp
 
   # ~~~ TRANSLATE `SP1` TO PRODUCE SP1_TP1_CANDS (A.K.A. PROGRAM PAIRS)
   ltrans_sp1 = ptlog.TransSP1()
   ltrans_sp1.sp1 = sp1
-  ltrans_sp1.stms = p_utils.current_time_sec()
+  ltrans_sp1.stms = p_utils.current_time_msec()
   lpllm_gen_log.trans_sp1 = ltrans_sp1
   trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1, ltrans_sp1)
 
@@ -1064,14 +977,14 @@ async def get_translation_pairs_from_tsp(
     ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_gen_cands(_c) for _c in sp1_tp1_cands]
     ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
     ltrans_sp1.success = True
-    ltrans_sp1.etms = p_utils.current_time_sec()
+    ltrans_sp1.etms = p_utils.current_time_msec()
   except SP1TranslationRetryLimitError as err:
     msg = f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}'
     logger.warning(msg)
     ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
     ltrans_sp1.success = False
     ltrans_sp1.reason = msg
-    ltrans_sp1.etms = p_utils.current_time_sec()
+    ltrans_sp1.etms = p_utils.current_time_msec()
     raise NoTransPairsFromTSPError from err
 
   logger.debug(_aux_log_msg_sp1_tp1_cands(sp1_tp1_cands))
@@ -1088,7 +1001,7 @@ async def get_translation_pairs_from_tsp(
     ltrans_sp2.sp1_tp1_cand = ptlog.Sp1Tp1Cand.from_gen_cands(sp1_tp1_cand)
     ltrans_sp2.sp2 = sp2
     ltrans_sp2.sp1_sp2_are_identical = False
-    ltrans_sp2.stms = p_utils.current_time_sec()
+    ltrans_sp2.stms = p_utils.current_time_msec()
     lpllm_gen_log.trans_sp2s.append(ltrans_sp2)
 
     # check if SP1 and SP2 are identical
@@ -1098,7 +1011,7 @@ async def get_translation_pairs_from_tsp(
       ltrans_sp2.sp1_sp2_are_identical = True
       ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pairs]
       ltrans_sp2.success = True
-      ltrans_sp2.etms = p_utils.current_time_sec()
+      ltrans_sp2.etms = p_utils.current_time_msec()
       continue
 
     trans_sp2 = BaseTranslateSP2Task.dispatch(subject, template_dict, sp1_tp1_cand, sp2, ltrans_sp2)
@@ -1114,14 +1027,14 @@ async def get_translation_pairs_from_tsp(
       ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
       ltrans_sp2.success = False
       ltrans_sp2.reason = msg
-      ltrans_sp2.etms = p_utils.current_time_sec()
+      ltrans_sp2.etms = p_utils.current_time_msec()
       continue
 
     all_translation_pairs.extend(translation_pair_cands)
     ltrans_sp2.translation_pairs = [ptlog.TransPair.from_tuple(tp) for tp in translation_pair_cands]
     ltrans_sp2.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp2.llm_query_stats]
     ltrans_sp2.success = True
-    ltrans_sp2.etms = p_utils.current_time_sec()
+    ltrans_sp2.etms = p_utils.current_time_msec()
     logger.debug(_aux_log_msg_trans_pair_cands(translation_pair_cands))
 
   logger.debug(
@@ -1134,11 +1047,190 @@ async def get_translation_pairs_from_tsp(
     logger.warning(msg)
     lpllm_gen_log.success = False
     lpllm_gen_log.reason = msg
-    lpllm_gen_log.etms = p_utils.current_time_sec()
+    lpllm_gen_log.etms = p_utils.current_time_msec()
     raise NoTransPairsFromTSPError(msg)
 
   lpllm_gen_log.success = True
-  lpllm_gen_log.etms = p_utils.current_time_sec()
+  lpllm_gen_log.etms = p_utils.current_time_msec()
+  return all_translation_pairs
+
+
+def _edit_node_text(
+  tp1_lit_node: pvis.AbstractNode,
+  sp1_lit_value: str,
+  sp2_lit_value: str
+) -> None:
+  ''''''
+  _RE_INT = re.compile(r'^\d+$')
+  _RE_BIGINT = re.compile(r'^(\d+)n$')
+  is_int = lambda s: bool(_RE_INT.match(s))
+  is_bigint = lambda s: bool(_RE_BIGINT.match(s))
+  tp1_lit_value = tp1_lit_node.children[0].get_type()
+
+  if is_int(sp1_lit_value):
+    if is_bigint(tp1_lit_value):
+      if tp1_lit_value[:-1] == sp1_lit_value:
+        if is_int(sp2_lit_value):
+          tp1_lit_node.children[0].node_type = sp2_lit_value + 'n'
+        else:
+          tp1_lit_node.children[0].node_type = sp2_lit_value
+    else:
+      if tp1_lit_value == sp1_lit_value:
+        tp1_lit_node.children[0].node_type = sp2_lit_value
+  else:
+    if tp1_lit_value == sp1_lit_value:
+      tp1_lit_node.children[0].node_type = sp2_lit_value
+
+
+def _get_edit_dict(
+  sp1_lit_nodes: List[pvis.AbstractNode],
+  tp1_lit_nodes: List[pvis.AbstractNode],
+  sp1_prob_node: pvis.AbstractNode,
+  sp2_prob_node: pvis.AbstractNode
+) -> Dict[str, str]:
+  ''''''
+  edit_dict : Dict[str, str] = {}
+  for sp1_lit_node in sp1_lit_nodes:
+    sp1_lit_npath = sp1_prob_node.get_path_to_child(sp1_lit_node)
+    sp2_lit_node = sp2_prob_node.get_child_by_path(sp1_lit_npath)
+    assert sp2_lit_node.is_literal_node(), 'sanity check'
+    assert sp1_lit_node.is_literal_node(), 'sanity check'
+    sp1_lit_value = sp1_lit_node.children[0].get_type()
+    sp2_lit_value = sp2_lit_node.children[0].get_type()
+    if sp1_lit_value == sp2_lit_value:
+      continue
+    if sp1_lit_value in edit_dict:
+      assert edit_dict[sp1_lit_value] == sp2_lit_value, 'sanity check'
+    else:
+      edit_dict[sp1_lit_value] = sp2_lit_value
+  for tp1_lit_node in tp1_lit_nodes:
+    assert tp1_lit_node.is_literal_node(), 'sanity check'
+  return edit_dict
+
+
+def get_tp2_offline(
+  sp1: str,
+  sp2: str,
+  tp1: str,
+  context: dict
+) -> str:
+  '''
+  Given two generated snippets sp1 and sp2, and a candidate translation tp1 of sp1,
+  generate a candidate translation tp2 of sp2 by editing tp1 based on the differences
+  between sp1 and sp2.
+  This function is intended to replace SP2 translation via LLM.
+  '''
+  p_utils.log_json_time(f'args-get_tp2_offline.json', locals())
+
+  sp1tree = pvpy.Tree.from_str(sp1)
+  sp2tree = pvpy.Tree.from_str(sp2)
+  tp1tree = pvjs.Tree.from_str(tp1)
+
+  sp1_prob_node = sp1tree.root_node.find_node_under_context(context['source_context'])
+  sp2_prob_node = sp2tree.root_node.find_node_under_context(context['source_context'])
+  tp1_prob_node = tp1tree.root_node.find_node_under_context(context['target_context'])
+
+  assert sp1_prob_node is not None, 'sanity check'
+  assert sp2_prob_node is not None, 'sanity check'
+  assert tp1_prob_node is not None, 'sanity check'
+
+  sp1_lit_nodes = sp1_prob_node.collect_literal_nodes()
+  tp1_lit_nodes = tp1_prob_node.collect_literal_nodes()
+
+  edit_dict = _get_edit_dict(sp1_lit_nodes, tp1_lit_nodes, sp1_prob_node, sp2_prob_node)
+  for src, dst in edit_dict.items():
+    for tp1_lit_node in tp1_lit_nodes:
+      _edit_node_text(tp1_lit_node, src, dst)
+
+  pp = pvjs.PrettyPrinter()
+  tp2 = pp.visit(tp1tree.root_node)
+  return tp2
+
+
+async def get_translation_pairs_from_tsp_less_llm(
+  subject: p_subject.PirelSubject,
+  tsp: Tuple[str, str, str],
+  template_dict: dict,
+  lpllm_gen_log: Optional[ptlog.PLLMGenLog] = None
+) -> List[Tuple[dict, dict]]:
+  '''
+  RETURN non-empty list of all possible translation pairs obtained from a given `tsp`.
+  NOTE raised errors propagate to the caller.
+
+  NOTE subject must contain the following attributes:
+  - name
+  - src_lang
+  - tar_lang
+  '''
+  logger.debug(
+    f'trans-tsp: ~~~ attempting to translate SP1 (LLM) and SP2 (offline) to generate '
+    f'translation pairs:\n{json.dumps(tsp, indent=2)}')
+
+  def _aux_log_msg_sp1_tp1_cands(sp1_tp1_cands: List[Dict[str, str]]) -> str:
+    s = f'trans-tsp: generated {len(sp1_tp1_cands)} candidate translations for SP1:\n'
+    for idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
+      hash = d_utils.string_sha256(sp1_tp1_cand['source'] + sp1_tp1_cand['target'])
+      cand = json.dumps(sp1_tp1_cand, indent=2)
+      s += f'[{idx}] {hash}:\n{cand}\n'
+    return s.rstrip('\n')
+
+  lpllm_gen_log = lpllm_gen_log or ptlog.PLLMGenLog()
+  lpllm_gen_log.stms = p_utils.current_time_msec()
+  sp1, sp2 = tsp
+
+  # ~~~ TRANSLATE `SP1` TO PRODUCE SP1_TP1_CANDS (A.K.A. PROGRAM PAIRS)
+  ltrans_sp1 = ptlog.TransSP1()
+  ltrans_sp1.sp1 = sp1
+  ltrans_sp1.stms = p_utils.current_time_msec()
+  lpllm_gen_log.trans_sp1 = ltrans_sp1
+  trans_sp1 = BaseTranslateSP1Task.dispatch(subject, template_dict, sp1, ltrans_sp1)
+
+  try:
+    sp1_tp1_cands = await trans_sp1.run()
+    ltrans_sp1.sp1_tp1_cands = [ptlog.Sp1Tp1Cand.from_gen_cands(_c) for _c in sp1_tp1_cands]
+    ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
+    ltrans_sp1.success = True
+    ltrans_sp1.etms = p_utils.current_time_msec()
+  except SP1TranslationRetryLimitError as err:
+    msg = f'BAD: Reached a retry limit for SP1 translation:\n{str(err)}'
+    logger.warning(msg)
+    ltrans_sp1.llm_query_stats = [ptlog.LLMQueryStat.from_dict(stats) for stats in trans_sp1.llm_query_stats]
+    ltrans_sp1.success = False
+    ltrans_sp1.reason = msg
+    ltrans_sp1.etms = p_utils.current_time_msec()
+    raise NoTransPairsFromTSPError from err
+
+  logger.debug(_aux_log_msg_sp1_tp1_cands(sp1_tp1_cands))
+
+  # ~~~ FOR EACH `TP1_CAND` GENERATE `TP2` VIA OFFLINE EDITING
+  all_translation_pairs = []
+  for cand_idx, sp1_tp1_cand in enumerate(sp1_tp1_cands, start=1):
+    logger.debug('Obtaining TP2 via offline editing of TP1')
+    tp1 = sp1_tp1_cand['target']
+    context = template_dict['contexts'][0]
+    tp2 = get_tp2_offline(sp1, sp2, tp1, context)
+    if p_utils.does_have_parse_error(tp2, subject.tar_lang):
+      msg = f'WARNING: TP2 generated via offline editing has a parse error. Skipping it.\nTP2:\n{tp2}'
+      logger.warning(msg)
+      continue
+    translation_pair = ({'source': sp1, 'target': tp1}, {'source': sp2, 'target': tp2})
+    all_translation_pairs.append(translation_pair)
+
+  logger.debug(
+    f'trans-tsp: ~~~ finishing API call to p_llm_gen.get_translation_pairs_from_tsp_less_llm\n'
+    f'The number of all translation pairs is {len(all_translation_pairs)}:\n'
+    f'{json.dumps(all_translation_pairs, indent=2)}')
+
+  if len(all_translation_pairs) == 0:
+    msg = f'BAD: Could not gen trans pairs from a program pair:\n{json.dumps(sp1_tp1_cands, indent=2)}'
+    logger.warning(msg)
+    lpllm_gen_log.success = False
+    lpllm_gen_log.reason = msg
+    lpllm_gen_log.etms = p_utils.current_time_msec()
+    raise NoTransPairsFromTSPError(msg)
+
+  lpllm_gen_log.success = True
+  lpllm_gen_log.etms = p_utils.current_time_msec()
   return all_translation_pairs
 
 
@@ -1226,7 +1318,7 @@ async def get_reference_translations(
   logger.info(f'~~~ Starting API call to p_llm_gen.get_reference_translations')
 
   lget_ref_trans = ptlog.GetRefTrans()
-  lget_ref_trans.stms = p_utils.current_time_sec()
+  lget_ref_trans.stms = p_utils.current_time_msec()
   lget_ref_trans.statement_str = statement_str
 
   fabr_template_dict = {'src_lang': src_lang, 'tar_lang': tar_lang}
@@ -1255,7 +1347,7 @@ async def get_reference_translations(
       [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
     lget_ref_trans.success = False
     lget_ref_trans.reason = str(err)
-    lget_ref_trans.etms = p_utils.current_time_sec()
+    lget_ref_trans.etms = p_utils.current_time_msec()
     return [], lget_ref_trans
 
   assert len(ref_translations) > 0, 'sanity check'
@@ -1264,13 +1356,13 @@ async def get_reference_translations(
     [ptlog.LLMQueryStat.from_dict(stats) for stats in get_ref_trans_task.llm_query_stats]
   lget_ref_trans.success = True
   lget_ref_trans.ref_translations = ref_translations
-  lget_ref_trans.etms = p_utils.current_time_sec()
+  lget_ref_trans.etms = p_utils.current_time_msec()
 
   return ref_translations, lget_ref_trans
 
 
 # TEST HARNESSES
-async def _test_query_llm():
+def _test_query_llm():
   '''
   SCHEMA:
   messages:
@@ -1285,7 +1377,7 @@ async def _test_query_llm():
     HumanMessage(content=config['messages']['human'])
   ]
   model_params = config['model_params']
-  raw_response, query_stats = await query_llm(messages, model_params=model_params)
+  raw_response, query_stats = asyncio.run(query_llm(messages, model_params=model_params))
 
   print('--- raw_response ---')
   print(raw_response)
@@ -1293,7 +1385,7 @@ async def _test_query_llm():
   print(json.dumps(query_stats, indent=2))
 
 
-async def _test_gen_test_function():
+def _test_gen_test_function():
   '''
   async def gen_test_function_deprecated(
     f_gold_function: str,
@@ -1304,10 +1396,34 @@ async def _test_gen_test_function():
   f_gold_fpath = p_consts.TMP_DIR / 'f_gold.py'
   f_gold_function = p_utils.read_text(f_gold_fpath)
   test_function, lgen_test_function = \
-    await gen_test_function_deprecated(f_gold_function, 'py', 'js')
+    asyncio.run(gen_test_function_deprecated(f_gold_function, 'py', 'js'))
   print(test_function)
 
 
+def _test_get_tp2_offline():
+  '''
+  def get_tp2_offline(
+    sp1: str,
+    sp2: str,
+    tp1: str,
+    context: dict
+  ) -> str:
+  '''
+  config_fpath = p_consts.TMP_DIR / 'test_get_tp2_offline_config.yaml'
+  config = p_utils.read_yaml(config_fpath)
+  args_dict = p_utils.read_json(config['args_dict_fpath'])
+
+  sp1 = args_dict['sp1']
+  sp2 = args_dict['sp2']
+  tp1 = args_dict['tp1']
+  context = args_dict['context']
+
+  tp2 = get_tp2_offline(sp1, sp2, tp1, context)
+  print('--- tp2 ---')
+  print(tp2)
+
+
 if __name__ == '__main__':
-  # asyncio.run(_test_query_llm())
-  asyncio.run(_test_gen_test_function())
+  # _test_query_llm())
+  # _test_gen_test_function()
+  _test_get_tp2_offline()

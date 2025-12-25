@@ -1,0 +1,7 @@
+{
+  "code": "assert foo() == bar()",
+  "choicable_nodes": [
+    "foo() == bar()"
+  ],
+  "exclude_stat_nids": []
+}

@@ -1,0 +1,44 @@
+{
+  "translation_pair": [
+    {
+      "source": "table = [[secret_fun_4071()] * (id_qdko + 3681) for id_rvys in id_adil]",
+      "target": "var table = id_adil.map(function(id_rvys) {\n    return Array(Math.max(0, id_qdko + 3681)).fill(secret_fun_4071());\n});"
+    },
+    {
+      "source": "table = [[secret_fun_4071()] * (id_rpv + id_yvpn) for id_jde in id_ufwj]",
+      "target": "var table = id_ufwj.map(function(id_jde) {\n    return Array(Math.max(0, id_rpv + id_yvpn)).fill(secret_fun_4071());\n});"
+    }
+  ],
+  "src_lang": "py",
+  "tar_lang": "js",
+  "context": {
+    "source_context": [
+      [
+        "py.list_comprehension",
+        "py.identifier"
+      ],
+      [
+        "py.assignment"
+      ],
+      [
+        "py.expression_statement"
+      ]
+    ],
+    "target_context": [
+      [
+        "unknown",
+        "js.identifier"
+      ],
+      [
+        "js.variable_declarator"
+      ],
+      [
+        "js.variable_declaration"
+      ]
+    ]
+  },
+  "is_insert_secret_fn": true,
+  "choose_largest_node": true,
+  "is_ignore_semicolon": true,
+  "translation_rule": "(match_expand\n  (fragment (\"py.list_comprehension\" (str \"[\") (\"py.binary_operator\" (\"py.list\" (str \"[\") \"*\" (str \"]\")) (str \"*\") (\"py.parenthesized_expression\" (str \"(\") (\"py.binary_operator\" \".\" (str \"+\") \".\") (str \")\"))) (\"py.for_in_clause\" (str \"for\") \".\" (str \"in\") \".\") (str \"]\")) \"*\")\n  (fragment (\"js.call_expression\" (\"js.member_expression\" \".5\" (str \".\") (\"js.property_identifier\" (val \"map\"))) (\"js.arguments\" (str \"(\") (\"js.function\" (str \"function\") (\"js.formal_parameters\" (str \"(\") \".4\" (str \")\")) (\"js.statement_block\" (str \"{\") \"*1\" (str \"}\"))) (str \")\"))) \"*6\")\n)"
+}

@@ -1,0 +1,20 @@
+{
+  "template_origin": "while (not class_var.bounded_string(ab) or (len(ab) > 2 and ab[0] == ab[1] == ab[2] and ab[-2] != ab[0] and ab[-3] != ab[0])):\n    pass",
+  "src_lang": "py",
+  "context_node_type": "while_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "while_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "while (id_thfa):\n    secret_fun_4071()",
+      "while (4231):\n    secret_fun_4071()"
+    ],
+    [
+      "while (id_cots or id_dgoy):\n    secret_fun_4071()",
+      "while (8842 or 812):\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

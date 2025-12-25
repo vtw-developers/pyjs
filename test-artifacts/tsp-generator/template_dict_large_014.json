@@ -1,0 +1,16 @@
+{
+  "template_origin": "if isinstance(v, list):\n    pass\nelif v.get('type', None) is None or v.get('value', None) is None:\n    pass\nelif v['type'] == 'string':\n    pass\nelif v['type'] == 'integer':\n    pass\nelif v['type'] == 'float':\n    pass\nelif v['type'] == 'bool':\n    pass\nelif v['type'] in ['datetime', 'datetime-local', 'date-local', 'time-local']:\n    pass\nelse:\n    pass",
+  "src_lang": "py",
+  "context_node_type": "if_statement",
+  "context_node_id": 1,
+  "problematic_node_path": [],
+  "problematic_node_type": "if_statement",
+  "is_insert_secret_fn": true,
+  "tsps": [
+    [
+      "if id_ksv:\n    secret_fun_4071()\nelif id_oyu:\n    secret_fun_4071()\nelif id_zwvc:\n    secret_fun_4071()\nelif id_zuba:\n    secret_fun_4071()\nelif id_decr:\n    secret_fun_4071()\nelif id_jyx:\n    secret_fun_4071()\nelif id_gkpy:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()",
+      "if 4890:\n    secret_fun_4071()\nelif 9587:\n    secret_fun_4071()\nelif 5102:\n    secret_fun_4071()\nelif 9380:\n    secret_fun_4071()\nelif 9558:\n    secret_fun_4071()\nelif 7271:\n    secret_fun_4071()\nelif 2014:\n    secret_fun_4071()\nelse:\n    secret_fun_4071()"
+    ]
+  ],
+  "problematic_node_id": 1
+}

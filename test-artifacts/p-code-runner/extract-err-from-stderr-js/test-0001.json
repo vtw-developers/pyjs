@@ -1,0 +1,10 @@
+{
+  "tar_std_error": "/tmp/pirel_code_runner/59da36eb.js:193\n    maxvalue = 0;\n             ^\n\nReferenceError: maxvalue is not defined\n    at f_gold (/tmp/pirel_code_runner/59da36eb.js:193:14)\n    at test (/tmp/pirel_code_runner/59da36eb.js:167:22)\n    at Object.<anonymous> (/tmp/pirel_code_runner/59da36eb.js:198:1)\n    at Module._compile (node:internal/modules/cjs/loader:1529:14)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)\n    at Module.load (node:internal/modules/cjs/loader:1275:32)\n    at Module._load (node:internal/modules/cjs/loader:1096:12)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)\n    at node:internal/main/run_main_module:28:49\n\nNode.js v20.19.3\n",
+  "tar_error_dict": {
+    "error_type": "ReferenceError",
+    "error_msg": "maxvalue is not defined",
+    "file_path": "/tmp/pirel_code_runner/59da36eb.js",
+    "line_num": 24,
+    "line_content": "maxvalue = 0;"
+  }
+}

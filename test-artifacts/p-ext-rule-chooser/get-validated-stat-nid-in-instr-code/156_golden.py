@@ -1,1 +1,0 @@
-diff = arr[i + m - 1] - arr[i]
