@@ -20,6 +20,23 @@ def _deinstrument_target_code(tar_code: str) -> str:
   return '\n'.join(clean_lines)
 
 
+def _escape_unicode_to_ascii_escapes(s: str) -> str:
+  # Escapes all non-ASCII characters as \uXXXX or \UXXXXXXXX, but leaves newlines unescaped
+  def __escape_char(c):
+    if ord(c) < 128:
+      return c
+    if ord(c) <= 0xFFFF:
+      return '\\u{:04x}'.format(ord(c))
+    else:
+      return '\\U{:08x}'.format(ord(c))
+  return ''.join(__escape_char(c) for c in s)
+
+
+def _unescape_ascii_unicode_escapes(s: str) -> str:
+  # Reverts escaped unicode (\uXXXX, \UXXXXXXXX) back to unicode characters
+  return s.encode('ascii').decode('unicode_escape')
+
+
 def translate(
   python_code: str,
   translation_rules: str,
@@ -69,6 +86,8 @@ def translate(
   p_config.Config.llm_temperature = llm_temperature
 
   python_code = p_utils.remove_comments_and_docstrings_py(python_code)
+  python_code = p_utils.remove_comments_and_docstrings_py(python_code)  # remove empty lines
+  python_code = _escape_unicode_to_ascii_escapes(python_code)
   subject = p_subject.PirelSubject(benchmark_name=benchmark_name,
                                    name=subject_name,
                                    src_program=python_code,
@@ -100,7 +119,7 @@ def translate(
             'Error during apply phase: ' + str(e))
   else:
     return (True,
-            _deinstrument_target_code(tar_program_plausible),
+            _deinstrument_target_code(_unescape_ascii_unicode_escapes(tar_program_plausible)),
             starting_ruleset.to_str_ruleset(),
             None)
 
@@ -111,9 +130,23 @@ def example_usage():
   '''
 
   python_code_good_1 = '''
-def add(a, b):
+def concat(a, b):
+    """
+    두 문자열을 연결하는 함수
+
+    Args:
+        a (float): 첫 번째 숫자
+        b (float): 두 번째 숫자
+
+    Returns:
+        str: 두 문자열의 연결 결과
+
+    Raises:
+        TypeError: 입력 값이 문자열이 아닌 경우
+    """
     return a + b
-add(2, 3)
+result = concat("연결", "관계")
+print(result)
 '''.strip()
   python_code_good_2 = '''
 a = 1
@@ -122,7 +155,7 @@ a = 1
 def add(a, b):
     return a + b
 '''.strip()
-  
+
   translation_rules = p_utils.read_text(p_consts.STARTING_RULESET_FPATH)
   llm_api_url = None  # 'http://localhost:11434/v1/chat/completions'
   llm_model = None  # 'Qwen/Qwen3-Coder-30B-A3B-Instruct'
